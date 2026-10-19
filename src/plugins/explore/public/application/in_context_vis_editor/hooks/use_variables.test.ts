@@ -13,8 +13,8 @@ jest.mock('../../../../../dashboard/public', () => ({
   VariableService: jest.fn(),
   VariableInterpolationService: jest.fn(),
   createNoOpVariableInterpolationService: jest.fn(),
-  hasLoadingVariables: (variables: Array<{ loading?: boolean }>) =>
-    variables.some((v) => v.loading),
+  hasLoadingVariables: jest.requireActual('../../../../../dashboard/public/variables/types')
+    .hasLoadingVariables,
 }));
 
 // Mock opensearch_dashboards_react
@@ -322,11 +322,14 @@ describe('useVariables', () => {
   describe('table data link variables', () => {
     it('gives the visualization builder the variable values when they change', () => {
       renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
+      mockVisualizationBuilder.setDataLinkVariables.mockClear();
 
-      mockVariables$.next([createMockVariable('region', ['us-east'])]);
+      mockInterpolationService.getVariables.mockReturnValue([{ name: 'region', value: 'eu' }]);
+      mockVariables$.next([createMockVariable('region', ['eu'])]);
 
+      expect(mockVisualizationBuilder.setDataLinkVariables).toHaveBeenCalledTimes(1);
       expect(mockVisualizationBuilder.setDataLinkVariables).toHaveBeenCalledWith([
-        { name: 'region', value: 'us-east' },
+        { name: 'region', value: 'eu' },
       ]);
     });
 

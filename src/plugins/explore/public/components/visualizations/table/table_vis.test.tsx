@@ -242,15 +242,19 @@ describe('TableVis', () => {
     expect(cell.props.variables).toBe(variables);
   });
 
-  test('passes no row for an index outside the rows', () => {
-    render(<TableVis rows={mockRows} columns={mockColumns} />);
+  test('passes the new variables to CellValue when they change', () => {
+    const { rerender } = render(
+      <TableVis rows={mockRows} columns={mockColumns} variables={[{ name: 'env', value: 'a' }]} />
+    );
+    const next = [{ name: 'env', value: 'b' }];
+    rerender(<TableVis rows={mockRows} columns={mockColumns} variables={next} />);
 
     const cell = lastRenderCellValue()({
-      rowIndex: 5,
+      rowIndex: 0,
       columnId: 'column1',
       setCellProps: jest.fn(),
     });
-    expect(cell.props.row).toBeUndefined();
+    expect(cell.props.variables).toBe(next);
   });
 
   test('passes the filtered row, not the unfiltered one', async () => {

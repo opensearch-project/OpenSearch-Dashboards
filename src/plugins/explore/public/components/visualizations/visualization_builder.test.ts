@@ -807,13 +807,17 @@ describe('showRawTable$', () => {
 });
 
 describe('dataLinkVariables$', () => {
-  test('emits only when the variables change, and reaches the render', () => {
+  test('is passed to the render', () => {
+    const builder = new VisualizationBuilder({});
+    expect(builder.renderVisualization({}).props.variables$).toBe(builder.dataLinkVariables$);
+  });
+
+  test('emits only when the variables change', () => {
     const builder = new VisualizationBuilder({});
     const emitted: unknown[] = [];
     const subscription = builder.dataLinkVariables$.subscribe((variables) =>
       emitted.push(variables)
     );
-    expect(builder.renderVisualization({}).props.variables$).toBe(builder.dataLinkVariables$);
 
     builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
     builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);

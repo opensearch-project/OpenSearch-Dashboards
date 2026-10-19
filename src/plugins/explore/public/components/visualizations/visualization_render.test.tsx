@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { VisualizationRender, CommonVisualizationRender } from './visualization_render';
@@ -176,25 +176,41 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
 
-  it('passes the dashboard variables to the table visualization', () => {
-    const { TableVis } = jest.requireMock('./table/table_vis');
-    (TableVis as jest.Mock).mockClear();
-    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
-    const showRawTable$ = new BehaviorSubject<boolean>(false);
-    const variables = [{ name: 'env', value: 'prod' }];
-    const variables$ = new BehaviorSubject(variables);
+  describe('table data link variables', () => {
+    const lastTableVisVariables = () => {
+      const { TableVis } = jest.requireMock('./table/table_vis');
+      const calls = (TableVis as jest.Mock).mock.calls;
+      return calls[calls.length - 1][0].variables;
+    };
 
-    render(
-      <VisualizationRender
-        data$={data$}
-        config$={visConfig$}
-        showRawTable$={showRawTable$}
-        variables$={variables$}
-      />
-    );
+    it('passes the latest dashboard variables to the table visualization', () => {
+      const variables$ = new BehaviorSubject([{ name: 'env', value: 'prod' }]);
+      render(
+        <VisualizationRender
+          data$={new BehaviorSubject<VisData | undefined>(mockVisData)}
+          config$={new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig)}
+          showRawTable$={new BehaviorSubject<boolean>(false)}
+          variables$={variables$}
+        />
+      );
 
-    expect((TableVis as jest.Mock).mock.calls[0][0].variables).toBe(variables);
+      const next = [{ name: 'env', value: 'stage' }];
+      act(() => variables$.next(next));
+
+      expect(lastTableVisVariables()).toBe(next);
+    });
+
+    it('passes no variables without a variables$ stream', () => {
+      render(
+        <VisualizationRender
+          data$={new BehaviorSubject<VisData | undefined>(mockVisData)}
+          config$={new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig)}
+          showRawTable$={new BehaviorSubject<boolean>(false)}
+        />
+      );
+
+      expect(lastTableVisVariables()).toEqual([]);
+    });
   });
 
   it('renders EchartsRender when there is a selection mapping', () => {

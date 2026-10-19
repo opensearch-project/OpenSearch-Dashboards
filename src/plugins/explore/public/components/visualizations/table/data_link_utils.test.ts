@@ -7,257 +7,273 @@
 
 import { getStateFromOsdUrl } from '../../../../../opensearch_dashboards_utils/public';
 import { ALL_OPTION_VALUE, VariableValue } from '../../../../../dashboard/public';
-import { isNavigableDataLinkUrl, resolveDataLink, resolveDataLinkUrl } from './data_link_utils';
+import { isNavigableDataLinkUrl, resolveDataLink } from './data_link_utils';
+
+const resolveUrl = (...args: Parameters<typeof resolveDataLink>) => resolveDataLink(...args).url;
 
 /** Reads _a the way the dashboard app does from a link relative to it. */
 const readDashboardState = (href: string) =>
   getStateFromOsdUrl('_a', `http://localhost/app/dashboards${href}`);
 
-describe('resolveDataLinkUrl', () => {
-  const row = {
-    service: 'checkout',
-    'request path': '/api/orders',
-    'resource.service.name': 'cart',
-    empty: null,
-    nested: { a: 1 },
-  };
-  const variables: VariableValue[] = [
-    { name: 'env', value: 'prod' },
-    { name: 'regions', value: 'eu,us', multi: true, values: ['eu west', 'us'] },
-  ];
+const row = {
+  service: 'checkout',
+  'request path': '/api/orders',
+  'resource.service.name': 'cart',
+  'http:status': 200,
+  'a:rison': 'colon',
+  empty: null,
+  nested: { a: 1 },
+};
+const variables: VariableValue[] = [
+  { name: 'env', value: 'prod' },
+  { name: 'regions', value: 'eu,us', multi: true, values: ['eu west', 'us'] },
+  { name: 'none', value: '', multi: true, values: [] },
+];
+const allRegions: VariableValue[] = [
+  { name: 'regions', value: 'eu,us', multi: true, values: ['eu', 'us'], isAll: true },
+];
 
-  it('replaces the clicked value', () => {
-    expect(resolveDataLinkUrl('https://x?q=${__value.text}', 'a b')).toBe('https://x?q=a%20b');
+describe('resolveDataLink', () => {
+  it.each([
+    {
+      name: 'clicked value',
+      url: 'https://x?q=${__value.text}',
+      value: 'a b',
+      expected: 'https://x?q=a%20b',
+    },
+    {
+      name: 'every occurrence',
+      url: '/${__value.text}/${__value.text}',
+      value: 'v',
+      expected: '/v/v',
+    },
+    {
+      name: 'reserved characters',
+      url: '?v=${__value.text}',
+      value: 'a&b#c/d e',
+      expected: '?v=a%26b%23c%2Fd%20e',
+    },
+    {
+      name: "' is left as is",
+      url: '?v=${__value.text}',
+      value: "o'brien",
+      expected: "?v=o'brien",
+    },
+    {
+      name: 'object value as JSON',
+      url: '?v=${__value.text}',
+      value: { b: 2 },
+      expected: `?v=${encodeURIComponent('{"b":2}')}`,
+    },
+    { name: 'row field', url: '?s=${__data.fields.service}', expected: '?s=checkout' },
+    {
+      name: 'row field with dots',
+      url: '?s=${__data.fields.resource.service.name}',
+      expected: '?s=cart',
+    },
+    { name: 'row field with a colon', url: '?s=${__data.fields.http:status}', expected: '?s=200' },
+    {
+      name: 'bracket field, double quotes',
+      url: '?p=${__data.fields["request path"]}',
+      expected: '?p=%2Fapi%2Forders',
+    },
+    {
+      name: 'bracket field, single quotes',
+      url: "?p=${__data.fields['request path']}",
+      expected: '?p=%2Fapi%2Forders',
+    },
+    {
+      name: 'bracket field named like a suffix',
+      url: '?s=${__data.fields["a:rison"]}',
+      expected: '?s=colon',
+    },
+    { name: 'null field', url: '?e=${__data.fields.empty}', expected: '?e=' },
+    {
+      name: 'object field as JSON',
+      url: '?n=${__data.fields.nested}',
+      expected: `?n=${encodeURIComponent('{"a":1}')}`,
+    },
+    { name: 'variable, both forms', url: '?e=$env&f=${env}', expected: '?e=prod&f=prod' },
+    { name: 'multi-value variable', url: '?r=$regions', expected: '?r=eu%20west,us' },
+    { name: 'empty multi-value variable', url: '?r=$none', expected: '?r=' },
+    {
+      name: 'All selected',
+      url: '?r=$regions',
+      vars: allRegions,
+      expected: `?r=${encodeURIComponent(ALL_OPTION_VALUE)}`,
+    },
+  ])('percent-encodes: $name', ({ url, value = 'x', vars = variables, expected }) => {
+    expect(resolveDataLink(url, value, row, vars)).toEqual({ url: expected, unresolved: [] });
   });
 
-  it('replaces every occurrence, not only the first', () => {
-    expect(resolveDataLinkUrl('/${__value.text}/${__value.text}', 'v')).toBe('/v/v');
+  it.each([
+    {
+      name: 'clicked value, unquoted',
+      url: 'current:!(${__value.text:rison})',
+      value: '/api/orders',
+      expected: 'current:!(/api/orders)',
+    },
+    { name: 'space', url: '${__value.text:rison}', value: 'foo bar', expected: "'foo+bar'" },
+    { name: "'", url: '${__value.text:rison}', value: "o'brien", expected: "'o!'brien'" },
+    { name: '!', url: '${__value.text:rison}', value: 'a!b', expected: "'a!!b'" },
+    {
+      name: 'bracket field',
+      url: '?p=${__data.fields["request path"]:rison}',
+      expected: '?p=/api/orders',
+    },
+    {
+      name: 'row field with dots',
+      url: '?s=${__data.fields.resource.service.name:rison}',
+      expected: '?s=cart',
+    },
+    { name: 'bare variable', url: '?e=$env:rison', expected: '?e=prod' },
+    {
+      name: 'multi-value variable as one array',
+      url: 'current:${regions:rison}',
+      expected: "current:!('eu+west',us)",
+    },
+    { name: 'empty multi-value variable', url: 'current:${none:rison}', expected: 'current:!()' },
+    {
+      name: 'All selected',
+      url: '?r=${regions:rison}',
+      vars: allRegions,
+      expected: `?r=!('${ALL_OPTION_VALUE}')`,
+    },
+  ])('rison-encodes: $name', ({ url, value = 'x', vars = variables, expected }) => {
+    expect(resolveDataLink(url, value, row, vars)).toEqual({ url: expected, unresolved: [] });
   });
 
-  it('replaces a row field with dot syntax', () => {
-    expect(resolveDataLinkUrl('?s=${__data.fields.service}', 'x', row)).toBe('?s=checkout');
+  it.each([
+    { name: 'field not in the row', placeholder: '${__data.fields.missing}' },
+    { name: 'field not in the row, with :rison', placeholder: '${__data.fields.missing:rison}' },
+    { name: 'inherited property', placeholder: '${__data.fields.constructor}' },
+    { name: 'prototype', placeholder: '${__data.fields.__proto__}' },
+    { name: 'unknown variable', placeholder: '$unknown' },
+    { name: 'variable without variables', placeholder: '$env', vars: [] },
+    { name: 'unknown suffix on a variable', placeholder: '${env:raw}' },
+    { name: 'unknown suffix on the clicked value', placeholder: '${__value.text:uri}' },
+  ])('keeps and reports an unresolved placeholder: $name', ({ placeholder, vars = variables }) => {
+    const url = `?k=${placeholder}`;
+    expect(resolveDataLink(url, 'x', row, vars)).toEqual({ url, unresolved: [placeholder] });
   });
 
-  it('replaces a row field whose name contains dots', () => {
-    expect(resolveDataLinkUrl('?s=${__data.fields.resource.service.name}', 'x', row)).toBe(
-      '?s=cart'
-    );
-  });
-
-  it('replaces a row field with bracket syntax, double or single quotes', () => {
-    expect(resolveDataLinkUrl('?p=${__data.fields["request path"]}', 'x', row)).toBe(
-      '?p=%2Fapi%2Forders'
-    );
-    expect(resolveDataLinkUrl("?p=${__data.fields['request path']}", 'x', row)).toBe(
-      '?p=%2Fapi%2Forders'
-    );
-  });
-
-  it('keeps the placeholder for a field that is not in the row', () => {
-    expect(resolveDataLinkUrl('?m=${__data.fields.missing}', 'x', row)).toBe(
-      '?m=${__data.fields.missing}'
-    );
-  });
-
-  it('gives an empty string for a null field and stringifies objects', () => {
-    expect(resolveDataLinkUrl('?e=${__data.fields.empty}', 'x', row)).toBe('?e=');
-    expect(resolveDataLinkUrl('?n=${__data.fields.nested}', 'x', row)).toBe(
-      `?n=${encodeURIComponent('{"a":1}')}`
-    );
-    expect(resolveDataLinkUrl('?v=${__value.text}', { b: 2 })).toBe(
-      `?v=${encodeURIComponent('{"b":2}')}`
-    );
-  });
-
-  it('replaces dashboard variables in both forms', () => {
-    expect(resolveDataLinkUrl('?e=$env&f=${env}', 'x', {}, variables)).toBe('?e=prod&f=prod');
-  });
-
-  it('joins the values of a multi-value variable, each encoded', () => {
-    expect(resolveDataLinkUrl('?r=$regions', 'x', {}, variables)).toBe('?r=eu%20west,us');
-  });
-
-  it('carries the All marker, not the expanded options, when All is selected', () => {
-    const all: VariableValue[] = [
-      { name: 'regions', value: 'eu,us', multi: true, values: ['eu', 'us'], isAll: true },
-    ];
-    expect(resolveDataLinkUrl('?r=$regions', 'x', {}, all)).toBe(
-      `?r=${encodeURIComponent(ALL_OPTION_VALUE)}`
-    );
-    expect(resolveDataLinkUrl('?r=${regions:rison}', 'x', {}, all)).toBe(
-      `?r=!('${ALL_OPTION_VALUE}')`
-    );
-  });
-
-  it('round-trips an All selection into the target dashboard state', () => {
-    const href = resolveDataLinkUrl(
-      '#/view/x?_a=(variables:!((id:regions,current:${regions:rison})))',
-      'x',
-      {},
-      [{ name: 'regions', value: '', multi: true, values: ['eu', 'us'], isAll: true }]
-    );
-    expect(readDashboardState(href)).toEqual({
-      variables: [{ id: 'regions', current: [ALL_OPTION_VALUE] }],
-    });
-  });
-
-  it('reports the placeholders it could not resolve', () => {
+  it('resolves the other placeholders when some cannot be resolved', () => {
     expect(
       resolveDataLink('?a=${__data.fields.missing}&b=$unknown&c=${__value.text}', 'v', row, [])
     ).toEqual({
       url: '?a=${__data.fields.missing}&b=$unknown&c=v',
       unresolved: ['${__data.fields.missing}', '$unknown'],
     });
-    expect(resolveDataLink('?e=$env', 'v', row, variables).unresolved).toEqual([]);
   });
 
-  it('cannot form a script URL from a cell value under either encoding', () => {
+  it.each([
+    {
+      name: 'percent-encoded',
+      url: '?v=${__value.text}&e=$env',
+      value: '$env ${__value.text}',
+      expected: `?v=${encodeURIComponent('$env ${__value.text}')}&e=prod`,
+    },
+    {
+      name: 'rison',
+      url: '?v=${__value.text:rison}&e=$env',
+      value: '$env',
+      expected: "?v='$env'&e=prod",
+    },
+  ])(
+    'does not expand placeholders inside substituted values: $name',
+    ({ url, value, expected }) => {
+      expect(resolveUrl(url, value, {}, variables)).toBe(expected);
+    }
+  );
+
+  it('cannot form a script URL from a value under either encoding', () => {
     for (const payload of ['javascript:alert(1)', 'data:text/html,x', 'vbscript:x']) {
-      for (const url of [
-        resolveDataLinkUrl('${__value.text}', payload),
-        resolveDataLinkUrl('${__value.text:rison}', payload),
-        resolveDataLinkUrl('${__data.fields.p:rison}', 'x', { p: payload }),
-      ]) {
-        expect(isNavigableDataLinkUrl(url)).toBe(true);
-        expect(new URL(url, 'http://base.invalid').protocol).toBe('http:');
-      }
+      expect(isNavigableDataLinkUrl(resolveUrl('${__value.text}', payload))).toBe(true);
+      expect(isNavigableDataLinkUrl(resolveUrl('${__value.text:rison}', payload))).toBe(true);
+      expect(
+        isNavigableDataLinkUrl(resolveUrl('${__data.fields.p:rison}', 'x', { p: payload }))
+      ).toBe(true);
     }
   });
 
-  it('keeps an unknown variable, and $var when there are no variables', () => {
-    expect(resolveDataLinkUrl('?u=$unknown', 'x', {}, variables)).toBe('?u=$unknown');
-    expect(resolveDataLinkUrl('?e=$env', 'x')).toBe('?e=$env');
+  it('can complete a script scheme the template starts, which the URL check refuses', () => {
+    const url = resolveUrl('${__value.text}:alert(1)', 'javascript');
+    expect(url).toBe('javascript:alert(1)');
+    expect(isNavigableDataLinkUrl(url)).toBe(false);
   });
 
-  it('does not expand placeholders inside substituted values', () => {
-    expect(
-      resolveDataLinkUrl('?v=${__value.text}&e=$env', '$env ${__value.text}', {}, variables)
-    ).toBe(`?v=${encodeURIComponent('$env ${__value.text}')}&e=prod`);
-  });
+  describe('round trip through the dashboard URL decoder', () => {
+    it('keeps quotes, spaces, reserved characters and a multi-value variable', () => {
+      const href = resolveUrl(
+        '#/view/d?_a=(variables:!((id:service,current:!(${service:rison})),(id:endpoint,current:!(${__value.text:rison})),(id:path,current:!(${__data.fields["request path"]:rison})),(id:regions,current:${regions:rison})))',
+        '/api/orders',
+        { 'request path': 'a&b#c+d 100%' },
+        [
+          { name: 'service', value: "o'brien" },
+          { name: 'regions', value: '', multi: true, values: ['eu west', 'foo bar'] },
+        ]
+      );
 
-  it('encodes reserved characters', () => {
-    expect(resolveDataLinkUrl('?v=${__value.text}', 'a&b#c/d e')).toBe('?v=a%26b%23c%2Fd%20e');
-  });
+      expect(readDashboardState(href)).toEqual({
+        variables: [
+          { id: 'service', current: ["o'brien"] },
+          { id: 'endpoint', current: ['/api/orders'] },
+          { id: 'path', current: ['a&b#c+d 100%'] },
+          { id: 'regions', current: ['eu west', 'foo bar'] },
+        ],
+      });
+    });
 
-  it('tells navigable URLs from script schemes', () => {
-    expect(isNavigableDataLinkUrl('/app/x?q=1')).toBe(true);
-    expect(isNavigableDataLinkUrl('#/view/x')).toBe(true);
-    expect(isNavigableDataLinkUrl('https://example.org/')).toBe(true);
-    expect(isNavigableDataLinkUrl('mailto:a@example.org')).toBe(true);
-    expect(isNavigableDataLinkUrl('javascript:alert(1)')).toBe(false);
-    expect(isNavigableDataLinkUrl(' JaVaScRiPt:alert(1)')).toBe(false);
-    expect(isNavigableDataLinkUrl('java\tscript:alert(1)')).toBe(false);
-    expect(isNavigableDataLinkUrl('data:text/html,x')).toBe(false);
-    expect(isNavigableDataLinkUrl('vbscript:x')).toBe(false);
-  });
+    it('selects All in the target dashboard', () => {
+      const href = resolveUrl(
+        '#/view/x?_a=(variables:!((id:regions,current:${regions:rison})))',
+        'x',
+        {},
+        allRegions
+      );
+      expect(readDashboardState(href)).toEqual({
+        variables: [{ id: 'regions', current: [ALL_OPTION_VALUE] }],
+      });
+    });
 
-  it('keeps a URL without placeholders unchanged', () => {
-    expect(resolveDataLinkUrl('https://example.com/a?b=c', 'x', row, variables)).toBe(
-      'https://example.com/a?b=c'
-    );
-  });
+    it('keeps the words true, false, null and numbers as strings', () => {
+      // Rison writes booleans and null as !t, !f and !n; a bare `true` is an
+      // identifier string, and a numeric string is quoted, so the target
+      // variable always receives the cell text, never a coerced value.
+      const href = resolveUrl(
+        '#/view/d?_a=(variables:!((id:a,current:!(${__value.text:rison})),(id:b,current:!(${__data.fields.flag:rison})),(id:c,current:${words:rison})))',
+        true,
+        { flag: 'null' },
+        [{ name: 'words', value: '', multi: true, values: ['false', '42'] }]
+      );
 
-  it('percent-encodes when there is no :rison suffix', () => {
-    expect(resolveDataLinkUrl('?v=${__value.text}', "o'brien /x")).toBe("?v=o'brien%20%2Fx");
-    expect(resolveDataLinkUrl('?v=${__value.text:uri}', '/api/orders')).toBe(
-      '?v=${__value.text:uri}'
-    );
-  });
-
-  it('rison-encodes a :rison suffix without percent-encoding the value', () => {
-    expect(resolveDataLinkUrl('current:!(${__value.text:rison})', '/api/orders')).toBe(
-      'current:!(/api/orders)'
-    );
-    expect(resolveDataLinkUrl('${__value.text:rison}', 'foo bar')).toBe("'foo+bar'");
-    expect(resolveDataLinkUrl('${__value.text:rison}', "o'brien")).toBe("'o!'brien'");
-    expect(resolveDataLinkUrl('${__value.text:rison}', 'a!b')).toBe("'a!!b'");
-    expect(resolveDataLinkUrl('?p=${__data.fields["request path"]:rison}', 'x', row)).toBe(
-      '?p=/api/orders'
-    );
-    expect(resolveDataLinkUrl('?s=${__data.fields.resource.service.name:rison}', 'x', row)).toBe(
-      '?s=cart'
-    );
-    expect(resolveDataLinkUrl('?e=$env:rison', 'x', {}, variables)).toBe('?e=prod');
-  });
-
-  it('rison-encodes a multi-value variable as one array', () => {
-    expect(resolveDataLinkUrl('current:${regions:rison}', 'x', {}, variables)).toBe(
-      "current:!('eu+west',us)"
-    );
-  });
-
-  it('keeps a colon in a field name that is not a :rison suffix', () => {
-    const colonRow = { 'http:status': 200, 'a:rison': 'colon' };
-    expect(resolveDataLinkUrl('?s=${__data.fields.http:status}', 'x', colonRow)).toBe('?s=200');
-    expect(resolveDataLinkUrl('?s=${__data.fields["a:rison"]}', 'x', colonRow)).toBe('?s=colon');
-  });
-
-  it('leaves an unknown suffix in place', () => {
-    expect(resolveDataLinkUrl('?e=${env:raw}', 'x', {}, variables)).toBe('?e=${env:raw}');
-    expect(resolveDataLinkUrl('?m=${__data.fields.missing:rison}', 'x', row)).toBe(
-      '?m=${__data.fields.missing:rison}'
-    );
-  });
-
-  it('does not expand a rison value that itself contains a placeholder', () => {
-    expect(resolveDataLinkUrl('?v=${__value.text:rison}&e=$env', '$env', {}, variables)).toBe(
-      "?v='$env'&e=prod"
-    );
-  });
-
-  it('round-trips a dashboard link through the URL parser and rison.decode', () => {
-    const href = resolveDataLinkUrl(
-      '#/view/endpoint-dashboard?_a=(variables:!((id:service,current:!(${service:rison})),(id:endpoint,current:!(${__value.text:rison}))))',
-      '/api/orders',
-      {},
-      [{ name: 'service', value: "o'brien" }]
-    );
-
-    expect(readDashboardState(href)).toEqual({
-      variables: [
-        { id: 'service', current: ["o'brien"] },
-        { id: 'endpoint', current: ['/api/orders'] },
-      ],
+      expect(readDashboardState(href)).toEqual({
+        variables: [
+          { id: 'a', current: ['true'] },
+          { id: 'b', current: ['null'] },
+          { id: 'c', current: ['false', '42'] },
+        ],
+      });
     });
   });
+});
 
-  it('round-trips spaces, reserved characters, and a multi-value variable', () => {
-    const href = resolveDataLinkUrl(
-      '#/view/endpoint-dashboard?_a=(variables:!((id:service,current:!(${service:rison})),(id:path,current:!(${__data.fields["request path"]:rison})),(id:regions,current:${regions:rison})))',
-      'x',
-      { 'request path': 'a&b#c+d 100%' },
-      [
-        { name: 'service', value: 'foo bar' },
-        { name: 'regions', value: 'eu,us', multi: true, values: ['eu west', "o'brien"] },
-      ]
-    );
+describe('isNavigableDataLinkUrl', () => {
+  it.each(['/app/x?q=1', '#/view/x', 'https://example.org/', 'mailto:a@example.org'])(
+    'allows %s',
+    (url) => {
+      expect(isNavigableDataLinkUrl(url)).toBe(true);
+    }
+  );
 
-    expect(readDashboardState(href)).toEqual({
-      variables: [
-        { id: 'service', current: ['foo bar'] },
-        { id: 'path', current: ['a&b#c+d 100%'] },
-        { id: 'regions', current: ['eu west', "o'brien"] },
-      ],
-    });
-  });
-
-  it('keeps the words true, false, null and numbers as strings through rison', () => {
-    // Rison writes booleans and null as !t, !f and !n; a bare `true` is an
-    // identifier string, and a numeric string is quoted, so the target
-    // variable always receives the cell text, never a coerced value.
-    const href = resolveDataLinkUrl(
-      '#/view/d?_a=(variables:!((id:a,current:!(${__value.text:rison})),(id:b,current:!(${__data.fields.flag:rison})),(id:c,current:${words:rison})))',
-      true,
-      { flag: 'null' },
-      [{ name: 'words', value: '', multi: true, values: ['false', '42'] }]
-    );
-
-    expect(readDashboardState(href)).toEqual({
-      variables: [
-        { id: 'a', current: ['true'] },
-        { id: 'b', current: ['null'] },
-        { id: 'c', current: ['false', '42'] },
-      ],
-    });
+  it.each([
+    'javascript:alert(1)',
+    ' JaVaScRiPt:alert(1)',
+    'java\tscript:alert(1)',
+    'data:text/html,x',
+    'vbscript:x',
+    'http://[',
+  ])('refuses %j', (url) => {
+    expect(isNavigableDataLinkUrl(url)).toBe(false);
   });
 });

@@ -199,42 +199,18 @@ describe('CellValue', () => {
     expect(screen.getByText('TestValue')).not.toHaveAttribute('title');
   });
 
-  it('keeps only the links that resolve when a cell has several', () => {
+  it('names each unresolved placeholder once, across links', () => {
     const links: DataLink[] = [
-      {
-        id: '1',
-        title: 'Resolved',
-        url: '/a/${__value.text}',
-        openInNewTab: false,
-        fields: ['col1'],
-      },
-      {
-        id: '2',
-        title: 'Unresolved',
-        url: '/b/${__data.fields.missing}',
-        openInNewTab: false,
-        fields: ['col1'],
-      },
+      { id: '1', title: 'A', url: '/a/$unknown', openInNewTab: false, fields: ['col1'] },
+      { id: '2', title: 'B', url: '/b/$unknown', openInNewTab: false, fields: ['col1'] },
+      // eslint-disable-next-line no-script-url
+      { id: '3', title: 'C', url: 'javascript:alert(1)', openInNewTab: false, fields: ['col1'] },
     ];
     render(<CellValue {...baseProps} dataLinks={links} />);
-    // One usable link renders directly, without a popover.
-    expect(screen.getByRole('link', { name: 'TestValue' })).toHaveAttribute('href', '/a/TestValue');
-  });
-
-  it('replaces every occurrence of the clicked value', () => {
-    const links: DataLink[] = [
-      {
-        id: '1',
-        title: 'Open',
-        url: '/a/${__value.text}/b/${__value.text}',
-        openInNewTab: false,
-        fields: ['col1'],
-      },
-    ];
-    render(<CellValue {...baseProps} dataLinks={links} />);
-    expect(screen.getByRole('link', { name: 'TestValue' })).toHaveAttribute(
-      'href',
-      '/a/TestValue/b/TestValue'
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('TestValue')).toHaveAttribute(
+      'title',
+      'No link: $unknown could not be resolved for this row'
     );
   });
 
@@ -294,7 +270,7 @@ describe('CellValue', () => {
     });
   });
 
-  it('resolves row fields and dashboard variables in every popover link', async () => {
+  it('lists only the resolved links in the popover, with their resolved URLs', async () => {
     const links: DataLink[] = [
       {
         id: '1',
@@ -308,6 +284,13 @@ describe('CellValue', () => {
         title: 'Endpoint',
         url: '/endpoint?path=${__value.text}&env=${env}',
         openInNewTab: true,
+        fields: ['col1'],
+      },
+      {
+        id: '3',
+        title: 'Unresolved',
+        url: '/b/${__data.fields.missing}',
+        openInNewTab: false,
         fields: ['col1'],
       },
     ];
@@ -333,6 +316,7 @@ describe('CellValue', () => {
         '/endpoint?path=TestValue&env=prod'
       );
     });
+    expect(screen.queryByRole('link', { name: 'Unresolved' })).not.toBeInTheDocument();
   });
 
   it('applies colored text style when colorMode is colored_text', () => {
