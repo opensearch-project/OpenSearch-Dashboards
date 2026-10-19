@@ -44,7 +44,7 @@ const useStyles = makeStyles({
   buttonWrapper: {
     cursor: 'pointer',
   },
-});
+}, { name: 'CaptureDownload' });
 
 export interface AttachDownloadProps {
   session: string;

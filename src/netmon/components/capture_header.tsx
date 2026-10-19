@@ -51,7 +51,7 @@ const useStyles = makeStyles({
       marginTop: '5px',
     },
   },
-});
+}, { name: 'CaptureHeader' });
 
 export interface CaptureHeaderProps {
   onSelectAll?: () => void;

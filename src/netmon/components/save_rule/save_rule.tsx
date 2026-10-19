@@ -61,7 +61,7 @@ const useStyles = makeStyles({
   infoIcon: {
     marginLeft: '2px',
   },
-});
+}, { name: 'SaveRule' });
 
 const validateForm = (value: QueryRule | null): SaveRuleFormDataValidation | null => {
   const validation = {
