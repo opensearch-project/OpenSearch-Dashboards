@@ -114,8 +114,8 @@ def load_assets(path_to_files):
         logger.error('OSD is not ready for API calls')
         return False
     logger.info('Creating index patterns...')
-    create_index_pattern('361f5c00-b47c-11e9-86a0-cd3d7bf2f81b', 'network_*', '@timestamp')
-    create_index_pattern('f655f660-db31-11e9-9a47-f1b6a93b3342', 'events_*', '@timestamp')
+    create_index_pattern('361f5c00-b47c-11e9-86a0-cd3d7bf2f81b', 'network_*', 'TimeUpdated')
+    create_index_pattern('f655f660-db31-11e9-9a47-f1b6a93b3342', 'events_*', 'TimeUpdated')
     try:
         files = [filename for filename in listdir(path_to_files) if isfile(join(path_to_files, filename))]
         logger.info(f'Found {len(files)} resource files to load')
