@@ -687,6 +687,11 @@ export class ExploreEmbeddable
 
           const chartRender = () => (
             <CommonVisualizationRender
+              // The panel's saved query, not the dashboard's, picks the empty state's samples.
+              query={{
+                language: this.savedExplore.searchSource.getField('query')?.language,
+                dataset: this.savedExplore.searchSource.getField('query')?.dataset,
+              }}
               visualizationData={visualizationData}
               visConfig={visConfig}
               showRawTable={false}
