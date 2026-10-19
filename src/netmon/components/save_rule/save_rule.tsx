@@ -53,15 +53,18 @@ import { preprocessQuery } from '../../utils/query_preprocessing';
 import { SaveRuleForm, SaveRuleFormDataValidation } from './save_rule_form';
 import { NmBlockingOverlay } from '../nm_blocking_overlay';
 
-const useStyles = makeStyles({
-  buttonContent: {
-    display: 'flex',
-    alignItems: 'center',
+const useStyles = makeStyles(
+  {
+    buttonContent: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    infoIcon: {
+      marginLeft: '2px',
+    },
   },
-  infoIcon: {
-    marginLeft: '2px',
-  },
-}, { name: 'SaveRule' });
+  { name: 'SaveRule' }
+);
 
 const validateForm = (value: QueryRule | null): SaveRuleFormDataValidation | null => {
   const validation = {

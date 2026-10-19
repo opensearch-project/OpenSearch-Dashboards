@@ -36,22 +36,25 @@ import { startPcapDownload } from '@logrhythm/nm-web-shared/services/session_fil
 import { toastNotifications } from '../services/notifications';
 import FileDownloadModal from './file_download/file_download_modal';
 
-const useStyles = makeStyles({
-  popoverWrapper: {
-    marginRight: '2px',
-  },
-  popoverPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'start',
-    '& button': {
-      width: '100%',
+const useStyles = makeStyles(
+  {
+    popoverWrapper: {
+      marginRight: '2px',
     },
-    '& button + button': {
-      marginTop: '5px',
+    popoverPanel: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'start',
+      '& button': {
+        width: '100%',
+      },
+      '& button + button': {
+        marginTop: '5px',
+      },
     },
   },
-}, { name: 'CaptureHeader' });
+  { name: 'CaptureHeader' }
+);
 
 export interface CaptureHeaderProps {
   onSelectAll?: () => void;
