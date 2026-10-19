@@ -246,7 +246,7 @@ export const createGroupedLineSeries =
     colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { xAxisConfig, axisColumnMappings, data = [] } = state;
+    const { xAxisConfig, axisColumnMappings, data = [], seriesDisplayNames } = state;
 
     const palette = getColors().categories;
     const newState = { ...state };
@@ -274,7 +274,8 @@ export const createGroupedLineSeries =
 
     const series = allValues.map((name, index) => {
       const color = getLegendColor(name, palette, sortedNames);
-      legendItems.push(createSeriesLegendItem(name, color));
+      const displayLabel = seriesDisplayNames?.[name] ?? name;
+      legendItems.push(createSeriesLegendItem(displayLabel, color, name));
 
       return {
         name,

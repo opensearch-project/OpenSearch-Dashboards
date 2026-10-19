@@ -493,10 +493,13 @@ export const seriesDisplayNameTooltipFormatter: TooltipFormatFn =
       const label = seriesDisplayNames?.[seriesName] ?? seriesName;
       // ignore value[0] which is axis x
       const valueRaw = p.value.slice(1);
+      // A per-series dataset contains only one value column, while a shared
+      // dataset contains one value column per series.
+      const value = valueRaw.length === 1 ? valueRaw[0] : valueRaw[seriesIndex];
       return formatTooltipLine({
         marker: p.marker,
         label,
-        value: formatValue(valueRaw[seriesIndex]),
+        value: formatValue(value),
       });
     });
     return sanitizeTooltipHtml([params[0].axisValueLabel, ...lines].filter(Boolean).join(''));

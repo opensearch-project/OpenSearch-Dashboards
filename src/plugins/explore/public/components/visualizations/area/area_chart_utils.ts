@@ -223,7 +223,8 @@ export const createStackAreaSeries =
     colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { xAxisConfig, axisColumnMappings, data = [] } = state;
+    // const { xAxisConfig, axisColumnMappings, data = [] } = state;
+    const { xAxisConfig, axisColumnMappings, data = [], seriesDisplayNames } = state;
     const palette = getColors().categories;
     const newState = { ...state };
     const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
@@ -255,7 +256,10 @@ export const createStackAreaSeries =
 
     const series = allValues.map((name, index) => {
       const color = getLegendColor(name, palette, sortedNames);
-      legendItems.push(createSeriesLegendItem(name, color));
+      // legendItems.push(createSeriesLegendItem(name, color));
+      // legend label is overridden to the display name
+      const displayLabel = seriesDisplayNames?.[name] ?? name;
+      legendItems.push(createSeriesLegendItem(displayLabel, color, name));
 
       return {
         name,
