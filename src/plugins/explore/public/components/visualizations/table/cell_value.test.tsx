@@ -199,6 +199,21 @@ describe('CellValue', () => {
     expect(screen.getByText('TestValue')).not.toHaveAttribute('title');
   });
 
+  it('does not render a relative link that the cell value moves to another host', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Moved',
+        url: '/${__value.text:rison}',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} value="/evil.com" dataLinks={links} />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('/evil.com')).toBeInTheDocument();
+  });
+
   it('names each unresolved placeholder once, across links', () => {
     const links: DataLink[] = [
       { id: '1', title: 'A', url: '/a/$unknown', openInNewTab: false, fields: ['col1'] },

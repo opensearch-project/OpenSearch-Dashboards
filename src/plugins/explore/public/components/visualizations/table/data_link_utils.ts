@@ -129,15 +129,29 @@ export const resolveDataLink = (
 // eslint-disable-next-line no-script-url
 const SCRIPT_PROTOCOLS = new Set(['javascript:', 'data:', 'vbscript:']);
 
+const RELATIVE_BASE = 'http://relative.invalid';
+const RELATIVE_ORIGIN = new URL(RELATIVE_BASE).origin;
+
 /**
  * A resolved link may only navigate. Substituted values are encoded (a rison
  * string with a `:` is quoted, so it cannot start a scheme), but the template
  * itself is author input. Parsing with a base also catches scheme obfuscation
  * such as whitespace or mixed case.
+ *
+ * When the template is given and is relative, the resolved URL must stay
+ * relative: rison leaves `/` unescaped, so a value like `/evil.com` at the
+ * start of a relative template would otherwise give `//evil.com`, another host.
  */
-export const isNavigableDataLinkUrl = (url: string): boolean => {
+export const isNavigableDataLinkUrl = (url: string, template?: string): boolean => {
   try {
-    return !SCRIPT_PROTOCOLS.has(new URL(url, 'http://relative.invalid').protocol);
+    const resolved = new URL(url, RELATIVE_BASE);
+    if (SCRIPT_PROTOCOLS.has(resolved.protocol)) {
+      return false;
+    }
+    const templateIsRelative =
+      template !== undefined &&
+      new URL(template.replace(PLACEHOLDER, 'x'), RELATIVE_BASE).origin === RELATIVE_ORIGIN;
+    return !templateIsRelative || resolved.origin === RELATIVE_ORIGIN;
   } catch {
     return false;
   }

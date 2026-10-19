@@ -276,4 +276,34 @@ describe('isNavigableDataLinkUrl', () => {
   ])('refuses %j', (url) => {
     expect(isNavigableDataLinkUrl(url)).toBe(false);
   });
+
+  it.each([
+    { template: '/${__value.text:rison}', value: '/evil.com' },
+    { template: '${__value.text:rison}', value: '//evil.com' },
+    { template: '${__data.fields.p:rison}', value: '//evil.com' },
+  ])('refuses a relative template that $value moves to another host', ({ template, value }) => {
+    const url = resolveUrl(template, value, { p: value });
+    expect(new URL(url, 'http://base.invalid').host).toBe('evil.com');
+    expect(isNavigableDataLinkUrl(url, template)).toBe(false);
+  });
+
+  it('treats a backslash like a slash when checking the host, as browsers do', () => {
+    expect(isNavigableDataLinkUrl('/\\evil.com', '/${__value.text}')).toBe(false);
+  });
+
+  it.each([
+    {
+      name: 'relative template',
+      template: '#/view/x?_a=(v:!(${__value.text:rison}))',
+      value: '/api/orders',
+    },
+    { name: 'relative path', template: '/app/x/${__value.text}', value: '/evil.com' },
+    {
+      name: 'absolute template with a host from the row',
+      template: 'https://${__data.fields.p}/x',
+      value: 'example.org',
+    },
+  ])('allows a $name', ({ template, value }) => {
+    expect(isNavigableDataLinkUrl(resolveUrl(template, value, { p: value }), template)).toBe(true);
+  });
 });

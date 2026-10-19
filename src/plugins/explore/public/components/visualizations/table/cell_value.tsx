@@ -73,9 +73,10 @@ export const CellValue = (props: Props) => {
   }
 
   // A URL with an unresolved placeholder would not open anything useful, and
-  // one with a script scheme must not open at all.
+  // one with a script scheme, or a relative link a value moved to another host,
+  // must not open at all.
   const applicableLinks = resolvedLinks.filter(
-    ({ url, unresolved }) => unresolved.length === 0 && isNavigableDataLinkUrl(url)
+    ({ link, url, unresolved }) => unresolved.length === 0 && isNavigableDataLinkUrl(url, link.url)
   );
 
   if (applicableLinks.length === 0) {
