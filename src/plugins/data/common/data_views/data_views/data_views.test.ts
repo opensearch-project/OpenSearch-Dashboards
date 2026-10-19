@@ -37,6 +37,7 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 
 describe('DataViews', () => {
   let dataViews: DataViewsService;
+  let apiClient: any;
   let savedObjectsClient: DataViewSavedObjectsClientCommon;
   const uiSettingsGet = jest.fn();
 
@@ -74,6 +75,7 @@ describe('DataViews', () => {
     uiSettingsGet.mockClear();
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
+    apiClient = { ...createFieldsFetcher(), refreshFields: jest.fn() };
     dataViews = new DataViewsService({
       patterns: indexPatternsMock,
       uiSettings: {
@@ -81,7 +83,7 @@ describe('DataViews', () => {
         getAll: () => {},
       } as any as DataViewUiSettingsCommon,
       savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -187,9 +189,34 @@ describe('DataViews', () => {
     const title = 'opensearch-dashboards-*';
     dataViews.createSavedObject = jest.fn();
     dataViews.setDefault = jest.fn();
+    dataViews.refreshFields = jest.fn();
+    dataViews.refreshFieldsAndSave = jest.fn();
     await dataViews.createAndSave({ title });
+    expect(dataViews.refreshFields).not.toHaveBeenCalled();
     expect(dataViews.createSavedObject).toHaveBeenCalled();
+    expect(dataViews.refreshFieldsAndSave).toHaveBeenCalled();
     expect(dataViews.setDefault).toHaveBeenCalled();
+  });
+
+  test('createAndSave skips fetching fields when skipFetchFields is true', async () => {
+    dataViews.createSavedObject = jest.fn();
+    dataViews.setDefault = jest.fn();
+    dataViews.refreshFieldsAndSave = jest.fn();
+    await dataViews.createAndSave({ title: 'opensearch-dashboards-*' }, false, true);
+    expect(dataViews.refreshFieldsAndSave).not.toHaveBeenCalled();
+  });
+
+  test('refreshFieldsAndSave', async () => {
+    const dataView = await dataViews.create({ id: 'id', title: 'opensearch-dashboards-*' }, true);
+    const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
+    apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
+    await dataViews.refreshFieldsAndSave(dataView);
+    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', {
+      metaFields: false,
+      dataSourceId: undefined,
+    });
+    expect(dataView.fields.getByName('foo')).toBeDefined();
+    expect(dataView.version).toBe('v2');
   });
 
   test('savedObjectToSpec', () => {
