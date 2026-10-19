@@ -25,6 +25,7 @@ import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
 import { ITransformationService } from '../data_transformations/types';
 import { createNoOpTransformationService } from '../data_transformations/transformation_service';
+import type { VariableValue } from '../../../../dashboard/public';
 
 interface VisState {
   title?: string;
@@ -54,10 +55,18 @@ export class VisualizationBuilder {
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
+  /** Dashboard variables for table data links, when editing a dashboard panel. */
+  dataLinkVariables$ = new BehaviorSubject<VariableValue[]>([]);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
+    }
+  }
+
+  setDataLinkVariables(variables: VariableValue[]) {
+    if (!isEqual(variables, this.dataLinkVariables$.value)) {
+      this.dataLinkVariables$.next(variables);
     }
   }
 
@@ -556,6 +565,7 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
+    this.dataLinkVariables$.complete();
   }
 
   reset(): void {
@@ -565,6 +575,7 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.dataLinkVariables$ = new BehaviorSubject<VariableValue[]>([]);
     this.transformationService = createNoOpTransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
@@ -638,6 +649,7 @@ export class VisualizationBuilder {
       data$: this.data$,
       config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
+      variables$: this.dataLinkVariables$,
       timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),

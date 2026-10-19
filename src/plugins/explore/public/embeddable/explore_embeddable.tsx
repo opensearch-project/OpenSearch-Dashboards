@@ -24,7 +24,9 @@ import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
 import {
   DashboardContainer,
   IVariableInterpolationService,
+  VariableValue,
   createNoOpVariableInterpolationService,
+  hasLoadingVariables,
 } from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
@@ -84,6 +86,7 @@ export interface SearchProps {
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  variables?: VariableValue[];
   axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
@@ -308,21 +311,44 @@ export class ExploreEmbeddable
         this.variableSubscription = dashboardContainer.variableService
           .getVariables$()
           .subscribe((variables) => {
-            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
-            if (hasLoading) return;
+            if (hasLoadingVariables(variables)) return;
 
-            this.handleVariablesChange();
+            const linkVariablesChanged = this.updateLinkVariables();
+            const refetching = this.handleVariablesChange();
+            // A refetch re-renders with the new variables; otherwise render here.
+            if (linkVariablesChanged && !refetching && this.node && this.searchProps) {
+              this.renderComponent(this.node, this.searchProps);
+            }
           });
       }
     }
   }
 
   /**
-   * Handle variable changes - interpolate query and refetch
+   * Table data links can use dashboard variables, so keep them in searchProps.
+   * Returns whether they changed. Variable option reloads (e.g. on a time range
+   * change) emit with the same values, and must not re-render the panel.
+   * The caller re-renders with the new searchProps object.
    */
-  private handleVariablesChange() {
+  private updateLinkVariables(): boolean {
+    if (!this.searchProps) {
+      return false;
+    }
+    const variables = this.interpolationService.getVariables();
+    if (isEqual(variables, this.searchProps.variables)) {
+      return false;
+    }
+    this.searchProps = { ...this.searchProps, variables };
+    return true;
+  }
+
+  /**
+   * Handle variable changes - interpolate query and refetch.
+   * Returns whether a refetch (which re-renders) was started.
+   */
+  private handleVariablesChange(): boolean {
     if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
-      return;
+      return false;
     }
 
     const { searchSource } = this.savedExplore;
@@ -333,7 +359,7 @@ export class ExploreEmbeddable
     );
 
     if (interpolatedQuery === this.lastInterpolatedQuery) {
-      return;
+      return false;
     }
     this.lastInterpolatedQuery = interpolatedQuery;
 
@@ -346,7 +372,9 @@ export class ExploreEmbeddable
 
     if (this.searchProps) {
       this.updateHandler(this.searchProps, true);
+      return true;
     }
+    return false;
   }
 
   private initializeSearchProps() {
@@ -361,6 +389,7 @@ export class ExploreEmbeddable
       isLoading: false,
       displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
+      variables: this.interpolationService.getVariables(),
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {

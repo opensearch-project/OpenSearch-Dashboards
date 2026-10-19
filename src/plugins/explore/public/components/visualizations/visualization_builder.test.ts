@@ -805,3 +805,34 @@ describe('showRawTable$', () => {
     expect(builder.showRawTable$.value).toBe(true);
   });
 });
+
+describe('dataLinkVariables$', () => {
+  test('emits only when the variables change, and reaches the render', () => {
+    const builder = new VisualizationBuilder({});
+    const emitted: unknown[] = [];
+    const subscription = builder.dataLinkVariables$.subscribe((variables) =>
+      emitted.push(variables)
+    );
+    expect(builder.renderVisualization({}).props.variables$).toBe(builder.dataLinkVariables$);
+
+    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
+    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
+    builder.setDataLinkVariables([{ name: 'env', value: 'stage' }]);
+
+    expect(emitted).toEqual([
+      [],
+      [{ name: 'env', value: 'prod' }],
+      [{ name: 'env', value: 'stage' }],
+    ]);
+    subscription.unsubscribe();
+  });
+
+  test('is cleared by reset', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
+
+    builder.reset();
+
+    expect(builder.dataLinkVariables$.value).toEqual([]);
+  });
+});

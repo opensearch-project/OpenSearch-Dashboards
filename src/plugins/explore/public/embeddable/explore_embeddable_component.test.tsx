@@ -136,6 +136,26 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('mockTableVis')).toBeInTheDocument();
   });
 
+  test('passes dashboard variables to the table visualization', () => {
+    const { TableVis } = jest.requireMock('../components/visualizations/table/table_vis');
+    (TableVis as jest.Mock).mockClear();
+    const variables = [{ name: 'service', value: 'checkout' }];
+
+    render(
+      <ExploreEmbeddableComponent
+        searchProps={{
+          ...mockSearchProps,
+          activeTab: 'visualization',
+          chartType: 'table' as any,
+          tableData: { rows: [{ col1: 'val1' }], columns: [] },
+          variables,
+        }}
+      />
+    );
+
+    expect((TableVis as jest.Mock).mock.calls[0][0].variables).toBe(variables);
+  });
+
   test('renders gracefully with missing optional fields in searchProps', () => {
     const minimalProps = {
       services: {} as any,

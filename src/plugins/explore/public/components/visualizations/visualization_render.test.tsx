@@ -176,6 +176,27 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
 
+  it('passes the dashboard variables to the table visualization', () => {
+    const { TableVis } = jest.requireMock('./table/table_vis');
+    (TableVis as jest.Mock).mockClear();
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+    const variables = [{ name: 'env', value: 'prod' }];
+    const variables$ = new BehaviorSubject(variables);
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        variables$={variables$}
+      />
+    );
+
+    expect((TableVis as jest.Mock).mock.calls[0][0].variables).toBe(variables);
+  });
+
   it('renders EchartsRender when there is a selection mapping', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);

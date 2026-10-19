@@ -772,6 +772,149 @@ describe('ExploreEmbeddable', () => {
     expect(adaptLegacyDataSpy).toHaveBeenCalled();
   });
 
+  describe('data link variables', () => {
+    test('keeps dashboard variables for data links in search props', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const parent = createTestContainer(
+        'links-var-emb',
+        {
+          panels: {
+            'links-var-emb': {
+              type: EXPLORE_EMBEDDABLE_TYPE,
+              explicitInput: { id: 'links-var-emb' },
+            },
+          },
+        },
+        { getVariables }
+      );
+      const mockServices = createMockServices();
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: mockSavedExplore,
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'links-var-emb' },
+        mockExecuteTriggerActions,
+        parent
+      );
+
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'a' }]);
+      // @ts-ignore - private for testing
+      const previousSearchProps = emb.searchProps;
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'b' }]);
+      // A new object, so a memoized component re-renders on the prop change.
+      // @ts-ignore - private for testing
+      expect(emb.searchProps).not.toBe(previousSearchProps);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('has no variables outside a dashboard', () => {
+      const mockServices = createMockServices();
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: mockSavedExplore,
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'links-no-parent-emb' },
+        mockExecuteTriggerActions
+      );
+
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([]);
+
+      emb.destroy();
+    });
+
+    const createRenderedEmbeddable = (
+      id: string,
+      interpolation: Partial<IVariableInterpolationService>
+    ) => {
+      const parent = createTestContainer(
+        id,
+        { panels: { [id]: { type: EXPLORE_EMBEDDABLE_TYPE, explicitInput: { id } } } },
+        interpolation
+      );
+      const mockServices = createMockServices();
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: mockSavedExplore,
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id },
+        mockExecuteTriggerActions,
+        parent
+      );
+      emb.render(document.createElement('div'));
+      return { parent, emb };
+    };
+
+    test('re-renders once on a variable change, and not when the values are unchanged', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createRenderedEmbeddable('links-render-emb', { getVariables });
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+
+      // Option reloads emit with the same values: no re-render.
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['a'] }]);
+      expect(renderSpy).not.toHaveBeenCalled();
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('does not render again when the query uses variables and refetches', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createRenderedEmbeddable('links-refetch-emb', {
+        getVariables,
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn().mockReturnValue('source = logs | where service = "b"'),
+      });
+      emb.originalQuery = 'source = logs | where service = "$service"';
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+      const updateSpy = jest.spyOn(emb as any, 'updateHandler').mockImplementation(() => {});
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      expect(renderSpy).not.toHaveBeenCalled();
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'b' }]);
+
+      emb.destroy();
+      parent.destroy();
+    });
+  });
+
   describe('variable interpolation in panel metadata', () => {
     test('interpolates input.title when it contains variables', () => {
       const mockInterpolation: Partial<IVariableInterpolationService> = {

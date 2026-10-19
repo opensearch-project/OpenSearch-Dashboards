@@ -81,6 +81,7 @@ export {
   VariableWithState,
   VariableState,
   ALL_OPTION_VALUE,
+  hasLoadingVariables,
 } from './variables/types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
