@@ -254,7 +254,7 @@ export interface RawEvent extends BaseEvent {
 export interface CustomEvent extends BaseEvent {
   type: EventType.CUSTOM;
   name: string;
-  data: unknown;
+  value: unknown;
 }
 
 /**
