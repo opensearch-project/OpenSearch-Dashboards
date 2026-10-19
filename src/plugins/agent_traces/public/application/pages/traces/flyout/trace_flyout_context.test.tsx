@@ -15,11 +15,6 @@ const NavButtons = ({ navigation }: any) => (
         Back to {navigation.back.kind} {navigation.back.label}
       </button>
     )}
-    {navigation?.forward && (
-      <button onClick={navigation.onForward}>
-        Forward to {navigation.forward.kind} {navigation.forward.label}
-      </button>
-    )}
   </>
 );
 
@@ -213,6 +208,23 @@ describe('TraceFlyoutContext', () => {
           <button onClick={() => updateFlyoutFullTree(mockTraceB.traceId, [mockTraceB], false)}>
             Tree B loaded
           </button>
+          <button
+            onClick={() =>
+              openFlyout(mockTrace, { fromSession: { sessionId: 'sess-from-trace' } as any })
+            }
+          >
+            Trace from session
+          </button>
+          <button
+            onClick={() =>
+              openFlyout(
+                { ...mockTrace, id: 'agent-2', spanId: 'agent-2', name: 'Second agent' },
+                { fromSession: { sessionId: 'sess-from-trace' } as any }
+              )
+            }
+          >
+            Second agent from session
+          </button>
         </>
       );
     };
@@ -226,7 +238,7 @@ describe('TraceFlyoutContext', () => {
 
     beforeEach(() => mockSessionMounts.mockClear());
 
-    it('follows the path: session -> trace -> back to session -> forward to trace', () => {
+    it('drills down session -> trace, and Back forgets the trace', () => {
       renderProvider();
       click('Open A');
       expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
@@ -238,23 +250,20 @@ describe('TraceFlyoutContext', () => {
       click('Back to session sess-a');
       expect(screen.queryByTestId('mock-flyout')).not.toBeInTheDocument();
       expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-a');
-      // The session comes back focused on the trace the user opened from it.
+      // The session comes back focused on the trace the user opened from it, with no way
+      // forward to that trace again (it opens from the session's list instead).
       expect(screen.getByTestId('mock-session-focus')).toHaveTextContent('trace-id-1');
-
-      click('Forward to trace Test Trace');
-      expect(screen.queryByTestId('mock-session-flyout')).not.toBeInTheDocument();
-      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Test Trace');
-      expect(screen.queryByText(/^Forward to/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
     });
 
-    it('keeps a tree that finished loading after the user went back', () => {
+    it('reopens a trace from its session after going back', () => {
       renderProvider();
       click('Open A');
       click('Trace from A');
       click('Back to session sess-a');
-      click('Tree loaded');
-      click('Forward to trace Test Trace');
-      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('tree loaded');
+      click('Trace from A');
+      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Test Trace');
+      expect(screen.getByText('Back to session sess-a')).toBeInTheDocument();
     });
 
     it('writes a tree only to its own trace, even after the user moved on', () => {
@@ -283,15 +292,40 @@ describe('TraceFlyoutContext', () => {
       expect(screen.getByTestId('mock-session-view')).toHaveTextContent('all');
     });
 
-    it('keeps a session fetched by id for Back/Forward', () => {
+    it('goes back to the trace a session was opened from, with no way forward', () => {
       renderProvider();
       click('Open trace');
       click('Session link');
-      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('not cached');
       click('Fetched sess-from-trace');
       click('Back to trace Test Trace');
-      click('Forward to session sess-from-trace');
-      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('cached');
+      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Test Trace');
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
+    });
+
+    it('focuses the trace a session was opened from', () => {
+      renderProvider();
+      click('Open trace');
+      click('Session link');
+      expect(screen.getByTestId('mock-session-focus')).toHaveTextContent(mockTrace.traceId);
+    });
+
+    it('goes back instead of looping when the session opens the trace it came from', () => {
+      renderProvider();
+      click('Open trace'); // trace from the Traces table
+      click('Session link'); // its session
+      click('Trace from session'); // the same trace, from the session's list
+      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Test Trace');
+      // Back to where the user started, not trace -> session -> trace.
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
+    });
+
+    it('shows the picked agent when the session opens another agent of the same trace', () => {
+      renderProvider();
+      click('Open trace');
+      click('Session link');
+      click('Second agent from session');
+      expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Second agent');
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
     });
 
     it('gives each trace opened from a table a fresh flyout', () => {
@@ -311,22 +345,18 @@ describe('TraceFlyoutContext', () => {
       act(() => screen.getByText('Session link A').click());
       expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-a');
       expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
-      expect(screen.getByText('Forward to trace Test Trace')).toBeInTheDocument();
     });
 
-    it('records trace -> session, and a new path drops the old forward entries', () => {
+    it('records trace -> session, and opening from a table starts over', () => {
       renderProvider();
       click('Open trace');
       click('Session link');
       expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-from-trace');
-      click('Back to trace Test Trace');
-      expect(screen.getByTestId('mock-flyout')).toBeInTheDocument();
-      expect(screen.getByText('Forward to session sess-from-trace')).toBeInTheDocument();
+      expect(screen.getByText('Back to trace Test Trace')).toBeInTheDocument();
 
-      // Opening from a table starts over: no back or forward.
       click('Open B');
       expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-b');
-      expect(screen.queryByText(/^Back to|^Forward to/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
     });
 
     it('gives each session a fresh flyout', () => {

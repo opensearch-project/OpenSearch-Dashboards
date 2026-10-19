@@ -21,7 +21,8 @@ import {
   TraceFlyoutContext,
   TraceFlyoutContextValue,
   currentView,
-  moveHistory,
+  backHistory,
+  previousView,
   navigationTargets,
   pushHistory,
   resetHistory,
@@ -57,15 +58,23 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
         isLoadingFullTree: true,
         fullTreeError: undefined,
       };
-      setHistory((prev) =>
-        options?.fromSession
-          ? pushHistory(prev, next, (current) =>
-              current.kind === 'session'
-                ? { ...current, focusTraceId: trace.traceId, sessionView: options.sessionView }
-                : current
-            )
-          : resetHistory(next)
-      );
+      setHistory((prev) => {
+        if (!options?.fromSession) return resetHistory(next);
+        // The trace this session was opened from: go back to it instead of repeating it (and
+        // show the row picked, e.g. another agent of the same trace).
+        const previous = previousView(prev);
+        if (previous?.kind === 'trace' && previous.trace.traceId === trace.traceId) {
+          const back = backHistory(prev);
+          const entries = [...back.entries];
+          entries[back.index] = previous.trace.spanId === trace.spanId ? previous : { ...next };
+          return { ...back, entries };
+        }
+        return pushHistory(prev, next, (current) =>
+          current.kind === 'session'
+            ? { ...current, focusTraceId: trace.traceId, sessionView: options.sessionView }
+            : current
+        );
+      });
     },
     [collapseSidebar]
   );
@@ -80,11 +89,16 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setHistory((prev) => {
         if (!options?.fromTrace) return resetHistory(next);
         // The session this trace was opened from: go back to it instead of repeating it.
-        const previous = prev.entries[prev.index - 1];
+        const previous = previousView(prev);
         if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
-          return moveHistory(prev, -1);
+          return backHistory(prev);
         }
-        return pushHistory(prev, next);
+        // Focus the trace the session was opened from.
+        const current = prev.entries[prev.index];
+        return pushHistory(
+          prev,
+          current?.kind === 'trace' ? { ...next, focusTraceId: current.trace.traceId } : next
+        );
       });
     },
     [collapseSidebar]
@@ -124,8 +138,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const navigation = useMemo<FlyoutNavigation>(
     () => ({
       ...navigationTargets(history),
-      onBack: () => setHistory((prev) => moveHistory(prev, -1)),
-      onForward: () => setHistory((prev) => moveHistory(prev, 1)),
+      onBack: () => setHistory((prev) => backHistory(prev)),
     }),
     [history]
   );

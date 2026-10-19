@@ -44,6 +44,7 @@ import {
   parseGenAiMessages,
   previewInputMessages,
   previewOutputMessages,
+  readAttribute,
 } from '../traces/hooks/genai_message_preview';
 import { SessionRow, formatSessionDuration } from './session_utils';
 import { FlyoutHistoryNav } from '../traces/flyout/flyout_history_nav';
@@ -168,6 +169,20 @@ const MessagePanel: React.FC<{
   );
 };
 
+/** "#n Agent name" when the trace's root names its agent, otherwise "Trace #n". */
+const traceLabel = (trace: SessionTrace, index: number): string => {
+  const agent = readAttribute(trace.root.rawDocument, 'gen_ai.agent.name');
+  return typeof agent === 'string' && agent
+    ? i18n.translate('agentTraces.sessions.flyout.agentLink', {
+        defaultMessage: '#{index} {agent}',
+        values: { index, agent },
+      })
+    : i18n.translate('agentTraces.sessions.flyout.traceLink', {
+        defaultMessage: 'Trace #{index}',
+        values: { index },
+      });
+};
+
 /** Input and output messages for one trace in the session conversation. */
 const ConversationTurn: React.FC<{
   index: number;
@@ -183,11 +198,7 @@ const ConversationTurn: React.FC<{
     data-test-subj={`agentTracesSessionTurn-${index}`}
   >
     <EuiLink onClick={onOpenTrace} data-test-subj={`agentTracesSessionTurnLink-${index}`}>
-      {i18n.translate('agentTraces.sessions.flyout.traceLink', {
-        defaultMessage: 'Trace #{index}',
-        values: { index },
-      })}{' '}
-      <EuiIcon type="arrowRight" size="s" />
+      {traceLabel(trace, index)} <EuiIcon type="arrowRight" size="s" />
     </EuiLink>
     <EuiSpacer size="xs" />
     <MessagePanel
@@ -226,6 +237,9 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   const turnRefs = useRef<Array<HTMLDivElement | null>>([]);
   const conversationRef = useRef<HTMLDivElement | null>(null);
   const conversationHeaderRef = useRef<HTMLDivElement | null>(null);
+
+  // A trace with parallel agents is listed once per agent.
+  const distinctTraceCount = useMemo(() => new Set(traces.map((t) => t.traceId)).size, [traces]);
 
   const totalTokens = useMemo(() => {
     const values = traces.map((t) => tokensOf(t.root)).filter((v): v is number => v !== null);
@@ -388,10 +402,15 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
               <div className="agtSessionFlyout__panelHeader">
                 <EuiTitle size="xxs">
                   <h3>
-                    {i18n.translate('agentTraces.sessions.flyout.traceList', {
-                      defaultMessage: 'Trace list ({count})',
-                      values: { count: traces.length },
-                    })}
+                    {traces.length > distinctTraceCount
+                      ? i18n.translate('agentTraces.sessions.flyout.agentRunList', {
+                          defaultMessage: 'Agent runs ({count})',
+                          values: { count: traces.length },
+                        })
+                      : i18n.translate('agentTraces.sessions.flyout.traceList', {
+                          defaultMessage: 'Trace list ({count})',
+                          values: { count: traces.length },
+                        })}
                   </h3>
                 </EuiTitle>
                 <EuiLink
@@ -436,12 +455,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                       })}
                       data-test-subj={`agentTracesSessionOpenTrace-${i + 1}`}
                     />
-                    <strong>
-                      {i18n.translate('agentTraces.sessions.flyout.traceLink', {
-                        defaultMessage: 'Trace #{index}',
-                        values: { index: i + 1 },
-                      })}
-                    </strong>
+                    <strong>{traceLabel(trace, i + 1)}</strong>
                     {errorSpanCount(trace) > 0 && (
                       <EuiToolTip
                         content={i18n.translate('agentTraces.sessions.flyout.traceErrors', {

@@ -7,7 +7,7 @@ import {
   EMPTY_HISTORY,
   FlyoutView,
   currentView,
-  moveHistory,
+  backHistory,
   navigationTargets,
   pushHistory,
   resetHistory,
@@ -24,29 +24,22 @@ describe('flyout history', () => {
     expect(currentView(EMPTY_HISTORY)).toBeNull();
     const h = resetHistory(session('s1'));
     expect(currentView(h)).toEqual(session('s1'));
-    expect(navigationTargets(h)).toEqual({ back: undefined, forward: undefined });
+    expect(navigationTargets(h)).toEqual({ back: undefined });
   });
 
-  it('moves back and forward along the path, and stops at the ends', () => {
+  it('goes back and forgets the flyout left, and stops at the start', () => {
     let h = pushHistory(resetHistory(session('s1')), trace('t1'));
-    expect(navigationTargets(h)).toEqual({
-      back: { kind: 'session', label: 's1' },
-      forward: undefined,
-    });
-    h = moveHistory(h, -1);
+    expect(navigationTargets(h)).toEqual({ back: { kind: 'session', label: 's1' } });
+    h = backHistory(h);
     expect(currentView(h)).toEqual(session('s1'));
-    expect(navigationTargets(h).forward).toEqual({ kind: 'trace', label: 't1' });
-    expect(moveHistory(h, -1)).toBe(h);
-    h = moveHistory(h, 1);
-    expect(currentView(h)).toEqual(trace('t1'));
-    expect(moveHistory(h, 1)).toBe(h);
+    expect(h.entries).toHaveLength(1);
+    expect(navigationTargets(h)).toEqual({ back: undefined });
+    expect(backHistory(h)).toBe(h);
   });
 
-  it('drops forward entries on a new move and records state on the flyout left', () => {
-    let h = pushHistory(resetHistory(session('s1')), trace('t1'));
-    h = moveHistory(h, -1);
-    h = pushHistory(
-      h,
+  it('records state on the flyout left', () => {
+    const h = pushHistory(
+      resetHistory(session('s1')),
       trace('t2'),
       (current) => ({ ...current, focusTraceId: 'id-t2' }) as FlyoutView
     );

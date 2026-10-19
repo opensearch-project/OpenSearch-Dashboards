@@ -361,7 +361,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               })}
             </EuiText>
             <EuiText size="xs" className="agentTracesFlyout__metaValue">
-              {rootTrace.totalTokens || '—'}
+              {rootTrace.totalTokens ?? '—'}
             </EuiText>
           </div>
         </div>
