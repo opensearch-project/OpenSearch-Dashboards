@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CSSProperties } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { DisableMode, ConnectNullValuesOption, DisconnectValuesOption } from '../../types';
@@ -10,6 +11,24 @@ import { DebouncedFieldText } from '../utils';
 
 // Duration used when a gap threshold is switched on before the user types one.
 export const DEFAULT_GAP_THRESHOLD = '1h';
+
+// Renders a comparator symbol in the field's icon slot so it reads inline, e.g. "> 1h".
+const createComparatorIcon = (symbol: string) => {
+  const ComparatorIcon = ({ className, style }: { className?: string; style?: CSSProperties }) => (
+    <span
+      className={className}
+      // The icon wrapper sets font-size: 0, so the symbol needs its own size to be visible.
+      style={{ ...style, fontSize: '14px', lineHeight: '16px', textAlign: 'center' }}
+      aria-hidden="true"
+    >
+      {symbol}
+    </span>
+  );
+  return ComparatorIcon;
+};
+
+const GreaterThanIcon = createComparatorIcon('>');
+const LessThanIcon = createComparatorIcon('<');
 
 const connectNullValuesOptions = [
   {
@@ -111,6 +130,7 @@ export const ConnectionGroup = ({
               })
             }
             placeholder={DEFAULT_GAP_THRESHOLD}
+            icon={GreaterThanIcon}
             data-test-subj={`${testsubj}DisconnectValuesThreshold`}
           />
         </EuiFormRow>
@@ -158,6 +178,7 @@ export const ConnectionGroup = ({
               })
             }
             placeholder={DEFAULT_GAP_THRESHOLD}
+            icon={LessThanIcon}
             data-test-subj={`${testsubj}ConnectNullValuesThreshold`}
           />
         </EuiFormRow>

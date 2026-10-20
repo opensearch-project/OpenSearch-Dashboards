@@ -150,7 +150,7 @@ export const defaultAreaChartStyles: AreaChartStyle = {
     threshold: '1h',
   },
   connectNullValues: {
-    connectMode: DisableMode.Always,
+    connectMode: DisableMode.Never,
     threshold: '1h',
   },
 };
