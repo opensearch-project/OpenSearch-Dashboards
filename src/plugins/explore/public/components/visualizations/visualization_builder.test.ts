@@ -806,22 +806,20 @@ describe('showRawTable$', () => {
   });
 });
 
-describe('dataLinkVariables$', () => {
+describe('variables$', () => {
   test('is passed to the render', () => {
     const builder = new VisualizationBuilder({});
-    expect(builder.renderVisualization({}).props.variables$).toBe(builder.dataLinkVariables$);
+    expect(builder.renderVisualization({}).props.variables$).toBe(builder.variables$);
   });
 
   test('emits only when the variables change', () => {
     const builder = new VisualizationBuilder({});
     const emitted: unknown[] = [];
-    const subscription = builder.dataLinkVariables$.subscribe((variables) =>
-      emitted.push(variables)
-    );
+    const subscription = builder.variables$.subscribe((variables) => emitted.push(variables));
 
-    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
-    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
-    builder.setDataLinkVariables([{ name: 'env', value: 'stage' }]);
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
+    builder.setVariables([{ name: 'env', value: 'stage' }]);
 
     expect(emitted).toEqual([
       [],
@@ -833,10 +831,10 @@ describe('dataLinkVariables$', () => {
 
   test('is cleared by reset', () => {
     const builder = new VisualizationBuilder({});
-    builder.setDataLinkVariables([{ name: 'env', value: 'prod' }]);
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
 
     builder.reset();
 
-    expect(builder.dataLinkVariables$.value).toEqual([]);
+    expect(builder.variables$.value).toEqual([]);
   });
 });

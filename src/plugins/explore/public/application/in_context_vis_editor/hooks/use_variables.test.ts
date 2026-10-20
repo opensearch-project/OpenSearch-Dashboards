@@ -95,7 +95,7 @@ describe('useVariables', () => {
     };
 
     mockVisualizationBuilder = {
-      setDataLinkVariables: jest.fn(),
+      setVariables: jest.fn(),
     };
 
     mockQueryBuilder = {
@@ -322,31 +322,31 @@ describe('useVariables', () => {
   describe('table data link variables', () => {
     it('gives the visualization builder the variable values when they change', () => {
       renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
-      mockVisualizationBuilder.setDataLinkVariables.mockClear();
+      mockVisualizationBuilder.setVariables.mockClear();
 
       mockInterpolationService.getVariables.mockReturnValue([{ name: 'region', value: 'eu' }]);
       mockVariables$.next([createMockVariable('region', ['eu'])]);
 
-      expect(mockVisualizationBuilder.setDataLinkVariables).toHaveBeenCalledTimes(1);
-      expect(mockVisualizationBuilder.setDataLinkVariables).toHaveBeenCalledWith([
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledTimes(1);
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledWith([
         { name: 'region', value: 'eu' },
       ]);
     });
 
     it('does not update the builder while variables are loading', () => {
       renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
-      mockVisualizationBuilder.setDataLinkVariables.mockClear();
+      mockVisualizationBuilder.setVariables.mockClear();
 
       const loadingVariable = { ...createMockVariable('region', ['us-east']), loading: true };
       mockVariables$.next([loadingVariable as any]);
 
-      expect(mockVisualizationBuilder.setDataLinkVariables).not.toHaveBeenCalled();
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
     });
 
     it('does not touch the builder without container variables', () => {
       renderHook(() => useVariables(undefined));
 
-      expect(mockVisualizationBuilder.setDataLinkVariables).not.toHaveBeenCalled();
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
     });
   });
 

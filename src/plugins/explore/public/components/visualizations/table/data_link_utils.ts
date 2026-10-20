@@ -156,11 +156,3 @@ export const isNavigableDataLinkUrl = (url: string, template?: string): boolean 
     return false;
   }
 };
-
-/** The resolved URL only; see resolveDataLink. */
-export const resolveDataLinkUrl = (
-  url: string,
-  value: unknown,
-  row: Record<string, unknown> = {},
-  variables: VariableValue[] = []
-): string => resolveDataLink(url, value, row, variables).url;

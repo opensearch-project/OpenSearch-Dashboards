@@ -88,7 +88,7 @@ For a complete reference of all currently defined rules, see the [Visualization 
 
 ## Table Data Links
 
-A table column can carry data links (`table/data_link_options.tsx`). Each link has a URL template that `resolveDataLinkUrl` (`table/data_link_utils.ts`) fills in when a cell renders. The grammar follows Grafana data links:
+A table column can carry data links (`table/data_link_options.tsx`). Each link has a URL template that `resolveDataLink` (`table/data_link_utils.ts`) fills in when a cell renders. The grammar follows Grafana data links:
 
 | Placeholder                                                | Resolves to                                                                                                                                                                            |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -111,7 +111,7 @@ Example, a link that opens another dashboard with two variables set from the row
 #/view/endpoint-dashboard?_a=(variables:!((id:service,current:!(${__data.fields.service:rison})),(id:endpoint,current:!(${__value.text:rison}))))
 ```
 
-On a dashboard, the Explore embeddable passes the current variable values to `TableVis` through `SearchProps.variables`, and re-renders the panel when they change. In the in-context visualization editor, `useVariables` passes them through `VisualizationBuilder.setDataLinkVariables`, so the preview resolves the same links.
+On a dashboard, the Explore embeddable passes the current variable values to `TableVis` through `SearchProps.variables`, and re-renders the panel when they change. In the in-context visualization editor, `useVariables` passes them through `VisualizationBuilder.setVariables`, so the preview resolves the same links.
 
 ## Usage and Extension
 

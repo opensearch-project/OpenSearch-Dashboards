@@ -82,7 +82,7 @@ export const useVariables = (containerVariables?: Variable[]) => {
     const sub = variableService.getVariables$().subscribe((variables) => {
       if (hasLoadingVariables(variables)) return;
 
-      visualizationBuilderForEditor.setDataLinkVariables(interpolationService.getVariables());
+      visualizationBuilderForEditor.setVariables(interpolationService.getVariables());
 
       const queryState = queryBuilder.queryState$.getValue();
       const currentQuery = prepareQueryForLanguage(queryState).query;

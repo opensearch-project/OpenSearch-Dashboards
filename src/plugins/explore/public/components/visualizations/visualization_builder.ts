@@ -55,8 +55,8 @@ export class VisualizationBuilder {
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
-  /** Dashboard variables for table data links, when editing a dashboard panel. */
-  dataLinkVariables$ = new BehaviorSubject<VariableValue[]>([]);
+  /** The dashboard's current variable values, when editing a dashboard panel. */
+  variables$ = new BehaviorSubject<VariableValue[]>([]);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
@@ -64,9 +64,9 @@ export class VisualizationBuilder {
     }
   }
 
-  setDataLinkVariables(variables: VariableValue[]) {
-    if (!isEqual(variables, this.dataLinkVariables$.value)) {
-      this.dataLinkVariables$.next(variables);
+  setVariables(variables: VariableValue[]) {
+    if (!isEqual(variables, this.variables$.value)) {
+      this.variables$.next(variables);
     }
   }
 
@@ -565,7 +565,7 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
-    this.dataLinkVariables$.complete();
+    this.variables$.complete();
   }
 
   reset(): void {
@@ -575,7 +575,7 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
-    this.dataLinkVariables$ = new BehaviorSubject<VariableValue[]>([]);
+    this.variables$ = new BehaviorSubject<VariableValue[]>([]);
     this.transformationService = createNoOpTransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
@@ -649,7 +649,7 @@ export class VisualizationBuilder {
       data$: this.data$,
       config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
-      variables$: this.dataLinkVariables$,
+      variables$: this.variables$,
       timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),
