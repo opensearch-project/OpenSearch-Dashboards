@@ -27,7 +27,7 @@ export interface VisualizationEmptyStateProps {
   dataset?: { type?: string };
 }
 
-// The active query, when the caller doesn't pass one. Explore's services aren't set everywhere
+// The active query, for what the caller doesn't pass. Explore's services aren't set everywhere
 // a visualization renders; then the language is unknown.
 const activeQuery = (): VisualizationEmptyStateProps => {
   try {
@@ -61,7 +61,11 @@ const pplSampleQueries = () => [
 ];
 
 export const VisualizationEmptyState = (props: VisualizationEmptyStateProps = {}) => {
-  const { language, dataset } = props.language ? props : activeQuery();
+  // The caller's query wins field by field, so a panel's own dataset is kept even when its saved
+  // query has no language.
+  const active = props.language && props.dataset ? {} : activeQuery();
+  const language = props.language ?? active.language;
+  const dataset = props.dataset ?? active.dataset;
 
   // Samples in the query's own language: the source's (or Explore's) guide for it, else PPL's
   // on PPL and when the language isn't known. Other languages get none, rather than PPL samples
@@ -82,6 +86,17 @@ export const VisualizationEmptyState = (props: VisualizationEmptyStateProps = {}
   const refLinkLabel = i18n.translate('explore.visualize.emptyState.docsLink', {
     defaultMessage: 'Reference documentations',
   });
+
+  const docsLink = docsUrl && (
+    <>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <EuiLink href={docsUrl} target="_blank">
+          {refLinkLabel}
+        </EuiLink>
+      </EuiText>
+    </>
+  );
 
   const tabs = [
     {
@@ -104,16 +119,7 @@ export const VisualizationEmptyState = (props: VisualizationEmptyStateProps = {}
               </Fragment>
             );
           })}
-          {docsUrl && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s">
-                <EuiLink href={docsUrl} target="_blank">
-                  {refLinkLabel}
-                </EuiLink>
-              </EuiText>
-            </>
-          )}
+          {docsLink}
         </Fragment>
       ),
     },
@@ -143,6 +149,9 @@ export const VisualizationEmptyState = (props: VisualizationEmptyStateProps = {}
                 style={{ textAlign: 'start' }}
               />
             </EuiPanel>
+          ) : docsUrl ? (
+            // A language with docs but no samples still links to its docs.
+            <EuiPanel style={{ textAlign: 'start' }}>{docsLink}</EuiPanel>
           ) : undefined
         }
       />

@@ -10,6 +10,8 @@ import {
   SourceTypeRegistryService,
   setSourceTypeRegistry,
 } from '../../services/source_type_registry';
+import { setServices } from '../../services/services';
+import type { ExploreServices } from '../../types';
 
 describe('VisualizationEmptyState', () => {
   it('renders empty state with title and tabs', () => {
@@ -68,6 +70,55 @@ describe('VisualizationEmptyState', () => {
         'https://other.test/docs'
       );
       expect(screen.queryByText('Top services with faults')).not.toBeInTheDocument();
+    });
+
+    it('still links to the docs of a language that has docs but no samples', () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'other',
+        label: 'Other',
+        datasetTypes: ['OTHER'],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: {
+          OtherQL: { docLink: { title: 'OtherQL docs', url: 'https://other.test/docs' } },
+        },
+      });
+      setSourceTypeRegistry(registry);
+      render(<VisualizationEmptyState language="OtherQL" dataset={{ type: 'OTHER' }} />);
+      expect(screen.queryByRole('tab', { name: 'Sample queries' })).not.toBeInTheDocument();
+      expect(screen.getByText('Reference documentations').closest('a')).toHaveAttribute(
+        'href',
+        'https://other.test/docs'
+      );
+    });
+
+    it("keeps the caller's dataset when only the language falls back to the active query", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'other',
+        label: 'Other',
+        datasetTypes: ['OTHER'],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: {
+          PPL: { sampleQueries: [{ label: 'Other PPL sample', query: 'source = x' }] },
+        },
+      });
+      setSourceTypeRegistry(registry);
+      // The active query (a dashboard's, say) is PPL on an index pattern. The caller passes only
+      // its dataset: the language comes from the active query, the dataset stays the caller's.
+      setServices({
+        data: {
+          query: {
+            queryString: {
+              getQuery: () => ({ language: 'PPL', dataset: { type: 'INDEX_PATTERN' } }),
+            },
+          },
+        },
+      } as unknown as ExploreServices);
+      render(<VisualizationEmptyState dataset={{ type: 'OTHER' }} />);
+      expect(screen.getByText('Other PPL sample')).toBeInTheDocument();
+      expect(screen.queryByText('Top services with faults')).not.toBeInTheDocument();
+      setServices(undefined as unknown as ExploreServices);
     });
 
     it('shows no samples for a language that has none, rather than PPL ones', () => {
