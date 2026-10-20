@@ -38,7 +38,10 @@ import {
   collectResourceQueryTextFields,
 } from './promql_variable_query_utils';
 import { normalizePersistedVariables } from './variable_query_utils';
-import { IVariableInterpolationService } from './variable_interpolation_service';
+import {
+  IVariableInterpolationService,
+  VariableInterpolationService,
+} from './variable_interpolation_service';
 
 /**
  * Max options rendered at once in the selector. Runtime state keeps the full
@@ -53,6 +56,12 @@ export const MAX_DISPLAY_OPTIONS = 100;
  * reporting is skipped.
  */
 export type VariableTelemetrySink = (event: { name: string; data: Record<string, any> }) => void;
+
+/**
+ * Outcome of refreshing one variable. `aborted` means a newer refresh of the
+ * same variable took over; that refresh also covers the variable's dependents.
+ */
+export type VariableRefreshStatus = 'refreshed' | 'aborted' | 'failed' | 'skipped';
 
 /**
  * VariableService — a self-contained feature for managing dashboard variables.
@@ -223,7 +232,7 @@ export class VariableService {
     this.updateRuntimeState(id, initialRuntimeState);
 
     if (newVariable.type === VariableType.Query) {
-      await this.refreshVariableOptions(id);
+      await this.refreshVariablesInOrder([id]);
     }
   }
 
@@ -335,7 +344,14 @@ export class VariableService {
       updatedVariable.type === VariableType.Query &&
       this.shouldRefreshQueryOptions(updates as Partial<QueryVariable>)
     ) {
-      await this.refreshVariableOptions(id);
+      await this.refreshVariablesInOrder([id]);
+    } else {
+      // Nothing to fetch for the variable itself, but its new definition (options,
+      // multi, "All" settings, value, or name) can change what its dependents
+      // interpolate. A rename affects references to both the old and new name.
+      await this.refreshVariablesInOrder(
+        this.getDirectDependentIds([existing.name, updatedVariable.name], id)
+      );
     }
   }
 
@@ -387,13 +403,25 @@ export class VariableService {
     // Telemetry: record variable change.
     this.recordTelemetry('variable_value_changed', { type: variable.type });
 
-    this.refreshDependentVariables(variable.name);
+    // The changed variable already has its new value; only its dependents re-query.
+    void this.refreshVariablesInOrder(this.getDirectDependentIds([variable.name], id));
   }
 
-  public async refreshVariableOptions(id: string): Promise<void> {
+  /** Ids of variables, other than `excludeId`, whose queries reference any of `names`. */
+  private getDirectDependentIds(names: string[], excludeId: string): string[] {
+    return this.getVariables()
+      .filter((v) => {
+        if (v.id === excludeId) return false;
+        const referenced = this.getReferencedVariableNames(v);
+        return names.some((name) => referenced.has(name));
+      })
+      .map((v) => v.id);
+  }
+
+  public async refreshVariableOptions(id: string): Promise<VariableRefreshStatus> {
     const variable = this.getVariables().find((v) => v.id === id);
     if (!variable || variable.type !== VariableType.Query) {
-      return;
+      return 'skipped';
     }
 
     const queryVariable = variable as QueryVariable;
@@ -455,17 +483,22 @@ export class VariableService {
       }
 
       if (controller.signal.aborted) {
-        return;
+        return 'aborted';
       }
+
+      // Read current now rather than at the start: the user may have changed
+      // the value while the query was running.
+      const latest = this.getVariables().find((v) => v.id === id);
+      if (!latest) {
+        return 'aborted';
+      }
+      const latestCurrent = latest.current;
 
       const sortedOptions = this.sortVariableOptions(options, queryVariable.sort);
       // Keep the "All" marker as-is so it tracks whatever the new options are.
-      const preservedCurrent = isAllMarker(queryVariable.current)
-        ? queryVariable.current
-        : this.resolveCurrentValueForQuery(
-            queryVariable.current,
-            this.getOptionValues(sortedOptions)
-          );
+      const preservedCurrent = isAllMarker(latestCurrent)
+        ? latestCurrent
+        : this.resolveCurrentValueForQuery(latestCurrent, this.getOptionValues(sortedOptions));
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
@@ -480,9 +513,10 @@ export class VariableService {
         v.id === id ? { ...v, current: preservedCurrent } : v
       );
       this.variables$.next(updatedVariables);
+      return 'refreshed';
     } catch (error: any) {
       if (error?.name === 'AbortError') {
-        return;
+        return 'aborted';
       }
       this.recordTelemetry('variable_query_failed', {
         type: queryVariable.type,
@@ -493,6 +527,7 @@ export class VariableService {
         loading: false,
         error: error.message || 'Failed to fetch options',
       });
+      return 'failed';
     } finally {
       if (this.refreshControllers.get(id) === controller) {
         this.refreshControllers.delete(id);
@@ -501,23 +536,187 @@ export class VariableService {
   }
 
   public async refreshAllVariableOptions(): Promise<void> {
-    const queryVariables = this.getVariables().filter((v) => v.type === VariableType.Query);
-    for (const v of queryVariables) {
-      await this.refreshVariableOptions(v.id);
-    }
+    await this.refreshVariablesInOrder(
+      this.getVariables()
+        .filter((v) => v.type === VariableType.Query)
+        .map((v) => v.id)
+    );
   }
 
   /**
-   * Refresh only variables that have useTimeFilter enabled.
-   * Called when time range changes.
+   * Refresh variables that have useTimeFilter enabled, plus every variable
+   * that depends on them. Called when time range changes.
    */
   public async refreshTimeFilteredVariableOptions(): Promise<void> {
-    const queryVariables = this.getVariables().filter(
-      (v) => v.type === VariableType.Query && (v as QueryVariable).useTimeFilter
+    await this.refreshVariablesInOrder(
+      this.getVariables()
+        .filter((v) => v.type === VariableType.Query && (v as QueryVariable).useTimeFilter)
+        .map((v) => v.id)
     );
-    for (const v of queryVariables) {
-      await this.refreshVariableOptions(v.id);
+  }
+
+  /**
+   * Refresh the given variables and all variables that depend on them, directly
+   * or transitively. Each variable is refreshed once, as soon as the variables
+   * it references in this set have finished refreshing, so independent
+   * variables refresh concurrently.
+   *
+   * A dependent is refreshed when at least one upstream refreshed. Otherwise it
+   * is skipped when an upstream was aborted (the newer refresh that aborted it
+   * also refreshes its dependents), or, for non-root variables, when every
+   * upstream failed or was skipped (there is nothing new to query with).
+   */
+  private async refreshVariablesInOrder(rootIds: string[]): Promise<void> {
+    const roots = new Set(rootIds);
+    const { order, upstreamIds } = this.buildRefreshOrder(rootIds);
+    const results = new Map<string, Promise<VariableRefreshStatus>>();
+
+    for (const id of order) {
+      // Only upstreams earlier in the order are awaited, so a broken cycle cannot deadlock.
+      const upstream = upstreamIds
+        .get(id)!
+        .filter((u) => results.has(u))
+        .map((u) => results.get(u)!);
+
+      const refresh: Promise<VariableRefreshStatus> =
+        upstream.length === 0
+          ? // Start right away when there is nothing to wait for.
+            this.refreshVariableOptions(id)
+          : Promise.all(upstream).then((statuses) => {
+              // A newer refresh may not wait for this round's other upstreams,
+              // so refresh whenever any upstream has new values.
+              if (statuses.includes('refreshed')) return this.refreshVariableOptions(id);
+              if (statuses.includes('aborted')) return 'aborted';
+              if (!roots.has(id)) return 'skipped';
+              return this.refreshVariableOptions(id);
+            });
+      results.set(id, refresh);
     }
+
+    await Promise.all(results.values());
+  }
+
+  /**
+   * Returns the roots plus their transitive dependents in dependency order,
+   * with each variable's upstreams within that set. Does not assume the
+   * variables array is dependency-ordered. Ties are broken by list position,
+   * so a dependency-ordered list keeps its existing order. A cycle is broken
+   * at its earliest listed variable, so variables downstream of the cycle
+   * still come after it.
+   */
+  private buildRefreshOrder(rootIds: string[]): {
+    order: string[];
+    upstreamIds: Map<string, string[]>;
+  } {
+    const variables = this.getVariables();
+    const indexById = new Map(variables.map((v, i) => [v.id, i]));
+    const idByName = new Map(variables.map((v) => [v.name, v.id]));
+
+    // Parse each query once: upstream ids per variable, and the reverse map.
+    const upstreamIds = new Map<string, string[]>();
+    const usedBy = new Map<string, string[]>();
+    for (const v of variables) {
+      const upstream: string[] = [];
+      for (const name of this.getReferencedVariableNames(v)) {
+        const upstreamId = idByName.get(name);
+        if (upstreamId === undefined || upstreamId === v.id) continue;
+        upstream.push(upstreamId);
+        usedBy.set(upstreamId, [...(usedBy.get(upstreamId) ?? []), v.id]);
+      }
+      upstreamIds.set(v.id, upstream);
+    }
+
+    const affected = new Set(rootIds.filter((id) => indexById.has(id)));
+    const queue = [...affected];
+    while (queue.length > 0) {
+      for (const downstreamId of usedBy.get(queue.shift()!) ?? []) {
+        if (!affected.has(downstreamId)) {
+          affected.add(downstreamId);
+          queue.push(downstreamId);
+        }
+      }
+    }
+
+    // Kahn's algorithm on the affected subgraph.
+    const byListIndex = (a: string, b: string) => indexById.get(a)! - indexById.get(b)!;
+    const inDegree = new Map<string, number>();
+    for (const id of affected) {
+      inDegree.set(id, upstreamIds.get(id)!.filter((u) => affected.has(u)).length);
+    }
+    const ready = [...affected].filter((id) => inDegree.get(id) === 0);
+    const placed = new Set<string>();
+    const order: string[] = [];
+    const cycleBreaks: string[] = [];
+    while (order.length < affected.size) {
+      if (ready.length === 0) {
+        // Only a cycle leaves nothing ready. Break it at the earliest listed
+        // variable on a cycle; variables downstream of the cycle are not on it.
+        const unplaced = [...affected].filter((id) => !placed.has(id)).sort(byListIndex);
+        const onCycle = (start: string) => {
+          const seen = new Set<string>();
+          const stack = [...(usedBy.get(start) ?? [])];
+          while (stack.length > 0) {
+            const id = stack.pop()!;
+            if (id === start) return true;
+            if (seen.has(id) || placed.has(id) || !affected.has(id)) continue;
+            seen.add(id);
+            stack.push(...(usedBy.get(id) ?? []));
+          }
+          return false;
+        };
+        const next = unplaced.find(onCycle) ?? unplaced[0];
+        cycleBreaks.push(next);
+        ready.push(next);
+      }
+      ready.sort(byListIndex);
+      const id = ready.shift()!;
+      if (placed.has(id)) continue;
+      placed.add(id);
+      order.push(id);
+      for (const downstreamId of usedBy.get(id) ?? []) {
+        if (!affected.has(downstreamId) || placed.has(downstreamId)) continue;
+        const remaining = inDegree.get(downstreamId)! - 1;
+        inDegree.set(downstreamId, remaining);
+        if (remaining === 0) ready.push(downstreamId);
+      }
+    }
+
+    if (cycleBreaks.length > 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[VariableService] Circular variable dependency; refreshing before its upstream:',
+        cycleBreaks.map((id) => variables[indexById.get(id)!].name)
+      );
+    }
+
+    const affectedUpstreamIds = new Map<string, string[]>();
+    for (const id of affected) {
+      affectedUpstreamIds.set(
+        id,
+        upstreamIds.get(id)!.filter((u) => affected.has(u))
+      );
+    }
+    return { order, upstreamIds: affectedUpstreamIds };
+  }
+
+  /** Names of the variables a query variable references, using the interpolation syntax. */
+  private getReferencedVariableNames(variable: Variable): Set<string> {
+    const names = new Set<string>();
+    if (variable.type !== VariableType.Query) return names;
+    const qv = variable as QueryVariable;
+    const texts =
+      qv.sourceKind === 'prometheusResource'
+        ? collectResourceQueryTextFields(qv.promQLResourceQuery)
+        : [qv.query];
+    for (const text of texts) {
+      if (typeof text !== 'string') continue;
+      const pattern = VariableInterpolationService.VARIABLE_PATTERN;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        names.add(match[1] || match[2]);
+      }
+    }
+    return names;
   }
 
   private getRuntimeState(id: string): VariableState {
@@ -731,31 +930,6 @@ export class VariableService {
     const current = this.getRuntimeState(id);
     this.runtimeState.set(id, { ...current, ...updates });
     this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
-  }
-
-  private refreshDependentVariables(changedVarName: string): void {
-    const variables = this.getVariables();
-    const changedVarIndex = variables.findIndex((v) => v.name === changedVarName);
-    if (changedVarIndex === -1) return;
-
-    const pattern = new RegExp(`\\$\\{${changedVarName}\\}|\\$${changedVarName}\\b`);
-    // Only refresh variables that come AFTER the changed variable
-    // Variables before the changed variable cannot reference it due to order constraints
-    for (let i = changedVarIndex + 1; i < variables.length; i++) {
-      const v = variables[i];
-      if (v.type === VariableType.Query) {
-        const qv = v as QueryVariable;
-        const referencesChangedVar =
-          qv.sourceKind === 'prometheusResource'
-            ? collectResourceQueryTextFields(qv.promQLResourceQuery).some((field) =>
-                pattern.test(field)
-              )
-            : pattern.test(qv.query);
-        if (referencesChangedVar) {
-          this.refreshVariableOptions(qv.id);
-        }
-      }
-    }
   }
 
   private shouldRefreshQueryOptions(updates: Partial<QueryVariable>): boolean {

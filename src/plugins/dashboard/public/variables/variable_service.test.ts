@@ -691,7 +691,7 @@ describe('VariableService', () => {
       expect(mockExecuteVariableQuery).not.toHaveBeenCalled();
     });
 
-    it('should only refresh variables that come after the changed variable', async () => {
+    it('should refresh dependents regardless of their position in the list', async () => {
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['host-a', 'host-b']));
 
       // Variable order: varB (depends on varA), varA, varC (depends on varA)
@@ -712,11 +712,15 @@ describe('VariableService', () => {
       service.updateVariableValue('var-a', ['value2']);
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      // varC should be refreshed (after varA), but varB should not (before varA)
-      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
-      const calledQuery = mockExecuteVariableQuery.mock.calls[0][1].query;
-      expect(calledQuery).toContain('varA');
-      expect(calledQuery).toContain('service'); // varC's query
+      // varB is listed before varA, so the interpolation order constraint leaves
+      // ${varA} unsubstituted and the raw query is sent. This test only checks
+      // that varB is refreshed; the raw query is a known limitation, not the
+      // intended result.
+      const calledQueries = mockExecuteVariableQuery.mock.calls.map((c) => c[1].query);
+      expect(calledQueries).toEqual([
+        "source=logs | where field = '${varA}' | dedup host | fields host",
+        "source=logs | where field = '${varA}' | dedup service | fields service",
+      ]);
     });
 
     it('should partially interpolate when some variables are before and some after', async () => {
@@ -762,6 +766,27 @@ describe('VariableService', () => {
   });
 
   describe('refreshVariableOptions', () => {
+    it('should keep a value the user selected while the query was running', async () => {
+      let resolveQuery: (value: any) => void = () => {};
+      mockExecuteVariableQuery.mockImplementation(
+        () => new Promise((resolve) => (resolveQuery = resolve))
+      );
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        query: 'region-query',
+        current: ['CN'],
+      });
+      const { service } = createService([region]);
+
+      const refresh = service.refreshVariableOptions('region-1');
+      service.updateVariableValue('region-1', ['JP']);
+      resolveQuery(makeQueryResult(['CN', 'JP'], 'region'));
+      await refresh;
+
+      expect(service.getVariables()[0].current).toEqual(['JP']);
+    });
+
     it('should update options and preserve valid current', async () => {
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['api', 'web', 'new-svc']));
       const { service } = createService([makeQueryVariable({ current: ['api'] })]);
@@ -1339,8 +1364,8 @@ describe('VariableService', () => {
     });
   });
 
-  describe('refreshAllVariableOptions — sequential execution', () => {
-    it('should refresh variables sequentially', async () => {
+  describe('refreshAllVariableOptions — independent variables', () => {
+    it('should start independent variables in list order', async () => {
       const callOrder: string[] = [];
       mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) => {
         callOrder.push(params.query);
@@ -1410,6 +1435,429 @@ describe('VariableService', () => {
       await service.refreshTimeFilteredVariableOptions();
 
       expect(refreshedQueries).toEqual([]);
+    });
+  });
+
+  describe('dependency-ordered refresh', () => {
+    /** Records each query as it is executed. */
+    function recordQueries(result = makeQueryResult(['result'])): string[] {
+      const queries: string[] = [];
+      mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) => {
+        queries.push(params.query);
+        return Promise.resolve(result);
+      });
+      return queries;
+    }
+
+    it('should refresh dependents of time-filtered variables when the time range changes', async () => {
+      const queries = recordQueries();
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        query: 'region-query',
+        useTimeFilter: true,
+      });
+      const svc = makeQueryVariable({ id: 'service-1', name: 'service', query: 'svc $region' });
+      const unrelated = makeQueryVariable({ id: 'other-1', name: 'other', query: 'other-query' });
+      const { service } = createService([region, svc, unrelated]);
+
+      await service.refreshTimeFilteredVariableOptions();
+
+      expect(queries).toEqual(['region-query', 'svc $region']);
+    });
+
+    it('should query dependents with the refreshed "All" expansion', async () => {
+      let regionValues = ['CN', 'JP'];
+      mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) =>
+        Promise.resolve(
+          params.query === 'region-query'
+            ? makeQueryResult(regionValues, 'region')
+            : makeQueryResult(['svc'])
+        )
+      );
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        query: 'region-query',
+        useTimeFilter: true,
+        multi: true,
+        includeAll: true,
+        current: ['$__all'],
+      });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        query: 'source=logs | where region in $region',
+      });
+      const { service } = createService([region, svc]);
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+      await service.refreshAllVariableOptions();
+
+      regionValues = ['CN', 'IN'];
+      mockExecuteVariableQuery.mockClear();
+      await service.refreshTimeFilteredVariableOptions();
+
+      const svcQuery = mockExecuteVariableQuery.mock.calls[1][1].query;
+      expect(svcQuery).toContain('IN');
+      expect(svcQuery).not.toContain('JP');
+    });
+
+    it('should start independent variables before a dependent that waits on its upstream', async () => {
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc' });
+      const { service } = createService([a, b, c]);
+
+      await service.refreshAllVariableOptions();
+
+      // c does not depend on a, so it does not wait for it; b does.
+      expect(queries).toEqual(['qa', 'qc', 'qb $a']);
+    });
+
+    it('should refresh independent dependents concurrently', async () => {
+      const events: string[] = [];
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        events.push(`start ${params.query}`);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        events.push(`end ${params.query}`);
+        return makeQueryResult(['result']);
+      });
+      const env = makeCustomVariable({ id: 'env', name: 'env' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $env' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $env' });
+      const { service } = createService([env, b, c]);
+
+      service.updateVariableValue('env', ['prod']);
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
+      expect(events.slice(0, 2)).toEqual(['start qb $env', 'start qc $env']);
+    });
+
+    it('should wait for the slowest upstream before starting a dependent', async () => {
+      const events: string[] = [];
+      const delays: Record<string, number> = { qa: 15, qb: 2 };
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        events.push(`start ${params.query}`);
+        await new Promise((resolve) => setTimeout(resolve, delays[params.query] ?? 2));
+        events.push(`end ${params.query}`);
+        return makeQueryResult(['result']);
+      });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $a $b' });
+      const { service } = createService([a, b, c]);
+
+      await service.refreshAllVariableOptions();
+
+      expect(events.indexOf('start qc $a $b')).toBeGreaterThan(events.indexOf('end qa'));
+      expect(events.indexOf('start qc $a $b')).toBeGreaterThan(events.indexOf('end qb'));
+    });
+
+    it('should refresh upstream first when the list is not dependency-ordered', async () => {
+      const queries = recordQueries();
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb ${a}' });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa' });
+      const { service } = createService([b, a]);
+
+      await service.refreshAllVariableOptions();
+
+      // Only the call order is asserted. With the current interpolation order
+      // constraint, b still cannot see a's value because b is listed first. Once
+      // that constraint is lifted, this test should also assert b's query.
+      expect(queries).toEqual(['qa', 'qb ${a}']);
+    });
+
+    it('should order a dependent between two roots that it sits between', async () => {
+      // A and C are roots; C depends on B, which depends on A.
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa', useTimeFilter: true });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $b', useTimeFilter: true });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([a, c, b]);
+
+      await service.refreshTimeFilteredVariableOptions();
+
+      expect(queries).toEqual(['qa', 'qb $a', 'qc $b']);
+    });
+
+    it('should refresh a variable reachable through several paths only once', async () => {
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa', useTimeFilter: true });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $a $b' });
+      const { service } = createService([a, b, c]);
+
+      await service.refreshTimeFilteredVariableOptions();
+
+      expect(queries).toEqual(['qa', 'qb $a', 'qc $a $b']);
+    });
+
+    it('should wait for an upstream refresh to finish before starting its dependent', async () => {
+      const events: string[] = [];
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        events.push(`start ${params.query}`);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        events.push(`end ${params.query}`);
+        return makeQueryResult(['result']);
+      });
+      const env = makeCustomVariable({ id: 'env', name: 'env' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $env' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $b' });
+      const { service } = createService([env, b, c]);
+
+      service.updateVariableValue('env', ['prod']);
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
+      expect(events).toEqual(['start qb $env', 'end qb $env', 'start qc $b', 'end qc $b']);
+    });
+
+    it('should not re-query the variable whose value was changed directly', async () => {
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([a, b]);
+
+      service.updateVariableValue('a', ['x']);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(queries).toEqual(['qb $a']);
+    });
+
+    it('should not treat a variable name that is a prefix of another as a reference', async () => {
+      const queries = recordQueries();
+      const env = makeCustomVariable({ id: 'env', name: 'env' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $environment' });
+      const { service } = createService([env, b]);
+
+      service.updateVariableValue('env', ['prod']);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(queries).toEqual([]);
+    });
+
+    it('should refresh each variable in a cycle once and warn', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa $b' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([a, b]);
+
+      await service.refreshAllVariableOptions();
+
+      expect(queries).toEqual(['qa $b', 'qb $a']);
+      // The cycle is broken at a, the earliest listed member.
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Circular'), ['a']);
+      warnSpy.mockRestore();
+    });
+
+    it('should refresh a dependent of a cycle after the cycle, even when listed first', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const queries = recordQueries();
+      const d = makeQueryVariable({ id: 'd', name: 'd', query: 'qd $b' });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa $b' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([d, a, b]);
+
+      await service.refreshAllVariableOptions();
+
+      expect(queries).toEqual(['qa $b', 'qb $a', 'qd $b']);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Circular'), ['a']);
+      warnSpy.mockRestore();
+    });
+
+    it('should skip dependents in a refresh that a newer refresh took over', async () => {
+      const queries: string[] = [];
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        queries.push(params.query);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return makeQueryResult(['result']);
+      });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa', useTimeFilter: true });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([a, b]);
+
+      const first = service.refreshTimeFilteredVariableOptions();
+      const second = service.refreshTimeFilteredVariableOptions();
+      await Promise.all([first, second]);
+
+      // The first a is aborted by the second, so only the second refresh queries b.
+      expect(queries).toEqual(['qa', 'qa', 'qb $a']);
+    });
+
+    it('should still refresh a dependent after its slow upstream when another upstream was taken over', async () => {
+      // d references b and x. A value change on a takes over b while x is still
+      // running in the first round, so the second round's d runs with the old x.
+      // The first round's d must refresh again once x finishes.
+      const events: string[] = [];
+      const delays: Record<string, number> = { qx: 20 };
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        events.push(`start ${params.query}`);
+        await new Promise((resolve) => setTimeout(resolve, delays[params.query] ?? 2));
+        events.push(`end ${params.query}`);
+        return makeQueryResult(['result']);
+      });
+      const a = makeCustomVariable({ id: 'a', name: 'a' });
+      const x = makeQueryVariable({ id: 'x', name: 'x', query: 'qx' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const d = makeQueryVariable({ id: 'd', name: 'd', query: 'qd $b $x' });
+      const { service } = createService([a, x, b, d]);
+
+      const reload = service.refreshAllVariableOptions();
+      service.updateVariableValue('a', ['prod']);
+      await reload;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const lastDStart = events.lastIndexOf('start qd $b $x');
+      expect(lastDStart).toBeGreaterThan(events.indexOf('end qx'));
+    });
+
+    it('should skip non-root dependents of a failed upstream but still refresh roots', async () => {
+      const queries: string[] = [];
+      mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) => {
+        queries.push(params.query);
+        return params.query === 'qa'
+          ? Promise.reject(new Error('boom'))
+          : Promise.resolve(makeQueryResult(['result']));
+      });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa', useTimeFilter: true });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $b' });
+      const d = makeQueryVariable({ id: 'd', name: 'd', query: 'qd $a', useTimeFilter: true });
+      const { service } = createService([a, b, c, d]);
+
+      await service.refreshTimeFilteredVariableOptions();
+
+      // b has nothing new to query with, and neither does c below it.
+      // d is time-filtered itself, so it refreshes anyway.
+      expect(queries).toEqual(['qa', 'qd $a']);
+    });
+
+    it('should refresh a dependent that has another upstream that refreshed', async () => {
+      const queries: string[] = [];
+      mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) => {
+        queries.push(params.query);
+        return params.query === 'qa'
+          ? Promise.reject(new Error('boom'))
+          : Promise.resolve(makeQueryResult(['result']));
+      });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa', useTimeFilter: true });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb', useTimeFilter: true });
+      const c = makeQueryVariable({ id: 'c', name: 'c', query: 'qc $a $b' });
+      const { service } = createService([a, b, c]);
+
+      await service.refreshTimeFilteredVariableOptions();
+
+      expect(queries).toEqual(['qa', 'qb', 'qc $a $b']);
+    });
+
+    it('should refresh dependents with the new "All" expansion when custom options are edited', async () => {
+      const queries: string[] = [];
+      mockExecuteVariableQuery.mockImplementation((_dp: any, params: any) => {
+        queries.push(params.query);
+        return Promise.resolve(makeQueryResult(['result']));
+      });
+      const env = makeCustomVariable({
+        id: 'env',
+        name: 'env',
+        multi: true,
+        includeAll: true,
+        current: ['$__all'],
+        customOptions: [{ value: 'dev' }, { value: 'prod' }],
+      });
+      const svc = makeQueryVariable({ id: 'svc', name: 'svc', query: 'where env in $env' });
+      const { service } = createService([env, svc], 'dashboard-123');
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+
+      await service.updateVariable('env', {
+        customOptions: [{ value: 'dev' }, { value: 'prod' }, { value: 'qa' }],
+      } as any);
+
+      expect(queries).toHaveLength(1);
+      expect(queries[0]).toContain("'qa'");
+    });
+
+    it('should refresh dependents when multi is turned off on a custom variable', async () => {
+      const queries = recordQueries();
+      const env = makeCustomVariable({
+        id: 'env',
+        name: 'env',
+        multi: true,
+        current: ['dev', 'prod'],
+      });
+      const svc = makeQueryVariable({ id: 'svc', name: 'svc', query: 'qsvc $env' });
+      const { service } = createService([env, svc], 'dashboard-123');
+
+      await service.updateVariable('env', { multi: false } as any);
+
+      expect(service.getVariables()[0].current).toEqual(['dev']);
+      expect(queries).toEqual(['qsvc $env']);
+    });
+
+    it('should refresh dependents of a Text variable when its value is edited', async () => {
+      const queries = recordQueries();
+      const keyword = makeTextVariable({ id: 'kw', name: 'kw', current: ['a'] });
+      const svc = makeQueryVariable({ id: 'svc', name: 'svc', query: 'qsvc $kw' });
+      const { service } = createService([keyword, svc], 'dashboard-123');
+
+      await service.updateVariable('kw', { current: ['b'] } as any);
+
+      expect(queries).toEqual(['qsvc $kw']);
+    });
+
+    it('should refresh variables referencing the old or new name when a variable is renamed', async () => {
+      const queries = recordQueries();
+      const env = makeCustomVariable({ id: 'env', name: 'env' });
+      const oldRef = makeQueryVariable({ id: 'old', name: 'old', query: 'qold $env' });
+      const newRef = makeQueryVariable({ id: 'new', name: 'new', query: 'qnew $stage' });
+      const other = makeQueryVariable({ id: 'other', name: 'other', query: 'qother' });
+      const { service } = createService([env, oldRef, newRef, other], 'dashboard-123');
+
+      await service.updateVariable('env', { name: 'stage' } as any);
+
+      expect(queries).toEqual(['qold $env', 'qnew $stage']);
+    });
+
+    it('should refresh dependents when a variable query is edited', async () => {
+      const queries = recordQueries();
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([a, b], 'dashboard-123');
+
+      await service.updateVariable('a', { query: 'qa2' } as any);
+
+      expect(queries).toEqual(['qa2', 'qb $a']);
+    });
+
+    it('should run cycle members one at a time after their upstream outside the cycle', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const events: string[] = [];
+      mockExecuteVariableQuery.mockImplementation(async (_dp: any, params: any) => {
+        events.push(`start ${params.query}`);
+        await new Promise((resolve) => setTimeout(resolve, 2));
+        events.push(`end ${params.query}`);
+        return makeQueryResult(['result']);
+      });
+      const root = makeQueryVariable({ id: 'r', name: 'r', query: 'qr' });
+      const a = makeQueryVariable({ id: 'a', name: 'a', query: 'qa $r $b' });
+      const b = makeQueryVariable({ id: 'b', name: 'b', query: 'qb $a' });
+      const { service } = createService([root, a, b]);
+
+      await service.refreshAllVariableOptions();
+
+      expect(events).toEqual([
+        'start qr',
+        'end qr',
+        'start qa $r $b',
+        'end qa $r $b',
+        'start qb $a',
+        'end qb $a',
+      ]);
+      warnSpy.mockRestore();
     });
   });
 
