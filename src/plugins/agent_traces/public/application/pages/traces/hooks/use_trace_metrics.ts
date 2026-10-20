@@ -11,14 +11,25 @@ import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
 import { extractSpanFilterQuery } from '../table_shared';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
-import { aiRootCondition, ensureAiRootFieldChecked } from '../../../utils/ai_root';
+import {
+  aiRootCondition,
+  ensureAiRootFieldChecked,
+  shadowedAiRootsOf,
+} from '../../../utils/ai_root';
 import { getSourceCommand } from '../../sessions/session_utils';
-import { shadowedAiRootsExclusion } from './shadowed_ai_roots';
+import { ensureShadowedAiRootsChecked } from './shadowed_ai_roots';
 
 export interface TraceMetrics {
+  /** Distinct traces with an AI root. */
   totalTraces: number;
   totalSpans: number;
+  /** Distinct traces with an AI root that match the query. */
   filteredTraces: number;
+  /** AI-root spans (rows of the Traces table); more than traces when agents run in parallel. */
+  totalAgentRuns: number;
+  filteredAgentRuns: number;
+  /** The shadowed AI-root lookup hit its limit, so counts may include a few duplicate runs. */
+  countsMayIncludeDuplicates: boolean;
   filteredSpans: number;
   totalTokens: number;
   latencyP50Nanos: number;
@@ -71,19 +82,20 @@ const doFetchMetrics = async (
   pplService: PPLService,
   datasetParam: Dataset,
   sourceOnlyQuery: string,
-  filteredQuery: string
+  filteredQuery: string,
+  timeKey: string
 ): Promise<TraceMetrics> => {
   const isGenAiSpan = `isnotnull(\`attributes.gen_ai.operation.name\`)`;
-  await ensureAiRootFieldChecked(pplService, datasetParam, getSourceCommand(sourceOnlyQuery));
+  const source = getSourceCommand(sourceOnlyQuery);
+  await ensureAiRootFieldChecked(pplService, datasetParam, source);
+  await ensureShadowedAiRootsChecked(pplService, datasetParam, source, timeKey);
   // AI roots: a GenAI trace root, or a span marked as the agent root (usually the outermost GenAI
-  // span under a non-GenAI root; an SDK may mark a non-GenAI span, so the filter keeps those too).
-  const shadowed = await shadowedAiRootsExclusion(
-    pplService,
-    datasetParam,
-    getSourceCommand(sourceOnlyQuery)
-  );
-  const rootCase = `(${aiRootCondition(datasetParam.id)})${shadowed}`;
-  const spanFilter = `where ${isGenAiSpan} OR (${rootCase})`;
+  // span under a non-GenAI root; an SDK may mark a non-GenAI span, so the filter keeps those too),
+  // minus the shadowed ones.
+  const rootCase = `(${aiRootCondition(datasetParam.id)})`;
+  // The AI-root condition goes only in `where` clauses, which OpenSearch runs as a query: inside
+  // `case()` it becomes a script, and a long list of shadowed AI roots exceeds the script size limit.
+  const isError = `\`status.code\` = 2`;
   // Row-level filters only (where, eval, ...): a filter placed after eval still applies.
   const { filterQuery: whereQuery } = extractSpanFilterQuery(filteredQuery);
 
@@ -91,26 +103,25 @@ const doFetchMetrics = async (
   // Note: User non-where commands (head, sort, etc.) are intentionally excluded from stats queries.
   // When a user types `| head 10`, it limits the data display but should not affect aggregate counts
   // or statistics. The UI hides the "of X total" text when head is detected (see queryEndsWithHead).
-  const [countStats, filteredStats, filteredCounts, sessionStats] = await Promise.all([
-    // Query A — Counts (source-only, no user filter):
-    // Total Traces, Total Spans, and their error counts are unaffected by user query filters
+  const [spanStats, filteredStats, filteredCounts, sessionStats, rootStats] = await Promise.all([
+    // Query A — Span counts (source-only, no user filter):
+    // Total Spans and their error count are unaffected by user query filters
     (async () => {
-      const countsQuery = `${sourceOnlyQuery} | ${spanFilter} | stats sum(case(${isGenAiSpan}, 1 else 0)) as total_spans, sum(case(${rootCase}, 1 else 0)) as total_traces, sum(case(\`status.code\` = 2 AND ${isGenAiSpan}, 1 else 0)) as error_spans, sum(case(\`status.code\` = 2 AND (${rootCase}), 1 else 0)) as error_traces`;
+      const countsQuery = `${sourceOnlyQuery} | where ${isGenAiSpan} | stats count() as total_spans, sum(case(${isError}, 1 else 0)) as error_spans`;
       const countsResponse = await pplService.executeQuery(datasetParam, countsQuery);
       return parseStatsResponse(countsResponse);
     })(),
     // Query B — Filtered stats (with user query where clauses only):
-    // Tokens and Latency respect user query where filters
+    // Tokens, Latency, and the traces and agent runs matching the query respect user query filters
     (async () => {
       const rootFilter = `where ${rootCase}`;
-      const statsQuery = `${whereQuery} | ${rootFilter} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens`;
+      const statsQuery = `${whereQuery} | ${rootFilter} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens, distinct_count(traceId) as filtered_traces, count() as filtered_runs`;
       const statsResponse = await pplService.executeQuery(datasetParam, statsQuery);
       return parseStatsResponse(statsResponse);
     })(),
-    // Query C — Filtered counts (with user query where clauses only):
-    // Total traces/spans matching the user's current query, shown in the info bar
+    // Query C — Filtered span count (with user query where clauses only), shown in the info bar
     (async () => {
-      const query = `${whereQuery} | ${spanFilter} | stats sum(case(${isGenAiSpan}, 1 else 0)) as filtered_spans, sum(case(${rootCase}, 1 else 0)) as filtered_traces`;
+      const query = `${whereQuery} | where ${isGenAiSpan} | stats count() as filtered_spans`;
       const response = await pplService.executeQuery(datasetParam, query);
       return parseStatsResponse(response);
     })(),
@@ -126,18 +137,28 @@ const doFetchMetrics = async (
         return {} as ReturnType<typeof parseStatsResponse>;
       }
     })(),
+    // Query E — AI-root counts (source-only): Total Traces counts distinct traces, as parallel
+    // agents are one AI root (agent run) each.
+    (async () => {
+      const query = `${sourceOnlyQuery} | where ${rootCase} | stats distinct_count(traceId) as total_traces, count() as total_runs, sum(case(${isError}, 1 else 0)) as error_traces`;
+      const response = await pplService.executeQuery(datasetParam, query);
+      return parseStatsResponse(response);
+    })(),
   ]);
 
   return {
-    totalTraces: countStats.total_traces ?? 0,
-    totalSpans: countStats.total_spans ?? 0,
-    filteredTraces: filteredCounts.filtered_traces ?? 0,
+    totalTraces: rootStats.total_traces ?? 0,
+    totalSpans: spanStats.total_spans ?? 0,
+    filteredTraces: filteredStats.filtered_traces ?? 0,
+    totalAgentRuns: rootStats.total_runs ?? 0,
+    filteredAgentRuns: filteredStats.filtered_runs ?? 0,
+    countsMayIncludeDuplicates: shadowedAiRootsOf(datasetParam.id).capped,
     filteredSpans: filteredCounts.filtered_spans ?? 0,
     totalTokens: (filteredStats.input_tokens ?? 0) + (filteredStats.output_tokens ?? 0),
     latencyP50Nanos: filteredStats.p50_latency ?? 0,
     latencyP99Nanos: filteredStats.p99_latency ?? 0,
-    errorTraces: countStats.error_traces ?? 0,
-    errorSpans: countStats.error_spans ?? 0,
+    errorTraces: rootStats.error_traces ?? 0,
+    errorSpans: spanStats.error_spans ?? 0,
     totalSessions: sessionStats.total_sessions ?? null,
   };
 };
@@ -165,7 +186,8 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
     setError(null);
 
     try {
-      const cacheKey = `${sourceOnlyQueryString}|${baseQueryString}`;
+      const timeKey = JSON.stringify(services.data?.query?.timefilter?.timefilter?.getTime() ?? {});
+      const cacheKey = `${sourceOnlyQueryString}|${baseQueryString}|${timeKey}`;
       let result: TraceMetrics;
 
       if (pendingMetrics && pendingMetrics.key === cacheKey) {
@@ -177,7 +199,8 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
           pplService,
           datasetParam,
           sourceOnlyQueryString,
-          baseQueryString
+          baseQueryString,
+          timeKey
         );
         pendingMetrics = { key: cacheKey, promise };
         try {
@@ -198,7 +221,14 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
     } finally {
       setLoading(false);
     }
-  }, [pplService, datasetParam, baseQueryString, sourceOnlyQueryString, tracesLoaded]);
+  }, [
+    pplService,
+    services.data,
+    datasetParam,
+    baseQueryString,
+    sourceOnlyQueryString,
+    tracesLoaded,
+  ]);
 
   useEffect(() => {
     fetchMetrics();

@@ -24,6 +24,7 @@ import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../i
 import { defaultPreparePplQuery } from '../../languages';
 import { ensureAiRootFieldChecked } from '../../ai_root';
 import { PPLService } from '../../../pages/traces/trace_details/data_fetching/ppl_request_helpers';
+import { ensureShadowedAiRootsChecked } from '../../../pages/traces/hooks/shadowed_ai_roots';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -197,12 +198,17 @@ export const executeQueries = createAsyncThunk<
     return;
   }
 
-  // The AI-root query only names the marker field once it is known to be mapped.
+  // The AI-root query only names the marker field once it is known to be mapped, and leaves out
+  // the shadowed AI roots.
   if (services.data && query.dataset) {
-    await ensureAiRootFieldChecked(
-      new PPLService(services.data),
+    const ppl = new PPLService(services.data);
+    const source = defaultPrepareQueryString({ ...query, query: '' });
+    await ensureAiRootFieldChecked(ppl, query.dataset, source);
+    await ensureShadowedAiRootsChecked(
+      ppl,
       query.dataset,
-      defaultPrepareQueryString({ ...query, query: '' })
+      source,
+      JSON.stringify(services.data.query?.timefilter?.timefilter?.getTime() ?? {})
     );
   }
 

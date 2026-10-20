@@ -15,6 +15,7 @@ import {
   isMarkedAiRoot,
   resetAiRootFieldChecks,
   setAiRootFieldPresent,
+  setShadowedAiRoots,
   useAiRootFieldVersion,
 } from './ai_root';
 import { prepareRootSpansQuery } from '../tab_queries';
@@ -32,6 +33,14 @@ describe('ai_root', () => {
       `(${GENAI_ROOT_CONDITION}) OR \`attributes.derived.gen_ai.is_root\` = true`
     );
     expect(aiRootCondition('ds-2')).toBe(GENAI_ROOT_CONDITION);
+  });
+
+  it('leaves out the shadowed AI roots once looked up', () => {
+    setAiRootFieldPresent('ds-1', true);
+    setShadowedAiRoots('ds-1', { spanIds: ['a', 'b'], capped: false });
+    expect(aiRootCondition('ds-1')).toBe(
+      `((${GENAI_ROOT_CONDITION}) OR \`attributes.derived.gen_ai.is_root\` = true) AND NOT spanId in ("a", "b")`
+    );
   });
 
   it('puts the condition in the Traces query', () => {
@@ -112,6 +121,16 @@ describe('ai_root', () => {
         row('weather', 'http', marked, '1'),
       ];
       expect(aiRootsOf(rows).map((r) => r.spanId)).toEqual(['weather', 'events']);
+    });
+
+    it('keeps only the outermost of nested marked spans', () => {
+      const rows = [
+        row('http', '', {}),
+        row('outer', 'http', marked, '1'),
+        row('llm', 'outer', {}, '2'),
+        row('inner', 'llm', marked, '3'),
+      ];
+      expect(aiRootsOf(rows).map((r) => r.spanId)).toEqual(['outer']);
     });
 
     it('is empty without a GenAI root or a marker', () => {

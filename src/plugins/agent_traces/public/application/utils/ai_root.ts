@@ -23,10 +23,18 @@ export const GENAI_ROOT_CONDITION = `parentSpanId = "" AND isnotnull(${OPERATION
  * PPL condition for the spans listed as agent traces. The marker is only referenced once it is
  * known to be in the index mapping: PPL rejects a query that names an unmapped field.
  */
-export const aiRootCondition = (datasetId: string | undefined): string =>
-  hasAiRootField(datasetId)
-    ? `(${GENAI_ROOT_CONDITION}) OR ${AI_ROOT_FIELD_PPL} = true`
-    : GENAI_ROOT_CONDITION;
+export const aiRootCondition = (datasetId: string | undefined): string => {
+  if (!hasAiRootField(datasetId)) return GENAI_ROOT_CONDITION;
+  const condition = `(${GENAI_ROOT_CONDITION}) OR ${AI_ROOT_FIELD_PPL} = true`;
+  const hidden = shadowedAiRootSpanIds(datasetId);
+  return hidden.length > 0 ? `(${condition}) AND NOT ${spanIdIn(hidden)}` : condition;
+};
+
+const quote = (value: string) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
+/** PPL `spanId in (...)` for the given span IDs. */
+export const spanIdIn = (spanIds: string[]): string =>
+  `spanId in (${spanIds.map(quote).join(', ')})`;
 
 /** Whether a span document is marked as an AI root. */
 export const isMarkedAiRoot = (source: Record<string, unknown> | undefined): boolean => {
@@ -58,9 +66,31 @@ export const isGenAiSpanDocument = (source: Record<string, unknown> | undefined)
 };
 
 interface SpanRowLike {
+  spanId?: string;
   parentSpanId?: string | null;
   rawDocument?: Record<string, unknown>;
 }
+
+/**
+ * Drops marked spans that have a marked ancestor among `rows`. Data Prepper can mark a span and,
+ * once a late parent arrives, its outermost GenAI ancestor too; only the outermost one counts.
+ */
+const outermostMarked = <T extends SpanRowLike>(rows: T[], marked: T[]): T[] => {
+  const byId = new Map(rows.filter((r) => r.spanId).map((r) => [r.spanId, r]));
+  const hasMarkedAncestor = (row: T) => {
+    const seen = new Set<string>();
+    let parentId = row.parentSpanId;
+    while (parentId && !seen.has(parentId)) {
+      seen.add(parentId);
+      const parent = byId.get(parentId);
+      if (!parent) return false;
+      if (isMarkedAiRoot(parent.rawDocument)) return true;
+      parentId = parent.parentSpanId;
+    }
+    return false;
+  };
+  return marked.filter((r) => !hasMarkedAncestor(r));
+};
 
 const rawStartOf = (row: SpanRowLike) => String(row.rawDocument?.startTime ?? '');
 
@@ -74,9 +104,10 @@ export const aiRootsOf = <T extends SpanRowLike>(rows: T[]): T[] => {
     (r) => !r.parentSpanId && (isMarkedAiRoot(r.rawDocument) || isGenAiSpanDocument(r.rawDocument))
   );
   if (roots.length > 0) return roots;
-  return rows
-    .filter((r) => isMarkedAiRoot(r.rawDocument))
-    .sort((a, b) => rawStartOf(a).localeCompare(rawStartOf(b)));
+  return outermostMarked(
+    rows,
+    rows.filter((r) => isMarkedAiRoot(r.rawDocument))
+  ).sort((a, b) => rawStartOf(a).localeCompare(rawStartOf(b)));
 };
 
 /** Whether this span is one that represents its trace (see `aiRootsOf`). */
@@ -109,13 +140,14 @@ const pending = new Map<string, Promise<void>>();
 // to recompute it once a check changes the condition.
 let version = 0;
 const listeners = new Set<() => void>();
+const bumpVersion = () => {
+  version += 1;
+  listeners.forEach((listener) => listener());
+};
 const record = (datasetId: string, present: boolean) => {
   const changed = checks.get(datasetId)?.present !== present;
   checks.set(datasetId, { at: Date.now(), present });
-  if (changed) {
-    version += 1;
-    listeners.forEach((listener) => listener());
-  }
+  if (changed) bumpVersion();
 };
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
@@ -144,6 +176,36 @@ const isFieldNotFound = (error: unknown): boolean => {
 
 export const hasAiRootField = (datasetId: string | undefined): boolean =>
   !!datasetId && !!checks.get(datasetId)?.present;
+
+export interface ShadowedAiRoots {
+  /** Marked spans that must not be listed as AI roots (see `fetchShadowedAiRoots`). */
+  spanIds: string[];
+  /** The lookup hit its limit, so a few duplicate agent runs may still be counted. */
+  capped: boolean;
+}
+
+const NO_SHADOWED: ShadowedAiRoots = { spanIds: [], capped: false };
+const shadowed = new Map<string, ShadowedAiRoots>();
+
+/** The latest shadowed AI roots looked up for a dataset. */
+export const shadowedAiRootsOf = (datasetId: string | undefined): ShadowedAiRoots =>
+  (datasetId && shadowed.get(datasetId)) || NO_SHADOWED;
+
+export const shadowedAiRootSpanIds = (datasetId: string | undefined): string[] =>
+  shadowedAiRootsOf(datasetId).spanIds;
+
+/** Records the shadowed AI roots of a dataset; `aiRootCondition` excludes them from then on. */
+export const setShadowedAiRoots = (datasetId: string, next: ShadowedAiRoots) => {
+  const current = shadowedAiRootsOf(datasetId);
+  shadowed.set(datasetId, next);
+  if (
+    current.capped !== next.capped ||
+    current.spanIds.length !== next.spanIds.length ||
+    current.spanIds.some((id, i) => id !== next.spanIds[i])
+  ) {
+    bumpVersion();
+  }
+};
 
 export interface PPLRunner {
   executeQuery(dataset: Dataset, pplQuery: string): Promise<unknown>;
@@ -184,6 +246,7 @@ export const ensureAiRootFieldChecked = async (
 export const resetAiRootFieldChecks = () => {
   checks.clear();
   pending.clear();
+  shadowed.clear();
 };
 
 /** For tests and callers that already know the mapping. */

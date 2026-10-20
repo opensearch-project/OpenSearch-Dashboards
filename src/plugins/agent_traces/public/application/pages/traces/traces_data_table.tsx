@@ -380,9 +380,13 @@ export const TracesDataTable: React.FC = () => {
         <DataTableInfoBar
           hasHead={hasHead}
           hitsCount={hits.length}
-          totalCount={traceMetrics?.filteredTraces ?? hits.length}
+          totalCount={traceMetrics?.filteredAgentRuns ?? hits.length}
           elapsedMs={results?.elapsedMs}
-          entityName="trace"
+          entityName={
+            traceMetrics && traceMetrics.filteredAgentRuns > traceMetrics.filteredTraces
+              ? 'agentRun'
+              : 'trace'
+          }
           wrapCellText={wrapCellText}
           onWrapCellTextChange={setWrapCellText}
         />

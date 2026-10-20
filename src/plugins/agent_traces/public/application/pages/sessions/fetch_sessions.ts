@@ -34,7 +34,12 @@ import {
   pplResponseToRecords,
   PplRecord,
 } from './session_utils';
-import { ensureAiRootFieldChecked, hasAiRootField } from '../../utils/ai_root';
+import {
+  ensureAiRootFieldChecked,
+  hasAiRootField,
+  shadowedAiRootSpanIds,
+} from '../../utils/ai_root';
+import { ensureShadowedAiRootsChecked } from '../traces/hooks/shadowed_ai_roots';
 
 /** Anything that can run a PPL query against a dataset (PPLService in the app and embeddable). */
 export interface PPLQueryRunner {
@@ -117,6 +122,8 @@ export const fetchSessions = async (
 
   const wholeSession = withoutTimeRange(dataset);
   await ensureAiRootFieldChecked(ppl, dataset, source);
+  // Any recent lookup will do: a shadowed span stays shadowed whatever the time range.
+  await ensureShadowedAiRootsChecked(ppl, dataset, source);
   let sessionIds: string[];
   let total: number;
   let errorsPartial = false;
@@ -213,7 +220,12 @@ export const fetchSessions = async (
       const [rootsResponse, errorsResponse] = await Promise.all([
         ppl.executeQuery(
           wholeSession,
-          buildRootSpansQuery(source, traceIds, hasAiRootField(dataset.id))
+          buildRootSpansQuery(
+            source,
+            traceIds,
+            hasAiRootField(dataset.id),
+            shadowedAiRootSpanIds(dataset.id)
+          )
         ),
         uncheckedTraceIds.length > 0
           ? ppl

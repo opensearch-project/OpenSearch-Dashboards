@@ -55,6 +55,7 @@ import { AgentView, isAgentView } from './agent_view_panel';
 import { OpenSearchSearchHit } from '../types/doc_views_types';
 import { prepareAgentSpansQuery, prepareRootSpansQuery } from '../application/tab_queries';
 import { dropShadowedAiRoots, ensureAiRootFieldChecked } from '../application/utils/ai_root';
+import { ensureShadowedAiRootsChecked } from '../application/pages/traces/hooks/shadowed_ai_roots';
 
 export interface SearchProps {
   description?: string;
@@ -458,11 +459,16 @@ export class AgentTracesEmbeddable
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
     if (this.agentView === 'traces' && this.savedQuery) {
-      // The Traces query names the AI-root marker only once it is known to be mapped.
-      await ensureAiRootFieldChecked(
-        new PPLService(this.services.data),
+      // The Traces query names the AI-root marker only once it is known to be mapped, and leaves
+      // out the shadowed AI roots.
+      const ppl = new PPLService(this.services.data);
+      const source = defaultPrepareQueryString({ ...this.savedQuery, query: '' });
+      await ensureAiRootFieldChecked(ppl, this.savedQuery.dataset, source);
+      await ensureShadowedAiRootsChecked(
+        ppl,
         this.savedQuery.dataset,
-        defaultPrepareQueryString({ ...this.savedQuery, query: '' })
+        source,
+        JSON.stringify(this.input.timeRange ?? {})
       );
       const currentQuery = searchSource.getField('query');
       if (currentQuery) {
