@@ -137,6 +137,8 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             queryId: schema.maybe(schema.string()),
+            // Caller-requested row limit, honored by the ppl strategy.
+            fetchSize: schema.maybe(schema.number({ min: 1 })),
           }),
         },
       },
