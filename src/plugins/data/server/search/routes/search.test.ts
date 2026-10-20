@@ -142,4 +142,20 @@ describe('Search service', () => {
     expect(error.body.message).toBe('oh no');
     expect(error.body.attributes.error).toBe('oops');
   });
+
+  it('returns data-frame strategy responses without a rawResponse', async () => {
+    const response = { type: 'default', body: { name: 'spans', size: 1 } };
+    mockDataStart.search.search.mockResolvedValue(response as any);
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      body: { params: {} },
+      params: { strategy: 'ppl' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    registerSearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
+    const handler = mockCoreSetup.http.createRouter.mock.results[0].value.post.mock.calls[0][1];
+    await handler({} as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledWith({ body: response });
+  });
 });
