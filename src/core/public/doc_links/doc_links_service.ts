@@ -162,6 +162,18 @@ export class DocLinksService {
               top_hits: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/top-hits/`,
               // https://opensearch.org/docs/latest/aggregations/metric/scripted-metric/
               scripted_metric: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/scripted-metric/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/average/
+              avg: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/average/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/minimum/
+              min: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/minimum/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/maximum/
+              max: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/maximum/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/extended-stats/
+              extended_stats: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/extended-stats/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/geocentroid/
+              geo_centroid: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/geocentroid/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/percentile-ranks/
+              percentile_ranks: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/percentile-ranks/`,
             },
             bucket: {
               // https://opensearch.org/docs/latest/aggregations/bucket/index/
@@ -188,6 +200,18 @@ export class DocLinksService {
               adjacency_matrix: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/adjacency-matrix/`,
               // https://opensearch.org/docs/latest/aggregations/bucket/nested/
               nested: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/nested/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/date-histogram/
+              date_histogram: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/date-histogram/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/date-range/
+              date_range: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/date-range/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/ip-range/
+              ip_range: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/ip-range/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/filters/
+              filters: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/filters/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/geohash-grid/
+              geohash_grid: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/geohash-grid/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/geotile-grid/
+              geotile_grid: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/geotile-grid/`,
             },
             pipeline: {
               // https://opensearch.org/docs/latest/aggregations/pipeline/index/
@@ -212,6 +236,14 @@ export class DocLinksService {
               moving_avg: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/moving-avg/`,
               // https://opensearch.org/docs/latest/aggregations/pipeline/serial-diff/
               serial_diff: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/serial-diff/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/max-bucket/
+              max_bucket: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/max-bucket/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/min-bucket/
+              min_bucket: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/min-bucket/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/sum-bucket/
+              sum_bucket: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/sum-bucket/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/moving-function/
+              moving_fn: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/moving-function/`,
             },
           },
           indexTemplates: {
@@ -715,6 +747,12 @@ export interface DocLinksStart {
           readonly geo_bound: string;
           readonly top_hits: string;
           readonly scripted_metric: string;
+          readonly avg: string;
+          readonly min: string;
+          readonly max: string;
+          readonly extended_stats: string;
+          readonly geo_centroid: string;
+          readonly percentile_ranks: string;
         };
         readonly bucket: {
           readonly base: string;
@@ -729,6 +767,12 @@ export interface DocLinksStart {
           readonly geo: string;
           readonly adjacency_matrix: string;
           readonly nested: string;
+          readonly date_histogram: string;
+          readonly date_range: string;
+          readonly ip_range: string;
+          readonly filters: string;
+          readonly geohash_grid: string;
+          readonly geotile_grid: string;
         };
         readonly pipeline: {
           readonly base: string;
@@ -742,6 +786,10 @@ export interface DocLinksStart {
           readonly derivative: string;
           readonly moving_avg: string;
           readonly serial_diff: string;
+          readonly max_bucket: string;
+          readonly min_bucket: string;
+          readonly sum_bucket: string;
+          readonly moving_fn: string;
         };
       };
       readonly indexTemplates: {
