@@ -250,6 +250,10 @@ describe('defineSearchStrategyRouteProvider', () => {
   it.each([0, -5])('rejects a non-positive fetchSize (%s)', (fetchSize) => {
     expect(() => validateRequestBody({ fetchSize })).toThrow();
   });
+
+  it('rejects a non-integer fetchSize', () => {
+    expect(() => validateRequestBody({ fetchSize: 2.5 })).toThrow(/must be an integer/);
+  });
 });
 
 describe('resolveOpenSearchClient', () => {
