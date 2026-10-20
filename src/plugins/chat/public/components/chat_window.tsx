@@ -24,7 +24,6 @@ import { ConfirmationRequest } from '../services/confirmation_service';
 import { AskUserRequest } from '../services/human_input_service';
 import { type Event as ChatEvent, EventType } from '../../common/events';
 import type { InputContent, Message, SystemMessage, UserMessage } from '../../common/types';
-import { getConversationTitle } from '../../common/parse_inline_title';
 import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
@@ -677,20 +676,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }, [toolCallStates, service.getActionRenderer]);
 
     // Get conversation name: prefer the auto-generated title from the agent's
-    // conversation_title CUSTOM event; otherwise fall back to parsing the inline
-    // CONVERSATION_TITLE: sentinel from the assistant response (covers backends
-    // that emit the sentinel but no CUSTOM event); finally fall back to the
-    // first user message text content.
+    // conversation_title CUSTOM event; otherwise fall back to the first user
+    // message text content. The title value comes only from the CUSTOM event
+    // (handleCustomEvent -> onConversationTitle); the inline CONVERSATION_TITLE:
+    // line is still stripped from displayed content but is no longer parsed as a
+    // title source here.
     const conversationName = useMemo(() => {
       if (generatedTitle) {
         return generatedTitle;
-      }
-
-      // Sentinel fallback. Skip the streaming answer so a partial title does not
-      // flicker into the header before the response settles.
-      const inlineTitle = getConversationTitle(timeline, { skipStreamingLast: isStreaming });
-      if (inlineTitle) {
-        return inlineTitle;
       }
 
       // Fallback: find first user message that has text content
@@ -712,7 +705,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
 
       return '';
-    }, [timeline, generatedTitle, isStreaming]);
+    }, [timeline, generatedTitle]);
 
     const handleShowHistory = useCallback(() => {
       setShowHistory(true);
