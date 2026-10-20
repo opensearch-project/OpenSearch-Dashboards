@@ -312,69 +312,54 @@ export class ExploreEmbeddable
           .getVariables$()
           .subscribe((variables) => {
             if (hasLoadingVariables(variables)) return;
-
-            const linkVariablesChanged = this.updateLinkVariables();
-            const refetching = this.handleVariablesChange();
-            // A refetch re-renders with the new variables; otherwise render here.
-            if (linkVariablesChanged && !refetching && this.node && this.searchProps) {
-              this.renderComponent(this.node, this.searchProps);
-            }
+            this.handleVariablesChange();
           });
       }
     }
   }
 
   /**
-   * Table data links can use dashboard variables, so keep them in searchProps.
-   * Returns whether they changed. Variable option reloads (e.g. on a time range
-   * change) emit with the same values, and must not re-render the panel.
-   * The caller re-renders with the new searchProps object.
+   * Handle variable changes. Table data links can use dashboard variables, so
+   * keep them in searchProps first. Then refetch when the interpolated query
+   * changes, and otherwise re-render only if the link variables changed.
+   * Variable option reloads (e.g. on a time range change) emit with the same
+   * values, and must not re-render the panel.
    */
-  private updateLinkVariables(): boolean {
-    if (!this.searchProps) {
-      return false;
-    }
+  private handleVariablesChange() {
     const variables = this.interpolationService.getVariables();
-    if (isEqual(variables, this.searchProps.variables)) {
-      return false;
-    }
-    this.searchProps = { ...this.searchProps, variables };
-    return true;
-  }
-
-  /**
-   * Handle variable changes - interpolate query and refetch.
-   * Returns whether a refetch (which re-renders) was started.
-   */
-  private handleVariablesChange(): boolean {
-    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
-      return false;
+    let linkVariablesChanged = false;
+    if (this.searchProps && !isEqual(variables, this.searchProps.variables)) {
+      this.searchProps = { ...this.searchProps, variables };
+      linkVariablesChanged = true;
     }
 
-    const { searchSource } = this.savedExplore;
-    const currentQuery = searchSource.getField('query');
-    const interpolatedQuery = this.interpolationService.interpolate(
-      this.originalQuery,
-      currentQuery?.language
-    );
+    if (this.originalQuery && this.interpolationService.hasVariables(this.originalQuery)) {
+      const { searchSource } = this.savedExplore;
+      const currentQuery = searchSource.getField('query');
+      const interpolatedQuery = this.interpolationService.interpolate(
+        this.originalQuery,
+        currentQuery?.language
+      );
 
-    if (interpolatedQuery === this.lastInterpolatedQuery) {
-      return false;
+      if (interpolatedQuery !== this.lastInterpolatedQuery) {
+        this.lastInterpolatedQuery = interpolatedQuery;
+        if (currentQuery) {
+          searchSource.setField('query', {
+            ...currentQuery,
+            query: interpolatedQuery,
+          });
+        }
+        if (this.searchProps) {
+          // The refetch re-renders with the new variables.
+          this.updateHandler(this.searchProps, true);
+          return;
+        }
+      }
     }
-    this.lastInterpolatedQuery = interpolatedQuery;
 
-    if (currentQuery) {
-      searchSource.setField('query', {
-        ...currentQuery,
-        query: interpolatedQuery,
-      });
+    if (linkVariablesChanged && this.node && this.searchProps) {
+      this.renderComponent(this.node, this.searchProps);
     }
-
-    if (this.searchProps) {
-      this.updateHandler(this.searchProps, true);
-      return true;
-    }
-    return false;
   }
 
   private initializeSearchProps() {

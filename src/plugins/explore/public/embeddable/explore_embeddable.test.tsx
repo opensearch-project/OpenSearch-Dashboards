@@ -889,6 +889,33 @@ describe('ExploreEmbeddable', () => {
       emb.destroy();
       parent.destroy();
     });
+
+    test('re-renders without a refetch when the interpolated query is unchanged', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard('links-same-query-emb', {
+        getVariables,
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn().mockReturnValue('source = logs | where env = "prod"'),
+      });
+      emb.originalQuery = 'source = logs | where env = "$env"';
+      // @ts-ignore - private for testing
+      emb.lastInterpolatedQuery = 'source = logs | where env = "prod"';
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+      const updateSpy = jest.spyOn(emb as any, 'updateHandler').mockImplementation(() => {});
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      expect(updateSpy).not.toHaveBeenCalled();
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+      expect(renderSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ variables: [{ name: 'service', value: 'b' }] })
+      );
+
+      emb.destroy();
+      parent.destroy();
+    });
   });
 
   describe('variable interpolation in panel metadata', () => {
