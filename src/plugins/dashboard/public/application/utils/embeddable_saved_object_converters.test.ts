@@ -156,7 +156,7 @@ test('normalizeSavedDashboardPanel fills in a missing embeddableConfig only', ()
     panelIndex: '1',
     gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
     version: '3.0.0',
-  } as any;
+  } as Omit<SavedDashboardPanel, 'embeddableConfig'> as SavedDashboardPanel;
   // A panel another app saved without one matches what the dashboard writes for it.
   expect(normalizeSavedDashboardPanel(panel)).toEqual({ ...panel, embeddableConfig: {} });
   const withConfig = { ...panel, embeddableConfig: { title: 'x' } };
@@ -172,7 +172,7 @@ test('a panel saved without embeddableConfig reads as unchanged after a load, as
     type: 'explore',
     panelIndex: '1',
     gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
-  } as any;
+  } as Omit<SavedDashboardPanel, 'embeddableConfig'> as SavedDashboardPanel;
   const roundTripped = convertPanelStateToSavedDashboardPanel(
     convertSavedDashboardPanelToPanelState(saved),
     '3.0.0'
