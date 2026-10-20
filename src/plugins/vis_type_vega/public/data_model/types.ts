@@ -228,6 +228,11 @@ export interface PromQLHttpResponse {
         totalSeriesCount: number;
         displayedSeriesCount: number;
       };
+      multiQuery?: {
+        queryCount: number;
+        successCount: number;
+        errors: Array<{ query: string; error: string }>;
+      };
     };
   };
 }
@@ -236,7 +241,6 @@ export interface PromQLQueryRequest {
   dataObject: Data;
   url: UrlObject;
   datasource: string;
-  useContext: boolean;
   maxDataPoints?: number;
   step?: number;
 }

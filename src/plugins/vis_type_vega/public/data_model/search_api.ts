@@ -70,13 +70,9 @@ export interface SearchAPIDependencies {
 export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
-    public readonly abortSignal?: AbortSignal,
+    private readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
-
-  public get http(): CoreSetup['http'] {
-    return this.dependencies.http;
-  }
 
   async search(searchRequests: SearchRequest[], options?: { strategy?: string }) {
     const { search } = this.dependencies.search;

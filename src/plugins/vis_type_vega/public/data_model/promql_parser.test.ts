@@ -6,6 +6,9 @@
 import { timefilterServiceMock } from '../../../data/public/query/timefilter/timefilter_service.mock';
 import { PromQLQueryParser } from './promql_parser';
 import { TimeCache } from './time_cache';
+import { SearchAPI } from './search_api';
+
+const DEFAULT_BOUNDS = { min: 0, max: 1_000_000 };
 
 const makeSearchApiMock = (fields = defaultFields(), meta?: unknown) => ({
   searchPromQL: jest.fn(() =>
@@ -27,13 +30,20 @@ function defaultFields() {
 function makeParser(searchApiMock = makeSearchApiMock(), onWarn = jest.fn()) {
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
   return {
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
-    parser: new PromQLQueryParser(timeCache, searchApiMock, onWarn),
+    parser: new PromQLQueryParser(timeCache, searchApiMock as unknown as SearchAPI, onWarn),
     timeCache,
     searchApiMock,
     onWarn,
   };
 }
+
+beforeEach(() => {
+  jest.spyOn(TimeCache.prototype, 'getTimeBounds').mockReturnValue(DEFAULT_BOUNDS);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 test('it should throw if query is missing', () => {
   const { parser } = makeParser();
@@ -66,18 +76,16 @@ test('it should parse url object and strip %datasource%', () => {
   );
   expect(result.dataObject).toEqual({});
   expect(result.datasource).toBe('promql_source');
-  expect(result.useContext).toBe(true);
   expect(result.url['%datasource%']).toBeUndefined();
   expect(result.url).toEqual({ body: { query: 'up' } });
 });
 
-test('it should parse %context% and strip it from url', () => {
+test('it should strip %context% from url', () => {
   const { parser } = makeParser();
   const result = parser.parseUrl(
     {},
     { '%datasource%': 'promql_source', '%context%': true, body: { query: 'up' } }
   );
-  expect(result.useContext).toBe(true);
   expect(result.url['%context%']).toBeUndefined();
 });
 
@@ -101,28 +109,16 @@ test('it should populate data and transform DataFrame fields to flat records', a
   expect(body.query.language).toBe('PROMQL');
   expect(body.query.dataset.id).toBe('promql_source');
   expect(body.query.dataset.type).toBe('PROMETHEUS');
-  expect(body.timeRange).toBeUndefined();
 });
 
-test('it should include timeRange in request body when %context% is true', async () => {
-  const { parser, timeCache, searchApiMock } = makeParser();
-  timeCache.setTimeRange({ from: 'now-15m', to: 'now' });
+test('it should send absolute ISO time bounds in the request body', async () => {
+  const from = new Date('2024-01-01T00:00:00.000Z');
+  const to = new Date('2024-01-01T01:00:00.000Z');
+  jest
+    .spyOn(TimeCache.prototype, 'getTimeBounds')
+    .mockReturnValue({ min: from.valueOf(), max: to.valueOf() });
 
-  const request = parser.parseUrl(
-    {},
-    { '%datasource%': 'promql_source', '%context%': true, body: { query: 'up' } }
-  );
-
-  await parser.populateData([request]);
-
-  const [, body] = searchApiMock.searchPromQL.mock.calls[0];
-  expect(body.timeRange).toEqual({ from: 'now-15m', to: 'now' });
-});
-
-test('it should omit timeRange when %context% is true but timeCache has no range set', async () => {
   const { parser, searchApiMock } = makeParser();
-  // timeCache not primed — _timeRange is undefined
-
   const request = parser.parseUrl(
     {},
     { '%datasource%': 'promql_source', '%context%': true, body: { query: 'up' } }
@@ -131,7 +127,7 @@ test('it should omit timeRange when %context% is true but timeCache has no range
   await parser.populateData([request]);
 
   const [, body] = searchApiMock.searchPromQL.mock.calls[0];
-  expect(body.timeRange).toBeUndefined();
+  expect(body.timeRange).toEqual({ from: from.toISOString(), to: to.toISOString() });
 });
 
 test('it should handle empty fields in response gracefully', async () => {
@@ -233,7 +229,7 @@ test('it should use the request name as the inspector label', async () => {
   expect(searchApiMock.searchPromQL.mock.calls[0][0]).toBe('my-metric');
 });
 
-test('it should warn when the response reports truncation', async () => {
+test('it should warn when the response reports server-side truncation', async () => {
   const truncation = { tableTruncated: true, totalSeriesCount: 5000, displayedSeriesCount: 2000 };
   const searchApiMock = makeSearchApiMock(defaultFields(), { truncation });
   const { parser, onWarn } = makeParser(searchApiMock);
@@ -249,7 +245,7 @@ test('it should warn when the response reports truncation', async () => {
   expect(onWarn.mock.calls[0][0]).toContain('5000');
 });
 
-test('it should not warn when truncation is not flagged', async () => {
+test('it should not warn when server-side truncation is not flagged', async () => {
   const truncation = { tableTruncated: false, totalSeriesCount: 10, displayedSeriesCount: 10 };
   const searchApiMock = makeSearchApiMock(defaultFields(), { truncation });
   const { parser, onWarn } = makeParser(searchApiMock);
@@ -263,13 +259,28 @@ test('it should not warn when truncation is not flagged', async () => {
   expect(onWarn).not.toHaveBeenCalled();
 });
 
-test('it should cap rows client-side and warn when response exceeds CLIENT_ROW_CAP', async () => {
-  const rowCount = 30_001;
+test('it should cap at a series boundary and warn with series counts', async () => {
+  // 3 series × 15 000 rows each = 45 000 total; cap is 30 000
+  // First two series (30 000 rows) fit exactly; third would exceed
+  const rowsPerSeries = 15_000;
+  const seriesNames = ['s1', 's2', 's3'];
   const bigFields = [
-    { name: 'Time', values: Array.from({ length: rowCount }, (_, i) => i * 1000) },
-    { name: 'Series', values: Array.from({ length: rowCount }, () => 'up') },
-    { name: 'Labels', values: Array.from({ length: rowCount }, () => ({})) },
-    { name: 'Value', values: Array.from({ length: rowCount }, () => 1) },
+    {
+      name: 'Time',
+      values: seriesNames.flatMap((s) => Array.from({ length: rowsPerSeries }, (_, i) => i * 1000)),
+    },
+    {
+      name: 'Series',
+      values: seriesNames.flatMap((s) => Array.from({ length: rowsPerSeries }, () => s)),
+    },
+    {
+      name: 'Labels',
+      values: seriesNames.flatMap((s) => Array.from({ length: rowsPerSeries }, () => ({}))),
+    },
+    {
+      name: 'Value',
+      values: seriesNames.flatMap((s) => Array.from({ length: rowsPerSeries }, () => 1)),
+    },
   ];
   const searchApiMock = makeSearchApiMock(bigFields);
   const { parser, onWarn } = makeParser(searchApiMock);
@@ -282,8 +293,29 @@ test('it should cap rows client-side and warn when response exceeds CLIENT_ROW_C
 
   expect(request.dataObject.values).toHaveLength(30_000);
   expect(onWarn).toHaveBeenCalledTimes(1);
-  expect(onWarn.mock.calls[0][0]).toContain('30000');
-  expect(onWarn.mock.calls[0][0]).toContain('30001');
+  // Warning should mention series counts
+  expect(onWarn.mock.calls[0][0]).toContain('2');
+  expect(onWarn.mock.calls[0][0]).toContain('3');
+});
+
+test('it should warn for each failed sub-query in a multi-query response', async () => {
+  const multiQuery = {
+    queryCount: 2,
+    successCount: 1,
+    errors: [{ query: 'bad_metric', error: 'parse error: unexpected token' }],
+  };
+  const searchApiMock = makeSearchApiMock(defaultFields(), { multiQuery });
+  const { parser, onWarn } = makeParser(searchApiMock);
+  const request = parser.parseUrl(
+    {},
+    { '%datasource%': 'promql_source', '%context%': true, body: { query: 'up;bad_metric' } }
+  );
+
+  await parser.populateData([request]);
+
+  expect(onWarn).toHaveBeenCalledTimes(1);
+  expect(onWarn.mock.calls[0][0]).toContain('bad_metric');
+  expect(onWarn.mock.calls[0][0]).toContain('parse error');
 });
 
 test('it should warn and continue when one of multiple requests fails', async () => {
@@ -295,7 +327,7 @@ test('it should warn and continue when one of multiple requests fails', async ()
       return Promise.resolve({ body: { fields: defaultFields() } });
     }),
   };
-  const { parser, onWarn } = makeParser(mixedSearchApiMock as any);
+  const { parser, onWarn } = makeParser(mixedSearchApiMock as unknown as SearchAPI);
   const r1 = parser.parseUrl(
     { name: 'r1' },
     { '%datasource%': 'ds1', '%context%': true, body: { query: 'up' } }
@@ -307,21 +339,54 @@ test('it should warn and continue when one of multiple requests fails', async ()
 
   await parser.populateData([r1, r2]);
 
-  // r2 should still have data despite r1 failing
   expect(r2.dataObject.values).toHaveLength(2);
-  // r1 should be left without values
   expect(r1.dataObject.values).toBeUndefined();
-  // a warning should identify the failing request by index
   expect(onWarn).toHaveBeenCalledTimes(1);
-  expect(onWarn.mock.calls[0][0]).toContain('1');
+  // Warning should use request name, not 1-based index
+  expect(onWarn.mock.calls[0][0]).toContain('r1');
   expect(onWarn.mock.calls[0][0]).toContain('network error');
+});
+
+test('it should extract error details from the HTTP response body when available', async () => {
+  const fetchError = Object.assign(new Error('Bad Request'), {
+    body: { error: { details: 'unknown metric: bad_expr' } },
+  });
+  const failingSearchApiMock = {
+    searchPromQL: jest.fn(() => Promise.reject(fetchError)),
+  };
+  const { parser, onWarn } = makeParser(failingSearchApiMock as unknown as SearchAPI);
+  const request = parser.parseUrl(
+    { name: 'myq' },
+    { '%datasource%': 'ds1', '%context%': true, body: { query: 'bad_expr' } }
+  );
+
+  await parser.populateData([request]);
+
+  expect(onWarn).toHaveBeenCalledTimes(1);
+  expect(onWarn.mock.calls[0][0]).toContain('unknown metric: bad_expr');
+});
+
+test('it should skip the warning for AbortError', async () => {
+  const abortError = Object.assign(new Error('aborted'), { name: 'AbortError' });
+  const abortingSearchApiMock = {
+    searchPromQL: jest.fn(() => Promise.reject(abortError)),
+  };
+  const { parser, onWarn } = makeParser(abortingSearchApiMock as unknown as SearchAPI);
+  const request = parser.parseUrl(
+    {},
+    { '%datasource%': 'ds1', '%context%': true, body: { query: 'up' } }
+  );
+
+  await parser.populateData([request]);
+
+  expect(onWarn).not.toHaveBeenCalled();
 });
 
 test('it should warn for every failed request when all requests fail', async () => {
   const failingSearchApiMock = {
     searchPromQL: jest.fn(() => Promise.reject(new Error('timeout'))),
   };
-  const { parser, onWarn } = makeParser(failingSearchApiMock as any);
+  const { parser, onWarn } = makeParser(failingSearchApiMock as unknown as SearchAPI);
   const r1 = parser.parseUrl(
     {},
     { '%datasource%': 'ds1', '%context%': true, body: { query: 'up' } }

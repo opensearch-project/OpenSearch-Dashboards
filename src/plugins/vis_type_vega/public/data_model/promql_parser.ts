@@ -33,7 +33,7 @@ export class PromQLQueryParser {
   parseUrl(dataObject: Data, url: UrlObject): PromQLQueryRequest {
     const datasource = url[DATASOURCE] as string | undefined;
     delete url[DATASOURCE];
-    const useContext = !!url[CONTEXT];
+    const hasContext = !!url[CONTEXT];
     delete url[CONTEXT];
     const maxDataPoints = this.parsePositiveNumber(url[MAXDATAPOINTS]);
     delete url[MAXDATAPOINTS];
@@ -58,7 +58,7 @@ export class PromQLQueryParser {
       );
     }
 
-    if (!useContext) {
+    if (!hasContext) {
       throw new Error(
         i18n.translate('visTypeVega.promqlQueryParser.dataUrl.contextRequired', {
           defaultMessage:
@@ -68,11 +68,15 @@ export class PromQLQueryParser {
       );
     }
 
-    return { dataObject, url, datasource, useContext, maxDataPoints, step };
+    return { dataObject, url, datasource, maxDataPoints, step };
   }
 
   async populateData(requests: PromQLQueryRequest[]) {
-    const timeRange = this.timeCache._timeRange;
+    const timeBounds = this.timeCache.getTimeBounds();
+    const timeRange = {
+      from: new Date(timeBounds.min).toISOString(),
+      to: new Date(timeBounds.max).toISOString(),
+    };
 
     const results = await Promise.allSettled(
       requests.map(async (request, index) => {
@@ -100,7 +104,7 @@ export class PromQLQueryParser {
             format: 'jdbc',
           },
           ...(Object.keys(options).length > 0 ? { options } : {}),
-          ...(request.useContext && timeRange ? { timeRange } : {}),
+          timeRange,
         };
 
         const response = await this.searchAPI.searchPromQL(
@@ -115,24 +119,48 @@ export class PromQLQueryParser {
         const valueValues = fields.find((f) => f.name === 'Value')?.values ?? [];
 
         const totalRows = timeValues.length;
-        const cappedTimeValues =
-          totalRows > CLIENT_ROW_CAP ? timeValues.slice(0, CLIENT_ROW_CAP) : timeValues;
+        let cappedRows = totalRows;
+        let keptSeries: number | undefined;
+        let totalSeries: number | undefined;
 
-        request.dataObject.values = cappedTimeValues.map((t, i) => ({
+        if (totalRows > CLIENT_ROW_CAP) {
+          // Cap at a series boundary so no series is shown partially
+          cappedRows = 0;
+          keptSeries = 0;
+          let i = 0;
+          while (i < totalRows) {
+            const seriesName = seriesValues[i];
+            let j = i + 1;
+            while (j < totalRows && seriesValues[j] === seriesName) j++;
+            if (cappedRows + (j - i) > CLIENT_ROW_CAP) break;
+            cappedRows += j - i;
+            keptSeries++;
+            i = j;
+          }
+          totalSeries = keptSeries;
+          while (i < totalRows) {
+            let j = i + 1;
+            while (j < totalRows && seriesValues[j] === seriesValues[i]) j++;
+            totalSeries++;
+            i = j;
+          }
+        }
+
+        request.dataObject.values = timeValues.slice(0, cappedRows).map((t, i) => ({
           Time: t,
           Series: seriesValues[i],
           Labels: labelsValues[i],
           Value: valueValues[i],
         }));
 
-        if (totalRows > CLIENT_ROW_CAP) {
+        if (keptSeries !== undefined && totalSeries !== undefined) {
           this.onWarning(
             i18n.translate('visTypeVega.promqlQueryParser.rowCapWarning', {
               defaultMessage:
-                'PromQL result was truncated client-side: showing {cap} of {total} data points. Use {maxDataPoints} or {step} to reduce the result size.',
+                'PromQL result was truncated client-side: showing {keptSeries} of {totalSeries} series. Use {maxDataPoints} or {step} to reduce the result size.',
               values: {
-                cap: CLIENT_ROW_CAP,
-                total: totalRows,
+                keptSeries,
+                totalSeries,
                 maxDataPoints: '%maxdatapoints%',
                 step: '%step%',
               },
@@ -153,19 +181,31 @@ export class PromQLQueryParser {
             })
           );
         }
+
+        const multiQueryErrors = response.body?.meta?.multiQuery?.errors ?? [];
+        for (const { query, error } of multiQueryErrors) {
+          this.onWarning(
+            i18n.translate('visTypeVega.promqlQueryParser.multiQuerySubError', {
+              defaultMessage: 'Sub-query "{query}" failed: {error}',
+              values: { query, error },
+            })
+          );
+        }
       })
     );
 
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
+        const reason = result.reason;
+        if (reason?.name === 'AbortError') return;
+        const message =
+          (reason as any)?.body?.error?.details ??
+          (reason as any)?.body?.message ??
+          (reason instanceof Error ? reason.message : String(reason));
         this.onWarning(
           i18n.translate('visTypeVega.promqlQueryParser.requestFailedWarning', {
-            defaultMessage: 'PromQL request {index} failed: {message}',
-            values: {
-              index: index + 1,
-              message:
-                result.reason instanceof Error ? result.reason.message : String(result.reason),
-            },
+            defaultMessage: 'PromQL request "{name}" failed: {message}',
+            values: { name: getRequestName(requests[index], index), message },
           })
         );
       }
