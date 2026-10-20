@@ -40,6 +40,7 @@ import { DocLinksStart } from '../../../../core/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
+import { getAggHelpLink } from './agg_help_link';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;
@@ -84,7 +85,7 @@ function DefaultEditorAggSelect({
 
   let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
-    aggHelpLink = services.docLinks.links.opensearch.aggregations.base;
+    aggHelpLink = getAggHelpLink(value.name, services.docLinks.links);
   }
 
   const helpLink = value && aggHelpLink && (

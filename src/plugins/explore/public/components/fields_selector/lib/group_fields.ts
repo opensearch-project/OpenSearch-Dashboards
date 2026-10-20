@@ -88,6 +88,12 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
+    // Skip multi-fields (e.g. `.keyword` sub-fields of a `text` field). Their values live under
+    // the parent field in `_source`, so they can never be resolved for the results grid and would
+    // always render as null if added as a column.
+    if (field.subType?.multi) {
+      continue;
+    }
     if (showFacetedFields && isFacetedField(field.name)) {
       result.facetedFields.push(field);
     }

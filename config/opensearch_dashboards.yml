@@ -460,3 +460,9 @@
 # those queries to the Open Distro endpoints. When disabled (default), SQL/PPL are shown for all
 # datasets and queries always use the /_plugins endpoints.
 # queryEnhancements.legacyElasticsearchCompatibility.enabled: false
+
+# Set the value of this setting to true to let Explore run PPL queries on the asynchronous job API,
+# rendering rows as the engine produces them instead of waiting for the whole result set. Requires a
+# data source whose engine exposes that API, and the per-user explore:enableStreamingResults advanced
+# setting. When disabled (default), PPL queries use the synchronous endpoint.
+# queryEnhancements.ppl.streaming.enabled: false
