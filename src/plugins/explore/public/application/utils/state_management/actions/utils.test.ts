@@ -606,6 +606,94 @@ describe('Utils - Histogram Breakdown Support', () => {
     });
   });
 
+  describe('processRawResultsForHistogram (PPL column resolution)', () => {
+    const config = () => createBaseHistogramConfig({ aggs: { 2: { date_histogram: {} } } });
+
+    it('reads a source histogram in either column order, with string counts', () => {
+      const rows = [
+        { '@timestamp': '2026-09-25 06:11:00.000', count: '100' },
+        { '@timestamp': '2026-09-25T06:11:30.000Z', count: '60' },
+      ];
+      const expected = [
+        {
+          key_as_string: '2026-09-25 06:11:00.000',
+          key: Date.UTC(2026, 8, 25, 6, 11, 0),
+          doc_count: 100,
+        },
+        {
+          key_as_string: '2026-09-25T06:11:30.000Z',
+          key: Date.UTC(2026, 8, 25, 6, 11, 30),
+          doc_count: 60,
+        },
+      ];
+      const schemas = [
+        [
+          { name: '@timestamp', type: 'date' },
+          { name: 'count', type: 'string' },
+        ],
+        [
+          { name: 'count', type: 'string' },
+          { name: '@timestamp', type: 'date' },
+        ],
+      ];
+      schemas.forEach((fieldSchema) => {
+        const rawResults: any = {
+          hits: { hits: rows.map((row) => ({ _source: row })), total: 2 },
+          fieldSchema,
+        };
+        const result = utils.processRawResultsForHistogram('source=x', rawResults, config());
+        expect(result.hits.total).toBe(160);
+        expect(result.aggregations['2'].buckets).toEqual(expected);
+      });
+    });
+
+    it('accepts epoch-millisecond bucket keys', () => {
+      const rawResults: any = {
+        hits: { hits: [{ _source: { '@timestamp': 1700000000000, count: 3 } }], total: 1 },
+        fieldSchema: [
+          { name: '@timestamp', type: 'long' },
+          { name: 'count', type: 'long' },
+        ],
+      };
+      const result = utils.processRawResultsForHistogram('source=x', rawResults, config());
+      expect(result.aggregations['2'].buckets[0].key).toBe(1700000000000);
+      expect(result.hits.total).toBe(3);
+    });
+
+    it('keeps the OpenSearch [count(), span()] order working', () => {
+      const rawResults: any = {
+        hits: {
+          hits: [{ _source: { 'count()': 5, 'span(@timestamp,1h)': '2023-01-01 00:00:00' } }],
+          total: 1,
+        },
+        fieldSchema: [
+          { name: 'count()', type: 'integer' },
+          { name: 'span(@timestamp,1h)', type: 'timestamp' },
+        ],
+      };
+      const result = utils.processRawResultsForHistogram('source=x', rawResults, config());
+      expect(result.hits.total).toBe(5);
+      expect(result.aggregations['2'].buckets[0].key).toBe(Date.UTC(2023, 0, 1));
+    });
+
+    it('resolves columns by type when names are unrecognised', () => {
+      expect(
+        utils.resolvePPLHistogramColumns([
+          { name: 'bucket', type: 'timestamp' },
+          { name: 'n', type: 'long' },
+        ])
+      ).toEqual({ countField: 'n', bucketField: 'bucket' });
+    });
+
+    it('falls back to the OpenSearch positional order', () => {
+      expect(utils.resolvePPLHistogramColumns([{ name: 'a' }, { name: 'b' }])).toEqual({
+        countField: 'a',
+        bucketField: 'b',
+      });
+      expect(utils.resolvePPLHistogramColumns([{ name: 'a' }])).toBeUndefined();
+    });
+  });
+
   describe('buildSQLHistogramQuery', () => {
     it('returns the original query when aggs is missing', () => {
       const query = 'SELECT * FROM logs';

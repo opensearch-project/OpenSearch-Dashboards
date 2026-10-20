@@ -72,6 +72,7 @@ import {
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
+import * as utilsModule from './utils';
 import { queryHasAggregation } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
@@ -1620,6 +1621,84 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           }),
         })
       );
+    });
+
+    describe("a source's own histogram query", () => {
+      const buildHistogramQuery = jest.fn();
+      const sentQuery = () =>
+        (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query)?.[0]?.query
+          ?.query;
+      const run = (language: string) => {
+        mockGetState.mockReturnValue({
+          query: { query: 'my query', language, dataset: { id: 'test', type: 'MY_SOURCE' } },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        const thunk = executeHistogramQuery({
+          services: mockServices,
+          cacheKey: 'histogram-key',
+          queryString: 'my query',
+          interval: '1h',
+        });
+        return thunk(mockDispatch, mockGetState, undefined);
+      };
+
+      beforeEach(() => {
+        buildHistogramQuery.mockReset();
+        (mockSearchSource.setFields as jest.Mock).mockClear();
+        const registry = new SourceTypeRegistryService();
+        registry.register({
+          id: 'my-source',
+          label: 'My source',
+          datasetTypes: ['MY_SOURCE'],
+          flavors: [ExploreFlavor.Logs],
+          resolveDefaultDataset: async () => undefined,
+          languageSettings: { MyQL: { buildHistogramQuery }, PPL: { buildHistogramQuery } },
+        });
+        setSourceTypeRegistry(registry);
+      });
+
+      afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+      it('sends the query the source builds, from the resolved interval', async () => {
+        buildHistogramQuery.mockReturnValue('my query | histogram');
+        await run('MyQL');
+
+        expect(buildHistogramQuery).toHaveBeenCalledWith('my query', {
+          interval: '5m',
+          timeFieldName: 'endTime',
+          breakdownField: undefined,
+        });
+        expect(sentQuery()).toBe('my query | histogram');
+        expect(utilsModule.processRawResultsForHistogram).toHaveBeenCalledWith(
+          'my query | histogram',
+          expect.anything(),
+          expect.anything(),
+          false
+        );
+      });
+
+      it("uses the source's builder over Explore's for a built-in language id", async () => {
+        buildHistogramQuery.mockReturnValue('my ppl histogram');
+        (utilsModule.buildPPLHistogramQuery as jest.Mock).mockClear();
+        await run('PPL');
+
+        expect(utilsModule.buildPPLHistogramQuery).not.toHaveBeenCalled();
+        expect(sentQuery()).toBe('my ppl histogram');
+      });
+
+      it('sends nothing and clears the key when the source builds no query', async () => {
+        buildHistogramQuery.mockReturnValue(undefined);
+        await run('MyQL');
+
+        expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenCalledWith({
+          type: 'queryEditor/clearQueryStatusMapByKey',
+          payload: 'histogram-key',
+        });
+        expect(mockServices.inspectorAdapters.requests.start).not.toHaveBeenCalled();
+      });
     });
 
     it('should execute histogram query with formatter in language config', async () => {
