@@ -42,6 +42,8 @@ export interface QueryResultStatus {
 export interface StreamingQueryStatus {
   /** True when the run ended because the user stopped it, so the results are knowingly incomplete. */
   aborted?: boolean;
+  /** True when polling failed after rows were shown; the rows are kept but are incomplete. */
+  interrupted?: boolean;
   /** Absent on the fast path, where the query completed before a job was created. */
   jobId?: string;
   /** The job's cluster, so release-on-unload can target a remote data source rather than local. */

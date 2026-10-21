@@ -17,7 +17,7 @@ import {
   PPLStreamJobNotFoundError,
   PPLStreamUnavailableError,
 } from '../../streaming/ppl_stream_errors';
-import { PPLStreamService } from '../../streaming/ppl_stream_service';
+import { PollStreamingQueryArgs, PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
 
 /** Core setting controlling whether integers too large for a JS number keep their precision. */
@@ -29,7 +29,7 @@ import { setResults } from '../slices';
 import { snapshotToHistogramBuckets } from '../../streaming/snapshot_to_histogram';
 import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
-import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
+import { streamJobError } from '../../streaming/stream_error_status';
 
 /** Interval between polls. A snapshot older than this is simply re-read, so no work is lost. */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
@@ -87,6 +87,17 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   });
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
+
+/** Delays before each retry of a poll that failed transiently. */
+const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
+
+/** A dropped connection (no status) or a server-side 5xx; a 4xx will not succeed on retry. */
+const isTransientPollError = (error: unknown): boolean => {
+  if (isAbort(error) || error instanceof PPLStreamJobNotFoundError) return false;
+  const e = error as { response?: { status?: number }; body?: { statusCode?: number } };
+  const status = e?.response?.status ?? e?.body?.statusCode;
+  return status === undefined || status >= 500;
+};
 
 /**
  * Runs a PPL query on the streaming path, publishing each snapshot into the results slice under
@@ -190,7 +201,7 @@ export const executeStreamingQuery = createAsyncThunk<
      * Marks the query as no longer in flight, preserving the counts already shown. Every exit path
      * must call this: `isPolling` drives the elapsed timer, progress bar and Stop button.
      */
-    const finalise = (aborted = false) => {
+    const finalise = (aborted = false, interrupted = false) => {
       if (isCurrent && !isCurrent()) return;
       dispatch(
         setIndividualQueryStatus({
@@ -199,10 +210,28 @@ export const executeStreamingQuery = createAsyncThunk<
             status: QueryExecutionStatus.READY,
             elapsedMs: Date.now() - startedAt,
             startTime: startedAt,
-            streaming: lastStreaming ? { ...lastStreaming, isPolling: false, aborted } : undefined,
+            streaming: lastStreaming
+              ? { ...lastStreaming, isPolling: false, aborted, ...(interrupted && { interrupted }) }
+              : undefined,
           },
         })
       );
+    };
+
+    /** Releases the server-side job, which otherwise holds its result until `keep_alive` lapses. */
+    const release = () => {
+      if (jobId) stream.cancel(jobId, dataSourceId).catch(() => undefined);
+    };
+
+    const pollWithRetry = async (args: PollStreamingQueryArgs): Promise<PPLStreamSnapshot> => {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          return await stream.poll(args);
+        } catch (error) {
+          if (attempt >= POLL_RETRY_DELAYS_MS.length || !isTransientPollError(error)) throw error;
+          await sleep(POLL_RETRY_DELAYS_MS[attempt], signal);
+        }
+      }
     };
 
     /**
@@ -234,7 +263,7 @@ export const executeStreamingQuery = createAsyncThunk<
       // `wanted` alone bounds this only if windows come back the size asked for.
       const maxRequests = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
       for (let n = 0; n < maxRequests && !signal.aborted && rows.nextOffset < wanted; n++) {
-        const snap = await stream.poll({
+        const snap = await pollWithRetry({
           id: jobId!,
           withLongNumeralsSupport: longNumerals,
           offset: rows.nextOffset,
@@ -314,7 +343,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
         // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
         // advancing would ask for a later slice of one.
-        const snapshot = await stream.poll({
+        const snapshot = await pollWithRetry({
           id: jobId,
           withLongNumeralsSupport,
           offset: asHistogram || updateMode === 'REPLACE' ? 0 : rows.nextOffset,
@@ -332,6 +361,7 @@ export const executeStreamingQuery = createAsyncThunk<
         if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
+          release();
           failWith(streamJobError(snapshot.error));
           return;
         }
@@ -355,11 +385,8 @@ export const executeStreamingQuery = createAsyncThunk<
 
         publish(snapshot, !terminal);
         if (terminal) {
-          // Rows are held client-side from here, so the job is never read again. Releasing it now
-          // frees its retained result immediately instead of after `keep_alive` lapses.
-          if (jobId) {
-            stream.cancel(jobId, dataSourceId).catch(() => undefined);
-          }
+          // Rows are held client-side from here, so the job is never read again.
+          release();
           return;
         }
       }
@@ -368,9 +395,7 @@ export const executeStreamingQuery = createAsyncThunk<
       finalise(signal.aborted);
     } catch (error) {
       if (isAbort(error)) {
-        if (jobId) {
-          stream.cancel(jobId, dataSourceId).catch(() => undefined);
-        }
+        release();
         finalise(true);
         return;
       }
@@ -379,13 +404,17 @@ export const executeStreamingQuery = createAsyncThunk<
         finalise();
         return;
       }
+      release();
       // Nothing reached the screen, so the caller can re-run on the non-streaming path instead of
       // showing a failure. `lastStreaming` is only set by `publish`, so it doubles as "rendered".
       if (!lastStreaming && (!isCurrent || isCurrent())) {
         throw new PPLStreamUnavailableError(error);
       }
-      failWith(streamRequestError(error));
-      throw error;
+      // Rows are on screen and re-running would replace them, so keep them and mark the result
+      // incomplete rather than replacing the table with an error.
+      // eslint-disable-next-line no-console
+      console.warn('[STREAMING] Polling failed; keeping the rows already shown:', error);
+      finalise(false, true);
     }
   }
 );

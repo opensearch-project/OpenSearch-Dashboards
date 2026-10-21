@@ -610,16 +610,103 @@ describe('executeStreamingQuery', () => {
     expect(final.streaming?.total).toBe(7);
   });
 
-  it('reports ERROR and stops polling when a request fails unexpectedly', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+  it('keeps the rendered rows and marks the result incomplete when polling keeps failing', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', total: 1, datarows: [['2026-09-15 10:00:00', 1]] })
+    );
     mockPoll.mockRejectedValue(new Error('network exploded'));
 
-    const { statuses } = await run().catch(() => ({ statuses: [] as any[] }));
+    const { action, results, statuses } = await run();
     const final = statuses[statuses.length - 1]?.status;
 
-    expect(final?.status).toBe('error');
-    expect(final?.streaming?.isPolling).toBe(false);
-    expect(final?.error?.originalErrorMessage).toBe('network exploded');
+    // Re-running on the non-streaming path would replace the rows already shown.
+    expect(isStreamUnavailable(action)).toBe(false);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming).toMatchObject({ isPolling: false, interrupted: true });
+    expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(1);
+    // The first poll plus one per retry delay.
+    expect(mockPoll).toHaveBeenCalledTimes(4);
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+  });
+
+  it.each([
+    ['a dropped connection', new Error('network exploded')],
+    ['a 5xx', { body: { statusCode: 503 } }],
+  ])('retries %s and carries on', async (_, failure) => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0 }));
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming?.interrupted).toBeUndefined();
+  });
+
+  it('waits longer before each retry', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(new Error('network exploded'));
+    const dispatch: jest.Mock = jest.fn((action: any) =>
+      typeof action === 'function' ? action(dispatch, () => ({})) : action
+    );
+    const promise = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+    } as any)(dispatch, () => ({}) as any, undefined);
+
+    await jest.advanceTimersByTimeAsync(STREAMING_POLL_INTERVAL_MS);
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    for (const [delay, polls] of [
+      [1_000, 2],
+      [2_000, 3],
+      [4_000, 4],
+    ]) {
+      await jest.advanceTimersByTimeAsync(delay - 1);
+      expect(mockPoll).toHaveBeenCalledTimes(polls - 1);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(mockPoll).toHaveBeenCalledTimes(polls);
+    }
+    await promise;
+  });
+
+  it('does not retry a client error, which would fail again', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue({ response: { status: 400 } });
+
+    const { statuses } = await run();
+
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBe(true);
+  });
+
+  it('treats an abort during a retry as a stop, not a failure', async () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValueOnce(new Error('network exploded')).mockRejectedValue(abortError);
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    // Retrying the abort would hold Stop for the whole backoff.
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.streaming).toMatchObject({ aborted: true });
+    expect(final?.streaming?.interrupted).toBeUndefined();
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+  });
+
+  it('releases the job when the engine reports it failed', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'FAILED' }));
+
+    await run();
+
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
   });
 
   describe('when nothing was ever rendered', () => {
@@ -653,17 +740,6 @@ describe('executeStreamingQuery', () => {
 
       expect(isStreamUnavailable(action)).toBe(false);
     });
-  });
-
-  // Once rows are on screen, re-running would replace them, so the failure is surfaced instead.
-  it('reports an error rather than unavailability when a poll fails after rows arrived', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', total: 2 }));
-    mockPoll.mockRejectedValue(new Error('network exploded'));
-
-    const { statuses } = await run();
-    const final = statuses[statuses.length - 1]?.status;
-
-    expect(final?.status).toBe('error');
   });
 
   describe('engine request fields', () => {
