@@ -143,6 +143,8 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    '^monaco-editor/esm/vs/(.*)$': '<rootDir>/node_modules/monaco-editor/esm/vs/$1',
+    '^monaco-editor/(?!esm/)(.+)$': '<rootDir>/node_modules/monaco-editor/esm/vs/$1',
     // query-string v9 is pure ESM; this shim restores the default-import shape
     // (`import qs from 'query-string'`) under Jest's CJS transform.
     '^query-string$': '<rootDir>/src/dev/jest/mocks/query_string_mock.js',
@@ -167,6 +169,7 @@ export default {
     // so it can't resolve in tests without a build. Map it to its source barrel,
     // which depends only on antlr4ng/@osd/antlr-grammar/semver (no monaco-editor).
     '^@osd/monaco/ppl-lint$': '<rootDir>/packages/osd-monaco/src/ppl/lint/index.ts',
+    '^@osd/monaco/environment$': '<rootDir>/packages/osd-monaco/src/monaco_environment.ts',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
