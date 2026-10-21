@@ -146,22 +146,10 @@ describe('AskUserCard', () => {
       expect(onAnswer).toHaveBeenCalledWith('req-1', 'metrics');
     });
 
-    it('does not show a text field when allowFreeText is unset', () => {
-      const { queryByTestId } = render(
-        <AskUserCard request={selectRequest()} onAnswer={jest.fn()} onDismiss={jest.fn()} />
-      );
-
-      expect(queryByTestId('askUserTextInput')).toBeNull();
-    });
-
-    it('shows both option buttons and a text field when allowFreeText is set', () => {
+    it('shows both option buttons and a text field', () => {
       const onAnswer = jest.fn();
       const { getByTestId } = render(
-        <AskUserCard
-          request={selectRequest({ allowFreeText: true })}
-          onAnswer={onAnswer}
-          onDismiss={jest.fn()}
-        />
+        <AskUserCard request={selectRequest()} onAnswer={onAnswer} onDismiss={jest.fn()} />
       );
 
       // Options still work.
