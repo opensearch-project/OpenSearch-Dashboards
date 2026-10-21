@@ -43,7 +43,7 @@ describe('visBuilder state validation', () => {
       expect(validationResult.valid).toBeFalsy();
       expect(validationResult.errorMsg).toBeDefined();
       expect(validationResult.errorMsg).toStrictEqual(
-        '/styleState Expected object, received array'
+        '/styleState Invalid input: expected object, received array'
       );
     });
   });
