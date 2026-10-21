@@ -341,7 +341,9 @@ describe('SaveQueryButton', () => {
           }),
         }),
         mockSetEditorTextWithQuery,
-        'SELECT * FROM test'
+        'SELECT * FROM test',
+        // The saved query has no dataset of its own here.
+        undefined
       );
       expect(mockTimeFilter.setRefreshInterval).toHaveBeenCalledWith({
         pause: false,
@@ -363,6 +365,10 @@ describe('SaveQueryButton', () => {
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/setQueryState' });
       expect(mockLoadQueryActionCreator).toHaveBeenCalled();
     });
+    // The saved query's own dataset decides, not the current one.
+    expect(
+      mockLoadQueryActionCreator.mock.calls[mockLoadQueryActionCreator.mock.calls.length - 1][3]
+    ).toEqual(expect.objectContaining({ type: 'EXPLICIT_RUN_TYPE' }));
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'query/executeQueries/pending' });
     delete (mockQueryStringManager as any).getDatasetService;
   });

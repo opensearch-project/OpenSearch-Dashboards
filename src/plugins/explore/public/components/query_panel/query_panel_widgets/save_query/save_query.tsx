@@ -136,7 +136,8 @@ export const SaveQueryButton = () => {
         loadQueryActionCreator(
           services,
           setEditorTextWithQuery,
-          savedQuery.attributes.query.query as string
+          savedQuery.attributes.query.query as string,
+          savedQuery.attributes.query?.dataset
         )
       );
 

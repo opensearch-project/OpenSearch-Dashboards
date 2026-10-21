@@ -67,9 +67,13 @@ export interface DatasetTypeConfig {
     /**
      * Optional. When true, Explore never runs a query for a dataset of this type on its own: not on
      * page load, when the dataset is selected or switched (including a source type or query
-     * language switch), on a new search, or when a saved search or saved query is opened. Queries
-     * run only when the user asks (Run, or a time range update). Use it for engines where every
-     * query has a cost. Defaults to false.
+     * language switch), on a new search, when a saved search or saved query is opened, when a
+     * field's "filter for value" or "filter out value" is clicked, or for the Metrics page's
+     * previews. Queries run only when the user asks (Run, or a time range update). Use it for
+     * engines where every query has a cost. Defaults to false.
+     *
+     * It overrides `searchOnLoad` and the `discover:searchOnPageLoad` advanced setting: a type with
+     * both set to true still never runs on page load.
      */
     requiresExplicitRun?: boolean;
     /** Optional supportsTimeFilter determines if a time field is supported */

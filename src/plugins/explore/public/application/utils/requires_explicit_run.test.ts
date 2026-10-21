@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { datasetRequiresExplicitRun } from './requires_explicit_run';
+import { datasetRequiresExplicitRun, getDatasetTypeConfig } from './requires_explicit_run';
 
 const queryStringWith = (getType: (type: string) => any) =>
   ({ getDatasetService: () => ({ getType }) }) as any;
@@ -39,5 +39,36 @@ describe('datasetRequiresExplicitRun', () => {
       )
     ).toBe(false);
     expect(datasetRequiresExplicitRun(undefined, { type: 'X' })).toBe(false);
+  });
+});
+
+describe('getDatasetTypeConfig', () => {
+  it('returns the registered config', () => {
+    const config = { id: 'X', meta: {} };
+    expect(
+      getDatasetTypeConfig(
+        queryStringWith(() => config),
+        'X'
+      )
+    ).toBe(config);
+  });
+
+  it('is undefined without a type, a dataset service, or when the lookup throws', () => {
+    expect(
+      getDatasetTypeConfig(
+        queryStringWith(() => ({})),
+        undefined
+      )
+    ).toBeUndefined();
+    expect(getDatasetTypeConfig({} as any, 'X')).toBeUndefined();
+    expect(
+      getDatasetTypeConfig(
+        queryStringWith(() => {
+          throw new Error('boom');
+        }),
+        'X'
+      )
+    ).toBeUndefined();
+    expect(getDatasetTypeConfig(undefined, 'X')).toBeUndefined();
   });
 });
