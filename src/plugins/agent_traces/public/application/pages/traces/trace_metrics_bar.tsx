@@ -73,21 +73,6 @@ export const TraceMetricsBar: React.FC<TraceMetricsBarProps> = ({ metrics, onErr
                       {i18n.translate('agentTraces.metricsBar.totalTraces', {
                         defaultMessage: 'Total Traces',
                       })}
-                      {metrics?.countsMayIncludeDuplicates && (
-                        <>
-                          {' '}
-                          <EuiIconTip
-                            type="alert"
-                            color="warning"
-                            size="s"
-                            content={i18n.translate('agentTraces.metricsBar.mayIncludeDuplicates', {
-                              defaultMessage:
-                                'Too many agent spans to check them all in this time range: counts may include a few duplicate agent runs.',
-                            })}
-                            iconProps={{ 'data-test-subj': 'agentTracesMetricsDuplicatesNotice' }}
-                          />
-                        </>
-                      )}
                     </EuiTextColor>
                   }
                   titleSize="s"
@@ -179,6 +164,25 @@ export const TraceMetricsBar: React.FC<TraceMetricsBarProps> = ({ metrics, onErr
                       {i18n.translate('agentTraces.metricsBar.totalTokens', {
                         defaultMessage: 'Total Tokens',
                       })}
+                      {metrics?.countsMayIncludeDuplicates && (
+                        <>
+                          {' '}
+                          <EuiIconTip
+                            type="alert"
+                            color="warning"
+                            size="s"
+                            aria-label={i18n.translate(
+                              'agentTraces.metricsBar.mayIncludeDuplicatesLabel',
+                              { defaultMessage: 'Tokens may count a few agent runs twice' }
+                            )}
+                            content={i18n.translate('agentTraces.metricsBar.mayIncludeDuplicates', {
+                              defaultMessage:
+                                'Too many agent runs to check them all for duplicates, so tokens and latency may count a few agent runs twice.',
+                            })}
+                            iconProps={{ 'data-test-subj': 'agentTracesMetricsDuplicatesNotice' }}
+                          />
+                        </>
+                      )}
                     </EuiTextColor>
                   }
                   titleSize="s"

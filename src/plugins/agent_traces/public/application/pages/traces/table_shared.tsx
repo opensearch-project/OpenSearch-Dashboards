@@ -441,7 +441,7 @@ const AgentRunCountMessage: React.FC<InfoBarCountProps> = ({
   hasHead ? (
     <FormattedMessage
       id="agentTraces.tracesDataTable.showingAgentRunsHeadOnly"
-      defaultMessage="{count} agent {hitsCount, plural, one {run} other {runs}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {agent run} other {agent runs}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
         hitsCount,
@@ -451,7 +451,7 @@ const AgentRunCountMessage: React.FC<InfoBarCountProps> = ({
   ) : (
     <FormattedMessage
       id="agentTraces.tracesDataTable.showingAgentRuns"
-      defaultMessage="{count} of {total} agent {totalCount, plural, one {run} other {runs}} in {elapsed} ms"
+      defaultMessage="{count} of {total} {totalCount, plural, one {agent run} other {agent runs}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
         total: <strong>{totalCount.toLocaleString()}</strong>,

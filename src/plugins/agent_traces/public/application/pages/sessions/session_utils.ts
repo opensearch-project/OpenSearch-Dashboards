@@ -13,7 +13,7 @@ import {
   previewOutputMessages,
   readAttribute,
 } from '../traces/hooks/genai_message_preview';
-import { AI_ROOT_FIELD, aiRootsOf, spanIdIn } from '../../utils/ai_root';
+import { AI_ROOT_FIELD, aiRootsOf } from '../../utils/ai_root';
 
 /** Backtick-quoted session id field for use in PPL. */
 export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
@@ -195,18 +195,16 @@ export const buildTraceSessionMapQuery = (
 
 /**
  * Root spans of the given traces (they carry per-trace input, output and token totals). With
- * `withAiRoots`, also the AI-root spans marked under non-GenAI roots, except `hiddenSpanIds` (the
- * shadowed ones); see `preferAiRoots`.
+ * `withAiRoots`, also the AI-root spans marked under non-GenAI roots; see `preferAiRoots`.
  */
 export const buildRootSpansQuery = (
   source: string,
   traceIds: string[],
-  withAiRoots = false,
-  hiddenSpanIds: string[] = []
+  withAiRoots = false
 ): string =>
   `${source} | where ${
     withAiRoots ? `(parentSpanId = "" or \`${AI_ROOT_FIELD}\` = true)` : 'parentSpanId = ""'
-  }${withAiRoots && hiddenSpanIds.length > 0 ? ` and NOT ${spanIdIn(hiddenSpanIds)}` : ''} and traceId in (${inList(traceIds)}) | sort startTime | head ${Math.max(
+  } and traceId in (${inList(traceIds)}) | sort startTime | head ${Math.max(
     1,
     traceIds.length * (withAiRoots ? 4 : 1)
   )}`;
