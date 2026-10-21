@@ -257,6 +257,46 @@ describe('TableVis', () => {
     expect(cell.props.variables).toBe(next);
   });
 
+  test('keeps the page and column filters when only the variables change', async () => {
+    const rows = Array.from({ length: 25 }, (_, i) => ({
+      column1: i,
+      column2: i % 2 ? 'odd' : 'even',
+    }));
+    const styleOptions = { ...defaultTableChartStyles, pageSize: 10, showColumnFilter: true };
+    const { rerender } = render(
+      <TableVis
+        rows={rows}
+        columns={mockColumns}
+        styleOptions={styleOptions}
+        variables={[{ name: 'env', value: 'a' }]}
+      />
+    );
+    const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
+    act(() => {
+      setFilters({ column2: { values: ['even'], operator: 'equals' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('13');
+    });
+    const calls = (jest.mocked(EuiDataGrid) as jest.Mock).mock.calls;
+    act(() => {
+      calls[calls.length - 1][0].pagination.onChangePage(1);
+    });
+    expect(screen.getByTestId('mockPageIndex').textContent).toBe('1');
+
+    rerender(
+      <TableVis
+        rows={rows}
+        columns={mockColumns}
+        styleOptions={styleOptions}
+        variables={[{ name: 'env', value: 'b' }]}
+      />
+    );
+
+    expect(screen.getByTestId('mockPageIndex').textContent).toBe('1');
+    expect(screen.getByTestId('mockRowCount').textContent).toBe('13');
+  });
+
   test('passes the filtered row, not the unfiltered one', async () => {
     render(
       <TableVis

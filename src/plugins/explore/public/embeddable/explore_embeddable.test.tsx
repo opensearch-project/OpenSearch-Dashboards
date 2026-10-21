@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
+import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
@@ -915,6 +919,74 @@ describe('ExploreEmbeddable', () => {
 
       emb.destroy();
       parent.destroy();
+    });
+
+    test('keeps every added column after a variable-only change', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-columns-emb',
+        { getVariables },
+        { rendered: false }
+      );
+      jest.spyOn(emb as any, 'fetch').mockResolvedValue(undefined);
+      emb.render(document.createElement('div'));
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      // The panel always calls the callbacks of the latest search props it was rendered with.
+      // @ts-ignore - private for testing
+      emb.searchProps.onAddColumn('column3');
+      // @ts-ignore - private for testing
+      emb.searchProps.onAddColumn('column4');
+
+      expect(emb.getInput().columns).toEqual(['column1', 'column2', 'column3', 'column4']);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('a variable-only re-render updates the panel without remounting it', async () => {
+      const realCreateRoot = jest.requireActual('react-dom/client').createRoot;
+      (createRoot as jest.Mock).mockImplementationOnce((node: HTMLElement) => realCreateRoot(node));
+      let mounts = 0;
+      let renderedVariables: unknown;
+      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(({ searchProps }) => {
+        useEffect(() => {
+          mounts++;
+        }, []);
+        renderedVariables = searchProps.variables;
+        return null;
+      });
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-remount-emb',
+        { getVariables },
+        { rendered: false }
+      );
+      jest.spyOn(emb as any, 'fetch').mockResolvedValue(undefined);
+
+      try {
+        await act(async () => {
+          emb.render(document.createElement('div'));
+        });
+        expect(mounts).toBe(1);
+
+        getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+        await act(async () => {
+          parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+        });
+
+        expect(renderedVariables).toEqual([{ name: 'service', value: 'b' }]);
+        // A remount would reset TableVis pagination and column filters.
+        expect(mounts).toBe(1);
+      } finally {
+        (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
+        await act(async () => {
+          emb.destroy();
+        });
+        parent.destroy();
+      }
     });
   });
 
