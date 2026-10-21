@@ -17,6 +17,7 @@ import {
   DIRECT_QUERY_CONNECTIONS_LIST_LOCATION,
   getDirectQueryConnectionFlowManagePath,
   getDirectQueryConnectionFlowPath,
+  normalizeDirectQueryConnectionFlowSubPath,
   parseDirectQueryConnectionFlowPath,
 } from './constants';
 
@@ -42,6 +43,14 @@ describe('direct query connection flow path helpers', () => {
     });
     expect(parseDirectQueryConnectionFlowPath('/manage/x')).toBeUndefined();
     expect(parseDirectQueryConnectionFlowPath('/flows')).toBeUndefined();
+  });
+
+  it('normalizes navigate sub-paths', () => {
+    expect(normalizeDirectQueryConnectionFlowSubPath('')).toBe('');
+    expect(normalizeDirectQueryConnectionFlowSubPath(undefined)).toBe('');
+    expect(normalizeDirectQueryConnectionFlowSubPath('/')).toBe('');
+    expect(normalizeDirectQueryConnectionFlowSubPath('manage/x')).toBe('/manage/x');
+    expect(normalizeDirectQueryConnectionFlowSubPath('/manage/x')).toBe('/manage/x');
   });
 });
 
@@ -114,22 +123,103 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     expect(unmount).toHaveBeenCalledTimes(1);
   });
 
-  it('passes the manage sub-path and re-mounts when navigating within the flow', async () => {
+  it('mounts once and reports sub-path changes through onPathChange', async () => {
     const unmount = jest.fn();
     const flow = createFlow({ mount: jest.fn(() => unmount) });
     registry.registerDirectQueryConnectionFlow(flow);
 
     await render('/flows/flowA/manage/so-1');
-    expect((flow.mount as jest.Mock).mock.calls[0][0].path).toBe('/manage/so-1');
+    const params = (flow.mount as jest.Mock).mock.calls[0][0];
+    expect(params.path).toBe('/manage/so-1');
+    const listener = jest.fn();
+    params.onPathChange(listener);
 
-    const { navigate } = (flow.mount as jest.Mock).mock.calls[0][0];
+    // Navigation inside the flow keeps it mounted.
     await act(async () => {
-      navigate('');
+      params.navigate('');
     });
     expect(history.location.pathname).toBe('/flows/flowA');
-    expect(unmount).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenLastCalledWith('');
+
+    // So does navigation from outside the flow (e.g. browser back).
+    await act(async () => {
+      history.goBack();
+    });
+    expect(history.location.pathname).toBe('/flows/flowA/manage/so-1');
+    expect(listener).toHaveBeenLastCalledWith('/manage/so-1');
+
+    expect(flow.mount).toHaveBeenCalledTimes(1);
+    expect(unmount).not.toHaveBeenCalled();
+  });
+
+  it('stops notifying a listener after it unsubscribes, and on unmount', async () => {
+    const flow = createFlow();
+    registry.registerDirectQueryConnectionFlow(flow);
+    const component = await render('/flows/flowA');
+    const params = (flow.mount as jest.Mock).mock.calls[0][0];
+    const kept = jest.fn();
+    const dropped = jest.fn();
+    params.onPathChange(kept);
+    const unsubscribe = params.onPathChange(dropped);
+    unsubscribe();
+
+    await act(async () => {
+      params.navigate('/manage/so-2');
+    });
+    expect(kept).toHaveBeenCalledWith('/manage/so-2');
+    expect(dropped).not.toHaveBeenCalled();
+
+    act(() => {
+      component.unmount();
+    });
+    wrapper = undefined;
+    kept.mockClear();
+    history.push('/flows/flowA/manage/so-3');
+    expect(kept).not.toHaveBeenCalled();
+  });
+
+  it('adds a missing leading slash to a navigate sub-path', async () => {
+    const flow = createFlow();
+    registry.registerDirectQueryConnectionFlow(flow);
+    await render('/flows/flowA');
+    const { navigate } = (flow.mount as jest.Mock).mock.calls[0][0];
+    await act(async () => {
+      navigate('manage/x');
+    });
+    expect(history.location.pathname).toBe('/flows/flowA/manage/x');
+    await act(async () => {
+      navigate('/');
+    });
+    expect(history.location.pathname).toBe('/flows/flowA');
+  });
+
+  it('re-mounts when the route switches to another flow', async () => {
+    const unmountA = jest.fn();
+    const flowA = createFlow({ mount: jest.fn(() => unmountA) });
+    const flowB = createFlow({ id: 'flowB', title: 'Flow B' });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowB);
+    await render('/flows/flowA');
+    await act(async () => {
+      history.push('/flows/flowB');
+    });
+    await flush();
+    expect(unmountA).toHaveBeenCalledTimes(1);
+    expect(flowB.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves isVisible once per registry for every route visit', async () => {
+    const isVisible = jest.fn(() => true);
+    const flow = createFlow({ isVisible });
+    registry.registerDirectQueryConnectionFlow(flow);
+    await render('/flows/flowA');
+    act(() => {
+      wrapper!.unmount();
+    });
+    wrapper = undefined;
+    await render('/flows/flowA/manage/so-1');
+    expect(isVisible).toHaveBeenCalledTimes(1);
     expect(flow.mount).toHaveBeenCalledTimes(2);
-    expect((flow.mount as jest.Mock).mock.calls[1][0].path).toBe('');
   });
 
   it('navigateToList returns to the Direct query connections tab', async () => {
@@ -180,9 +270,19 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     );
   });
 
-  it('renders a not-found callout for an unknown flow id', async () => {
+  it('renders a not-found callout for an unknown flow id, without a spinner first', async () => {
     registry.registerDirectQueryConnectionFlow(createFlow());
-    const component = await render('/flows/unknown');
+    history.push('/flows/unknown');
+    // First render, before any effect has run.
+    const component = mount(
+      <Router history={history}>
+        <Route path={['/flows/:flowId', '/flows/:flowId/*']}>
+          <DirectQueryConnectionFlowMountPoint registry={registry} core={core} />
+        </Route>
+      </Router>
+    );
+    wrapper = component;
+    expect(component.find('EuiLoadingSpinner').exists()).toBe(false);
     expect(component.find('[data-test-subj="directQueryConnectionFlowNotFound"]').exists()).toBe(
       true
     );

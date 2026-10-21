@@ -18,10 +18,24 @@ export interface DirectQueryConnectionFlowSavedObject {
 export interface DirectQueryConnectionFlowMountParams {
   /** Container the flow renders into. */
   element: HTMLElement;
-  /** Sub-path after `/flows/<id>`, e.g. `''` (create page) or `'/manage/<savedObjectId>'`. */
+  /**
+   * Sub-path after `/flows/<id>` when the flow is mounted, e.g. `''` (create page) or
+   * `'/manage/<savedObjectId>'`. Later changes are reported through `onPathChange`.
+   */
   path: string;
-  /** Navigate within the flow. `''` is the create page, `'/manage/<id>'` a manage page. */
+  /**
+   * Navigate within the flow. `''` is the create page, `'/manage/<id>'` a manage page; a missing
+   * leading slash is added. The flow stays mounted: the new sub-path is reported through
+   * `onPathChange`.
+   */
   navigate: (subPath: string) => void;
+  /**
+   * Subscribes to sub-path changes while the flow is mounted, whether they come from `navigate`
+   * or from outside the flow (browser back and forward, a link to another page of the same flow).
+   * Returns an unsubscribe function. The flow is mounted once per visit to `/flows/<id>`, so a
+   * flow that renders more than one page reads its current page from here.
+   */
+  onPathChange: (listener: (path: string) => void) => () => void;
   /** Navigate back to the Direct query connections tab of the data sources app. */
   navigateToList: () => void;
   core: CoreStart;
@@ -44,13 +58,32 @@ export interface DirectQueryConnectionFlow {
    * blank) the row shows the stored `attributes.type`. The stored value itself is never changed.
    */
   typeLabel?: string;
-  /** Defaults to visible. A rejected promise or a thrown error hides the flow (fail closed). */
+  /**
+   * Defaults to visible. A rejected promise or a thrown error hides the flow (fail closed). Use it
+   * for capability or feature checks: flows can only be registered during setup, so a flow that
+   * depends on something known only at start registers unconditionally and decides here.
+   *
+   * It is evaluated once per page load and the result is shared by the data sources app's home
+   * panel, connections table and flow route, so it must be cheap, idempotent and free of side
+   * effects.
+   */
   isVisible?: () => Promise<boolean> | boolean;
-  /** Renders the flow into `params.element` and returns an unmount callback. */
+  /**
+   * Renders the flow into `params.element` and returns an unmount callback. Called once per visit
+   * to `/flows/<id>`: navigating between the flow's own pages does not unmount it (see
+   * `params.onPathChange`).
+   */
   mount: (params: DirectQueryConnectionFlowMountParams) => (() => void) | Promise<() => void>;
   /**
    * Whether the given `data-connection` saved object is managed by this flow. Owned rows in the
    * Direct query connections table link to `/flows/<id>/manage/<savedObjectId>`.
+   *
+   * Ownership convention: decide from the saved object's own attributes (for example a marker
+   * attribute the flow writes when it creates the connection), and treat the attributes as
+   * untrusted, raw saved-object values. A plugin that also registers a workspace data source
+   * association filter should use the same predicate there, so both extension points agree on
+   * which connections it governs. At most one visible flow should claim a connection; when more
+   * than one does, the first registered wins.
    */
   ownsConnection?: (savedObject: DirectQueryConnectionFlowSavedObject) => boolean;
 }
@@ -64,6 +97,7 @@ const FLOW_ID_PATTERN = /^[A-Za-z0-9_.-]+$/;
 
 export class DirectQueryConnectionFlowRegistry {
   private readonly flows = new Map<string, DirectQueryConnectionFlow>();
+  private visibleFlows?: Promise<DirectQueryConnectionFlow[]>;
 
   /**
    * Register a direct query connection flow. A flow id can only be registered once; subsequent
@@ -82,6 +116,7 @@ export class DirectQueryConnectionFlowRegistry {
       throw new Error(`Direct query connection flow '${flow.id}' is already registered`);
     }
     this.flows.set(flow.id, Object.freeze({ ...flow }));
+    this.visibleFlows = undefined;
   }
 
   public hasFlows() {
@@ -97,6 +132,24 @@ export class DirectQueryConnectionFlowRegistry {
   }
 
   /**
+   * The visible flows, in registration order. Each flow's `isVisible` is resolved once and the
+   * result is shared by every caller, so the home panel, the connections table and the flow route
+   * always agree.
+   */
+  public getVisibleFlows(): Promise<DirectQueryConnectionFlow[]> {
+    if (!this.visibleFlows) {
+      this.visibleFlows = getVisibleDirectQueryConnectionFlows(this.getAllFlows());
+    }
+    return this.visibleFlows;
+  }
+
+  /** Whether the flow with the given id is registered and visible (see `getVisibleFlows`). */
+  public async isFlowVisible(id: string): Promise<boolean> {
+    const flow = this.getFlow(id);
+    return !!flow && (await this.getVisibleFlows()).includes(flow);
+  }
+
+  /**
    * Returns the first registered flow that owns the given saved object, if any. A throwing
    * `ownsConnection` is treated as "not owned".
    */
@@ -107,23 +160,34 @@ export class DirectQueryConnectionFlowRegistry {
 
 /**
  * Returns the first of the given flows that owns the given saved object, if any. A throwing
- * `ownsConnection` is treated as "not owned".
+ * `ownsConnection` is treated as "not owned". Outside production builds, a warning names the
+ * flows when more than one claims the same connection.
  */
 export const findOwningDirectQueryConnectionFlow = (
   flows: DirectQueryConnectionFlow[],
   savedObject: DirectQueryConnectionFlowSavedObject
 ): DirectQueryConnectionFlow | undefined => {
+  const owners: DirectQueryConnectionFlow[] = [];
   for (const flow of flows) {
     if (!flow.ownsConnection) continue;
     try {
       if (flow.ownsConnection(savedObject) === true) {
-        return flow;
+        owners.push(flow);
+        if (process.env.NODE_ENV === 'production') break;
       }
     } catch (e) {
       // fail closed: a broken predicate never claims a connection
     }
   }
-  return undefined;
+  if (owners.length > 1) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Direct query connection flows ${owners
+        .map((flow) => `'${flow.id}'`)
+        .join(', ')} all claim saved object '${savedObject.id}'; '${owners[0].id}' is used.`
+    );
+  }
+  return owners[0];
 };
 
 /**

@@ -88,7 +88,10 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   /**
    * Registers a pluggable direct query connection flow rendered by the data sources app under
-   * `/flows/<id>`. Must be called during setup; throws after data source management startup.
+   * `/flows/<id>`. Must be called during setup; throws after data source management startup, and
+   * there is no notification for late registrations. A flow that depends on something only known
+   * at start (a capability, a feature flag) registers during setup and gates itself with
+   * `isVisible`.
    */
   registerDirectQueryConnectionFlow: (flow: DirectQueryConnectionFlow) => void;
   ui: {

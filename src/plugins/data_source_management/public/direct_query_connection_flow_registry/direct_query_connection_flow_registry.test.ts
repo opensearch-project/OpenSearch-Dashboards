@@ -199,3 +199,58 @@ describe('findOwningDirectQueryConnectionFlow', () => {
     expect(findOwningDirectQueryConnectionFlow([], so)).toBeUndefined();
   });
 });
+
+describe('findOwningDirectQueryConnectionFlow with overlapping owners', () => {
+  const so = { id: 'so-1', attributes: {} };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('warns outside production builds when more than one flow claims a connection', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const first = createFlow({ id: 'first', ownsConnection: () => true });
+    const second = createFlow({ id: 'second', ownsConnection: () => true });
+    expect(findOwningDirectQueryConnectionFlow([first, second], so)?.id).toBe('first');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain("'first', 'second'");
+  });
+
+  it('does not warn for a single owner', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = createFlow({ id: 'owner', ownsConnection: () => true });
+    const other = createFlow({ id: 'other', ownsConnection: () => false });
+    expect(findOwningDirectQueryConnectionFlow([other, owner], so)?.id).toBe('owner');
+    expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('DirectQueryConnectionFlowRegistry#getVisibleFlows', () => {
+  it('resolves each isVisible once and shares the result', async () => {
+    const registry = new DirectQueryConnectionFlowRegistry();
+    const isVisibleA = jest.fn(() => Promise.resolve(true));
+    const isVisibleB = jest.fn(() => false);
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'a', isVisible: isVisibleA }));
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'b', isVisible: isVisibleB }));
+
+    const [first, second] = await Promise.all([
+      registry.getVisibleFlows(),
+      registry.getVisibleFlows(),
+    ]);
+    expect(first.map((flow) => flow.id)).toEqual(['a']);
+    expect(second).toBe(first);
+    expect(await registry.isFlowVisible('a')).toBe(true);
+    expect(await registry.isFlowVisible('b')).toBe(false);
+    expect(await registry.isFlowVisible('unknown')).toBe(false);
+    expect(isVisibleA).toHaveBeenCalledTimes(1);
+    expect(isVisibleB).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-resolves after a new registration', async () => {
+    const registry = new DirectQueryConnectionFlowRegistry();
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'a' }));
+    expect((await registry.getVisibleFlows()).map((flow) => flow.id)).toEqual(['a']);
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'b' }));
+    expect((await registry.getVisibleFlows()).map((flow) => flow.id)).toEqual(['a', 'b']);
+  });
+});

@@ -694,7 +694,10 @@ describe('GetDataConnections', () => {
       ).toBe(false);
 
       expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(true);
-      expect(findRow('Flow-owned connection').text()).toContain('Workspace One, unknown-ws');
+      expect(findRow('Flow-owned connection').text()).toContain(
+        'Workspace One, 1 unavailable workspace'
+      );
+      expect(findRow('Flow-owned connection').text()).not.toContain('unknown-ws');
       expect(findRow('Unowned connection').text()).toContain('—');
     });
 

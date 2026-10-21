@@ -54,7 +54,6 @@ import { getDirectQueryConnectionFlowManagePath } from '../../direct_query_conne
 import {
   DirectQueryConnectionFlow,
   findOwningDirectQueryConnectionFlow,
-  getVisibleDirectQueryConnectionFlows,
 } from '../../../direct_query_connection_flow_registry';
 
 const EMPTY_WORKSPACE_LIST$ = of<WorkspaceObject[]>([]);
@@ -101,13 +100,11 @@ export const ManageDirectQueryDataConnectionsTable = ({
       return;
     }
     let cancelled = false;
-    getVisibleDirectQueryConnectionFlows(directQueryConnectionFlowRegistry.getAllFlows()).then(
-      (flows) => {
-        if (!cancelled) {
-          setVisibleFlows(flows.length ? flows : NO_FLOWS);
-        }
+    directQueryConnectionFlowRegistry.getVisibleFlows().then((flows) => {
+      if (!cancelled) {
+        setVisibleFlows(flows.length ? flows : NO_FLOWS);
       }
-    );
+    });
     return () => {
       cancelled = true;
     };
@@ -541,9 +538,27 @@ export const ManageDirectQueryDataConnectionsTable = ({
         if (!workspaceIds?.length) {
           return '—';
         }
-        return workspaceIds
-          .map((id) => workspaceList?.find((workspace) => workspace.id === id)?.name ?? id)
-          .join(', ');
+        // Workspaces the user can't see (or that no longer exist) are counted, not shown by id.
+        const names: string[] = [];
+        let unavailable = 0;
+        workspaceIds.forEach((id) => {
+          const name = workspaceList?.find((workspace) => workspace.id === id)?.name;
+          if (name) {
+            names.push(name);
+          } else {
+            unavailable++;
+          }
+        });
+        if (unavailable > 0) {
+          names.push(
+            i18n.translate('dataSourcesManagement.directQueryTable.unavailableWorkspaces', {
+              defaultMessage:
+                '{count, plural, one {# unavailable workspace} other {# unavailable workspaces}}',
+              values: { count: unavailable },
+            })
+          );
+        }
+        return names.join(', ');
       },
     },
     featureFlagStatus && {

@@ -14,6 +14,18 @@ export const getDirectQueryConnectionFlowPath = (flowId: string) =>
 export const getDirectQueryConnectionFlowManagePath = (flowId: string, savedObjectId: string) =>
   `${getDirectQueryConnectionFlowPath(flowId)}/manage/${encodeURIComponent(savedObjectId)}`;
 
+/**
+ * Normalizes a sub-path passed to a flow's `navigate`: `''` (or a bare `/`) is the create page,
+ * and a missing leading slash is added, so `'manage/x'` and `'/manage/x'` are the same page.
+ */
+export const normalizeDirectQueryConnectionFlowSubPath = (subPath: string | undefined) => {
+  const trimmed = (subPath ?? '').trim();
+  if (!trimmed || trimmed === '/') {
+    return '';
+  }
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+};
+
 /** Location that brings the user back to the Direct query connections tab of the home panel. */
 export const DIRECT_QUERY_CONNECTIONS_LIST_LOCATION = {
   pathname: '/',

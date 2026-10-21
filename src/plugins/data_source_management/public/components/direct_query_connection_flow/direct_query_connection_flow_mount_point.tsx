@@ -11,11 +11,11 @@ import { CoreStart } from 'src/core/public';
 import {
   DirectQueryConnectionFlow,
   IDirectQueryConnectionFlowRegistry,
-  isDirectQueryConnectionFlowVisible,
 } from '../../direct_query_connection_flow_registry';
 import {
   DIRECT_QUERY_CONNECTIONS_LIST_LOCATION,
   getDirectQueryConnectionFlowPath,
+  normalizeDirectQueryConnectionFlowSubPath,
   parseDirectQueryConnectionFlowPath,
 } from './constants';
 
@@ -28,7 +28,8 @@ type FlowState = 'resolving' | 'visible' | 'hidden';
 
 /**
  * Renders a registered {@link DirectQueryConnectionFlow} for the current `/flows/<id>` route.
- * The flow is (re-)mounted whenever its sub-path changes and unmounted when the route is left.
+ * The flow is mounted once per flow id; sub-path changes within the flow are reported to it
+ * through `onPathChange` instead of re-mounting it. It is unmounted when the route is left.
  */
 export const DirectQueryConnectionFlowMountPoint = ({
   registry,
@@ -43,24 +44,53 @@ export const DirectQueryConnectionFlowMountPoint = ({
   const path = parsed?.path ?? '';
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [flowState, setFlowState] = useState<FlowState>('resolving');
+  // Visibility of the flow it was resolved for. An unknown flow id is known to be hidden right
+  // away, so it never shows the spinner; switching to another flow is "resolving" again until its
+  // own visibility is known, so a flow is never mounted on another flow's result.
+  const [resolved, setResolved] = useState<{ flowId?: string; visible: boolean }>({
+    visible: false,
+  });
+  const flowState: FlowState = !flow
+    ? 'hidden'
+    : resolved.flowId !== flow.id
+      ? 'resolving'
+      : resolved.visible
+        ? 'visible'
+        : 'hidden';
+
+  // The current sub-path and the mounted flow's listeners, read by the mount effect without making
+  // it depend on (and re-run for) every path change.
+  const pathRef = useRef(path);
+  const pathListenersRef = useRef(new Set<(path: string) => void>());
 
   useEffect(() => {
-    let cancelled = false;
     if (!flow) {
-      setFlowState('hidden');
       return;
     }
-    setFlowState('resolving');
-    isDirectQueryConnectionFlowVisible(flow).then((visible) => {
+    let cancelled = false;
+    registry.isFlowVisible(flow.id).then((visible) => {
       if (!cancelled) {
-        setFlowState(visible ? 'visible' : 'hidden');
+        setResolved({ flowId: flow.id, visible });
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [flow]);
+  }, [flow, registry]);
+
+  useEffect(() => {
+    if (pathRef.current === path) {
+      return;
+    }
+    pathRef.current = path;
+    pathListenersRef.current.forEach((listener) => {
+      try {
+        listener(path);
+      } catch (e) {
+        // A broken listener must not stop the others or the route change.
+      }
+    });
+  }, [path]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -69,6 +99,7 @@ export const DirectQueryConnectionFlowMountPoint = ({
     }
     let cancelled = false;
     let unmount: (() => void) | undefined;
+    const listeners = pathListenersRef.current;
 
     const flowPath = getDirectQueryConnectionFlowPath(flow.id);
     const onMountError = (e: unknown) => {
@@ -85,8 +116,15 @@ export const DirectQueryConnectionFlowMountPoint = ({
       Promise.resolve(
         flow.mount({
           element,
-          path,
-          navigate: (subPath: string) => history.push(`${flowPath}${subPath || ''}`),
+          path: pathRef.current,
+          navigate: (subPath: string) =>
+            history.push(`${flowPath}${normalizeDirectQueryConnectionFlowSubPath(subPath)}`),
+          onPathChange: (listener) => {
+            listeners.add(listener);
+            return () => {
+              listeners.delete(listener);
+            };
+          },
           navigateToList: () => history.push(DIRECT_QUERY_CONNECTIONS_LIST_LOCATION),
           core,
         })
@@ -105,10 +143,11 @@ export const DirectQueryConnectionFlowMountPoint = ({
 
     return () => {
       cancelled = true;
+      listeners.clear();
       unmount?.();
       unmount = undefined;
     };
-  }, [flow, flowState, path, history, core]);
+  }, [flow, flowState, history, core]);
 
   if (!flow || flowState === 'hidden') {
     return (
@@ -133,6 +172,7 @@ export const DirectQueryConnectionFlowMountPoint = ({
   return (
     <>
       {flowState === 'resolving' && <EuiLoadingSpinner size="xl" />}
+      {/* Rendered while visibility resolves too, so the container exists when the flow mounts. */}
       <div
         ref={containerRef}
         data-test-subj={`directQueryConnectionFlowMountPoint-${flow.id}`}

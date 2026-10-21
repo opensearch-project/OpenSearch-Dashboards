@@ -28,10 +28,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
 import { TopNavControlDescriptionData } from '../../../../navigation/public';
-import {
-  DirectQueryConnectionFlow,
-  getVisibleDirectQueryConnectionFlows,
-} from '../../direct_query_connection_flow_registry';
+import { DirectQueryConnectionFlow } from '../../direct_query_connection_flow_registry';
 import {
   DIRECT_QUERY_CONNECTIONS_TAB_ID,
   getDirectQueryConnectionFlowPath,
@@ -83,13 +80,11 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
       return;
     }
     let cancelled = false;
-    getVisibleDirectQueryConnectionFlows(directQueryConnectionFlowRegistry.getAllFlows()).then(
-      (flows) => {
-        if (!cancelled) {
-          setVisibleFlows(flows);
-        }
+    directQueryConnectionFlowRegistry.getVisibleFlows().then((flows) => {
+      if (!cancelled) {
+        setVisibleFlows(flows);
       }
-    );
+    });
     return () => {
       cancelled = true;
     };

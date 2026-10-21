@@ -255,6 +255,11 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     );
 }
 
+/**
+ * Loads every `data-connection` saved object with all its attributes. Don't narrow this with a
+ * `fields` projection: the connections table reads `description`, and a registered direct query
+ * connection flow's `ownsConnection` may read any attribute.
+ */
 export async function getDataConnections(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
     .find<DataConnectionSavedObjectAttributes>({
