@@ -62,7 +62,8 @@ export interface WorkspacePluginSetup {
   };
   /**
    * Hides data source connections that a plugin knows cannot be associated with a workspace from
-   * the "Associate data sources" modal (e.g. connections allowed only in some use cases).
+   * the "Associate data sources" modal (e.g. connections allowed only in some use cases). UI only:
+   * the server does not apply filters, so enforce the rule server-side as well if it matters.
    */
   registerDataSourceAssociationFilter: (filter: DataSourceAssociationFilter) => void;
 }

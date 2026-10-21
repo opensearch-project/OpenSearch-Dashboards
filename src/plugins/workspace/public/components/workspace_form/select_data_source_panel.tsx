@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -23,6 +23,7 @@ import { WorkspaceClient } from '../../workspace_client';
 import { getDataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from './data_source_connection_table';
+import { getDataSourceAssociationContext, getWorkspaceFeaturesKey } from '../../utils';
 
 export interface SelectDataSourcePanelProps {
   errors?: { [key: number]: WorkspaceFormError };
@@ -30,7 +31,10 @@ export interface SelectDataSourcePanelProps {
   assignedDataSourceConnections: DataSourceConnection[];
   onChange: (value: DataSourceConnection[]) => void;
   showDataSourceManagement: boolean;
-  /** Features of the workspace being created (for the association filters). */
+  /**
+   * Feature configs of the workspace being created. The association filters get the context
+   * built from them, and selections they no longer allow are dropped when they change.
+   */
   workspaceFeatures?: string[];
 }
 
@@ -49,6 +53,30 @@ export const SelectDataSourcePanel = ({
   const {
     services: { notifications, http, chrome, workspaceClient },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
+
+  const associationFilters = getDataSourceAssociationFilters(workspaceClient);
+  const workspaceFeaturesKey = getWorkspaceFeaturesKey(workspaceFeatures);
+
+  // A use case change can make selected connections not associable any more: drop them, so the
+  // modal and the submitted selection agree.
+  useEffect(() => {
+    if (!associationFilters || !assignedDataSourceConnections.length) {
+      return;
+    }
+    const context = getDataSourceAssociationContext(workspaceFeatures);
+    const allowed = assignedDataSourceConnections.filter((connection) =>
+      associationFilters.isAssociable(connection, context)
+    );
+    if (allowed.length !== assignedDataSourceConnections.length) {
+      onChange(allowed);
+      setSelectedItems((items) =>
+        items.filter((item) => allowed.some((connection) => connection.id === item.id))
+      );
+    }
+    // Only a change of the workspace (or the filters) re-checks the selection; new selections come
+    // from the modal, which already applied the filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceFeaturesKey, associationFilters]);
 
   const excludedConnectionIds = useMemo(
     () => assignedDataSourceConnections.map((c) => c.id),
@@ -205,7 +233,7 @@ export const SelectDataSourcePanel = ({
           notifications={notifications}
           logos={chrome.logos}
           workspaceFeatures={workspaceFeatures}
-          associationFilters={getDataSourceAssociationFilters(workspaceClient)}
+          associationFilters={associationFilters}
         />
       )}
     </div>

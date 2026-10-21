@@ -33,6 +33,7 @@ import {
   WORKSPACE_DETAIL_APP_ID,
 } from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
+import type { DataSourceAssociationContext } from './services/data_source_association_filters';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { DataSourceEngineType } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -463,6 +464,25 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
+
+/**
+ * The context the data source association filters get for a workspace with these feature configs
+ * (stored on the workspace, or chosen in the creator form), so every entry point builds it the
+ * same way. Undefined features mean the workspace is unknown.
+ */
+export const getDataSourceAssociationContext = (
+  features: string[] | undefined
+): DataSourceAssociationContext => ({
+  useCaseId: features ? getFirstUseCaseOfFeatureConfigs(features) : undefined,
+  features: features ? [...features] : undefined,
+});
+
+/**
+ * A stable memo key for a feature list: two arrays with the same features (in any order) give the
+ * same key, and no feature id can collide with another.
+ */
+export const getWorkspaceFeaturesKey = (features: string[] | undefined) =>
+  features ? JSON.stringify([...features].sort()) : undefined;
 
 export function enrichBreadcrumbsWithWorkspace(
   core: CoreStart,

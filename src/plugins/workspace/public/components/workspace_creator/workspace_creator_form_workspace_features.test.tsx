@@ -45,18 +45,18 @@ describe('WorkspaceCreatorForm workspace features for the association filters', 
     (SelectDataSourcePanel as jest.Mock).mockClear();
   });
 
-  it('passes the chosen use case as a one-element feature list', () => {
-    renderForm(['use-case-observability']);
+  it("passes the form's feature configs, which carry the chosen use case", () => {
+    renderForm(['use-case-observability', 'discover']);
     expect(SelectDataSourcePanel).toHaveBeenLastCalledWith(
-      expect.objectContaining({ workspaceFeatures: ['use-case-observability'] }),
+      expect.objectContaining({ workspaceFeatures: ['use-case-observability', 'discover'] }),
       expect.anything()
     );
   });
 
-  it('passes undefined while no use case is chosen', () => {
+  it('passes an empty feature list while no use case is chosen', () => {
     renderForm();
     expect(SelectDataSourcePanel).toHaveBeenLastCalledWith(
-      expect.objectContaining({ workspaceFeatures: undefined }),
+      expect.objectContaining({ workspaceFeatures: [] }),
       expect.anything()
     );
   });

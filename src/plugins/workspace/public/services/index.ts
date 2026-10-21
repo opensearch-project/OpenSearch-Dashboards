@@ -4,8 +4,12 @@
  */
 
 export { UseCaseService } from './use_case_service';
-export {
+export type {
+  DataSourceAssociationCandidate,
+  DataSourceAssociationContext,
   DataSourceAssociationFilter,
+} from './data_source_association_filters';
+export {
   DataSourceAssociationFilters,
   getDataSourceAssociationFilters,
 } from './data_source_association_filters';
