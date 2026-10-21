@@ -128,6 +128,7 @@ export const mergeDataSourcesWithConnections = (
       title: ds.title,
       description: ds.description,
       relatedConnections,
+      ...(ds.workspaces ? { workspaces: ds.workspaces } : {}),
     });
   });
 
@@ -250,6 +251,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
             datasourceversion,
             type,
             installedplugins,
+            ...(source.workspaces ? { workspaces: source.workspaces } : {}),
           };
         }) || []
     );

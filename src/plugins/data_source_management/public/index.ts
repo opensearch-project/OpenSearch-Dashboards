@@ -29,7 +29,6 @@ export {
   DirectQueryConnectionFlow,
   DirectQueryConnectionFlowMountParams,
   DirectQueryConnectionFlowSavedObject,
-  IDirectQueryConnectionFlowRegistry,
 } from './direct_query_connection_flow_registry';
 export { DataSourceSelectionService } from './service/data_source_selection_service';
 export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';

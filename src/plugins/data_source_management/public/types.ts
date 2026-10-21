@@ -59,10 +59,12 @@ export interface DataSourceTableItem {
   relatedConnections?: DataSourceTableItem[];
   // This is used to identify the type of the data connection saved object
   objectType?: string;
-  // Id of the registered DirectQueryConnectionFlow that owns this data-connection saved
-  // object, if any. Only populated when at least one flow is registered.
+  // Id of the DirectQueryConnectionFlow that owns this data-connection saved object, if any. Set
+  // only when an owning flow is registered and visible to the current user, who can manage data
+  // sources; `undefined` doesn't mean no flow is registered for the connection.
   directQueryConnectionFlowId?: string;
-  // Workspace ids of the saved object. Only populated when at least one flow is registered.
+  // Workspace ids of the row's saved object (data-source or data-connection). Not set for rows
+  // that aren't saved objects, such as direct query connections nested under a data source.
   workspaces?: string[];
 }
 

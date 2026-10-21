@@ -35,7 +35,6 @@ import {
 import {
   DirectQueryConnectionFlow,
   DirectQueryConnectionFlowRegistry,
-  IDirectQueryConnectionFlowRegistry,
 } from './direct_query_connection_flow_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
@@ -107,7 +106,6 @@ export interface DataSourceManagementPluginSetup {
 
 export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
-  getDirectQueryConnectionFlowRegistry: () => IDirectQueryConnectionFlowRegistry;
 }
 
 /**
@@ -449,7 +447,6 @@ export class DataSourceManagementPlugin implements Plugin<
 
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
-      getDirectQueryConnectionFlowRegistry: () => this.directQueryConnectionFlowRegistry,
     };
   }
 

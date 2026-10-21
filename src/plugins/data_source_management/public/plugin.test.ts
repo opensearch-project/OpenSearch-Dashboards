@@ -24,7 +24,6 @@ import {
   getRenderAssociatedObjectsDetailsFlyout,
 } from './plugin';
 import { AuthenticationMethodRegistry } from './auth_registry';
-import { DirectQueryConnectionFlowRegistry } from './direct_query_connection_flow_registry';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;
@@ -34,7 +33,6 @@ describe('#dataSourceManagement', () => {
   beforeEach(() => {
     mockDataSourceManagementPluginStart = {
       getAuthenticationMethodRegistry: jest.fn(() => new AuthenticationMethodRegistry()),
-      getDirectQueryConnectionFlowRegistry: jest.fn(() => new DirectQueryConnectionFlowRegistry()),
     };
 
     coreSetup = {
@@ -111,7 +109,7 @@ describe('#dataSourceManagement', () => {
     }).toThrow('cannot call `registerAuthenticationMethod` after data source management startup.');
   });
 
-  it('can register a direct query connection flow and read it from the start registry', () => {
+  it('can register a direct query connection flow in setup', () => {
     const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
     const flow = {
       id: 'example-flow',
@@ -120,17 +118,9 @@ describe('#dataSourceManagement', () => {
       mount: jest.fn(() => jest.fn()),
     };
     expect(setup.registerDirectQueryConnectionFlow).toBeInstanceOf(Function);
-    setup.registerDirectQueryConnectionFlow(flow);
-    const registry = doStart().getDirectQueryConnectionFlowRegistry();
-    expect(registry.hasFlows()).toBe(true);
-    expect(registry.getFlow('example-flow')).toEqual(flow);
-  });
-
-  it('exposes an empty direct query connection flow registry when nothing is registered', () => {
-    const { doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
-    const registry = doStart().getDirectQueryConnectionFlowRegistry();
-    expect(registry.hasFlows()).toBe(false);
-    expect(registry.getAllFlows()).toEqual([]);
+    expect(() => setup.registerDirectQueryConnectionFlow(flow)).not.toThrow();
+    // The registry stays internal: the start contract doesn't expose it.
+    expect(doStart()).not.toHaveProperty('getDirectQueryConnectionFlowRegistry');
   });
 
   it('should throw error if registering a direct query connection flow after startup', () => {

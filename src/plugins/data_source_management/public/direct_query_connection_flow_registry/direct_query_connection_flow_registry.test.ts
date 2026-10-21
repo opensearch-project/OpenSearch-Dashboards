@@ -7,9 +7,9 @@ import {
   DirectQueryConnectionFlow,
   DirectQueryConnectionFlowRegistry,
   findOwningDirectQueryConnectionFlow,
-  getVisibleDirectQueryConnectionFlows,
   isDirectQueryConnectionFlowVisible,
 } from './direct_query_connection_flow_registry';
+import { DataConnectionType } from '../../../data_source/common';
 
 const createFlow = (
   overrides: Partial<DirectQueryConnectionFlow> = {}
@@ -89,46 +89,6 @@ describe('DirectQueryConnectionFlowRegistry', () => {
     registry.getAllFlows().splice(0, 2);
     expect(registry.getAllFlows()).toHaveLength(2);
   });
-
-  describe('#findOwningFlow', () => {
-    const so = { id: 'so-1', attributes: { ownerPlugin: 'example' }, workspaces: ['ws1'] };
-
-    it('returns the first flow whose ownsConnection returns true', () => {
-      registry.registerDirectQueryConnectionFlow(createFlow({ id: 'noPredicate' }));
-      registry.registerDirectQueryConnectionFlow(
-        createFlow({ id: 'notOwner', ownsConnection: () => false })
-      );
-      registry.registerDirectQueryConnectionFlow(
-        createFlow({
-          id: 'owner',
-          ownsConnection: (o) => o.attributes.ownerPlugin === 'example',
-        })
-      );
-      expect(registry.findOwningFlow(so)?.id).toBe('owner');
-    });
-
-    it('returns undefined when no flow owns the saved object', () => {
-      registry.registerDirectQueryConnectionFlow(
-        createFlow({ id: 'notOwner', ownsConnection: () => false })
-      );
-      expect(registry.findOwningFlow(so)).toBeUndefined();
-    });
-
-    it('treats a throwing ownsConnection as not owned', () => {
-      registry.registerDirectQueryConnectionFlow(
-        createFlow({
-          id: 'throws',
-          ownsConnection: () => {
-            throw new Error('boom');
-          },
-        })
-      );
-      registry.registerDirectQueryConnectionFlow(
-        createFlow({ id: 'owner', ownsConnection: () => true })
-      );
-      expect(registry.findOwningFlow(so)?.id).toBe('owner');
-    });
-  });
 });
 
 describe('isDirectQueryConnectionFlowVisible', () => {
@@ -155,7 +115,8 @@ describe('isDirectQueryConnectionFlowVisible', () => {
     ).toBe(false);
   });
 
-  it('fails closed when isVisible rejects or throws', async () => {
+  it('fails closed, and logs, when isVisible rejects or throws', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
     expect(
       await isDirectQueryConnectionFlowVisible(
         createFlow({ isVisible: () => Promise.reject(new Error('nope')) })
@@ -170,33 +131,68 @@ describe('isDirectQueryConnectionFlowVisible', () => {
         })
       )
     ).toBe(false);
-  });
-});
-
-describe('getVisibleDirectQueryConnectionFlows', () => {
-  it('returns only visible flows, preserving order', async () => {
-    const flows = [
-      createFlow({ id: 'a' }),
-      createFlow({ id: 'b', isVisible: () => Promise.reject(new Error('x')) }),
-      createFlow({ id: 'c', isVisible: () => Promise.resolve(true) }),
-      createFlow({ id: 'd', isVisible: () => false }),
-    ];
-    expect((await getVisibleDirectQueryConnectionFlows(flows)).map((f) => f.id)).toEqual([
-      'a',
-      'c',
-    ]);
+    expect(error).toHaveBeenCalledTimes(2);
+    expect(error.mock.calls[0][0]).toContain("'flowA'");
+    error.mockRestore();
   });
 });
 
 describe('findOwningDirectQueryConnectionFlow', () => {
   const so = { id: 'so-1', attributes: { ownerPlugin: 'example' } };
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('only considers the given flows', () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
     const owner = createFlow({ id: 'owner', ownsConnection: () => true });
     const other = createFlow({ id: 'other', ownsConnection: () => true });
     expect(findOwningDirectQueryConnectionFlow([other, owner], so)?.id).toBe('other');
     expect(findOwningDirectQueryConnectionFlow([owner], so)?.id).toBe('owner');
     expect(findOwningDirectQueryConnectionFlow([], so)).toBeUndefined();
+  });
+
+  it('returns the first flow whose ownsConnection returns true', () => {
+    const noPredicate = createFlow({ id: 'noPredicate' });
+    const notOwner = createFlow({ id: 'notOwner', ownsConnection: () => false });
+    const owner = createFlow({
+      id: 'owner',
+      ownsConnection: (o) => o.attributes.ownerPlugin === 'example',
+    });
+    expect(findOwningDirectQueryConnectionFlow([noPredicate, notOwner, owner], so)?.id).toBe(
+      'owner'
+    );
+    expect(findOwningDirectQueryConnectionFlow([noPredicate, notOwner], so)).toBeUndefined();
+  });
+
+  it('treats a throwing ownsConnection as not owned, and logs the flow id', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const throws = createFlow({
+      id: 'throws',
+      ownsConnection: () => {
+        throw new Error('boom');
+      },
+    });
+    const owner = createFlow({ id: 'owner', ownsConnection: () => true });
+    expect(findOwningDirectQueryConnectionFlow([throws, owner], so)?.id).toBe('owner');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.mock.calls[0][0]).toContain("'throws'");
+  });
+
+  it('ignores claims on a connection of a built-in type', () => {
+    const greedy = createFlow({ id: 'greedy', ownsConnection: () => true });
+    Object.values(DataConnectionType).forEach((type) => {
+      expect(
+        findOwningDirectQueryConnectionFlow([greedy], { id: 'so-2', attributes: { type } })
+      ).toBeUndefined();
+    });
+    expect(
+      findOwningDirectQueryConnectionFlow([greedy], {
+        id: 'so-3',
+        attributes: { type: 'Example direct query' },
+      })?.id
+    ).toBe('greedy');
   });
 });
 
@@ -267,6 +263,21 @@ describe('DirectQueryConnectionFlowRegistry#getVisibleFlows', () => {
       createFlow({ id: 'hung', isVisible: () => new Promise<boolean>(() => {}) })
     );
     expect(await registry.isFlowVisible('a')).toBe(true);
+  });
+
+  it('retries a failed isVisible on the next call instead of caching it', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const registry = new DirectQueryConnectionFlowRegistry();
+    const isVisible = jest
+      .fn<Promise<boolean>, []>()
+      .mockRejectedValueOnce(new Error('transient'))
+      .mockResolvedValue(true);
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'a', isVisible }));
+    expect(await registry.isFlowVisible('a')).toBe(false);
+    expect(await registry.isFlowVisible('a')).toBe(true);
+    expect(await registry.isFlowVisible('a')).toBe(true);
+    expect(isVisible).toHaveBeenCalledTimes(2);
+    jest.restoreAllMocks();
   });
 
   it('re-resolves after a new registration', async () => {

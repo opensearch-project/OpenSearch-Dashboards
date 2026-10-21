@@ -111,11 +111,15 @@ export async function mountManagementSection(
             />
           </Route>
         )}
-        {canManageDataSource && directQueryConnectionFlowRegistry?.hasFlows() && (
+        {/* Registered even with no flow, so an old link to a flow lands on its "not available"
+            callout instead of the data source edit page. */}
+        {canManageDataSource && (
           <Route path={['/flows/:flowId', '/flows/:flowId/*']}>
             <DirectQueryConnectionFlowMountPoint
               registry={directQueryConnectionFlowRegistry}
               core={coreStart}
+              history={params.history}
+              setBreadcrumbs={params.setBreadcrumbs}
             />
           </Route>
         )}

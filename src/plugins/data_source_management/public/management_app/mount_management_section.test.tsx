@@ -12,6 +12,7 @@ import {
   DataSourceManagementStartDependencies,
 } from './mount_management_section';
 import { StartServicesAccessor } from 'src/core/public';
+import { ScopedHistory } from '../../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
@@ -211,8 +212,11 @@ describe('mountManagementSection', () => {
       canManage: boolean,
       registry?: DirectQueryConnectionFlowRegistry
     ) => {
-      const history = createMemoryHistory();
-      history.push(path);
+      // The app's history is scoped, as in production; flows get a sub history of it.
+      const history = new ScopedHistory(
+        createMemoryHistory({ initialEntries: [`/app/dataSources${path}`] }),
+        '/app/dataSources'
+      );
       const element = document.createElement('div');
       let unmount: () => void = () => {};
       await act(async () => {
@@ -234,7 +238,11 @@ describe('mountManagementSection', () => {
       const { registry, flow, unmountFlow } = createRegistryWithFlow();
       const { element, unmount } = await mountAt('/flows/example-flow', true, registry);
       expect(flow.mount).toHaveBeenCalledTimes(1);
-      expect(flow.mount.mock.calls[0][0]).toEqual(expect.objectContaining({ path: '' }));
+      expect(flow.mount.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ path: '', setBreadcrumbs: mockParams.setBreadcrumbs })
+      );
+      const { history: flowHistory } = flow.mount.mock.calls[0][0] as { history?: unknown };
+      expect(flowHistory).toBeInstanceOf(ScopedHistory);
       expect(element.textContent).toContain('ExampleFlow');
 
       act(() => unmount());
@@ -258,14 +266,17 @@ describe('mountManagementSection', () => {
       act(() => unmount());
     });
 
-    it('falls through to the existing routes when no flow is registered', async () => {
-      const { element, unmount } = await mountAt(
-        '/flows/example-flow',
-        true,
-        new DirectQueryConnectionFlowRegistry()
-      );
-      expect(element.textContent).toContain('EditDataSourceWithRouter');
-      act(() => unmount());
-    });
+    it.each([
+      ['an empty registry', () => new DirectQueryConnectionFlowRegistry()],
+      ['no registry', () => undefined],
+    ])(
+      'shows the "not available" callout for a flow link with %s',
+      async (_name, createRegistry) => {
+        const { element, unmount } = await mountAt('/flows/example-flow', true, createRegistry());
+        expect(element.textContent).toContain('This connection flow is not available.');
+        expect(element.textContent).not.toContain('EditDataSourceWithRouter');
+        act(() => unmount());
+      }
+    );
   });
 });

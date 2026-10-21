@@ -271,34 +271,34 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       expect(utils.getDataConnections).toHaveBeenCalled();
     });
 
-    it('should include the description of data-connection rows', async () => {
-      jest.spyOn(utils, 'getDataConnections').mockReturnValue(
-        Promise.resolve([
-          {
-            type: 'data-connection',
-            id: 'described',
-            attributes: {
-              connectionId: 'Described',
-              type: 'example-direct-query' as DataConnectionType,
-              description: 'My example connection',
-            },
-          },
-          {
-            type: 'data-connection',
-            id: 'undescribed',
-            attributes: {
-              connectionId: 'Undescribed',
-              type: 'example-direct-query' as DataConnectionType,
-            },
-          },
-        ] as any)
-      );
+    const describedConnections = [
+      {
+        type: 'data-connection',
+        id: 'described',
+        attributes: {
+          connectionId: 'Described',
+          type: 'example-direct-query' as DataConnectionType,
+          description: 'My example connection',
+        },
+      },
+      {
+        type: 'data-connection',
+        id: 'undescribed',
+        attributes: {
+          connectionId: 'Undescribed',
+          type: 'example-direct-query' as DataConnectionType,
+        },
+      },
+    ];
+
+    const mountWithServices = async (services: any) => {
       await act(async () => {
         component = mount(
           wrapWithIntl(
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
-              history={history}
+              // Its own history, so these cases don't leak calls into the shared mock's snapshots.
+              history={scopedHistoryMock.create() as unknown as ScopedHistory}
               location={{} as unknown as RouteComponentProps['location']}
               match={{} as unknown as RouteComponentProps['match']}
             />
@@ -306,9 +306,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
           {
             // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
-            wrappingComponentProps: {
-              services: mockedContext,
-            },
+            wrappingComponentProps: { services },
           }
         );
       });
@@ -316,12 +314,97 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
       component.update();
+    };
+
+    const dataConnectionRows = (): any[] =>
+      (component.find('EuiInMemoryTable').prop('items') as any[]).filter(
+        (row) => row.objectType === 'data-connection'
+      );
+
+    it('should include the description of data-connection rows when a flow is visible', async () => {
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(describedConnections as any));
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-flow',
+        title: 'Example connection',
+        buttonLabel: 'Connect example data source',
+        mount: jest.fn(),
+      });
+      await mountWithServices({ ...mockedContext, directQueryConnectionFlowRegistry: registry });
       const tableRows: any[] = component.find('EuiInMemoryTable').prop('items');
       expect(tableRows.find((row) => row.id === 'described')).toEqual(
         expect.objectContaining({ description: 'My example connection' })
       );
       expect(tableRows.find((row) => row.id === 'undescribed')).not.toHaveProperty('description');
       expect(component.text()).toContain('My example connection');
+    });
+
+    it('should not add descriptions to data-connection rows when no flow is visible', async () => {
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(describedConnections as any));
+      await mountWithServices({
+        ...mockedContext,
+        directQueryConnectionFlowRegistry: new DirectQueryConnectionFlowRegistry(),
+      });
+      const tableRows: any[] = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows.find((row) => row.id === 'described')).not.toHaveProperty('description');
+      expect(component.text()).not.toContain('My example connection');
+    });
+
+    it('should not wait for flow visibility to render rows', async () => {
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(describedConnections as any));
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'hung-flow',
+        title: 'Hung',
+        buttonLabel: 'Hung',
+        isVisible: () => new Promise<boolean>(() => {}),
+        mount: jest.fn(),
+        ownsConnection: () => true,
+      });
+      await mountWithServices({ ...mockedContext, directQueryConnectionFlowRegistry: registry });
+      const tableRows = dataConnectionRows();
+      expect(tableRows.map((row) => row.id)).toEqual(['described', 'undescribed']);
+      tableRows.forEach((row) => expect(row).not.toHaveProperty('directQueryConnectionFlowId'));
+    });
+
+    it('should apply a flow that becomes visible after the rows have loaded', async () => {
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(describedConnections as any));
+      let resolveVisible: (visible: boolean) => void = () => {};
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'late-flow',
+        title: 'Late',
+        buttonLabel: 'Late',
+        isVisible: () =>
+          new Promise<boolean>((resolve) => {
+            resolveVisible = resolve;
+          }),
+        mount: jest.fn(),
+        ownsConnection: (so) => so.id === 'described',
+      });
+      (utils.getDataConnections as jest.Mock).mockClear();
+      await mountWithServices({ ...mockedContext, directQueryConnectionFlowRegistry: registry });
+      let tableRows: any[] = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows.find((row) => row.id === 'described')).not.toHaveProperty(
+        'directQueryConnectionFlowId'
+      );
+      await act(async () => {
+        resolveVisible(true);
+      });
+      component.update();
+      tableRows = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows.find((row) => row.id === 'described')).toEqual(
+        expect.objectContaining({ directQueryConnectionFlowId: 'late-flow' })
+      );
+      expect(utils.getDataConnections).toHaveBeenCalledTimes(1);
     });
 
     it('should handle errors correctly', async () => {
@@ -733,8 +816,14 @@ describe('GetDataConnections', () => {
       expect(tableRows.length).toBeGreaterThan(0);
       tableRows.forEach((row) => {
         expect(row).not.toHaveProperty('directQueryConnectionFlowId');
-        expect(row).not.toHaveProperty('workspaces');
+        expect(row).not.toHaveProperty('description');
       });
+      // Rows keep their saved-object workspaces; only the column depends on a visible flow.
+      expect(tableRows.find((row) => row.id === 'flow-1')?.workspaces).toEqual([
+        'ws1',
+        'unknown-ws',
+      ]);
+      expect(tableRows.find((row) => row.id === 'legacy-1')).not.toHaveProperty('workspaces');
       expect(component.find('a[data-test-subj^="directQueryConnectionFlowLink-"]')).toHaveLength(0);
       expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(false);
     };
@@ -760,7 +849,6 @@ describe('GetDataConnections', () => {
           history
         );
         expectNoFlowBehaviour();
-        // rows are fetched once, after flow visibility is resolved
         expect(utils.getDataConnections).toHaveBeenCalledTimes(1);
       }
     );
@@ -822,13 +910,7 @@ describe('GetDataConnections', () => {
         },
         history
       );
-      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
-      tableRows.forEach((row) => {
-        expect(row).not.toHaveProperty('directQueryConnectionFlowId');
-        expect(row).not.toHaveProperty('workspaces');
-      });
-      expect(component.find('a[data-test-subj^="directQueryConnectionFlowLink-"]')).toHaveLength(0);
-      expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(false);
+      expectNoFlowBehaviour();
     });
   });
 });

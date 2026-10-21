@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'src/core/public';
+import { DataConnectionType } from '../../../data_source/common';
 
 /**
  * Minimal structural view of a `data-connection` saved object that is handed to
@@ -19,23 +20,34 @@ export interface DirectQueryConnectionFlowMountParams {
   /** Container the flow renders into. */
   element: HTMLElement;
   /**
+   * History scoped to the flow, `/flows/<id>`: its locations are relative to the flow, so a flow
+   * can render its own `Router` with it. The flow's own sub-routes are `''` (the create page) and
+   * `'/manage/<savedObjectId>'` (the manage page of a connection the flow owns, linked from the
+   * Direct query connections table); both are stable. A flow may add other sub-routes. The flow
+   * stays mounted while the location stays under `/flows/<id>`.
+   */
+  history: ScopedHistory;
+  /** Sets the data sources app's breadcrumbs, as `ManagementAppMountParams.setBreadcrumbs` does. */
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  /**
    * Sub-path after `/flows/<id>` when the flow is mounted, e.g. `''` (create page) or
-   * `'/manage/<savedObjectId>'`. Later changes are reported through `onPathChange`.
+   * `'/manage/<savedObjectId>'`. A helper over `history.location.pathname`; later changes are
+   * reported through `onPathChange`.
    */
   path: string;
   /**
-   * Navigate within the flow. `''` is the create page, `'/manage/<id>'` a manage page; a missing
-   * leading slash is added. The flow stays mounted: the new sub-path is reported through
-   * `onPathChange`.
+   * Navigate within the flow, a helper over `history.push`. `''` is the create page,
+   * `'/manage/<id>'` a manage page; a missing leading slash is added. The flow stays mounted: the
+   * new sub-path is reported through `onPathChange`.
    */
   navigate: (subPath: string) => void;
   /**
    * Subscribes to sub-path changes while the flow is mounted, whether they come from `navigate`
    * or from outside the flow (browser back and forward, a link to another page of the same flow).
-   * On subscribe, the listener is told the current sub-path at once if it differs from `path`
-   * (it changed while an async `mount` was pending). Returns an unsubscribe function. The flow is
-   * mounted once per visit to `/flows/<id>`, so a flow that renders more than one page reads its
-   * current page from here.
+   * A helper over `history.listen`. On subscribe, the listener is told the current sub-path at once
+   * if it differs from `path` (it changed while an async `mount` was pending). Returns an
+   * unsubscribe function. The flow is mounted once per visit to `/flows/<id>`, so a flow that
+   * renders more than one page without its own router reads its current page from here.
    */
   onPathChange: (listener: (path: string) => void) => () => void;
   /** Navigate back to the Direct query connections tab of the data sources app. */
@@ -53,7 +65,6 @@ export interface DirectQueryConnectionFlow {
   title: string;
   /** Label of the header button rendered on the Direct query connections tab. */
   buttonLabel: string;
-  description?: string;
   /**
    * Label shown in the Type column of the Direct query connections table for the connections this
    * flow owns (see `ownsConnection`), e.g. "Example data connection". Optional: without it (or when
@@ -61,13 +72,14 @@ export interface DirectQueryConnectionFlow {
    */
   typeLabel?: string;
   /**
-   * Defaults to visible. A rejected promise or a thrown error hides the flow (fail closed). Use it
-   * for capability or feature checks: flows can only be registered during setup, so a flow that
-   * depends on something known only at start registers unconditionally and decides here.
+   * Defaults to visible. A rejected promise or a thrown error hides the flow for that check (fail
+   * closed) and is logged; the next check calls `isVisible` again. Use it for capability or feature
+   * checks: flows can only be registered during setup, so a flow that depends on something known
+   * only at start registers unconditionally and decides here.
    *
-   * It is evaluated once per page load and the result is shared by the data sources app's home
-   * panel, connections table and flow route, so it must be cheap, idempotent and free of side
-   * effects.
+   * A result is shared by the data sources app's home panel, connections table and flow route, and
+   * reused for the page load, so it must be cheap, idempotent and free of side effects. Each flow is
+   * resolved on its own: a slow `isVisible` only delays its own flow.
    */
   isVisible?: () => Promise<boolean> | boolean;
   /**
@@ -82,10 +94,11 @@ export interface DirectQueryConnectionFlow {
    *
    * Ownership convention: decide from the saved object's own attributes (for example a marker
    * attribute the flow writes when it creates the connection), and treat the attributes as
-   * untrusted, raw saved-object values. A plugin that also registers a workspace data source
-   * association filter should use the same predicate there, so both extension points agree on
-   * which connections it governs. At most one visible flow should claim a connection; when more
-   * than one does, the first registered wins.
+   * untrusted, raw saved-object values. A flow's connections use their own `attributes.type`
+   * value: claims on a connection whose `type` is a built-in `DataConnectionType` are ignored. A
+   * plugin that also registers a workspace data source association filter should use the same
+   * predicate there, so both extension points agree on which connections it governs. At most one
+   * visible flow should claim a connection; when more than one does, the first registered wins.
    */
   ownsConnection?: (savedObject: DirectQueryConnectionFlowSavedObject) => boolean;
 }
@@ -97,9 +110,12 @@ export type IDirectQueryConnectionFlowRegistry = Omit<
 
 const FLOW_ID_PATTERN = /^[A-Za-z0-9_.-]+$/;
 
+const BUILT_IN_DATA_CONNECTION_TYPES = new Set<string>(Object.values(DataConnectionType));
+
 export class DirectQueryConnectionFlowRegistry {
   private readonly flows = new Map<string, DirectQueryConnectionFlow>();
-  // Each flow's resolved visibility, so one slow or hung `isVisible` only delays its own flow.
+  // Each flow's resolved visibility, so one slow or hung `isVisible` only delays its own flow. A
+  // check that failed is not kept, so the next call asks the flow again.
   private readonly visibility = new Map<string, Promise<boolean>>();
 
   /**
@@ -134,9 +150,8 @@ export class DirectQueryConnectionFlowRegistry {
   }
 
   /**
-   * The visible flows, in registration order. Each flow's `isVisible` is resolved once and the
-   * result is shared by every caller, so the home panel, the connections table and the flow route
-   * always agree.
+   * The visible flows, in registration order. Waits for every flow's `isVisible`; callers that
+   * must not be held up by one slow flow use `isFlowVisible` per flow instead.
    */
   public async getVisibleFlows(): Promise<DirectQueryConnectionFlow[]> {
     const flows = this.getAllFlows();
@@ -146,39 +161,46 @@ export class DirectQueryConnectionFlowRegistry {
 
   /**
    * Whether the flow with the given id is registered and visible. Waits only on that flow's own
-   * `isVisible`, which is resolved once and shared with `getVisibleFlows`.
+   * `isVisible`. A successful result is resolved once and shared by every caller, so the home
+   * panel, the connections table and the flow route agree; a failed check is logged, counts as
+   * hidden, and is retried on the next call.
    */
   public isFlowVisible(id: string): Promise<boolean> {
     const flow = this.getFlow(id);
     if (!flow) {
       return Promise.resolve(false);
     }
-    let visible = this.visibility.get(id);
-    if (!visible) {
-      visible = isDirectQueryConnectionFlowVisible(flow);
-      this.visibility.set(id, visible);
+    const cached = this.visibility.get(id);
+    if (cached) {
+      return cached;
     }
+    const visible = resolveDirectQueryConnectionFlowVisibility(flow).then(
+      ({ visible: v, failed }) => {
+        if (failed && this.visibility.get(id) === visible) {
+          this.visibility.delete(id);
+        }
+        return v;
+      }
+    );
+    this.visibility.set(id, visible);
     return visible;
-  }
-
-  /**
-   * Returns the first registered flow that owns the given saved object, if any. A throwing
-   * `ownsConnection` is treated as "not owned".
-   */
-  public findOwningFlow(savedObject: DirectQueryConnectionFlowSavedObject) {
-    return findOwningDirectQueryConnectionFlow(this.getAllFlows(), savedObject);
   }
 }
 
 /**
  * Returns the first of the given flows that owns the given saved object, if any. A throwing
- * `ownsConnection` is treated as "not owned". Outside production builds, a warning names the
- * flows when more than one claims the same connection.
+ * `ownsConnection` is logged and treated as "not owned", and claims on a connection whose
+ * `attributes.type` is a built-in `DataConnectionType` are ignored. Outside production builds, a
+ * warning names the flows when more than one claims the same connection.
  */
 export const findOwningDirectQueryConnectionFlow = (
   flows: DirectQueryConnectionFlow[],
   savedObject: DirectQueryConnectionFlowSavedObject
 ): DirectQueryConnectionFlow | undefined => {
+  const type = savedObject?.attributes?.type;
+  if (typeof type === 'string' && BUILT_IN_DATA_CONNECTION_TYPES.has(type)) {
+    return undefined;
+  }
   const owners: DirectQueryConnectionFlow[] = [];
   for (const flow of flows) {
     if (!flow.ownsConnection) continue;
@@ -189,6 +211,11 @@ export const findOwningDirectQueryConnectionFlow = (
       }
     } catch (e) {
       // fail closed: a broken predicate never claims a connection
+      // eslint-disable-next-line no-console
+      console.error(
+        `Direct query connection flow '${flow.id}': ownsConnection threw for saved object '${savedObject?.id}'`,
+        e
+      );
     }
   }
   if (owners.length > 1) {
@@ -202,29 +229,25 @@ export const findOwningDirectQueryConnectionFlow = (
   return owners[0];
 };
 
-/**
- * Resolves a flow's visibility. Missing `isVisible` means visible; any error or rejection means
- * hidden.
- */
-export const isDirectQueryConnectionFlowVisible = async (
+const resolveDirectQueryConnectionFlowVisibility = async (
   flow: DirectQueryConnectionFlow
-): Promise<boolean> => {
+): Promise<{ visible: boolean; failed: boolean }> => {
   if (!flow.isVisible) {
-    return true;
+    return { visible: true, failed: false };
   }
   try {
-    return (await flow.isVisible()) === true;
+    return { visible: (await flow.isVisible()) === true, failed: false };
   } catch (e) {
-    return false;
+    // eslint-disable-next-line no-console
+    console.error(`Direct query connection flow '${flow.id}': isVisible failed`, e);
+    return { visible: false, failed: true };
   }
 };
 
 /**
- * Resolves the visibility of all given flows and returns the visible ones, preserving order.
+ * Resolves a flow's visibility. Missing `isVisible` means visible; an error or a rejection is
+ * logged and means hidden.
  */
-export const getVisibleDirectQueryConnectionFlows = async (
-  flows: DirectQueryConnectionFlow[]
-): Promise<DirectQueryConnectionFlow[]> => {
-  const visibility = await Promise.all(flows.map(isDirectQueryConnectionFlowVisible));
-  return flows.filter((_, i) => visibility[i]);
-};
+export const isDirectQueryConnectionFlowVisible = async (
+  flow: DirectQueryConnectionFlow
+): Promise<boolean> => (await resolveDirectQueryConnectionFlowVisibility(flow)).visible;

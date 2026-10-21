@@ -4,10 +4,10 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiLoadingSpinner, EuiSmallButton, EuiSpacer } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+import { EuiCallOut, EuiLoadingSpinner, EuiSmallButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'src/core/public';
 import {
   DirectQueryConnectionFlow,
   IDirectQueryConnectionFlowRegistry,
@@ -20,11 +20,25 @@ import {
 } from './constants';
 
 interface DirectQueryConnectionFlowMountPointProps {
-  registry: IDirectQueryConnectionFlowRegistry;
+  /** The registry; without one (or with no matching flow) the "not available" callout shows. */
+  registry?: IDirectQueryConnectionFlowRegistry;
   core: CoreStart;
+  /** The data sources app's history; flows get a sub history scoped to `/flows/<id>`. */
+  history: ScopedHistory;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 type FlowState = 'resolving' | 'visible' | 'hidden';
+
+const describeMountError = (e: unknown): string | undefined => {
+  if (e instanceof Error) {
+    return e.message || undefined;
+  }
+  if (e === undefined || e === null) {
+    return undefined;
+  }
+  return typeof e === 'string' ? e : String(e);
+};
 
 /**
  * Renders a registered {@link DirectQueryConnectionFlow} for the current `/flows/<id>` route.
@@ -34,13 +48,13 @@ type FlowState = 'resolving' | 'visible' | 'hidden';
 export const DirectQueryConnectionFlowMountPoint = ({
   registry,
   core,
+  history,
+  setBreadcrumbs,
 }: DirectQueryConnectionFlowMountPointProps) => {
-  const history = useHistory();
   const location = useLocation();
   const parsed = parseDirectQueryConnectionFlowPath(location.pathname);
-  const flow: DirectQueryConnectionFlow | undefined = parsed
-    ? registry.getFlow(parsed.flowId)
-    : undefined;
+  const flow: DirectQueryConnectionFlow | undefined =
+    parsed && registry ? registry.getFlow(parsed.flowId) : undefined;
   const path = parsed?.path ?? '';
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +72,9 @@ export const DirectQueryConnectionFlowMountPoint = ({
         ? 'visible'
         : 'hidden';
 
+  // A mount that failed, for the flow it failed for: shown as an error callout instead of the flow.
+  const [mountError, setMountError] = useState<{ flowId: string; message?: string }>();
+
   // The current sub-path, and the listeners of the currently mounted flow (one set per mount, so a
   // flow never hears another flow's paths). Read by the mount effect without making it depend on
   // (and re-run for) every path change.
@@ -65,7 +82,7 @@ export const DirectQueryConnectionFlowMountPoint = ({
   const pathListenersRef = useRef<Set<(path: string) => void>>();
 
   useEffect(() => {
-    if (!flow) {
+    if (!flow || !registry) {
       return;
     }
     let cancelled = false;
@@ -89,6 +106,8 @@ export const DirectQueryConnectionFlowMountPoint = ({
         listener(path);
       } catch (e) {
         // A broken listener must not stop the others or the route change.
+        // eslint-disable-next-line no-console
+        console.error(`Direct query connection flow: a path listener threw`, e);
       }
     });
   }, [path]);
@@ -106,19 +125,21 @@ export const DirectQueryConnectionFlowMountPoint = ({
 
     const flowPath = getDirectQueryConnectionFlowPath(flow.id);
     const onMountError = (e: unknown) => {
-      core.notifications.toasts.addDanger({
-        title: i18n.translate('dataSourcesManagement.directQueryConnectionFlow.mountError', {
-          defaultMessage: 'Could not load {title}',
-          values: { title: flow.title },
-        }),
-        text: e instanceof Error ? e.message : undefined,
-      });
+      // eslint-disable-next-line no-console
+      console.error(`Direct query connection flow '${flow.id}': mount failed`, e);
+      if (!cancelled) {
+        setMountError({ flowId: flow.id, message: describeMountError(e) });
+      }
     };
+    // Scoped to this flow; it falls out of scope on its own once the location leaves `/flows/<id>`.
+    const flowHistory = history.createSubHistory(flowPath);
 
     try {
       Promise.resolve(
         flow.mount({
           element,
+          history: flowHistory,
+          setBreadcrumbs,
           path: mountedPath,
           navigate: (subPath: string) =>
             history.push(`${flowPath}${normalizeDirectQueryConnectionFlowSubPath(subPath)}`),
@@ -135,6 +156,11 @@ export const DirectQueryConnectionFlowMountPoint = ({
                 listener(pathRef.current);
               } catch (e) {
                 // Same as for later changes: a broken listener doesn't break the route.
+                // eslint-disable-next-line no-console
+                console.error(
+                  `Direct query connection flow '${flow.id}': a path listener threw`,
+                  e
+                );
               }
             }
             return () => {
@@ -166,7 +192,37 @@ export const DirectQueryConnectionFlowMountPoint = ({
       unmount?.();
       unmount = undefined;
     };
-  }, [flow, flowState, history, core]);
+  }, [flow, flowState, history, core, setBreadcrumbs]);
+
+  const backToList = (
+    <EuiSmallButton onClick={() => history.push(DIRECT_QUERY_CONNECTIONS_LIST_LOCATION)}>
+      {i18n.translate('dataSourcesManagement.directQueryConnectionFlow.backToList', {
+        defaultMessage: 'Back to direct query connections',
+      })}
+    </EuiSmallButton>
+  );
+
+  if (flow && mountError?.flowId === flow.id) {
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="alert"
+        data-test-subj="directQueryConnectionFlowMountError"
+        title={i18n.translate('dataSourcesManagement.directQueryConnectionFlow.mountError', {
+          defaultMessage: 'Could not load {title}',
+          values: { title: flow.title },
+        })}
+      >
+        {mountError.message && (
+          <EuiText size="s">
+            <p>{mountError.message}</p>
+          </EuiText>
+        )}
+        <EuiSpacer size="s" />
+        {backToList}
+      </EuiCallOut>
+    );
+  }
 
   if (!flow || flowState === 'hidden') {
     return (
@@ -179,11 +235,7 @@ export const DirectQueryConnectionFlowMountPoint = ({
         })}
       >
         <EuiSpacer size="s" />
-        <EuiSmallButton onClick={() => history.push(DIRECT_QUERY_CONNECTIONS_LIST_LOCATION)}>
-          {i18n.translate('dataSourcesManagement.directQueryConnectionFlow.backToList', {
-            defaultMessage: 'Back to direct query connections',
-          })}
-        </EuiSmallButton>
+        {backToList}
       </EuiCallOut>
     );
   }

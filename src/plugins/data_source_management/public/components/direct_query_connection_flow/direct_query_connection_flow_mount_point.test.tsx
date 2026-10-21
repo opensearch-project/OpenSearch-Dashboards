@@ -6,7 +6,8 @@
 import React, { act } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { Route, Router } from 'react-router-dom';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import { ScopedHistory } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   DirectQueryConnectionFlow,
@@ -57,7 +58,8 @@ describe('direct query connection flow path helpers', () => {
 });
 
 describe('DirectQueryConnectionFlowMountPoint', () => {
-  let history: MemoryHistory;
+  let history: ScopedHistory;
+  let setBreadcrumbs: jest.Mock;
   let registry: DirectQueryConnectionFlowRegistry;
   let core: ReturnType<typeof coreMock.createStart>;
   let wrapper: ReactWrapper | undefined;
@@ -78,7 +80,12 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
       wrapper = mount(
         <Router history={history}>
           <Route path={['/flows/:flowId', '/flows/:flowId/*']}>
-            <DirectQueryConnectionFlowMountPoint registry={registry} core={core} />
+            <DirectQueryConnectionFlowMountPoint
+              registry={registry}
+              core={core}
+              history={history}
+              setBreadcrumbs={setBreadcrumbs}
+            />
           </Route>
         </Router>
       );
@@ -89,7 +96,8 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
   };
 
   beforeEach(() => {
-    history = createMemoryHistory();
+    history = new ScopedHistory(createMemoryHistory({ initialEntries: ['/app/dsm'] }), '/app/dsm');
+    setBreadcrumbs = jest.fn();
     registry = new DirectQueryConnectionFlowRegistry();
     core = coreMock.createStart();
   });
@@ -351,7 +359,12 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     const component = mount(
       <Router history={history}>
         <Route path={['/flows/:flowId', '/flows/:flowId/*']}>
-          <DirectQueryConnectionFlowMountPoint registry={registry} core={core} />
+          <DirectQueryConnectionFlowMountPoint
+            registry={registry}
+            core={core}
+            history={history}
+            setBreadcrumbs={setBreadcrumbs}
+          />
         </Route>
       </Router>
     );
@@ -362,16 +375,79 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     );
   });
 
-  it('shows a danger toast when mount throws', async () => {
+  it('shows an error callout, not the flow, when mount throws', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     const flow = createFlow({
       mount: jest.fn(() => {
         throw new Error('broken');
       }),
     });
     registry.registerDirectQueryConnectionFlow(flow);
-    await render('/flows/flowA');
-    expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      expect.objectContaining({ text: 'broken' })
+    const component = await render('/flows/flowA');
+    const callout = component.find('[data-test-subj="directQueryConnectionFlowMountError"]');
+    expect(callout.exists()).toBe(true);
+    expect(callout.first().text()).toContain('Could not load Flow A');
+    expect(callout.first().text()).toContain('broken');
+    expect(
+      component.find('div[data-test-subj="directQueryConnectionFlowMountPoint-flowA"]').exists()
+    ).toBe(false);
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("'flowA'"),
+      expect.any(Error)
     );
+    expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it('shows the error callout when an async mount rejects', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const flow = createFlow({ mount: jest.fn(() => Promise.reject(new Error('late'))) });
+    registry.registerDirectQueryConnectionFlow(flow);
+    const component = await render('/flows/flowA');
+    const callout = component.find('[data-test-subj="directQueryConnectionFlowMountError"]');
+    expect(callout.exists()).toBe(true);
+    expect(callout.first().text()).toContain('late');
+    consoleError.mockRestore();
+  });
+
+  it('gives the flow a history scoped to its own path and the breadcrumb setter', async () => {
+    const flow = createFlow();
+    registry.registerDirectQueryConnectionFlow(flow);
+    await render('/flows/flowA/manage/so-1');
+    const params = (flow.mount as jest.Mock).mock.calls[0][0];
+    expect(params.setBreadcrumbs).toBe(setBreadcrumbs);
+    expect(params.history).toBeInstanceOf(ScopedHistory);
+    expect(params.history.location.pathname).toBe('/manage/so-1');
+
+    await act(async () => {
+      params.history.push('');
+    });
+    expect(history.location.pathname).toBe('/flows/flowA');
+    await act(async () => {
+      params.history.push('/manage/so-2');
+    });
+    expect(history.location.pathname).toBe('/flows/flowA/manage/so-2');
+    expect(params.history.createHref({ pathname: '/manage/so-3' })).toBe(
+      '/app/dsm/flows/flowA/manage/so-3'
+    );
+    // Pushes through the flow's history still reach the flow as path changes, without a remount.
+    expect(flow.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('scopes each flow to its own path', async () => {
+    const flowA = createFlow();
+    const flowB = createFlow({ id: 'flowB', title: 'Flow B' });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowB);
+    await render('/flows/flowA');
+    await act(async () => {
+      history.push('/flows/flowB');
+    });
+    await flush();
+    const paramsB = (flowB.mount as jest.Mock).mock.calls[0][0];
+    await act(async () => {
+      paramsB.history.push('/manage/b');
+    });
+    expect(history.location.pathname).toBe('/flows/flowB/manage/b');
   });
 });

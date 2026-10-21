@@ -28,11 +28,11 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
 import { TopNavControlDescriptionData } from '../../../../navigation/public';
-import { DirectQueryConnectionFlow } from '../../direct_query_connection_flow_registry';
 import {
   DIRECT_QUERY_CONNECTIONS_TAB_ID,
   getDirectQueryConnectionFlowPath,
 } from '../direct_query_connection_flow/constants';
+import { useVisibleDirectQueryConnectionFlows } from '../direct_query_connection_flow/use_visible_direct_query_connection_flows';
 
 interface DataSourceHomePanelProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -69,26 +69,14 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
   const { HeaderControl } = navigation.ui;
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const [visibleFlows, setVisibleFlows] = useState<DirectQueryConnectionFlow[]>([]);
+  const visibleFlows = useVisibleDirectQueryConnectionFlows(
+    directQueryConnectionFlowRegistry,
+    canManageDataSource
+  );
 
   useEffect(() => {
     setBreadcrumbs(getListBreadcrumbs());
   }, [setBreadcrumbs]);
-
-  useEffect(() => {
-    if (!canManageDataSource || !directQueryConnectionFlowRegistry?.hasFlows()) {
-      return;
-    }
-    let cancelled = false;
-    directQueryConnectionFlowRegistry.getVisibleFlows().then((flows) => {
-      if (!cancelled) {
-        setVisibleFlows(flows);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [canManageDataSource, directQueryConnectionFlowRegistry]);
 
   const isDirectQueryTabSelected =
     !featureFlagStatus || selectedTabId === DIRECT_QUERY_CONNECTIONS_TAB_ID;
