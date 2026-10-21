@@ -58,7 +58,7 @@ export const InputContentSourceSchema = z.union([
 export const ImageInputContentSchema = z.object({
   type: z.literal('image'),
   source: InputContentSourceSchema,
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   name: z.string().optional(),
 });
 
