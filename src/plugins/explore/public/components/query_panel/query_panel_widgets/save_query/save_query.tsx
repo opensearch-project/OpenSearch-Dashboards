@@ -29,7 +29,10 @@ import { useTimeFilter } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
-import { datasetRequiresExplicitRun } from '../../../../application/utils/requires_explicit_run';
+import {
+  datasetRequiresExplicitRun,
+  stageQueryForExplicitRun,
+} from '../../../../application/utils/requires_explicit_run';
 import { useEditorText, useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './save_query.scss';
 
@@ -162,6 +165,7 @@ export const SaveQueryButton = () => {
           savedQuery.attributes.query?.dataset
         )
       ) {
+        stageQueryForExplicitRun(dispatch);
         return;
       }
       // @ts-expect-error TS2345 TODO(ts-error): fixme

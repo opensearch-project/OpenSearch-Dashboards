@@ -13,6 +13,10 @@ import {
   clearQueryStatusMap,
 } from '../../../../application/utils/state_management/slices';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
+import {
+  datasetRequiresExplicitRun,
+  stageQueryForExplicitRun,
+} from '../../../../application/utils/requires_explicit_run';
 
 export const useTimeFilter = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -30,6 +34,13 @@ export const useTimeFilter = () => {
       }
 
       if (isQuickSelection) {
+        // A quick selection made for the user (e.g. picking a recent query with its time range)
+        // only stages the change for a dataset type that requires an explicit Run.
+        const queryString = services.data.query.queryString;
+        if (datasetRequiresExplicitRun(queryString, queryString?.getQuery?.()?.dataset)) {
+          stageQueryForExplicitRun(dispatch);
+          return;
+        }
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         // @ts-expect-error TS2345 TODO(ts-error): fixme

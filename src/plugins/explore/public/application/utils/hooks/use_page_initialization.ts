@@ -18,6 +18,7 @@ import {
   clearLastExecutedData,
   setEditorMode,
   setUsingRegexPatterns,
+  setIsQueryEditorDirty,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
@@ -122,8 +123,10 @@ export const useInitPage = () => {
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
         // A dataset type can require an explicit Run (meta.requiresExplicitRun): opening the saved
-        // search then shows its query without running it.
-        if (!datasetRequiresExplicitRun(services.data.query.queryString, restoredDataset)) {
+        // search then shows its query without running it, staged for Run.
+        if (datasetRequiresExplicitRun(services.data.query.queryString, restoredDataset)) {
+          dispatch(setIsQueryEditorDirty(true));
+        } else {
           // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(executeQueries({ services }));
         }

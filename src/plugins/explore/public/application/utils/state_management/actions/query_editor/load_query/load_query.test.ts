@@ -15,6 +15,12 @@ jest.mock('../run_query', () => ({
 
 jest.mock('../../../slices', () => ({
   clearLastExecutedData: jest.fn(),
+  clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
+  clearQueryStatusMap: jest.fn(() => ({ type: 'queryEditor/clearQueryStatusMap' })),
+  setIsQueryEditorDirty: jest.fn((dirty: boolean) => ({
+    type: 'queryEditor/setIsQueryEditorDirty',
+    payload: dirty,
+  })),
 }));
 
 const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
@@ -138,6 +144,42 @@ describe('loadQueryActionCreator', () => {
 
     expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
     expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+    // The previous results are cleared and the query is staged for Run.
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'results/clearResults' });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'queryEditor/clearQueryStatusMap' });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setIsQueryEditorDirty',
+      payload: true,
+    });
+  });
+
+  it('runs for a dataset type that requires an explicit Run when the user asked for it', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getQuery: () => ({ query: '', dataset: undefined }),
+            getDatasetService: () => ({
+              getType: () => ({ meta: { requiresExplicitRun: true } }),
+            }),
+          },
+        },
+      },
+    } as any;
+    const getState = () =>
+      ({ query: { dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } } }) as any;
+
+    await loadQueryActionCreator(
+      explicitServices,
+      mockSetEditorTextWithQuery,
+      testQuery,
+      undefined,
+      {
+        userInitiated: true,
+      }
+    )(mockDispatch, getState);
+
+    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(explicitServices, testQuery);
   });
 
   it('waits when either the current or the loaded dataset requires an explicit Run', async () => {

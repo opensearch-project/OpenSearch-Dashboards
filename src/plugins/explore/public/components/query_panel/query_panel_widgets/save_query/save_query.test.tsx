@@ -94,6 +94,11 @@ jest.doMock('../../../../application/utils/state_management/actions/query_action
 
 jest.doMock('../../../../application/utils/state_management/slices', () => ({
   clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
+  clearQueryStatusMap: jest.fn(() => ({ type: 'queryEditor/clearQueryStatusMap' })),
+  setIsQueryEditorDirty: jest.fn((dirty: boolean) => ({
+    type: 'queryEditor/setIsQueryEditorDirty',
+    payload: dirty,
+  })),
   setSavedQuery: jest.fn(() => ({ type: 'legacy/setSavedQuery' })),
   setQueryState: jest.fn(() => ({ type: 'query/setQueryState' })),
   setDateRange: jest.fn(() => ({ type: 'query/setDateRange' })),
@@ -370,6 +375,12 @@ describe('SaveQueryButton', () => {
       mockLoadQueryActionCreator.mock.calls[mockLoadQueryActionCreator.mock.calls.length - 1][3]
     ).toEqual(expect.objectContaining({ type: 'EXPLICIT_RUN_TYPE' }));
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'query/executeQueries/pending' });
+    // The previous results are cleared and the query is staged for Run.
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'queryEditor/clearQueryStatusMap' });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setIsQueryEditorDirty',
+      payload: true,
+    });
     delete (mockQueryStringManager as any).getDatasetService;
   });
 

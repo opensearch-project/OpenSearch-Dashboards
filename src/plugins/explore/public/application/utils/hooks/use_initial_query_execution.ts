@@ -49,29 +49,36 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   useEffect(() => {
     const initializePage = async () => {
       if (
-        !isInitialized &&
-        queryState.dataset &&
-        shouldSearchOnPageLoad &&
-        services &&
-        !exploreId && // saved search loading and execution is handled by useInitPage()
-        datasetFromContext && // Wait for dataset to be loaded by DatasetProvider
-        datasetLoading === false // Wait for DatasetProvider to finish loading
+        isInitialized ||
+        !queryState.dataset ||
+        !services ||
+        exploreId || // saved search loading and execution is handled by useInitPage()
+        !datasetFromContext || // Wait for dataset to be loaded by DatasetProvider
+        datasetLoading !== false // Wait for DatasetProvider to finish loading
       ) {
-        // Add initial default query to history
-        const timefilter = services?.data?.query?.timefilter?.timefilter;
-        if (timefilter && queryState.query.trim()) {
-          services.data.query.queryString.addToQueryHistory(queryState, timefilter.getTime());
-        }
-        dispatch(clearResults());
-        dispatch(clearQueryStatusMap());
-
-        if (!activeTabIdRef.current) {
-          await dispatch(detectAndSetOptimalTab({ services }));
-        }
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
-        await dispatch(executeQueries({ services }));
-        dispatch(setIsInitialized(true));
+        return;
       }
+      if (!shouldSearchOnPageLoad) {
+        // The page load doesn't run a query (searchOnLoad false, or the dataset type requires an
+        // explicit Run), but the page is initialized: a later dataset switch runs through the
+        // dataset change middleware only, not through this effect as well.
+        dispatch(setIsInitialized(true));
+        return;
+      }
+      // Add initial default query to history
+      const timefilter = services?.data?.query?.timefilter?.timefilter;
+      if (timefilter && queryState.query.trim()) {
+        services.data.query.queryString.addToQueryHistory(queryState, timefilter.getTime());
+      }
+      dispatch(clearResults());
+      dispatch(clearQueryStatusMap());
+
+      if (!activeTabIdRef.current) {
+        await dispatch(detectAndSetOptimalTab({ services }));
+      }
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
+      await dispatch(executeQueries({ services }));
+      dispatch(setIsInitialized(true));
     };
 
     initializePage();

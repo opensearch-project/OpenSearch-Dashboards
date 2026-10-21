@@ -69,11 +69,15 @@ export interface DatasetTypeConfig {
      * page load, when the dataset is selected or switched (including a source type or query
      * language switch), on a new search, when a saved search or saved query is opened, when a
      * field's "filter for value" or "filter out value" is clicked, or for the Metrics page's
-     * previews. Queries run only when the user asks (Run, or a time range update). Use it for
-     * engines where every query has a cost. Defaults to false.
+     * previews. Queries run only when the user asks (Run, a time range update, a tab switch, or
+     * "filter for pattern"). Use it for engines where every query has a cost. Defaults to false.
      *
      * It overrides `searchOnLoad` and the `discover:searchOnPageLoad` advanced setting: a type with
-     * both set to true still never runs on page load.
+     * both set to true still never runs on page load, in Explore, Discover and Agent Traces. In
+     * Explore an auto-refresh tick refreshes only a query the user has run, picking a recent query
+     * stages it, and the Metrics page's previews, metric charts and breakdowns load on request.
+     * Read it through `datasetTypeRequiresExplicitRun`, not this field, so it can later depend on
+     * the dataset.
      */
     requiresExplicitRun?: boolean;
     /** Optional supportsTimeFilter determines if a time field is supported */

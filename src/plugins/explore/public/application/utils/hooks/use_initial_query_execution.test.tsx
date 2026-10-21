@@ -420,7 +420,7 @@ describe('useInitialQueryExecution', () => {
   });
 
   describe('dataset-specific searchOnLoad', () => {
-    it('should use dataset type config searchOnLoad when available and set to false', () => {
+    it('should use dataset type config searchOnLoad when available and set to false', async () => {
       const servicesWithDatasetConfig = {
         ...mockServices,
         data: {
@@ -445,15 +445,21 @@ describe('useInitialQueryExecution', () => {
         },
       } as any;
 
-      const { result } = renderHookWithProvider(servicesWithDatasetConfig);
+      await act(async () => {
+        renderHookWithProvider(servicesWithDatasetConfig);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // Should NOT execute query because dataset config searchOnLoad is false
       expect(mockExecuteQueries).not.toHaveBeenCalled();
       expect(mockClearResults).not.toHaveBeenCalled();
-      expect(result.current.isInitialized).toBe(false);
+      // The page is still marked initialized, so a later dataset switch doesn't run here too.
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'meta/setIsInitialized', payload: true })
+      );
     });
 
-    it('does not run on page load for a dataset type that requires an explicit run, even if searchOnLoad is true', () => {
+    it('does not run on page load for a dataset type that requires an explicit run, even if searchOnLoad is true', async () => {
       const servicesWithDatasetConfig = {
         ...mockServices,
         data: {
@@ -473,10 +479,16 @@ describe('useInitialQueryExecution', () => {
         uiSettings: { ...mockServices.uiSettings, get: jest.fn().mockReturnValue(true) },
       } as any;
 
-      const { result } = renderHookWithProvider(servicesWithDatasetConfig);
+      await act(async () => {
+        renderHookWithProvider(servicesWithDatasetConfig);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       expect(mockExecuteQueries).not.toHaveBeenCalled();
-      expect(result.current.isInitialized).toBe(false);
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'meta/setIsInitialized', payload: true })
+      );
     });
   });
 

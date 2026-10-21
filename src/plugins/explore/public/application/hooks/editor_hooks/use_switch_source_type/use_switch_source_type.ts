@@ -17,7 +17,10 @@ import {
 import { setQueryWithHistory } from '../../../utils/state_management/slices';
 import type { AppDispatch } from '../../../utils/state_management/store';
 import { onEditorRunActionCreator } from '../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
-import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
+import {
+  datasetRequiresExplicitRun,
+  stageQueryForExplicitRun,
+} from '../../../utils/requires_explicit_run';
 import { useClearEditors } from '../use_clear_editors';
 import { useEditorFocus } from '../use_editor_focus';
 
@@ -66,7 +69,10 @@ export const useSwitchSourceType = (flavor: ExploreFlavor | null) => {
         dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
         clearEditors();
         schedule(focusOnEditor);
-        if (datasetRequiresExplicitRun(queryString, dataset)) return;
+        if (datasetRequiresExplicitRun(queryString, dataset)) {
+          stageQueryForExplicitRun(dispatch);
+          return;
+        }
         schedule(() =>
           dispatch(onEditorRunActionCreator(services, queryString.getQuery().query as string))
         );

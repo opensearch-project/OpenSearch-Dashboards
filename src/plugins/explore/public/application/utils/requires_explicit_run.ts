@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { AnyAction } from '@reduxjs/toolkit';
 import { Dataset } from '../../../../data/common';
 import { DatasetTypeConfig, QueryStringContract } from '../../../../data/public';
+import {
+  clearQueryStatusMap,
+  clearResults,
+  setIsQueryEditorDirty,
+} from './state_management/slices';
 
 /**
  * The registered config of a dataset type, or undefined when the type, the dataset service or the
@@ -28,11 +34,27 @@ export const getDatasetTypeConfig = (
  * meta.requiresExplicitRun): Explore then runs a query only when the user asks.
  *
  * Invariant: every code path that runs a query on its own (page load, a dataset, source type or
- * language switch, a new search, opening a saved search or saved query, filter for value, Metrics
- * previews) must check this first and not run when it returns true. A run the user asks for (Run,
- * a time range update) must not check it.
+ * language switch, a new search, opening a saved search or saved query, picking a recent query,
+ * filter for value, an auto-refresh tick before the user has run the query, the Metrics previews
+ * and metric detail) must check this first and not run when it returns true. A run the user asks
+ * for (Run, a time range update, a tab switch, "filter for pattern", an assistant action that
+ * runs a query) must not check it.
  */
 export const datasetRequiresExplicitRun = (
   queryString: Pick<QueryStringContract, 'getDatasetService'> | undefined,
   dataset: { type?: Dataset['type'] } | undefined
-): boolean => getDatasetTypeConfig(queryString, dataset?.type)?.meta?.requiresExplicitRun === true;
+): boolean =>
+  // Same rule as the data plugin's `datasetTypeRequiresExplicitRun`, on a guarded type lookup
+  // (Explore tests often replace the data plugin's public module, so it isn't imported here).
+  getDatasetTypeConfig(queryString, dataset?.type)?.meta?.requiresExplicitRun === true;
+
+/**
+ * What a skipped automatic run leaves behind for a dataset type that requires an explicit Run:
+ * the previous results and statuses are cleared (they belong to another query or language) and
+ * the editor is marked dirty, so TopNav shows "Update" for the staged query.
+ */
+export const stageQueryForExplicitRun = (dispatch: (action: AnyAction) => unknown) => {
+  dispatch(clearResults());
+  dispatch(clearQueryStatusMap());
+  dispatch(setIsQueryEditorDirty(true));
+};

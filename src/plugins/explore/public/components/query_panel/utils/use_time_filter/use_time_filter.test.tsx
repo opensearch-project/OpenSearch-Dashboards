@@ -21,6 +21,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('../../../../application/utils/state_management/slices', () => ({
   clearResults: jest.fn(),
   clearQueryStatusMap: jest.fn(),
+  setIsQueryEditorDirty: jest.fn((dirty: boolean) => ({ type: 'SET_DIRTY', payload: dirty })),
 }));
 
 jest.mock('../../../../application/utils/state_management/actions/query_actions', () => ({
@@ -235,6 +236,32 @@ describe('useTimeFilter', () => {
       });
 
       expect(mockTimeFilter.setRefreshInterval).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('for a dataset type that requires an explicit Run', () => {
+    it('stages a quick selection (e.g. a recent query) instead of running it', () => {
+      mockServices.data.query.queryString = {
+        getQuery: () => ({ dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } }),
+        getDatasetService: () => ({
+          getType: () => ({ meta: { requiresExplicitRun: true } }),
+        }),
+      };
+      const { result } = renderUseTimeFilter();
+
+      act(() => {
+        result.current.handleTimeChange({
+          start: 'now-1h',
+          end: 'now',
+          isQuickSelection: true,
+          isInvalid: false,
+        });
+      });
+
+      expect(mockTimeFilter.setTime).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_DIRTY', payload: true });
     });
   });
 });
