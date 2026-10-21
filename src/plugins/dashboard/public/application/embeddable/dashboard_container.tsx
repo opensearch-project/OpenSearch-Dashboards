@@ -32,6 +32,7 @@ import './_dashboard_container.scss';
 
 import { isEqual } from 'lodash';
 import { Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
@@ -194,6 +195,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           this.updateInput({ variables });
         }
       })
+    );
+
+    // Variable values can also change from the dashboard URL without remounting the
+    // container (a link to the same dashboard, browser back/forward).
+    this.variableSubscriptions.push(
+      this.getInput$()
+        .pipe(
+          map((input) => input.variables),
+          distinctUntilChanged(isEqual)
+        )
+        .subscribe((variables) => {
+          if (variables) {
+            this.variableService.applyCurrentValues(variables);
+          }
+        })
     );
 
     // Subscribe to container input changes to update VariableService dashboardId

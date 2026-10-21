@@ -749,6 +749,99 @@ describe('VariableService', () => {
     });
   });
 
+  describe('applyCurrentValues', () => {
+    it('should update current values and emit the new variables', () => {
+      const { service } = createService([makeCustomVariable()]);
+      const emitted: Variable[][] = [];
+      const subscription = service
+        .getVariablesWithoutState$()
+        .subscribe((variables) => emitted.push(variables));
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['prod'] }]);
+
+      expect(service.getVariables()[0].current).toEqual(['prod']);
+      expect(emitted).toHaveLength(2);
+      expect(emitted[1][0].current).toEqual(['prod']);
+      subscription.unsubscribe();
+    });
+
+    it('should only take current from the given variables', () => {
+      const { service } = createService([makeCustomVariable()]);
+
+      service.applyCurrentValues([
+        { ...makeCustomVariable({ name: 'renamed', customOptions: ['x'] }), current: ['staging'] },
+      ]);
+
+      const [variable] = service.getVariables() as CustomVariable[];
+      expect(variable.current).toEqual(['staging']);
+      expect(variable.name).toBe('env');
+      expect(variable.customOptions).toEqual(['dev', 'staging', 'prod']);
+    });
+
+    it('should ignore unknown variable ids', () => {
+      const { service } = createService([makeCustomVariable()]);
+      const before = service.getVariables();
+
+      service.applyCurrentValues([{ id: 'nonexistent', current: ['prod'] }]);
+
+      expect(service.getVariables()).toBe(before);
+    });
+
+    it('should not emit when the current values are unchanged', () => {
+      const { service } = createService([makeCustomVariable({ current: ['dev'] })]);
+      const before = service.getVariables();
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['dev'] }]);
+
+      expect(service.getVariables()).toBe(before);
+    });
+
+    it('should drop the "All" marker when concrete values are also present', () => {
+      const { service } = createService([
+        makeCustomVariable({ multi: true, includeAll: true, current: ['dev'] }),
+      ]);
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['$__all', 'prod'] }]);
+
+      expect(service.getVariables()[0].current).toEqual(['prod']);
+    });
+
+    it('should refresh dependent query variables', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-a', 'svc-b']));
+      const region = makeCustomVariable({ id: 'region-1', name: 'region', current: ['us-east'] });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+
+      service.applyCurrentValues([{ id: 'region-1', current: ['eu-west'] }]);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not record a value change telemetry event', () => {
+      const { service, telemetrySink } = createService([makeCustomVariable()]);
+      telemetrySink.mockClear();
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['prod'] }]);
+
+      expect(telemetrySink).not.toHaveBeenCalled();
+    });
+
+    it('should default a cleared query variable to the first option', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['api', 'web']));
+      const { service } = createService([makeQueryVariable({ current: ['web'] })]);
+
+      service.applyCurrentValues([{ id: 'query-1', current: undefined }]);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(service.getVariables()[0].current).toEqual(['api']);
+    });
+  });
+
   describe('reorderVariables', () => {
     it('should swap variable positions', () => {
       const v1 = makeCustomVariable({ id: '1', name: 'a' });
@@ -781,6 +874,23 @@ describe('VariableService', () => {
       await service.refreshVariableOptions('query-1');
       // For Query variables, preserve user's selection even if not in current options
       expect(service.getVariables()[0].current).toEqual(['old-value']);
+    });
+
+    it('should keep a current value that changed while options were loading', async () => {
+      let resolveQuery: (result: ReturnType<typeof makeQueryResult>) => void = () => {};
+      mockExecuteVariableQuery.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveQuery = resolve;
+        })
+      );
+      const { service } = createService([makeQueryVariable({ current: ['api'] })]);
+
+      const refresh = service.refreshVariableOptions('query-1');
+      service.updateVariableValue('query-1', ['web']);
+      resolveQuery(makeQueryResult(['api', 'web']));
+      await refresh;
+
+      expect(service.getVariables()[0].current).toEqual(['web']);
     });
 
     it('should build query options from configured value and label fields', async () => {

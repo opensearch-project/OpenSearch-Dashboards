@@ -390,6 +390,46 @@ export class VariableService {
     this.refreshDependentVariables(variable.name);
   }
 
+  /**
+   * Apply selected values that changed outside the service, e.g. when the dashboard URL
+   * changes without remounting the dashboard (a link to the same dashboard, browser back/forward).
+   * Only `current` is taken from the given variables; their definitions are ignored.
+   */
+  public applyCurrentValues(variables: Array<Pick<Variable, 'id' | 'current'>>): void {
+    const currentById = new Map(variables.map((v) => [v.id, v.current]));
+    const changed: Variable[] = [];
+    const updatedVariables = this.getVariables().map((variable) => {
+      if (!currentById.has(variable.id)) {
+        return variable;
+      }
+      const next = currentById.get(variable.id);
+      const current = next ? this.normalizeAllSelection(next) : next;
+      if (isEqual(current, variable.current)) {
+        return variable;
+      }
+      const updated = { ...variable, current } as Variable;
+      changed.push(updated);
+      return updated;
+    });
+
+    if (changed.length === 0) {
+      return;
+    }
+
+    this.variables$.next(updatedVariables);
+    changed.forEach((variable) => {
+      // A query variable whose selection the URL cleared has no value to interpolate.
+      // Re-run its options so it falls back to the first option, matching a fresh load.
+      if (
+        variable.type === VariableType.Query &&
+        (!variable.current || variable.current.length === 0)
+      ) {
+        this.refreshVariableOptions(variable.id);
+      }
+      this.refreshDependentVariables(variable.name);
+    });
+  }
+
   public async refreshVariableOptions(id: string): Promise<void> {
     const variable = this.getVariables().find((v) => v.id === id);
     if (!variable || variable.type !== VariableType.Query) {
@@ -459,13 +499,12 @@ export class VariableService {
       }
 
       const sortedOptions = this.sortVariableOptions(options, queryVariable.sort);
+      // Read `current` again: it may have been changed while the options were loading.
+      const latestCurrent = this.getVariables().find((v) => v.id === id)?.current;
       // Keep the "All" marker as-is so it tracks whatever the new options are.
-      const preservedCurrent = isAllMarker(queryVariable.current)
-        ? queryVariable.current
-        : this.resolveCurrentValueForQuery(
-            queryVariable.current,
-            this.getOptionValues(sortedOptions)
-          );
+      const preservedCurrent = isAllMarker(latestCurrent)
+        ? latestCurrent
+        : this.resolveCurrentValueForQuery(latestCurrent, this.getOptionValues(sortedOptions));
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
