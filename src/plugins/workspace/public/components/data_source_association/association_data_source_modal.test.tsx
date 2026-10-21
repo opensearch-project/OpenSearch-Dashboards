@@ -8,7 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { DataSourceConnectionType } from '../../../common/types';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import * as utilsExports from '../../utils';
-import { dataSourceAssociationFilters } from '../../services/data_source_association_filters';
+import { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 
 import {
   AssociationDataSourceModal,
@@ -21,6 +21,7 @@ const setupAssociationDataSourceModal = ({
   excludedConnectionIds,
   handleAssignDataSourceConnections,
   workspaceFeatures,
+  associationFilters,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
   const coreServices = coreMock.createStart();
   jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
@@ -74,6 +75,7 @@ const setupAssociationDataSourceModal = ({
         excludedConnectionIds={excludedConnectionIds ?? []}
         handleAssignDataSourceConnections={handleAssignDataSourceConnections ?? jest.fn()}
         workspaceFeatures={workspaceFeatures}
+        associationFilters={associationFilters}
       />
     </IntlProvider>
   );
@@ -270,27 +272,35 @@ describe('AssociationDataSourceModal', () => {
   });
 
   it('hides connections that a registered association filter rejects for the workspace', async () => {
-    const filter = jest.fn(
+    const isAssociable = jest.fn(
       (connection: any, features?: string[]) =>
         connection.id !== 'dqs1' || (features ?? []).includes('use-case-observability')
     );
-    const spy = jest
-      .spyOn(dataSourceAssociationFilters, 'isAssociable')
-      .mockImplementation((connection, features) => filter(connection, features));
-    try {
-      setupAssociationDataSourceModal({
-        mode: AssociationDataSourceModalMode.DirectQueryConnections,
-        workspaceFeatures: ['use-case-search'],
-      });
-      await waitFor(() => {
-        expect(filter).toHaveBeenCalledWith(expect.objectContaining({ id: 'dqs1' }), [
-          'use-case-search',
-        ]);
-      });
-      expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
-    } finally {
-      spy.mockRestore();
-    }
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({ fields: ['owner'], isAssociable });
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-search'],
+      associationFilters,
+    });
+    await waitFor(() => {
+      expect(isAssociable).toHaveBeenCalledWith(expect.objectContaining({ id: 'dqs1' }), [
+        'use-case-search',
+      ]);
+    });
+    expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
+    // The fields the filters requested are loaded with the connections.
+    expect(utilsExports.getDataSourcesList).toHaveBeenCalledWith(expect.anything(), undefined, [
+      'owner',
+    ]);
+  });
+
+  it('offers every connection without association filters', async () => {
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-search'],
+    });
+    expect(await screen.findByRole('option', { name: 'Data Connection 1' })).toBeInTheDocument();
   });
 });
 

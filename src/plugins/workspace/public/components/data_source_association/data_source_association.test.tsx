@@ -17,6 +17,7 @@ import { DataSourceConnectionType } from 'src/plugins/workspace/common/types';
 import { BehaviorSubject } from 'rxjs';
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
 import { createMockWorkspaceClient } from '../../workspace_client.mock';
+import { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
@@ -65,6 +66,32 @@ describe('<DataSourceAssociation />', () => {
     fireEvent.click(screen.getByText('OpenSearch data sources'));
     expect(servicesMock.overlays.openModal).toHaveBeenCalled();
     expect(screen.getByText('Mocked association data source modal')).toBeInTheDocument();
+  });
+
+  it("passes the current workspace's features and the client's association filters to the modal", () => {
+    const associationFilters = new DataSourceAssociationFilters();
+    servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      ...createMockWorkspaceClient(),
+      getDataSourceAssociationFilters: () => associationFilters,
+    } as IWorkspaceClient);
+    servicesMock.workspaces.currentWorkspace$ = new BehaviorSubject({
+      id: 'workspace_test',
+      name: 'Test workspace',
+      features: ['use-case-observability'],
+    } as any);
+    (AssociationDataSourceModalContent as jest.Mock).mockImplementation(() => <div />);
+
+    render(<DataSourceAssociation excludedDataSourceIds={[]} />);
+    fireEvent.click(screen.getByTestId('workspaceAssociateDataSourceButton'));
+    fireEvent.click(screen.getByText('Direct query data sources'));
+
+    expect(AssociationDataSourceModalContent).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        workspaceFeatures: ['use-case-observability'],
+        associationFilters,
+      }),
+      expect.anything()
+    );
   });
 
   it('should associate data sources successfully', async () => {

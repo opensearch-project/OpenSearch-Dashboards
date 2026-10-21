@@ -33,7 +33,7 @@ import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
-import { dataSourceAssociationFilters } from '../../services/data_source_association_filters';
+import type { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
@@ -232,7 +232,19 @@ export interface AssociationDataSourceModalProps {
    * passed to the registered association filters.
    */
   workspaceFeatures?: string[];
+  /**
+   * The data source association filters registered with the workspace plugin. Without them every
+   * fetched connection is offered.
+   */
+  associationFilters?: DataSourceAssociationFilters;
 }
+
+/**
+ * A stable memo key for a feature list: two arrays with the same features (in any order) give the
+ * same key, and no feature id can collide with another.
+ */
+const getWorkspaceFeaturesKey = (workspaceFeatures?: string[]) =>
+  workspaceFeatures ? JSON.stringify([...workspaceFeatures].sort()) : undefined;
 
 export const AssociationDataSourceModal = (props: AssociationDataSourceModalProps) => {
   return (
@@ -252,6 +264,7 @@ export const AssociationDataSourceModalContent = ({
   handleAssignDataSourceConnections,
   logos,
   workspaceFeatures,
+  associationFilters,
 }: AssociationDataSourceModalProps) => {
   const [fetchedConnections, setFetchedConnections] = useState<DataSourceConnection[]>([]);
   const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
@@ -260,15 +273,17 @@ export const AssociationDataSourceModalContent = ({
   const [isSaving, setIsSaving] = useState(false);
   const mountedRef = useRef(false);
   // A stable key, so a new array with the same features does not recompute the options.
-  const workspaceFeaturesKey = workspaceFeatures?.join(',');
+  const workspaceFeaturesKey = getWorkspaceFeaturesKey(workspaceFeatures);
   // Connections that plugins report cannot be associated with this workspace are not offered.
   const allConnections = useMemo(
     () =>
-      fetchedConnections.filter((connection) =>
-        dataSourceAssociationFilters.isAssociable(connection, workspaceFeatures)
-      ),
+      associationFilters
+        ? fetchedConnections.filter((connection) =>
+            associationFilters.isAssociable(connection, workspaceFeatures)
+          )
+        : fetchedConnections,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fetchedConnections, workspaceFeaturesKey]
+    [fetchedConnections, workspaceFeaturesKey, associationFilters]
   );
 
   useEffect(() => {
@@ -297,7 +312,7 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
-    getDataSourcesList(savedObjects.client)
+    getDataSourcesList(savedObjects.client, undefined, associationFilters?.getRequestedFields())
       .then((dataSourcesList) =>
         fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
       )
@@ -307,7 +322,7 @@ export const AssociationDataSourceModalContent = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [savedObjects.client, http, notifications, mode]);
+  }, [savedObjects.client, http, notifications, mode, associationFilters]);
 
   useEffect(() => {
     setOptions(

@@ -7,7 +7,7 @@ export { UseCaseService } from './use_case_service';
 export {
   DataSourceAssociationFilter,
   DataSourceAssociationFilters,
-  dataSourceAssociationFilters,
+  getDataSourceAssociationFilters,
 } from './data_source_association_filters';
 export {
   WorkspaceCollaboratorType,

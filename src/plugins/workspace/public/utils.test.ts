@@ -21,7 +21,6 @@ import {
   fetchRemoteClusterConnections,
   convertDataSourcesToOpenSearchAndDataConnections,
 } from './utils';
-import { dataSourceAssociationFilters } from './services/data_source_association_filters';
 import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { AssociationDataSourceModalMode } from '../common/constants';
@@ -484,33 +483,48 @@ describe('workspace utils: getDataSourcesList', () => {
   });
 
   it('should load the saved object attributes requested by association filters', async () => {
-    const spy = jest
-      .spyOn(dataSourceAssociationFilters, 'getRequestedFields')
-      .mockReturnValue(['owner']);
-    try {
-      mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
-        savedObjects: [
-          {
-            id: 'id1',
-            type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
-            get: (param: string) => (param === 'owner' ? 'example-plugin' : 'mock_value'),
-          },
-        ],
-      });
-      const result = await getDataSourcesList(mockedSavedObjectClient, []);
-      expect(mockedSavedObjectClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ fields: expect.arrayContaining(['connectionId', 'owner']) }),
-        { withoutClientBasePath: true }
-      );
-      expect(result[0]).toEqual(
-        expect.objectContaining({ attributes: { owner: 'example-plugin' } })
-      );
-      expect(
-        convertDataSourcesToOpenSearchAndDataConnections(result as any).dataConnections[0]
-      ).toEqual(expect.objectContaining({ attributes: { owner: 'example-plugin' } }));
-    } finally {
-      spy.mockRestore();
-    }
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          get: (param: string) => (param === 'owner' ? 'example-plugin' : 'mock_value'),
+        },
+      ],
+    });
+    const result = await getDataSourcesList(mockedSavedObjectClient, [], ['owner']);
+    expect(mockedSavedObjectClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: expect.arrayContaining(['connectionId', 'owner']) }),
+      { withoutClientBasePath: true }
+    );
+    expect(result[0]).toEqual(expect.objectContaining({ attributes: { owner: 'example-plugin' } }));
+    expect(
+      convertDataSourcesToOpenSearchAndDataConnections(result as any).dataConnections[0]
+    ).toEqual(expect.objectContaining({ attributes: { owner: 'example-plugin' } }));
+  });
+
+  it('should request each field once when association filters ask for built-in fields', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({ savedObjects: [] });
+    await getDataSourcesList(mockedSavedObjectClient, [], ['description', 'owner', 'owner']);
+    const { fields } = (mockedSavedObjectClient.find as jest.Mock).mock.calls[0][0];
+    expect(fields).toEqual([
+      'id',
+      'title',
+      'auth',
+      'description',
+      'dataSourceEngineType',
+      'type',
+      'connectionId',
+      'owner',
+    ]);
+  });
+
+  it('should not add attributes when no fields are requested', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [{ id: 'id1', type: DATA_CONNECTION_SAVED_OBJECT_TYPE, get: () => 'x' }],
+    });
+    const result = await getDataSourcesList(mockedSavedObjectClient, []);
+    expect(result[0]).not.toHaveProperty('attributes');
   });
 
   it('should return empty array if no saved objects responded', async () => {

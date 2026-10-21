@@ -51,7 +51,6 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
 import { WorkspaceTitleDisplay } from './components/workspace_name/workspace_name';
-import { dataSourceAssociationFilters } from './services/data_source_association_filters';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(WORKSPACE_USE_CASE_PREFIX);
@@ -215,24 +214,31 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   return visibleApplications;
 };
 
+/**
+ * Lists the data sources and data connections.
+ * @param requestedFields extra saved object attributes to load, returned in `attributes` (the
+ * fields requested by the data source association filters)
+ */
 export const getDataSourcesList = (
   client: SavedObjectsStart['client'],
-  targetWorkspaces?: string[]
+  targetWorkspaces?: string[],
+  requestedFields: string[] = []
 ) => {
+  const builtInFields = [
+    'id',
+    'title',
+    'auth',
+    'description',
+    'dataSourceEngineType',
+    'type',
+    'connectionId',
+  ];
+  const extraFields = [...new Set(requestedFields)];
   return client
     .find(
       {
         type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-        fields: [
-          'id',
-          'title',
-          'auth',
-          'description',
-          'dataSourceEngineType',
-          'type',
-          'connectionId',
-          ...dataSourceAssociationFilters.getRequestedFields(),
-        ],
+        fields: [...new Set([...builtInFields, ...extraFields])],
         perPage: 10000,
         workspaces: targetWorkspaces,
       },
@@ -252,9 +258,8 @@ export const getDataSourcesList = (
           const type = source.type;
           // This is a field only for detail type of data connection in order not to mix with saved object type.
           const connectionType = source.get('type');
-          const requestedFields = dataSourceAssociationFilters.getRequestedFields();
-          const attributes = requestedFields.length
-            ? Object.fromEntries(requestedFields.map((field) => [field, source.get(field)]))
+          const attributes = extraFields.length
+            ? Object.fromEntries(extraFields.map((field) => [field, source.get(field)]))
             : undefined;
           return {
             id,

@@ -12,6 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 import { DataSourceConnectionType } from '../../../common/types';
 
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
+import { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 
 const dataSources = [
   {
@@ -214,6 +215,41 @@ describe('SelectDataSourcePanel', () => {
     fireEvent.click(getByText('Remove selected'));
 
     expect(onChangeMock).toHaveBeenCalledWith([assignedDataSourcesConnections[0]]);
+  });
+
+  it("offers only the connections the workspace client's association filters allow", async () => {
+    const associationFilters = new DataSourceAssociationFilters();
+    const isAssociable = jest.fn(
+      (connection: { id: string }, features?: string[]) =>
+        connection.id !== 'ds2' || (features ?? []).includes('use-case-observability')
+    );
+    associationFilters.register({ isAssociable });
+    const { getByTestId, getByText, queryByText } = render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider
+          services={{
+            ...mockCoreStart,
+            workspaceClient: { getDataSourceAssociationFilters: () => associationFilters },
+          }}
+        >
+          <SelectDataSourcePanel
+            onChange={jest.fn()}
+            savedObjects={mockCoreStart.savedObjects}
+            assignedDataSourceConnections={[]}
+            showDataSourceManagement={true}
+            workspaceFeatures={['use-case-search']}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    await waitFor(() => {
+      expect(getByText('Data Source 1')).toBeInTheDocument();
+    });
+    expect(queryByText('Data Source 2')).not.toBeInTheDocument();
+    expect(isAssociable).toHaveBeenCalledWith(expect.objectContaining({ id: 'ds2' }), [
+      'use-case-search',
+    ]);
   });
 
   it('should close associate data sources modal', async () => {

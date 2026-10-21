@@ -20,6 +20,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { AssociationDataSourceModalContent } from './association_data_source_modal';
+import { getDataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import {
@@ -119,6 +120,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
               mode={mode}
               logos={chrome.logos}
               workspaceFeatures={currentWorkspace?.features}
+              associationFilters={getDataSourceAssociationFilters(workspaceClient)}
             />
           )
         );
@@ -134,6 +136,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
       excludedDataSourceIds,
       onAssociateDataSource,
       currentWorkspace,
+      workspaceClient,
     ]
   );
 

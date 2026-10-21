@@ -71,7 +71,7 @@ import {
 import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
 import {
   DataSourceAssociationFilter,
-  dataSourceAssociationFilters,
+  DataSourceAssociationFilters,
   WorkspaceCollaboratorTypesService,
   UseCaseService,
 } from './services';
@@ -123,6 +123,7 @@ export class WorkspacePlugin implements Plugin<
   private useCase = new UseCaseService();
   private workspaceValidationService = new WorkspaceValidationService();
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
+  private dataSourceAssociationFilters = new DataSourceAssociationFilters();
   private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
   private _changeSavedObjectCurrentWorkspace() {
@@ -308,7 +309,11 @@ export class WorkspacePlugin implements Plugin<
       core.http.basePath.getBasePath()
     );
 
-    await this.workspaceValidationService.setup(core, workspaceId);
+    await this.workspaceValidationService.setup(
+      core,
+      workspaceId,
+      this.dataSourceAssociationFilters
+    );
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation, data }] = await core.getStartServices();
@@ -644,7 +649,7 @@ export class WorkspacePlugin implements Plugin<
         AddCollaboratorsModal,
       },
       registerDataSourceAssociationFilter: (filter: DataSourceAssociationFilter) => {
-        dataSourceAssociationFilters.register(filter);
+        this.dataSourceAssociationFilters.register(filter);
       },
     };
   }

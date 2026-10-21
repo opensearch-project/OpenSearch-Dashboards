@@ -20,6 +20,7 @@ import { WorkspaceFormError } from './types';
 import { AssociationDataSourceModal } from '../data_source_association/association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
+import { getDataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from './data_source_connection_table';
 
@@ -46,7 +47,7 @@ export const SelectDataSourcePanel = ({
     AssociationDataSourceModalMode.OpenSearchConnections
   );
   const {
-    services: { notifications, http, chrome },
+    services: { notifications, http, chrome, workspaceClient },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
 
   const excludedConnectionIds = useMemo(
@@ -204,6 +205,7 @@ export const SelectDataSourcePanel = ({
           notifications={notifications}
           logos={chrome.logos}
           workspaceFeatures={workspaceFeatures}
+          associationFilters={getDataSourceAssociationFilters(workspaceClient)}
         />
       )}
     </div>

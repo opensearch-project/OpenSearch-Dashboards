@@ -4,7 +4,10 @@
  */
 
 import { DataSourceConnectionType } from '../../common/types';
-import { DataSourceAssociationFilters } from './data_source_association_filters';
+import {
+  DataSourceAssociationFilters,
+  getDataSourceAssociationFilters,
+} from './data_source_association_filters';
 
 const connection = {
   id: 'dc-1',
@@ -57,13 +60,46 @@ describe('DataSourceAssociationFilters', () => {
     expect(filters.getRequestedFields()).toEqual(['owner', 'kind']);
   });
 
-  it('hides a connection when a filter throws', () => {
+  it('hides a connection when a filter throws, and warns once per filter', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const filters = new DataSourceAssociationFilters();
+      const error = new Error('boom');
+      filters.register({
+        isAssociable: () => {
+          throw error;
+        },
+      });
+      expect(filters.isAssociable(connection, ['use-case-observability'])).toBe(false);
+      expect(filters.isAssociable({ ...connection, id: 'dc-2' }, undefined)).toBe(false);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][1]).toBe(error);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('keeps registrations per instance', () => {
+    const first = new DataSourceAssociationFilters();
+    const second = new DataSourceAssociationFilters();
+    first.register({ fields: ['owner'], isAssociable: () => false });
+    expect(first.isAssociable(connection, undefined)).toBe(false);
+    expect(second.isAssociable(connection, undefined)).toBe(true);
+    expect(second.getRequestedFields()).toEqual([]);
+  });
+});
+
+describe('getDataSourceAssociationFilters', () => {
+  it("returns the workspace client's filters", () => {
     const filters = new DataSourceAssociationFilters();
-    filters.register({
-      isAssociable: () => {
-        throw new Error('boom');
-      },
-    });
-    expect(filters.isAssociable(connection, ['use-case-observability'])).toBe(false);
+    expect(
+      getDataSourceAssociationFilters({ getDataSourceAssociationFilters: () => filters })
+    ).toBe(filters);
+  });
+
+  it('returns undefined for a client without them', () => {
+    expect(getDataSourceAssociationFilters({})).toBeUndefined();
+    expect(getDataSourceAssociationFilters(null)).toBeUndefined();
+    expect(getDataSourceAssociationFilters(undefined)).toBeUndefined();
   });
 });
