@@ -94,6 +94,30 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
 
+/**
+ * Resolves once the page is visible. A poll renews the job's lease, so a hidden tab that kept
+ * polling would hold an abandoned job's result in cluster memory indefinitely.
+ */
+const untilVisible = (signal: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (typeof document === 'undefined' || !document.hidden) return resolve();
+    const done = () => {
+      document.removeEventListener('visibilitychange', onChange);
+      signal.removeEventListener('abort', onAbort);
+    };
+    const onChange = () => {
+      if (document.hidden) return;
+      done();
+      resolve();
+    };
+    const onAbort = () => {
+      done();
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+    document.addEventListener('visibilitychange', onChange);
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+
 /** Delays before each retry of a poll that failed transiently. */
 const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
 
@@ -344,6 +368,7 @@ export const executeStreamingQuery = createAsyncThunk<
       while (!signal.aborted) {
         const wait = nextPollAt - Date.now();
         if (wait > 0) await sleep(wait, signal);
+        await untilVisible(signal);
         nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
         // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
@@ -393,14 +418,16 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
+        let drainFailed = false;
         if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
           // A failure paging the tail of an already-completed query must not discard the rows
-          // already held; publish the terminal snapshot with what we have, as the expired-job path
-          // does. An abort still propagates, to be handled as a cancellation below.
+          // already held; publish the terminal snapshot with what we have, marked incomplete. An
+          // abort still propagates, to be handled as a cancellation below.
           try {
             await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
           } catch (drainError) {
             if (isAbort(drainError)) throw drainError;
+            drainFailed = true;
           }
         }
 
@@ -408,6 +435,7 @@ export const executeStreamingQuery = createAsyncThunk<
         if (terminal) {
           // Rows are held client-side from here, so the job is never read again.
           release();
+          if (drainFailed) finalise(false, true);
           return;
         }
       }
@@ -421,8 +449,9 @@ export const executeStreamingQuery = createAsyncThunk<
         return;
       }
       if (error instanceof PPLStreamJobNotFoundError) {
-        // Expired or already released. Keep whatever was rendered and stop.
-        finalise();
+        // Expired (e.g. while the tab was hidden) or lost with its node: the rows shown are all
+        // there will be, but the query did not finish.
+        finalise(false, true);
         return;
       }
       release();

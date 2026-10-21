@@ -42,7 +42,7 @@ export interface QueryResultStatus {
 export interface StreamingQueryStatus {
   /** True when the run ended because the user stopped it, so the results are knowingly incomplete. */
   aborted?: boolean;
-  /** True when polling failed after rows were shown; the rows are kept but are incomplete. */
+  /** True when the run ended before the query finished, other than by Stop; the rows are kept. */
   interrupted?: boolean;
   /** Absent on the fast path, where the query completed before a job was created. */
   jobId?: string;

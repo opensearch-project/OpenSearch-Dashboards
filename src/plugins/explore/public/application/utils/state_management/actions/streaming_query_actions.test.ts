@@ -436,13 +436,16 @@ describe('executeStreamingQuery', () => {
     expect(results[results.length - 1].results.aggregations).toBeUndefined();
   });
 
-  it('stops without error when the job has expired', async () => {
+  it('marks the result incomplete when the job has expired, rather than finished', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
     mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
 
     const { statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
 
-    expect(statuses[statuses.length - 1].status.status).toBe('ready');
+    expect(final.status).toBe('ready');
+    expect(final.streaming).toMatchObject({ isPolling: false, interrupted: true });
+    expect(final.streaming?.aborted).toBe(false);
   });
 
   it('stays LOADING while polling and marks isPolling so partial rows are still rendered', async () => {
@@ -759,6 +762,84 @@ describe('executeStreamingQuery', () => {
     });
   });
 
+  describe('in a hidden tab', () => {
+    let hidden = false;
+    let hiddenSpy: jest.SpyInstance;
+    const setHidden = (value: boolean) => {
+      hidden = value;
+      document.dispatchEvent(new Event('visibilitychange'));
+    };
+    const start = () => {
+      const dispatch: jest.Mock = jest.fn((action: any) =>
+        typeof action === 'function' ? action(dispatch, () => ({})) : action
+      );
+      const promise = executeStreamingQuery({
+        services,
+        cacheKey: 'ck',
+        queryString: 'source=logs',
+      } as any)(dispatch, () => ({}) as any, undefined);
+      return { promise };
+    };
+
+    beforeEach(() => {
+      hidden = false;
+      hiddenSpy = jest.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+    });
+    afterEach(() => hiddenSpy.mockRestore());
+
+    it('stops polling while hidden and resumes as soon as the tab is shown', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll
+        .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
+        .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+      hidden = true;
+
+      const { promise } = start();
+      await jest.advanceTimersByTimeAsync(60_000);
+      expect(mockPoll).not.toHaveBeenCalled();
+
+      setHidden(false);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(mockPoll).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await promise;
+      expect(mockPoll).toHaveBeenCalledTimes(2);
+    });
+
+    it('stays paused through a visibility event that leaves the tab hidden', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+      hidden = true;
+
+      const { promise } = start();
+      await jest.advanceTimersByTimeAsync(2_000);
+      setHidden(true);
+      await jest.advanceTimersByTimeAsync(2_000);
+      expect(mockPoll).not.toHaveBeenCalled();
+
+      setHidden(false);
+      await jest.advanceTimersByTimeAsync(1_000);
+      await promise;
+    });
+
+    it('stops at once, and releases the job, when aborted while paused', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      hidden = true;
+      const removed = jest.spyOn(document, 'removeEventListener');
+
+      const { promise } = start();
+      await jest.advanceTimersByTimeAsync(5_000);
+      promise.abort();
+      await promise;
+
+      expect(mockPoll).not.toHaveBeenCalled();
+      expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+      expect(removed).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+      removed.mockRestore();
+    });
+  });
+
   it('does not retry a client error, which would fail again', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockRejectedValue({ response: { status: 400 } });
@@ -984,6 +1065,38 @@ describe('executeStreamingQuery', () => {
     expect(statuses[statuses.length - 1].status.status).toBe('ready');
     expect(results[results.length - 1].results.hits.hits).toHaveLength(10);
     expect(statuses.some((s) => s.status.status === 'error')).toBe(false);
+    // 10 of 25 rows: the query finished, but the result shown is not all of it.
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
+  });
+
+  it('marks the result incomplete when the job expires while its tail is paged', async () => {
+    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockResolvedValueOnce(
+        snapshot({
+          id: 'job-1',
+          status: 'SUCCEEDED',
+          update_mode: 'REPLACE',
+          datarows: [...Array(10).keys()].map(row),
+          size: 10,
+          total: 25,
+        })
+      )
+      .mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
+
+    const { statuses } = await run();
+
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
+  });
+
+  it('leaves a result that was paged in full unmarked', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0 }));
+
+    const { statuses } = await run();
+
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBeUndefined();
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {
