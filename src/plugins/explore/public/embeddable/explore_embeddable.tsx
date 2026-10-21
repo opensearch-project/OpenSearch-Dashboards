@@ -6,7 +6,6 @@
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
