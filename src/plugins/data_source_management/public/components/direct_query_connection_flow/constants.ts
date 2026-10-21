@@ -23,6 +23,10 @@ export const normalizeDirectQueryConnectionFlowSubPath = (subPath: string | unde
   if (!trimmed || trimmed === '/') {
     return '';
   }
+  // A query string or hash on the create page (`?x`, `#x`) is appended as is.
+  if (trimmed.startsWith('?') || trimmed.startsWith('#')) {
+    return trimmed;
+  }
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 };
 

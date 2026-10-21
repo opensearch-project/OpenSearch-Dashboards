@@ -51,6 +51,8 @@ describe('direct query connection flow path helpers', () => {
     expect(normalizeDirectQueryConnectionFlowSubPath('/')).toBe('');
     expect(normalizeDirectQueryConnectionFlowSubPath('manage/x')).toBe('/manage/x');
     expect(normalizeDirectQueryConnectionFlowSubPath('/manage/x')).toBe('/manage/x');
+    expect(normalizeDirectQueryConnectionFlowSubPath('?x=1')).toBe('?x=1');
+    expect(normalizeDirectQueryConnectionFlowSubPath('#top')).toBe('#top');
   });
 });
 
@@ -176,6 +178,78 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     kept.mockClear();
     history.push('/flows/flowA/manage/so-3');
     expect(kept).not.toHaveBeenCalled();
+  });
+
+  it('tells a listener that subscribes after an async mount the path it missed', async () => {
+    let resolveMount: (fn: () => void) => void = () => {};
+    const flow = createFlow({
+      mount: jest.fn(
+        () =>
+          new Promise<() => void>((resolve) => {
+            resolveMount = resolve;
+          })
+      ),
+    });
+    registry.registerDirectQueryConnectionFlow(flow);
+    await render('/flows/flowA');
+    const params = (flow.mount as jest.Mock).mock.calls[0][0];
+    expect(params.path).toBe('');
+
+    // The route changes while the flow is still loading.
+    await act(async () => {
+      history.push('/flows/flowA/manage/x');
+    });
+    const listener = jest.fn();
+    await act(async () => {
+      resolveMount(jest.fn());
+      params.onPathChange(listener);
+    });
+    expect(listener).toHaveBeenCalledWith('/manage/x');
+    expect(flow.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not report another flow's paths to an abandoned async mount", async () => {
+    let subscribeA: ((listener: (path: string) => void) => () => void) | undefined;
+    const flowA = createFlow({
+      mount: jest.fn((params) => {
+        subscribeA = params.onPathChange;
+        return new Promise<() => void>(() => {});
+      }),
+    });
+    const flowB = createFlow({ id: 'flowB', title: 'Flow B' });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowB);
+    await render('/flows/flowA');
+    await act(async () => {
+      history.push('/flows/flowB');
+    });
+    await flush();
+    // A's mount never resolved; it subscribes only now.
+    const listenerA = jest.fn();
+    subscribeA!(listenerA);
+    await act(async () => {
+      history.push('/flows/flowB/manage/y');
+    });
+    expect(listenerA).not.toHaveBeenCalled();
+    expect(flowB.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not mount a hidden flow the route switches to from a visible one', async () => {
+    const flowA = createFlow();
+    const flowB = createFlow({ id: 'flowB', title: 'Flow B', isVisible: () => false });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowB);
+    const component = await render('/flows/flowA');
+    expect(flowA.mount).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      history.push('/flows/flowB');
+    });
+    await flush();
+    component.update();
+    expect(flowB.mount).not.toHaveBeenCalled();
+    expect(component.find('[data-test-subj="directQueryConnectionFlowNotFound"]').exists()).toBe(
+      true
+    );
   });
 
   it('adds a missing leading slash to a navigate sub-path', async () => {

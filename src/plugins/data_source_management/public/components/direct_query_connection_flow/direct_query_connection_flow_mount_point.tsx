@@ -58,10 +58,11 @@ export const DirectQueryConnectionFlowMountPoint = ({
         ? 'visible'
         : 'hidden';
 
-  // The current sub-path and the mounted flow's listeners, read by the mount effect without making
-  // it depend on (and re-run for) every path change.
+  // The current sub-path, and the listeners of the currently mounted flow (one set per mount, so a
+  // flow never hears another flow's paths). Read by the mount effect without making it depend on
+  // (and re-run for) every path change.
   const pathRef = useRef(path);
-  const pathListenersRef = useRef(new Set<(path: string) => void>());
+  const pathListenersRef = useRef<Set<(path: string) => void>>();
 
   useEffect(() => {
     if (!flow) {
@@ -83,7 +84,7 @@ export const DirectQueryConnectionFlowMountPoint = ({
       return;
     }
     pathRef.current = path;
-    pathListenersRef.current.forEach((listener) => {
+    pathListenersRef.current?.forEach((listener) => {
       try {
         listener(path);
       } catch (e) {
@@ -99,7 +100,9 @@ export const DirectQueryConnectionFlowMountPoint = ({
     }
     let cancelled = false;
     let unmount: (() => void) | undefined;
-    const listeners = pathListenersRef.current;
+    const listeners = new Set<(path: string) => void>();
+    pathListenersRef.current = listeners;
+    const mountedPath = pathRef.current;
 
     const flowPath = getDirectQueryConnectionFlowPath(flow.id);
     const onMountError = (e: unknown) => {
@@ -116,11 +119,24 @@ export const DirectQueryConnectionFlowMountPoint = ({
       Promise.resolve(
         flow.mount({
           element,
-          path: pathRef.current,
+          path: mountedPath,
           navigate: (subPath: string) =>
             history.push(`${flowPath}${normalizeDirectQueryConnectionFlowSubPath(subPath)}`),
           onPathChange: (listener) => {
+            if (cancelled) {
+              // A flow whose mount was abandoned (route left or switched) hears nothing.
+              return () => {};
+            }
             listeners.add(listener);
+            // The path may have changed while the flow was still mounting (an async mount): a
+            // listener that subscribes late is told the current path at once.
+            if (pathRef.current !== mountedPath) {
+              try {
+                listener(pathRef.current);
+              } catch (e) {
+                // Same as for later changes: a broken listener doesn't break the route.
+              }
+            }
             return () => {
               listeners.delete(listener);
             };
@@ -144,6 +160,9 @@ export const DirectQueryConnectionFlowMountPoint = ({
     return () => {
       cancelled = true;
       listeners.clear();
+      if (pathListenersRef.current === listeners) {
+        pathListenersRef.current = undefined;
+      }
       unmount?.();
       unmount = undefined;
     };

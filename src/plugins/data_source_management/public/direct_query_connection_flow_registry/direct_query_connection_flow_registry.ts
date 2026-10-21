@@ -97,7 +97,8 @@ const FLOW_ID_PATTERN = /^[A-Za-z0-9_.-]+$/;
 
 export class DirectQueryConnectionFlowRegistry {
   private readonly flows = new Map<string, DirectQueryConnectionFlow>();
-  private visibleFlows?: Promise<DirectQueryConnectionFlow[]>;
+  // Each flow's resolved visibility, so one slow or hung `isVisible` only delays its own flow.
+  private readonly visibility = new Map<string, Promise<boolean>>();
 
   /**
    * Register a direct query connection flow. A flow id can only be registered once; subsequent
@@ -116,7 +117,6 @@ export class DirectQueryConnectionFlowRegistry {
       throw new Error(`Direct query connection flow '${flow.id}' is already registered`);
     }
     this.flows.set(flow.id, Object.freeze({ ...flow }));
-    this.visibleFlows = undefined;
   }
 
   public hasFlows() {
@@ -136,17 +136,27 @@ export class DirectQueryConnectionFlowRegistry {
    * result is shared by every caller, so the home panel, the connections table and the flow route
    * always agree.
    */
-  public getVisibleFlows(): Promise<DirectQueryConnectionFlow[]> {
-    if (!this.visibleFlows) {
-      this.visibleFlows = getVisibleDirectQueryConnectionFlows(this.getAllFlows());
-    }
-    return this.visibleFlows;
+  public async getVisibleFlows(): Promise<DirectQueryConnectionFlow[]> {
+    const flows = this.getAllFlows();
+    const visibility = await Promise.all(flows.map((flow) => this.isFlowVisible(flow.id)));
+    return flows.filter((_, i) => visibility[i]);
   }
 
-  /** Whether the flow with the given id is registered and visible (see `getVisibleFlows`). */
-  public async isFlowVisible(id: string): Promise<boolean> {
+  /**
+   * Whether the flow with the given id is registered and visible. Waits only on that flow's own
+   * `isVisible`, which is resolved once and shared with `getVisibleFlows`.
+   */
+  public isFlowVisible(id: string): Promise<boolean> {
     const flow = this.getFlow(id);
-    return !!flow && (await this.getVisibleFlows()).includes(flow);
+    if (!flow) {
+      return Promise.resolve(false);
+    }
+    let visible = this.visibility.get(id);
+    if (!visible) {
+      visible = isDirectQueryConnectionFlowVisible(flow);
+      this.visibility.set(id, visible);
+    }
+    return visible;
   }
 
   /**

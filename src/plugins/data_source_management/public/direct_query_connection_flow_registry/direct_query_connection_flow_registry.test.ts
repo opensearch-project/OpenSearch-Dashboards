@@ -216,6 +216,20 @@ describe('findOwningDirectQueryConnectionFlow with overlapping owners', () => {
     expect(warn.mock.calls[0][0]).toContain("'first', 'second'");
   });
 
+  it('does not warn in production builds', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const env = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const first = createFlow({ id: 'first', ownsConnection: () => true });
+      const second = createFlow({ id: 'second', ownsConnection: () => true });
+      expect(findOwningDirectQueryConnectionFlow([first, second], so)?.id).toBe('first');
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      process.env.NODE_ENV = env;
+    }
+  });
+
   it('does not warn for a single owner', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const owner = createFlow({ id: 'owner', ownsConnection: () => true });
@@ -238,12 +252,21 @@ describe('DirectQueryConnectionFlowRegistry#getVisibleFlows', () => {
       registry.getVisibleFlows(),
     ]);
     expect(first.map((flow) => flow.id)).toEqual(['a']);
-    expect(second).toBe(first);
+    expect(second).toEqual(first);
     expect(await registry.isFlowVisible('a')).toBe(true);
     expect(await registry.isFlowVisible('b')).toBe(false);
     expect(await registry.isFlowVisible('unknown')).toBe(false);
     expect(isVisibleA).toHaveBeenCalledTimes(1);
     expect(isVisibleB).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits only on the asked flow, so a hung isVisible delays no other flow', async () => {
+    const registry = new DirectQueryConnectionFlowRegistry();
+    registry.registerDirectQueryConnectionFlow(createFlow({ id: 'a' }));
+    registry.registerDirectQueryConnectionFlow(
+      createFlow({ id: 'hung', isVisible: () => new Promise<boolean>(() => {}) })
+    );
+    expect(await registry.isFlowVisible('a')).toBe(true);
   });
 
   it('re-resolves after a new registration', async () => {
