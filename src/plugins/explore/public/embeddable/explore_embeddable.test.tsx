@@ -827,9 +827,9 @@ describe('ExploreEmbeddable', () => {
 
       // @ts-ignore - private for testing
       expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'b' }]);
-      // A new object, so a memoized component re-renders on the prop change.
+      // The same object, so the callbacks set up on it keep seeing current state.
       // @ts-ignore - private for testing
-      expect(emb.searchProps).not.toBe(previousSearchProps);
+      expect(emb.searchProps).toBe(previousSearchProps);
 
       emb.destroy();
       parent.destroy();
@@ -980,6 +980,42 @@ describe('ExploreEmbeddable', () => {
         expect(renderedVariables).toEqual([{ name: 'service', value: 'b' }]);
         // A remount would reset TableVis pagination and column filters.
         expect(mounts).toBe(1);
+      } finally {
+        (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
+        await act(async () => {
+          emb.destroy();
+        });
+        parent.destroy();
+      }
+    });
+
+    test('remounts the panel when a fetch delivers new rows', async () => {
+      const realCreateRoot = jest.requireActual('react-dom/client').createRoot;
+      (createRoot as jest.Mock).mockImplementationOnce((node: HTMLElement) => realCreateRoot(node));
+      let mounts = 0;
+      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => {
+        useEffect(() => {
+          mounts++;
+        }, []);
+        return null;
+      });
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-refetch-remount-emb',
+        { getVariables: jest.fn().mockReturnValue([]) },
+        { rendered: false }
+      );
+
+      try {
+        await act(async () => {
+          emb.render(document.createElement('div'));
+        });
+        expect(mounts).toBe(1);
+
+        // The Logs table copies its rows into state on mount.
+        await act(async () => {
+          emb.reload();
+        });
+        expect(mounts).toBe(2);
       } finally {
         (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
         await act(async () => {

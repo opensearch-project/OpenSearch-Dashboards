@@ -165,6 +165,10 @@ export class ExploreEmbeddable
   };
   private node?: HTMLElement;
   private root?: Root;
+  // Keys the rendered component so it remounts only when a fetch delivers new rows:
+  // the Logs table copies its rows into state on mount, while the table vis keeps
+  // pagination and column filters in state that must survive other re-renders.
+  private fetchedDataVersion = 0;
 
   // Variable interpolation support
   private interpolationService: IVariableInterpolationService =
@@ -329,7 +333,7 @@ export class ExploreEmbeddable
     const variables = this.interpolationService.getVariables();
     let linkVariablesChanged = false;
     if (this.searchProps && !isEqual(variables, this.searchProps.variables)) {
-      this.searchProps = { ...this.searchProps, variables };
+      this.searchProps.variables = variables;
       linkVariablesChanged = true;
     }
 
@@ -418,34 +422,35 @@ export class ExploreEmbeddable
       this.updateInput({ sort: newSort });
     };
 
+    // Column actions read this.searchProps, not the local object: updateHandler
+    // writes the current columns and sort onto whatever this.searchProps is now.
     searchProps.onAddColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = buildColumns(
-        columnActions.addColumn(searchProps.columns, { column: columnName })
-      );
+      const updatedColumns = buildColumns(columnActions.addColumn(columns, { column: columnName }));
       this.updateInput({ columns: updatedColumns });
     };
 
     searchProps.onRemoveColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = columnActions.removeColumn(searchProps.columns, columnName);
-      const updatedSort =
-        searchProps.sort && searchProps.sort.length
-          ? searchProps.sort.filter((s) => s[0] !== columnName)
-          : [];
+      const sort = this.searchProps?.sort;
+      const updatedColumns = columnActions.removeColumn(columns, columnName);
+      const updatedSort = sort && sort.length ? sort.filter((s) => s[0] !== columnName) : [];
       this.updateInput({ sort: updatedSort, columns: updatedColumns });
     };
 
     searchProps.onMoveColumn = (columnName, newIndex: number) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const oldIndex = searchProps.columns.indexOf(columnName);
-      const updatedColumns = columnActions.reorderColumn(searchProps.columns, oldIndex, newIndex);
+      const oldIndex = columns.indexOf(columnName);
+      const updatedColumns = columnActions.reorderColumn(columns, oldIndex, newIndex);
       this.updateInput({ columns: updatedColumns });
     };
 
@@ -719,6 +724,7 @@ export class ExploreEmbeddable
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = transformedRows;
+    this.fetchedDataVersion++;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
@@ -771,8 +777,9 @@ export class ExploreEmbeddable
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(
+      <ExploreEmbeddableComponent key={this.fetchedDataVersion} searchProps={searchProps} />
+    );
   }
 
   public destroy() {
