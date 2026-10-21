@@ -31,8 +31,14 @@ import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
 import { streamJobError } from '../../streaming/stream_error_status';
 
-/** Interval between polls. A snapshot older than this is simply re-read, so no work is lost. */
+/**
+ * Minimum time between the starts of two polls, so a query costs at most one request per second.
+ * A long poll that already waited this long is followed at once.
+ */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
+
+/** Kept well under the 30s OpenSearch client request timeout and common proxy idle timeouts. */
+export const STREAMING_LONG_POLL_WAIT = '10s';
 
 /**
  * Rows held client-side; `total` still reports the real size. Must stay well above ROWS_PER_POLL,
@@ -332,14 +338,24 @@ export const executeStreamingQuery = createAsyncThunk<
       // pick up revisions; committed rows are continued from. REPLACE until the engine classifies
       // the job, since re-reading is always safe.
       let updateMode: PPLStreamUpdateMode = 'REPLACE';
+      let last: PPLStreamSnapshot = submitted;
+      let nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
       while (!signal.aborted) {
-        await sleep(STREAMING_POLL_INTERVAL_MS, signal);
+        const wait = nextPollAt - Date.now();
+        if (wait > 0) await sleep(wait, signal);
+        nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
         // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
         // just transfers and parses rows to discard them every interval. Drop to the smallest
         // window the route allows and keep polling only to observe progress and terminal status.
         const pollCount = streamingPollCount(ROWS_PER_POLL, !asHistogram && rows.isFull);
+
+        // Committed rows not yet read can be fetched now, so only a caught-up client waits on the
+        // server for a newer snapshot. A backend without `sequence` cannot be long-polled.
+        const canWait =
+          last.sequence !== undefined &&
+          (asHistogram || updateMode === 'REPLACE' || rows.isFull || rows.nextOffset >= last.total);
 
         // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
         // advancing would ask for a later slice of one.
@@ -350,7 +366,12 @@ export const executeStreamingQuery = createAsyncThunk<
           count: pollCount,
           dataSourceId,
           signal,
+          ...(canWait && {
+            waitForSequence: last.sequence,
+            waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
+          }),
         });
+        last = snapshot;
 
         if (snapshot.update_mode) {
           updateMode = snapshot.update_mode as PPLStreamUpdateMode;

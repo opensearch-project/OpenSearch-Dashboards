@@ -11,6 +11,7 @@ import {
   executeStreamingQuery,
   isStreamUnavailable,
   streamingPollCount,
+  STREAMING_LONG_POLL_WAIT,
   STREAMING_POLL_INTERVAL_MS,
 } from './streaming_query_actions';
 
@@ -310,7 +311,17 @@ describe('executeStreamingQuery', () => {
         .mockResolvedValueOnce(snapshot({ id: 'job-1', status: 'RUNNING' }))
         .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0, size: 0 }));
 
-      await run();
+      const dispatch: jest.Mock = jest.fn((action: any) =>
+        typeof action === 'function' ? action(dispatch, () => ({})) : action
+      );
+      const promise = executeStreamingQuery({
+        services,
+        cacheKey: 'ck',
+        queryString: 'source=logs',
+      } as any)(dispatch, () => ({}) as any, undefined);
+      // Async advance settles each poll before the next timer, so every iteration sleeps.
+      await jest.advanceTimersByTimeAsync(10 * STREAMING_POLL_INTERVAL_MS);
+      await promise;
 
       // At least a few sleeps ran, and every listener they added was also removed.
       expect(added.length).toBeGreaterThan(1);
@@ -672,6 +683,80 @@ describe('executeStreamingQuery', () => {
       expect(mockPoll).toHaveBeenCalledTimes(polls);
     }
     await promise;
+  });
+
+  describe('long polling', () => {
+    it('waits on the server for a snapshot newer than the last one seen', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 3 }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', sequence: 4 }));
+
+      await run();
+
+      expect(mockPoll.mock.calls[0][0]).toMatchObject({
+        waitForSequence: 3,
+        waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
+      });
+    });
+
+    it('polls without waiting when the backend reports no sequence', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run();
+
+      expect(mockPoll.mock.calls[0][0].waitForSequence).toBeUndefined();
+      expect(mockPoll.mock.calls[0][0].waitForCompletionTimeout).toBeUndefined();
+    });
+
+    // A newer sequence may never come once the engine has committed everything, so waiting here
+    // would stall paging until the wait lapses.
+    it('does not wait while committed rows are still unread', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
+      mockPoll
+        .mockResolvedValueOnce(
+          snapshot({
+            id: 'job-1',
+            sequence: 2,
+            update_mode: 'APPEND',
+            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
+            total: 25,
+          })
+        )
+        .mockResolvedValue(exhausted(25));
+
+      await run();
+
+      expect(mockPoll.mock.calls[1][0]).toMatchObject({ offset: 10 });
+      expect(mockPoll.mock.calls[1][0].waitForSequence).toBeUndefined();
+    });
+
+    it('follows a long poll at once but never starts two polls within the interval', async () => {
+      const starts: number[] = [];
+      const t0 = Date.now();
+      const respond = (ms: number, snap: object) => () => {
+        starts.push(Date.now() - t0);
+        return new Promise((resolve) => setTimeout(() => resolve(snap), ms));
+      };
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
+      mockPoll
+        .mockImplementationOnce(respond(5_000, snapshot({ id: 'job-1', sequence: 2 })))
+        .mockImplementationOnce(respond(0, snapshot({ id: 'job-1', sequence: 3 })))
+        .mockImplementation(respond(0, snapshot({ id: 'job-1', status: 'SUCCEEDED' })));
+      const dispatch: jest.Mock = jest.fn((action: any) =>
+        typeof action === 'function' ? action(dispatch, () => ({})) : action
+      );
+
+      const promise = executeStreamingQuery({
+        services,
+        cacheKey: 'ck',
+        queryString: 'source=logs',
+      } as any)(dispatch, () => ({}) as any, undefined);
+      await jest.advanceTimersByTimeAsync(10_000);
+      await promise;
+
+      // The 5s long poll is followed immediately; the instant one after it still waits the interval.
+      expect(starts).toEqual([1_000, 6_000, 7_000]);
+    });
   });
 
   it('does not retry a client error, which would fail again', async () => {
