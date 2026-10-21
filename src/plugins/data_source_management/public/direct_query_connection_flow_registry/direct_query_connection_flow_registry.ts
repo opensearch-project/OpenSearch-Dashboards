@@ -32,8 +32,10 @@ export interface DirectQueryConnectionFlowMountParams {
   /**
    * Subscribes to sub-path changes while the flow is mounted, whether they come from `navigate`
    * or from outside the flow (browser back and forward, a link to another page of the same flow).
-   * Returns an unsubscribe function. The flow is mounted once per visit to `/flows/<id>`, so a
-   * flow that renders more than one page reads its current page from here.
+   * On subscribe, the listener is told the current sub-path at once if it differs from `path`
+   * (it changed while an async `mount` was pending). Returns an unsubscribe function. The flow is
+   * mounted once per visit to `/flows/<id>`, so a flow that renders more than one page reads its
+   * current page from here.
    */
   onPathChange: (listener: (path: string) => void) => () => void;
   /** Navigate back to the Direct query connections tab of the data sources app. */

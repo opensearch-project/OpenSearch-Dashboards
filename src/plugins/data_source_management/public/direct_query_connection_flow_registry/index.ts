@@ -10,6 +10,5 @@ export {
   DirectQueryConnectionFlowRegistry,
   IDirectQueryConnectionFlowRegistry,
   isDirectQueryConnectionFlowVisible,
-  getVisibleDirectQueryConnectionFlows,
   findOwningDirectQueryConnectionFlow,
 } from './direct_query_connection_flow_registry';
