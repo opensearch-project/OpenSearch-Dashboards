@@ -11429,17 +11429,17 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-geckodriver@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-6.1.0.tgz#a732f10779e9cde2860f75ab634a4d84bf2870d2"
-  integrity sha512-ZRXLa4ZaYTTgUO4Eefw+RsQCleugU2QLb1ME7qTYxxuRj51yAhfnXaItXNs5/vUzfIaDHuZ+YnSF005hfp07nQ==
+geckodriver@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-7.0.0.tgz#411471fad5e891f6d1e49a9ccfb1bbdd6cdc9476"
+  integrity sha512-RypjU7cNcyjWK3ruEriCkWMRa9nroCT3y2qwkPynGzKTK1wG0UCWubb4AfVDTXzG9BhzRTwg29DoeK7PCRnK1w==
   dependencies:
     "@wdio/logger" "^9.18.0"
     "@zip.js/zip.js" "^2.8.11"
     decamelize "^6.0.1"
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7.0.6"
-    modern-tar "^0.7.2"
+    modern-tar "^0.8.5"
 
 generator-function@^2.0.0:
   version "2.0.1"
@@ -15040,10 +15040,10 @@ mock-fs@^4.12.0:
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.14.0.tgz#ce5124d2c601421255985e6e94da80a7357b1b18"
   integrity sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw==
 
-modern-tar@^0.7.2:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/modern-tar/-/modern-tar-0.7.3.tgz#6c302e229040f37fd359e37d1930fdd6ff9fc57c"
-  integrity sha512-4W79zekKGyYU4JXVmB78DOscMFaJth2gGhgfTl2alWE4rNe3nf4N2pqenQ0rEtIewrnD79M687Ouba3YGTLOvg==
+modern-tar@^0.8.5:
+  version "0.8.6"
+  resolved "https://registry.npmjs.org/modern-tar/-/modern-tar-0.8.6.tgz#dc67de5954b4b679d55ba703d5263dbd328c1e4c"
+  integrity sha512-LYSks0tNVqbtez/9OB0YFP6qLRSqkdAxJWOQpVaR67lNTbj2zNLyYpowkRMia5lXLCZKzxwoxkxH2MbbBR2aEg==
 
 module-details-from-path@^1.0.3:
   version "1.0.3"
