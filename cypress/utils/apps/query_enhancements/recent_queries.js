@@ -18,7 +18,7 @@ export const RecentQueriesDataTypes = {
 
 export const BaseQuery = {
   INDEX_PATTERN: {
-    'OpenSearch SQL': {
+    SQL: {
       query: `SELECT * FROM `,
       where: ' WHERE ',
     },
@@ -28,7 +28,7 @@ export const BaseQuery = {
     },
   },
   INDEXES: {
-    'OpenSearch SQL': {
+    SQL: {
       query: `SELECT * FROM `,
       where: ' WHERE ',
     },
@@ -56,7 +56,7 @@ export const TestQueries = [
 /* // TODO
 export const QueryRegex = {
   PPL: /.*?(source .*? 8000)(?:.*)/s,
-  'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
+  'SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
 };*/
 
 /**
@@ -76,12 +76,12 @@ export const QueryRegex = {
  * @returns {RecentQueriesFilteringTestConfig}
  */
 export const generateRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
-  if (language.name !== 'PPL' && language.name !== 'OpenSearch SQL') {
+  if (language.name !== 'PPL' && language.name !== 'SQL') {
     return; // undefined
   }
   const oppositeLang = {
-    PPL: 'OpenSearch SQL',
-    'OpenSearch SQL': 'PPL',
+    PPL: 'SQL',
+    SQL: 'PPL',
   };
   const defaultQuery = language.name === 'PPL' ? '' : ' LIMIT 10';
   const customDatasetType = RecentQueriesDataTypes[datasetType].name;

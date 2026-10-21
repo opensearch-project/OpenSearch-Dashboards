@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
+import { createAppliedResult, createInvalidConfigResult } from '../transformation_utils';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -91,11 +93,13 @@ export function createFilterFieldsTransformation(): TransformationInstance<Filte
     },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: FilterFieldsConfig) => {
-      if (!isConfigComplete(config)) return data;
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Filter Fields configuration is incomplete.');
+      }
 
       const fieldNames = new Set(config.fieldOptions.map((f) => f.name));
 
-      return data.map((row) => {
+      const transformed = data.map((row) => {
         const source = row._source as Record<string, unknown>;
         const newSource =
           config.mode === 'include'
@@ -104,14 +108,8 @@ export function createFilterFieldsTransformation(): TransformationInstance<Filte
 
         return { ...row, _source: newSource };
       });
-    },
-    validateConfig: (config: FilterFieldsConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      const valid = config.fieldOptions.filter((f) => fieldNames.has(f.name));
-      if (valid.length !== config.fieldOptions.length) {
-        return { ...config, fieldOptions: valid };
-      }
-      return config;
+
+      return createAppliedResult(transformed);
     },
     Editor: FilterFieldsEditor,
   };
@@ -128,4 +126,32 @@ export const filterFieldsTransformationDefinition: TransformationDefinition<Filt
   }),
   iconType: 'tableOfContents',
   createInstance: createFilterFieldsTransformation,
+};
+
+export const filterFieldsConfigSchema: TransformationConfigSchema = {
+  mode: {
+    description: 'Whether to keep only the listed fields (include) or drop them (exclude).',
+    kind: 'enum',
+    defaultValue: 'exclude',
+    required: true,
+    enumOptions: [
+      { value: 'include', label: 'Include only these fields' },
+      { value: 'exclude', label: 'Exclude these fields' },
+    ],
+  },
+  fieldOptions: {
+    description:
+      'List of column names to include or exclude. Only the "name" property is used at runtime; ' +
+      'provide objects with just { name: string }.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      name: {
+        description: 'Column name from the result schema.',
+        kind: 'field_name',
+        required: true,
+      },
+    },
+  },
 };

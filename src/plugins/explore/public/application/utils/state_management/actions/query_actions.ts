@@ -8,16 +8,21 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import semver from 'semver';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { SearchResponse } from 'elasticsearch';
 import {
   IBucketDateHistogramAggConfig,
   Query,
   DataView,
   IndexPatternField,
+  IDataFrame,
   getDataSourceEngineCapabilities,
 } from '../../../../../../../../src/plugins/data/common';
-import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
-import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
+import { QueryExecutionStatus, QueryProgress } from '../types';
+import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
+import {
+  setHasUserInitiatedQuery,
+  setIndividualQueryStatus,
+} from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
   DataPublicPluginStart,
@@ -31,7 +36,15 @@ import {
   getDimensions,
   Dimensions,
 } from '../../../../components/chart/utils';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, ASYNC_QUERY_POLL_INTERVAL_SETTING } from '../../../../../common';
+import { executeStreamingQuery, isStreamUnavailable } from './streaming_query_actions';
+import {
+  isCurrentStreamingRun,
+  registerStreamingAbort,
+  unregisterStreamingAbort,
+} from '../../streaming/streaming_abort_registry';
+import { findDateHistogramAggId, isStreamingEligible } from '../../streaming/streaming_config';
+import { enrichStreamingQuery } from '../../streaming/enrich_streaming_query';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
@@ -49,9 +62,10 @@ import {
   buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
-  queryHasStats,
+  queryHasAggregation,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import { hasFieldValue } from '../../../../utils/has_field_value';
 import { ExploreFlavor } from '../../../../../common';
 import { TRACES_CHART_BAR_TARGET } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
@@ -61,6 +75,7 @@ import {
   executeErrorCountQuery,
   executeLatencyQuery,
 } from './trace_query_actions';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -87,6 +102,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
     case 'PROMQL':
       return query.query as string;
     default:
+      // Languages registered source types list are used as typed.
+      if (getSourceTypeRegistry().getLanguageSettings(query.language)) {
+        return query.query as string;
+      }
       throw new Error(
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
       );
@@ -145,11 +164,20 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   dataset: DataView
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
+  // Counts only occurrences that carry an actual value. Tabular responses (e.g. PPL)
+  // include every field of the schema on every row, with null for the ones a document
+  // doesn't populate, so fieldCounts alone can't tell a populated field from an empty
+  // one. Kept separate from fieldCounts because the fields sidebar relies on the
+  // latter's "present in the response" meaning.
+  const nonEmptyFieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
-      const fields = Object.keys(dataset.flattenHit(hit));
-      for (const fieldName of fields) {
+      const flattened = dataset.flattenHit(hit);
+      for (const fieldName of Object.keys(flattened)) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+        if (hasFieldValue(flattened[fieldName])) {
+          nonEmptyFieldCounts[fieldName] = (nonEmptyFieldCounts[fieldName] || 0) + 1;
+        }
       }
     }
 
@@ -160,6 +188,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
+    nonEmptyFieldCounts,
     dataset,
     elapsedMs: rawResults.elapsedMs,
   };
@@ -264,6 +293,101 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
 };
 
 /**
+ * Resolves streaming configuration for the current query, or undefined to use the standard
+ * single-shot path. The histogram entry is present only when the dataset has a time field and the
+ * histogram config yields a date histogram.
+ */
+const getStreamingConfig = async (
+  state: RootState,
+  services: ExploreServices,
+  getState: () => RootState
+): Promise<
+  | {
+      tableQuery: string;
+      histogram?: { cacheKey: string; aggId: string; queryString: string };
+    }
+  | undefined
+> => {
+  try {
+    const query = state.query;
+    const engineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
+    if (
+      !isStreamingEligible(services, {
+        language: query.language,
+        engineType,
+        datasetType: query.dataset?.type,
+      })
+    ) {
+      return undefined;
+    }
+
+    const timeFieldName = query.dataset?.timeFieldName;
+    const timeRange = services.data.query.timefilter.timefilter.getTime();
+    const baseQuery = defaultPrepareQueryString(query);
+
+    // The streaming path bypasses the interceptor, so apply the same enrichment here.
+    const tableQuery = enrichStreamingQuery({
+      queryString: baseQuery,
+      timeFieldName,
+      timeRange,
+      engineType,
+    });
+
+    if (!timeFieldName || !query.dataset?.id) {
+      return { tableQuery };
+    }
+
+    const dataView = await services.data.dataViews.get(
+      query.dataset.id,
+      query.dataset.type !== 'INDEX_PATTERN'
+    );
+    if (!dataView) return { tableQuery };
+
+    const histogramConfig = createHistogramConfigWithInterval(
+      dataView,
+      state.legacy?.interval ?? 'auto',
+      services,
+      getState
+    );
+    const aggId = findDateHistogramAggId(histogramConfig?.aggs as Record<string, unknown>);
+    if (!aggId || !histogramConfig?.finalInterval) return { tableQuery };
+
+    // A breakdown histogram is a multi-series `timechart ... by <field>`, which the single-series
+    // snapshot mapping (one bucket + one count column) cannot read: it would collapse every series
+    // into one wrong count. Leave the histogram to the synchronous path until streamed breakdown
+    // series are supported; the table still streams.
+    if (state.queryEditor.breakdownField) return { tableQuery };
+
+    return {
+      tableQuery,
+      histogram: {
+        // No breakdown on this path (handled above), so the plain histogram cache key.
+        cacheKey: prepareHistogramCacheKey(query),
+        aggId,
+        // The aggregation itself, so it runs as its own streaming job.
+        queryString: buildPPLHistogramQuery(
+          enrichStreamingQuery({
+            queryString: baseQuery,
+            timeFieldName,
+            timeRange,
+            engineType,
+            skipDefaultSort: true,
+          }),
+          histogramConfig
+        ),
+      },
+    };
+  } catch (error) {
+    // Streaming is an enhancement, never a prerequisite: returning undefined falls back to the
+    // standard single-shot path so a failure here can never stop a query from running. Logged
+    // because the fallback is otherwise indistinguishable from streaming simply being disabled.
+    // eslint-disable-next-line no-console
+    console.warn('[STREAMING] Falling back to the non-streaming path:', error);
+    return undefined;
+  }
+};
+
+/**
  * Enhanced executeQueries orchestrator - executes queries independently without blocking
  */
 export const executeQueries = createAsyncThunk<
@@ -299,26 +423,123 @@ export const executeQueries = createAsyncThunk<
   const needsDataTableQuery =
     !results[dataTableCacheKey] ||
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+  // The histogram query is built in PPL, so languages that cannot run it opt out (PROMQL, and
+  // source-type languages unless their source declares support).
   const needsHistogramQuery =
-    query.language !== 'PROMQL' &&
+    getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
+  // Stop is offered while a user-initiated query runs, and every path through here is one: a page
+  // load, a time-range or dataset change, an interval change, as well as the editor's Run. Setting
+  // it only in `onEditorRun` left those other paths running a cancellable query with no way to
+  // cancel it. Cleared by `overall_status_middleware` when the queries settle.
+  if (needsDataTableQuery || needsHistogramQuery) {
+    dispatch(setHasUserInitiatedQuery(true));
+  }
+
   const promises = [];
+  // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
+  let streamedHistogram = false;
   // Execute query without aggregations
   if (needsDataTableQuery) {
-    promises.push(
-      dispatch(
-        executeDataTableQuery({
+    // Streaming replaces the single-shot data-table fetch when enabled.
+    const streamingConfig = await getStreamingConfig(state, services, getState);
+    if (streamingConfig) {
+      // Identifies this run so a superseded one cannot publish over, or unregister, its successor.
+      const tableToken = {};
+      // Register before dispatch so the token owns the key when executeStreamingQuery's synchronous
+      // LOADING claim runs isCurrentStreamingRun(); registering after would let that claim be skipped
+      // while a prior run for the same key still holds the token. The real abort is patched in once
+      // the thunk returns the promise.
+      let abortTable: () => void = () => undefined;
+      registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
+      const run = dispatch(
+        executeStreamingQuery({
           services,
           cacheKey: dataTableCacheKey,
-          queryString,
+          queryString: streamingConfig.tableQuery,
+          indexName: query.dataset?.title,
+          dataSourceId: query.dataset?.dataSource?.id,
+          isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
         })
-      )
-    );
+      );
+      abortTable = () => run.abort();
+      run
+        .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
+        .catch(() => undefined);
+      // An engine without the async PPL API only fails at submit, with nothing rendered, so the
+      // query is re-run on the standard path.
+      promises.push(
+        run.then((outcome) =>
+          isStreamUnavailable(outcome)
+            ? dispatch(
+                executeDataTableQuery({
+                  services,
+                  cacheKey: dataTableCacheKey,
+                  queryString,
+                })
+              )
+            : outcome
+        )
+      );
+
+      // Stream the histogram as its own job, so its counts come from the engine and no raw rows are
+      // transferred to compute them. In practice the chart arrives whole and later than the table:
+      // the engine publishes on an output-row threshold, which for an aggregation means buckets, and
+      // a histogram sized for a bar target never has enough of them to cross it.
+      if (streamingConfig.histogram && needsHistogramQuery) {
+        const histogramKey = streamingConfig.histogram.cacheKey;
+        const histogramToken = {};
+        // Register before dispatch, as with the table run above, so the LOADING claim's
+        // isCurrentStreamingRun() sees this token rather than a prior run's.
+        let abortHistogram: () => void = () => undefined;
+        registerStreamingAbort(histogramKey, () => abortHistogram(), histogramToken);
+        const histogramRun = dispatch(
+          executeStreamingQuery({
+            services,
+            cacheKey: histogramKey,
+            queryString: streamingConfig.histogram.queryString,
+            indexName: query.dataset?.title,
+            dataSourceId: query.dataset?.dataSource?.id,
+            asHistogram: { aggId: streamingConfig.histogram.aggId },
+            isCurrent: () => isCurrentStreamingRun(histogramKey, histogramToken),
+          })
+        );
+        abortHistogram = () => histogramRun.abort();
+        // If submit fails the chart has nothing, so run the standard histogram query instead.
+        // Not awaited, so the chain is terminated here rather than left floating.
+        histogramRun
+          .then((outcome) => {
+            if (isStreamUnavailable(outcome)) {
+              dispatch(
+                executeHistogramQuery({
+                  services,
+                  cacheKey: histogramCacheKey,
+                  queryString,
+                  interval: state.legacy?.interval,
+                })
+              );
+            }
+          })
+          .catch(() => undefined)
+          .finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
+        streamedHistogram = true;
+      }
+    } else {
+      promises.push(
+        dispatch(
+          executeDataTableQuery({
+            services,
+            cacheKey: dataTableCacheKey,
+            queryString,
+          })
+        )
+      );
+    }
   }
 
   // Execute histogram query in background (non-blocking)
-  if (needsHistogramQuery) {
+  if (needsHistogramQuery && !streamedHistogram) {
     const interval = state.legacy?.interval;
     dispatch(
       executeHistogramQuery({
@@ -333,7 +554,7 @@ export const executeQueries = createAsyncThunk<
   // Execute bucket count query for aggregation queries (non-blocking)
   // This appends | stats count() to get the true total bucket count
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
-  if (query.language === 'PPL' && queryHasStats(originalQueryString)) {
+  if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
     const bucketCountCacheKey = prepareBucketCountCacheKey(query);
     const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
     const needsBucketCountQuery =
@@ -525,6 +746,14 @@ const executeQueryBase = async (
   const query = getState().query;
 
   const queryStartTime = Date.now();
+  let abortController: AbortController | undefined;
+  let partialRowsShown = false;
+  // A newer run for the same key replaces this run's controller. A superseded run must leave the
+  // key's results, status and controller to its successor.
+  const isSuperseded = () => {
+    const current = activeQueryAbortControllers.get(cacheKey);
+    return abortController !== undefined && current !== undefined && current !== abortController;
+  };
 
   try {
     dispatch(
@@ -548,8 +777,7 @@ const executeQueryBase = async (
     // Don't auto-abort other queries - let them complete unless explicitly cancelled
     // This prevents data loading issues when multiple queries are running concurrently
 
-    // Create abort controller for this specific query
-    const abortController = new AbortController();
+    abortController = new AbortController();
 
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
@@ -623,8 +851,7 @@ const executeQueryBase = async (
           const topBreakdownSource = await createSearchSourceWithQuery(
             { ...query, dataset, query: topBreakdownQuery },
             dataView,
-            services,
-            false
+            services
           );
           const topBreakdownResults = await topBreakdownSource.fetch({
             abortSignal: abortController.signal,
@@ -658,21 +885,13 @@ const executeQueryBase = async (
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        true, // Include histogram
-        effectiveInterval
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {
+        includeHistogram: true,
+        customInterval: effectiveInterval,
+      });
     } else {
       // Tab-specific: Create without aggregations
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        false // No histogram
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {});
     }
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
@@ -689,12 +908,59 @@ const executeQueryBase = async (
       .getLanguageService()
       .getLanguage(query.language);
 
-    // Execute query
+    // Async sources that return rows while still running hand them to `onPartialResults` on
+    // each poll. Only row views stream them: an aggregation's running values reorder as the
+    // scan proceeds, so aggregation views wait for the final result.
+    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+
+    const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
+      // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
+      // query cleared its key; writing them would bring the key back and keep the page loading.
+      if (abortController?.signal.aborted || !getState().queryEditor.queryStatusMap[cacheKey]) {
+        return;
+      }
+      partialRowsShown = true;
+
+      dispatch(
+        setResults({
+          cacheKey,
+          results: {
+            ...partialResults,
+            // The inspector's timer stops only when the request finishes.
+            elapsedMs: Date.now() - queryStartTime,
+            fieldSchema: dataFrame.schema,
+          } as ISearchResult,
+        })
+      );
+
+      const { recordsMatched, recordsScanned } = dataFrame.meta?.progress ?? {};
+      const progress: QueryProgress = { recordsMatched, recordsScanned };
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.LOADING,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: undefined,
+            progress,
+          },
+        })
+      );
+    };
+
+    // `onPartialResults` and `pollInterval` only matter to polling sources.
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
+      ...(streamsPartialRows && { onPartialResults }),
+      pollInterval: services.uiSettings.get(ASYNC_QUERY_POLL_INTERVAL_SETTING),
     });
+
+    if (isSuperseded()) {
+      return;
+    }
 
     // Add response stats to inspector
     inspectorRequest
@@ -708,6 +974,7 @@ const executeQueryBase = async (
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
       frameMeta: searchSource.getDataFrame()?.meta,
+      warnings: searchSource.getDataFrame()?.meta?.warnings,
     };
 
     if (isHistogramQuery && effectiveHistogramConfig) {
@@ -745,6 +1012,15 @@ const executeQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
+    if (isSuperseded()) {
+      return;
+    }
+
+    // Partial rows from a run that didn't finish aren't results.
+    if (partialRowsShown) {
+      dispatch(clearResultsByKey(cacheKey));
+    }
+
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
@@ -816,10 +1092,13 @@ export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
-  includeHistogram: boolean = false,
-  customInterval?: string,
-  sizeParam?: number
+  options: {
+    includeHistogram?: boolean;
+    customInterval?: string;
+    sizeParam?: number;
+  } = {}
 ) => {
+  const { includeHistogram = false, customInterval, sizeParam } = options;
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();

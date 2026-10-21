@@ -22,3 +22,13 @@
   font-weight: $euiFontWeightRegular;
   min-width: $euiSize * 12;
 }
+
+// Holds the chart's eventual height while its query runs, so results below do not shift.
+// The canvas is a flex column, so without flex-shrink: 0 the reserved height collapses to the
+// spinner's own height and the shift comes back.
+.dscCanvas__chartPlaceholder {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}

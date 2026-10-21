@@ -70,6 +70,8 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { DashboardLayout } from '../../../common';
+import { removeMemberFromLayout } from './section_layout_utils';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -89,6 +91,7 @@ export interface DashboardContainerInput extends ContainerInput {
   };
   isEmptyState?: boolean;
   variables?: Variable[];
+  layout?: DashboardLayout;
 }
 
 interface IndexSignature {
@@ -120,6 +123,7 @@ export interface DashboardContainerOptions {
   initialVariables?: Variable[];
   savedObjects?: CoreStart['savedObjects'];
   telemetry?: CoreStart['telemetry'];
+  allowDashboardSections?: boolean;
 }
 
 export type DashboardReactContextValue =
@@ -137,6 +141,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private readonly logos: Logos;
   private root?: Root;
   private variableSubscriptions: Subscription[] = [];
+  // Transient context passed through the visualization editor.
+  private pendingCreateSectionId?: string;
   public readonly variableService: VariableService;
   public readonly variableInterpolationService: IVariableInterpolationService;
 
@@ -232,6 +238,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
   }
 
+  // Keep section membership consistent when a panel is deleted.
+  public removeEmbeddable(embeddableId: string) {
+    super.removeEmbeddable(embeddableId);
+    const layout = this.input.layout;
+    if (layout?.type === 'SectionLayout') {
+      const items = removeMemberFromLayout(layout.items, embeddableId);
+      if (!isEqual(items, layout.items)) {
+        this.updateInput({ layout: { type: 'SectionLayout', items } });
+      }
+    }
+  }
+
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
@@ -267,12 +285,62 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       placementMethod,
       placementArgs
     );
-    this.updateInput({
-      panels: {
-        ...this.input.panels,
-        [placeholderPanelState.explicitInput.id]: placeholderPanelState,
-      },
-    });
+    const placeholderId = placeholderPanelState.explicitInput.id;
+
+    const sectionId =
+      placementArgs && 'sectionId' in placementArgs ? (placementArgs as any).sectionId : undefined;
+    const layout = this.input.layout;
+    const useSection =
+      Boolean(sectionId) &&
+      Boolean(this.options.allowDashboardSections) &&
+      layout?.type === 'SectionLayout' &&
+      layout.items.some((section) => section.id === sectionId);
+
+    if (useSection) {
+      const targetSection = layout!.items.find((s) => s.id === sectionId)!;
+
+      // Placement runs independently in the flat and section-relative grids.
+      // Read back every member because placePanelBeside may shift siblings.
+      const sectionPanels: { [key: string]: DashboardPanelState } = {};
+      targetSection.members.forEach((m) => {
+        sectionPanels[m.idRef] = {
+          gridData: { ...m.gridData, i: m.idRef },
+          explicitInput: { id: m.idRef },
+        } as DashboardPanelState;
+      });
+      const slot = placementMethod
+        ? placementMethod({ ...(placementArgs as any), currentPanels: sectionPanels })
+        : placeholderPanelState.gridData;
+
+      const newMembers = [
+        ...targetSection.members.map((m) => ({
+          ...m,
+          gridData: {
+            x: sectionPanels[m.idRef].gridData.x,
+            y: sectionPanels[m.idRef].gridData.y,
+            w: sectionPanels[m.idRef].gridData.w,
+            h: sectionPanels[m.idRef].gridData.h,
+          },
+        })),
+        {
+          idRef: placeholderId,
+          type: 'panel' as const,
+          gridData: { x: slot.x, y: slot.y, w: slot.w, h: slot.h },
+        },
+      ];
+      const newItems = layout!.items.map((s: any) =>
+        s.id === sectionId ? { ...s, members: newMembers } : s
+      );
+      this.updateInput({
+        panels: { ...this.input.panels, [placeholderId]: placeholderPanelState },
+        layout: { type: 'SectionLayout', items: newItems },
+      });
+    } else {
+      this.updateInput({
+        panels: { ...this.input.panels, [placeholderId]: placeholderPanelState },
+      });
+    }
+
     newStateComplete.then((newPanelState: Partial<PanelState>) =>
       this.replacePanel(placeholderPanelState, newPanelState)
     );
@@ -286,8 +354,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
     // until the container logic is fixed.
 
+    const previousId = previousPanelState.explicitInput.id;
     const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
+    delete finalPanels[previousId];
     const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuidv4();
     finalPanels[newPanelId] = {
       ...previousPanelState,
@@ -301,9 +370,29 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         id: newPanelId,
       },
     };
+
+    // Preserve section membership when replacing a panel id.
+    const layout = this.input.layout;
+    const layoutUpdate =
+      layout?.type === 'SectionLayout' &&
+      layout.items.some((section) => section.members.some((m) => m.idRef === previousId))
+        ? {
+            layout: {
+              type: 'SectionLayout' as const,
+              items: layout.items.map((section) => ({
+                ...section,
+                members: section.members.map((member) =>
+                  member.idRef === previousId ? { ...member, idRef: newPanelId } : member
+                ),
+              })),
+            },
+          }
+        : {};
+
     this.updateInput({
       panels: finalPanels,
       lastReloadRequestTime: new Date().getTime(),
+      ...layoutUpdate,
     });
   }
 
@@ -370,6 +459,34 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       }
     }
     return queries;
+  }
+
+  /**
+   * Moving a panel between grid renderers unmounts and destroys its embeddable.
+   * Remove and re-add affected panels so the container creates live instances.
+   */
+  public reparentPanels(
+    ids: string[],
+    layout: DashboardLayout,
+    panels?: DashboardContainerInput['panels']
+  ) {
+    const finalPanels = panels ?? this.input.panels;
+    const strippedPanels = { ...this.input.panels };
+    ids.forEach((id) => delete strippedPanels[id]);
+    this.updateInput({ panels: strippedPanels });
+    this.updateInput({ panels: finalPanels, layout });
+  }
+
+  public setPendingCreateSectionContext(sectionId: string) {
+    this.pendingCreateSectionId = sectionId;
+  }
+
+  // Consume the section context once so a later create cannot reuse it.
+  public getStateTransferContainerInfoData(): Record<string, unknown> | undefined {
+    if (!this.options.allowDashboardSections) return undefined;
+    const sectionId = this.pendingCreateSectionId;
+    this.pendingCreateSectionId = undefined;
+    return sectionId ? { sectionId } : undefined;
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

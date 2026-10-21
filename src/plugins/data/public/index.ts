@@ -546,6 +546,7 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   useSyncQueryStateWithUrl,
+  getGlobalQueryUrlState,
   QueryState,
   getDefaultQuery,
   FilterManager,
@@ -690,10 +691,12 @@ export { verifyPerformanceFixOutcome } from './ppl_lint/verify_performance_fix_o
 // descriptor and an apply handler; the session store, candidate evaluator, silent
 // test tool, and approve card are common.
 export {
+  armPPLLintFixRequest,
   cleanupPPLLintFixRequest,
   clearPPLLintFixSession,
   getPPLLintFixOutcome,
   getPPLLintFixSession,
+  isPPLLintFixFlowActive,
   markPPLLintFixApplied,
   markPPLLintFixDismissed,
   markPPLLintFixFailed,

@@ -40,4 +40,5 @@ export class StorageMock extends Storage {
   keys = jest.fn();
   get = jest.fn();
   set = jest.fn();
+  rawByteLength = jest.fn();
 }

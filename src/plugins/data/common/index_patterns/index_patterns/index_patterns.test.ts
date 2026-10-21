@@ -51,6 +51,8 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
+  let newService: (apiClient?: any) => IndexPatternsService;
+  let onNotification: jest.Mock;
   let savedObjectsClient: SavedObjectsClientCommon;
   const uiSettingsGet = jest.fn();
 
@@ -88,19 +90,23 @@ describe('IndexPatterns', () => {
     uiSettingsGet.mockClear();
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
-    indexPatterns = new IndexPatternsService({
-      uiSettings: {
-        get: uiSettingsGet,
-        getAll: () => {},
-      } as any as UiSettingsCommon,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
-      fieldFormats,
-      onNotification: () => {},
-      onError: () => {},
-      onRedirectNoIndexPattern: () => {},
-      onUnsupportedTimePattern: () => {},
-    });
+    onNotification = jest.fn();
+    newService = (apiClient: any = createFieldsFetcher()) =>
+      new IndexPatternsService({
+        uiSettings: {
+          get: uiSettingsGet,
+          getAll: () => {},
+        } as any as UiSettingsCommon,
+        savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+        apiClient,
+        fieldFormats,
+        onNotification,
+        onError: () => {},
+        onRedirectNoIndexPattern: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+    indexPatterns = newService();
   });
 
   test('does cache gets for the same id', async () => {
@@ -119,11 +125,172 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 
-  test('savedObjectCache pre-fetches title and displayName', async () => {
+  test('refreshes a stale field list when timeFieldName is missing from it', async () => {
+    const id = 'stale-time-field';
+    // What an index-pattern saved object looks like after being imported from
+    // another cluster, or cached before the time-series mappings existed: the
+    // time field it names is absent from its own cached field list.
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: {
+        title: 'metrics-index',
+        timeFieldName: '@timestamp',
+        fields: JSON.stringify([
+          { name: '_id', type: 'string', aggregatable: false, searchable: true },
+          { name: '_index', type: 'string', aggregatable: true, searchable: true },
+        ]),
+      },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest.fn().mockResolvedValue([
+      { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
+      { name: 'host', type: 'string', aggregatable: true, searchable: true },
+    ]);
+    indexPatterns = newService(apiClient);
+
+    const indexPattern = await indexPatterns.get(id);
+
+    // Without reconciliation the agg/time-filter paths see no @timestamp, which
+    // blanks dashboard panels and silently drops the time range filter.
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalled();
+    expect(indexPattern.getTimeField()).toBeDefined();
+    expect(indexPattern.getFieldByName('@timestamp')).toBeDefined();
+  });
+
+  test('does not refresh when the cached field list already has the time field', async () => {
+    const id = 'fresh-time-field';
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: {
+        title: 'metrics-index',
+        timeFieldName: '@timestamp',
+        fields: JSON.stringify([
+          { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
+        ]),
+      },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest.fn().mockResolvedValue([]);
+    indexPatterns = newService(apiClient);
+
+    await indexPatterns.get(id);
+
+    // Refreshing on every get() would add a field-caps round trip to every
+    // dashboard load, so it must only happen on a real mismatch.
+    expect(apiClient.getFieldsForWildcard).not.toHaveBeenCalled();
+  });
+
+  test('does not refresh a pattern with no time field at all', async () => {
+    const id = 'no-time-field';
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: { title: 'logs-*', fields: JSON.stringify([]) },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest.fn().mockResolvedValue([]);
+    indexPatterns = newService(apiClient);
+
+    await indexPatterns.get(id);
+
+    expect(apiClient.getFieldsForWildcard).not.toHaveBeenCalled();
+  });
+
+  test('reports an actionable message when the time field is absent from the index', async () => {
+    const id = 'absent-time-field';
+    // Shape seen on a time series collection that defaulted its time field to
+    // @timestamp while the documents carry a different one: the field is not
+    // stale in the snapshot, it does not exist upstream either.
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: {
+        title: 'ocsf-test',
+        timeFieldName: '@timestamp',
+        fields: JSON.stringify([
+          { name: 'time_dt', type: 'date', aggregatable: true, searchable: true },
+        ]),
+      },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest
+      .fn()
+      .mockResolvedValue([{ name: 'time_dt', type: 'date', aggregatable: true, searchable: true }]);
+    indexPatterns = newService(apiClient);
+
+    const indexPattern = await indexPatterns.get(id);
+
+    // Refresh cannot invent the field, so the user is told instead of being
+    // left with an opaque aggregation failure.
+    expect(indexPattern.getTimeField()).toBeUndefined();
+    expect(onNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining('@timestamp'),
+        text: expect.stringContaining('date fields'),
+        color: 'warning',
+      })
+    );
+  });
+
+  test('reports the missing time field once, not once per resolver', async () => {
+    const id = 'absent-once';
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: {
+        title: 'ocsf-test',
+        timeFieldName: '@timestamp',
+        fields: JSON.stringify([{ name: 'time_dt', type: 'date' }]),
+      },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest
+      .fn()
+      .mockResolvedValue([{ name: 'time_dt', type: 'date' }]);
+    indexPatterns = newService(apiClient);
+
+    // Several components resolve the same pattern around first render.
+    await Promise.all([indexPatterns.get(id), indexPatterns.get(id), indexPatterns.get(id)]);
+    indexPatterns.clearCache(id);
+    await indexPatterns.get(id);
+
+    // Once for the concurrent burst, once after the cache was explicitly
+    // cleared -- never one per caller.
+    expect(onNotification).toHaveBeenCalledTimes(2);
+  });
+
+  test('does not report when a refresh repairs the field list', async () => {
+    const id = 'repairable';
+    setDocsourcePayload(id, {
+      id,
+      version: 'v1',
+      attributes: {
+        title: 'metrics-index',
+        timeFieldName: '@timestamp',
+        fields: JSON.stringify([{ name: '_id', type: 'string' }]),
+      },
+    });
+    const apiClient = createFieldsFetcher();
+    apiClient.getFieldsForWildcard = jest
+      .fn()
+      .mockResolvedValue([
+        { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
+      ]);
+    indexPatterns = newService(apiClient);
+
+    const indexPattern = await indexPatterns.get(id);
+
+    expect(indexPattern.getTimeField()).toBeDefined();
+    expect(onNotification).not.toHaveBeenCalled();
+  });
+
+  test('savedObjectCache pre-fetches fields required for source compatibility filtering', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title', 'displayName'],
+      fields: ['title', 'displayName', 'type'],
       perPage: 10000,
     });
   });
@@ -263,12 +430,12 @@ describe('IndexPatterns', () => {
     expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
   });
 
-  describe('getCache - excludeEngineTypes', () => {
-    const buildPattern = (id: string, dataSourceId?: string) => ({
+  describe('getCache filtering', () => {
+    const buildPattern = (id: string, dataSourceId?: string, datasetType?: string) => ({
       id,
       type: 'index-pattern',
       version: '1',
-      attributes: { title: id },
+      attributes: { title: id, ...(datasetType && { type: datasetType }) },
       references: dataSourceId ? [{ id: dataSourceId, type: 'data-source', name: 'ds' }] : [],
     });
 
@@ -314,6 +481,38 @@ describe('IndexPatterns', () => {
       });
       const cache = await indexPatterns.getCache({ excludeEngineTypes: [] });
       expect(cache?.map((o) => o.id)).toEqual(['a', 'b']);
+    });
+
+    test('excludes saved objects whose dataset type is blocked', async () => {
+      setupClientWithDataSources(
+        [
+          buildPattern('index-pattern'),
+          buildPattern('indexes-dataset', undefined, 'INDEXES'),
+          buildPattern('rollup', undefined, 'rollup'),
+        ],
+        {}
+      );
+      const cache = await indexPatterns.getCache({ excludeDatasetTypes: ['INDEXES'] });
+      expect(cache?.map((o) => o.id)).toEqual(['index-pattern', 'rollup']);
+    });
+
+    test('combines engine-type and dataset-type filters', async () => {
+      setupClientWithDataSources(
+        [
+          buildPattern('supported', 'ds-os'),
+          buildPattern('blocked-engine', 'ds-ae'),
+          buildPattern('blocked-dataset', 'ds-os', 'INDEXES'),
+        ],
+        {
+          'ds-os': 'OpenSearch',
+          'ds-ae': 'AnalyticEngine',
+        }
+      );
+      const cache = await indexPatterns.getCache({
+        excludeEngineTypes: ['AnalyticEngine'],
+        excludeDatasetTypes: ['INDEXES'],
+      });
+      expect(cache?.map((o) => o.id)).toEqual(['supported']);
     });
 
     test('excludes patterns whose data source has a blocked engine type', async () => {

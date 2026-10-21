@@ -82,6 +82,7 @@
  */
 
 import { pull, sortBy } from 'lodash';
+import { safeSetItem } from '@osd/std';
 import { IStorage } from '../types';
 
 interface IndexedItem {
@@ -166,7 +167,8 @@ export class HashedItemStore implements IStorage<string, boolean> {
   }
 
   private setIndexedItems(items: IndexedItem[]) {
-    this.storage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify(items));
+    // persistItem() sheds on quota; this index write did not, so it threw.
+    safeSetItem(this.storage, HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify(items));
   }
 
   private getIndexedItem(hash: string, indexedItems: IndexedItem[] = this.getIndexedItems()) {

@@ -37,13 +37,18 @@ import {
 } from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
-import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
+import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters, Query } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
 export interface ISyncConfig {
   filters: FilterStateStore;
   query: boolean;
   dataset?: boolean;
+  /**
+   * Query selected by the application before URL synchronization starts.
+   * Used only when `_q` is absent so URL initialization does not discard app-owned query state.
+   */
+  initialQuery?: Query;
   /**
    * When true, skips using existing filters from filterManager when initializing state from URL.
    * This is useful when navigating to a saved search/explore to prevent filter persistence.
@@ -77,19 +82,22 @@ export const connectStorageToQueryState = (
       syncKeys.push('appFilters');
     }
 
-    const initialState: QueryState = osdUrlStateStorage.get('_q') ?? {
-      query: queryString.getDefaultQuery(),
+    const queryStateFromUrl = osdUrlStateStorage.get<QueryState>('_q');
+    const initialQuery = syncConfig.initialQuery ?? queryString.getDefaultQuery();
+    const initialState: QueryState = queryStateFromUrl ?? {
+      query: initialQuery,
       // If caller specifies to skip filters from memory, use empty array
       filters: syncConfig.skipAppFiltersFromMemory ? [] : filterManager.getAppFilters(),
     };
 
-    if (!osdUrlStateStorage.get('_q')) {
+    if (!queryStateFromUrl) {
       // set up initial '_q' flag in the URL to sync query and filter changes
       osdUrlStateStorage.set('_q', initialState, {
         replace: true,
       });
-      // clear existing query and apply default query
-      queryString.clearQuery();
+      // Apply the same query written to `_q`. Calling clearQuery() here would replace the
+      // application-owned initial query with the configured default.
+      queryString.setQuery(initialQuery, false, false);
     }
 
     // Clear app filters if caller requested to skip filters from memory

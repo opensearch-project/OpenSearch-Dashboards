@@ -38,4 +38,5 @@ export const TopNavIds = {
   FULL_SCREEN: 'fullScreenMode',
   VISUALIZE: 'visualize',
   ADD_EXISTING: 'addExisting',
+  ADD_SECTION: 'addSection',
 };

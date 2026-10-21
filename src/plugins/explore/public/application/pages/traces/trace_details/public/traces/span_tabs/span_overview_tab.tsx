@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
+import { formatSpanDuration, isEmpty } from '../../utils/helper_functions';
 import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
 import { isSpanError, resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
 import './span_tabs.scss';
@@ -162,7 +162,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
               startTime
                 ? `${moment(startTime).format('MMM D')} @ ${moment(startTime).format(
                     'HH:mm:ss.SSS'
-                  )} (${round(nanoToMilliSec(duration || 0), 0)}ms)`
+                  )}`
                 : '-'
             }
           />
@@ -201,6 +201,20 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
             }
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <OverviewField
+            label={i18n.translate('explore.spanOverviewTab.duration', {
+              defaultMessage: 'Duration',
+            })}
+            value={duration ? formatSpanDuration(duration) : '-'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

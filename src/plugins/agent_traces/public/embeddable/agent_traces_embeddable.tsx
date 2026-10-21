@@ -41,6 +41,20 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import { addPPLSourceClause } from '../application/utils/languages/ppl/get_query_string_with_source';
 import { VisualizationBuilder } from '../../../explore/public';
 import { ExecutionContextSearch } from '../../../expressions/common';
+import { setStateToOsdUrl } from '../../../opensearch_dashboards_utils/public';
+import { PLUGIN_ID, AGENT_TRACES_SESSION_ID_FIELD } from '../../common';
+import { formatTimestamp, TraceRow } from '../application/pages/traces/hooks/tree_utils';
+import { hitToBaseRow } from '../application/pages/traces/table_shared';
+import {
+  PPLService,
+  escapePPLValue,
+} from '../application/pages/traces/trace_details/data_fetching/ppl_request_helpers';
+import { fetchSessions } from '../application/pages/sessions/fetch_sessions';
+import { SessionRow } from '../application/pages/sessions/session_utils';
+import { AgentView, isAgentView } from './agent_view_panel';
+import { OpenSearchSearchHit } from '../types/doc_views_types';
+import { prepareAgentSpansQuery, prepareRootSpansQuery } from '../application/tab_queries';
+import { dropShadowedAiRoots, ensureAiRootFieldChecked } from '../application/utils/ai_root';
 
 export interface SearchProps {
   description?: string;
@@ -64,7 +78,26 @@ export interface SearchProps {
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   visualizationBuilder?: VisualizationBuilder;
   searchContext?: ExecutionContextSearch;
+  /** Saved from the Traces, Spans or Sessions tab: render the agent table for that tab. */
+  agentView?: AgentView;
+  agentRows?: TraceRow[];
+  sessions?: SessionRow[];
+  agentTotal?: number | null;
+  agentError?: string;
+  formatTs?: (ts: string) => string;
+  onOpenTrace?: (row: TraceRow) => void;
+  onOpenSession?: (session: SessionRow) => void;
 }
+
+/** Read the tab a saved search was saved from (its `uiState.activeTab`). */
+const savedActiveTab = (uiState: unknown): string | undefined => {
+  try {
+    const parsed = typeof uiState === 'string' ? JSON.parse(uiState || '{}') : uiState;
+    return (parsed as { activeTab?: string })?.activeTab;
+  } catch {
+    return undefined;
+  }
+};
 
 interface AgentTracesEmbeddableConfig {
   savedAgentTraces: SavedAgentTraces;
@@ -100,6 +133,10 @@ export class AgentTracesEmbeddable
   private node?: HTMLElement;
   private root?: Root;
   private visualizationBuilder?: VisualizationBuilder;
+  private agentView?: AgentView;
+  /** Base PPL query (source + user query) for the Sessions view, which runs its own queries. */
+  private sessionsBaseQuery?: string;
+  private savedQuery?: Query;
 
   constructor(
     {
@@ -182,6 +219,14 @@ export class AgentTracesEmbeddable
       displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedAgentTraces.title,
       visualizationBuilder: this.visualizationBuilder,
+      formatTs: this.formatTs,
+      onOpenTrace: (row) =>
+        this.openInAgentTraces('traces', `| where traceId = ${escapePPLValue(row.traceId)}`),
+      onOpenSession: (session) =>
+        this.openInAgentTraces(
+          'sessions',
+          `| where \`${AGENT_TRACES_SESSION_ID_FIELD}\` = ${escapePPLValue(session.sessionId)}`
+        ),
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -191,8 +236,22 @@ export class AgentTracesEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
+    const activeTab = savedActiveTab(this.savedAgentTraces.uiState);
+    this.agentView = !isVisualizationTab && isAgentView(activeTab) ? activeTab : undefined;
+    searchProps.agentView = this.agentView;
     const query = this.savedAgentTraces.searchSource.getField('query');
-    if (query) {
+    this.savedQuery = query ? { ...query } : undefined;
+    if (query && this.agentView) {
+      // Same query the tab runs in the app (e.g. Traces = root agent spans).
+      this.sessionsBaseQuery = defaultPrepareQueryString(query);
+      // The tab registry is only filled when the app mounts, so use the tab queries directly.
+      query.query =
+        this.agentView === 'traces'
+          ? prepareRootSpansQuery(query)
+          : this.agentView === 'spans'
+            ? prepareAgentSpansQuery(query)
+            : this.sessionsBaseQuery;
+    } else if (query) {
       if (isVisualizationTab) {
         // Visualization tabs keep the full query (including stats) to get aggregated data.
         // Only add the source clause without stripping stats.
@@ -313,8 +372,72 @@ export class AgentTracesEmbeddable
     }
   }
 
+  private formatTs = (ts: string) => {
+    const tz = this.services.uiSettings.get('dateFormat:tz');
+    return formatTimestamp(
+      ts,
+      tz && tz !== 'Browser' ? tz : Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+  };
+
+  /** Open a trace or session in the Agent Traces app, with the dashboard's time range. */
+  private openInAgentTraces(tab: AgentView, filter: string) {
+    const query = this.savedQuery;
+    let path = '#/';
+    path = setStateToOsdUrl('_a', { ui: { activeTabId: tab } }, { useHash: false }, path);
+    path = setStateToOsdUrl(
+      '_q',
+      { dataset: query?.dataset, language: query?.language ?? 'PPL', query: filter },
+      { useHash: false },
+      path
+    );
+    path = setStateToOsdUrl('_g', { time: this.input.timeRange }, { useHash: false }, path);
+    this.services.core.application.navigateToApp(PLUGIN_ID, { path });
+  }
+
+  /** Sessions run their own queries (matching ids, per-session stats, root spans). */
+  private fetchSessionsView = async () => {
+    if (!this.searchProps) return;
+    const dataset = this.savedQuery?.dataset;
+    // Like fetch(): a newer refresh cancels this one, so a slow response cannot overwrite it.
+    if (this.abortController) this.abortController.abort();
+    const abortController = new AbortController();
+    this.abortController = abortController;
+    this.updateOutput({ loading: true, error: undefined });
+    this.searchProps.isLoading = true;
+    try {
+      if (!dataset || !this.sessionsBaseQuery) throw new Error('Saved search has no dataset');
+      const result = await fetchSessions(
+        // The panel's time range (dashboard time or a per-panel override), as fetch() uses.
+        new PPLService(this.services.data, {
+          timeRange: this.input.timeRange,
+          signal: abortController.signal,
+        }),
+        dataset,
+        this.sessionsBaseQuery,
+        this.formatTs
+      );
+      if (abortController.signal.aborted) return;
+      this.searchProps.sessions = result.sessions;
+      this.searchProps.agentTotal = result.totalSessions;
+      this.searchProps.agentError = undefined;
+      this.searchProps.rows = result.sessions;
+      this.searchProps.hits = result.sessions.length;
+    } catch (error: unknown) {
+      if (abortController.signal.aborted) return;
+      this.searchProps.sessions = [];
+      this.searchProps.agentError = error instanceof Error ? error.message : String(error);
+    }
+    this.searchProps.isLoading = false;
+    this.updateOutput({ loading: false, error: undefined });
+  };
+
   private fetch = async () => {
     if (!this.searchProps) return;
+    if (this.agentView === 'sessions') {
+      await this.fetchSessionsView();
+      return;
+    }
     const { searchSource } = this.savedAgentTraces;
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -334,6 +457,21 @@ export class AgentTracesEmbeddable
     });
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
+    if (this.agentView === 'traces' && this.savedQuery) {
+      // The Traces query names the AI-root marker only once it is known to be mapped.
+      await ensureAiRootFieldChecked(
+        new PPLService(this.services.data),
+        this.savedQuery.dataset,
+        defaultPrepareQueryString({ ...this.savedQuery, query: '' })
+      );
+      const currentQuery = searchSource.getField('query');
+      if (currentQuery) {
+        searchSource.setField('query', {
+          ...currentQuery,
+          query: prepareRootSpansQuery(this.savedQuery),
+        });
+      }
+    }
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
@@ -348,7 +486,7 @@ export class AgentTracesEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
-    const rows = resp.hits.hits;
+    const rows = this.agentView === 'traces' ? dropShadowedAiRoots(resp.hits.hits) : resp.hits.hits;
 
     // Feed data to VisualizationBuilder for visualization tabs
     if (this.visualizationBuilder) {
@@ -364,6 +502,12 @@ export class AgentTracesEmbeddable
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = rows;
+    if (this.agentView) {
+      this.searchProps.agentRows = rows.map(
+        (hit: OpenSearchSearchHit<Record<string, unknown>>) =>
+          hitToBaseRow(hit, this.formatTs) as TraceRow
+      );
+    }
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;

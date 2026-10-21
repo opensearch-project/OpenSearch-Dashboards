@@ -14,13 +14,24 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
-import { binaryOperatorOptions, unaryOperatorOptions, modeToggleOptions } from '../types';
+import {
+  binaryOperatorOptions,
+  unaryOperatorOptions,
+  modeToggleOptions,
+  TransformationConfigSchema,
+} from '../types';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  getRowFieldValue,
+  rowHasField,
+} from '../transformation_utils';
 
 type Mode = 'binary' | 'unary' | 'crossFields';
 type BinaryOperator = '+' | '-' | '*' | '/';
@@ -167,13 +178,24 @@ const parseArithmetic = (input: string): number | null => {
   return result !== null && isFinite(result) ? result : null;
 };
 
-const evaluateExpression = (expression: string, source: Record<string, unknown>): number | null => {
+const evaluateExpression = (expression: string, row: OpenSearchSearchHit): number | null => {
   const expr = expression.replace(/\$\{([^}]+)\}/g, (_, fieldName) => {
-    const val = Number(source[fieldName]);
+    const val = Number(getRowFieldValue(row, fieldName));
     return isNaN(val) ? 'NaN' : String(val);
   });
   if (expr.includes('NaN')) return null;
   return parseArithmetic(expr);
+};
+
+const getExpressionFields = (expression: string): string[] => {
+  const fields: string[] = [];
+  const fieldPattern = /\$\{([^}]+)\}/g;
+  let match = fieldPattern.exec(expression);
+  while (match) {
+    fields.push(match[1]);
+    match = fieldPattern.exec(expression);
+  }
+  return fields;
 };
 
 const operatorMap: Record<BinaryOperator, string> = {
@@ -504,16 +526,51 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
     },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: AddFieldConfig) => {
-      if (!isConfigComplete(config)) return data;
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Add Field configuration is incomplete.');
+      }
+
+      let referencedFields: string[] = [];
+
+      if (config.mode === 'binary') {
+        referencedFields = [config.field1, config.field2].filter(
+          (field): field is string => !!field && field !== CUSTOM_VALUE_KEY
+        );
+      } else if (config.mode === 'unary') {
+        referencedFields = [config.unaryField!];
+      } else if (config.crossFieldsOperator === 'expression') {
+        referencedFields = getExpressionFields(config.expression);
+      } else {
+        referencedFields = (config.crossFields ?? []).map((field) => field.name);
+      }
 
       const alias = config.alias || generateAlias(config);
+      const missingFields = new Set<string>();
+      let applicableRows = 0;
+      const allowsPartialInputs =
+        config.mode === 'crossFields' && config.crossFieldsOperator !== 'expression';
 
-      return data.map((row) => {
+      if (data.length === 0) {
+        referencedFields.forEach((field) => missingFields.add(field));
+      }
+
+      const transformed = data.map((row) => {
+        const missingFieldsForRow = referencedFields.filter((field) => !rowHasField(row, field));
+        missingFieldsForRow.forEach((field) => missingFields.add(field));
+
+        if (
+          (!allowsPartialInputs && missingFieldsForRow.length > 0) ||
+          (allowsPartialInputs && missingFieldsForRow.length === referencedFields.length)
+        ) {
+          return row;
+        }
+        applicableRows++;
+
         let result: number | null = null;
 
         if (config.mode === 'binary') {
           const getRaw = (field: string | undefined, custom: string) =>
-            field === CUSTOM_VALUE_KEY ? Number(custom) : Number(get(row, `_source.${field}`));
+            field === CUSTOM_VALUE_KEY ? Number(custom) : Number(getRowFieldValue(row, field!));
 
           const v1 = getRaw(config.field1, config.field1CustomValue);
           const v2 = getRaw(config.field2, config.field2CustomValue);
@@ -522,15 +579,16 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
             result = applyBinary(v1, config.binaryOperator, v2);
           }
         } else if (config.mode === 'unary') {
-          const raw = Number(get(row, `_source.${config.unaryField}`));
+          const raw = Number(getRowFieldValue(row, config.unaryField!));
           if (!isNaN(raw)) {
             result = applyUnary(raw, config.unaryOperator);
           }
         } else if (config.crossFieldsOperator === 'expression') {
-          result = evaluateExpression(config.expression, row._source as Record<string, unknown>);
+          result = evaluateExpression(config.expression, row);
         } else {
           const values = (config.crossFields ?? [])
-            .map((f) => Number(get(row, `_source.${f.name}`)))
+            .filter((field) => rowHasField(row, field.name))
+            .map((field) => Number(getRowFieldValue(row, field.name)))
             .filter((v) => !isNaN(v));
           if (values.length > 0) {
             const sum = values.reduce((a, b) => a + b, 0);
@@ -544,32 +602,15 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
 
         return { ...row, _source: newSource };
       });
-    },
-    validateConfig: (config: AddFieldConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      const patch: Partial<AddFieldConfig> = {};
 
-      if (config.mode === 'binary') {
-        if (config.field1 && config.field1 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field1)) {
-          patch.field1 = undefined;
-          patch.field1CustomValue = '';
-        }
-        if (config.field2 && config.field2 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field2)) {
-          patch.field2 = undefined;
-          patch.field2CustomValue = '';
-        }
-      } else if (config.mode === 'unary') {
-        if (config.unaryField && !fieldNames.has(config.unaryField)) {
-          patch.unaryField = undefined;
-        }
-      } else if (config.crossFieldsOperator !== 'expression') {
-        const valid = (config.crossFields ?? []).filter((f) => fieldNames.has(f.name));
-        if (valid.length !== (config.crossFields ?? []).length) {
-          patch.crossFields = valid;
-        }
+      if (missingFields.size === 0) {
+        return createAppliedResult(transformed);
       }
-
-      return Object.keys(patch).length > 0 ? { ...config, ...patch } : config;
+      return createMissingFieldsResult(
+        applicableRows > 0 ? transformed : data,
+        Array.from(missingFields),
+        applicableRows > 0 ? 'partially_applied' : 'skipped'
+      );
     },
     Editor: AddFieldEditor,
   };
@@ -585,4 +626,146 @@ export const addFieldTransformationDefinition: TransformationDefinition<AddField
   }),
   iconType: 'plusInCircle',
   createInstance: createAddFieldTransformation,
+};
+
+/**
+ * Config schema for add_field.
+ *
+ * The `mode` field is a discriminator: the set of relevant config fields changes
+ * depending on its value.
+ *
+ * mode = "binary": field1, field1CustomValue, binaryOperator, field2, field2CustomValue, alias
+ * mode = "unary":  unaryOperator, unaryField, alias
+ * mode = "crossFields" + crossFieldsOperator != "expression": crossFields, alias
+ * mode = "crossFields" + crossFieldsOperator == "expression": expression, alias
+ *
+ * To use a constant number instead of a field in binary mode, set field1 or field2 to the
+ * special sentinel value "__CUSTOM__" and put the number string in field1CustomValue /
+ * field2CustomValue.
+ */
+export const addFieldConfigSchema: TransformationConfigSchema = {
+  mode: {
+    description:
+      'Calculation mode. Determines which other fields are used. ' +
+      '"binary" — arithmetic between two operands (fields or constants); ' +
+      '"unary" — single math function applied to one numerical field; ' +
+      '"crossFields" — aggregate or expression across multiple numerical fields.',
+    kind: 'enum',
+    defaultValue: 'binary',
+    required: true,
+    discriminates: [
+      'field1',
+      'field1CustomValue',
+      'binaryOperator',
+      'field2',
+      'field2CustomValue',
+      'unaryOperator',
+      'unaryField',
+      'crossFieldsOperator',
+      'crossFields',
+      'expression',
+    ],
+    enumOptions: modeToggleOptions.map((o) => ({ value: o.id, label: o.label })),
+  },
+  // ---- binary mode fields ----
+  field1: {
+    description:
+      '(binary mode) First operand. Set to a column name from the result schema, ' +
+      'or to the sentinel "__CUSTOM__" to use a constant number from field1CustomValue.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  field1CustomValue: {
+    description:
+      '(binary mode) Constant value for field1 when field1 === "__CUSTOM__". ' +
+      'Pass a numeric string, e.g. "60".',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  binaryOperator: {
+    description: '(binary mode) Arithmetic operator to apply between field1 and field2.',
+    kind: 'enum',
+    defaultValue: '+',
+    required: false,
+    enumOptions: binaryOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+  },
+  field2: {
+    description:
+      '(binary mode) Second operand. Same rules as field1 — use a column name or "__CUSTOM__".',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  field2CustomValue: {
+    description:
+      '(binary mode) Constant value for field2 when field2 === "__CUSTOM__". ' +
+      'Pass a numeric string.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  // ---- unary mode fields ----
+  unaryOperator: {
+    description: '(unary mode) Math function to apply to unaryField.',
+    kind: 'enum',
+    defaultValue: 'abs',
+    required: false,
+    enumOptions: unaryOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+  },
+  unaryField: {
+    description: '(unary mode) Numerical column to apply the unary function to.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  // ---- crossFields mode fields ----
+  crossFieldsOperator: {
+    description:
+      '(crossFields mode) How to combine the selected fields. ' +
+      '"total" sums them, "mean" averages them, ' +
+      '"expression" evaluates a custom formula (see expression field).',
+    kind: 'enum',
+    defaultValue: 'total',
+    required: false,
+    enumOptions: [
+      { value: 'total', label: 'Sum (total)' },
+      { value: 'mean', label: 'Mean (average)' },
+      { value: 'expression', label: 'Custom expression' },
+    ],
+  },
+  crossFields: {
+    description:
+      '(crossFields mode, operator != "expression") List of numerical columns to aggregate. ' +
+      'Only the "name" property is used.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: false,
+    nestedSchema: {
+      name: {
+        description: 'Numerical column name.',
+        kind: 'field_name',
+        required: true,
+      },
+    },
+  },
+  expression: {
+    description:
+      '(crossFields mode, operator == "expression") Arithmetic expression over column values. ' +
+      'Reference columns with ${fieldName} syntax, e.g. "${price} * 1.1 - ${discount}". ' +
+      'Supports +, -, *, /, parentheses, and numeric literals.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  // ---- shared ----
+  alias: {
+    description:
+      'Name of the new column added to each row. ' +
+      'If omitted, a name is auto-generated from the operator and field names.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
 };

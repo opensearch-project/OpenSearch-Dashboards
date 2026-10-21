@@ -15,6 +15,8 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
+import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
+import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -104,25 +106,6 @@ export function fillMissingTimestamps(
 }
 
 /**
- * Masks subquery brackets and quoted string literals in a PPL query so that command-detection
- * regexes only match top-level pipes.
- *
- * - Brackets: `[...]` content is replaced with NUL characters. Uses [\s\S]*? to cross newlines.
- * - Quotes: single- and double-quoted strings are replaced with NUL characters so that
- *   `| stats` inside a string literal (e.g. `where msg = '| stats count()'`) is not matched.
- *
- * Shared by queryEndsWithHead and queryHasStats.
- */
-const maskPPLSubqueriesAndStrings = (queryString: string): string => {
-  // First mask quoted strings (handles escaped quotes within)
-  let masked = queryString.replace(/'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-  masked = masked.replace(/"(?:[^"\\]|\\.)*"/g, (match) => '\0'.repeat(match.length));
-  // Then mask bracket subqueries ([\s\S]*? crosses newlines)
-  masked = masked.replace(/\[[\s\S]*?\]/g, (match) => '\0'.repeat(match.length));
-  return masked;
-};
-
-/**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
  * Subquery brackets and quoted strings are masked so that head inside them is ignored.
  */
@@ -132,19 +115,63 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a `stats` command, whose output rows are aggregation
- * buckets rather than documents. Subquery brackets and quoted strings are masked so that
- * `stats` inside them is ignored.
+ * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
+ * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
+ * brackets and quoted strings are masked so that a command inside them is ignored.
  *
- * Used to detect queries where the hit counter should show bucket count separately from
- * document count. Other aggregating commands (chart, timechart, top, rare, etc.) will be
- * added in a follow-up PR once stripStatsFromQuery is extended to handle them.
+ * Used to detect queries where the hit counter should show bucket count separately from document
+ * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
  */
-export const queryHasStats = (queryString: string): boolean => {
+export const queryHasAggregation = (queryString: string): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return /\|\s*stats\b/i.test(masked);
+  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
 };
 
+/** Commands that reshape rows such that the time field may no longer exist downstream. */
+const TIME_FIELD_CONSUMING_COMMANDS = ['stats', 'eventstats', 'top', 'rare', 'rename'];
+const TIME_FIELD_CONSUMING_REGEX = new RegExp(
+  `\\|\\s*(${TIME_FIELD_CONSUMING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+/** Splits on top-level pipes, ignoring those inside quoted strings or bracketed subqueries. */
+const splitTopLevelStages = (queryString: string): string[] => {
+  const masked = maskPPLSubqueriesAndStrings(queryString);
+  const stages: string[] = [];
+  let start = 0;
+  for (let i = 0; i < masked.length; i++) {
+    if (masked[i] === '|') {
+      stages.push(queryString.slice(start, i));
+      start = i + 1;
+    }
+  }
+  stages.push(queryString.slice(start));
+  return stages;
+};
+
+/**
+ * Removes `fields` projections so the appended aggregation can still reference the time field.
+ *
+ * `fields` is the only command that can drop the time field while leaving the row set intact, and
+ * removing it is always safe here: a projection restricts the available columns and never introduces
+ * one, so no later stage can break by having more columns available. Row-set commands (`where`,
+ * `head`, `dedup`) are preserved, because the histogram must describe the rows the query actually
+ * matches. `rex`/`eval`/`parse` are preserved too: they only add columns, and removing them could
+ * break a later stage that reads what they produced.
+ */
+const stripFieldsProjections = (queryString: string): string =>
+  splitTopLevelStages(queryString)
+    .filter((stage, index) => index === 0 || !/^\s*fields\b/i.test(stage))
+    .map((stage) => stage.trim())
+    .join(' | ');
+
+/**
+ * Appends the histogram aggregation to a query.
+ *
+ * Returns the query unchanged when no aggregation can be built, which leaves the chart empty rather
+ * than emitting a query that fails: a failed histogram is dispatched non-blocking and its error is
+ * never rendered, so an invalid query would surface as a silently missing chart.
+ */
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
   const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
@@ -152,10 +179,18 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
     return query;
   }
 
+  const source = stripFieldsProjections(query);
+
+  // A remaining aggregation or rename may have consumed the time field, and whether it did cannot be
+  // determined from the query text alone.
+  if (TIME_FIELD_CONSUMING_REGEX.test(maskPPLSubqueriesAndStrings(source))) {
+    return query;
+  }
+
   if (breakdownField) {
-    return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+    return `${source} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
   } else {
-    return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+    return `${source} | stats count() by span(${timeFieldName}, ${finalInterval})`;
   }
 };
 

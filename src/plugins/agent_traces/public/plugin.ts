@@ -26,6 +26,7 @@ import {
   createOsdUrlTracker,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
+import { getGlobalQueryUrlState } from '../../data/public';
 import {
   AgentTracesFlavor,
   PLUGIN_ID,
@@ -177,9 +178,7 @@ export class AgentTracesPlugin implements Plugin<
                   (value: Record<string, unknown>) =>
                     !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
                 ),
-                map((value: Record<string, unknown>) => ({
-                  ...(value.state as Record<string, unknown>),
-                }))
+                map(({ state }) => getGlobalQueryUrlState(state))
               ),
             },
           ],

@@ -32,7 +32,24 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 jest.mock('./save_vis_modal', () => ({
-  SaveVisModal: () => <div data-test-subj="save-vis-modal">Modal</div>,
+  SaveVisModal: ({ onConfirm }: any) => (
+    <button
+      data-test-subj="save-vis-modal"
+      onClick={() =>
+        onConfirm({
+          savedExplore: {
+            title: '',
+            save: jest.fn().mockResolvedValue('new-explore'),
+          },
+          newTitle: 'New Explore',
+          isTitleDuplicateConfirmed: false,
+          onTitleDuplicate: jest.fn(),
+        })
+      }
+    >
+      Modal
+    </button>
+  ),
 }));
 
 jest.mock('../../../components/data_transformations', () => {
@@ -49,7 +66,7 @@ jest.mock('../../../components/data_transformations', () => {
       clearPipeline: jest.fn(),
       pipeline$: mockObs,
       getPipeline$: () => mockObs,
-      stageSchemas$: mockMapObs,
+      stageFields$: mockMapObs,
     }),
     TransformPanel: () => null,
   };
@@ -143,6 +160,32 @@ describe('SaveVisButton', () => {
     expect(await screen.findByTestId('save-vis-modal')).toBeInTheDocument();
   });
 
+  it('preserves container info when saving a new explore from a dashboard', async () => {
+    const containerInfo = {
+      containerName: 'Dashboard',
+      containerId: 'dashboard-1',
+      containerData: { sectionId: 'section-1' },
+    };
+    mockOsdUrlStateStorageGet.mockReturnValue({
+      originatingApp: 'dashboards',
+      containerInfo,
+    });
+
+    render(<SaveVisButton />);
+    fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+    fireEvent.click(await screen.findByTestId('save-vis-modal'));
+
+    await waitFor(() => {
+      expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboards', {
+        state: {
+          type: 'explore',
+          input: { savedObjectId: 'new-explore' },
+          containerInfo,
+        },
+      });
+    });
+  });
+
   it('saves directly without modal for existing explore when not dirty', async () => {
     (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
     (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: mockSavedExplore });
@@ -197,16 +240,6 @@ describe('SaveVisButton', () => {
 
   it('discards and navigates to originatingApp when originatingApp is set', () => {
     mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    render(<SaveVisButton />);
-    fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));
-    expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboard');
-  });
-
-  it('saves and navigates to edit path when originatingApp is set', () => {
-    mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    // jsdom 26: spy on location.reload rather than replacing the location object.
-    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
-
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));
     expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboard');

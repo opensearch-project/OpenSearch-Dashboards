@@ -55,7 +55,7 @@ import {
   createStartServicesGetter,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { opensearchFilters } from '../../data/public';
+import { getGlobalQueryUrlState, opensearchFilters } from '../../data/public';
 import { createRawDataVisFn } from './visualizations/vega/utils/expression_helper';
 import { VISBUILDER_ENABLE_VEGA_SETTING } from '../common/constants';
 
@@ -93,10 +93,7 @@ export class VisBuilderPlugin implements Plugin<
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],

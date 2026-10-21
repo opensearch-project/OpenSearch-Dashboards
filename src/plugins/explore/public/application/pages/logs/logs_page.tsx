@@ -26,11 +26,11 @@ import { useAnalyzePanelState } from '../../../components/query_panel/query_pane
 import {
   PPLAnalyzePanel,
   getPPLAnalyzeResult$,
-  runPPLAnalyzeInBackground,
   cancelPPLAnalyze,
   clearPPLAnalyzeResult,
   setPPLAnalyzeOpen,
 } from '../../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../utils/languages';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
@@ -141,7 +141,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
   const handleToggleAnalyze = useCallback(() => {
     if (!isOpen) {
-      runPPLAnalyzeInBackground({
+      runPPLAnalyzeWithSource({
         query: queryState,
         http: services.http,
         timefilter: services.data.query.timefilter.timefilter,

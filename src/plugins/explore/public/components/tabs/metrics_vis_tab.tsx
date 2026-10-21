@@ -117,7 +117,9 @@ export const MetricsVisTab = React.memo(() => {
   useEffect(() => {
     if (results) {
       const fieldSchema = results.fieldSchema || [];
-      visualizationBuilder.handleData(limitedRows, fieldSchema);
+      // meta data seriesDisplayNames stores the map between originSeries and displayName
+      const seriesDisplayNames = results.frameMeta?.seriesDisplayNames as Record<string, string>;
+      visualizationBuilder.handleData(limitedRows, fieldSchema, seriesDisplayNames);
     }
   }, [visualizationBuilder, results, limitedRows]);
 

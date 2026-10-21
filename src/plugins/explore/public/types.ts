@@ -58,6 +58,7 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
+import { SourceTypeRegistrySetup } from './services/source_type_registry';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -75,6 +76,8 @@ export interface ExplorePluginSetup {
   docViewsLinks: {
     addDocViewLink: (docViewLinkSpec: unknown) => void;
   };
+  /** Adds a source type to the query panel's "Source type" column (OpenSearch is built in). */
+  sourceTypes: SourceTypeRegistrySetup;
 }
 
 export interface ExplorePluginStart {

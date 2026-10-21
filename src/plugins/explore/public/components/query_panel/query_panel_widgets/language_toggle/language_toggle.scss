@@ -165,6 +165,10 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
 
   &__sourceType {
     border-radius: 5px;
+
+    // A <button>, which centers its label; a name that wraps onto two lines should read from
+    // the left edge like the rest of the column.
+    text-align: left;
     font-size: $ouiFontSizeS;
     padding: $ouiSizeS 10px;
 
@@ -179,6 +183,85 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
     display: flex;
     flex-wrap: wrap;
     gap: $ouiSizeS;
+  }
+
+  // A source's described languages: one row each, name and tag over a description.
+  &__languages {
+    display: flex;
+    flex-direction: column;
+    gap: $ouiSizeS;
+    width: 320px;
+
+    + .exploreLanguagePicker__chips {
+      margin-top: $ouiSizeS;
+    }
+  }
+
+  &__language {
+    background: $ouiColorEmptyShade;
+    border: 1px solid $ouiBorderColor;
+    border-radius: 5px;
+    color: $ouiTextColor;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $ouiSizeS 10px;
+    text-align: left;
+    width: 100%;
+
+    &:hover:not([aria-current="true"]) {
+      border-color: $ouiColorPrimary;
+    }
+
+    &[aria-current="true"] {
+      cursor: default;
+    }
+
+    &--selected {
+      background: $exploreLanguagePickerSoftPrimary;
+      border-color: $ouiColorPrimary;
+
+      // Keeps the tag distinct from the row's own tint.
+      .exploreLanguagePicker__languageTag {
+        background: $ouiColorEmptyShade;
+      }
+    }
+  }
+
+  &__languageHeader {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__languageName {
+    font-size: $ouiFontSizeS;
+    font-weight: $ouiFontWeightSemiBold;
+  }
+
+  &__languageTag {
+    background: $exploreLanguagePickerSoftPrimary;
+    border-radius: 3px;
+    color: $ouiColorPrimaryText;
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 0 6px;
+  }
+
+  &__languageDescription {
+    color: $ouiTextSubduedColor;
+    font-size: $ouiFontSizeXS;
+    line-height: $ouiLineHeight;
+  }
+
+  &__learnMore {
+    // `block` for `margin-top`, which is ignored on the anchor's default `inline`.
+    // `fit-content` so the click target stops at the label, not the whole column.
+    display: block;
+    font-size: $ouiFontSizeXS;
+    margin-top: $ouiSizeM;
+    width: fit-content;
   }
 
   &__chip {

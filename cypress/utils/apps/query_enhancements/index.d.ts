@@ -12,12 +12,12 @@ declare namespace Cypress {
       options?: Partial<Cypress.TypeOptions> & { submit?: boolean }
     ): Chainable<any>;
 
-    setQueryLanguage(value: 'DQL' | 'Lucene' | 'OpenSearch SQL' | 'PPL'): Chainable<any>;
+    setQueryLanguage(value: 'DQL' | 'Lucene' | 'SQL' | 'PPL'): Chainable<any>;
 
     setIndexAsDataset(
       index: string,
       dataSourceName: string,
-      language?: 'OpenSearch SQL' | 'PPL',
+      language?: 'SQL' | 'PPL',
       timeFieldName?: string,
       finalAction?: string
     ): Chainable<any>;

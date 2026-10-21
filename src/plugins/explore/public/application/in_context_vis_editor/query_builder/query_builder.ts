@@ -26,6 +26,7 @@ import {
   QueryAssistParameters,
   QueryAssistResponse,
 } from '../../../../../query_enhancements/common/query_assist';
+import { PromQLQueryOptions } from '../../../../../query_enhancements/common';
 
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
@@ -43,6 +44,7 @@ import {
   QUERY_EDITOR_STATE_KEY,
   ActiveBottomPanelTab,
 } from '../types';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -67,6 +69,7 @@ export interface QueryState {
   query: string;
   language: string;
   dataset?: Dataset;
+  queryOptions?: PromQLQueryOptions;
 }
 
 export interface QueryEditorState {
@@ -164,6 +167,9 @@ export class QueryBuilder {
 
     const preferredDataset = queryStateFromUrl?.dataset ?? options?.savedQueryState?.dataset;
 
+    const queryOptions =
+      queryStateFromUrl?.queryOptions ?? options?.savedQueryState?.queryOptions ?? {};
+
     // Retrieve the preloaded query state based on the language type for a new explore object,
     // or validate whether the URL dataset is compatible with the language type before proceeding.
     // This prevents errors that would otherwise be thrown and avoids invalid operations
@@ -200,6 +206,10 @@ export class QueryBuilder {
     const finalQueryState = {
       ...preloadedQueryState,
       query: finalQuery,
+      // Metrics languages (PromQL, or a registered Metrics source's own) keep their options.
+      ...(getSourceTypeRegistry().isMetricsLanguage(languageType) && queryOptions
+        ? { queryOptions }
+        : {}),
     };
 
     this.updateQueryState(finalQueryState);
@@ -288,8 +298,12 @@ export class QueryBuilder {
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
 
+          const cleanQuery = getSourceTypeRegistry().isMetricsLanguage(newQuery?.language)
+            ? newQuery
+            : { ...newQuery, queryOptions: undefined };
+
           // sync query state with global queryStringManager
-          this.getServices().data.query.queryString.setQuery(newQuery);
+          this.getServices().data.query.queryString.setQuery(cleanQuery);
 
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
@@ -534,6 +548,15 @@ export class QueryBuilder {
     };
 
     this.queryState$.next(updatedQuery);
+  }
+
+  // Only for updating PromQL step/legend options
+  updateQueryOptions(partial: Partial<PromQLQueryOptions>) {
+    const queryOptions = {
+      ...this.queryState$.value.queryOptions,
+      ...partial,
+    };
+    this.updateQueryState({ queryOptions });
   }
 
   async waitForDatasetReady(): Promise<DatasetViewState> {

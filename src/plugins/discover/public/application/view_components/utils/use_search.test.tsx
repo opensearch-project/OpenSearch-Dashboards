@@ -129,6 +129,7 @@ const wrapper: React.FC = ({ children }) => {
 describe('useSearch', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.location.hash = '';
   });
 
   it('should initialize with loading state when search on page load is enabled', async () => {
@@ -290,6 +291,44 @@ describe('useSearch', () => {
     );
   });
 
+  it('restores the saved query when the incoming URL has no query state', async () => {
+    const services = createMockServices();
+    const staleSharedQuery = {
+      query: 'stale shared query',
+      language: 'test language',
+    };
+    services.data.query.queryString.getQuery = jest.fn().mockReturnValue(staleSharedQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+    window.location.hash = '#/view/test-saved-search';
+
+    renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQuery);
+    });
+  });
+
+  it('preserves the current query when the incoming URL has explicit query state', async () => {
+    const services = createMockServices();
+    const urlQuery = {
+      query: 'query from URL',
+      language: 'test language',
+    };
+    services.data.query.queryString.getQuery = jest.fn().mockReturnValue(urlQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+    window.location.hash = '#/view/test-saved-search?_q=(query:(query:test))';
+
+    renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(urlQuery);
+    });
+  });
+
   it('if no saved search, use get query', async () => {
     const services = createMockServices();
     services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearchEmptyQuery);
@@ -302,6 +341,40 @@ describe('useSearch', () => {
 
     await waitFor(() => {
       expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockDefaultQuery);
+    });
+  });
+
+  it('retains dataset-aware default query resolution when the saved search has no query', async () => {
+    const services = createMockServices();
+    const dataset = {
+      id: 'dataset-id',
+      title: 'dataset',
+      type: 'INDEX_PATTERN',
+    };
+    const currentQuery = {
+      query: 'default query',
+      language: 'current language',
+      dataset,
+    };
+    const resolvedDefaultQuery = {
+      query: 'default query',
+      language: 'resolved language',
+      dataset,
+    };
+    services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearchEmptyQuery);
+    services.data.query.queryString.getQuery = jest.fn().mockReturnValue(currentQuery);
+    services.data.query.queryString.getDefaultQuery = jest
+      .fn()
+      .mockReturnValue(resolvedDefaultQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+
+    renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(services.data.query.queryString.getDefaultQuery).toHaveBeenCalledWith(dataset);
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(resolvedDefaultQuery);
     });
   });
 

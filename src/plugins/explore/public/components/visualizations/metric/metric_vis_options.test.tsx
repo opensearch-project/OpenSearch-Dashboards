@@ -71,14 +71,35 @@ describe('MetricVisStyleControls', () => {
     expect(screen.getByText('Metric')).toBeInTheDocument();
   });
 
-  it('does not render title input when showTitle is false', () => {
-    const propsWithoutTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: false },
-    };
-    render(<MetricVisStyleControls {...propsWithoutTitle} />);
+  it('renders metric name input when text display includes the name', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.queryByPlaceholderText('Default title')).not.toBeInTheDocument();
+    const nameInput = screen.getByTestId('metricNameInput');
+    expect(nameInput).toBeInTheDocument();
+    expect(nameInput).toHaveValue('');
+    expect(nameInput).toHaveAttribute('placeholder', 'Auto');
+  });
+
+  it('does not render metric name input when text display excludes the name', () => {
+    const propsWithoutName = {
+      ...mockProps,
+      styleOptions: { ...defaultMetricChartStyles, textMode: 'value' as const },
+    };
+    render(<MetricVisStyleControls {...propsWithoutName} />);
+
+    expect(screen.queryByTestId('metricNameInput')).not.toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when metric name is changed', async () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+
+    fireEvent.change(screen.getByTestId('metricNameInput'), {
+      target: { value: 'Total requests' },
+    });
+
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ title: 'Total requests' });
+    });
   });
 
   it('renders font size range slider', () => {

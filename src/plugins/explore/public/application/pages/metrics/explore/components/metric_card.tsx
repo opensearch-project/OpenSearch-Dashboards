@@ -19,6 +19,7 @@ import {
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { MetricMetadata, MetricType, TYPE_COLORS, inferMetricType } from '../types';
+import { isNativeHistogram } from '../services/query_generator';
 import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { useExploration } from '../contexts/exploration_context';
 
@@ -65,8 +66,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   const { onTimeRangeChange, timeBounds } = useExploration();
 
-  const sparklineLabel =
-    type === MetricType.COUNTER ? 'sum(rate)' : type === MetricType.HISTOGRAM ? 'p95' : 'avg';
+  const sparklineLabel = isNativeHistogram(name, type)
+    ? 'histogram_avg'
+    : type === MetricType.COUNTER
+      ? 'sum(rate)'
+      : type === MetricType.HISTOGRAM
+        ? 'p95'
+        : 'avg';
 
   const chartColor = SERIES_COLORS[colorIndex % SERIES_COLORS.length];
 

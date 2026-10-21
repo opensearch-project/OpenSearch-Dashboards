@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { TraceFlowView } from './trace_flow_view';
 import { TraceRow } from '../hooks/tree_utils';
 import { categorizeSpanTree } from '../../../../services/span_categorization';
@@ -20,10 +20,23 @@ jest.mock('@osd/i18n/react', () => ({
 }));
 
 let capturedMapProps: any = {};
+// When set, the mock map renders one agent card node for this span id, inside a wrapper that
+// stands in for React Flow's node click handler.
+let mockNodeId: string | undefined;
+const mockMapNodeClick = jest.fn();
 jest.mock('@osd/apm-topology', () => ({
   CelestialMap: (props: any) => {
     capturedMapProps = props;
-    return <div data-test-subj="mock-celestial-map" />;
+    const Node = props.nodeTypes?.agentCard;
+    return (
+      <div data-test-subj="mock-celestial-map">
+        {mockNodeId && Node && (
+          <div data-test-subj="mock-flow-node" onClick={mockMapNodeClick} role="presentation">
+            <Node data={{ id: mockNodeId }} />
+          </div>
+        )}
+      </div>
+    );
   },
   AgentCardNode: () => <div data-test-subj="mock-agent-card-node" />,
 }));
@@ -119,6 +132,34 @@ describe('TraceFlowView', () => {
     expect(capturedMapProps.showMinimap).toBe(true);
     expect(capturedMapProps.topN).toBe(Infinity);
     expect(capturedMapProps.breadcrumbs).toEqual([]);
+  });
+
+  it('centers a clicked node at the current zoom', () => {
+    (categorizeSpanTree as jest.Mock).mockReturnValue([{ ...mockTrace, spanId: 'span-1' }]);
+    (spansToFlow as jest.Mock).mockReturnValue({ nodes: [], edges: [] });
+
+    render(<TraceFlowView {...defaultProps} />);
+
+    expect(capturedMapProps.onNodeClickZoom).toBe('centerOnNode');
+  });
+
+  it('selects the span on node click and lets the click reach the map', () => {
+    const span = { ...mockTrace, spanId: 'span-1' };
+    (categorizeSpanTree as jest.Mock).mockReturnValue([span]);
+    (spansToFlow as jest.Mock).mockReturnValue({ nodes: [], edges: [] });
+    const onSelectSpan = jest.fn();
+    mockNodeId = 'span-1';
+    mockMapNodeClick.mockClear();
+
+    try {
+      render(<TraceFlowView {...defaultProps} onSelectSpan={onSelectSpan} />);
+      fireEvent.click(screen.getByTestId('mock-agent-card-node'));
+    } finally {
+      mockNodeId = undefined;
+    }
+
+    expect(onSelectSpan).toHaveBeenCalledWith(span);
+    expect(mockMapNodeClick).toHaveBeenCalledTimes(1);
   });
 
   it('does not call spansToFlow when categorized tree is empty', () => {

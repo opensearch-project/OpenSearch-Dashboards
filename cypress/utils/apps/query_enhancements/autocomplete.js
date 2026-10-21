@@ -283,28 +283,6 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
 };
 
 /**
- * Selects the first field-value suggestion the editor offers and stores its text
- * as the `@selectedFieldValue` alias for later assertions. Field-value suggestions
- * are seeded from the most recent documents, so the exact set is not stable; select
- * whatever value is present instead of a hard-coded one.
- * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
- */
-export const selectFirstValueSuggestion = (useKeyboard = false) => {
-  cy.get('.suggest-widget.visible', { timeout: 15000 })
-    .find('.monaco-list-row:has(.codicon-symbol-value) .monaco-icon-label-container .label-name', {
-      timeout: 15000,
-    })
-    .first()
-    .invoke('text')
-    .then((text) => {
-      const value = text.trim();
-      expect(value, 'a field value suggestion should be available').to.not.be.empty;
-      cy.wrap(value).as('selectedFieldValue');
-      selectSuggestion(value, useKeyboard);
-    });
-};
-
-/**
  * Shows suggestion widget and waits for hint to appear with retry logic
  * @param {number} maxAttempts - Maximum number of retry attempts
  * @returns {Cypress.Chainable}
@@ -384,6 +362,12 @@ export const createQuery = (config, useKeyboard = false) => {
     config.language === QueryLanguages.DQL.name
       ? 'osdQueryEditor__singleLine'
       : 'osdQueryEditor__multiLine';
+  const typeAndSelectQuerySuggestion = (input, suggestion) => {
+    if (input) {
+      cy.get('.inputarea').type(input, { force: true });
+    }
+    selectSuggestion(suggestion, useKeyboard);
+  };
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
@@ -397,29 +381,28 @@ export const createQuery = (config, useKeyboard = false) => {
         cy.wait(200); // Allow editor to process the clear
       }
 
-      cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
-        selectSuggestion('source', useKeyboard);
+        typeAndSelectQuerySuggestion('s', 'source');
         selectSuggestion('=', useKeyboard);
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
-        selectSuggestion(dataset, useKeyboard);
+        typeAndSelectQuerySuggestion('data', dataset);
         selectSuggestion('|', useKeyboard);
-        selectSuggestion('where', useKeyboard);
-        selectSuggestion('unique_category', useKeyboard);
+        typeAndSelectQuerySuggestion('w', 'where');
+        typeAndSelectQuerySuggestion('u', 'unique_category');
         selectSuggestion('=', useKeyboard);
-        selectFirstValueSuggestion(useKeyboard);
+        typeAndSelectQuerySuggestion('D', 'Development');
       } else if (config.language === QueryLanguages.SQL.name) {
-        selectSuggestion('SELECT', useKeyboard);
+        typeAndSelectQuerySuggestion('s', 'SELECT');
         selectSuggestion('*', useKeyboard);
-        selectSuggestion('FROM', useKeyboard);
-        selectSuggestion('data_logs_small_time_1', useKeyboard);
-        selectSuggestion('WHERE', useKeyboard);
-        selectSuggestion('unique_category', useKeyboard);
+        typeAndSelectQuerySuggestion('f', 'FROM');
+        typeAndSelectQuerySuggestion('data', 'data_logs_small_time_1');
+        typeAndSelectQuerySuggestion('w', 'WHERE');
+        typeAndSelectQuerySuggestion('u', 'unique_category');
         selectSuggestion('=', useKeyboard);
-        selectFirstValueSuggestion(useKeyboard);
+        typeAndSelectQuerySuggestion('D', 'Development');
       } else if (config.language === QueryLanguages.DQL.name) {
-        selectSuggestion('unique_category', useKeyboard);
-        selectFirstValueSuggestion(useKeyboard);
+        typeAndSelectQuerySuggestion('u', 'unique_category');
+        typeAndSelectQuerySuggestion('D', 'Development');
       }
     });
 };
@@ -571,40 +554,41 @@ export const generateAutocompleteTestConfigurations = (
  * @param {string} [operator] - The operator to use for comparison ('>', '<', '=', or undefined for equality)
  */
 export const validateQueryResults = (field, expectedValue, operator) => {
-  // Expand the first row to view the field value
-  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
-  cy.getElementByTestId(`tableDocViewRow-${field}-value`).within(() => {
-    cy.get('span')
-      .invoke('text')
-      .then((text) => {
-        // For numeric comparisons (>, <, >=, <=)
-        if (['>', '<', '>=', '<=', '='].includes(operator)) {
-          const actualValue = parseFloat(text.replace(/,/g, ''));
-          const numericExpectedValue = parseFloat(expectedValue.toString().replace(/,/g, ''));
+  const escapedField = field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const fieldTitlePattern = new RegExp(`^${escapedField}:$`);
 
-          switch (operator) {
-            case '>':
-              expect(actualValue).to.be.greaterThan(numericExpectedValue);
-              break;
-            case '<':
-              expect(actualValue).to.be.lessThan(numericExpectedValue);
-              break;
-            case '>=':
-              expect(actualValue).to.be.at.least(numericExpectedValue);
-              break;
-            case '<=':
-              expect(actualValue).to.be.at.most(numericExpectedValue);
-              break;
-            case '=':
-              expect(actualValue).to.equal(numericExpectedValue);
-              break;
-          }
-        } else {
-          // For undefined, keep original string comparison
-          expect(text).to.equal(expectedValue.toString());
+  cy.get('tbody tr')
+    .first()
+    .contains('[data-test-subj="dscDataGridTableCellListFieldTitle"]', fieldTitlePattern)
+    .next()
+    .should(($value) => {
+      const text = $value.text();
+
+      // For numeric comparisons (>, <, >=, <=)
+      if (['>', '<', '>=', '<=', '='].includes(operator)) {
+        const actualValue = parseFloat(text.replace(/,/g, ''));
+        const numericExpectedValue = parseFloat(expectedValue.toString().replace(/,/g, ''));
+
+        switch (operator) {
+          case '>':
+            expect(actualValue).to.be.greaterThan(numericExpectedValue);
+            break;
+          case '<':
+            expect(actualValue).to.be.lessThan(numericExpectedValue);
+            break;
+          case '>=':
+            expect(actualValue).to.be.at.least(numericExpectedValue);
+            break;
+          case '<=':
+            expect(actualValue).to.be.at.most(numericExpectedValue);
+            break;
+          case '=':
+            expect(actualValue).to.equal(numericExpectedValue);
+            break;
         }
-      });
-  });
-  // Close the expanded row
-  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
+      } else {
+        // For undefined, keep original string comparison
+        expect(text).to.equal(expectedValue.toString());
+      }
+    });
 };

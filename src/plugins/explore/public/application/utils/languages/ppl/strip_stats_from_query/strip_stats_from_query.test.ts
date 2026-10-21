@@ -137,4 +137,95 @@ describe('stripStatsFromQuery', () => {
       query: 'source=logs\n| where level="error"\n| eval x=1',
     });
   });
+
+  it('should remove top pipe (and everything after it)', () => {
+    const queryWithTop: Query = {
+      query: 'source=logs | where level="error" | top 10 host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithTop);
+    expect(result).toEqual({
+      ...queryWithTop,
+      query: 'source=logs | where level="error"',
+    });
+  });
+
+  it('should remove rare pipe (and everything after it)', () => {
+    const queryWithRare: Query = {
+      query: 'source=logs | rare 5 host | sort host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithRare);
+    expect(result).toEqual({
+      ...queryWithRare,
+      query: 'source=logs',
+    });
+  });
+
+  it('should not strip a field or command that merely starts with an aggregation name', () => {
+    const queryWithTopicField: Query = {
+      query: 'source=logs | where topic="checkout"',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithTopicField);
+    expect(result).toEqual({
+      ...queryWithTopicField,
+      query: 'source=logs | where topic="checkout"',
+    });
+  });
+
+  it('should not strip a pipe command that appears inside a double-quoted string literal', () => {
+    const queryWithStatsInString: Query = {
+      query: 'source=logs | where msg="error | stats count()"',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithStatsInString);
+    expect(result).toEqual({
+      ...queryWithStatsInString,
+      query: 'source=logs | where msg="error | stats count()"',
+    });
+  });
+
+  it('should not strip a pipe command that appears inside a single-quoted string literal', () => {
+    const queryWithTopInString: Query = {
+      query: "source=logs | where msg='| top 5 host'",
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithTopInString);
+    expect(result).toEqual({
+      ...queryWithTopInString,
+      query: "source=logs | where msg='| top 5 host'",
+    });
+  });
+
+  it('should not strip an aggregation command nested inside a bracketed subquery', () => {
+    const queryWithStatsInSubquery: Query = {
+      query: 'source=logs | where user in [ source=admins | stats count by role ]',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithStatsInSubquery);
+    expect(result).toEqual({
+      ...queryWithStatsInSubquery,
+      query: 'source=logs | where user in [ source=admins | stats count by role ]',
+    });
+  });
+
+  it('should strip the top-level aggregation but keep an earlier subquery that contains one', () => {
+    const queryWithSubqueryThenStats: Query = {
+      query: 'source=logs | where user in [ source=admins | top 5 role ] | stats count by host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithSubqueryThenStats);
+    expect(result).toEqual({
+      ...queryWithSubqueryThenStats,
+      query: 'source=logs | where user in [ source=admins | top 5 role ]',
+    });
+  });
 });

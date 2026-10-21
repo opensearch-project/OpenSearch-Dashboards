@@ -46,6 +46,8 @@ import {
   SyntheticsIcon,
   VpcIcon,
 } from '../resources/services';
+import { ApachekafkaIcon } from '../resources/dependencies';
+import { DEPENDENCY_ICONS } from './dependency_icons.constants';
 // import { type ComponentProps, FC } from 'react';
 
 export const ICONS: { [key: string]: any } = {
@@ -97,6 +99,10 @@ export const ICONS: { [key: string]: any } = {
   'AWS::Glacier::Vault': GlacierIcon,
   'AWS::Kinesis': KinesisIcon,
   'AWS::Kinesis::Stream': KinesisIcon,
+  // Kept for callers that predate the dependency icon keys (see DEPENDENCY_ICONS).
+  Kafka: ApachekafkaIcon,
+  'Messaging::Kafka': ApachekafkaIcon,
+  ...DEPENDENCY_ICONS,
   K8s: K8sIcon,
   'AWS::Kubernetes': K8sIcon,
   'AWS::Macie': MacieIcon,

@@ -7,6 +7,7 @@ import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
+import { useStreamingStatus } from '../../streaming/use_streaming_status';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
@@ -23,7 +24,7 @@ import { RootState } from '../../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import {
   queryEndsWithHead,
-  queryHasStats,
+  queryHasAggregation,
 } from '../../../application/utils/state_management/actions/utils';
 
 interface ActionBarProps {
@@ -64,21 +65,33 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   };
 
   const rows = results?.hits?.hits || [];
-  // For aggregation queries (stats/chart/timechart), use the bucket count from the dedicated
-  // count query and show the histogram document total separately.
+  // For aggregation queries (stats/top/rare), use the bucket count from the dedicated count query
+  // and show the histogram document total separately.
   // For head queries, hide the denominator entirely.
   const queryString = query.language === 'PPL' ? defaultPrepareQueryString(query) : '';
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
   const hasHead = query.language === 'PPL' && queryEndsWithHead(queryString);
-  const hasStats = query.language === 'PPL' && queryHasStats(originalQueryString);
+  const hasAggregation = query.language === 'PPL' && queryHasAggregation(originalQueryString);
   const totalHits = hasHead ? undefined : histogramResults?.hits.total;
   // For aggregation queries, use the bucket count from the dedicated count query.
   // Only show bucket format on Statistics/Visualization tabs where rows are actual buckets.
-  // On Logs tab, rows are documents (stripStatsFromQuery removes the stats clause).
+  // On Logs tab, rows are documents (stripStatsFromQuery removes the aggregation clause).
   // When the count query hasn't returned or failed, degrade to the standard hits format.
   const isLogsTab = activeTabId === EXPLORE_LOGS_TAB_ID;
-  const effectiveBucketCount = hasStats && !isLogsTab ? bucketCount : undefined;
+  const effectiveBucketCount = hasAggregation && !isLogsTab ? bucketCount : undefined;
   const elapsedMs = results?.elapsedMs;
+  // Keyed to the active tab's query, not the results query: the Statistics and Visualization tabs show
+  // a different query's counts, and annotating those with the results query's progress would describe
+  // the wrong query. Their queries are not streamed, so this correctly yields no annotation there.
+  const tabCacheKey = useMemo(() => {
+    try {
+      const activeTab = services.tabRegistry?.getTab(activeTabId);
+      return (activeTab?.prepareQuery || defaultPrepareQueryString)(query);
+    } catch {
+      return undefined;
+    }
+  }, [services, activeTabId, query]);
+  const streaming = useStreamingStatus(tabCacheKey).streaming;
 
   return (
     <DiscoverResultsActionBar
@@ -92,6 +105,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
       }}
       rows={rows}
       elapsedMs={elapsedMs}
+      streaming={streaming}
       dataset={dataset}
       inspectionHanlder={openInspector}
       extraActions={compatibleSlotItems}

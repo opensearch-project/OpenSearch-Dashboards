@@ -9,6 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
+import { safeSetItem } from '@osd/std';
 import {
   CoreSetup,
   CoreStart,
@@ -121,7 +122,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       });
 
     this.windowStateChangeSubscription = chat.getWindowState$().subscribe((newWindowState) => {
-      window.localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify(newWindowState));
+      safeSetItem(window.localStorage, WINDOW_STATE_KEY, JSON.stringify(newWindowState));
     });
   }
 
@@ -189,7 +190,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       try {
         const agenticMemoryProvider = new AgenticMemoryProvider(
           core.http,
-          () => this.chatService?.getCurrentDataSourceId() ?? Promise.resolve(undefined)
+          () => this.chatService?.peekCurrentDataSourceId() ?? Promise.resolve(undefined)
         );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {

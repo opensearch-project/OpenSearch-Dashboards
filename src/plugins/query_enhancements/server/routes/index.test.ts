@@ -5,7 +5,12 @@
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { URI } from '../../common';
-import { coerceStatusCode, definePPLBundleRoute, resolveOpenSearchClient } from './index';
+import {
+  coerceStatusCode,
+  definePPLBundleRoute,
+  defineSearchStrategyRouteProvider,
+  resolveOpenSearchClient,
+} from './index';
 
 describe('coerceStatusCode', () => {
   it('should return 503 when input is 500', () => {
@@ -205,6 +210,29 @@ describe('definePPLBundleRoute', () => {
       body: 'dataSourceId is not supported because data source plugin is unavailable',
     });
     expect(result).toEqual(res.custom.mock.results[0].value);
+  });
+});
+
+describe('defineSearchStrategyRouteProvider', () => {
+  const validateBody = (query: Record<string, unknown>) => {
+    const router = { post: jest.fn() };
+    defineSearchStrategyRouteProvider(loggingSystemMock.create().get(), router as any)(
+      'ppl',
+      {} as any
+    );
+    const { validate } = router.post.mock.calls[0][0];
+    return validate.body.validate({
+      query: { query: 'source = logs', language: 'PPL', dataset: null, format: 'jdbc', ...query },
+      aggConfig: null,
+    });
+  };
+
+  it('accepts partial_result from older clients', () => {
+    expect(() => validateBody({ partial_result: false })).not.toThrow();
+  });
+
+  it('rejects other unknown query keys', () => {
+    expect(() => validateBody({ unknown_key: true })).toThrow(/unknown_key/);
   });
 });
 

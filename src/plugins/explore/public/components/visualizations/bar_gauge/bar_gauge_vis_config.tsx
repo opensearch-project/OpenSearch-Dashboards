@@ -53,6 +53,9 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
   name: 'Bar Gauge',
   icon: 'visBarHorizontal',
   type: 'bar_gauge',
+  metadata: {
+    description: 'Progress bars against a threshold range.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'bar_gauge'>> = [
       {
@@ -94,6 +97,7 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
               data={gaugeData}
               styles={props.styleOptions}
               isHorizontal={isHorizontal}
+              seriesDisplayNames={props.seriesDisplayNames}
             />
           );
         },

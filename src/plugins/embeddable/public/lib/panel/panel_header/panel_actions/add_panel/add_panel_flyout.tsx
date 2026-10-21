@@ -39,7 +39,7 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
-import { SavedObjectEmbeddableInput } from '../../../../embeddables';
+import { IEmbeddable, SavedObjectEmbeddableInput } from '../../../../embeddables';
 
 interface Props {
   onClose: () => void;
@@ -48,6 +48,9 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  onPanelAdded?: (embeddable: IEmbeddable) => void | Promise<void>;
+  closeAfterAdd?: boolean;
+  showCreateNew?: boolean;
 }
 
 interface State {
@@ -101,6 +104,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     const explicitInput = await factory.getExplicitInput();
     const embeddable = await this.props.container.addNewEmbeddable(type, explicitInput);
     if (embeddable) {
+      await this.props.onPanelAdded?.(embeddable);
       this.showToast(embeddable.getInput().title || '');
     }
   };
@@ -114,12 +118,16 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       throw new EmbeddableFactoryNotFoundError(savedObjectType);
     }
 
-    this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+    const embeddable = await this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
       factoryForSavedObjectType.type,
       { savedObjectId }
     );
 
+    await this.props.onPanelAdded?.(embeddable);
     this.showToast(name);
+    if (this.props.closeAfterAdd) {
+      this.props.onClose();
+    }
   };
 
   private getCreateMenuItems(): ReactElement[] {
@@ -157,7 +165,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           defaultMessage: 'No matching objects found.',
         })}
       >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        {this.props.showCreateNew === false ? null : (
+          <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        )}
       </SavedObjectFinder>
     );
 

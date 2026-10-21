@@ -72,7 +72,7 @@ export const searchAssets = async ({
       {
         query: {
           type: SUPPORTED_ASSET_TYPES,
-          search: `*${query}*`,
+          search: `${query}*`,
           perPage: 10,
           workspaces: currentWorkspaceId ? [currentWorkspaceId] : [],
         },

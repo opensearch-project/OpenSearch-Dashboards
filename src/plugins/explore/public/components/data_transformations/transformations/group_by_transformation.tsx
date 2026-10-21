@@ -7,14 +7,24 @@ import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
-import { TransformationInstance, TransformationDefinition, FieldSchema } from '../types';
+import {
+  TransformationInstance,
+  TransformationDefinition,
+  FieldSchema,
+  TransformationConfigSchema,
+} from '../types';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
-import { FIELD_TYPE_MAP } from '../../visualizations/constants';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { CalculationMethod, calculateValue } from '../../visualizations/utils/calculation';
 import { ValueCalculationSelector } from '../../visualizations/style_panel/value/value_calculation_selector';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  getRowFieldValue,
+  rowHasField,
+} from '../transformation_utils';
 
 // Methods not applicable to string fields
 const STRING_DISABLED: CalculationMethod[] = [
@@ -49,9 +59,8 @@ const getDisabledForField = (field: FieldSchema): CalculationMethod[] => {
   }
 };
 
-const defaultMethodForField = (field: { type?: string; name?: string }): CalculationMethod => {
-  const fieldType = FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown;
-  switch (fieldType) {
+const defaultMethodForField = (field: FieldSchema): CalculationMethod => {
+  switch (field.visFieldType) {
     case VisFieldType.Numerical:
       return 'total';
     case VisFieldType.Date:
@@ -72,8 +81,22 @@ interface GroupByConfig {
   aggregations: AggMethod[];
 }
 
+const createDefaultAggregations = (
+  groupByField: string,
+  availableFields: FieldSchema[]
+): AggMethod[] =>
+  availableFields
+    .filter((field) => field.name !== groupByField)
+    .map((field) => ({
+      field: field.name,
+      method: defaultMethodForField(field),
+    }));
+
 const applyAgg = (values: unknown[], method: CalculationMethod): unknown => {
-  if ((method === 'min' || method === 'max') && values.length > 0) {
+  if (values.length === 0) {
+    return method === 'count' || method === 'distinct_count' ? 0 : null;
+  }
+  if (method === 'min' || method === 'max') {
     const firstVal = values[0];
     // Detect date especially for min and max method
     if (typeof firstVal === 'string' && isNaN(Number(firstVal)) && !isNaN(Date.parse(firstVal))) {
@@ -114,6 +137,15 @@ const GroupByEditor = ({
     update({ aggregations: updated });
   };
 
+  const handleGroupByFieldChange = (field: FieldSchema | undefined) => {
+    const groupByField = field?.name;
+    onChange({
+      ...config,
+      groupByField,
+      aggregations: groupByField ? createDefaultAggregations(groupByField, availableFields) : [],
+    });
+  };
+
   const fieldMap = new Map(availableFields.map((f) => [f.name, f]));
 
   const visibleCount = config.aggregations.filter((r) => !r.hidden).length;
@@ -125,7 +157,7 @@ const GroupByEditor = ({
         <FieldSelector
           configField={config.groupByField}
           availableFields={availableFields}
-          updateConfigField={(f) => update({ groupByField: f?.name })}
+          updateConfigField={handleGroupByFieldChange}
           testSubjPrefix="groupByField"
         />
       </EuiFlexItem>
@@ -207,51 +239,42 @@ export function createGroupByTransformation(): TransformationInstance<GroupByCon
     },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: GroupByConfig) => {
-      if (!config.groupByField || config.aggregations.length === 0) return data;
+      if (!config.groupByField || config.aggregations.length === 0) {
+        return createInvalidConfigResult(data, 'Group By configuration is incomplete.');
+      }
+
       const groups = new Map<string, OpenSearchSearchHit[]>();
+      let missingGroupByRows = 0;
       for (const row of data) {
-        const key = String(get(row, `_source.${config.groupByField}`) ?? '');
+        if (!rowHasField(row, config.groupByField)) {
+          missingGroupByRows++;
+          continue;
+        }
+        const key = String(getRowFieldValue(row, config.groupByField) ?? '');
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key)?.push(row);
       }
 
-      const result = Array.from(groups.entries()).map(([groupKey, rows]) => {
+      if (groups.size === 0) {
+        return createMissingFieldsResult(data, [config.groupByField]);
+      }
+
+      const result = Array.from(groups.values()).map((rows) => {
         const source: Record<string, unknown> = {
-          [config.groupByField!]: get(rows[0], `_source.${config.groupByField}`),
+          [config.groupByField!]: getRowFieldValue(rows[0], config.groupByField!),
         };
         for (const agg of config.aggregations) {
           if (agg.hidden) continue;
-          const values = rows.map((row) => get(row, `_source.${agg.field}`));
+          const values = rows
+            .filter((row) => rowHasField(row, agg.field))
+            .map((row) => getRowFieldValue(row, agg.field));
           source[`${agg.method}_${agg.field}`] = applyAgg(values, agg.method);
         }
         return { ...rows[0], _source: source };
       });
-      return result;
-    },
-    validateConfig: (
-      config: GroupByConfig,
-      availableFields: Array<{ name?: string; type?: string }>
-    ) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-
-      if (config.groupByField && !fieldNames.has(config.groupByField)) {
-        return { ...config, groupByField: undefined, aggregations: [] };
-      }
-
-      if (config.groupByField) {
-        const validAggs = config.aggregations.filter((a) => fieldNames.has(a.field));
-        const existingFields = new Set(validAggs.map((a) => a.field));
-
-        const newAggs = availableFields
-          .filter((f) => f.name && f.name !== config.groupByField && !existingFields.has(f.name))
-          .map((f) => ({ field: f.name ?? '', method: defaultMethodForField(f) }));
-
-        if (newAggs.length > 0 || validAggs.length !== config.aggregations.length) {
-          return { ...config, aggregations: [...validAggs, ...newAggs] };
-        }
-      }
-
-      return config;
+      return missingGroupByRows > 0
+        ? createMissingFieldsResult(result, [config.groupByField], 'partially_applied')
+        : createAppliedResult(result);
     },
 
     Editor: GroupByEditor,
@@ -269,4 +292,56 @@ export const groupByTransformationDefinition: TransformationDefinition<GroupByCo
   }),
   iconType: 'aggregate',
   createInstance: createGroupByTransformation,
+};
+
+export const groupByConfigSchema: TransformationConfigSchema = {
+  groupByField: {
+    description:
+      'The column to group rows by. Each unique value in this column becomes one output row.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  aggregations: {
+    description:
+      'Aggregation methods to apply to all other columns per group. ' +
+      'The output column name is "<method>_<field>" (e.g. "mean_AvgTicketPrice"). ' +
+      'Set hidden: true to exclude a field from the output.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      field: {
+        description: 'Column name to aggregate.',
+        kind: 'field_name',
+        required: true,
+      },
+      method: {
+        description:
+          'Aggregation method. Not all methods apply to all field types: ' +
+          'string fields support count/first/last only; ' +
+          'date fields support count/min/max/first/last; ' +
+          'numerical fields support all methods.',
+        kind: 'enum',
+        defaultValue: 'count',
+        required: true,
+        enumOptions: [
+          { value: 'count', label: 'Count' },
+          { value: 'total', label: 'Sum (total)' },
+          { value: 'mean', label: 'Mean (average)' },
+          { value: 'median', label: 'Median' },
+          { value: 'min', label: 'Min' },
+          { value: 'max', label: 'Max' },
+          { value: 'first', label: 'First value' },
+          { value: 'last', label: 'Last value' },
+        ],
+      },
+      hidden: {
+        description: 'Set to true to exclude this aggregation from the output.',
+        kind: 'boolean',
+        defaultValue: false,
+        required: false,
+      },
+    },
+  },
 };

@@ -9,6 +9,40 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
+// A query row is labeled (A, B, C...) only once it holds a non-empty query, so a
+// freshly loaded row renders with a blank label. `inputQueryRow` puts a query in
+// the row so it becomes 'A' and everything below can scope to `queryRow-A`.
+const QUERY = 'prometheus_build_info';
+
+const focusQueryEditor = () => {
+  cy.getElementByTestId('exploreQueryPanelEditor')
+    .find('.react-monaco-editor-container')
+    .should('be.visible')
+    .click({ force: true });
+  cy.get('.inputarea').first().should('be.visible').and('have.prop', 'ownerDocument');
+  cy.wait(100);
+};
+
+const clearQueryEditor = () => {
+  cy.get('.inputarea')
+    .first()
+    .focus()
+    .type('{ctrl}a', { force: true })
+    .type('{backspace}', { force: true })
+    .type('{meta}a', { force: true })
+    .type('{backspace}', { force: true });
+};
+
+const inputQueryRow = () => {
+  // The row has no label yet, so the mode toggle cannot be scoped to a row —
+  // there is exactly one row on mount, so the un-scoped toggle is unambiguous.
+  cy.getElementByTestId('code').parents('label').first().click({ force: true });
+  focusQueryEditor();
+  cy.get('.inputarea').first().type(QUERY, { force: true, delay: 50 });
+  // Dismiss the autocomplete popup the seed typing opens.
+  cy.get('.inputarea').first().type('{esc}', { force: true });
+};
+
 const switchRowToCodeMode = (label = 'A') => {
   // EuiButtonGroup renders each option as a radio input with data-test-subj=id,
   // wrapped in a label. Click the wrapping label (scoped to this row).
@@ -23,20 +57,8 @@ const typeInQueryEditor = (query, options = {}) => {
   const { parseSpecialCharSequences = true, label = 'A' } = options;
 
   switchRowToCodeMode(label);
-
-  cy.getElementByTestId('exploreQueryPanelEditor')
-    .find('.react-monaco-editor-container')
-    .should('be.visible')
-    .click({ force: true });
-  cy.get('.inputarea').first().should('be.visible').and('have.prop', 'ownerDocument');
-  cy.wait(100);
-  cy.get('.inputarea')
-    .first()
-    .focus()
-    .type('{ctrl}a', { force: true })
-    .type('{backspace}', { force: true })
-    .type('{meta}a', { force: true })
-    .type('{backspace}', { force: true });
+  focusQueryEditor();
+  clearQueryEditor();
 
   cy.get('.inputarea').first().type(query, {
     force: true,
@@ -183,8 +205,9 @@ const prometheusDatasetTestSuite = () => {
           // Wait for explore tab initial render to settle before switching tabs
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
           cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
-          // Query tab defaults to Builder mode so exploreQueryPanelEditor may not
-          // exist — wait for the query row container instead.
+          // The row starts empty, which leaves it unlabeled — seed a query so it
+          // becomes row 'A'.
+          inputQueryRow();
           cy.getElementByTestId('queryRow-A').should('be.visible');
         });
 
@@ -200,14 +223,11 @@ const prometheusDatasetTestSuite = () => {
         });
 
         it('should validate autocomplete suggestions for PromQL metrics', function () {
-          switchRowToCodeMode('A');
+          switchRowToCodeMode();
+          focusQueryEditor();
+          // beforeEach seeded a query into the row — type from an empty editor.
+          clearQueryEditor();
 
-          cy.getElementByTestId('exploreQueryPanelEditor')
-            .find('.react-monaco-editor-container')
-            .should('be.visible')
-            .click({ force: true });
-
-          cy.get('.inputarea').first().should('be.visible').focus();
           cy.get('.inputarea').first().type('prom', { force: true, delay: 100 });
           cy.get('.suggest-widget').should('be.visible');
 
@@ -524,8 +544,9 @@ const prometheusDatasetTestSuite = () => {
           // Wait for explore tab initial render to settle before switching tabs
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
           cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
-          // Query tab defaults to Builder mode so exploreQueryPanelEditor may not
-          // exist — wait for the query row container instead.
+          // The row starts empty, which leaves it unlabeled — set a query so it
+          // becomes row 'A'.
+          inputQueryRow();
           cy.getElementByTestId('queryRow-A').should('be.visible');
         });
 

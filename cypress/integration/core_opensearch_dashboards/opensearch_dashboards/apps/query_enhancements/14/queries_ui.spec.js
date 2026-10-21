@@ -84,7 +84,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           // Verify expanded state persists
           cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
@@ -92,7 +92,7 @@ export const runQueryTests = () => {
 
           // Switch back to the original language
           if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           } else {
             cy.setQueryLanguage('PPL');
           }
@@ -106,7 +106,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
           cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
@@ -160,11 +160,11 @@ export const runQueryTests = () => {
                       case 'Lucene':
                         expect(href).to.match(/\/query-dsl\/full-text\/query-string\/$/);
                         break;
-                      case 'OpenSearch SQL':
-                        expect(href).to.match(/\/search-plugins\/sql\/sql\/basic\/$/);
+                      case 'SQL':
+                        expect(href).to.match(/\/sql-and-ppl\/sql\/basic\/$/);
                         break;
                       case 'PPL':
-                        expect(href).to.match(/\/search-plugins\/sql\/ppl\/syntax\/$/);
+                        expect(href).to.match(/\/sql-and-ppl\/ppl\/commands\/syntax\/$/);
                         break;
                       default:
                         throw new Error(`Unexpected language: ${language}`);

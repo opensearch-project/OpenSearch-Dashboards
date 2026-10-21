@@ -27,6 +27,7 @@ import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_manag
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 import { ResultStatus } from '../utils';
+import { hasUsableTimeField } from '../../helpers/has_usable_time_field';
 
 export interface TopNavProps {
   opts: {
@@ -87,8 +88,11 @@ export const TopNav = ({
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
       skipAppFiltersFromMemory: true,
+      // Discover resolves URL or default-dataset state before this component mounts. Preserve
+      // that app-owned query when `_q` has not been created yet.
+      initialQuery: data.query.queryString.getQuery(),
     };
-  }, []);
+  }, [data.query.queryString]);
 
   useConnectStorageToQueryState(services.data.query, osdUrlStateStorage, syncConfig);
 
@@ -143,10 +147,9 @@ export const TopNav = ({
     );
   }, [savedSearch?.title]);
 
-  const showDatePicker = useMemo(
-    () => (indexPattern ? indexPattern.isTimeBased() : false),
-    [indexPattern]
-  );
+  // Showing a range we cannot filter on is worse than hiding it: getTime()
+  // drops the filter silently when the field does not resolve.
+  const showDatePicker = useMemo(() => hasUsableTimeField(indexPattern), [indexPattern]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));
