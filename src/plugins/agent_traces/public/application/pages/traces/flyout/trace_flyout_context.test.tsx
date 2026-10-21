@@ -302,6 +302,17 @@ describe('TraceFlyoutContext', () => {
       expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
     });
 
+    it('keeps a session fetched by id when going back to it', () => {
+      renderProvider();
+      click('Open B');
+      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('not cached');
+      click('Fetched sess-b');
+      click('Trace B from session');
+      click('Back to session sess-b');
+      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('cached');
+      expect(mockSessionMounts).toHaveBeenLastCalledWith('sess-b');
+    });
+
     it('focuses the trace a session was opened from', () => {
       renderProvider();
       click('Open trace');

@@ -54,7 +54,7 @@ export interface TraceDetailsProps {
   fullTreeError?: string;
   /** Open this trace's session (replaces this flyout with the session flyout). */
   onOpenSession?: (session: SessionRow | string) => void;
-  /** Back and Forward through the flyouts the user moved between. */
+  /** Back to the flyout the user came from. */
   navigation?: FlyoutNavigation;
 }
 

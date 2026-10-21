@@ -127,17 +127,18 @@ describe('SessionDetailsFlyout', () => {
     expect(screen.queryByTestId('agentTracesSessionViewAllTraces')).not.toBeInTheDocument();
   });
 
-  it('labels agent runs by agent name, falling back to the trace number', () => {
-    const agent = (traceId: string, spanId: string, name?: string) => ({
-      ...mockTraces[0],
+  const agent = (traceId: string, spanId: string, name?: unknown) => ({
+    ...mockTraces[0],
+    traceId,
+    root: {
+      ...mockTraces[0].root,
       traceId,
-      root: {
-        ...mockTraces[0].root,
-        traceId,
-        spanId,
-        rawDocument: name ? { attributes: { 'gen_ai.agent.name': name } } : {},
-      },
-    });
+      spanId,
+      rawDocument: name !== undefined ? { attributes: { 'gen_ai.agent.name': name } } : {},
+    },
+  });
+
+  it('labels agent runs by agent name, falling back to the trace number', () => {
     // Two parallel agents in t1, and a trace without an agent name.
     mockDetail.traces = [
       agent('t1', 'a', 'Weather Agent'),
@@ -158,5 +159,35 @@ describe('SessionDetailsFlyout', () => {
   it('keeps the trace list title when each trace is listed once', () => {
     render(<SessionDetailsFlyout session={session} formatTs={(t) => t} onClose={jest.fn()} />);
     expect(screen.getByText('Trace list (3)')).toBeInTheDocument();
+  });
+
+  it('falls back to the trace number for a blank or non-text agent name', () => {
+    mockDetail.traces = [
+      agent('t1', 'a', '   '),
+      agent('t2', 'b', 42),
+      agent('t3', 'c', '  Planner '),
+    ];
+    render(<SessionDetailsFlyout session={session} formatTs={(t) => t} onClose={jest.fn()} />);
+    expect(screen.getByTestId('agentTracesSessionTraceItem-1')).toHaveTextContent('Trace #1');
+    expect(screen.getByTestId('agentTracesSessionTraceItem-2')).toHaveTextContent('Trace #2');
+    expect(screen.getByTestId('agentTracesSessionTraceItem-3')).toHaveTextContent('#3 Planner');
+    expect(screen.getByLabelText('Open #3 Planner')).toBeInTheDocument();
+  });
+
+  it('focuses the agent run the user came back from, not just its trace', () => {
+    mockDetail.traces = [agent('t1', 'a', 'Weather Agent'), agent('t1', 'b', 'Events Agent')];
+    render(
+      <SessionDetailsFlyout
+        session={session}
+        focusTraceId="t1"
+        focusSpanId="b"
+        formatTs={(t) => t}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('agentTracesSessionTraceItem-2')).toHaveAttribute(
+      'aria-current',
+      'true'
+    );
   });
 });

@@ -31,6 +31,8 @@ export type FlyoutView =
       session?: SessionRow;
       /** Trace to focus when the session shows again (the one the user opened from it). */
       focusTraceId?: string;
+      /** The agent run of that trace, when the trace lists several (parallel agents). */
+      focusSpanId?: string;
       /** Session view and table tab the user left the session on, restored on Back. */
       sessionView?: SessionViewState;
     };
@@ -80,6 +82,57 @@ export const backHistory = (history: FlyoutHistory): FlyoutHistory =>
 export const previousView = (history: FlyoutHistory): FlyoutView | undefined =>
   history.entries[history.index - 1];
 
+export type TraceView = Extract<FlyoutView, { kind: 'trace' }>;
+export type SessionView = Extract<FlyoutView, { kind: 'session' }>;
+
+/**
+ * Open a trace from the session flyout. When the session was itself opened from that trace,
+ * go back to it instead of repeating it (no trace -> session -> trace loop), showing the row
+ * picked (another agent of the same trace). Otherwise drill down, recording on the session
+ * which agent run was opened and where the session was left, so Back restores both.
+ */
+export const openTraceFromSession = (
+  history: FlyoutHistory,
+  next: TraceView,
+  sessionView?: SessionViewState
+): FlyoutHistory => {
+  const previous = previousView(history);
+  if (previous?.kind === 'trace' && previous.trace.traceId === next.trace.traceId) {
+    const back = backHistory(history);
+    const entries = [...back.entries];
+    entries[back.index] = previous.trace.spanId === next.trace.spanId ? previous : next;
+    return { ...back, entries };
+  }
+  return pushHistory(history, next, (current) =>
+    current.kind === 'session'
+      ? {
+          ...current,
+          focusTraceId: next.trace.traceId,
+          focusSpanId: next.trace.spanId,
+          sessionView,
+        }
+      : current
+  );
+};
+
+/**
+ * Open a session from the trace flyout. When the trace was opened from that session, go back
+ * to it; otherwise drill down with the trace (and its agent run) focused in the session.
+ */
+export const openSessionFromTrace = (history: FlyoutHistory, next: SessionView): FlyoutHistory => {
+  const previous = previousView(history);
+  if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
+    return backHistory(history);
+  }
+  const current = currentView(history);
+  return pushHistory(
+    history,
+    current?.kind === 'trace'
+      ? { ...next, focusTraceId: current.trace.traceId, focusSpanId: current.trace.spanId }
+      : next
+  );
+};
+
 /** Where Back leads, for its label. */
 export interface FlyoutHistoryTarget {
   kind: FlyoutView['kind'];
@@ -127,8 +180,8 @@ export interface TraceFlyoutContextValue {
   /** Close the currently open flyout. */
   closeFlyout: () => void;
   /**
-   * Keep a session row that was fetched by id in its history entries, so Back/Forward to the
-   * session reuse it instead of fetching it again.
+   * Keep a session row that was fetched by id in its history entries, so going back to the
+   * session reuses it instead of fetching it again.
    */
   cacheSession: (session: SessionRow) => void;
   /**

@@ -56,11 +56,13 @@ interface SessionDetailsFlyoutProps {
   session: SessionRow;
   /** Trace to focus once the traces load (the one the user came back from). */
   focusTraceId?: string;
+  /** The agent run of that trace to focus, when the trace lists several. */
+  focusSpanId?: string;
   /** View and tab to open on (where the user left the session). */
   sessionView?: SessionViewState;
   formatTs: (ts: string) => string;
   onClose: () => void;
-  /** Back and Forward through the flyouts the user moved between. */
+  /** Back to the flyout the user came from. */
   navigation?: FlyoutNavigation;
 }
 
@@ -171,8 +173,9 @@ const MessagePanel: React.FC<{
 
 /** "#n Agent name" when the trace's root names its agent, otherwise "Trace #n". */
 const traceLabel = (trace: SessionTrace, index: number): string => {
-  const agent = readAttribute(trace.root.rawDocument, 'gen_ai.agent.name');
-  return typeof agent === 'string' && agent
+  const value = readAttribute(trace.root.rawDocument, 'gen_ai.agent.name');
+  const agent = typeof value === 'string' ? value.trim() : '';
+  return agent
     ? i18n.translate('agentTraces.sessions.flyout.agentLink', {
         defaultMessage: '#{index} {agent}',
         values: { index, agent },
@@ -221,6 +224,7 @@ const ConversationTurn: React.FC<{
 export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   session,
   focusTraceId,
+  focusSpanId,
   sessionView,
   formatTs,
   onClose,
@@ -287,9 +291,13 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   useEffect(() => {
     if (restoredFocus.current || !focusTraceId || traces.length === 0) return;
     restoredFocus.current = true;
-    const index = traces.findIndex((t) => t.traceId === focusTraceId);
+    // The agent run the user opened; a trace with parallel agents lists one entry per agent.
+    const run = traces.findIndex(
+      (t) => t.traceId === focusTraceId && t.root.spanId === focusSpanId
+    );
+    const index = run >= 0 ? run : traces.findIndex((t) => t.traceId === focusTraceId);
     if (index > 0) focusTrace(index);
-  }, [focusTraceId, traces, focusTrace]);
+  }, [focusTraceId, focusSpanId, traces, focusTrace]);
 
   const drillItems = useMemo(
     () =>
@@ -450,12 +458,17 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                         openTrace(trace.root);
                       }}
                       aria-label={i18n.translate('agentTraces.sessions.flyout.openTrace', {
-                        defaultMessage: 'Open trace {index}',
-                        values: { index: i + 1 },
+                        defaultMessage: 'Open {label}',
+                        values: { label: traceLabel(trace, i + 1) },
                       })}
                       data-test-subj={`agentTracesSessionOpenTrace-${i + 1}`}
                     />
-                    <strong>{traceLabel(trace, i + 1)}</strong>
+                    <strong
+                      className="agtSessionFlyout__traceItemName"
+                      title={traceLabel(trace, i + 1)}
+                    >
+                      {traceLabel(trace, i + 1)}
+                    </strong>
                     {errorSpanCount(trace) > 0 && (
                       <EuiToolTip
                         content={i18n.translate('agentTraces.sessions.flyout.traceErrors', {

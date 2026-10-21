@@ -15,16 +15,17 @@ import {
   EMPTY_HISTORY,
   FlyoutHistory,
   FlyoutNavigation,
-  FlyoutView,
   OpenSessionOptions,
   OpenTraceOptions,
   TraceFlyoutContext,
   TraceFlyoutContextValue,
+  SessionView,
+  TraceView,
   currentView,
   backHistory,
-  previousView,
   navigationTargets,
-  pushHistory,
+  openSessionFromTrace,
+  openTraceFromSession,
   resetHistory,
 } from './trace_flyout_state';
 
@@ -32,8 +33,8 @@ export { useTraceFlyout } from './trace_flyout_state';
 
 /**
  * Hosts the single Agent Traces flyout. A trace and a session never stack: opening one
- * replaces the other. Moves between them are kept in a history, so Back and Forward in
- * the flyout header follow the user's path.
+ * replaces the other. Moves between them are kept in a history, so Back in the flyout
+ * header returns to the flyout the user came from.
  */
 export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<FlyoutHistory>(EMPTY_HISTORY);
@@ -51,30 +52,18 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const openFlyout = useCallback(
     (trace: TraceRow, options?: OpenTraceOptions) => {
       collapseSidebar();
-      const next: FlyoutView = {
+      const next: TraceView = {
         kind: 'trace',
         trace,
         fullTree: undefined,
         isLoadingFullTree: true,
         fullTreeError: undefined,
       };
-      setHistory((prev) => {
-        if (!options?.fromSession) return resetHistory(next);
-        // The trace this session was opened from: go back to it instead of repeating it (and
-        // show the row picked, e.g. another agent of the same trace).
-        const previous = previousView(prev);
-        if (previous?.kind === 'trace' && previous.trace.traceId === trace.traceId) {
-          const back = backHistory(prev);
-          const entries = [...back.entries];
-          entries[back.index] = previous.trace.spanId === trace.spanId ? previous : { ...next };
-          return { ...back, entries };
-        }
-        return pushHistory(prev, next, (current) =>
-          current.kind === 'session'
-            ? { ...current, focusTraceId: trace.traceId, sessionView: options.sessionView }
-            : current
-        );
-      });
+      setHistory((prev) =>
+        options?.fromSession
+          ? openTraceFromSession(prev, next, options.sessionView)
+          : resetHistory(next)
+      );
     },
     [collapseSidebar]
   );
@@ -82,24 +71,13 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const openSession = useCallback(
     (session: SessionRow | string, options?: OpenSessionOptions) => {
       collapseSidebar();
-      const next: FlyoutView =
+      const next: SessionView =
         typeof session === 'string'
           ? { kind: 'session', sessionId: session }
           : { kind: 'session', sessionId: session.sessionId, session };
-      setHistory((prev) => {
-        if (!options?.fromTrace) return resetHistory(next);
-        // The session this trace was opened from: go back to it instead of repeating it.
-        const previous = previousView(prev);
-        if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
-          return backHistory(prev);
-        }
-        // Focus the trace the session was opened from.
-        const current = prev.entries[prev.index];
-        return pushHistory(
-          prev,
-          current?.kind === 'trace' ? { ...next, focusTraceId: current.trace.traceId } : next
-        );
-      });
+      setHistory((prev) =>
+        options?.fromTrace ? openSessionFromTrace(prev, next) : resetHistory(next)
+      );
     },
     [collapseSidebar]
   );
@@ -180,6 +158,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
           sessionId={view.sessionId}
           session={view.session}
           focusTraceId={view.focusTraceId}
+          focusSpanId={view.focusSpanId}
           sessionView={view.sessionView}
           onLoaded={cacheSession}
           formatTs={formatTs}
