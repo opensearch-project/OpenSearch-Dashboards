@@ -233,8 +233,9 @@ export interface AssociationDataSourceModalProps {
    */
   workspaceFeatures?: string[];
   /**
-   * The data source association filters registered with the workspace plugin. Without them every
-   * fetched connection is offered.
+   * The data source association filters registered with the workspace plugin. Without them (no
+   * workspace plugin client) every fetched connection is offered; either way the server still
+   * validates every association.
    */
   associationFilters?: DataSourceAssociationFilters;
 }

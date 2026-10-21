@@ -93,12 +93,12 @@ describe('getDataSourceAssociationFilters', () => {
   it("returns the workspace client's filters", () => {
     const filters = new DataSourceAssociationFilters();
     expect(
-      getDataSourceAssociationFilters({ getDataSourceAssociationFilters: () => filters })
+      getDataSourceAssociationFilters({ getDataSourceAssociationFilters: () => filters } as any)
     ).toBe(filters);
   });
 
   it('returns undefined for a client without them', () => {
-    expect(getDataSourceAssociationFilters({})).toBeUndefined();
+    expect(getDataSourceAssociationFilters({} as any)).toBeUndefined();
     expect(getDataSourceAssociationFilters(null)).toBeUndefined();
     expect(getDataSourceAssociationFilters(undefined)).toBeUndefined();
   });

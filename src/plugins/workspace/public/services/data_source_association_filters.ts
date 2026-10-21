@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { IWorkspaceClient } from '../../../../core/public';
 import { DataSourceConnection } from '../../common/types';
 
 /**
@@ -79,7 +80,7 @@ export class DataSourceAssociationFilters {
  * them), or undefined for any other client.
  */
 export const getDataSourceAssociationFilters = (
-  workspaceClient: unknown
+  workspaceClient: IWorkspaceClient | null | undefined
 ): DataSourceAssociationFilters | undefined => {
   const client = workspaceClient as
     | { getDataSourceAssociationFilters?: () => DataSourceAssociationFilters | undefined }
