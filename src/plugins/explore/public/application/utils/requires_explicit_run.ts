@@ -4,7 +4,7 @@
  */
 
 import type { AnyAction } from '@reduxjs/toolkit';
-import { Dataset } from '../../../../data/common';
+import { Dataset, datasetTypeRequiresExplicitRun } from '../../../../data/common';
 import { DatasetTypeConfig, QueryStringContract } from '../../../../data/public';
 import {
   clearQueryStatusMap,
@@ -44,9 +44,9 @@ export const datasetRequiresExplicitRun = (
   queryString: Pick<QueryStringContract, 'getDatasetService'> | undefined,
   dataset: { type?: Dataset['type'] } | undefined
 ): boolean =>
-  // Same rule as the data plugin's `datasetTypeRequiresExplicitRun`, on a guarded type lookup
-  // (Explore tests often replace the data plugin's public module, so it isn't imported here).
-  getDatasetTypeConfig(queryString, dataset?.type)?.meta?.requiresExplicitRun === true;
+  // The data plugin's rule, on a guarded type lookup. It comes from data/common because many
+  // Explore tests replace the data plugin's public module.
+  datasetTypeRequiresExplicitRun(getDatasetTypeConfig(queryString, dataset?.type), dataset);
 
 /**
  * What a skipped automatic run leaves behind for a dataset type that requires an explicit Run:

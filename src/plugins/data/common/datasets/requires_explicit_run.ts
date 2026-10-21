@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dataset } from '../../../../common';
-import { DatasetTypeConfig } from './types';
+import { Dataset } from './types';
 
 /**
  * Whether queries on the dataset wait for the user (DatasetTypeConfig `meta.requiresExplicitRun`):
@@ -15,11 +14,9 @@ import { DatasetTypeConfig } from './types';
  * on the dataset without changing them.
  *
  * @param typeConfig the config of the dataset's type, if registered
- * @param dataset the dataset the query runs on
+ * @param dataset the dataset the query runs on (not read yet: the setting is per type for now)
  */
 export const datasetTypeRequiresExplicitRun = (
-  typeConfig: Pick<DatasetTypeConfig, 'meta'> | undefined,
-  // Not read yet: the setting is per type for now.
-
-  dataset?: Pick<Dataset, 'type'>
+  typeConfig: { meta?: { requiresExplicitRun?: boolean } } | undefined,
+  dataset?: { type?: Dataset['type'] }
 ): boolean => typeConfig?.meta?.requiresExplicitRun === true;

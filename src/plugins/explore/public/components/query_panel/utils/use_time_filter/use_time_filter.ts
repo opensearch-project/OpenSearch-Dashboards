@@ -18,6 +18,14 @@ import {
   stageQueryForExplicitRun,
 } from '../../../../application/utils/requires_explicit_run';
 
+export interface HandleTimeChangeOptions {
+  /**
+   * The change comes from picking a recent query, not from the user picking a time range. Only
+   * such a change is staged instead of run for a dataset type that requires an explicit Run.
+   */
+  fromRecentQuery?: boolean;
+}
+
 export const useTimeFilter = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
@@ -25,7 +33,10 @@ export const useTimeFilter = () => {
   const timeFilter = services.data.query.timefilter.timefilter;
 
   const handleTimeChange = useCallback(
-    ({ start, end, isQuickSelection }: OnTimeChangeProps) => {
+    (
+      { start, end, isQuickSelection }: OnTimeChangeProps,
+      options: HandleTimeChangeOptions = {}
+    ) => {
       const newTimeRange = { from: start, to: end };
 
       // Update timeFilter - this will trigger re-render automatically
@@ -34,10 +45,13 @@ export const useTimeFilter = () => {
       }
 
       if (isQuickSelection) {
-        // A quick selection made for the user (e.g. picking a recent query with its time range)
-        // only stages the change for a dataset type that requires an explicit Run.
+        // Picking a recent query with its time range only stages the change for a dataset type
+        // that requires an explicit Run. A time range the user picks still runs.
         const queryString = services.data.query.queryString;
-        if (datasetRequiresExplicitRun(queryString, queryString?.getQuery?.()?.dataset)) {
+        if (
+          options.fromRecentQuery &&
+          datasetRequiresExplicitRun(queryString, queryString?.getQuery?.()?.dataset)
+        ) {
           stageQueryForExplicitRun(dispatch);
           return;
         }

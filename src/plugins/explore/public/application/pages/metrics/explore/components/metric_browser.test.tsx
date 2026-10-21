@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MetricBrowser } from './metric_browser';
 import { ExplorationContext, defaultState } from '../contexts/exploration_context';

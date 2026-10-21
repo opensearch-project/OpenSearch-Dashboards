@@ -91,6 +91,8 @@ const BreakdownPanel: React.FC<{
   metricType: MetricType;
   /** The metric is a native histogram (see isNativeHistogram). */
   nativeHistogram?: boolean;
+  /** The breakdown query waits for the user (see "Load charts"). */
+  deferred?: boolean;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
@@ -103,6 +105,7 @@ const BreakdownPanel: React.FC<{
   layout,
   metricType,
   nativeHistogram,
+  deferred,
   onVisibilityChange,
   onTimeRangeChange,
   timeBounds,
@@ -152,7 +155,15 @@ const BreakdownPanel: React.FC<{
               height: 160,
             }}
           >
-            <EuiLoadingChart size="m" />
+            {deferred ? (
+              <EuiText size="xs" color="subdued" data-test-subj="metricsExploreBreakdownDeferred">
+                {i18n.translate('explore.metricsExplore.notLoaded', {
+                  defaultMessage: 'Not loaded',
+                })}
+              </EuiText>
+            ) : (
+              <EuiLoadingChart size="m" />
+            )}
           </div>
         </EuiPanel>
       </div>
@@ -519,6 +530,12 @@ export const MetricDetail: React.FC = () => {
             timeFrom={timeBounds?.min}
             timeTo={timeBounds?.max}
           />
+        ) : !previewsEnabled ? (
+          <EuiText size="s" color="subdued" data-test-subj="metricsExploreDetailChartDeferred">
+            {i18n.translate('explore.metricsExplore.detailChartDeferred', {
+              defaultMessage: 'Not loaded. Select Load charts to run the query.',
+            })}
+          </EuiText>
         ) : (
           <EuiText size="s" color="subdued">
             {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
@@ -597,6 +614,7 @@ export const MetricDetail: React.FC = () => {
                 layout={state.layout}
                 metricType={metricType}
                 nativeHistogram={isNativeHistogram(state.metric, metricType)}
+                deferred={!previewsEnabled}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
                 timeBounds={timeBounds}

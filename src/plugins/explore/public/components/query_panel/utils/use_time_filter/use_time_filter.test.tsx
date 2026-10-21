@@ -240,13 +240,16 @@ describe('useTimeFilter', () => {
   });
 
   describe('for a dataset type that requires an explicit Run', () => {
-    it('stages a quick selection (e.g. a recent query) instead of running it', () => {
+    beforeEach(() => {
       mockServices.data.query.queryString = {
         getQuery: () => ({ dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } }),
         getDatasetService: () => ({
           getType: () => ({ meta: { requiresExplicitRun: true } }),
         }),
       };
+    });
+
+    it('still runs a quick selection the user picks', () => {
       const { result } = renderUseTimeFilter();
 
       act(() => {
@@ -256,6 +259,24 @@ describe('useTimeFilter', () => {
           isQuickSelection: true,
           isInvalid: false,
         });
+      });
+
+      expect(mockExecuteQueries).toHaveBeenCalled();
+    });
+
+    it('stages a recent query instead of running it', () => {
+      const { result } = renderUseTimeFilter();
+
+      act(() => {
+        result.current.handleTimeChange(
+          {
+            start: 'now-1h',
+            end: 'now',
+            isQuickSelection: true,
+            isInvalid: false,
+          },
+          { fromRecentQuery: true }
+        );
       });
 
       expect(mockTimeFilter.setTime).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
