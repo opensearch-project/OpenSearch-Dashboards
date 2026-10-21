@@ -461,7 +461,7 @@
     "exit-hook": "^2.2.0",
     "fetch-mock": "^7.3.9",
     "fp-ts": "^2.3.1",
-    "geckodriver": "^6.1.0",
+    "geckodriver": "^7.0.0",
     "getopts": "^2.2.5",
     "globals": "^15.15.0",
     "gulp-babel": "^8.0.0",
