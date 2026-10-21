@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLoadingSpinner, EuiSmallButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -74,6 +74,11 @@ export const DirectQueryConnectionFlowMountPoint = ({
 
   // A mount that failed, for the flow it failed for: shown as an error callout instead of the flow.
   const [mountError, setMountError] = useState<{ flowId: string; message?: string }>();
+  // The error is dropped as soon as another flow (or none) is shown, so coming back to the flow
+  // mounts it again instead of showing the old error.
+  if (mountError && mountError.flowId !== flow?.id) {
+    setMountError(undefined);
+  }
 
   // The current sub-path, and the listeners of the currently mounted flow (one set per mount, so a
   // flow never hears another flow's paths). Read by the mount effect without making it depend on
@@ -131,10 +136,10 @@ export const DirectQueryConnectionFlowMountPoint = ({
         setMountError({ flowId: flow.id, message: describeMountError(e) });
       }
     };
-    // Scoped to this flow; it falls out of scope on its own once the location leaves `/flows/<id>`.
-    const flowHistory = history.createSubHistory(flowPath);
-
     try {
+      // Scoped to this flow; it falls out of scope on its own once the location leaves
+      // `/flows/<id>`.
+      const flowHistory = history.createSubHistory(flowPath);
       Promise.resolve(
         flow.mount({
           element,

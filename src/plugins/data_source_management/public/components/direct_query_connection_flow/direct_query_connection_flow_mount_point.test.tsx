@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -399,6 +399,43 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     consoleError.mockRestore();
   });
 
+  it('mounts a flow again when the route comes back to it after a failed mount', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mountA = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('broken');
+      })
+      .mockImplementation(() => jest.fn());
+    const flowA = createFlow({ mount: mountA });
+    const flowB = createFlow({ id: 'flowB', title: 'Flow B' });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowB);
+    const component = await render('/flows/flowA');
+    expect(component.find('[data-test-subj="directQueryConnectionFlowMountError"]').exists()).toBe(
+      true
+    );
+
+    await act(async () => {
+      history.push('/flows/flowB');
+    });
+    await flush();
+    await act(async () => {
+      history.push('/flows/flowA');
+    });
+    await flush();
+    component.update();
+
+    expect(mountA).toHaveBeenCalledTimes(2);
+    expect(component.find('[data-test-subj="directQueryConnectionFlowMountError"]').exists()).toBe(
+      false
+    );
+    expect(
+      component.find('div[data-test-subj="directQueryConnectionFlowMountPoint-flowA"]').exists()
+    ).toBe(true);
+    consoleError.mockRestore();
+  });
+
   it('shows the error callout when an async mount rejects', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     const flow = createFlow({ mount: jest.fn(() => Promise.reject(new Error('late'))) });
@@ -449,5 +486,26 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
       paramsB.history.push('/manage/b');
     });
     expect(history.location.pathname).toBe('/flows/flowB/manage/b');
+  });
+
+  it("does not report a flow whose id starts with another flow's id to that flow's history", async () => {
+    const flowA = createFlow({ id: 'a', title: 'A' });
+    const flowAb = createFlow({ id: 'ab', title: 'AB' });
+    registry.registerDirectQueryConnectionFlow(flowA);
+    registry.registerDirectQueryConnectionFlow(flowAb);
+    await render('/flows/a');
+    const paramsA = (flowA.mount as jest.Mock).mock.calls[0][0];
+    const heard: string[] = [];
+    // A listener the flow (wrongly) keeps after it is unmounted.
+    paramsA.history.listen((l: { pathname: string }) => heard.push(l.pathname));
+
+    await act(async () => {
+      history.push('/flows/ab/manage/x');
+    });
+    await flush();
+
+    expect(flowAb.mount).toHaveBeenCalledTimes(1);
+    expect(heard).toEqual([]);
+    expect(() => paramsA.history.location).toThrow();
   });
 });
