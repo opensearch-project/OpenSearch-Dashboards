@@ -1047,7 +1047,7 @@ const executeQueryBase = async (
       parsedError = {
         error: {
           reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          details: error.body?.error || error.message || 'An error occurred',
           type: error.name,
         },
       };

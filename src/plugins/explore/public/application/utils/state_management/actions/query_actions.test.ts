@@ -1854,6 +1854,41 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it('shows the message of an error without a body (e.g. a strategy start failure)', async () => {
+      const error = new Error('The data source rejected the query');
+      mockSearchSource.fetch.mockRejectedValue(error);
+
+      const thunk = executeHistogramQuery({
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '1h',
+      });
+
+      try {
+        await thunk(mockDispatch, mockGetState, undefined);
+      } catch (e) {
+        expect(e).toBe(error);
+      }
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                message: expect.objectContaining({
+                  details: 'The data source rejected the query',
+                  reason: 'The data source rejected the query',
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
     it('should handle AbortError gracefully', async () => {
       const abortError = new Error('Aborted');
       abortError.name = 'AbortError';

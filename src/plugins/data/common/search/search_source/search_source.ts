@@ -97,6 +97,7 @@ import {
   IDataFramePollingResponse,
   IDataFrameResponse,
   QueryStartedResponse,
+  QueryFailedStatusResponse,
   QuerySuccessStatusResponse,
   convertResult,
   createDataFrame,
@@ -121,7 +122,7 @@ import {
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
-import { handleQueryResults } from '../../utils/helpers';
+import { getFailedQueryMessage, handleQueryResults } from '../../utils/helpers';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -510,6 +511,12 @@ export class SearchSource {
                 },
               }),
             });
+          } else if (typeof status === 'string' && status.toLowerCase() === 'failed') {
+            // A strategy can fail the query synchronously at start (e.g. a pre-flight validation
+            // or a rejected start call). Surface its message instead of a generic state error,
+            // the same way a failure reported while polling is surfaced.
+            const failedError: unknown = (response as QueryFailedStatusResponse).body?.error;
+            throw new Error(getFailedQueryMessage(failedError));
           } else {
             throw new Error('Invalid query state');
           }
