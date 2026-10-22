@@ -44,18 +44,65 @@ function isFacetedField(fieldName: string): fieldName is (typeof FACET_FIELDS)[n
   return (FACET_FIELDS as readonly string[]).includes(normalizedFieldName);
 }
 
-interface GroupedFields {
+export interface GroupedFields {
   facetedFields: DataViewField[];
   selectedFields: DataViewField[];
   queryFields: DataViewField[];
   discoveredFields: DataViewField[];
 }
 
+// One collator for the sidebar: `Intl.Collator#compare` is several times cheaper than
+// `String#localeCompare`, which re-resolves the locale on every call.
+const fieldNameCollator = new Intl.Collator();
+
+export function compareFieldNames(a: DataViewField, b: DataViewField): number {
+  if (!a.displayName) {
+    return 0;
+  }
+  return fieldNameCollator.compare(a.displayName, b.displayName || '');
+}
+
 /**
- * group the fields into selected, popular and unpopular, filter by fieldFilterState
+ * Sort fields by display name. The result only depends on the field list itself, so callers
+ * should memoize it per dataset rather than re-sorting on every result.
  */
-export function groupFields(
-  fields: DataViewField[] | null,
+export function sortFields(fields: Iterable<DataViewField> | null | undefined): DataViewField[] {
+  if (!fields) {
+    return [];
+  }
+  // fields are not regular JS array but a custom class extending native array and it breaks native array method (e.g. filter())
+  // Convert FldList to proper Array for sorting to work correctly
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/d7004dc5b0392477fdd54ac66b29d231975a173b/src/plugins/data/common/index_patterns/fields/field_list.ts
+  return Array.from(fields).sort(compareFieldNames);
+}
+
+/**
+ * Merge two lists that are each already sorted by `compareFieldNames` into one sorted list.
+ */
+export function mergeSortedFields(a: DataViewField[], b: DataViewField[]): DataViewField[] {
+  if (a.length === 0) return b;
+  if (b.length === 0) return a;
+  const result: DataViewField[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (compareFieldNames(a[i], b[j]) <= 0) {
+      result.push(a[i++]);
+    } else {
+      result.push(b[j++]);
+    }
+  }
+  while (i < a.length) result.push(a[i++]);
+  while (j < b.length) result.push(b[j++]);
+  return result;
+}
+
+/**
+ * Split already-sorted fields into selected, query (present in the current hits) and discovered
+ * groups, applying the sidebar filter. A single linear pass; no sorting.
+ */
+export function partitionFields(
+  sortedFields: DataViewField[] | null,
   columns: string[],
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
@@ -67,24 +114,12 @@ export function groupFields(
     queryFields: [],
     discoveredFields: [],
   };
-  if (!Array.isArray(fields) || typeof fieldCounts !== 'object') {
+  if (!Array.isArray(sortedFields) || typeof fieldCounts !== 'object') {
     return result;
   }
 
-  // fields are not regular JS array but a custom class extending native array and it breaks native array method (e.g. filter())
-  // Convert FldList to proper Array for filtering to work correctly
-  // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/d7004dc5b0392477fdd54ac66b29d231975a173b/src/plugins/data/common/index_patterns/fields/field_list.ts
-  const fieldsArray = Array.from(fields);
-
-  const compareFn = (a: DataViewField, b: DataViewField) => {
-    if (!a.displayName) {
-      return 0;
-    }
-    return a.displayName.localeCompare(b.displayName || '');
-  };
-  const fieldsSorted = fieldsArray.sort(compareFn);
-
-  for (const field of fieldsSorted) {
+  const selected = new Set(columns);
+  for (const field of sortedFields) {
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
@@ -97,7 +132,7 @@ export function groupFields(
     if (showFacetedFields && isFacetedField(field.name)) {
       result.facetedFields.push(field);
     }
-    if (columns.includes(field.name)) {
+    if (selected.has(field.name)) {
       result.selectedFields.push(field);
     } else if (field.name in fieldCounts) {
       result.queryFields.push(field);
@@ -107,4 +142,27 @@ export function groupFields(
   }
 
   return result;
+}
+
+/**
+ * Sort, then group the fields into selected, query and discovered, filtered by fieldFilterState.
+ * Prefer `sortFields` + `partitionFields` when the sort can be memoized separately.
+ */
+export function groupFields(
+  fields: DataViewField[] | null,
+  columns: string[],
+  fieldCounts: Record<string, number>,
+  fieldFilterState: FieldFilterState,
+  showFacetedFields: boolean = false
+): GroupedFields {
+  if (!Array.isArray(fields)) {
+    return partitionFields(null, columns, fieldCounts, fieldFilterState, showFacetedFields);
+  }
+  return partitionFields(
+    sortFields(fields),
+    columns,
+    fieldCounts,
+    fieldFilterState,
+    showFacetedFields
+  );
 }
