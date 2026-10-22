@@ -20,7 +20,6 @@ import {
 import { QueryExecutionStatus, QueryProgress } from '../types';
 import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
 import {
-  clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
 } from '../slices/query_editor/query_editor_slice';
@@ -830,6 +829,8 @@ const executeQueryBase = async (
       ? getSourceTypeRegistry().getHistogramQueryBuilder(query.language, query.dataset)
       : undefined;
     if (sourceHistogramBuilder) {
+      // Without a histogram config (no time field, or it can't be bucketed) the source gets no
+      // histogram. Falling through to the PPL/SQL branches would send its query as one.
       const sourceHistogramQuery =
         histogramConfig &&
         sourceHistogramBuilder(queryString, {
@@ -837,10 +838,26 @@ const executeQueryBase = async (
           timeFieldName: histogramConfig.timeFieldName,
           breakdownField: histogramConfig.breakdownField,
         });
-      // No histogram for this query: send nothing, and leave the key as if it never ran.
+      // No histogram for this query: send nothing and settle the key with no results. Settling it
+      // through setIndividualQueryStatus lets the overall status leave LOADING, which a run of only
+      // the histogram (an interval or breakdown change) would otherwise never do.
       if (!sourceHistogramQuery) {
+        // A newer run of this key aborted this one: the key is that run's to settle.
+        if (isSuperseded() || abortController.signal.aborted) {
+          return;
+        }
         activeQueryAbortControllers.delete(cacheKey);
-        dispatch(clearQueryStatusMapByKey(cacheKey));
+        dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: {
+              status: QueryExecutionStatus.NO_RESULTS,
+              startTime: queryStartTime,
+              elapsedMs: Date.now() - queryStartTime,
+              error: undefined,
+            },
+          })
+        );
         return;
       }
       effectiveQuery = sourceHistogramQuery;
@@ -1002,7 +1019,8 @@ const executeQueryBase = async (
         effectiveQuery,
         rawResultsWithMeta,
         effectiveHistogramConfig,
-        query.language === 'SQL'
+        // A source's own query returns HISTOGRAM_RESULT_COLUMNS, not Explore's SQL shape.
+        !sourceHistogramBuilder && query.language === 'SQL'
       );
     }
 

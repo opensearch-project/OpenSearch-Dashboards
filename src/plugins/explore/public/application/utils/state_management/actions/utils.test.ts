@@ -647,6 +647,49 @@ describe('Utils - Histogram Breakdown Support', () => {
       });
     });
 
+    it('reads digit-only bucket keys as epoch milliseconds', () => {
+      const rawResults: any = {
+        hits: { hits: [{ _source: { '@timestamp': '1790316660000', count: '4' } }], total: 1 },
+        fieldSchema: [
+          { name: '@timestamp', type: 'string' },
+          { name: 'count', type: 'string' },
+        ],
+      };
+      const result = utils.processRawResultsForHistogram('source=x', rawResults, config());
+      expect(result.aggregations['2'].buckets[0].key).toBe(1790316660000);
+      expect(result.hits.total).toBe(4);
+    });
+
+    it('reads epoch-millisecond bucket keys on the breakdown path', () => {
+      const rawResults: any = {
+        hits: {
+          hits: [
+            { _source: { '@timestamp': 1790316660000, svc: 'a', count: '2' } },
+            { _source: { '@timestamp': '1790316720000', svc: 'b', count: 3 } },
+            { _source: { '@timestamp': '2026-09-25 06:13:00.000', svc: 'a', count: '1' } },
+          ],
+          total: 3,
+        },
+        fieldSchema: [{ name: '@timestamp' }, { name: 'svc' }, { name: 'count' }],
+      };
+      const result: any = utils.processRawResultsForHistogram(
+        'source=x',
+        rawResults,
+        createBaseHistogramConfig({ aggs: { 2: { date_histogram: {} } }, breakdownField: 'svc' })
+      );
+      expect(result.hits.total).toBe(6);
+      expect(result.breakdownSeries.series).toEqual([
+        {
+          breakdownValue: 'a',
+          dataPoints: [
+            [1790316660000, 2],
+            [Date.UTC(2026, 8, 25, 6, 13), 1],
+          ],
+        },
+        { breakdownValue: 'b', dataPoints: [[1790316720000, 3]] },
+      ]);
+    });
+
     it('accepts epoch-millisecond bucket keys', () => {
       const rawResults: any = {
         hits: { hits: [{ _source: { '@timestamp': 1700000000000, count: 3 } }], total: 1 },

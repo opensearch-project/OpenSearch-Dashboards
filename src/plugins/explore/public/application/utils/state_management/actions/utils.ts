@@ -50,6 +50,16 @@ function parseTimestampToMs(timestampStr: string): number {
 }
 
 /**
+ * A histogram bucket's start in epoch milliseconds. Accepts a number or a digit-only string
+ * (epoch milliseconds), or a timestamp string as {@link parseTimestampToMs} reads it.
+ */
+const parseBucketKeyToMs = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  const text = String(value).trim();
+  return /^\d+$/.test(text) ? Number(text) : parseTimestampToMs(text);
+};
+
+/**
  * Fills in missing timestamps in a time series map with zero values
  *
  * @param seriesMap - Map of series names to arrays of [timestamp, count] tuples
@@ -513,11 +523,10 @@ export const processRawResultsForHistogram = (
     let totalHits = 0;
     rawResults.hits.hits.forEach((hit) => {
       const sourceValues = Object.values(hit._source);
-      const timestampStr = String(sourceValues[timestampIdx]);
       const breakdownValue = String(sourceValues[breakdownIdx]);
       const count = Number(sourceValues[countIdx]) || 0;
 
-      const timestamp = parseTimestampToMs(timestampStr);
+      const timestamp = parseBucketKeyToMs(sourceValues[timestampIdx]);
 
       totalHits += count;
 
@@ -571,8 +580,7 @@ export const processRawResultsForHistogram = (
         const buckets = value as Array<{ key: string | number; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp =
-              typeof bucket.key === 'number' ? bucket.key : parseTimestampToMs(String(bucket.key));
+            const timestamp = parseBucketKeyToMs(bucket.key);
             totalHits += bucket.value;
             return {
               key_as_string: String(bucket.key),

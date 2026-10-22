@@ -1654,7 +1654,11 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           datasetTypes: ['MY_SOURCE'],
           flavors: [ExploreFlavor.Logs],
           resolveDefaultDataset: async () => undefined,
-          languageSettings: { MyQL: { buildHistogramQuery }, PPL: { buildHistogramQuery } },
+          languageSettings: {
+            MyQL: { buildHistogramQuery },
+            PPL: { buildHistogramQuery },
+            SQL: { buildHistogramQuery },
+          },
         });
         setSourceTypeRegistry(registry);
       });
@@ -1688,16 +1692,93 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         expect(sentQuery()).toBe('my ppl histogram');
       });
 
-      it('sends nothing and clears the key when the source builds no query', async () => {
+      it('sends nothing and settles the key with no results when the source builds no query', async () => {
         buildHistogramQuery.mockReturnValue(undefined);
         await run('MyQL');
 
         expect(mockSearchSource.fetch).not.toHaveBeenCalled();
-        expect(mockDispatch).toHaveBeenCalledWith({
-          type: 'queryEditor/clearQueryStatusMapByKey',
-          payload: 'histogram-key',
-        });
+        // Settled through setIndividualQueryStatus, so the overall status leaves LOADING.
+        expect(mockDispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'queryEditor/setIndividualQueryStatus',
+            payload: expect.objectContaining({
+              cacheKey: 'histogram-key',
+              status: expect.objectContaining({ status: QueryExecutionStatus.NO_RESULTS }),
+            }),
+          })
+        );
         expect(mockServices.inspectorAdapters.requests.start).not.toHaveBeenCalled();
+      });
+
+      it("parses a source's histogram on the SQL id with the source's columns, not SQL's", async () => {
+        buildHistogramQuery.mockReturnValue('my sql histogram');
+        await run('SQL');
+
+        expect(utilsModule.buildSQLHistogramQuery).not.toHaveBeenCalled();
+        expect(utilsModule.processRawResultsForHistogram).toHaveBeenLastCalledWith(
+          'my sql histogram',
+          expect.anything(),
+          expect.anything(),
+          false
+        );
+      });
+
+      describe('an older run that builds no query', () => {
+        const deferred = () => {
+          let resolve: (v: unknown) => void = () => undefined;
+          const promise = new Promise((r) => (resolve = r));
+          return { promise, resolve };
+        };
+        const settledNoResults = () =>
+          mockDispatch.mock.calls.some(
+            ([action]) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload?.status?.status === QueryExecutionStatus.NO_RESULTS
+          );
+
+        it.each([
+          ['while the newer run is still in flight', true],
+          ['after the newer run finished', false],
+        ])("leaves the newer run's key alone %s", async (_label, olderFirst) => {
+          // A fresh controller per run; starting the second run aborts the first.
+          (global.AbortController as jest.Mock).mockImplementation(() => {
+            const controller = {
+              signal: { aborted: false },
+              abort: jest.fn(() => {
+                controller.signal.aborted = true;
+              }),
+            };
+            return controller;
+          });
+          const older = deferred();
+          const newer = deferred();
+          (mockServices.data.dataViews.get as jest.Mock)
+            .mockReturnValueOnce(older.promise)
+            .mockReturnValueOnce(newer.promise);
+          buildHistogramQuery.mockImplementation(() =>
+            buildHistogramQuery.mock.calls.length === (olderFirst ? 1 : 2)
+              ? undefined
+              : 'newer histogram'
+          );
+
+          const olderRun = run('MyQL');
+          const newerRun = run('MyQL');
+          // Both runs have started and wait on their data view (thunks start a few ticks late).
+          await new Promise((r) => setTimeout(r, 0));
+          if (olderFirst) {
+            older.resolve(mockDataView);
+            await olderRun;
+            expect(settledNoResults()).toBe(false);
+            newer.resolve(mockDataView);
+            await newerRun;
+          } else {
+            newer.resolve(mockDataView);
+            await newerRun;
+            older.resolve(mockDataView);
+            await olderRun;
+          }
+          expect(settledNoResults()).toBe(false);
+        });
       });
     });
 
