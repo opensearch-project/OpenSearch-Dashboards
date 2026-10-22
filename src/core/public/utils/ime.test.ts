@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { KeyboardEvent } from 'react';
+import React, { type KeyboardEvent } from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import { installImeCompositionGuard, isImeComposing } from './ime';
 
 // `keyCode` is deprecated but still in KeyboardEventInit, and jsdom honours it.
@@ -26,6 +27,12 @@ describe('isImeComposing', () => {
 
   it('is true for the keyCode 229 Enter Safari sends after compositionend', () => {
     expect(isImeComposing(reactKeyDown({ key: 'Enter', keyCode: 229 }))).toBe(true);
+  });
+
+  it('is true for a composing keydown that carries the real keyCode', () => {
+    expect(isImeComposing(reactKeyDown({ key: 'Enter', keyCode: 13, isComposing: true }))).toBe(
+      true
+    );
   });
 
   it('is false for the Enter that follows a Korean commit', () => {
@@ -87,8 +94,21 @@ describe('installImeCompositionGuard', () => {
     expect(received).toEqual([]);
   });
 
-  it("stops Safari's commit Enter that arrives after compositionend", () => {
+  it('matches key when code is empty', () => {
+    input.dispatchEvent(
+      nativeKeyDown({ key: 'Escape', code: '', keyCode: 229, isComposing: true })
+    );
+    expect(received).toEqual([]);
+  });
+
+  it('lets the keyCode 229 keydowns of Android virtual keyboards through', () => {
+    input.dispatchEvent(nativeKeyDown({ key: 'Unidentified', code: '', keyCode: 229 }));
+    expect(received).toEqual(['Unidentified//229']);
+  });
+
+  it("stops Safari's commit Enter and cancel Escape that arrive after compositionend", () => {
     input.dispatchEvent(nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229 }));
+    input.dispatchEvent(nativeKeyDown({ key: 'Escape', code: 'Escape', keyCode: 229 }));
     expect(received).toEqual([]);
   });
 
@@ -114,17 +134,51 @@ describe('installImeCompositionGuard', () => {
     expect(event.defaultPrevented).toBe(false);
   });
 
-  it('lets keydowns from inside a Monaco editor through', () => {
-    const editor = document.createElement('div');
-    editor.className = 'monaco-editor';
-    const textarea = document.createElement('textarea');
-    editor.appendChild(textarea);
-    document.body.appendChild(editor);
-    textarea.dispatchEvent(
-      nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true })
+  describe('inside a Monaco editor', () => {
+    let editor: HTMLDivElement;
+    let textarea: HTMLTextAreaElement;
+
+    beforeEach(() => {
+      editor = document.createElement('div');
+      editor.className = 'monaco-editor';
+      textarea = document.createElement('textarea');
+      editor.appendChild(textarea);
+      document.body.appendChild(editor);
+    });
+
+    afterEach(() => editor.remove());
+
+    it('lets keyCode 229 keydowns through for Monaco to handle', () => {
+      textarea.dispatchEvent(
+        nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true })
+      );
+      expect(received).toEqual(['Enter/Enter/229']);
+    });
+
+    it('stops composing keydowns that Monaco does not stop itself', () => {
+      textarea.dispatchEvent(
+        nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 13, isComposing: true })
+      );
+      expect(received).toEqual([]);
+    });
+  });
+
+  it('keeps the composing Enter from React handlers in both phases', () => {
+    const seen: string[] = [];
+    const { container, unmount } = render(
+      React.createElement(
+        'div',
+        { onKeyDownCapture: (e: KeyboardEvent) => seen.push(`capture:${e.keyCode}`) },
+        React.createElement('input', {
+          onKeyDown: (e: KeyboardEvent) => seen.push(`bubble:${e.keyCode}`),
+        })
+      )
     );
-    editor.remove();
-    expect(received).toEqual(['Enter/Enter/229']);
+    const field = container.querySelector('input')!;
+    fireEvent.keyDown(field, { key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true });
+    fireEvent.keyDown(field, { key: 'Enter', code: 'Enter', keyCode: 13 });
+    unmount();
+    expect(seen).toEqual(['capture:13', 'bubble:13']);
   });
 
   it('stops guarding once removed', () => {
