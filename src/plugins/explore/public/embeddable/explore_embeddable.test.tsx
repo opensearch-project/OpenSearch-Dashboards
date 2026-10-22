@@ -989,18 +989,20 @@ describe('ExploreEmbeddable', () => {
       }
     });
 
-    test('remounts the panel when a fetch delivers new rows', async () => {
+    test('a fetch hands the new rows to the mounted panel', async () => {
       const realCreateRoot = jest.requireActual('react-dom/client').createRoot;
       (createRoot as jest.Mock).mockImplementationOnce((node: HTMLElement) => realCreateRoot(node));
       let mounts = 0;
-      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => {
+      let renderedRows: unknown;
+      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(({ searchProps }) => {
         useEffect(() => {
           mounts++;
         }, []);
+        renderedRows = searchProps.rows;
         return null;
       });
       const { parent, emb } = createEmbeddableInDashboard(
-        'links-refetch-remount-emb',
+        'links-refetch-emb',
         { getVariables: jest.fn().mockReturnValue([]) },
         { rendered: false }
       );
@@ -1010,12 +1012,14 @@ describe('ExploreEmbeddable', () => {
           emb.render(document.createElement('div'));
         });
         expect(mounts).toBe(1);
+        const rowsBeforeReload = renderedRows;
 
-        // The Logs table copies its rows into state on mount.
         await act(async () => {
           emb.reload();
         });
-        expect(mounts).toBe(2);
+        expect(renderedRows).toBeDefined();
+        expect(renderedRows).not.toBe(rowsBeforeReload);
+        expect(mounts).toBe(1);
       } finally {
         (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
         await act(async () => {

@@ -159,6 +159,29 @@ describe('DefaultDiscoverTable', () => {
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
   });
 
+  it('shows the new rows from the first page when the rows change', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(undefined, true));
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('51–100');
+
+    rerender(getDataTable(mockRows.slice(0, 20), true));
+
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(20);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('1–20');
+  });
+
+  it('keeps the current page when re-rendered with the same rows', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(undefined, true));
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+
+    rerender(getDataTable(undefined, true));
+
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(50);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('51–100');
+  });
+
   describe('Column Width Algorithm', () => {
     // Mock DOM methods needed for width calculation
     beforeEach(() => {
