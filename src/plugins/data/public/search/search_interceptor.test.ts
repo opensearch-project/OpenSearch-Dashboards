@@ -39,7 +39,7 @@ import {
 } from '../../common';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
-import { SearchTimeoutError, PainlessError } from './errors';
+import { SearchTimeoutError, PainlessError, DataSourceError } from './errors';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -161,6 +161,108 @@ describe('SearchInterceptor', () => {
         await response.toPromise();
       } catch (e) {
         expect(e).toBeInstanceOf(PainlessError);
+      }
+    });
+
+    // Regression test for the empty "Search Error" toast: a too-many-docvalue_fields
+    // 400 must surface its reason, not fall through to a blank toast.
+    const docvalueFieldsReason =
+      'Trying to retrieve too many docvalue_fields. Must be less than or equal to: [100] but was [150]. ' +
+      'This limit can be set by changing the [index.max_docvalue_fields_search] index level setting.';
+
+    const docvalueFieldsErrorBody = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Bad Request',
+      attributes: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          root_cause: [
+            {
+              type: 'illegal_argument_exception',
+              reason: docvalueFieldsReason,
+            },
+          ],
+          failed_shards: [
+            {
+              shard: 0,
+              index: 'ocsf-docvalue-repro',
+              node: 'node-1',
+              reason: {
+                type: 'illegal_argument_exception',
+                reason: docvalueFieldsReason,
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    test('Should throw DataSourceError on a non-Painless structured OpenSearch error', async () => {
+      const mockResponse: any = { result: 400, body: docvalueFieldsErrorBody };
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = { params: {} };
+      const response = searchInterceptor.search(mockRequest);
+
+      try {
+        await response.toPromise();
+        throw new Error('search did not throw');
+      } catch (e) {
+        expect(e).toBeInstanceOf(DataSourceError);
+        expect((e as DataSourceError).reason).toBe(docvalueFieldsReason);
+      }
+    });
+
+    test('showError surfaces the real reason for a DataSourceError instead of a blank toast', async () => {
+      const mockResponse: any = { result: 400, body: docvalueFieldsErrorBody };
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = { params: {} };
+
+      try {
+        await searchInterceptor.search(mockRequest).toPromise();
+        throw new Error('search did not throw');
+      } catch (e) {
+        // The reason is the source of the rendered toast body; assert it is the real
+        // message, not the bare status line that produced the blank toast.
+        expect((e as DataSourceError).reason).toBe(docvalueFieldsReason);
+
+        searchInterceptor.showError(e as Error);
+        expect(mockCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Search Error', text: expect.anything() })
+        );
+        expect(mockCoreSetup.notifications.toasts.addError).not.toHaveBeenCalled();
+      }
+    });
+
+    test('A Painless error routes to PainlessError, not DataSourceError (mutual exclusion)', async () => {
+      const mockResponse: any = {
+        result: 400,
+        body: {
+          attributes: {
+            error: {
+              failed_shards: [
+                {
+                  reason: {
+                    lang: 'painless',
+                    script_stack: ['a', 'b'],
+                    reason: 'compile error',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = { params: {} };
+
+      try {
+        await searchInterceptor.search(mockRequest).toPromise();
+        throw new Error('search did not throw');
+      } catch (e) {
+        expect(e).toBeInstanceOf(PainlessError);
+        expect(e).not.toBeInstanceOf(DataSourceError);
       }
     });
 

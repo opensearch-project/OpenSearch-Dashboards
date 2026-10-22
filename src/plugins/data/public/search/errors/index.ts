@@ -29,5 +29,6 @@
  */
 
 export * from './painless_error';
+export * from './data_source_error';
 export * from './timeout_error';
 export * from './analytic_engine_error';
