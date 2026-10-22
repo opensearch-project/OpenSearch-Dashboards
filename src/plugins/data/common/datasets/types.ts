@@ -316,6 +316,12 @@ export interface DatasetField {
   displayName?: string;
   /** Whether the field can be used in aggregations. Nested/text fields are typically not aggregatable. */
   aggregatable?: boolean;
+  /**
+   * Whether the field is searchable (indexed). Drives the index-pattern field's `filterable`
+   * computation, which gates the Discover "filter for/out" buttons. Dropping it leaves the UI
+   * treating the field as unindexed ("Unindexed fields can not be searched").
+   */
+  searchable?: boolean;
   /** Sub-type info. `subType.nested` marks a field that lives inside a nested object (e.g. `events.time`). */
   subType?: IFieldSubType;
   // TODO:  osdFieldType?

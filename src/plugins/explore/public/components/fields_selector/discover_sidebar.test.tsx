@@ -75,7 +75,7 @@ jest.mock('../../helpers/use_flavor_id', () => ({
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((dataSet) => dataSet.fields),
+  getUnknownFieldList: jest.fn(() => []),
 }));
 
 jest.mock('./field_list', () => ({

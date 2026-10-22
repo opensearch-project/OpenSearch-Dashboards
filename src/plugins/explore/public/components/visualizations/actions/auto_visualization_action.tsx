@@ -577,6 +577,8 @@ export function ChartPreview({
   return (
     <div style={{ height: 250, width: '100%' }}>
       <CommonVisualizationRender
+        // This chart always runs its own PPL query, whatever is active in Explore.
+        query={{ language: query.language, dataset: query.dataset }}
         visualizationData={visData}
         visConfig={visConfig}
         showRawTable={false}
