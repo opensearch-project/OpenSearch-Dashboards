@@ -840,6 +840,73 @@ describe('VariableService', () => {
 
       expect(service.getVariables()[0].current).toEqual(['api']);
     });
+
+    it('should refresh dependents of a cleared query variable with its fallback value', async () => {
+      mockExecuteVariableQuery.mockImplementation(async (_data: unknown, { query }: any) =>
+        query.includes('dedup region')
+          ? makeQueryResult(['eu', 'us'], 'region')
+          : makeQueryResult([`svc-for-${query.match(/region = '([^']*)'/)?.[1] ?? '?'}`])
+      );
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        current: ['us'],
+        query: 'source=logs | dedup region | fields region',
+      });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        current: ['svc-for-us'],
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+      mockExecuteVariableQuery.mockClear();
+
+      service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(service.getVariables()[0].current).toEqual(['eu']);
+      const serviceQueries = mockExecuteVariableQuery.mock.calls
+        .map(([, { query }]) => query as string)
+        .filter((query) => query.includes('dedup service'));
+      expect(serviceQueries[serviceQueries.length - 1]).toContain("region = 'eu'");
+      expect(getOptionValues(service.getVariablesWithState()[1].options)).toEqual(['svc-for-eu']);
+    });
+
+    it('should default a cleared dependent to the first option for its cleared parent', async () => {
+      mockExecuteVariableQuery.mockImplementation(async (_data: unknown, { query }: any) =>
+        query.includes('dedup region')
+          ? makeQueryResult(['eu', 'us'], 'region')
+          : makeQueryResult([`svc-for-${query.match(/region = '([^']*)'/)?.[1] ?? '?'}`])
+      );
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        current: ['us'],
+        query: 'source=logs | dedup region | fields region',
+      });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        current: ['svc-for-us'],
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+
+      service.applyCurrentValues([
+        { id: 'region-1', current: undefined },
+        { id: 'service-1', current: undefined },
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(getCurrentValues(service)).toEqual({ region: ['eu'], service: ['svc-for-eu'] });
+    });
   });
 
   describe('reorderVariables', () => {

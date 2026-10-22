@@ -514,9 +514,15 @@ const handleDashboardContainerChanges = (
     newAppState.query = input.query;
   }
   // Sync variables from container input to appState
+  let onlyFilledEmptyVariables = false;
   if (!isEqual(input.variables, appStateData.variables)) {
     newAppState.variables = input.variables;
     dashboard.setIsDirty(true);
+    // Defaulting a variable that has no selection is not a navigation step of its own.
+    onlyFilledEmptyVariables = (input.variables ?? []).every((variable) => {
+      const previous = appStateData.variables?.find((v) => v.id === variable.id)?.current;
+      return isEqual(variable.current, previous) || !previous || previous.length === 0;
+    });
   }
   if (!isEqual(input.layout, appStateData.layout)) {
     newAppState.layout = input.layout;
@@ -524,6 +530,9 @@ const handleDashboardContainerChanges = (
   }
 
   appState.transitions.setDashboard(newAppState);
+  if (onlyFilledEmptyVariables && Object.keys(newAppState).length === 1) {
+    dashboardContainer.updateAppStateUrl?.({ replace: true });
+  }
 
   // event emit dirty?
 };

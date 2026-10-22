@@ -417,17 +417,29 @@ export class VariableService {
     }
 
     this.variables$.next(updatedVariables);
-    changed.forEach((variable) => {
-      // A query variable whose selection the URL cleared has no value to interpolate.
-      // Re-run its options so it falls back to the first option, matching a fresh load.
-      if (
-        variable.type === VariableType.Query &&
-        (!variable.current || variable.current.length === 0)
-      ) {
-        this.refreshVariableOptions(variable.id);
-      }
+    // A query variable whose selection the URL cleared has no value to interpolate.
+    // Re-run its options so it falls back to the first option, matching a fresh load.
+    const cleared = changed.filter(
+      (variable) =>
+        variable.type === VariableType.Query && (!variable.current || variable.current.length === 0)
+    );
+    changed
+      .filter((variable) => !cleared.includes(variable))
+      .forEach((variable) => this.refreshDependentVariables(variable.name));
+    if (cleared.length > 0) {
+      this.refreshClearedVariables(cleared);
+    }
+  }
+
+  /**
+   * Refresh cleared variables in dashboard order, and their dependents only once the
+   * fallback is chosen, so a cleared variable never resolves against a cleared parent.
+   */
+  private async refreshClearedVariables(cleared: Variable[]): Promise<void> {
+    for (const variable of cleared) {
+      await this.refreshVariableOptions(variable.id);
       this.refreshDependentVariables(variable.name);
-    });
+    }
   }
 
   public async refreshVariableOptions(id: string): Promise<void> {

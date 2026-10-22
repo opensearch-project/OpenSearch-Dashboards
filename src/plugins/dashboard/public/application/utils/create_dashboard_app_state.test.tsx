@@ -152,6 +152,31 @@ describe('createDashboardGlobalAndAppState', () => {
     );
   });
 
+  test('replaces the current history entry when writing back state applied from the URL', () => {
+    const containerSet = jest.fn();
+    createStateContainer.mockReturnValueOnce({
+      getState: () => dashboardAppStateStub,
+      set: containerSet,
+    });
+    createDashboardGlobalAndAppState({
+      stateDefaults: dashboardAppStateStub,
+      osdUrlStateStorage,
+      services: {
+        ...mockServices,
+        history: { location: { pathname: '/view/dashboard-id' } },
+      } as any,
+      savedDashboardInstance: { ...savedDashboardInstance, id: 'dashboard-id' } as any,
+    });
+    const { stateContainer: syncedContainer } =
+      syncState.mock.calls[syncState.mock.calls.length - 1][0];
+    (osdUrlStateStorage.flush as jest.Mock).mockClear();
+
+    syncedContainer.set({ variables: [{ id: 'var1', current: ['value1'] }] });
+
+    expect(containerSet).toHaveBeenCalled();
+    expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
     expect(stateContainer).toBe('stateContainer');
     stopStateSync();
