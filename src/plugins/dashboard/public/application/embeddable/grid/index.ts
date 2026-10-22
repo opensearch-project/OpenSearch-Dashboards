@@ -29,3 +29,4 @@
  */
 
 export { DashboardGrid } from './dashboard_grid';
+export { SectionLayoutContainer } from './section_layout_container';

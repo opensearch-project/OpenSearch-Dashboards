@@ -32,6 +32,9 @@ jest.mock('./key_parser', () => ({
       if (keys === 'cmd+f') {
         return 'Ctrl+F';
       }
+      if (keys === 'cmd+k') {
+        return 'Ctrl+K';
+      }
       return keys;
     }),
   })),
@@ -88,6 +91,15 @@ describe('KeyboardShortcutHelpModal', () => {
       name: 'Go to Discover',
       category: 'navigation',
       keys: 'g d',
+      execute: jest.fn(),
+    },
+    {
+      id: 'toggle_global_search_command_palette',
+      pluginId: 'core',
+      name: 'Toggle command palette',
+      category: 'navigation',
+      keys: 'cmd+k',
+      allowInEditable: true,
       execute: jest.fn(),
     },
   ];
@@ -222,6 +234,26 @@ describe('KeyboardShortcutHelpModal', () => {
   });
 
   describe('Service Integration', () => {
+    it('renders the registered command palette shortcut', async () => {
+      const trigger = <button data-testid="trigger">Open Help</button>;
+
+      render(
+        <TestWrapper>
+          <KeyboardShortcutHelpModal
+            trigger={trigger}
+            keyboardShortcutService={mockKeyboardShortcutService}
+          />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open Help' }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Toggle command palette')).toBeInTheDocument();
+        expect(screen.getByText('K')).toBeInTheDocument();
+      });
+    });
+
     it('handles service unavailable gracefully', async () => {
       const trigger = <button data-testid="trigger">Open Help</button>;
 

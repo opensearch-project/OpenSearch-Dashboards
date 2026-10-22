@@ -122,6 +122,10 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
   name: 'Line',
   icon: 'visLine',
   type: 'line',
+  metadata: {
+    description:
+      'Trends over time. Use when user asks about trends, changes over time, or time-series.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'line'>> = [
       {
@@ -210,7 +214,8 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -244,7 +249,8 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -272,10 +278,15 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category line chart');
 
-          const { spec, legendItems } = createCategoryLineChart(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createCategoryLineChart(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender

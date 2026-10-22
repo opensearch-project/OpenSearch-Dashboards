@@ -29,6 +29,8 @@ jest.mock('../../../context_provider/public', () => {
     AssistantActionService: {
       getInstance: jest.fn(() => assistantActionsInstance),
     },
+    // Actions registered via this hook (e.g. switch_data_source) are no-ops in these tests
+    useAssistantAction: jest.fn(),
   };
 });
 
@@ -97,6 +99,9 @@ describe('ChatWindow', () => {
         .fn()
         .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
       setDataSourceId: jest.fn(),
+      clearConfirmedDataSourceId: jest.fn(),
+      clearSessionDataSourceList: jest.fn(),
+      clearSessionDataSourceAndContext: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,
@@ -715,6 +720,57 @@ describe('ChatWindow', () => {
       // The sendMessage method via ref doesn't trim the input
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '  test message  ',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('IME composition', () => {
+    it('should not send on the Enter that commits an IME composition', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '안녕하세요' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(input).toHaveValue('안녕하세요');
+
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '안녕하세요',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+
+    it('should send on an Enter that arrives after the composition ended', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '안녕하세요' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 229 });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '안녕하세요',
         expect.any(Array),
         expect.any(Object)
       );

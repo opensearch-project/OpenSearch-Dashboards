@@ -16,6 +16,7 @@ export interface ContainerState {
 export interface ContainerInfo {
   containerName: string;
   containerId: string;
+  containerData?: Record<string, unknown>;
 }
 
 export type ActiveBottomPanelTab = 'QUERY_TAB' | 'TRANSFORM_TAB';

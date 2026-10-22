@@ -9,6 +9,7 @@ import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../d
 import { SearchUsage } from '../../../data/server';
 import { promqlSearchStrategyProvider } from './promql_search_strategy';
 import { prometheusManager } from '../connections/managers/prometheus_manager';
+import { queryManagerService } from '../connections/query_manager_service';
 
 jest.mock('../connections/managers/prometheus_manager', () => ({
   prometheusManager: {
@@ -272,7 +273,7 @@ describe('promqlSearchStrategy', () => {
       );
     });
 
-    it('should name series from a per-query legendFormat template when provided', async () => {
+    it('keeps Series original name and maps the legendFormat name in meta.seriesDisplayNames', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
         sessionId: 'session-1',
@@ -314,10 +315,16 @@ describe('promqlSearchStrategy', () => {
 
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values[0]).toBe('prometheus-localhost:9090');
+      const identity = seriesField?.values[0];
+      expect(identity).toBe('{instance="localhost:9090", job="prometheus"}');
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toEqual({
+        [identity as string]: 'prometheus-localhost:9090',
+      });
     });
 
-    it('keeps series distinct when a legendFormat template collapses them to one name', async () => {
+    it('keeps two same-display-name series as distinct identity keys in the map', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
         sessionId: 'session-1',
@@ -357,7 +364,105 @@ describe('promqlSearchStrategy', () => {
 
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values).toEqual(['api {instance="node-1"}', 'api {instance="node-2"}']);
+      expect(seriesField?.values).toEqual([
+        '{instance="node-1", job="api"}',
+        '{instance="node-2", job="api"}',
+      ]);
+      expect(new Set(seriesField?.values).size).toBe(2);
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      const map = result.body.meta?.seriesDisplayNames;
+      expect(map).toEqual({
+        '{instance="node-1", job="api"}': 'api',
+        '{instance="node-2", job="api"}': 'api',
+      });
+      expect(Object.keys(map).length).toBe(2);
+    });
+
+    it('omits meta.seriesDisplayNames entirely when no legendFormat is provided', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'localhost:9090', job: 'prometheus' },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'up', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toBeUndefined();
+    });
+
+    it('keeps series distinct by __name__ when a legendFormat template collapses them to one name', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { __name__: 'http_requests_total', job: 'api' },
+                values: [[1638316800, 1]],
+              },
+              { metric: { __name__: 'http_errors_total', job: 'api' }, values: [[1638316800, 2]] },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: '{job="api"}',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ legendFormat: '{{job}}' }],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values).toEqual([
+        'http_requests_total{job="api"}',
+        'http_errors_total{job="api"}',
+      ]);
       expect(new Set(seriesField?.values).size).toBe(2);
     });
 
@@ -987,6 +1092,40 @@ describe('promqlSearchStrategy', () => {
       ).rejects.toThrow('Single query failed');
     });
 
+    it.each([
+      [{ statusCode: 400 }, 400],
+      [{ statusCode: 404 }, 404],
+      [{ status: 422 }, 422],
+      // The connection's credentials were rejected, not the user's session.
+      [{ statusCode: 401 }, 502],
+      [{ status: 403 }, 502],
+      [{ statusCode: 409 }, undefined],
+      [{ statusCode: 502 }, undefined],
+      [{}, undefined],
+    ])("maps a single query's upstream status %p", async (fields, expected) => {
+      (prometheusManager.query as jest.Mock).mockRejectedValue(
+        Object.assign(new Error('Bad query'), fields)
+      );
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const error = await strategy
+        .search(
+          emptyRequestHandlerContext,
+          {
+            body: {
+              query: { query: 'bad{', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+              timeRange: { from: '2021-12-01T00:00:00.000Z', to: '2021-12-01T01:00:00.000Z' },
+            },
+          } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+          {}
+        )
+        .catch((e: any) => e);
+      // The JSON shape Explore's error panel reads; the route takes the status from it.
+      expect(JSON.parse(error.message)).toEqual({
+        error: { type: 'PromQLQueryError', reason: 'PromQL query failed', details: 'Bad query' },
+        ...(expected ? { status: expected, statusCode: expected } : {}),
+      });
+    });
+
     it('should extract error details from response body in multi-query', async () => {
       const mockResponseA = {
         queryId: 'query-a',
@@ -1141,9 +1280,17 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
+      // Series keeps the per-query label prefix + raw identity, unchanged by templates.
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values).toEqual(['A: server1', 'B: srv-server1']);
+      expect(seriesField?.values).toEqual(['A: {instance="server1"}', 'B: {instance="server1"}']);
+
+      // Each query's interpolated display name rides in meta, keyed by identity.
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toEqual({
+        'A: {instance="server1"}': 'server1',
+        'B: {instance="server1"}': 'srv-server1',
+      });
     });
 
     it('resolves each query its own step from its min step', async () => {
@@ -1617,6 +1764,58 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.options.start).toBeDefined();
       expect(callArgs.body.options.end).toBeDefined();
       expect(callArgs.body.options.step).toBeDefined();
+    });
+  });
+  describe('query manager', () => {
+    const response = {
+      queryId: 'query-1',
+      sessionId: 'session-1',
+      results: {
+        'my-dataset': { resultType: 'matrix', result: [{ metric: {}, values: [[1638316800, 1]] }] },
+      },
+    };
+    const myManager = { query: jest.fn() };
+    queryManagerService.register('MY_DATASET_TYPE', myManager as any);
+
+    const search = (dataset: Record<string, string>) =>
+      promqlSearchStrategyProvider(config$, logger, usage).search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'up', dataset, language: 'PROMQL' },
+            timeRange: { from: '2021-12-01T00:00:00.000Z', to: '2021-12-01T01:00:00.000Z' },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+    it("runs a dataset's PromQL on the manager registered for its type", async () => {
+      myManager.query.mockResolvedValue(response);
+
+      await search({ id: 'my-dataset', type: 'MY_DATASET_TYPE' });
+
+      expect(myManager.query).toHaveBeenCalledWith(
+        emptyRequestHandlerContext,
+        expect.anything(),
+        expect.objectContaining({
+          dataconnection: 'my-dataset',
+          body: expect.objectContaining({ query: 'up' }),
+        })
+      );
+      expect(prometheusManager.query).not.toHaveBeenCalled();
+    });
+
+    it('uses the Prometheus manager for a type with no manager of its own', async () => {
+      mockPrometheusManagerQuery({
+        ...response,
+        results: { 'prom-1': response.results['my-dataset'] },
+      });
+
+      await search({ id: 'prom-1', type: 'PROMETHEUS' });
+      await search({ id: 'prom-1' } as Record<string, string>);
+
+      expect(prometheusManager.query).toHaveBeenCalledTimes(2);
+      expect(myManager.query).not.toHaveBeenCalled();
     });
   });
 });

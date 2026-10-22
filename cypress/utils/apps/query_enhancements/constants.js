@@ -41,7 +41,7 @@ export const INVALID_INDEX = 'index_that_does_not_exist';
 
 /**
  * The languages in discover
- * @typedef {('DQL'|'Lucene'|'OpenSearch SQL'|'PPL')} QueryEnhancementLanguage
+ * @typedef {('DQL'|'Lucene'|'SQL'|'PPL')} QueryEnhancementLanguage
  */
 
 /**
@@ -106,7 +106,7 @@ export const QueryLanguages = {
     },
   },
   SQL: {
-    name: 'OpenSearch SQL',
+    name: 'SQL',
     apiName: 'SQL',
     supports: {
       filters: false,

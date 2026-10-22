@@ -34,6 +34,11 @@ import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 export interface ContainerInfo {
   containerName: string;
   containerId: string;
+  /**
+   * Opaque context passed through an editor without interpretation and returned
+   * in {@link EmbeddablePackageState}.
+   */
+  containerData?: Record<string, unknown>;
 }
 
 /**
@@ -59,6 +64,8 @@ export interface EmbeddablePackageState {
   type: string;
   input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
   embeddableId?: string;
+  /** Includes the container context supplied when the editor was opened. */
+  containerInfo?: ContainerInfo;
 }
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {

@@ -7,7 +7,7 @@ import { AxisRole, VisFieldType, TimeUnit, AggregationType, VisColumn } from '..
 import { BarChartStyle } from './bar_vis_config';
 import { getAxisConfig, applyPercentageAxis, getNormalizedAxisConfig } from '../utils/utils';
 
-import { createBarSeries } from './bar_chart_utils';
+import { createBarSeries, inferTimeIntervals } from './bar_chart_utils';
 import {
   pipe,
   createBaseConfig,
@@ -15,6 +15,7 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
 import {
@@ -24,13 +25,65 @@ import {
   transform,
   pivot,
 } from '../utils/data_transformation';
+import { ceilToTimeUnit, roundToTimeUnit } from '../utils/data_transformation/utils/time';
+import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
+const alignTimeRangeToBuckets = (
+  timeRange: { from: string; to: string } | undefined,
+  timeUnit: TimeUnit | undefined
+) => {
+  if (!timeRange || !timeUnit) {
+    return timeRange;
+  }
+
+  const from = new Date(timeRange.from);
+  const to = new Date(timeRange.to);
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+    return timeRange;
+  }
+
+  return {
+    from: roundToTimeUnit(from, timeUnit).toISOString(),
+    to: ceilToTimeUnit(to, timeUnit).toISOString(),
+  };
+};
+
+const includeDataInTimeRange = (
+  timeRange: { from: string; to: string } | undefined,
+  data: Array<Record<string, any>>,
+  timeField: string
+) => {
+  if (!timeRange) {
+    return timeRange;
+  }
+
+  const from = new Date(timeRange.from);
+  const to = new Date(timeRange.to);
+  let minTimestamp = Infinity;
+  let maxTimestamp = -Infinity;
+  data.forEach((row) => {
+    const timestamp = new Date(row[timeField]).getTime();
+    if (!isNaN(timestamp)) {
+      minTimestamp = Math.min(minTimestamp, timestamp);
+      maxTimestamp = Math.max(maxTimestamp, timestamp);
+    }
+  });
+  if (isNaN(from.getTime()) || isNaN(to.getTime()) || !isFinite(minTimestamp)) {
+    return timeRange;
+  }
+
+  return {
+    from: new Date(Math.min(from.getTime(), minTimestamp)).toISOString(),
+    to: new Date(Math.max(to.getTime(), maxTimestamp)).toISOString(),
+  };
+};
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -53,6 +106,7 @@ export const createBarSpec = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -69,6 +123,7 @@ export const createBarSpec = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
+    seriesDisplayNames,
   });
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
@@ -97,6 +152,17 @@ export const createTimeBarChart = (
   const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
   const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
+  const effectiveTimeUnit = skipBucketing
+    ? undefined
+    : timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeField)
+      : timeUnit;
+  const visibleTimeRange =
+    styles.showFullTimeRange && transformedData.length > 0
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
+      : timeRange;
   const result = pipe(
     skipBucketing
       ? transform(convertTo2DArray())
@@ -104,7 +170,7 @@ export const createTimeBarChart = (
           aggregate({
             groupBy: timeField,
             field: seriesFields,
-            timeUnit,
+            timeUnit: effectiveTimeUnit,
             aggregationType,
           }),
           transformStackPercentage(styles, { excludeFields: [timeField] }),
@@ -132,7 +198,7 @@ export const createTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
+    timeRange: visibleTimeRange,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -150,7 +216,8 @@ export const createGroupedTimeBarChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  allData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -178,6 +245,17 @@ export const createGroupedTimeBarChart = (
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
   const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
+  const effectiveTimeUnit = skipBucketing
+    ? undefined
+    : timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeField)
+      : timeUnit;
+  const visibleTimeRange =
+    styles.showFullTimeRange && transformedData.length > 0
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
+      : timeRange;
 
   const result = pipe(
     transform(
@@ -185,7 +263,7 @@ export const createGroupedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit: skipBucketing ? undefined : timeUnit,
+        timeUnit: effectiveTimeUnit,
         // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
         aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
@@ -198,6 +276,7 @@ export const createGroupedTimeBarChart = (
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,
+    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
@@ -218,7 +297,8 @@ export const createGroupedTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
+    timeRange: visibleTimeRange,
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };

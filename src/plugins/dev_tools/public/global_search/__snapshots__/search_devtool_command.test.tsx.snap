@@ -3,7 +3,6 @@
 exports[`<DevToolItem /> render DevToolItem 1`] = `
 <div>
   <div
-    aria-hidden="true"
     data-test-subj="toolId-dev"
   >
     <nav

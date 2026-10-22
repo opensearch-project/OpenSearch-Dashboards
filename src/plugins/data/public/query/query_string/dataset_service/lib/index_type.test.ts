@@ -87,6 +87,25 @@ describe('indexTypeConfig', () => {
     });
   });
 
+  test('toDataset carries displayName from meta when present', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'index1',
+        title: 'otel-v1*',
+        type: 'INDEX',
+        meta: {
+          timeFieldName: 'startTime',
+          displayName: 'My Trace Dataset',
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        },
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    expect(result.displayName).toBe('My Trace Dataset');
+  });
+
   test('toDataset handles multi-index selection with comma-separated titles', () => {
     const mockPath: DataStructure[] = [
       {
@@ -232,6 +251,37 @@ describe('indexTypeConfig', () => {
       });
     });
 
+    test('uses the leaf parent when the path does not contain a DATA_SOURCE node', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: DEFAULT_DATA.SET_TYPES.INDEX,
+          parent: {
+            id: 'datasource1',
+            title: 'DataSource 1',
+            type: 'OpenSearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceEngineType: 'OpenSearch',
+              dataSourceVersion: '2.17.0',
+            },
+          },
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
+      });
+    });
+
     test('falls back to LOCAL_DATASOURCE when there is no DATA_SOURCE node in path', () => {
       const mockPath: DataStructure[] = [
         {
@@ -264,6 +314,31 @@ describe('indexTypeConfig', () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({ name: 'field1', type: 'string' });
     expect(result[1]).toEqual({ name: 'field2', type: 'number' });
+  });
+
+  test('fetchFields passes through searchable, esTypes and readFromDocValues', async () => {
+    const mockFields = [
+      {
+        name: 'resource.attributes.telemetry.sdk.language',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+    ];
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({
+      getFieldsForWildcard: jest.fn().mockResolvedValue(mockFields),
+    });
+
+    const mockDataset: Dataset = { id: 'logs', title: 'logs*', type: 'INDEXES' };
+    const result = await indexTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0]).toMatchObject({
+      esTypes: ['keyword'],
+      searchable: true,
+      readFromDocValues: true,
+    });
   });
 
   test('fetchFields passes through aggregatable and subType', async () => {

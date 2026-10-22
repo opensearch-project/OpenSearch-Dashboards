@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
-import { DataStorage } from '../../common';
+import { Dataset, DataStorage } from '../../common';
 import { IndexPattern, IndexPatternsService } from '../index_patterns';
 import { ISearchInterceptor } from '../search';
 import { FilterManager } from './filter_manager';
@@ -32,6 +32,12 @@ export interface IQuerySetup {
 export interface IQueryStart {
   addToQueryLog: ReturnType<typeof createAddToQueryLog>;
   filterManager: FilterManager;
+  /**
+   * Resolves the current default dataset after DatasetService initialization completes.
+   * Applications decide whether to adopt the dataset and its generated query before restoring
+   * their own query state.
+   */
+  getDefaultDataset: () => Promise<Dataset | undefined>;
   queryString: QueryStringContract;
   savedQueries: ReturnType<typeof createSavedQueryService>;
   state$: Observable<{ changes: QueryStateChange; state: QueryState }>;

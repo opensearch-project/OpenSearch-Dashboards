@@ -28,11 +28,13 @@ import { AgenticMemoryProvider } from '../services/agentic_memory_provider';
 interface ConversationHistoryPanelProps {
   conversationHistoryService: ConversationHistoryService;
   onSelectConversation: (conversation: SavedConversation) => void;
+  onDeleteConversation?: (threadId: string) => Promise<void>;
 }
 
 export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> = ({
   conversationHistoryService,
   onSelectConversation,
+  onDeleteConversation,
 }) => {
   const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
   const toasts = services.core?.notifications?.toasts;
@@ -120,7 +122,11 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
   const handleDelete = async (threadId: string) => {
     try {
-      await conversationHistoryService.deleteConversation(threadId);
+      if (onDeleteConversation) {
+        await onDeleteConversation(threadId);
+      } else {
+        await conversationHistoryService.deleteConversation(threadId);
+      }
       pageRef.current = 0;
       setPage(0);
       setIsLoadingWithRef(false);

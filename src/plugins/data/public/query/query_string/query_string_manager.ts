@@ -38,39 +38,25 @@ import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
-import { getApplication } from '../../services';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private queryHistory: QueryHistory;
   private datasetService!: DatasetServiceContract;
   private languageService!: LanguageServiceContract;
-  private currentAppId: string | undefined;
 
   constructor(
     private readonly storage: DataStorage,
     private readonly sessionStorage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings'],
     private readonly defaultSearchInterceptor: ISearchInterceptor,
-    private readonly notifications: NotificationsSetup
+    private readonly notifications: NotificationsSetup,
+    private readonly currentAppIdProvider: () => string | undefined = () => undefined
   ) {
-    // datasetService and languageService must exist before getDefaultQuery() runs,
-    // otherwise the initial query skips the dataset-aware language clamp.
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage: this.sessionStorage });
-    try {
-      const application = getApplication();
-      if (application && application.currentAppId$) {
-        application.currentAppId$.subscribe((appId) => {
-          this.currentAppId = appId;
-        });
-      }
-    } catch {
-      // eslint-disable-next-line no-console
-      console.warn('Could not subscribe to application.currentAppId$');
-    }
   }
 
   private getDefaultQueryString() {
@@ -92,34 +78,39 @@ export class QueryStringManager {
     );
   }
 
-  public getDefaultQuery(): Query {
-    const defaultLanguageId = this.getDefaultLanguage();
-    const defaultQuery = this.getDefaultQueryString();
-    const defaultDataset = this.datasetService?.getDefault();
-
-    const query = {
-      query: defaultQuery,
-      language: defaultLanguageId,
+  /**
+   * Builds a default query for an explicitly selected dataset.
+   *
+   * Do not implicitly read DatasetService's default here: its asynchronous initialization used to
+   * replace application-restored queries with a generated dataset query.
+   */
+  public getDefaultQuery(dataset?: Dataset): Query {
+    const { language: defaultLanguage, useUserQuery } = this.resolveDefaultLanguage();
+    const query: Query = {
+      query: useUserQuery ? this.getDefaultQueryString() : '',
+      language: defaultLanguage,
     };
 
     if (
       this.uiSettings &&
       this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
-      defaultDataset &&
+      dataset &&
       this.languageService
     ) {
-      let languageId = defaultLanguageId;
+      let language = defaultLanguage;
       const supportedLanguages = this.datasetService
-        .getType(defaultDataset.type)
-        ?.supportedLanguages(defaultDataset);
-      if (supportedLanguages && !supportedLanguages.includes(languageId)) {
-        languageId = supportedLanguages[0];
+        .getType(dataset.type)
+        ?.supportedLanguages(dataset);
+      if (supportedLanguages && !supportedLanguages.includes(language)) {
+        language =
+          supportedLanguages.find((languageId) => this.isLanguageSupported(languageId)) ??
+          supportedLanguages[0];
       }
-      const newQuery = { ...query, language: languageId, dataset: defaultDataset };
+      const datasetQuery = { ...query, language, dataset };
 
       return {
-        ...newQuery,
-        query: this.getInitialDatasetQueryString(newQuery),
+        ...datasetQuery,
+        query: this.getInitialDatasetQueryString(datasetQuery),
       };
     }
 
@@ -127,14 +118,15 @@ export class QueryStringManager {
   }
 
   /**
-   * Re-seeds query$ from getDefaultQuery() if the user hasn't changed the query yet.
-   * Called after DatasetService.init() resolves so the default dataset (and any
-   * language clamp it implies) can be applied to the initial query.
+   * @deprecated Applications should explicitly resolve and apply their default dataset.
+   *
+   * Kept for third-party plugin compatibility. The Data plugin no longer calls this during
+   * startup because doing so can overwrite query state already restored by an application.
    */
   public refreshDefaultQuery(previousDefault: Query): void {
     const currentQuery = this.query$.getValue();
     if (isEqual(currentQuery, previousDefault)) {
-      this.query$.next(this.getDefaultQuery());
+      this.query$.next(this.getDefaultQuery(this.datasetService.getDefault()));
     }
   }
 
@@ -145,7 +137,6 @@ export class QueryStringManager {
       return {
         query,
         language: this.getDefaultLanguage(),
-        dataset: this.datasetService?.getDefault(),
       };
     } else {
       return query;
@@ -156,43 +147,11 @@ export class QueryStringManager {
     return this.query$.asObservable().pipe(skip(1));
   };
 
-  public getQuery = (): Query => {
-    const currentAppId = this.getCurrentAppId();
-    const query = this.query$.getValue();
-
-    if (currentAppId) {
-      const currentLanguage = query.language;
-      if (
-        containsWildcardOrValue(
-          this.languageService.getLanguage(currentLanguage)?.supportedAppNames,
-          currentAppId
-        )
-      ) {
-        return this.query$.getValue();
-      }
-
-      const defaultLanguage = this.uiSettings.get('search:queryLanguage');
-      const defaultLanguageTitle = this.languageService.getLanguage(defaultLanguage)?.title;
-
-      showWarning(this.notifications, {
-        title: i18n.translate('data.unSupportedLanguageTitle', {
-          defaultMessage: 'Unsupported Language Selected',
-        }),
-        text: i18n.translate('data.unSupportedLanguageBody', {
-          defaultMessage:
-            'Selected language {currentLanguage} is not supported. Defaulting to {defaultLanguage}.',
-          values: {
-            currentLanguage,
-            defaultLanguage: defaultLanguageTitle,
-          },
-        }),
-      });
-
-      const updatedQuery = this.getInitialQueryByLanguage(defaultLanguage);
-      this.setQuery(updatedQuery);
-    }
-    return this.query$.getValue();
-  };
+  // Reading query state must not apply app-specific fallbacks. Applications such as Explore keep
+  // their own query state and call getQuery() while building requests; mutating the shared query
+  // here can combine an app-level PPL query with a newly defaulted DQL language. Applications
+  // normalize unsupported restored queries when initializing their own state instead.
+  public getQuery = (): Query => this.query$.getValue();
 
   /**
    * Updates the query.
@@ -252,7 +211,9 @@ export class QueryStringManager {
   public clearQuery = () => {
     const force = false;
     const mergeCurrentQuery = false;
-    this.setQuery(this.getDefaultQuery(), force, mergeCurrentQuery);
+    // Preserve the historical clear behavior without making default-dataset loading mutate query
+    // state asynchronously. This reads only the dataset already cached by DatasetService.
+    this.setQuery(this.getDefaultQuery(this.datasetService.getDefault()), force, mergeCurrentQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
@@ -367,29 +328,36 @@ export class QueryStringManager {
       return false;
     }
 
-    return containsWildcardOrValue(
+    return isAppSupported(
       this.languageService.getLanguage(languageId)?.supportedAppNames,
       currentAppId
     );
   }
 
-  private getDefaultLanguage() {
+  private resolveDefaultLanguage(): { language: string; useUserQuery: boolean } {
     const lastUsedLanguage = this.storage.get('userQueryLanguage');
+    // userQueryLanguage and userQueryString are persisted as a pair. Reuse the string only when
+    // that language is still supported by the active app; otherwise PPL could be parsed as DQL.
     if (lastUsedLanguage && this.isLanguageSupported(lastUsedLanguage)) {
-      return lastUsedLanguage;
+      return { language: lastUsedLanguage, useUserQuery: true };
     }
 
-    return this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
+    const configuredLanguage = this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) || 'kuery';
+    if (!this.getCurrentAppId() || this.isLanguageSupported(configuredLanguage)) {
+      return { language: configuredLanguage, useUserQuery: false };
+    }
+
+    // The UI setting can also reference a language unsupported by the active app. Use an empty
+    // kuery instead of carrying a query string across languages.
+    return { language: 'kuery', useUserQuery: false };
+  }
+
+  private getDefaultLanguage() {
+    return this.resolveDefaultLanguage().language;
   }
 
   private getCurrentAppId(): string | undefined {
-    try {
-      return this.currentAppId;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Application Not available.');
-    }
-    return undefined;
+    return this.currentAppIdProvider();
   }
 }
 
@@ -400,8 +368,17 @@ const showWarning = (
   notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
 };
 
-const containsWildcardOrValue = (arr: string[] | undefined, value: string) => {
-  return arr ? arr.includes('*') || arr.includes(value) : true;
+const isAppSupported = (supportedAppNames: string[] | undefined, currentAppId: string) => {
+  if (!supportedAppNames) {
+    return true;
+  }
+
+  // Language registrations use the owning app name (for example, `explore`), while Core may
+  // expose a namespaced app ID for one of its experiences (for example, `explore/logs`).
+  return supportedAppNames.some(
+    (appName) =>
+      appName === '*' || currentAppId === appName || currentAppId.startsWith(`${appName}/`)
+  );
 };
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

@@ -81,6 +81,26 @@ describe('GlobalSearchService', () => {
     expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 
+  it('does not register a command with an unknown type', () => {
+    const globalSearchService = new GlobalSearchService();
+    const setup = globalSearchService.setup();
+    const start = globalSearchService.start();
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    setup.registerSearchCommand({
+      id: 'invalid-command',
+      type: 'UNKNOWN' as any,
+      run: async () => [],
+    });
+
+    expect(start.getAllSearchCommands()).toEqual([]);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'Unknown SearchCommand type UNKNOWN for id invalid-command'
+    );
+
+    consoleWarnSpy.mockRestore();
+  });
+
   it('registerSearchCommand with action callback', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();

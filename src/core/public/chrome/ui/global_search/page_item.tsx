@@ -14,11 +14,10 @@ import { useMemo } from 'react';
 interface Props {
   link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
   search: string;
-  callback?: () => void;
   renderBreadcrumbs?: (breadcrumbs: EuiBreadcrumb[]) => EuiBreadcrumb[];
 }
 
-export const GlobalSearchPageItem = ({ link, search, callback, renderBreadcrumbs }: Props) => {
+export const GlobalSearchPageItem = ({ link, search, renderBreadcrumbs }: Props) => {
   const breadcrumbs = useMemo(() => {
     const breadcrumbList: EuiBreadcrumb[] = [];
     const appId = link.id.toLowerCase();
@@ -55,24 +54,12 @@ export const GlobalSearchPageItem = ({ link, search, callback, renderBreadcrumbs
       ...processedCrumbs,
       {
         text,
-        onClick: () => {},
       },
     ];
   }, [link, search, renderBreadcrumbs]);
 
-  const onNavItemClick = () => {
-    callback?.();
-  };
-
   return (
-    <div
-      key={link.id}
-      aria-hidden="true"
-      data-test-subj={`global-search-item-${link.id}`}
-      onClick={() => {
-        onNavItemClick();
-      }}
-    >
+    <div key={link.id} data-test-subj={`global-search-item-${link.id}`}>
       <EuiSimplifiedBreadcrumbs breadcrumbs={breadcrumbs} hideTrailingSeparator responsive />
     </div>
   );

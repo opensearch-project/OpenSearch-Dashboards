@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { EuiText, EuiLink, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
@@ -231,13 +231,23 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     }
   };
 
+  const addToDashboardLabel = i18n.translate('explore.addtoDashboardButton.name', {
+    defaultMessage: 'Add to dashboard',
+  });
+
   return (
     <>
-      <EuiButtonEmpty size="s" onClick={handleAddToDashboard} data-test-subj="addToDashboardButton">
-        {i18n.translate('explore.addtoDashboardButton.name', {
-          defaultMessage: 'Add to dashboard',
-        })}
-      </EuiButtonEmpty>
+      {/* Icon-only with a hover tooltip carrying the name (Variant A, UXSO #3). */}
+      <EuiToolTip content={addToDashboardLabel} delay="long">
+        <EuiButtonIcon
+          size="s"
+          iconType="dashboard"
+          color="text"
+          aria-label={addToDashboardLabel}
+          onClick={handleAddToDashboard}
+          data-test-subj="addToDashboardButton"
+        />
+      </EuiToolTip>
       {showAddToDashboardModal && (
         <AddToDashboardModal
           savedExploreId={savedExploreIdFromUrl}

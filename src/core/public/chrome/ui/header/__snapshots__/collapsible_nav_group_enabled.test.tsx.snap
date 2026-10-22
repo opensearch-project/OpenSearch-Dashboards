@@ -24,34 +24,45 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+          class="osdHeaderSearchBar"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
           >
-            <input
-              aria-label="Search the menus"
-              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
-              data-test-subj="global-search-input"
-              placeholder="Search menu or assets"
-              style="padding-right: 32px;"
-              type="search"
-              value=""
-            />
             <div
-              class="euiFormControlLayoutIcons"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <input
+                aria-label="Search the menus"
+                class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
+                data-test-subj="global-search-input"
+                placeholder="Search menu or assets"
+                style="padding-right: 32px;"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
               >
                 <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
-                />
-              </span>
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="search"
+                  />
+                </span>
+              </div>
             </div>
           </div>
+          <span
+            aria-hidden="true"
+            class="osdHeaderSearchBar__shortcutHint"
+            data-test-subj="global-search-command-palette-shortcut"
+          >
+            Ctrl+K
+          </span>
         </div>
       </div>
       <div
@@ -179,34 +190,45 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+          class="osdHeaderSearchBar"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
           >
-            <input
-              aria-label="Search the menus"
-              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
-              data-test-subj="global-search-input"
-              placeholder="Search menu or assets"
-              style="padding-right: 32px;"
-              type="search"
-              value=""
-            />
             <div
-              class="euiFormControlLayoutIcons"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <input
+                aria-label="Search the menus"
+                class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
+                data-test-subj="global-search-input"
+                placeholder="Search menu or assets"
+                style="padding-right: 32px;"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
               >
                 <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
-                />
-              </span>
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="search"
+                  />
+                </span>
+              </div>
             </div>
           </div>
+          <span
+            aria-hidden="true"
+            class="osdHeaderSearchBar__shortcutHint"
+            data-test-subj="global-search-command-palette-shortcut"
+          >
+            Ctrl+K
+          </span>
         </div>
       </div>
       <div

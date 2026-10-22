@@ -14,14 +14,14 @@ import {
 } from '@elastic/eui';
 import { LabelFilter } from './promql_parser';
 import { BuilderAction } from './build_promql';
-import { OPERATORS } from './operation_categories';
+import { EMPTY_LABEL_VALUE, OPERATORS, toLabelValueDisplay } from './operation_categories';
 import { comboBoxWidth } from './measure_text';
 
 interface LabelFilterRowProps {
   filter: LabelFilter;
   idx: number;
   labelOptions: EuiComboBoxOptionOption[];
-  labelValueOptions: EuiComboBoxOptionOption[];
+  labelValueOptions: Array<EuiComboBoxOptionOption<string>>;
   canRemove: boolean;
   dispatch: React.Dispatch<BuilderAction>;
   loadLabelValues: (labelName: string) => void;
@@ -55,7 +55,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
           dispatch({
             type: 'SET_LABEL_FILTER',
             index: idx,
-            filter: { label: labelName, value: '' },
+            filter: { label: labelName, value: undefined },
           });
           if (labelName) loadLabelValues(labelName);
         }}
@@ -65,7 +65,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
             dispatch({
               type: 'SET_LABEL_FILTER',
               index: idx,
-              filter: { label: labelName, value: '' },
+              filter: { label: labelName, value: undefined },
             });
             loadLabelValues(labelName);
           }
@@ -84,7 +84,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
         className="pqbOperatorSelect"
       />
       <div className="pqbSep" />
-      <EuiComboBox
+      <EuiComboBox<string>
         compressed
         singleSelection={{ asPlainText: true }}
         isClearable={false}
@@ -92,23 +92,38 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
           defaultMessage: 'Label value',
         })}
         options={labelValueOptions}
-        selectedOptions={filter.value ? [{ label: filter.value }] : []}
+        selectedOptions={
+          filter.value !== undefined
+            ? [{ label: toLabelValueDisplay(filter.value), value: filter.value }]
+            : []
+        }
         onChange={(selected) =>
           dispatch({
             type: 'SET_LABEL_FILTER',
             index: idx,
-            filter: { value: selected[0]?.label || '' },
+            filter: { value: selected[0]?.value },
           })
         }
         onCreateOption={(val) => {
           const v = val.trim();
-          if (v) dispatch({ type: 'SET_LABEL_FILTER', index: idx, filter: { value: v } });
+          if (v) {
+            dispatch({
+              type: 'SET_LABEL_FILTER',
+              index: idx,
+              filter: { value: v === EMPTY_LABEL_VALUE ? '' : v },
+            });
+          }
         }}
         onFocus={() => {
           if (filter.label) loadLabelValues(filter.label);
         }}
         className="pqbCombo--labelValue"
-        style={{ width: comboBoxWidth(filter.value || 'Label value'), flex: '0 0 auto' }}
+        style={{
+          width: comboBoxWidth(
+            filter.value === undefined ? 'Label value' : toLabelValueDisplay(filter.value)
+          ),
+          flex: '0 0 auto',
+        }}
       />
       <div className="pqbSep" />
       <EuiButtonIcon
@@ -124,7 +139,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
             : dispatch({
                 type: 'SET_LABEL_FILTER',
                 index: idx,
-                filter: { label: '', op: '=', value: '' },
+                filter: { label: '', op: '=', value: undefined },
               })
         }
       />

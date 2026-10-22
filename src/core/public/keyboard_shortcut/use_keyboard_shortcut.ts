@@ -81,6 +81,7 @@ export function useKeyboardShortcut(
     shortcut.name,
     shortcut.category,
     shortcut.keys,
+    shortcut.allowInEditable,
     shortcut.execute,
   ]);
 }

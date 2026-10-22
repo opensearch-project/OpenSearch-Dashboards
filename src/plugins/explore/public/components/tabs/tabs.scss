@@ -35,6 +35,13 @@
     }
   }
 
+  &__actionBar {
+    flex-shrink: 0;
+    flex-grow: 0;
+    padding: $ouiSizeXS $ouiSize;
+    border-bottom: $ouiBorderThin;
+  }
+
   &__tabPanel {
     min-height: 0;
     flex-grow: 1;

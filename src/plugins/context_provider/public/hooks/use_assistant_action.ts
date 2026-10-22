@@ -15,7 +15,7 @@ export interface RenderProps<T = any> {
   error?: Error;
   /** The id of the tool call being rendered, for renderers that correlate to external state. */
   toolCallId?: string;
-  onApprove?: () => void;
+  onApprove?: (modifiedArgs?: Partial<T>) => void;
   onReject?: () => void;
 }
 

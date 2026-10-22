@@ -116,7 +116,7 @@ interface ChatMessagesProps {
     toolCallId: string;
     toolResult: any;
   }) => Promise<void>;
-  onApproveConfirmation?: () => void;
+  onApproveConfirmation?: (modifiedArgs?: any) => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
   onRemoveInput?: (content: string) => void;

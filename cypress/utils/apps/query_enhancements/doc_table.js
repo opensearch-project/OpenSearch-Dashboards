@@ -84,7 +84,7 @@ export const getExpandedDocTableRowFieldValue = (expandedDocumentField) => {
 
 /**
  * Select a language in the Dataset Selector for Index
- * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL"
+ * @param {string} datasetLanguage Index supports "SQL" and "PPL"
  */
 export const selectIndexDatasetLanguage = (datasetLanguage) => {
   cy.getElementByTestId('advancedSelectorLanguageSelect').select(datasetLanguage);
@@ -96,7 +96,7 @@ export const selectIndexDatasetLanguage = (datasetLanguage) => {
  * Select an index dataset.
  * @param {string} indexClusterName Name of the cluster to be used for the Index.
  * @param {string} indexName Name of the index dataset to be used.
- * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL".
+ * @param {string} datasetLanguage Index supports "SQL" and "PPL".
  */
 export const selectIndexDataset = (indexClusterName, indexName, datasetLanguage) => {
   cy.getElementByTestId('datasetSelectorButton').click();
@@ -110,7 +110,7 @@ export const selectIndexDataset = (indexClusterName, indexName, datasetLanguage)
 
 /**
  * Select a language in the Dataset Selector for Index Pattern
- * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+ * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "SQL" and "PPL"
  */
 export const selectIndexPatternDatasetLanguage = (datasetLanguage) => {
   cy.getElementByTestId('advancedSelectorLanguageSelect').select(datasetLanguage);
@@ -120,7 +120,7 @@ export const selectIndexPatternDatasetLanguage = (datasetLanguage) => {
 /**
  * Select an index pattern dataset.
  * @param {string} indexPatternName Name of the index pattern to be used.
- * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+ * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "SQL" and "PPL"
  */
 export const selectIndexPatternDataset = (indexPatternName, datasetLanguage) => {
   cy.getElementByTestId('datasetSelectorButton').click();

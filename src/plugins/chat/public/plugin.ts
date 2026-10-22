@@ -9,6 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
+import { safeSetItem } from '@osd/std';
 import {
   CoreSetup,
   CoreStart,
@@ -121,7 +122,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       });
 
     this.windowStateChangeSubscription = chat.getWindowState$().subscribe((newWindowState) => {
-      window.localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify(newWindowState));
+      safeSetItem(window.localStorage, WINDOW_STATE_KEY, JSON.stringify(newWindowState));
     });
   }
 
@@ -178,6 +179,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+        setSessionDataSourceList: (dataSourceId: string | undefined) => {
+          this.chatService?.setSessionDataSourceList(dataSourceId);
+        },
       });
     }
 
@@ -186,7 +190,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       try {
         const agenticMemoryProvider = new AgenticMemoryProvider(
           core.http,
-          () => this.chatService?.getCurrentDataSourceId() ?? Promise.resolve(undefined)
+          () => this.chatService?.peekCurrentDataSourceId() ?? Promise.resolve(undefined)
         );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {
@@ -241,27 +245,43 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       },
     });
 
+    const sendGlobalSearchMessage = async (content: string) => {
+      await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+    };
+
     core.chrome.globalSearch.registerSearchCommand({
       id: 'AI_CHATBOT_COMMAND',
       type: 'ACTIONS',
       inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
         defaultMessage: 'Search or chat with AI',
       }),
-      run: async () => [
-        React.createElement(
-          EuiText,
+      run: async (query: string) => {
+        if (!query) {
+          return [];
+        }
+
+        return [
           {
-            size: 'xs',
-            color: 'subdued',
+            id: 'chat-with-ai',
+            label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
+              defaultMessage: 'Chat with AI',
+            }),
+            content: React.createElement(
+              EuiText,
+              {
+                size: 'xs',
+                color: 'subdued',
+              },
+              i18n.translate('chat.globalSearch.chatWithAI.hints', {
+                defaultMessage: 'Press Enter to chat with AI',
+              })
+            ),
+            placement: 'trailing',
+            execute: () => sendGlobalSearchMessage(query),
           },
-          i18n.translate('chat.globalSearch.chatWithAI.hints', {
-            defaultMessage: 'Press Enter to chat with AI',
-          })
-        ),
-      ],
-      action: async ({ content }: { content: string }) => {
-        await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+        ];
       },
+      action: ({ content }: { content: string }) => sendGlobalSearchMessage(content),
     });
 
     this.setupChatbotWindowState(core);

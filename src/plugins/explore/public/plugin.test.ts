@@ -4,7 +4,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ExplorePlugin } from './plugin';
+import { ExplorePlugin, initializeLogsDefaultQuery } from './plugin';
+import { getSourceTypeRegistry } from './services/source_type_registry';
+import { ExploreFlavor, EXPLORE_LOGS_TAB_ID } from '../common';
 import { coreMock } from '../../../core/public/mocks';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
@@ -14,7 +16,12 @@ import {
   DEFAULT_NAV_GROUPS,
   getUseCaseFeatureConfig,
 } from 'opensearch-dashboards/public';
-import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
+import {
+  ExplorePluginStart,
+  ExploreServices,
+  ExploreSetupDependencies,
+  ExploreStartDependencies,
+} from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
@@ -430,6 +437,21 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it('exposes source type registration that Explore reads back', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+
+      setup.sourceTypes.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+
+      expect(getSourceTypeRegistry().getForDataset({ type: 'FAKE' }).id).toBe('fake');
+      expect(getSourceTypeRegistry().getLanguageSettings('FakeQL')).toEqual({});
+    });
+
     it('should setup URL forwarding', () => {
       plugin.setup(coreSetup, setupDeps);
 
@@ -479,6 +501,36 @@ describe('ExplorePlugin', () => {
     });
   });
 
+  describe('registration after setup', () => {
+    // Capability-gated sources (per-account flags only exist in start) register from their own
+    // start. Explore reads the registry when it renders, after every plugin has started, so it
+    // must keep accepting registrations after setup.
+    it('shows a source type registered after start, with its languages', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      setup.sourceTypes.register({
+        id: 'lateSource',
+        label: 'Late source',
+        datasetTypes: ['LATE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { LateQL: {} },
+      });
+
+      expect(
+        getSourceTypeRegistry()
+          .getAll(ExploreFlavor.Logs)
+          .map((s) => s.id)
+      ).toContain('lateSource');
+      expect(getSourceTypeRegistry().getForDataset({ type: 'LATE' }).id).toBe('lateSource');
+      expect(
+        getSourceTypeRegistry().getLanguagesForTab(EXPLORE_LOGS_TAB_ID, ExploreFlavor.Logs)
+      ).toEqual(['LateQL']);
+      expect(getSourceTypeRegistry().supportsHistogram('LateQL', { type: 'LATE' })).toBe(false);
+    });
+  });
+
   describe('start', () => {
     beforeEach(() => {
       plugin.setup(coreSetup, setupDeps);
@@ -493,6 +545,55 @@ describe('ExplorePlugin', () => {
         CONTEXT_MENU_TRIGGER,
         expect.any(Object)
       );
+    });
+
+    it("maps each registered source's dataset types to its metrics resource client", () => {
+      const sourceTypes = (plugin as any).sourceTypeRegistry;
+      sourceTypes.register({
+        id: 'my-source',
+        label: 'My Source',
+        datasetTypes: ['MY_DATASET_TYPE', 'MY_OTHER_TYPE'],
+        metricsResourceClientId: 'my-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+      sourceTypes.register({
+        id: 'no-client',
+        label: 'No client',
+        datasetTypes: ['NO_CLIENT_TYPE'],
+        resolveDefaultDataset: async () => undefined,
+      });
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+
+      plugin.start(coreStart, deps);
+
+      expect(setClientForDatasetType.mock.calls).toEqual([
+        ['MY_DATASET_TYPE', 'my-metrics'],
+        ['MY_OTHER_TYPE', 'my-metrics'],
+      ]);
+    });
+
+    it('maps a source registered after start, as a plugin starting after Explore would', () => {
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+      plugin.start(coreStart, deps);
+      expect(setClientForDatasetType).not.toHaveBeenCalled();
+
+      (plugin as any).sourceTypeRegistry.register({
+        id: 'late-source',
+        label: 'Late Source',
+        datasetTypes: ['LATE_TYPE'],
+        metricsResourceClientId: 'late-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+
+      expect(setClientForDatasetType).toHaveBeenCalledWith('LATE_TYPE', 'late-metrics');
     });
 
     it('should not register Ask AI embeddable action when contextProvider is not available', () => {
@@ -774,5 +875,72 @@ describe('ExplorePlugin', () => {
 
       expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('initializeLogsDefaultQuery', () => {
+  const defaultDataset = {
+    id: 'logs',
+    title: 'Logs',
+    type: 'INDEXES',
+  };
+  const defaultQuery = {
+    dataset: defaultDataset,
+    language: 'PPL',
+    query: 'source = Logs',
+  };
+
+  const createServices = (queryState: unknown = null) =>
+    ({
+      osdUrlStateStorage: {
+        get: jest.fn().mockReturnValue(queryState),
+      },
+      data: {
+        query: {
+          getDefaultDataset: jest.fn().mockResolvedValue(defaultDataset),
+          queryString: {
+            getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
+            setQuery: jest.fn(),
+          },
+        },
+      },
+    }) as unknown as ExploreServices;
+
+  test('initializes the default query when URL state has no explicit query', async () => {
+    const services = createServices();
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
+    expect(services.data.query.queryString.getDefaultQuery).toHaveBeenCalledWith(defaultDataset);
+    expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(
+      defaultQuery,
+      false,
+      false
+    );
+  });
+
+  test('preserves an explicit URL query', async () => {
+    const services = createServices({ query: '' });
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).not.toHaveBeenCalled();
+    expect(services.data.query.queryString.setQuery).not.toHaveBeenCalled();
+  });
+
+  test('does not reject the Logs mount when default dataset resolution fails', async () => {
+    const services = createServices();
+    const error = new Error('default dataset unavailable');
+    (services.data.query.getDefaultDataset as jest.Mock).mockRejectedValue(error);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await expect(initializeLogsDefaultQuery(services)).resolves.toBeUndefined();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Failed to initialize the Logs default dataset query',
+      error
+    );
+
+    consoleWarn.mockRestore();
   });
 });

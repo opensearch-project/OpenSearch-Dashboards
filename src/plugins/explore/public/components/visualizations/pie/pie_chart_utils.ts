@@ -14,6 +14,7 @@ import {
   LegendItem,
 } from '../utils/legend';
 import { normalizeEmptyValue } from '../utils/data_transformation';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
 export const createPieSeries =
   <T extends BaseChartStyle>({
@@ -30,6 +31,7 @@ export const createPieSeries =
   (state: EChartsSpecState<T>) => {
     const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
     const palette = getColors().categories;
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
     const data: PieSeriesOption['data'] = [];
     const legendItems: LegendItem[] = [];
     if (state.transformedData) {
@@ -42,8 +44,9 @@ export const createPieSeries =
       state.transformedData.forEach((d) => {
         const value = d[valueField];
         const name = normalizeEmptyValue(d[cateField]);
+        const displayLabel = state.seriesDisplayNames?.[name] ?? name;
         const color = getLegendColor(name, palette, sortedNames);
-        legendItems.push(createDataLegendItem(name, color, 0));
+        legendItems.push(createDataLegendItem(displayLabel, color, 0, name));
         data.push({
           name,
           value,
@@ -54,14 +57,24 @@ export const createPieSeries =
       });
     }
 
-    let formatter = '{b}';
-    if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
-      formatter = `{b}: {@${valueField}}`;
-    } else if (styles?.exclusive?.showLabels) {
-      formatter = '{b}';
-    } else if (styles?.exclusive?.showValues) {
-      formatter = `{@${valueField}}`;
-    }
+    const formatter = (params: any) => {
+      const label = state.seriesDisplayNames?.[params.name] ?? params.name;
+      const rawValue = params.data?.value ?? params.value;
+      const value = hasUnit
+        ? formatUnitValue(rawValue, styles.unitId, styles.decimals, styles.unitSuffix)
+        : String(rawValue);
+
+      if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
+        return `${label}: ${value}`;
+      }
+      if (styles?.exclusive?.showLabels) {
+        return label;
+      }
+      if (styles?.exclusive?.showValues) {
+        return value;
+      }
+      return '';
+    };
 
     const series: PieSeriesOption[] = [
       {

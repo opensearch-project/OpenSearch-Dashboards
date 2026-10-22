@@ -212,6 +212,12 @@ describe('group_fields', function () {
     );
     expect(actual.facetedFields.map((f) => f.name)).toContain('status.code');
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
+
+    // A tab can supply its own facet list (e.g. Sessions)
+    const custom = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true, [
+      'regularField',
+    ]);
+    expect(custom.facetedFields.map((f) => f.name)).toEqual(['regularField']);
   });
 
   it('should handle empty or null fields', function () {

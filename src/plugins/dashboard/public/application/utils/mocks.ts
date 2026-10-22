@@ -34,6 +34,7 @@ export const createDashboardServicesMock = () => {
     dashboardConfig: {
       getHideWriteControls: jest.fn(),
     },
+    allowDashboardSections: false,
     dashboard,
     opensearchDashboardsVersion,
     usageCollection,

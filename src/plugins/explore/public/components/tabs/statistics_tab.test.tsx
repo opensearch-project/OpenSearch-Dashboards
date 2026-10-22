@@ -59,6 +59,38 @@ describe('StatisticsTab', () => {
     expect(slot!.querySelector('[data-testid="mocked-action-bar"]')).toBeInTheDocument();
   });
 
+  it('renders a partial-result warning callout when the result carries warnings', () => {
+    mockUseTabResults.mockReturnValue({
+      results: {
+        ...createResults([{ field: 'value1' }], [{ name: 'field' }]),
+        warnings: [
+          {
+            type: 'PARTIAL_RESULT',
+            message: 'Results are partial: 1 of 2 shards did not return data.',
+            detail: 'Rows from the shards that did not respond are missing.',
+          },
+        ],
+      },
+    });
+
+    renderWithSlot();
+
+    expect(screen.getByTestId('queryWarningsCallout')).toBeInTheDocument();
+    expect(
+      screen.getByText('Results are partial: 1 of 2 shards did not return data.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders no warning callout when the result has no warnings', () => {
+    mockUseTabResults.mockReturnValue({
+      results: createResults([{ field: 'value1' }], [{ name: 'field' }]),
+    });
+
+    renderWithSlot();
+
+    expect(screen.queryByTestId('queryWarningsCallout')).not.toBeInTheDocument();
+  });
+
   it('renders columns from fieldSchema and row data from hits', () => {
     mockUseTabResults.mockReturnValue({
       results: createResults(

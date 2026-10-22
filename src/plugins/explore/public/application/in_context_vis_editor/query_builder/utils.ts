@@ -29,6 +29,7 @@ import {
   IPrometheusSearchResult,
 } from '../../../application/utils/state_management/slices';
 import { AgentError, ProhibitedQueryError } from '../../../components/query_panel/utils/error';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 
 export interface RootState {
   query: QueryState;
@@ -43,15 +44,24 @@ export const resolveDatasetByLanguage = async (
   languageType: SupportLanguageType,
   preferredDataset?: Dataset
 ): Promise<Dataset | undefined> => {
-  // Get existing dataset from QueryStringManager or use preferred dataset
+  // Prefer URL/saved state and the current shared query before resolving the configured default.
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+  let existingDataset = preferredDataset || queryStringQuery?.dataset;
 
-  // Determine dataset type based on language
-  const isPromQL = languageType === SupportLanguageType.promQL;
-  // for CORE_SIGNAL_TYPES, rule if languageType, then assume its flavor is METRICS otherwise is logs
-  const requiredSignalType = isPromQL ? CORE_SIGNAL_TYPES.METRICS : undefined;
+  if (!existingDataset) {
+    try {
+      // The editor explicitly opts in to the configured default only when no restored or current
+      // query state selected a dataset. QueryStringManager no longer resolves this implicitly.
+      existingDataset = await services.data.query.getDefaultDataset();
+    } catch {
+      // A default-dataset lookup failure should still allow the first compatible dataset fallback.
+    }
+  }
+
+  // A metrics language (PromQL, or one a registered Metrics source lists) needs a metrics
+  // dataset; any other language needs a logs or traces one.
+  const isMetrics = getSourceTypeRegistry().isMetricsLanguage(languageType);
+  const requiredSignalType = isMetrics ? CORE_SIGNAL_TYPES.METRICS : undefined;
 
   if (existingDataset) {
     try {
@@ -73,7 +83,7 @@ export const resolveDatasetByLanguage = async (
   }
 
   // Fetch first available dataset of the required type
-  const flavor = isPromQL ? ExploreFlavor.Metrics : null;
+  const flavor = isMetrics ? ExploreFlavor.Metrics : null;
   return await fetchFirstAvailableDataset(services, flavor, requiredSignalType);
 };
 
@@ -95,6 +105,7 @@ export const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
@@ -105,9 +116,20 @@ export const getPreloadedQueryState = async (
   }
 
   if (minimalDataset) {
+    // The requested (saved) language wins when the dataset's type can run it: a dataset's own
+    // `language` is only its default, and a source can offer another language on the same
+    // dataset (e.g. its own SQL dialect next to PromQL). Otherwise keep the dataset's default.
+    const supportedLanguages = services.data.query.queryString
+      .getDatasetService?.()
+      ?.getType(minimalDataset.type)
+      ?.supportedLanguages(minimalDataset);
+    const language =
+      languageType && supportedLanguages?.includes(languageType)
+        ? languageType
+        : minimalDataset.language || languageType || 'PPL';
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || languageType || 'PPL',
+      language,
     });
 
     // override the initial query to be an empty string
@@ -127,14 +149,10 @@ export const getPreloadedQueryState = async (
   }
 };
 
-export const getRequiredSignalType = (languageType?: SupportLanguageType): string | string[] => {
-  switch (languageType) {
-    case SupportLanguageType.promQL:
-      return CORE_SIGNAL_TYPES.METRICS;
-    default:
-      return [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES];
-  }
-};
+export const getRequiredSignalType = (languageType?: SupportLanguageType): string | string[] =>
+  getSourceTypeRegistry().isMetricsLanguage(languageType)
+    ? CORE_SIGNAL_TYPES.METRICS
+    : [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES];
 
 export const isSignalTypeCompatible = (
   effectiveSignalType: string | undefined,
@@ -219,12 +237,7 @@ export const queryExecution = async ({
       query: queryString,
     };
 
-    const searchSource = await createSearchSourceWithQuery(
-      preparedQueryObject,
-      dataView,
-      services,
-      false // No histogram
-    );
+    const searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services);
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
@@ -257,6 +270,7 @@ export const queryExecution = async ({
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
     };
 
     updateResultFn(rawResultsWithMeta);

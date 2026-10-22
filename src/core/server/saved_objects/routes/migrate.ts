@@ -28,13 +28,46 @@
  * under the License.
  */
 
-import { IRouter } from '../../http';
+import { AuthStatus, IRouter, OpenSearchDashboardsRequest } from '../../http';
+import { HttpAuth } from '../../http/types';
+import { Logger } from '../../logging';
+import { AuthInfo } from '../../utils/auth_info';
 import { IOpenSearchDashboardsMigrator } from '../migrations';
+
+interface MigrateRouteOptions {
+  auth: HttpAuth;
+  adminRoles: string[];
+  logger: Logger;
+}
+
+/**
+ * Re-running migrations reindexes the saved objects index with the internal user,
+ * so it is restricted to admin roles whenever an auth provider is registered.
+ * With no auth provider (status `unknown`) there are no users to tell apart.
+ */
+const isAllowed = (
+  request: OpenSearchDashboardsRequest,
+  { auth, adminRoles }: MigrateRouteOptions
+): boolean => {
+  const { status, state } = auth.get(request);
+  if (status === AuthStatus.unknown) {
+    return true;
+  }
+  if (status !== AuthStatus.authenticated) {
+    return false;
+  }
+  const roles = (state as { authInfo?: AuthInfo } | undefined)?.authInfo?.roles ?? [];
+  return roles.some((role) => adminRoles.includes(role));
+};
 
 export const registerMigrateRoute = (
   router: IRouter,
-  migratorPromise: Promise<IOpenSearchDashboardsMigrator>
+  migratorPromise: Promise<IOpenSearchDashboardsMigrator>,
+  options: MigrateRouteOptions
 ) => {
+  // `runMigrations({ rerun: true })` is not safe to run concurrently.
+  let migrationInProgress = false;
+
   router.post(
     {
       path: '/_migrate',
@@ -44,8 +77,26 @@ export const registerMigrateRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const migrator = await migratorPromise;
-      await migrator.runMigrations({ rerun: true });
+      if (!isAllowed(req, options)) {
+        options.logger.warn('Rejected saved objects migration request from a non-admin user');
+        return res.forbidden({
+          body: { message: 'Re-running saved objects migrations requires an admin role' },
+        });
+      }
+      if (migrationInProgress) {
+        return res.customError({
+          statusCode: 409,
+          body: { message: 'A saved objects migration is already in progress' },
+        });
+      }
+
+      migrationInProgress = true;
+      try {
+        const migrator = await migratorPromise;
+        await migrator.runMigrations({ rerun: true });
+      } finally {
+        migrationInProgress = false;
+      }
       return res.ok({
         body: {
           success: true,

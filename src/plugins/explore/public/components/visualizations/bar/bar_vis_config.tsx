@@ -140,6 +140,11 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
   name: 'Bar',
   type: 'bar',
   icon: 'visBarVertical',
+  metadata: {
+    description:
+      'Compare values across categories or time buckets. Use for comparisons, rankings, ' +
+      'and distributions across groups.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'bar'>> = [
       {
@@ -155,10 +160,15 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for bar chart');
 
-          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
@@ -182,10 +192,15 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y || x.length === 0) throw Error('Missing axis config for bar chart');
 
-          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
@@ -277,7 +292,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -311,7 +327,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -344,7 +361,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -378,7 +396,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

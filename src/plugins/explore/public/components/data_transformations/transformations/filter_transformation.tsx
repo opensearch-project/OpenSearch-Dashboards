@@ -7,7 +7,6 @@ import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import {
   TransformationInstance,
   TransformationDefinition,
@@ -16,11 +15,17 @@ import {
   FilterConfig,
   numericalOperatorOptions,
   allOperatorOptions,
+  TransformationConfigSchema,
 } from '../types';
 import { VisFieldType } from '../../visualizations/types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  getRowFieldValue,
+} from '../transformation_utils';
 
 const isConfigComplete = (config: FilterConfig): boolean => {
   return !!config.field && !!config.operator && config.value.trim() !== '';
@@ -128,14 +133,11 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
     transformationMethod: (data: OpenSearchSearchHit[], config: FilterConfig) => {
       const { field, operator, value } = config;
 
-      // Return original data if config is incomplete
       if (!isConfigComplete({ field, operator, value })) {
-        return data;
+        return createInvalidConfigResult(data, 'Filter configuration is incomplete.');
       }
-
-      return data.filter((row) => {
-        // get value from OpenSearch hit structure (_source.field)
-        const fieldValue = get(row, `_source.${field}`);
+      const filtered = data.filter((row) => {
+        const fieldValue = getRowFieldValue(row, field!);
 
         // Handle null/undefined field values
         if (fieldValue == null) {
@@ -183,7 +185,7 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
           case 'is_earlier_or_equal':
           case 'is_later':
           case 'is_later_or_equal': {
-            const fieldTs = Date.parse(fieldValue);
+            const fieldTs = Date.parse(String(fieldValue));
             const compareTs = Date.parse(value);
             if (isNaN(fieldTs) || isNaN(compareTs)) return false;
             if (operator === 'is_earlier') return fieldTs < compareTs;
@@ -195,13 +197,7 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
             return true;
         }
       });
-    },
-
-    validateConfig: (config: FilterConfig, availableFields: Array<{ name?: string }>) => {
-      if (config.field && !availableFields.find((f) => f.name === config.field)) {
-        return { ...config, field: undefined, value: '' };
-      }
-      return config;
+      return createAppliedResult(filtered);
     },
     Editor: FilterEditor,
   };
@@ -217,4 +213,37 @@ export const filterTransformationDefinition: TransformationDefinition<FilterConf
   // TODO icon filter is not applicable
   iconType: 'filter',
   createInstance: createFilterTransformation,
+};
+
+export const filterConfigSchema: TransformationConfigSchema = {
+  field: {
+    description: 'The column to filter on. Must be a column name from the result schema.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  operator: {
+    description:
+      'Comparison operator. Available operators depend on the field type — ' +
+      'use base operators for all types, add numerical extras for number fields, ' +
+      'add date extras for date/timestamp fields. ' +
+      'value must always be passed as a string.',
+    kind: 'enum',
+    defaultValue: 'equals',
+    required: true,
+    byFieldType: {
+      base: allOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+      numerical: numericalOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+      date: dateOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+    },
+  },
+  value: {
+    description:
+      'The value to compare against. Always a string — ' +
+      'pass numbers as numeric strings (e.g. "500"), ' +
+      'dates as ISO 8601 strings (e.g. "2025-01-01T00:00:00.000Z").',
+    kind: 'string',
+    defaultValue: '',
+    required: true,
+  },
 };

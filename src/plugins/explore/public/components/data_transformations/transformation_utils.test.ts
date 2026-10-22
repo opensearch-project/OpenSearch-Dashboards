@@ -8,7 +8,9 @@ import {
   removeTransformation,
   updateTransformationConfig,
   toggleTransformationHide,
-  deriveSchemaFromRows,
+  inferSchemaFromRows,
+  getRowFieldValue,
+  rowHasField,
 } from './transformation_utils';
 import { TransformationInstance } from './types';
 
@@ -21,7 +23,7 @@ const createMockInstance = (
   definition_id: 'test',
   config,
   hide,
-  transformationMethod: (data) => data,
+  transformationMethod: (data) => ({ rows: data, status: 'applied', issues: [] }),
   Editor: (() => null) as any,
 });
 
@@ -34,49 +36,29 @@ const createHit = (source: Record<string, unknown>) => ({
 
 describe('transformation_utils', () => {
   describe('addTransformation', () => {
-    it('appends instance to pipeline', () => {
+    it('appends an instance without mutating the pipeline', () => {
       const existing = [createMockInstance('a')];
       const newInstance = createMockInstance('b');
       const result = addTransformation(existing, newInstance);
-      expect(result).toHaveLength(2);
-      expect(result[1].instance_id).toBe('b');
-    });
 
-    it('does not mutate original pipeline', () => {
-      const existing = [createMockInstance('a')];
-      addTransformation(existing, createMockInstance('b'));
-      expect(existing).toHaveLength(1);
-    });
-
-    it('adds to empty pipeline', () => {
-      const result = addTransformation([], createMockInstance('a'));
-      expect(result).toHaveLength(1);
+      expect(result.map((instance) => instance.instance_id)).toEqual(['a', 'b']);
+      expect(existing.map((instance) => instance.instance_id)).toEqual(['a']);
     });
   });
 
   describe('removeTransformation', () => {
-    it('removes instance by id', () => {
+    it('removes an instance without mutating the pipeline', () => {
       const pipeline = [createMockInstance('a'), createMockInstance('b'), createMockInstance('c')];
       const result = removeTransformation(pipeline, 'b');
-      expect(result).toHaveLength(2);
+
       expect(result.map((i) => i.instance_id)).toEqual(['a', 'c']);
-    });
-
-    it('returns same array structure when id not found', () => {
-      const pipeline = [createMockInstance('a')];
-      const result = removeTransformation(pipeline, 'nonexistent');
-      expect(result).toHaveLength(1);
-    });
-
-    it('does not mutate original pipeline', () => {
-      const pipeline = [createMockInstance('a'), createMockInstance('b')];
-      removeTransformation(pipeline, 'a');
-      expect(pipeline).toHaveLength(2);
+      expect(pipeline.map((i) => i.instance_id)).toEqual(['a', 'b', 'c']);
+      expect(removeTransformation(pipeline, 'nonexistent')).toEqual(pipeline);
     });
   });
 
   describe('updateTransformationConfig', () => {
-    it('merges new config into matching instance', () => {
+    it('updates only the matching config without mutating the pipeline', () => {
       const pipeline = [
         createMockInstance('a', { limit: 10, order: 'asc' }),
         createMockInstance('b', { field: 'name' }),
@@ -84,111 +66,80 @@ describe('transformation_utils', () => {
       const result = updateTransformationConfig(pipeline, 'a', { limit: 20 });
       expect(result[0].config).toEqual({ limit: 20, order: 'asc' });
       expect(result[1].config).toEqual({ field: 'name' });
-    });
-
-    it('does not mutate original pipeline', () => {
-      const pipeline = [createMockInstance('a', { limit: 10 })];
-      updateTransformationConfig(pipeline, 'a', { limit: 20 });
-      expect(pipeline[0].config).toEqual({ limit: 10 });
-    });
-
-    it('leaves pipeline unchanged when id not found', () => {
-      const pipeline = [createMockInstance('a', { limit: 10 })];
-      const result = updateTransformationConfig(pipeline, 'nonexistent', { limit: 20 });
-      expect(result[0].config).toEqual({ limit: 10 });
+      expect(pipeline[0].config).toEqual({ limit: 10, order: 'asc' });
+      expect(updateTransformationConfig(pipeline, 'nonexistent', { limit: 20 })).toEqual(pipeline);
     });
   });
 
   describe('toggleTransformationHide', () => {
-    it('toggles hide from false to true', () => {
-      const pipeline = [createMockInstance('a', {}, false)];
+    it.each([
+      { initial: false, expected: true },
+      { initial: true, expected: false },
+    ])('toggles hide from $initial to $expected', ({ initial, expected }) => {
+      const pipeline = [createMockInstance('a', {}, initial), createMockInstance('b', {}, false)];
       const result = toggleTransformationHide(pipeline, 'a');
-      expect(result[0].hide).toBe(true);
-    });
 
-    it('toggles hide from true to false', () => {
-      const pipeline = [createMockInstance('a', {}, true)];
-      const result = toggleTransformationHide(pipeline, 'a');
-      expect(result[0].hide).toBe(false);
-    });
-
-    it('only toggles matching instance', () => {
-      const pipeline = [createMockInstance('a', {}, false), createMockInstance('b', {}, false)];
-      const result = toggleTransformationHide(pipeline, 'a');
-      expect(result[0].hide).toBe(true);
+      expect(result[0].hide).toBe(expected);
       expect(result[1].hide).toBe(false);
-    });
-
-    it('does not mutate original pipeline', () => {
-      const pipeline = [createMockInstance('a', {}, false)];
-      toggleTransformationHide(pipeline, 'a');
-      expect(pipeline[0].hide).toBe(false);
+      expect(pipeline[0].hide).toBe(initial);
     });
   });
 
-  describe('deriveSchemaFromRows', () => {
-    it('returns original schema when rows are empty', () => {
-      const schema = [{ name: 'field1', type: 'keyword' }];
-      expect(deriveSchemaFromRows([], schema)).toEqual(schema);
-    });
-
-    it('preserves original schema fields that still exist in source', () => {
-      const rows = [createHit({ name: 'Alice', age: 30 })];
-      const schema = [
-        { name: 'name', type: 'keyword' },
+  describe('inferSchemaFromRows', () => {
+    it('uses the union of fields present across rows', () => {
+      const rows = [createHit({ name: 'Alice' }), createHit({ age: 30 })];
+      expect(inferSchemaFromRows(rows)).toEqual([
+        { name: 'name', type: 'string' },
         { name: 'age', type: 'integer' },
+      ]);
+    });
+
+    it('infers field types from row values', () => {
+      const rows = [
+        createHit({
+          count: 5,
+          ratio: 1.5,
+          timestamp: '2024-01-15T00:00:00Z',
+          label: 'hello',
+          enabled: true,
+          nested: { value: 1 },
+        }),
       ];
-      const result = deriveSchemaFromRows(rows, schema);
-      expect(result).toEqual(schema);
+
+      expect(inferSchemaFromRows(rows)).toEqual([
+        { name: 'count', type: 'integer' },
+        { name: 'ratio', type: 'double' },
+        { name: 'timestamp', type: 'date' },
+        { name: 'label', type: 'string' },
+        { name: 'enabled', type: 'boolean' },
+        { name: 'nested', type: 'object' },
+      ]);
     });
 
-    it('removes schema fields that no longer exist in source', () => {
-      const rows = [createHit({ name: 'Alice' })];
-      const schema = [
-        { name: 'name', type: 'keyword' },
-        { name: 'removed', type: 'keyword' },
-      ];
-      const result = deriveSchemaFromRows(rows, schema);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('name');
+    it('uses a later non-null value to infer a field type', () => {
+      const rows = [createHit({ value: null }), createHit({ value: 42 })];
+      expect(inferSchemaFromRows(rows)).toEqual([{ name: 'value', type: 'integer' }]);
     });
 
-    it('infers integer type for new integer fields', () => {
-      const rows = [createHit({ name: 'Alice', count: 5 })];
-      const schema = [{ name: 'name', type: 'keyword' }];
-      const result = deriveSchemaFromRows(rows, schema);
-      expect(result).toHaveLength(2);
-      expect(result[1]).toEqual({ name: 'count', type: 'integer' });
+    it('returns an empty schema when there are no rows', () => {
+      expect(inferSchemaFromRows([])).toEqual([]);
     });
+  });
 
-    it('infers double type for new float fields', () => {
-      const rows = [createHit({ value: 3.14 })];
-      const result = deriveSchemaFromRows(rows, []);
-      expect(result[0]).toEqual({ name: 'value', type: 'double' });
-    });
+  describe('row field access', () => {
+    it('prefers a literal dotted field and falls back to a nested path', () => {
+      const literalRow = createHit({
+        'service.name': 'literal',
+        service: { name: 'nested' },
+      });
+      const nestedRow = createHit({ service: { name: 'nested' } });
 
-    it('infers date type for date strings', () => {
-      const rows = [createHit({ timestamp: '2024-01-15T00:00:00Z' })];
-      const result = deriveSchemaFromRows(rows, []);
-      expect(result[0]).toEqual({ name: 'timestamp', type: 'date' });
-    });
-
-    it('infers boolean type', () => {
-      const rows = [createHit({ flag: true })];
-      const result = deriveSchemaFromRows(rows, []);
-      expect(result[0]).toEqual({ name: 'flag', type: 'boolean' });
-    });
-
-    it('infers string type for plain strings', () => {
-      const rows = [createHit({ label: 'hello' })];
-      const result = deriveSchemaFromRows(rows, []);
-      expect(result[0]).toEqual({ name: 'label', type: 'string' });
-    });
-
-    it('does not treat numeric strings as dates', () => {
-      const rows = [createHit({ code: '12345' })];
-      const result = deriveSchemaFromRows(rows, []);
-      expect(result[0].type).toBe('string');
+      expect(rowHasField(literalRow, 'service.name')).toBe(true);
+      expect(getRowFieldValue(literalRow, 'service.name')).toBe('literal');
+      expect(rowHasField(nestedRow, 'service.name')).toBe(true);
+      expect(getRowFieldValue(nestedRow, 'service.name')).toBe('nested');
+      expect(rowHasField(nestedRow, 'service.missing')).toBe(false);
+      expect(getRowFieldValue(nestedRow, 'service.missing')).toBeUndefined();
     });
   });
 });

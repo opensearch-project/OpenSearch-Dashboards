@@ -76,6 +76,8 @@ import { WorkspaceValidationService } from './services/workspace_validation_serv
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { searchAssets } from './components/global_search/search_assets_command';
+import { searchRecentlyAccessed } from './components/global_search/search_recently_accessed_command';
+import { searchCreateActions } from './components/global_search/search_create_actions_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -551,8 +553,8 @@ export class WorkspacePlugin implements Plugin<
     core.chrome.globalSearch.registerSearchCommand({
       id: 'workspacePagesSearch',
       type: 'PAGES',
-      run: async (query: string, callback: () => void) =>
-        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
+      run: async (query: string) =>
+        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart),
     });
 
     let resolver: (payload: Awaited<ReturnType<typeof searchAssets>>) => void;
@@ -563,8 +565,8 @@ export class WorkspacePlugin implements Plugin<
     core.chrome.globalSearch.registerSearchCommand({
       id: 'assetsSearch',
       type: 'SAVED_OBJECTS',
-      run: async (query: string, callback, options) => {
-        const [{ workspaces, http }] = await core.getStartServices();
+      run: async (query: string, options) => {
+        const [{ application, workspaces, http }] = await core.getStartServices();
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
         const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
 
@@ -576,8 +578,39 @@ export class WorkspacePlugin implements Plugin<
             currentWorkspaceId,
             abortSignal: options?.abortSignal,
             visibleWorkspaceIds,
-            onAssetClick: callback,
+            navigateToUrl: application.navigateToUrl,
           });
+        });
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'recentlyAccessedSearch',
+      type: 'RECENTLY_ACCESSED',
+      run: async (query: string) => {
+        const [{ application, chrome, workspaces, http }] = await core.getStartServices();
+
+        return searchRecentlyAccessed({
+          items: chrome.recentlyAccessed.get(),
+          query,
+          currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
+          basePath: http.basePath,
+          navigateToUrl: application.navigateToUrl,
+        });
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'workspaceCreateActions',
+      type: 'ACTIONS',
+      run: async (query: string) => {
+        const [{ application, workspaces, http }] = await core.getStartServices();
+
+        return searchCreateActions({
+          query,
+          currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
+          basePath: http.basePath,
+          navigateToUrl: application.navigateToUrl,
         });
       },
     });

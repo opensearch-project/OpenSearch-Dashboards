@@ -17,6 +17,7 @@ import {
   IndexPatternSpec,
   UI_SETTINGS,
 } from '../../../../common';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -32,9 +33,12 @@ interface AppDatasetFilter {
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
+  private defaultDatasetId?: string;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
   private datasetFilters: AppDatasetFilter[] = [];
+  // Dataset ids confirmed to have no saved object, so cacheDataset skips the lookup next time.
+  private adHocDatasetIds: Set<string> = new Set();
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -59,7 +63,10 @@ export class DatasetService {
 
   public async init(indexPatterns: IndexPatternsContract): Promise<void> {
     this.indexPatterns = indexPatterns;
-    this.defaultDataset = await this.fetchDefaultDataset();
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
   }
 
   public registerType(handlerConfig: DatasetTypeConfig): void {
@@ -84,6 +91,20 @@ export class DatasetService {
   }
 
   public getDefault(): Dataset | undefined {
+    return this.defaultDataset;
+  }
+
+  public async refreshDefault(): Promise<Dataset | undefined> {
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    if (defaultDatasetId === this.defaultDatasetId) {
+      return this.defaultDataset;
+    }
+
+    // defaultIndex can change after the Data plugin starts. Re-fetch only when its ID changes so
+    // application initialization sees the current default without repeating the startup request.
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
     return this.defaultDataset;
   }
 
@@ -123,6 +144,12 @@ export class DatasetService {
     try {
       const asyncType = type?.meta.isFieldLoadAsync ?? false;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+        // A saved dataset must be served from its saved object; a temporary view rebuilt from
+        // type.fetchFields would drop persisted field metadata and shadow it in the shared cache.
+        if (await this.loadPersistedDataView(dataset, services, signalType)) {
+          return;
+        }
+
         const fetchedFields = asyncType
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);
@@ -130,10 +157,13 @@ export class DatasetService {
           id: dataset.id,
           type: dataset.type,
           title: dataset.title,
+          displayName: dataset.displayName,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
           fieldsLoading: asyncType,
-          signalType,
+          // Fall back to the dataset's own signalType so cache-hydrated views (e.g. the default
+          // dataset, where no signalType arg is passed) keep it instead of showing Type: N/A.
+          signalType: signalType ?? dataset.signalType,
           schemaMappings: dataset.schemaMappings,
           dataSourceRef: dataset.dataSource
             ? {
@@ -196,10 +226,71 @@ export class DatasetService {
     }
   }
 
-  public async saveDataset(
+  /**
+   * Ensures the cache holds the saved-object-backed data view when the dataset has been saved.
+   * Returns false for ad-hoc datasets that have no saved object.
+   */
+  private async loadPersistedDataView(
     dataset: Dataset,
     services: Partial<IDataPluginServices>,
     signalType?: string
+  ): Promise<boolean> {
+    const dataViews = services.data?.dataViews;
+    // Ids built by the dataset selector (`<dataSourceId>::<index>`) can never be saved-object ids.
+    if (
+      !dataViews ||
+      !dataset.id ||
+      dataset.id.includes('::') ||
+      this.adHocDatasetIds.has(dataset.id)
+    ) {
+      return false;
+    }
+
+    // Saved-object-backed views carry a version; temporary cached views do not.
+    let persisted = await dataViews.get(dataset.id, true);
+    if (!persisted?.version) {
+      try {
+        // Evict any temporary view so get() loads the saved object instead of returning it.
+        dataViews.clearCache(dataset.id, false);
+        persisted = await dataViews.get(dataset.id);
+      } catch (error) {
+        // Only a missing saved object marks the id as ad-hoc; transient failures are retried on
+        // the next call and use the temporary view meanwhile.
+        if (error instanceof SavedObjectNotFound) {
+          this.adHocDatasetIds.add(dataset.id);
+        }
+        return false;
+      }
+      if (!persisted?.version) {
+        return false;
+      }
+
+      // Datasets saved from the stripped fetchFields output persist every field as
+      // `searchable: false` with no `esTypes`; refresh them in memory so filtering works without
+      // a manual "Refresh field list". Real mappings always carry esTypes.
+      const savedFields = persisted.fields.getAll().filter((field) => !field.scripted);
+      if (
+        savedFields.length &&
+        savedFields.every((field) => !field.spec.searchable && !field.spec.esTypes?.length)
+      ) {
+        await dataViews.refreshFields(persisted);
+      }
+    }
+
+    // Older saved objects may predate persisted signalType; keep the caller's value in that case.
+    if (!persisted.signalType && (signalType ?? dataset.signalType)) {
+      persisted.signalType = signalType ?? dataset.signalType;
+    }
+    return true;
+  }
+
+  public async saveDataset(
+    dataset: Dataset,
+    services: Partial<IDataPluginServices>,
+    signalType?: string,
+    // Re-selection flows set this to reuse an existing dataset; creates leave it false so a
+    // real conflict still surfaces.
+    reuseExisting: boolean = false
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
@@ -240,10 +331,11 @@ export class DatasetService {
         const createdDataView = await services.data?.dataViews.createAndSave(
           spec,
           undefined,
-          asyncType
+          asyncType,
+          reuseExisting
         );
 
-        // Update the dataset with the new UUID generated during save
+        // Update the dataset with the id of the saved (or reused) data view.
         if (createdDataView?.id) {
           dataset.id = createdDataView.id;
         }
@@ -368,8 +460,9 @@ export class DatasetService {
     this.sessionStorage.set('lastCacheTime', time);
   }
 
-  private async fetchDefaultDataset(): Promise<Dataset | undefined> {
-    const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
+  private async fetchDefaultDataset(
+    defaultIndexPatternId: string | undefined
+  ): Promise<Dataset | undefined> {
     if (!defaultIndexPatternId) {
       return undefined;
     }
@@ -397,12 +490,21 @@ export class DatasetService {
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+            ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
+            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {
                 id: dataSource.id,
                 title: dataSource.attributes?.title,
-                type: dataSource.attributes?.dataSourceEngineType || '',
+                type:
+                  dataSource.attributes?.dataSourceEngineType ||
+                  DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+                meta: {
+                  type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                  dataSourceEngineType: dataSource.attributes?.dataSourceEngineType,
+                  dataSourceVersion: dataSource.attributes?.dataSourceVersion,
+                },
               }
             : undefined,
         },

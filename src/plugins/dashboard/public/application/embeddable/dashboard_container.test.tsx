@@ -270,3 +270,512 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
   // expect(action.length).toBe(1);
 });
+
+test('removeEmbeddable prunes the panel from its section in SectionLayout mode', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      m1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'm1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+      m2: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'b', id: 'm2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+    layout: {
+      type: 'SectionLayout',
+      items: [
+        {
+          id: 's1',
+          type: 'section',
+          name: 'Section 1',
+          collapsed: false,
+          members: [
+            { idRef: 'm1', type: 'panel', gridData: { x: 0, y: 0, w: 6, h: 6 } },
+            { idRef: 'm2', type: 'panel', gridData: { x: 6, y: 0, w: 6, h: 6 } },
+          ],
+        },
+      ],
+    },
+  } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+  container.removeEmbeddable('m1');
+
+  const input = container.getInput();
+  expect(input.panels.m1).toBeUndefined();
+  expect((input.layout as any).items[0].members.map((m: any) => m.idRef)).toEqual(['m2']);
+});
+
+test('addNewEmbeddable leaves a SectionLayout panel unclaimed', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {},
+    layout: {
+      type: 'SectionLayout',
+      items: [
+        { id: 's1', type: 'section', name: 'Section 1', collapsed: false, members: [] },
+        { id: 's2', type: 'section', name: 'Section 2', collapsed: true, members: [] },
+      ],
+    },
+  } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+  const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
+    CONTACT_CARD_EMBEDDABLE,
+    { firstName: 'z' }
+  );
+
+  const input = container.getInput();
+  (input.layout as any).items.forEach((section: any) => expect(section.members).toEqual([]));
+  expect(input.panels[embeddable.id]).toBeDefined();
+});
+
+test('removeEmbeddable in GridLayout (no layout) does not touch layout', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      p1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'p1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+  container.removeEmbeddable('p1');
+
+  const input = container.getInput();
+  expect(input.panels.p1).toBeUndefined();
+  expect(input.layout).toBeUndefined();
+  container.destroy();
+});
+
+test('removeEmbeddable in SectionLayout where panel is not in any section is a no-op for layout', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      orphan: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'orphan' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+    layout: {
+      type: 'SectionLayout',
+      items: [
+        {
+          id: 's1',
+          type: 'section',
+          name: 'Section 1',
+          collapsed: false,
+          members: [],
+        },
+      ],
+    },
+  } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+  const layoutBefore = container.getInput().layout;
+  container.removeEmbeddable('orphan');
+
+  const input = container.getInput();
+  expect(input.panels.orphan).toBeUndefined();
+  expect(input.layout).toEqual(layoutBefore);
+  container.destroy();
+});
+
+test('replacePanel removes old panel and adds new one with correct gridData', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      old1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Old', id: 'old1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+
+  container.replacePanel(initialInput.panels.old1, {
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: 'new1', firstName: 'New' } as any,
+  });
+
+  const input = container.getInput();
+  expect(input.panels.old1).toBeUndefined();
+  expect(input.panels.new1).toBeDefined();
+  expect(input.panels.new1.gridData.i).toBe('new1');
+  expect(input.panels.new1.explicitInput.id).toBe('new1');
+  expect(input.lastReloadRequestTime).toBeDefined();
+  container.destroy();
+});
+
+test('replacePanel generates a uuid when newPanelState has no explicit id', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      old2: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Old', id: 'old2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+
+  container.replacePanel(initialInput.panels.old2, {
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { firstName: 'NoId' } as any,
+  });
+
+  const input = container.getInput();
+  expect(input.panels.old2).toBeUndefined();
+  const newPanelIds = Object.keys(input.panels);
+  expect(newPanelIds.length).toBe(1);
+  const newPanel = input.panels[newPanelIds[0]];
+  expect(newPanel.gridData.i).toBe(newPanelIds[0]);
+  expect(newPanel.explicitInput.id).toBe(newPanelIds[0]);
+  container.destroy();
+});
+
+test('replacePanel transfers section membership from the replaced panel to the replacement', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      old1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Old', id: 'old1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+    layout: {
+      type: 'SectionLayout',
+      items: [
+        {
+          id: 's1',
+          type: 'section',
+          name: 'Section 1',
+          collapsed: false,
+          members: [{ idRef: 'old1', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 15 } }],
+        },
+      ],
+    },
+  } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+
+  container.replacePanel(initialInput.panels.old1, {
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: 'new1', firstName: 'New' } as any,
+  });
+
+  const layout = container.getInput().layout as any;
+  const s1 = layout.items.find((s: any) => s.id === 's1');
+  const memberIds = s1.members.map((m: any) => m.idRef);
+  expect(memberIds).toEqual(['new1']);
+  expect(container.getInput().panels.new1).toBeDefined();
+  expect(container.getInput().panels.old1).toBeUndefined();
+  container.destroy();
+});
+
+test('replacePanel in GridLayout mode does not add a layout', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      old1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Old', id: 'old1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options);
+  container.replacePanel(initialInput.panels.old1, {
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: 'new1', firstName: 'New' } as any,
+  });
+  expect(container.getInput().layout).toBeUndefined();
+  container.destroy();
+});
+
+test('addOrUpdateEmbeddable replaces existing panel when id matches', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      exist1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Before', id: 'exist1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+
+  await container.addOrUpdateEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    { firstName: 'After' } as any,
+    'exist1'
+  );
+
+  const input = container.getInput();
+  expect(input.panels.exist1).toBeUndefined();
+  const panelIds = Object.keys(input.panels);
+  expect(panelIds.length).toBe(1);
+  container.destroy();
+});
+
+test('addOrUpdateEmbeddable adds new panel when id does not exist', async () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
+
+  await container.addOrUpdateEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    { firstName: 'Brand New' } as any,
+    'nonexistent'
+  );
+
+  const panelIds = Object.keys(container.getInput().panels);
+  expect(panelIds.length).toBe(1);
+  container.destroy();
+});
+
+test('addOrUpdateEmbeddable uses explicitInput.id as fallback for matching', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      match1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Before', id: 'match1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+
+  await container.addOrUpdateEmbeddable(CONTACT_CARD_EMBEDDABLE, {
+    id: 'match1',
+    firstName: 'Replaced',
+  } as any);
+
+  const input = container.getInput();
+  expect(input.panels.match1).toBeUndefined();
+  expect(Object.keys(input.panels).length).toBe(1);
+  container.destroy();
+});
+
+test('showPlaceholderUntil adds placeholder then replaces on resolve', async () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
+
+  const resolvedState = {
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: 'final1', firstName: 'Final' },
+  };
+
+  container.showPlaceholderUntil(Promise.resolve(resolvedState));
+
+  const panelIds = Object.keys(container.getInput().panels);
+  expect(panelIds.length).toBe(1);
+  const placeholderId = panelIds[0];
+  expect(container.getInput().panels[placeholderId].type).toBe('placeholder');
+
+  await new Promise((r) => setTimeout(r, 50));
+
+  const input = container.getInput();
+  expect(input.panels[placeholderId]).toBeUndefined();
+  expect(input.panels.final1).toBeDefined();
+  expect(input.panels.final1.type).toBe(CONTACT_CARD_EMBEDDABLE);
+  container.destroy();
+});
+
+test('getPanelQueries returns empty array when no children have originalQuery', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      pq1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'X', id: 'pq1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options);
+  await new Promise<void>((resolve) => {
+    const sub = container.getOutput$().subscribe((output) => {
+      if (output.embeddableLoaded.pq1) {
+        sub.unsubscribe();
+        resolve();
+      }
+    });
+  });
+
+  const queries = container.getPanelQueries();
+  expect(queries).toEqual([]);
+  container.destroy();
+});
+
+test('getPanelQueries returns queries from children that have originalQuery', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      pq2: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Y', id: 'pq2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options);
+  await new Promise<void>((resolve) => {
+    const sub = container.getOutput$().subscribe((output) => {
+      if (output.embeddableLoaded.pq2) {
+        sub.unsubscribe();
+        resolve();
+      }
+    });
+  });
+
+  const child = container.getChild<any>('pq2');
+  child.originalQuery = 'SELECT * FROM {{myVar}}';
+
+  const queries = container.getPanelQueries();
+  expect(queries).toEqual(['SELECT * FROM {{myVar}}']);
+  container.destroy();
+});
+
+test('getPanelQueries handles errors gracefully (catch branch)', () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
+
+  jest.spyOn(container, 'getChildIds').mockReturnValue(['bogus1', 'bogus2']);
+  jest.spyOn(container, 'getChild').mockImplementation(() => {
+    throw new Error('not loaded');
+  });
+
+  const queries = container.getPanelQueries();
+  expect(queries).toEqual([]);
+  container.destroy();
+});
+
+test('destroy cleans up variable subscriptions', () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
+
+  expect(container.variableService).toBeDefined();
+  container.destroy();
+});
+
+test('constructor initializes with variables when provided', () => {
+  const variables = [
+    { id: 'var1', name: 'test', type: 'custom' as const, value: 'hello', options: [] },
+  ];
+  const initialInput = getSampleDashboardInput({ variables } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+  expect(container.getInput().variables).toEqual(variables);
+  container.destroy();
+});
+
+test('initVariableRefreshSubscription refreshes on timeRange change when query variables exist', async () => {
+  const variables = [
+    { id: 'qv1', name: 'queryVar', type: 'query' as const, value: '', options: [] },
+  ];
+  const initialInput = getSampleDashboardInput({ variables } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+
+  const refreshSpy = jest.spyOn(container.variableService, 'refreshTimeFilteredVariableOptions');
+  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
+
+  container.updateInput({
+    timeRange: { from: 'now-1h', to: 'now' },
+  });
+
+  await new Promise((r) => setTimeout(r, 10));
+
+  expect(refreshSpy).toHaveBeenCalled();
+  container.destroy();
+});
+
+test('initVariableRefreshSubscription refreshes all on reload when query variables exist', async () => {
+  const variables = [
+    { id: 'qv2', name: 'queryVar2', type: 'query' as const, value: '', options: [] },
+  ];
+  const initialInput = getSampleDashboardInput({ variables } as any);
+
+  const container = new DashboardContainer(initialInput, options);
+
+  const refreshAllSpy = jest.spyOn(container.variableService, 'refreshAllVariableOptions');
+  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
+
+  container.updateInput({
+    lastReloadRequestTime: new Date().getTime(),
+  });
+
+  await new Promise((r) => setTimeout(r, 10));
+
+  expect(refreshAllSpy).toHaveBeenCalled();
+  container.destroy();
+});
+
+test('dashboard id change triggers setDashboardId on variableService', async () => {
+  const initialInput = getSampleDashboardInput({ id: 'initial-id' });
+
+  const container = new DashboardContainer(initialInput, options);
+  const setIdSpy = jest.spyOn(container.variableService, 'setDashboardId');
+
+  container.updateInput({ id: 'new-saved-id' });
+
+  await new Promise((r) => setTimeout(r, 10));
+
+  expect(setIdSpy).toHaveBeenCalledWith('new-saved-id');
+  container.destroy();
+});
+
+test('reparentPanels recreates the re-parented panel as a fresh instance with its input preserved', async () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options);
+  await new Promise((r) => setTimeout(r, 10));
+
+  const original = container.getChild<ContactCardEmbeddable>('123');
+  expect(original).toBeDefined();
+
+  container.reparentPanels(['123'], {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 's1',
+        type: 'section',
+        name: 'S1',
+        collapsed: false,
+        members: [{ idRef: '123', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 15 } }],
+      },
+    ],
+  } as any);
+  await new Promise((r) => setTimeout(r, 10));
+
+  const recreated = container.getChild<ContactCardEmbeddable>('123');
+  expect(recreated).toBeDefined();
+  expect(recreated).not.toBe(original);
+  expect(recreated.getInput().firstName).toBe('Sam');
+  expect(container.getInput().layout?.type).toBe('SectionLayout');
+
+  container.destroy();
+});
+
+test('getStateTransferContainerInfoData round-trips the pending create-section id (flag on)', () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), {
+    ...options,
+    allowDashboardSections: true,
+  });
+
+  expect(container.getStateTransferContainerInfoData()).toBeUndefined();
+
+  container.setPendingCreateSectionContext('section-1');
+  expect(container.getStateTransferContainerInfoData()).toEqual({ sectionId: 'section-1' });
+  expect(container.getStateTransferContainerInfoData()).toBeUndefined();
+
+  container.destroy();
+});
+
+test('getStateTransferContainerInfoData is inert when the sections flag is off', () => {
+  const container = new DashboardContainer(getSampleDashboardInput(), {
+    ...options,
+    allowDashboardSections: false,
+  });
+
+  container.setPendingCreateSectionContext('section-1');
+  expect(container.getStateTransferContainerInfoData()).toBeUndefined();
+
+  container.destroy();
+});

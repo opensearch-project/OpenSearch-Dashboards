@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
-import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { TraceDetailsFlyout, TraceDetailsProps, sessionIdOf } from './trace_details_flyout';
 import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
@@ -29,7 +29,12 @@ jest.mock('../flow/trace_flow_view', () => ({
 }));
 
 jest.mock('./trace_tree_view', () => ({
-  TraceTreeView: () => <div data-test-subj="mock-tree-view">Tree View</div>,
+  TraceTreeView: ({ expandedNodes, onCollapseAll }: any) => (
+    <div data-test-subj="mock-tree-view">
+      Tree View <span data-test-subj="mock-expanded">{expandedNodes.size}</span>
+      <button onClick={onCollapseAll}>Collapse all</button>
+    </div>
+  ),
 }));
 
 jest.mock('./timeline_gantt', () => ({
@@ -130,5 +135,116 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
     expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
+  });
+
+  it('heads the flyout with the clicked agent when two agents share an HTTP root', () => {
+    const agent = (id: string, name: string, startTime: string): TraceRow => ({
+      ...mockTrace,
+      id,
+      spanId: id,
+      parentSpanId: 'span-1',
+      name,
+      rawDocument: { startTime, attributes: { 'derived.gen_ai.is_root': true } },
+    });
+    const weather = agent('weather', 'invoke_agent Weather Agent', '1');
+    const events = agent('events', 'invoke_agent Events Agent', '2');
+    const httpRoot: TraceRow = { ...mockTrace, name: 'POST /runs', children: [weather, events] };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={events} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Events Agent')).toBeInTheDocument();
+  });
+
+  it('heads the flyout with the GenAI root when an inner span is marked', () => {
+    const inner: TraceRow = {
+      ...mockTrace,
+      id: 'inner',
+      spanId: 'inner',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Sub Agent',
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+    };
+    const genAiRoot: TraceRow = {
+      ...mockTrace,
+      name: 'invoke_agent Orchestrator',
+      rawDocument: { attributes: { 'gen_ai.operation.name': 'invoke_agent' } },
+      children: [inner],
+    };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={genAiRoot} fullTree={[genAiRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Orchestrator')).toBeInTheDocument();
+  });
+
+  it('heads the flyout with the nearest agent when a child span is clicked', () => {
+    const chat: TraceRow = {
+      ...mockTrace,
+      id: 'chat',
+      spanId: 'chat',
+      parentSpanId: 'agent',
+      name: 'chat',
+    };
+    const agent: TraceRow = {
+      ...mockTrace,
+      id: 'agent',
+      spanId: 'agent',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Travel Planner',
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+      children: [chat],
+    };
+    const httpRoot: TraceRow = { ...mockTrace, name: 'POST /runs', children: [agent] };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={chat} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Travel Planner')).toBeInTheDocument();
+  });
+
+  it('heads the flyout with the marked AI root under a non-GenAI root', () => {
+    const agent: TraceRow = {
+      ...mockTrace,
+      id: 'agent-1',
+      spanId: 'agent-span-1',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Travel Planner',
+      totalTokens: 180,
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+    };
+    const httpRoot: TraceRow = {
+      ...mockTrace,
+      name: 'POST /runs',
+      totalTokens: 360,
+      children: [agent],
+    };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={agent} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Travel Planner')).toBeInTheDocument();
+    expect(screen.queryByText('Trace: POST /runs')).not.toBeInTheDocument();
+  });
+});
+
+describe('sessionIdOf', () => {
+  it('returns the first span session id, flat or nested', () => {
+    expect(
+      sessionIdOf([
+        { rawDocument: { attributes: {} } } as any,
+        { rawDocument: { attributes: { gen_ai: { conversation: { id: 'sess-1' } } } } } as any,
+        { rawDocument: { attributes: { 'gen_ai.conversation.id': 'sess-2' } } } as any,
+      ])
+    ).toBe('sess-1');
+    expect(sessionIdOf([undefined, { rawDocument: {} } as any])).toBeUndefined();
+  });
+
+  it("keeps the user's collapsed tree when the same tree is sent again", () => {
+    const child = { ...mockTrace, id: 'child', spanId: 'child', parentSpanId: 'span-1' };
+    const tree = () => [{ ...mockTrace, children: [child] }] as TraceRow[];
+    const { rerender } = render(<TraceDetailsFlyout {...defaultProps} fullTree={tree()} />);
+    expect(screen.getByTestId('mock-expanded')).not.toHaveTextContent(/^0$/);
+    fireEvent.click(screen.getByText('Collapse all'));
+    expect(screen.getByTestId('mock-expanded')).toHaveTextContent(/^0$/);
+    // The traces table re-sends the tree (new array, same spans), e.g. on a cache sync.
+    rerender(<TraceDetailsFlyout {...defaultProps} fullTree={tree()} />);
+    expect(screen.getByTestId('mock-expanded')).toHaveTextContent(/^0$/);
   });
 });

@@ -47,6 +47,7 @@ export interface SavedObjectDashboard extends SavedObject {
   panelsJSON: string;
   optionsJSON?: string;
   variablesJSON?: string;
+  layoutJSON?: string;
   // TODO: write a migration to rid of this, it's only around for bwc.
   uiStateJSON?: string;
   lastSavedTitle: string;
@@ -73,6 +74,7 @@ export function createSavedDashboardClass(
       panelsJSON: 'text',
       optionsJSON: 'text',
       variablesJSON: 'text',
+      layoutJSON: 'text',
       version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'keyword',
@@ -115,6 +117,7 @@ export function createSavedDashboardClass(
             useSharedCrosshair: false,
           }),
           variablesJSON: undefined,
+          layoutJSON: undefined,
           version: 1,
           timeRestore: false,
           timeTo: undefined,

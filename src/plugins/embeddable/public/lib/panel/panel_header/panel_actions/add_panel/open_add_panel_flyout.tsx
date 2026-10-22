@@ -33,6 +33,7 @@ import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { toMountPoint } from '../../../../../../../opensearch_dashboards_react/public';
 import { IContainer } from '../../../../containers';
+import { IEmbeddable } from '../../../../embeddables';
 import { AddPanelFlyout } from './add_panel_flyout';
 
 export async function openAddPanelFlyout(options: {
@@ -42,9 +43,21 @@ export async function openAddPanelFlyout(options: {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
+  onPanelAdded?: (embeddable: IEmbeddable) => void | Promise<void>;
+  closeAfterAdd?: boolean;
+  showCreateNew?: boolean;
 }) {
-  const { embeddable, getFactory, getAllFactories, overlays, notifications, SavedObjectFinder } =
-    options;
+  const {
+    embeddable,
+    getFactory,
+    getAllFactories,
+    overlays,
+    notifications,
+    SavedObjectFinder,
+    onPanelAdded,
+    closeAfterAdd,
+    showCreateNew,
+  } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <AddPanelFlyout
@@ -58,6 +71,9 @@ export async function openAddPanelFlyout(options: {
         getAllFactories={getAllFactories}
         notifications={notifications}
         SavedObjectFinder={SavedObjectFinder}
+        onPanelAdded={onPanelAdded}
+        closeAfterAdd={closeAfterAdd}
+        showCreateNew={showCreateNew}
       />
     ),
     {

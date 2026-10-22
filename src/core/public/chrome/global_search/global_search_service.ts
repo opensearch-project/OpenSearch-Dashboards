@@ -8,11 +8,9 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
- * search input match with `@` will handled by saved objects search command
- * search input match with `>` will handled by plugin customized commands
+ * Search input matching `@` is handled by saved object search commands.
  */
 export const SAVED_OBJECTS_SYMBOL = '@';
-export const COMMANDS_SYMBOL = '>';
 
 export const SearchCommandTypes = {
   PAGES: {
@@ -24,6 +22,12 @@ export const SearchCommandTypes = {
       defaultMessage: 'Assets',
     }),
     alias: SAVED_OBJECTS_SYMBOL,
+  },
+  RECENTLY_ACCESSED: {
+    description: i18n.translate('core.globalSearch.recentlyAccessed.description', {
+      defaultMessage: 'Recently accessed',
+    }),
+    alias: null,
   },
   ACTIONS: {
     description: i18n.translate('core.globalSearch.actions.description', {
@@ -44,6 +48,43 @@ export interface GlobalSearchCommandRunOptions {
    * AbortSignal to cancel the search operation
    */
   abortSignal?: AbortSignal;
+}
+
+/**
+ * A result returned by a {@link GlobalSearchCommand}.
+ * @experimental
+ */
+export interface GlobalSearchResult {
+  /**
+   * Stable identifier unique within the owning command.
+   */
+  id: string;
+
+  /**
+   * Plain text label used for accessibility and result identity.
+   */
+  label: string;
+
+  /**
+   * Provider-owned visual representation of the result.
+   */
+  content: ReactNode;
+
+  /**
+   * Controls whether the result is rendered in its command section or after all sections.
+   * Defaults to `section`.
+   */
+  placement?: 'section' | 'trailing';
+
+  /**
+   * Optional native navigation target.
+   */
+  href?: string;
+
+  /**
+   * Executes the result without depending on a rendering surface.
+   */
+  execute: () => void | Promise<void>;
 }
 
 /**
@@ -69,16 +110,11 @@ export interface GlobalSearchCommand {
   inputPlaceholder?: string;
 
   /**
-   * do the search and return search result with a React element
+   * Executes the search and returns structured results.
    * @param value search query
-   * @param callback callback function when search is done
    * @param options options object containing abortSignal and other future extensible properties
    */
-  run(
-    value: string,
-    callback?: () => void,
-    options?: GlobalSearchCommandRunOptions
-  ): Promise<ReactNode[]>;
+  run(value: string, options?: GlobalSearchCommandRunOptions): Promise<GlobalSearchResult[]>;
 
   /**
    * Callback function executed when the user presses Enter in the global search bar.
@@ -116,9 +152,13 @@ export interface GlobalSearchServiceSetupContract {
    * chrome.globalSearch.registerSearchCommand({
    *   id: 'my-search-command',
    *   type: 'PAGES',
-   *   run: async (query, callback, abortSignal) => {
-   *     // Perform search logic
-   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   run: async (query, options) => {
+   *     return [{
+   *       id: 'result-1',
+   *       label: 'Result 1',
+   *       content: <SearchResult>Result 1</SearchResult>,
+   *       execute: () => navigateToResult('result-1'),
+   *     }];
    *   }
    * });
    * ```
@@ -185,9 +225,13 @@ export interface GlobalSearchServiceStartContract {
    * chrome.globalSearch.registerSearchCommand({
    *   id: 'my-search-command',
    *   type: 'PAGES',
-   *   run: async (query, callback, abortSignal) => {
-   *     // Perform search logic
-   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   run: async (query, options) => {
+   *     return [{
+   *       id: 'result-1',
+   *       label: 'Result 1',
+   *       content: <SearchResult>Result 1</SearchResult>,
+   *       execute: () => navigateToResult('result-1'),
+   *     }];
    *   }
    * });
    * ```
@@ -220,6 +264,14 @@ export class GlobalSearchService {
   }
 
   private registerSearchCommand(searchHandler: GlobalSearchCommand) {
+    if (!Object.prototype.hasOwnProperty.call(SearchCommandTypes, searchHandler.type)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Unknown SearchCommand type ${String(searchHandler.type)} for id ${searchHandler.id}`
+      );
+      return;
+    }
+
     const exists = this.searchCommands.find((item) => {
       return item.id === searchHandler.id;
     });

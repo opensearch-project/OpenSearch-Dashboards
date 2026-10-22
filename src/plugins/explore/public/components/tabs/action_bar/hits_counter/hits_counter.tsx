@@ -30,10 +30,13 @@
 
 import './hits_counter.scss';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
+import { formatDuration } from './format_duration';
+import { formatStreamingAnnotation } from './format_streaming_annotation';
+import { StreamingQueryStatus } from '../../../../application/utils/state_management/types';
 
 export interface HitsCounterProps {
   /**
@@ -57,13 +60,26 @@ export interface HitsCounterProps {
    */
   rows?: OpenSearchSearchHit[];
   /**
-   * query ran time in ms
+   * query run time in milliseconds
    */
   elapsedMs?: number;
   /**
    * optional override for the rows count display (useful for filtered results)
    */
   rowsCountOverride?: number;
+  /**
+   * how many columns the hide-empty-fields setting is currently hiding; 0 renders nothing
+   */
+  hiddenColumnCount?: number;
+  /**
+   * turns the setting off, so the hidden columns come back
+   */
+  onShowHiddenColumns?: () => void;
+  /**
+   * progress of the streaming query behind these results; absent for a non-streaming query, whose
+   * readout is then unchanged
+   */
+  streaming?: StreamingQueryStatus;
 }
 
 export function HitsCounter({
@@ -74,8 +90,24 @@ export function HitsCounter({
   rows,
   elapsedMs,
   rowsCountOverride,
+  hiddenColumnCount = 0,
+  onShowHiddenColumns,
+  streaming,
 }: HitsCounterProps) {
   const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
+  // elapsedMs is republished on every streaming snapshot, so the duration ticks while polling.
+  const duration = formatDuration(elapsedMs);
+  const annotation = formatStreamingAnnotation(streaming);
+  const durationSegment =
+    duration || annotation ? (
+      <>
+        {' · '}
+        {duration && <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>}
+        {annotation && (
+          <span data-test-subj="discoverQueryStreamingAnnotation">{` (${annotation})`}</span>
+        )}
+      </>
+    ) : null;
 
   return (
     <I18nProvider>
@@ -92,7 +124,7 @@ export function HitsCounter({
             {hits && bucketCount ? (
               <FormattedMessage
                 id="explore.discover.hitsAggregationResultTitle"
-                defaultMessage="{rowsCount} / {bucketCount} {bucketCountRaw, plural, one {bucket} other {buckets}} · {hits} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {bucketCount} {bucketCountRaw, plural, one {bucket} other {buckets}} · {hits} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -106,17 +138,13 @@ export function HitsCounter({
                     </strong>
                   ),
                   bucketCountRaw: bucketCount,
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             ) : hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
-                defaultMessage="{rowsCount} / {hits} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {hits} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -124,33 +152,51 @@ export function HitsCounter({
                     </strong>
                   ),
                   hits: <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>,
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             ) : (
               <FormattedMessage
                 id="explore.discover.noHitsResultTitle"
-                defaultMessage="{rowsCount} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
                       {rowsCount.toLocaleString()}
                     </strong>
                   ),
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             )}
           </EuiText>
         </EuiFlexItem>
+        {/* Sits in the same sentence as the counts so the table's column set is disclosed where
+            the result summary already is, and offers the way back out of the filter. The gap is a
+            margin rather than a leading space, since the row's gutterSize="none" collapses one. */}
+        {hiddenColumnCount > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" className="dscResultCount__hiddenColumns">
+              {'· '}
+              <EuiLink
+                onClick={onShowHiddenColumns}
+                className="dscResultCount__hiddenColumnsLink"
+                data-test-subj="exploreHiddenColumnsCount"
+                aria-label={i18n.translate('explore.discover.hiddenColumnsAriaLabel', {
+                  defaultMessage:
+                    'Show {hiddenColumnCount, plural, one {# empty column} other {# empty columns}}',
+                  values: { hiddenColumnCount },
+                })}
+              >
+                <FormattedMessage
+                  id="explore.discover.hiddenColumnsCount"
+                  defaultMessage="{hiddenColumnCount, plural, one {# column hidden} other {# columns hidden}}"
+                  values={{ hiddenColumnCount }}
+                />
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {showResetButton && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

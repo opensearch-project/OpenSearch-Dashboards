@@ -26,13 +26,11 @@ export const WorkspaceGlobalSearchPageItem = ({
   search,
   currentWorkspace,
   registeredUseCases$,
-  onCallback,
 }: {
   link: NavLink;
   search: string;
   currentWorkspace: WorkspaceObject | null;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
-  onCallback: (link: NavLink) => void;
 }) => {
   const availableUseCases = useObservable(registeredUseCases$);
 
@@ -61,7 +59,6 @@ export const WorkspaceGlobalSearchPageItem = ({
     <GlobalSearchPageItem
       link={link}
       search={search}
-      callback={() => onCallback(link)}
       renderBreadcrumbs={(breadcrumbs) => renderBreadcrumbs({ breadcrumbs })}
     />
   );

@@ -66,7 +66,8 @@ export const SaveVisButton = () => {
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
 
   // directly read from url storage
-  const originatingApp = osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY)?.originatingApp;
+  const { originatingApp, containerInfo } =
+    osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY) ?? {};
 
   const searchContext = useSearchContext();
 
@@ -99,7 +100,11 @@ export const SaveVisButton = () => {
           exploreId === undefined
             ? [
                 {
-                  state: { type: 'explore', input: { savedObjectId: id } },
+                  state: {
+                    type: 'explore',
+                    input: { savedObjectId: id },
+                    ...(containerInfo ? { containerInfo } : {}),
+                  },
                 },
               ]
             : [];
@@ -116,7 +121,15 @@ export const SaveVisButton = () => {
         }
       }
     },
-    [stateTransfer, exploreId, chrome, services.scopedHistory, toastNotifications, originatingApp]
+    [
+      stateTransfer,
+      exploreId,
+      chrome,
+      services.scopedHistory,
+      toastNotifications,
+      originatingApp,
+      containerInfo,
+    ]
   );
 
   const handleSave = useCallback(

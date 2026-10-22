@@ -28,7 +28,13 @@
  * under the License.
  */
 
-export { GridData } from './embeddable/types';
+export {
+  GridData,
+  SectionMemberGridData,
+  SectionLayoutMember,
+  DashboardSection,
+  DashboardLayout,
+} from './embeddable/types';
 export {
   RawSavedDashboardPanel730ToLatest,
   DashboardDoc730ToLatest,

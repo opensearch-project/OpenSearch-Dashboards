@@ -64,6 +64,13 @@ export interface DataSourceEngineCapabilities {
   minSqlBucketFunctionVersion?: string;
   /** Whether the backend runtime PPL grammar endpoint (`/_plugins/_ppl/_grammar`) exists. */
   supportsRuntimePplGrammar: boolean;
+  /**
+   * Whether the engine serves the asynchronous PPL API streaming depends on: `/_plugins/_ppl`
+   * accepting `wait_for_completion_timeout` and returning a pollable job id. The Open Distro
+   * endpoints have no async equivalent, so engines using them must set this false. Needs no version
+   * gating otherwise — older SQL plugins ignore the extra fields and return a complete result.
+   */
+  supportsAsyncPplStreaming: boolean;
   /** Client-action endpoints the server Facet should use to run PPL/SQL for this engine. */
   sqlPplEndpoints: SqlPplEndpointActions;
   /** Which language the autocomplete column-value fetcher should use for this engine. */
@@ -77,6 +84,7 @@ export const DEFAULT_ENGINE_CAPABILITIES: DataSourceEngineCapabilities = {
   supportsSqlBucketFunctions: true,
   minSqlBucketFunctionVersion: '3.9.0',
   supportsRuntimePplGrammar: true,
+  supportsAsyncPplStreaming: true,
   sqlPplEndpoints: { ppl: 'enhancements.pplQuery', sql: 'enhancements.sqlQuery' },
   columnValueSuggestionLanguage: 'PPL',
 };
@@ -95,6 +103,7 @@ const ENGINE_CAPABILITIES: Partial<Record<string, DataSourceEngineCapabilities>>
     supportsPplSpan: false,
     supportsSqlBucketFunctions: false,
     supportsRuntimePplGrammar: false,
+    supportsAsyncPplStreaming: false,
     sqlPplEndpoints: {
       ppl: 'enhancements.pplQueryOpenDistro',
       sql: 'enhancements.sqlQueryOpenDistro',

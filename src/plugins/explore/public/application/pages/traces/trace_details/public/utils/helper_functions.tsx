@@ -19,6 +19,36 @@ export function nanoToMilliSec(nano: number) {
   return nano / 1000000;
 }
 
+/**
+ * Format a raw nanosecond span duration into a compact, human-readable string,
+ * picking the largest unit that keeps the value readable. Span durations arrive
+ * as nanoseconds by the OTel/Data Prepper convention (`durationInNanos`), so the
+ * ladder runs ns -> µs -> ms -> s -> min:
+ *   < 1 µs   -> "512 ns"
+ *   < 1 ms   -> "256.62 µs"
+ *   < 1 s    -> "1.53 ms"
+ *   < 60 s   -> "1.53 s"
+ *   >= 60 s  -> "2.10 min"
+ * Extends the observability APM latency formatter (ms -> s at 1000 ms) down to
+ * sub-millisecond units so short spans don't round to a misleading "0 ms".
+ * Values <= 0 / non-numeric render as "0 ns".
+ */
+export function formatSpanDuration(nano: number): string {
+  const ns = Math.max(0, Number(nano) || 0);
+  // Compare the *rounded* value at each tier so a value just under a boundary
+  // (e.g. 999.999 ms) promotes to the next unit ("1 s") instead of rendering the
+  // boundary itself ("1000 ms").
+  const nsR = round(ns, 2);
+  if (nsR < 1000) return `${nsR} ns`;
+  const usR = round(ns / 1000, 2);
+  if (usR < 1000) return `${usR} µs`;
+  const msR = round(ns / 1_000_000, 2);
+  if (msR < 1000) return `${msR} ms`;
+  const secondsR = round(ns / 1_000_000_000, 2);
+  if (secondsR < 60) return `${secondsR} s`;
+  return `${round(ns / 60_000_000_000, 2)} min`;
+}
+
 export function get(obj: any, path: string, defaultValue?: any): any {
   const travel = (regexp: RegExp) =>
     String.prototype.split

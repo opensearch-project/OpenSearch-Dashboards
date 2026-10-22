@@ -13,10 +13,7 @@ import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
-import {
-  round,
-  nanoToMilliSec,
-} from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
+import { formatSpanDuration } from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -27,6 +24,10 @@ export const isOnTracesPage = (): boolean => {
 
 export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
+};
+
+export const isTraceIdColumn = (columnId: string): boolean => {
+  return columnId === 'traceId' || columnId === 'trace_id' || columnId === 'traceID';
 };
 
 export const isDurationColumn = (columnId: string) => {
@@ -166,6 +167,76 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
   );
 };
 
+export const handleTraceIdNavigation = (
+  rowData: OpenSearchSearchHit<Record<string, unknown>>,
+  dataset: Dataset
+): void => {
+  // Extract traceId from row data
+  const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
+
+  // Intentionally omit spanId: the trace details page selects the trace's root
+  // span (parentless, else earliest by startTime) when no spanId is provided.
+  const fullPageUrl = buildTraceDetailsUrl('', traceIdValue, dataset);
+  window.open(fullPageUrl, '_blank');
+};
+
+export interface TraceIdLinkProps {
+  sanitizedCellValue: string;
+  rowData: OpenSearchSearchHit<Record<string, unknown>>;
+  dataset: Dataset;
+}
+
+export const TraceIdLink: React.FC<TraceIdLinkProps> = ({
+  sanitizedCellValue,
+  rowData,
+  dataset,
+}) => {
+  // Validate required fields before allowing navigation (mirrors SpanIdLink)
+  const validationResult = validateRequiredTraceFields(rowData as any);
+  const isValid = validationResult.isValid;
+
+  const handleTraceIdClick = () => {
+    if (isValid) {
+      handleTraceIdNavigation(rowData, dataset);
+    }
+  };
+
+  const displayValue = sanitizedCellValue.replace(/<[^>]*>/g, '').trim();
+
+  if (!isValid) {
+    // Return non-clickable text when required fields are missing
+    return (
+      <EuiToolTip
+        content={i18n.translate('explore.traceIdLink.missingFieldsTooltip', {
+          defaultMessage:
+            'Required trace fields are missing. Please update your data ingestion to include all required fields.',
+        })}
+      >
+        <EuiText size="s" color="subdued">
+          {displayValue}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('explore.traceIdLink.redirectTooltip', {
+        defaultMessage: 'View full trace (opens in a new tab)',
+      })}
+    >
+      <EuiLink
+        onClick={handleTraceIdClick}
+        data-test-subj="traceIdLink"
+        className="exploreSpanIdLink"
+      >
+        {displayValue}
+        <EuiIcon type="popout" size="s" />
+      </EuiLink>
+    </EuiToolTip>
+  );
+};
+
 export interface TraceFlyoutButtonProps {
   sanitizedCellValue: string;
   rowData: OpenSearchSearchHit<Record<string, unknown>>;
@@ -243,7 +314,7 @@ export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedC
     .replace(/,/g, '')
     .trim();
 
-  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+  const durationLabel = formatSpanDuration(Number(duration));
 
   return (
     <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">

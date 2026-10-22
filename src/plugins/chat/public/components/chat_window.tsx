@@ -41,6 +41,8 @@ import { CoreStart } from '../../../../core/public';
 import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
+import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
+import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
 
 export interface ChatWindowInstance {
@@ -69,6 +71,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const { chatService, confirmationService, humanInputService } = useChatContext();
     const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
     const toasts = services.core?.notifications?.toasts;
+
+    // Register the switch_data_source tool so the LLM can request a data source switch mid-conversation
+    useSwitchDataSourceAction(chatService);
     const [timeline, setTimeline] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
@@ -517,7 +522,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     handleSendRef.current = handleSend;
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !isImeComposing(e)) {
         e.preventDefault();
         handleSend();
       }
@@ -637,11 +642,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       stopStreaming();
     }, [stopStreaming]);
 
-    const handleApproveConfirmation = useCallback(() => {
-      if (pendingConfirmation) {
-        confirmationService.approve(pendingConfirmation.id);
-      }
-    }, [pendingConfirmation, confirmationService]);
+    const handleApproveConfirmation = useCallback(
+      (modifiedArgs?: any) => {
+        if (pendingConfirmation) {
+          confirmationService.approve(pendingConfirmation.id, modifiedArgs);
+        }
+      },
+      [pendingConfirmation, confirmationService]
+    );
 
     const handleRejectConfirmation = useCallback(() => {
       if (pendingConfirmation) {
@@ -701,6 +709,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         stopStreaming();
         setPendingMessage(null);
         setAvailableDataSources([]);
+
+        // Clear the confirmed conversation-level data source and its context
+        chatService.clearSessionDataSourceAndContext();
 
         // Abort any ongoing conversation loading
         if (conversationLoadAbortControllerRef.current) {
@@ -832,6 +843,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           <ConversationHistoryPanel
             conversationHistoryService={chatService.conversationHistoryService}
             onSelectConversation={handleSelectConversation}
+            onDeleteConversation={(threadId) => chatService.deleteConversation(threadId)}
           />
         ) : (
           <ChatSessionErrorBoundary onStartNewSession={handleNewChat}>

@@ -86,10 +86,15 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
 const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('BottomRightContainer', () => {
-  const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
+  const createMockStore = (
+    status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED,
+    results: Record<string, unknown> = {},
+    progress?: Record<string, number>,
+    streaming?: Record<string, unknown>
+  ) => {
     const queryStatusMap =
       status === QueryExecutionStatus.LOADING
-        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
+        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING, progress, streaming } }
         : {};
 
     return configureStore({
@@ -104,6 +109,7 @@ describe('BottomRightContainer', () => {
               elapsedMs: undefined,
               startTime: undefined,
               body: undefined,
+              streaming,
             },
             promptModeIsAvailable: false,
             editorMode: 'single-query',
@@ -111,7 +117,7 @@ describe('BottomRightContainer', () => {
           }
         ) => state,
         query: (state = {}) => state,
-        results: (state = {}) => state,
+        results: (state = results) => state,
         tab: (state = {}) => state,
       },
     });
@@ -136,8 +142,13 @@ describe('BottomRightContainer', () => {
     mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
   });
 
-  const renderComponent = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
-    const store = createMockStore(status);
+  const renderComponent = (
+    status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED,
+    results?: Record<string, unknown>,
+    progress?: Record<string, number>,
+    streaming?: Record<string, unknown>
+  ) => {
+    const store = createMockStore(status, results, progress, streaming);
     return render(
       <Provider store={store}>
         <BottomRightContainer />
@@ -175,6 +186,47 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent(QueryExecutionStatus.LOADING);
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  });
+
+  it('renders partial rows instead of the spinner while a polling query is still loading', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    } as any);
+    renderComponent(
+      QueryExecutionStatus.LOADING,
+      { 'mock-query-string': { hasResults: true } },
+      { recordsMatched: 120 }
+    );
+    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+  });
+
+  it('renders partial rows instead of the spinner while a streaming query is polling', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    } as any);
+    renderComponent(QueryExecutionStatus.LOADING, {}, undefined, {
+      isPolling: true,
+      total: 500000,
+      rowsFetched: 120,
+      fractionDone: 0.3,
+    });
+    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+  });
+
+  it('keeps the spinner for a re-run that has rows but is producing no partial results', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    } as any);
+    renderComponent(QueryExecutionStatus.LOADING, { 'mock-query-string': { hasResults: true } });
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 

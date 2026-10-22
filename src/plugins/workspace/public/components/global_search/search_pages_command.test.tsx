@@ -7,7 +7,12 @@ import { workspaceSearchPages } from './search_pages_command';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { ChromeNavLink, NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
+import {
+  ChromeNavLink,
+  NavGroupItemInMap,
+  NavGroupType,
+  WorkspaceObject,
+} from 'opensearch-dashboards/public';
 
 describe('<workspaceSearchPagesCommand />', () => {
   const registeredUseCases = new BehaviorSubject([
@@ -57,6 +62,7 @@ describe('<workspaceSearchPagesCommand />', () => {
       id: 'dataAdministration',
       title: 'Data Administration',
       description: 'Data Administration description',
+      type: NavGroupType.SYSTEM,
       navLinks: [
         {
           id: 'dataAdministration-link1',
@@ -76,6 +82,7 @@ describe('<workspaceSearchPagesCommand />', () => {
       id: 'settingsAndSetup',
       title: 'Settings and Setup',
       description: 'Settings and Setup description',
+      type: NavGroupType.SYSTEM,
       navLinks: [
         {
           id: 'settingsAndSetup-link1',
@@ -109,127 +116,69 @@ describe('<workspaceSearchPagesCommand />', () => {
     },
   };
 
-  const callbackFn = jest.fn();
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
+  it('returns no results for an empty query', async () => {
+    await expect(workspaceSearchPages('', registeredUseCases, coreStartMock)).resolves.toEqual([]);
+  });
+
   it('search return empty result', async () => {
-    const searchResult = await workspaceSearchPages(
-      'bar',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    const searchResult = await workspaceSearchPages('bar', registeredUseCases, coreStartMock);
 
     expect(searchResult).toHaveLength(0);
   });
 
   it('search return matched result', async () => {
-    const searchResult = await workspaceSearchPages(
-      'foo',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    const searchResult = await workspaceSearchPages('foo', registeredUseCases, coreStartMock);
 
     expect(searchResult).toHaveLength(2);
   });
 
   it('search return pages out of workspace', async () => {
-    let searchResult = await workspaceSearchPages(
-      'Settings',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    let searchResult = await workspaceSearchPages('Settings', registeredUseCases, coreStartMock);
 
     expect(searchResult).toHaveLength(2);
 
-    searchResult = await workspaceSearchPages(
-      'Administration',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    searchResult = await workspaceSearchPages('Administration', registeredUseCases, coreStartMock);
     expect(searchResult).toHaveLength(2);
   });
 
-  it('search click callback with non system link should navigate correctly', async () => {
-    const searchResult = await workspaceSearchPages(
-      'foo',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+  it('executes workspace page navigation', async () => {
+    const searchResult = await workspaceSearchPages('foo', registeredUseCases, coreStartMock);
 
-    (searchResult[0] as any).props?.onCallback({
-      navGroup: {
-        type: 'non-system',
-      },
-      href: 'test-link',
-      id: 'test',
-    });
+    searchResult[0].execute();
 
-    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('test');
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('foo-group-link1');
   });
 
-  it('search click callback with system link should use window assign correctly', async () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
+  it('executes system page navigation through the application service', async () => {
+    const searchResult = await workspaceSearchPages('Settings', registeredUseCases, coreStartMock);
 
-    const testUrl = 'http://localhost:5601/test';
-
-    const searchResult = await workspaceSearchPages(
-      'Settings',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
-
-    (searchResult[0] as any).props?.onCallback({
-      navGroup: {
-        type: 'system',
-      },
-      href: testUrl,
-      id: 'test',
-    });
+    searchResult[0].execute();
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignSpy).toHaveBeenCalledWith(testUrl);
-
-    assignSpy.mockRestore();
+    expect(coreStartMock.application.navigateToUrl).toHaveBeenCalledWith(
+      'http://localhost:5601/link1'
+    );
   });
 
-  it('search click callback with system link and basePath should use window assign correctly', async () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
-
+  it('removes workspace information from system page URLs while preserving the base path', async () => {
     const originalBasePath = coreStartMock.http.basePath;
     const basePath = '/foo';
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = basePath;
 
-    const testUrl = `http://localhost:5601${basePath}/app/test`;
+    const searchResult = await workspaceSearchPages('Settings', registeredUseCases, coreStartMock);
 
-    const searchResult = await workspaceSearchPages(
-      'Settings',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
-
-    (searchResult[0] as any).props?.onCallback({
-      navGroup: {
-        type: 'system',
-      },
-      href: testUrl,
-      id: 'test',
-    });
+    searchResult[0].execute();
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignSpy).toHaveBeenCalledWith(testUrl);
+    expect(coreStartMock.application.navigateToUrl).toHaveBeenCalledWith(
+      `http://localhost:5601${basePath}/link1`
+    );
 
-    assignSpy.mockRestore();
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = originalBasePath;
   });

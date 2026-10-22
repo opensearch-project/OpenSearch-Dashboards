@@ -108,6 +108,9 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
   name: 'State timeline',
   type: 'state_timeline',
   icon: 'visBarHorizontal',
+  metadata: {
+    description: 'Discrete status or value changes over time.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'state_timeline'>> = [
       {
@@ -128,7 +131,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -188,7 +192,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

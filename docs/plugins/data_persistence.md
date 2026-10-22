@@ -65,10 +65,7 @@ There are two types for data persistence:
             filter(
                 ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-                ...state,
-                filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
             ),
         },
         ],
