@@ -24,19 +24,21 @@ export const isImeComposing = (event: ReactKeyboardEvent | KeyboardEvent): boole
 };
 
 /**
- * Monaco handles composition itself and stops keyCode 229 keydowns on its own input, and its
- * keybindings must keep seeing every keydown.
+ * Monaco reads keyCode 229 keydowns on its own input to track the composition, then stops their
+ * propagation itself. It does not stop composing keydowns with any other keyCode, so those are
+ * guarded like everywhere else.
  */
-const PASSTHROUGH_SELECTOR = '.monaco-editor';
+const MONACO_SELECTOR = '.monaco-editor';
 
 /**
- * Stops Enter and Escape keydowns that belong to an IME composition before any other listener sees
- * them, so handlers never act on half-composed text. It only calls `stopPropagation`: the IME
- * still commits or cancels the text. `code` is checked as well as `key` because composing keydowns
- * report `key: "Process"` in Firefox and in Chrome on Windows.
+ * Stops Enter and Escape keydowns that belong to an IME composition at `window` in the capture
+ * phase, so document, React and element listeners never act on half-composed text. Other `window`
+ * capture listeners still see them. It only calls `stopPropagation`: the IME still commits or
+ * cancels the text. `code` is checked as well as `key` because composing keydowns report
+ * `key: "Process"` in Firefox and in Chrome on Windows.
  *
- * Handlers that act on other keys while composing (arrows, Tab, Space), or that listen in the
- * capture phase above an editor this guard lets through, still need {@link isImeComposing}.
+ * Only keydown is guarded. Handlers that act on other keys while composing (arrows, Tab, Space),
+ * or that listen in the capture phase above a Monaco editor, still need {@link isImeComposing}.
  *
  * @returns a function that removes the guard
  */
@@ -48,7 +50,8 @@ export const installImeCompositionGuard = (target: Window = window): (() => void
     );
     if (!isEnterOrEscape) return;
     const origin = event.composedPath()[0] ?? event.target;
-    if (origin instanceof Element && origin.closest(PASSTHROUGH_SELECTOR)) return;
+    if (event.keyCode === 229 && origin instanceof Element && origin.closest(MONACO_SELECTOR))
+      return;
     event.stopPropagation();
   };
   target.addEventListener('keydown', onKeyDown, { capture: true });
