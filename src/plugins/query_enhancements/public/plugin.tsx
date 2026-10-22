@@ -118,6 +118,7 @@ export class QueryEnhancementsPlugin implements Plugin<
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
             case OSD_FIELD_TYPES.DATE:
+              if (value == null) return value;
               return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
 
             default:
@@ -301,6 +302,7 @@ export class QueryEnhancementsPlugin implements Plugin<
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
             case OSD_FIELD_TYPES.DATE:
+              if (value == null) return value;
               return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // Date fields need special formatting in order for discover table formatter to render in the correct time zone
 
             default:
