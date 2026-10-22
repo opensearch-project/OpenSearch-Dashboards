@@ -51,7 +51,6 @@ import { Logos } from 'opensearch-dashboards/public';
 import { getServices } from '../opensearch_dashboards_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 import { SampleDataCard } from './sample_data';
-import { isImeComposing } from '../../../../../core/public/utils';
 
 interface Props {
   urlBasePath: string;
@@ -70,7 +69,7 @@ export class Welcome extends React.Component<Props> {
   private services = getServices();
 
   private hideOnEsc = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && !isImeComposing(e)) {
+    if (e.key === 'Escape') {
       this.props.onSkip();
     }
   };
