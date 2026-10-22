@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 .header__homeLoaderNavButton .euiHeaderSectionItemButton__content {
   // avoid layout shift on smallest breakpoint if logo and loading indicator are different sizes
   min-width: 24px;
