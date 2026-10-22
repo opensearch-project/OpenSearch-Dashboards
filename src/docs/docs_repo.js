@@ -32,14 +32,14 @@ import { resolve } from 'path';
 
 const opensearchDashboardsDir = resolve(__dirname, '..', '..');
 
-export function buildDocsScript(cmd) {
-  return resolve(process.cwd(), cmd.docrepo, 'build_docs');
+export function buildDocsScript(options) {
+  return resolve(process.cwd(), options.docrepo, 'build_docs');
 }
 
-export function buildDocsArgs(cmd) {
+export function buildDocsArgs(options) {
   const docsIndexFile = resolve(opensearchDashboardsDir, 'docs', 'index.asciidoc');
   let args = ['--doc', docsIndexFile, '--chunk=1'];
-  if (cmd.open) {
+  if (options.open) {
     args = [...args, '--open'];
   }
   return args;

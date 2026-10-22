@@ -24,7 +24,7 @@
     "prettier": "^3.5.3"
   },
   "dependencies": {
-    "commander": "^3.0.2",
+    "commander": "^14.0.3",
     "glob": "^7.1.7"
   }
 }

@@ -54,7 +54,7 @@ program
   .command('help <command>')
   .description('get the help for a specific command')
   .action(function (cmdName) {
-    const cmd = program.commands.find((c) => c._name === cmdName);
+    const cmd = program.commands.find((command) => command.name() === cmdName);
 
     if (!cmd) {
       return program.error(`unknown command ${cmdName}`);
@@ -63,9 +63,7 @@ program
     cmd.help();
   });
 
-program.command('*', null, { noHelp: true }).action(function (cmd) {
-  program.error(`unknown command ${cmd}`);
-});
+program.rejectUnknownCommands();
 
 // check for no command name
 const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
