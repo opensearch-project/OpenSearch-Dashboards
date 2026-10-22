@@ -1527,6 +1527,35 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           true
         );
       });
+
+      it('does not stream on the Metrics page', async () => {
+        const flavorModule = jest.requireMock('../../../../helpers/get_flavor_from_app_id');
+        flavorModule.getCurrentFlavor.mockResolvedValue(ExploreFlavor.Metrics);
+        const streamSpy = jest.spyOn(streamingQueryActions, 'executeStreamingQuery');
+        mockGetState.mockReturnValue(stateWithPplDataset());
+        const dispatch: jest.Mock = jest.fn((action: any) =>
+          typeof action === 'function' ? action(dispatch, mockGetState, undefined) : action
+        );
+
+        try {
+          await executeQueries({ services: streamingServices() })(
+            dispatch as any,
+            mockGetState,
+            undefined
+          );
+
+          expect(streamSpy).not.toHaveBeenCalled();
+          const dispatchedTypes = dispatch.mock.calls
+            .map(([action]: any[]) => action?.type)
+            .filter(Boolean);
+          expect(
+            dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))
+          ).toBe(true);
+        } finally {
+          streamSpy.mockRestore();
+          flavorModule.getCurrentFlavor.mockResolvedValue('logs');
+        }
+      });
     });
 
     // A streamed table run lasts as long as its query, so dependants start on its first rows.
@@ -1577,7 +1606,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         tableRows = 'some';
         streamSpy = jest
           .spyOn(streamingQueryActions, 'executeStreamingQuery')
-          .mockImplementation((args: any) => () => {
+          // A stand-in thunk, so it cannot satisfy the real AsyncThunkAction type.
+          .mockImplementation(((args: any) => () => {
             const done = new Promise((resolve) => (finishTable = () => resolve({})));
             if (!args.asHistogram && tableRows === 'some') {
               Promise.resolve().then(() => {
@@ -1586,7 +1616,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
               });
             }
             return Object.assign(done, { abort: jest.fn() });
-          });
+          }) as any);
         flavorModule.getCurrentFlavor.mockResolvedValue(ExploreFlavor.Traces);
       });
 

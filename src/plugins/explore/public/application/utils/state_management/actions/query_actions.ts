@@ -333,6 +333,9 @@ const getStreamingConfig = async (
     ) {
       return undefined;
     }
+    // The Metrics page shows only the Visualization tab, which charts a result as complete: a
+    // streamed table would go unread, or be charted part-way when the tab reads the same query.
+    if ((await getCurrentFlavor(services)) === ExploreFlavor.Metrics) return undefined;
 
     const timeFieldName = query.dataset?.timeFieldName;
     const timeRange = services.data.query.timefilter.timefilter.getTime();
