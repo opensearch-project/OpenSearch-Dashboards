@@ -76,6 +76,8 @@ export interface ExecuteStreamingQueryArgs {
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
+  /** Called once, when the first table rows are published. */
+  onFirstRows?: () => void;
 }
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -142,7 +144,16 @@ export const executeStreamingQuery = createAsyncThunk<
 >(
   'query/executeStreamingQuery',
   async (
-    { services, cacheKey, queryString, indexName, asHistogram, dataSourceId, isCurrent },
+    {
+      services,
+      cacheKey,
+      queryString,
+      indexName,
+      asHistogram,
+      dataSourceId,
+      isCurrent,
+      onFirstRows,
+    },
     { dispatch, signal }
   ) => {
     const stream = new PPLStreamService(services.http);
@@ -153,6 +164,7 @@ export const executeStreamingQuery = createAsyncThunk<
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;
+    let firstRowsReported = false;
 
     const publish = (snapshot: PPLStreamSnapshot, isPolling: boolean) => {
       if (isCurrent && !isCurrent()) return;
@@ -191,6 +203,10 @@ export const executeStreamingQuery = createAsyncThunk<
             }),
           })
         );
+        if (onFirstRows && !firstRowsReported && rows.heldRows.length > 0) {
+          firstRowsReported = true;
+          onFirstRows();
+        }
       }
 
       if (typeof snapshot.progress?.fraction_done === 'number') {
@@ -420,6 +436,8 @@ export const executeStreamingQuery = createAsyncThunk<
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
         let drainFailed = false;
         if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
+          // Show the window in hand while the rest is paged in, which can take several seconds.
+          publish(snapshot, true);
           // A failure paging the tail of an already-completed query must not discard the rows
           // already held; publish the terminal snapshot with what we have, marked incomplete. An
           // abort still propagates, to be handled as a cancellation below.

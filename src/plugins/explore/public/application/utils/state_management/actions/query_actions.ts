@@ -501,10 +501,16 @@ export const executeQueries = createAsyncThunk<
   }
 
   const tabPromises = [];
+  // The table's promise, which a streamed run settles only when its query finishes.
+  let tablePromises: Promise<unknown> = Promise.resolve();
   try {
     const promises = [];
     // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
     let streamedHistogram = false;
+    // A streamed table run lasts as long as the query, so dependants start on its first rows.
+    let streamingTable = false;
+    let reportFirstRows: () => void = () => undefined;
+    const firstRows = new Promise<void>((resolve) => (reportFirstRows = resolve));
     // Execute query without aggregations
     if (needsDataTableQuery) {
       // Streaming replaces the single-shot data-table fetch when enabled.
@@ -521,6 +527,7 @@ export const executeQueries = createAsyncThunk<
         // the thunk returns the promise.
         let abortTable: () => void = () => undefined;
         registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
+        streamingTable = true;
         const run = dispatch(
           executeStreamingQuery({
             services,
@@ -529,6 +536,7 @@ export const executeQueries = createAsyncThunk<
             indexName: query.dataset?.title,
             dataSourceId: query.dataset?.dataSource?.id,
             isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
+            onFirstRows: () => reportFirstRows(),
           })
         );
         abortTable = () => run.abort();
@@ -644,8 +652,11 @@ export const executeQueries = createAsyncThunk<
       }
     }
 
-    // Wait only for data table query to complete (not histogram)
-    await Promise.all(promises);
+    // Traces and tab queries may read the table's results (the RED queries are skipped for an empty
+    // table, the Patterns tab takes its default field from the first row), so they wait for it. A
+    // streamed table lasts as long as its query, so its first rows are enough.
+    tablePromises = Promise.all(promises);
+    await (streamingTable ? Promise.race([firstRows, tablePromises]) : tablePromises);
     if (runController.signal.aborted) {
       return;
     }
@@ -795,8 +806,8 @@ export const executeQueries = createAsyncThunk<
     }
   }
 
-  // Wait for all tab queries to complete
-  await Promise.all(tabPromises);
+  // Wait for all tab queries to complete, and for the table if it is still streaming
+  await Promise.all([...tabPromises, tablePromises]);
 });
 
 /**

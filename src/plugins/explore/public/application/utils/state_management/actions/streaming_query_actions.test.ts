@@ -688,6 +688,66 @@ describe('executeStreamingQuery', () => {
     await promise;
   });
 
+  describe('onFirstRows', () => {
+    const rowsSnap = (overrides: Record<string, unknown>) =>
+      snapshot({ datarows: [['2026-09-15 10:00:00', 1]], total: 1, size: 1, ...overrides });
+
+    it('fires once, when the first rows are published', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
+        .mockResolvedValue(rowsSnap({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows });
+
+      expect(onFirstRows).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fire for a run that returns no rows', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows });
+
+      expect(onFirstRows).not.toHaveBeenCalled();
+    });
+
+    // A job that finishes in the first poll still has its tail paged in afterwards, and that can
+    // take seconds the dependent queries should not wait out.
+    it('fires before the tail of a completed job is paged in', async () => {
+      let pollsWhenFired: number | undefined;
+      const onFirstRows = jest.fn(() => (pollsWhenFired = mockPoll.mock.calls.length));
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll
+        .mockResolvedValueOnce(
+          snapshot({
+            id: 'job-1',
+            status: 'SUCCEEDED',
+            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
+            total: 25,
+          })
+        )
+        .mockResolvedValue(exhausted(25));
+
+      await run({ onFirstRows });
+
+      expect(pollsWhenFired).toBe(1);
+      expect(mockPoll.mock.calls.length).toBeGreaterThan(1);
+    });
+
+    it('does not fire for a histogram job', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(rowsSnap({ status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows, asHistogram: { aggId: '2' } });
+
+      expect(onFirstRows).not.toHaveBeenCalled();
+    });
+  });
+
   describe('long polling', () => {
     it('waits on the server for a snapshot newer than the last one seen', async () => {
       mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 3 }));
