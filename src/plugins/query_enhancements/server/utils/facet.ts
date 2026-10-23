@@ -146,7 +146,7 @@ export class Facet {
       const clientId = dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
-        : this.defaultClient.asScoped(request).callAsCurrentUser;
+        : this.defaultClient.asScoped(request.rawRequest ?? request).callAsCurrentUser;
       const queryRes = await client(resolvedEndpoint, params);
       return {
         success: true,
@@ -176,7 +176,7 @@ export class Facet {
       const clientId = query.dataset?.dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
-        : this.defaultClient.asScoped(request).callAsCurrentUser;
+        : this.defaultClient.asScoped(request.rawRequest ?? request).callAsCurrentUser;
       const queryRes = await client(endpoint, params);
       return {
         success: true,

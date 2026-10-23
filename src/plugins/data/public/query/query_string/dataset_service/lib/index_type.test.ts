@@ -373,6 +373,27 @@ describe('indexTypeConfig', () => {
     });
   });
 
+  test('fetchFields preserves the searchable flag so filter buttons stay enabled', async () => {
+    const mockFields = [
+      { name: 'Carrier', type: 'string', aggregatable: true, searchable: true },
+      { name: 'notSearchable', type: 'string', aggregatable: true, searchable: false },
+    ];
+    const mockGetFieldsForWildcard = jest.fn().mockResolvedValue(mockFields);
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({
+      getFieldsForWildcard: mockGetFieldsForWildcard,
+    });
+
+    const mockDataset: Dataset = {
+      id: 'index1',
+      title: 'opensearch_dashboards_sample_data_flights',
+      type: 'INDEX',
+    };
+    const result = await indexTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0].searchable).toBe(true);
+    expect(result[1].searchable).toBe(false);
+  });
+
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = { id: 'index1', title: 'Index 1', type: 'INDEX' };
     expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['PPL', 'SQL']);
