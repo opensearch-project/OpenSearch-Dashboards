@@ -9,7 +9,7 @@
 
 "@ag-ui/client@1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@ag-ui/client/-/client-1.0.0.tgz#17fb17ec3ec596d0824f91ef1c358c4099f06baa"
+  resolved "https://registry.yarnpkg.com/@ag-ui/client/-/client-1.0.0.tgz#17fb17ec3ec596d0824f91ef1c358c4099f06baa"
   integrity sha512-Q24E4yuK35tz7ROOC0yWYltdOZK1K+5GmM2Syh/PReFE9e8lDcE8LoMoY5HZyxpQZ+0IizwpQm9LyVqAHP8mpw==
   dependencies:
     "@ag-ui/core" "1.0.0"
@@ -25,12 +25,12 @@
 
 "@ag-ui/core@1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@ag-ui/core/-/core-1.0.0.tgz#b2840ab883713e01ef7f0803f0cab06c2256a0ec"
+  resolved "https://registry.yarnpkg.com/@ag-ui/core/-/core-1.0.0.tgz#b2840ab883713e01ef7f0803f0cab06c2256a0ec"
   integrity sha512-yCRhsQvb4+lmGMrDsi4TOJxqKpm/kb3H64wwL+Z90jNVrkhy17RErfzsNgybfbjNKLM0nenEDYDVJsZHJJSigQ==
 
 "@ag-ui/encoder@1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@ag-ui/encoder/-/encoder-1.0.0.tgz#062913b4314bbf5292c83ef700a992ba22b2c5e4"
+  resolved "https://registry.yarnpkg.com/@ag-ui/encoder/-/encoder-1.0.0.tgz#062913b4314bbf5292c83ef700a992ba22b2c5e4"
   integrity sha512-8w+SHIjsatOcHHe5UBqdlqOiZaQWa3rMv1cUdNFXtHmfcIOLbMd1PG3SRWHD9AMUzApDl4964BV9xs3QPZogrw==
   dependencies:
     "@ag-ui/core" "1.0.0"
@@ -38,7 +38,7 @@
 
 "@ag-ui/proto@1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@ag-ui/proto/-/proto-1.0.0.tgz#6fd55556c05164fb6a5b036f67e2c89d297d3307"
+  resolved "https://registry.yarnpkg.com/@ag-ui/proto/-/proto-1.0.0.tgz#6fd55556c05164fb6a5b036f67e2c89d297d3307"
   integrity sha512-RXEdjD3RfZ/8fUEX+ZqN5SrZAxrOZ9oQt0FlEhN4Ie/YEOKDVv0u1g83fOhGxWJTTVAmYSM/xf+ijwixsmz2RA==
   dependencies:
     "@ag-ui/core" "1.0.0"
@@ -8437,7 +8437,7 @@ compare-versions@3.5.1:
 
 compare-versions@^6.1.1:
   version "6.1.1"
-  resolved "https://registry.npmjs.org/compare-versions/-/compare-versions-6.1.1.tgz#7af3cc1099ba37d244b3145a9af5201b629148a9"
+  resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-6.1.1.tgz#7af3cc1099ba37d244b3145a9af5201b629148a9"
   integrity sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==
 
 complex.js@^2.2.5:
@@ -16362,7 +16362,7 @@ postcss-scss@^4.0.2:
 
 postcss-selector-parser@^6.0.2, postcss-selector-parser@^6.0.4, postcss-selector-parser@^6.0.6, postcss-selector-parser@^6.0.9, postcss-selector-parser@^7.1.6:
   version "7.1.6"
-  resolved "https://registry.npmjs.org/postcss-selector-parser/-/postcss-selector-parser-7.1.6.tgz#45e970f2d93d4547d6754167ed1132f43012c4bf"
+  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-7.1.6.tgz#45e970f2d93d4547d6754167ed1132f43012c4bf"
   integrity sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==
   dependencies:
     cssesc "^3.0.0"
@@ -21352,20 +21352,10 @@ zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-validation-error/-/zod-validation-error-4.0.2.tgz#bc605eba49ce0fcd598c127fee1c236be3f22918"
   integrity sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==
 
-zod@^3.22.0, zod@^3.23.8, zod@^3.24.1, zod@^3.25.32, zod@^3.25.76:
-  version "3.25.76"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
-  integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
-
-"zod@^3.25 || ^4.0":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.2.1.tgz#07f0388c7edbfd5f5a2466181cb4adf5b5dbd57b"
-  integrity sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==
-
-"zod@^3.25.0 || ^4.0.0":
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
-  integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
+zod@4.6.7, zod@^3.23.8, zod@^3.24.1, "zod@^3.25 || ^4.0", "zod@^3.25.0 || ^4.0.0", zod@^3.25.32, zod@^3.25.76, zod@^4.6.7:
+  version "4.6.7"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.6.7.tgz#e806cf64a7f4e37635ce9f2f52c04c3766f75e5b"
+  integrity sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==
 
 zrender@6.1.0:
   version "6.1.0"
