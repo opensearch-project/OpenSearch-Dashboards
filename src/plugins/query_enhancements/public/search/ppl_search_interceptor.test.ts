@@ -460,6 +460,44 @@ describe('PPLSearchInterceptor', () => {
       );
     });
 
+    describe('requested fetchSize', () => {
+      const runSearchWith = async (strategy: string, fetchSize?: number) => {
+        jest.spyOn(pplSearchInterceptor as any, 'buildQuery').mockResolvedValue({
+          language: 'PPL',
+          query: 'source=test_index',
+          dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        });
+        mockFetch.mockReturnValue(of({ data: 'mock response' }) as any);
+        const request = {
+          ...mockRequest,
+          params: {
+            ...mockRequest.params,
+            body: { ...mockRequest.params?.body, ...(fetchSize && { fetchSize }) },
+          },
+        };
+
+        await (pplSearchInterceptor as any)
+          .runSearch(request, new AbortController().signal, strategy)
+          .toPromise();
+        return mockFetch.mock.calls[0][0];
+      };
+
+      it('forwards a requested fetchSize for the ppl strategy', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL, 1000);
+        expect(context.body?.fetchSize).toBe(1000);
+      });
+
+      it('does not forward fetchSize for the async ppl strategy', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL_ASYNC, 1000);
+        expect(context.body).not.toHaveProperty('fetchSize');
+      });
+
+      it('does not add fetchSize when the request has none', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL);
+        expect(context.body).not.toHaveProperty('fetchSize');
+      });
+    });
+
     it('should build query using buildQuery method', async () => {
       const buildQuerySpy = jest
         .spyOn(pplSearchInterceptor as any, 'buildQuery')

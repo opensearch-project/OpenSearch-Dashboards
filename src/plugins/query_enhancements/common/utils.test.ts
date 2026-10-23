@@ -336,4 +336,20 @@ describe('fetch', () => {
 
     expect(JSON.parse(context.http.fetch.mock.calls[0][0].body)).not.toHaveProperty('options');
   });
+
+  it('forwards fetchSize when the context has one', () => {
+    const context = createContext({ fetchSize: 1000 });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body).fetchSize).toBe(1000);
+  });
+
+  it('omits fetchSize when the context has none', () => {
+    const context = createContext({ timeRange: { from: 'now-1h', to: 'now' } });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body)).not.toHaveProperty('fetchSize');
+  });
 });
