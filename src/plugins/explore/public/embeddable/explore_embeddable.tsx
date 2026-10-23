@@ -164,10 +164,6 @@ export class ExploreEmbeddable
   };
   private node?: HTMLElement;
   private root?: Root;
-  // Keys the rendered component so it remounts only when a fetch delivers new rows:
-  // the Logs table copies its rows into state on mount, while the table vis keeps
-  // pagination and column filters in state that must survive other re-renders.
-  private fetchedDataVersion = 0;
 
   // Variable interpolation support
   private interpolationService: IVariableInterpolationService =
@@ -725,7 +721,6 @@ export class ExploreEmbeddable
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = transformedRows;
-    this.fetchedDataVersion++;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
@@ -778,9 +773,7 @@ export class ExploreEmbeddable
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    this.root.render(
-      <ExploreEmbeddableComponent key={this.fetchedDataVersion} searchProps={searchProps} />
-    );
+    this.root.render(<ExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {
