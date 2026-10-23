@@ -306,6 +306,23 @@ describe('indexPatternTypeConfig', () => {
     });
   });
 
+  test('fetchFields preserves the searchable flag', async () => {
+    const mockIndexPattern = {
+      fields: [
+        { name: 'Carrier', type: 'string', aggregatable: true, searchable: true },
+        { name: 'notSearchable', type: 'string', aggregatable: true, searchable: false },
+      ],
+    };
+    const mockGet = jest.fn().mockResolvedValue(mockIndexPattern);
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({ get: mockGet });
+
+    const mockDataset: Dataset = { id: 'test-pattern', title: 'Test', type: 'INDEX_PATTERN' };
+    const result = await indexPatternTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0].searchable).toBe(true);
+    expect(result[1].searchable).toBe(false);
+  });
+
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = {
       id: 'test-pattern',
