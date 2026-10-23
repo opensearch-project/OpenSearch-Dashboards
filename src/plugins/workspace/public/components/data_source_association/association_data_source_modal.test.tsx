@@ -8,6 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { DataSourceConnectionType } from '../../../common/types';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import * as utilsExports from '../../utils';
+import { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 
 import {
   AssociationDataSourceModal,
@@ -19,6 +20,8 @@ const setupAssociationDataSourceModal = ({
   mode,
   excludedConnectionIds,
   handleAssignDataSourceConnections,
+  workspaceFeatures,
+  associationFilters,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
   const coreServices = coreMock.createStart();
   jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
@@ -71,6 +74,8 @@ const setupAssociationDataSourceModal = ({
         closeModal={jest.fn()}
         excludedConnectionIds={excludedConnectionIds ?? []}
         handleAssignDataSourceConnections={handleAssignDataSourceConnections ?? jest.fn()}
+        workspaceFeatures={workspaceFeatures}
+        associationFilters={associationFilters}
       />
     </IntlProvider>
   );
@@ -264,6 +269,93 @@ describe('AssociationDataSourceModal', () => {
         type: 'AWS Security Lake',
       },
     ]);
+  });
+
+  it('hides connections that a registered association filter rejects for the workspace', async () => {
+    const isAssociable = jest.fn(
+      (candidate: any, context: any) =>
+        candidate.id !== 'dqs1' || context.useCaseId === 'observability'
+    );
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({ fields: ['owner'], isAssociable });
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-search', 'discover'],
+      associationFilters,
+    });
+    await waitFor(() => {
+      expect(isAssociable).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'dqs1', savedObjectType: 'data-connection' }),
+        { useCaseId: 'search', features: ['use-case-search', 'discover'] }
+      );
+    });
+    expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
+    // The fields the filters requested are loaded with the connections.
+    expect(utilsExports.getDataSourcesList).toHaveBeenCalledWith(expect.anything(), undefined, [
+      'owner',
+    ]);
+  });
+
+  it('offers a connection the filter allows for the use case', async () => {
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({
+      isAssociable: (candidate, context) =>
+        candidate.id !== 'dqs1' || context.useCaseId === 'observability',
+    });
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-observability'],
+      associationFilters,
+    });
+    expect(await screen.findByRole('option', { name: 'Data Connection 1' })).toBeInTheDocument();
+  });
+
+  it('does not filter direct query connections nested under a data source', async () => {
+    const isAssociable = jest.fn(() => false);
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({ isAssociable });
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-search'],
+      associationFilters,
+    });
+    await waitFor(() => {
+      expect(isAssociable).toHaveBeenCalled();
+    });
+    expect(isAssociable).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'ds1-dqc1' }),
+      expect.anything()
+    );
+  });
+
+  it('gives filters an unknown workspace context without workspace features', async () => {
+    const isAssociable = jest.fn(() => true);
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({ isAssociable });
+    setupAssociationDataSourceModal({ associationFilters });
+    await waitFor(() => {
+      expect(isAssociable).toHaveBeenCalledWith(expect.objectContaining({ id: 'ds2' }), {
+        useCaseId: undefined,
+        features: undefined,
+      });
+    });
+  });
+
+  it.each([
+    ['without association filters', undefined],
+    ['with an empty filter registry', new DataSourceAssociationFilters()],
+  ])('offers every connection %s', async (_name, associationFilters) => {
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      workspaceFeatures: ['use-case-search'],
+      associationFilters,
+    });
+    expect(await screen.findByRole('option', { name: 'Data Connection 1' })).toBeInTheDocument();
+    expect(utilsExports.getDataSourcesList).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      associationFilters ? [] : undefined
+    );
   });
 });
 

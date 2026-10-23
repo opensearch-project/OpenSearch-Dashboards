@@ -17,6 +17,7 @@ import {
   WorkspaceError,
 } from '../../../../core/public';
 import { WorkspaceClient } from '../workspace_client';
+import { DataSourceAssociationFilters } from './data_source_association_filters';
 
 /**
  * A service to validate workspace entering state by handle triggered workspace errors.
@@ -44,10 +45,18 @@ export class WorkspaceValidationService {
     });
   }
 
-  async setup(core: CoreSetup, workspaceId: string) {
+  async setup(
+    core: CoreSetup,
+    workspaceId: string,
+    dataSourceAssociationFilters?: DataSourceAssociationFilters
+  ) {
     this.workspaceId = workspaceId;
 
-    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    const workspaceClient = new WorkspaceClient(
+      core.http,
+      core.workspaces,
+      dataSourceAssociationFilters
+    );
     await workspaceClient.init();
     core.workspaces.setClient(workspaceClient);
     this.workspaceClient = workspaceClient;
