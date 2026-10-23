@@ -7,7 +7,8 @@ import { Query } from 'src/plugins/data/common';
 import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import { stringify } from '@osd/std';
-import { DEFAULT_DATA, getHighlightRequest } from '../../data/common';
+import moment from 'moment';
+import { DEFAULT_DATA, getHighlightRequest, OSD_FIELD_TYPES } from '../../data/common';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -21,6 +22,12 @@ export const getFields = (rawResponse: any) => {
     ...field,
     values: rawResponse.data.datarows?.map((row: any) => row[index]),
   }));
+};
+
+// Date fields need special formatting in order for discover table formatter to render in the correct time zone
+export const formatFieldValue = (value: string | null | undefined, type: OSD_FIELD_TYPES) => {
+  if (type !== OSD_FIELD_TYPES.DATE || value == null) return value;
+  return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 };
 
 export const removeKeyword = (queryString: string | undefined) => {
