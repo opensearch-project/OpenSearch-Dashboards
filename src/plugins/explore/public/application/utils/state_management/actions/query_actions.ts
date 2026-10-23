@@ -388,7 +388,11 @@ const getStreamingConfig = async (
 };
 
 /**
- * Enhanced executeQueries orchestrator - executes queries independently without blocking
+ * Enhanced executeQueries orchestrator - executes queries independently without blocking.
+ *
+ * A dataset type can require an explicit Run (DatasetTypeConfig meta.requiresExplicitRun): code
+ * that dispatches this on its own (not for a user's Run or time range update) must check
+ * `datasetRequiresExplicitRun` first, see `../../requires_explicit_run`.
  */
 export const executeQueries = createAsyncThunk<
   void,

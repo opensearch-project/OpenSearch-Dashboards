@@ -35,6 +35,7 @@ export {
   DatasetServiceContract,
   DatasetTypeConfig,
   DatasetIndexedViewsService,
+  datasetTypeRequiresExplicitRun,
 } from './dataset_service';
 export {
   LanguageServiceContract,
