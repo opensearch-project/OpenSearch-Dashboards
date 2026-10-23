@@ -28,8 +28,10 @@
  * under the License.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@osd/config-schema';
 import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
+import { FieldSpec, IndexPatternAttributes } from '../../common';
 import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
 
@@ -147,6 +149,67 @@ export function registerRoutes(http: HttpServiceSetup) {
         });
       } catch {
         return response.notFound();
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/index_patterns/{id}/_refresh_fields',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        query: schema.object({
+          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            defaultValue: [],
+          }),
+          data_source: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const callAsCurrentUser = await decideLegacyClient(context, request);
+      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { id } = request.params;
+
+      let parsedFields: string[] = [];
+      try {
+        parsedFields = parseMetaFields(request.query.meta_fields);
+      } catch {
+        return response.badRequest();
+      }
+
+      try {
+        const savedObject = await savedObjectsClient.get<IndexPatternAttributes>(
+          'index-pattern',
+          id
+        );
+        const savedFields: FieldSpec[] = JSON.parse(savedObject.attributes.fields || '[]');
+        const fields = [
+          ...(await indexPatterns.getFieldsForWildcard({
+            pattern: savedObject.attributes.title,
+            metaFields: parsedFields,
+          })),
+          ...savedFields.filter((field) => field.scripted),
+        ];
+        const { version } = await savedObjectsClient.update(
+          'index-pattern',
+          id,
+          { fields: JSON.stringify(fields) },
+          { version: savedObject.version }
+        );
+
+        return response.ok({ body: { fields, version } });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          return response.customError({
+            statusCode: error.output.statusCode,
+            body: { message: error.output.payload.message, attributes: error.output.payload },
+          });
+        }
+        throw error;
       }
     }
   );

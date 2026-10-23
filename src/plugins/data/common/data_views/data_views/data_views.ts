@@ -384,17 +384,35 @@ export class DataViewsService {
       const scripted = dataView.getScriptedFields().map((field) => field.spec);
       dataView.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id: dataView.id, title: dataView.title },
-        }),
-      });
+      this.onRefreshFieldsError(err, dataView);
     }
+  };
+
+  refreshFieldsAndSave = async (dataView: DataView) => {
+    try {
+      const { fields, version } = await this.apiClient.refreshFields(dataView.id as string, {
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+        dataSourceId: dataView.dataSourceRef?.id,
+      });
+      dataView.fields.replaceAll(fields);
+      dataView.version = version;
+      dataView.resetOriginalSavedObjectBody();
+    } catch (err) {
+      this.onRefreshFieldsError(err, dataView);
+    }
+  };
+
+  private onRefreshFieldsError = (err: Error, dataView: DataView) => {
+    if (err instanceof DataViewMissingIndices) {
+      this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+    }
+
+    this.onError(err, {
+      title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+        defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+        values: { id: dataView.id, title: dataView.title },
+      }),
+    });
   };
 
   /**
@@ -639,10 +657,13 @@ export class DataViewsService {
     skipFetchFields = false,
     reuseExisting = false
   ) {
-    const dataView = await this.create(spec, skipFetchFields);
+    const dataView = await this.create(spec, true);
     // createSavedObject returns the existing view when reuseExisting hits a duplicate.
     const savedDataView =
       (await this.createSavedObject(dataView, override, reuseExisting)) ?? dataView;
+    if (!skipFetchFields && savedDataView === dataView) {
+      await this.refreshFieldsAndSave(dataView);
+    }
     await this.setDefault(savedDataView.id as string);
     return savedDataView;
   }
