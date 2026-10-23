@@ -58,6 +58,9 @@ import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
 import { VisType, TypesStart } from '../../vis_types';
+import { Storage } from '../../../../opensearch_dashboards_utils/public';
+
+const CLASSIC_VIS_TYPES_OPEN_KEY = 'visualizations:classicTypesOpen';
 
 interface VisTypeListEntry {
   type: VisType | VisTypeAlias;
@@ -98,9 +101,11 @@ function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
 }
 
 class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionState> {
+  private readonly storage = new Storage(localStorage);
+
   public state: TypeSelectionState = {
     highlightedType: null,
-    isLegacyOpen: false,
+    isLegacyOpen: this.storage.get(CLASSIC_VIS_TYPES_OPEN_KEY) === true,
     query: '',
   };
 
@@ -208,7 +213,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   <EuiText size="s" color="subdued">
                     <FormattedMessage
                       id="visualizations.newVisWizard.legacyTypesDescription"
-                      defaultMessage="Use the classic editor for existing workflows and specialized chart types."
+                      defaultMessage="Maps, markdown, controls, TSVB, Vega, and other specialized types that aren’t in the visualization editor yet."
                     />
                   </EuiText>
                 </EuiFlexItem>
@@ -264,7 +269,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     defaultMessage: 'Filter classic visualization types',
                   }),
                   i18n.translate('visualizations.newVisWizard.selectLegacyVisType', {
-                    defaultMessage: 'Select a legacy visualization type',
+                    defaultMessage: 'Select a classic visualization type',
                   }),
                   'tooltip'
                 )}
@@ -378,26 +383,46 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
-              <EuiScreenReaderOnly>
-                <span aria-live="polite">
-                  {query && (
-                    <FormattedMessage
-                      id="visualizations.newVisWizard.resultsFound"
-                      defaultMessage="{resultCount} {resultCount, plural,
-                        one {type}
-                        other {types}
-                      } found"
-                      values={{
-                        resultCount: visTypes.filter((type) => type.highlighted).length,
-                      }}
-                    />
-                  )}
-                </span>
-              </EuiScreenReaderOnly>
+              {showDescriptionPanel && (
+                <EuiScreenReaderOnly>
+                  <span aria-live="polite">
+                    {query && (
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.resultsFound"
+                        defaultMessage="{resultCount} {resultCount, plural,
+                          one {type}
+                          other {types}
+                        } found"
+                        values={{
+                          resultCount: visTypes.filter((type) => type.highlighted).length,
+                        }}
+                      />
+                    )}
+                  </span>
+                </EuiScreenReaderOnly>
+              )}
               <EuiKeyPadMenu className="visNewVisDialog__types" data-test-subj="visNewDialogTypes">
                 {visTypes.map((visType) => this.renderVisType(visType, descriptionMode))}
               </EuiKeyPadMenu>
             </EuiFlexItem>
+            {!showDescriptionPanel && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p role="status">
+                    {query && (
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.typesMatch"
+                        defaultMessage="{matchCount} of {typeCount} {typeCount, plural, one {type matches} other {types match}}"
+                        values={{
+                          matchCount: visTypes.filter((type) => type.highlighted).length,
+                          typeCount: visTypes.length,
+                        }}
+                      />
+                    )}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         {showDescriptionPanel && (
@@ -459,7 +484,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     query: string
   ): VisTypeListEntry[] {
     const q = query.toLowerCase();
-    const entries = visTypes.map((type) => {
+    return visTypes.map((type) => {
       const matchesQuery =
         type.name.toLowerCase().includes(q) ||
         type.title.toLowerCase().includes(q) ||
@@ -470,8 +495,6 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         highlighted: query !== '' && matchesQuery,
       };
     });
-
-    return orderBy(entries, ['highlighted', 'type.title'], ['desc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry, descriptionMode: DescriptionMode) => {
@@ -579,6 +602,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       highlightedType: null,
       isLegacyOpen,
     });
+    this.storage.set(CLASSIC_VIS_TYPES_OPEN_KEY, isLegacyOpen);
   };
 
   private onQueryChange = (ev: ChangeEvent<HTMLInputElement>) => {

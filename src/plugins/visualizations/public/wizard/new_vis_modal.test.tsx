@@ -136,6 +136,8 @@ describe('NewVisModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    settingsGet.mockReturnValue(false);
   });
 
   it('should render as expected', () => {
@@ -177,7 +179,7 @@ describe('NewVisModal', () => {
     expect(wrapper.find('#visTypeDescription-vis').exists()).toBe(true);
   });
 
-  it('should show the recommended editor before workflows and legacy types', () => {
+  it('should show the recommended editor before workflows and classic types', () => {
     const wrapper = mountWithIntl(
       // @ts-expect-error TS2741 TODO(ts-error): fixme
       <NewVisModal
@@ -251,6 +253,46 @@ describe('NewVisModal', () => {
     ).toBeUndefined();
     expect(wrapper.find('[data-test-subj="visType-visBuilder"]').exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="visType-discoverWorkflow"]').exists()).toBe(false);
+  });
+
+  it('remembers the classic types expansion choice when the dialog is reopened', () => {
+    const openDialog = () =>
+      mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={recommendedVisTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+          application={{} as ApplicationStart}
+          savedObjects={{} as SavedObjectsStart}
+        />
+      );
+    let wrapper = openDialog();
+
+    wrapper.find('button[aria-controls="legacyVisualizationTypes"]').simulate('click');
+    wrapper.find('input[data-test-subj="filterVisType"]').simulate('change', {
+      target: { value: 'with' },
+    });
+    wrapper.unmount();
+    wrapper = openDialog();
+
+    expect(wrapper.find('[data-test-subj="legacyVisTypesContent"]').exists()).toBe(true);
+    expect(wrapper.find('input[data-test-subj="filterVisType"]').prop('value')).toBe('');
+    expect(
+      wrapper.find('button[aria-controls="legacyVisualizationTypes"]').prop('aria-expanded')
+    ).toBe(true);
+
+    wrapper.find('button[aria-controls="legacyVisualizationTypes"]').simulate('click');
+    wrapper.unmount();
+    wrapper = openDialog();
+
+    expect(wrapper.find('[data-test-subj="legacyVisTypesContent"]').exists()).toBe(false);
+    expect(
+      wrapper.find('button[aria-controls="legacyVisualizationTypes"]').prop('aria-expanded')
+    ).toBe(false);
+    wrapper.unmount();
   });
 
   it('should keep the flat selector when no recommended editor is available', () => {
@@ -393,7 +435,7 @@ describe('NewVisModal', () => {
   });
 
   describe('filter for visualization types', () => {
-    it('should render as expected', () => {
+    it('keeps the flat grid order while disabling non-matching types', () => {
       const wrapper = mountWithIntl(
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
@@ -406,9 +448,78 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
+      const typeOrder = () =>
+        wrapper
+          .find('button[data-test-subj^="visType-"]')
+          .map((button) => button.prop('data-test-subj'));
+      const initialOrder = typeOrder();
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
-      expect(wrapper).toMatchSnapshot();
+
+      expect(typeOrder()).toEqual(initialOrder);
+      expect(wrapper.find('button[data-test-subj="visType-vis"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('button[data-test-subj="visType-visWithSearch"]').prop('disabled')).toBe(
+        false
+      );
+      expect(
+        wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]').prop('disabled')
+      ).toBe(false);
+      wrapper.unmount();
+    });
+
+    it('keeps classic types in place and reports matches as the filter changes', () => {
+      const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={recommendedVisTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+          application={{} as ApplicationStart}
+          savedObjects={{} as SavedObjectsStart}
+        />
+      );
+      wrapper.find('button[aria-controls="legacyVisualizationTypes"]').simulate('click');
+
+      const typeOrder = () =>
+        wrapper
+          .find('button[data-test-subj^="visType-"]')
+          .map((button) => button.prop('data-test-subj'));
+      const initialOrder = typeOrder();
+      const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
+      searchBox.simulate('change', { target: { value: 'WITH' } });
+
+      expect(typeOrder()).toEqual(initialOrder);
+      expect(wrapper.find('button[data-test-subj="visType-vis"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('button[data-test-subj="visType-visWithSearch"]').prop('disabled')).toBe(
+        false
+      );
+      expect(wrapper.find('button[data-test-subj="visType-visBuilder"]').prop('disabled')).toBe(
+        false
+      );
+      expect(wrapper.find('[role="status"]').text()).toBe('2 of 3 types match');
+
+      searchBox.simulate('change', { target: { value: 'no matching type' } });
+
+      expect(typeOrder()).toEqual(initialOrder);
+      expect(
+        wrapper.find('button[data-test-subj^="visType-"]').everyWhere((button) => {
+          return button.prop('disabled') === true;
+        })
+      ).toBe(true);
+      expect(wrapper.find('[role="status"]').text()).toBe('0 of 3 types match');
+
+      searchBox.simulate('change', { target: { value: '' } });
+
+      expect(typeOrder()).toEqual(initialOrder);
+      expect(
+        wrapper.find('button[data-test-subj^="visType-"]').everyWhere((button) => {
+          return button.prop('disabled') === false;
+        })
+      ).toBe(true);
+      expect(wrapper.find('[role="status"]').text()).toBe('');
+      wrapper.unmount();
     });
   });
 
