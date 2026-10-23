@@ -99,14 +99,18 @@ describe('useInitializeMetricsDataset', () => {
     services: ExploreServices,
     dataset?: any,
     savedExplore?: any,
-    language: string = 'PROMQL'
+    language: string = 'PROMQL',
+    savedExploreId?: string
   ) => {
     const store = createMockStore(dataset, language);
     jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
 
-    return renderHook(() => useInitializeMetricsDataset({ services, savedExplore }), {
-      wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
-    });
+    return renderHook(
+      () => useInitializeMetricsDataset({ services, savedExplore, savedExploreId }),
+      {
+        wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
+      }
+    );
   };
 
   describe('when savedExplore is provided', () => {
@@ -115,13 +119,346 @@ describe('useInitializeMetricsDataset', () => {
       const savedExplore = { id: 'saved-explore-id' };
 
       await act(async () => {
-        renderHookWithProvider(mockServices, undefined, savedExplore);
+        renderHookWithProvider(mockServices, undefined, savedExplore, 'PROMQL', 'saved-explore-id');
         await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       expect(mockGetType).not.toHaveBeenCalled();
       expect(mockFetch).not.toHaveBeenCalled();
       expect(mockDispatch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when a saved explore is still loading (cold load of #/view/<id>)', () => {
+    it('leaves the query alone so the saved language and dataset are restored', async () => {
+      const mockServices = createMockServices();
+
+      await act(async () => {
+        // No dataset yet and a non-default language, as on a cold load before the saved object
+        // arrives; the saved object (not this default) must supply the dataset and language.
+        renderHookWithProvider(mockServices, undefined, undefined, 'External QL', 'saved-id');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+      expect(mockGetType).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    const renderLoading = (services: ExploreServices) => {
+      const store = createMockStore(undefined, 'External QL');
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+      return renderHook(
+        (props: { savedExplore?: any; savedExploreError?: string | null }) =>
+          useInitializeMetricsDataset({ services, savedExploreId: 'saved-id', ...props }),
+        {
+          initialProps: {},
+          wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
+        }
+      );
+    };
+
+    it('applies the default once if the saved explore fails to load', async () => {
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      let hook: ReturnType<typeof renderLoading>;
+      await act(async () => {
+        hook = renderLoading(mockServices);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+
+      await act(async () => {
+        hook!.rerender({ savedExploreError: 'Failed to load saved explore: Not found' });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(1);
+      expect(mockSetQueryWithHistory).toHaveBeenCalledWith(
+        expect.objectContaining({ dataset: undefined, language: 'PROMQL' })
+      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        hook!.rerender({ savedExploreError: 'Failed to load saved explore: Not found again' });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does nothing once the saved explore has loaded', async () => {
+      const mockServices = createMockServices();
+
+      let hook: ReturnType<typeof renderLoading>;
+      await act(async () => {
+        hook = renderLoading(mockServices);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      await act(async () => {
+        hook!.rerender({ savedExplore: { id: 'saved-id' } });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('initializes again when the mounted page moves to another saved explore that fails', async () => {
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+      const store = createMockStore(undefined, 'External QL');
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+
+      let hook: any;
+      await act(async () => {
+        hook = renderHook(
+          (props: { savedExploreId?: string; savedExplore?: any; savedExploreError?: string }) =>
+            useInitializeMetricsDataset({ services: mockServices, ...props }),
+          {
+            initialProps: { savedExploreId: 'first', savedExplore: { id: 'first' } },
+            wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
+          }
+        );
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      // The first saved explore loaded: it supplies its own dataset.
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+
+      // The URL moves to a second saved explore; the first one is still the loaded object.
+      await act(async () => {
+        hook.rerender({ savedExploreId: 'second', savedExplore: { id: 'first' } });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+
+      // The second one fails to load: the default applies for it.
+      await act(async () => {
+        hook.rerender({
+          savedExploreId: 'second',
+          savedExplore: { id: 'first' },
+          savedExploreError: 'Failed to load saved explore: Not found',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(1);
+      expect(mockSetQueryWithHistory).toHaveBeenCalledWith(
+        expect.objectContaining({ dataset: undefined, language: 'PROMQL' })
+      );
+    });
+
+    it('does nothing when the mounted page moves to another saved explore that loads', async () => {
+      const mockServices = createMockServices();
+      const store = createMockStore(undefined, 'External QL');
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+
+      let hook: any;
+      await act(async () => {
+        hook = renderHook(
+          (props: { savedExploreId?: string; savedExplore?: any }) =>
+            useInitializeMetricsDataset({ services: mockServices, ...props }),
+          {
+            initialProps: { savedExploreId: 'first', savedExplore: { id: 'first' } },
+            wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
+          }
+        );
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      await act(async () => {
+        hook.rerender({ savedExploreId: 'second', savedExplore: { id: 'second' } });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    const renderSwitching = (services: ExploreServices, initialProps: Record<string, any>) => {
+      const store = createMockStore(undefined, 'External QL');
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+      return renderHook(
+        (props: { savedExploreId?: string; savedExplore?: any; savedExploreError?: string }) =>
+          useInitializeMetricsDataset({ services, ...props }),
+        {
+          initialProps,
+          wrapper: ({ children }) => <Provider store={store as any}>{children}</Provider>,
+        }
+      );
+    };
+
+    it('drops an in-flight default once a saved explore for the next id has loaded', async () => {
+      const mockServices = createMockServices();
+      let resolveFetch: (value: any) => void = () => {};
+      mockFetch.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+      mockToDataset.mockReturnValue({ id: 'prometheus-connection', type: 'PROMETHEUS' });
+
+      let hook: any;
+      await act(async () => {
+        // A fails to load, so its default starts fetching.
+        hook = renderSwitching(mockServices, {
+          savedExploreId: 'a',
+          savedExploreError: 'Failed to load saved explore: A',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      mockSetQueryWithHistory.mockClear();
+
+      // The page moves to B, which loads before A's fetch resolves.
+      await act(async () => {
+        hook.rerender({ savedExploreId: 'b', savedExplore: { id: 'b' } });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      await act(async () => {
+        resolveFetch({ children: [{ id: 'connection' }] });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+      expect(mockGetInitialQueryByDataset).not.toHaveBeenCalled();
+    });
+
+    it("does not apply the previous saved explore's error to the next id", async () => {
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      let hook: any;
+      await act(async () => {
+        hook = renderSwitching(mockServices, {
+          savedExploreId: 'a',
+          savedExploreError: 'Failed to load saved explore: Not found',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(1);
+      mockSetQueryWithHistory.mockClear();
+
+      // First render for B still carries A's error; then B loads.
+      await act(async () => {
+        hook.rerender({
+          savedExploreId: 'b',
+          savedExploreError: 'Failed to load saved explore: Not found',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      await act(async () => {
+        hook.rerender({ savedExploreId: 'b', savedExplore: { id: 'b' } });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+    });
+
+    it('leaves a move from a saved explore to a new search to the reset', async () => {
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      let hook: any;
+      await act(async () => {
+        hook = renderSwitching(mockServices, { savedExploreId: 'a', savedExplore: { id: 'a' } });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+
+      // "New": no id in the URL, A is still the loaded object, and the reset sets the query.
+      await act(async () => {
+        hook.rerender({ savedExploreId: undefined, savedExplore: { id: 'a' } });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+
+      // A later saved explore initializes as usual.
+      await act(async () => {
+        hook.rerender({ savedExploreId: 'b', savedExploreError: 'Failed to load: B' });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockSetQueryWithHistory).toHaveBeenCalledWith(
+        expect.objectContaining({ dataset: undefined, language: 'PROMQL' })
+      );
+    });
+
+    it('drops an in-flight default for a saved explore on a move to a new search', async () => {
+      const mockServices = createMockServices();
+      let resolveFetch: (value: any) => void = () => {};
+      mockFetch.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+      mockToDataset.mockReturnValue({ id: 'prometheus-connection', type: 'PROMETHEUS' });
+
+      let hook: any;
+      await act(async () => {
+        // A fails to load, so its default starts fetching.
+        hook = renderSwitching(mockServices, {
+          savedExploreId: 'a',
+          savedExploreError: 'Failed to load saved explore: A',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        hook.rerender({ savedExploreId: undefined });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      await act(async () => {
+        resolveFetch({ children: [{ id: 'connection' }] });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockGetInitialQueryByDataset).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('applies the default on a new search when its empty saved explore resolves during the fetch', async () => {
+      const mockServices = createMockServices();
+      let resolveFetch: (value: any) => void = () => {};
+      mockFetch.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+      mockToDataset.mockReturnValue({ id: 'prometheus-connection', type: 'PROMETHEUS' });
+
+      let hook: any;
+      await act(async () => {
+        hook = renderSwitching(mockServices, {});
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      // A new search resolves to a new, empty saved explore (no id) while the fetch is pending.
+      await act(async () => {
+        hook.rerender({ savedExplore: { id: undefined } });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      await act(async () => {
+        resolveFetch({ children: [{ id: 'connection' }] });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(mockGetInitialQueryByDataset).toHaveBeenCalled();
+      expect(mockSetQueryWithHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ dataset: { id: 'prometheus-connection', type: 'PROMETHEUS' } })
+      );
+    });
+
+    it('still applies the default when no saved explore is in the URL', async () => {
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      await act(async () => {
+        renderHookWithProvider(mockServices, undefined, undefined, 'External QL');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
+      expect(mockSetQueryWithHistory).toHaveBeenCalledWith(
+        expect.objectContaining({ dataset: undefined, language: 'PROMQL' })
+      );
     });
   });
 

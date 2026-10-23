@@ -303,16 +303,22 @@ export const queryExecution = async ({
     }
 
     let parsedError;
+    let detailsFallback = 'Unknown Error';
     try {
       parsedError = JSON.parse(error.body.message);
     } catch (parseError) {
+      const reason = error.body?.message || error.message || 'Unknown Error';
+      const details = error.body?.error || error.message;
       parsedError = {
         error: {
-          reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          reason,
+          // The reason is the title and the details are shown under it: an error that carries a
+          // single message (e.g. a search strategy start failure) shows it once.
+          details: details && details !== reason ? details : '',
           type: error.name,
         },
       };
+      detailsFallback = '';
     }
 
     updateEditorStateFn({
@@ -323,7 +329,7 @@ export const queryExecution = async ({
         error: {
           error: error.body?.error || 'Unknown Error',
           message: {
-            details: parsedError?.error?.details || 'Unknown Error',
+            details: parsedError?.error?.details || detailsFallback,
             reason: parsedError?.error?.reason || 'Unknown Error',
             type: parsedError?.error?.type,
           },
