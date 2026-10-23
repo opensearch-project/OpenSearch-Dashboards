@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { VisualizationRender, CommonVisualizationRender } from './visualization_render';
@@ -174,6 +174,43 @@ describe('VisualizationRender', () => {
     );
 
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
+  });
+
+  describe('table data link variables', () => {
+    const lastTableVisVariables = () => {
+      const { TableVis } = jest.requireMock('./table/table_vis');
+      const calls = (TableVis as jest.Mock).mock.calls;
+      return calls[calls.length - 1][0].variables;
+    };
+
+    it('passes the latest dashboard variables to the table visualization', () => {
+      const variables$ = new BehaviorSubject([{ name: 'env', value: 'prod' }]);
+      render(
+        <VisualizationRender
+          data$={new BehaviorSubject<VisData | undefined>(mockVisData)}
+          config$={new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig)}
+          showRawTable$={new BehaviorSubject<boolean>(false)}
+          variables$={variables$}
+        />
+      );
+
+      const next = [{ name: 'env', value: 'stage' }];
+      act(() => variables$.next(next));
+
+      expect(lastTableVisVariables()).toBe(next);
+    });
+
+    it('passes no variables without a variables$ stream', () => {
+      render(
+        <VisualizationRender
+          data$={new BehaviorSubject<VisData | undefined>(mockVisData)}
+          config$={new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig)}
+          showRawTable$={new BehaviorSubject<boolean>(false)}
+        />
+      );
+
+      expect(lastTableVisVariables()).toEqual([]);
+    });
   });
 
   it('renders EchartsRender when there is a selection mapping', () => {

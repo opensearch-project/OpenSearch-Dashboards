@@ -177,9 +177,13 @@ export const DataLinkModal: React.FC<DataLinkModalProps> = ({
             defaultMessage: 'URL',
           })}
           helpText={i18n.translate('explore.stylePanel.table.dataLinks.urlHelpText', {
-            defaultMessage: 'Use {cellValue} to include the cell value in the URL',
+            defaultMessage:
+              'Placeholders: {cellValue} (clicked value), {rowField} (same-row field), {variable} (dashboard variable). Add {risonSuffix} for a value inside dashboard URL state.',
             values: {
               cellValue: '${__value.text}',
+              rowField: '${__data.fields.name}',
+              variable: '$variable',
+              risonSuffix: ':rison',
             },
           })}
         >

@@ -119,6 +119,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
           columns={searchProps.tableData?.columns ?? []}
           rows={searchProps.tableData?.rows ?? []}
           styleOptions={searchProps.styleOptions as TableChartStyle}
+          variables={searchProps.variables}
           disableActions={true}
         />
       );

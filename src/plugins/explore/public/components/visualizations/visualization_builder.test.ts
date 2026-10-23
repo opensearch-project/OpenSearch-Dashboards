@@ -805,3 +805,36 @@ describe('showRawTable$', () => {
     expect(builder.showRawTable$.value).toBe(true);
   });
 });
+
+describe('variables$', () => {
+  test('is passed to the render', () => {
+    const builder = new VisualizationBuilder({});
+    expect(builder.renderVisualization({}).props.variables$).toBe(builder.variables$);
+  });
+
+  test('emits only when the variables change', () => {
+    const builder = new VisualizationBuilder({});
+    const emitted: unknown[] = [];
+    const subscription = builder.variables$.subscribe((variables) => emitted.push(variables));
+
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
+    builder.setVariables([{ name: 'env', value: 'stage' }]);
+
+    expect(emitted).toEqual([
+      [],
+      [{ name: 'env', value: 'prod' }],
+      [{ name: 'env', value: 'stage' }],
+    ]);
+    subscription.unsubscribe();
+  });
+
+  test('is cleared by reset', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVariables([{ name: 'env', value: 'prod' }]);
+
+    builder.reset();
+
+    expect(builder.variables$.value).toEqual([]);
+  });
+});
