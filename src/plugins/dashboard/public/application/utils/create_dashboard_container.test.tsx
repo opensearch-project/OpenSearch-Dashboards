@@ -11,7 +11,23 @@ import { Variable, VariableType } from '../../variables/types';
 const query = { query: '', language: 'kuery' };
 
 const makeVariables = (current?: string[]): Variable[] => [
+  {
+    id: 'env',
+    name: 'env',
+    type: VariableType.Query,
+    current,
+    sourceKind: 'queryResult',
+    query: 'source=logs | dedup env | fields env',
+    language: 'PPL',
+  },
+];
+
+const makeCustomVariables = (current?: string[]): Variable[] => [
   { id: 'env', name: 'env', type: VariableType.Custom, current, customOptions: ['dev', 'prod'] },
+];
+
+const makeTextVariables = (current?: string[]): Variable[] => [
+  { id: 'keyword', name: 'keyword', type: VariableType.Text, current },
 ];
 
 const setup = (appStateVariables: Variable[], inputVariables: Variable[]) => {
@@ -80,6 +96,25 @@ describe('handleDashboardContainerInputs variables', () => {
     expect(appState.transitions.setDashboard).toHaveBeenCalledWith({
       variables: makeVariables(['prod']),
     });
+    expect(dashboardContainer.updateAppStateUrl).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['text', makeTextVariables],
+    ['custom', makeCustomVariables],
+  ])(
+    'does not replace the URL history entry for the first selection of an empty %s variable',
+    (_type, make) => {
+      const { dashboardContainer, appState } = setup(make(undefined), make(['dev']));
+
+      expect(appState.transitions.setDashboard).toHaveBeenCalledWith({ variables: make(['dev']) });
+      expect(dashboardContainer.updateAppStateUrl).not.toHaveBeenCalled();
+    }
+  );
+
+  test('does not replace the URL history entry when all variables were removed', () => {
+    const { dashboardContainer } = setup(makeVariables(['dev']), []);
+
     expect(dashboardContainer.updateAppStateUrl).not.toHaveBeenCalled();
   });
 });

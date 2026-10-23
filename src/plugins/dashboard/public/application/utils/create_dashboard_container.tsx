@@ -52,6 +52,7 @@ import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { normalizeDashboardQuery } from '../utils/migrate_legacy_query';
 import { Dashboard } from '../../dashboard';
+import { VariableType } from '../../variables/types';
 
 export const createDashboardContainer = async ({
   services,
@@ -519,10 +520,17 @@ const handleDashboardContainerChanges = (
     newAppState.variables = input.variables;
     dashboard.setIsDirty(true);
     // Defaulting a variable that has no selection is not a navigation step of its own.
-    onlyFilledEmptyVariables = (input.variables ?? []).every((variable) => {
+    // Only query variables are defaulted automatically; any other change is a user selection.
+    const changed = (input.variables ?? []).flatMap((variable) => {
       const previous = appStateData.variables?.find((v) => v.id === variable.id)?.current;
-      return isEqual(variable.current, previous) || !previous || previous.length === 0;
+      return isEqual(variable.current, previous) ? [] : [{ variable, previous }];
     });
+    onlyFilledEmptyVariables =
+      changed.length > 0 &&
+      changed.every(
+        ({ variable, previous }) =>
+          variable.type === VariableType.Query && (!previous || previous.length === 0)
+      );
   }
   if (!isEqual(input.layout, appStateData.layout)) {
     newAppState.layout = input.layout;

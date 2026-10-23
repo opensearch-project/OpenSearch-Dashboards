@@ -907,6 +907,49 @@ describe('VariableService', () => {
 
       expect(getCurrentValues(service)).toEqual({ region: ['eu'], service: ['svc-for-eu'] });
     });
+
+    it('should refresh dependents with the fallback value when another refresh aborts the cleared one', async () => {
+      let regionQueries = 0;
+      mockExecuteVariableQuery.mockImplementation(async (_data: unknown, { query }: any) => {
+        if (!query.includes('dedup region')) {
+          return makeQueryResult([`svc-for-${query.match(/region = '([^']*)'/)?.[1] ?? '?'}`]);
+        }
+        regionQueries++;
+        if (regionQueries > 1) {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+        return makeQueryResult(['eu', 'us'], 'region');
+      });
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        current: ['us'],
+        useTimeFilter: true,
+        query: 'source=logs | dedup region | fields region',
+      });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        current: ['svc-for-us'],
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+      mockExecuteVariableQuery.mockClear();
+
+      service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+      service.refreshTimeFilteredVariableOptions();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(service.getVariables()[0].current).toEqual(['eu']);
+      const serviceQueries = mockExecuteVariableQuery.mock.calls
+        .map(([, { query }]) => query as string)
+        .filter((query) => query.includes('dedup service'));
+      expect(serviceQueries).toEqual([expect.stringContaining("region = 'eu'")]);
+      expect(getOptionValues(service.getVariablesWithState()[1].options)).toEqual(['svc-for-eu']);
+    });
   });
 
   describe('reorderVariables', () => {

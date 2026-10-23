@@ -63,6 +63,7 @@ export class VariableService {
   private savedObjectsClient?: SavedObjectsClientContract;
   private variables$ = new BehaviorSubject<Variable[]>([]);
   private refreshControllers: Map<string, AbortController> = new Map();
+  private refreshRequests: Map<string, Promise<void>> = new Map();
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
@@ -438,11 +439,32 @@ export class VariableService {
   private async refreshClearedVariables(cleared: Variable[]): Promise<void> {
     for (const variable of cleared) {
       await this.refreshVariableOptions(variable.id);
+      // Another refresh (time range change, reload) may have aborted this one before the
+      // fallback was chosen; wait for it so dependents see the parent's final value.
+      await this.waitForPendingRefresh(variable.id);
       this.refreshDependentVariables(variable.name);
     }
   }
 
-  public async refreshVariableOptions(id: string): Promise<void> {
+  private async waitForPendingRefresh(id: string): Promise<void> {
+    let pending = this.refreshRequests.get(id);
+    while (pending) {
+      await pending;
+      pending = this.refreshRequests.get(id);
+    }
+  }
+
+  public refreshVariableOptions(id: string): Promise<void> {
+    const request: Promise<void> = this.loadVariableOptions(id).finally(() => {
+      if (this.refreshRequests.get(id) === request) {
+        this.refreshRequests.delete(id);
+      }
+    });
+    this.refreshRequests.set(id, request);
+    return request;
+  }
+
+  private async loadVariableOptions(id: string): Promise<void> {
     const variable = this.getVariables().find((v) => v.id === id);
     if (!variable || variable.type !== VariableType.Query) {
       return;
@@ -880,6 +902,7 @@ export class VariableService {
   public destroy(): void {
     this.refreshControllers.forEach((c) => c.abort());
     this.refreshControllers.clear();
+    this.refreshRequests.clear();
     this.runtimeState.clear();
     this.runtimeStateChange$.complete();
     this.variables$.complete();
