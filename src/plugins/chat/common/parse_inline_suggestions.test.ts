@@ -87,4 +87,9 @@ describe('stripInlineSuggestions', () => {
     const content = 'Here are my SUGGESTIONS: use a pie chart';
     expect(stripInlineSuggestions(content)).toBe(content);
   });
+
+  it('should leave a CONVERSATION_TITLE line alone', () => {
+    const content = 'CONVERSATION_TITLE: Greeting\nHello world\nSUGGESTIONS:["Say more"]';
+    expect(stripInlineSuggestions(content)).toBe('CONVERSATION_TITLE: Greeting\nHello world');
+  });
 });
