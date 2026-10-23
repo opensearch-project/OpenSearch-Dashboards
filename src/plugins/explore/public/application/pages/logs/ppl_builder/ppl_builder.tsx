@@ -22,7 +22,6 @@ import { AddMetricMenu } from './add_metric_menu';
 import { useFieldData } from './use_field_data';
 import { useDatasetContext } from '../../../context';
 import { ControlGroup, GhostAddButton } from '../../../components/query_builder';
-import { isImeComposing } from '../../../../../../../core/public/utils';
 
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
@@ -132,7 +131,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !isImeComposing(e)) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
         onRun?.();
       }
