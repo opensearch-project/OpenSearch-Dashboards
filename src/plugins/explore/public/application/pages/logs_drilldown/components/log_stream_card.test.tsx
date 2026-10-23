@@ -496,5 +496,66 @@ describe('LogStreamCard', () => {
         screen.queryByTestId(`logsExploreCardHealth-${baseProps.name}`)
       ).not.toBeInTheDocument();
     });
+
+    it('shows docs count + store size as header metadata when there is no health (e.g. serverless)', () => {
+      render(
+        <LogStreamCard
+          {...baseProps}
+          kind="index"
+          health={undefined}
+          docsCount={12}
+          storeSize="3.7kb"
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      expect(
+        screen.queryByTestId(`logsExploreCardHealth-${baseProps.name}`)
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId(`logsExploreCardIndexMeta-${baseProps.name}`)).toHaveTextContent(
+        '12 docs · 3.7kb'
+      );
+    });
+
+    it('keeps docs/size inside the health tooltip (no extra header metadata) when health is known', () => {
+      render(
+        <LogStreamCard
+          {...baseProps}
+          kind="index"
+          health="green"
+          docsCount={12}
+          storeSize="3.7kb"
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      expect(screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`logsExploreCardIndexMeta-${baseProps.name}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows no header metadata when neither docs nor size are known, or for a dataset card', () => {
+      const { rerender } = render(
+        <LogStreamCard
+          {...baseProps}
+          kind="index"
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      expect(
+        screen.queryByTestId(`logsExploreCardIndexMeta-${baseProps.name}`)
+      ).not.toBeInTheDocument();
+      rerender(
+        <LogStreamCard
+          {...baseProps}
+          kind="dataset"
+          docsCount={5}
+          storeSize="1kb"
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      expect(
+        screen.queryByTestId(`logsExploreCardIndexMeta-${baseProps.name}`)
+      ).not.toBeInTheDocument();
+    });
   });
 });

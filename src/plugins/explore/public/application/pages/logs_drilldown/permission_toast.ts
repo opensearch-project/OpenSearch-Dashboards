@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../../types';
 
 /**
- * Was this failure a 4xx client error (typically 403 permission denied / 401 auth)? The drilldown
+ * Was this failure an auth/permission error (401 unauthenticated / 403 forbidden)? The drilldown
  * hits several APIs (resolve_index/cat.indices for the list + metadata, PPL search for previews and
  * histograms); a locked-down role can 4xx on any of them. We detect the status from the several
  * shapes OSD/opensearch-js surface it in, plus a text fallback for security-plugin messages.
@@ -18,7 +18,10 @@ export const isClientAuthError = (e: unknown): boolean => {
     | undefined;
   const status =
     err?.statusCode ?? err?.status ?? err?.body?.statusCode ?? err?.body?.status ?? undefined;
-  if (typeof status === 'number' && status >= 400 && status < 500) return true;
+  if (status === 401 || status === 403) return true;
+  // Any other 4xx (e.g. 400 for an unsupported request, 404 for an API the engine doesn't expose) is
+  // not a permission problem, so it must not raise the "check permissions" toast.
+  if (typeof status === 'number' && status >= 400 && status < 500) return false;
   const raw = e instanceof Error ? e.message : String(e ?? '');
   return /\b40[13]\b|forbidden|unauthorized|not authorized|no permissions for|security_exception/i.test(
     raw

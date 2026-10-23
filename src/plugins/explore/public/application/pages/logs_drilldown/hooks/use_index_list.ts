@@ -5,6 +5,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DataStructure, DEFAULT_DATA } from '../../../../../../data/common';
+// Type-only: `dataSource` is an optional plugin, so its enum can't be value-imported into this bundle.
+import type { DataSourceEngineType } from '../../../../../../data_source/common/data_sources';
 import { ExploreServices } from '../../../../types';
 import { BrowsableItem } from '../types';
 import { maybeNotifyPermissionDenied } from '../permission_toast';
@@ -99,7 +101,8 @@ export const useIndexList = ({
 
         // Enrich with creation dates and sort newest-first. `_cat/indices` (via the directquery
         // route) exposes `creation.date.string`; we ask it to sort descending and use that order,
-        // falling back to name-descending if the call fails or a row lacks a date.
+        // falling back to name-descending if the call fails or a row lacks a date (always the
+        // case on OpenSearch Serverless, which has no creation date).
         const sorted = await sortByCreationDate(items, services, dataSourceId);
 
         if (requestId === requestIdRef.current) {
@@ -126,11 +129,44 @@ export const useIndexList = ({
   return { items: filtered, loading, error };
 };
 
+// String value of `DataSourceEngineType.OpenSearchServerless` (kept in sync with the enum).
+const OPENSEARCH_SERVERLESS = 'OpenSearch Serverless' as DataSourceEngineType.OpenSearchServerless;
+
+/**
+ * Whether the data source is OpenSearch Serverless, read from its saved object's engine type (set
+ * when the data source connection is validated). Serverless `_cat/indices` has no `creation.date`
+ * (sorting by it is rejected) and returns empty `health`/`pri`/`rep`, so the enrichment call asks
+ * only for the columns it supports. Any lookup failure is treated as "not serverless" so other
+ * engines keep their existing behavior.
+ */
+async function isServerlessDataSource(
+  services: ExploreServices,
+  dataSourceId: string
+): Promise<boolean> {
+  try {
+    const dataSource = await services.savedObjects.client.get<{ dataSourceEngineType?: string }>(
+      'data-source',
+      dataSourceId
+    );
+    return dataSource?.attributes?.dataSourceEngineType === OPENSEARCH_SERVERLESS;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** Parses a numeric `_cat` cell; empty or non-numeric cells are unknown (never 0). */
+const parseCount = (value?: string): number | undefined => {
+  if (value == null || value.trim() === '') return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+};
+
 /**
  * Orders indexes newest-first using `_cat/indices?h=index,creation.date&s=creation.date:desc`
  * via the directquery route. On any failure (route unavailable, remote-only cluster, etc.) it
  * falls back to name-descending, which approximates newest-first for date-suffixed/rolling
- * index names.
+ * index names. OpenSearch Serverless has no creation date, so its rows are ordered by name and the
+ * request asks only for the columns serverless returns.
  */
 async function sortByCreationDate(
   items: BrowsableItem[],
@@ -147,6 +183,7 @@ async function sortByCreationDate(
   if (!dataSourceId) return nameDescending();
 
   try {
+    const serverless = await isServerlessDataSource(services, dataSourceId);
     // Also request `docs.count`, `health`, `store.size`, `pri`, `rep` — they ride along on this ONE
     // already-made cat.indices call (the route is a pass-through), so empty-index detection, the
     // health dot AND the health tooltip metadata cost zero extra round-trips. All are absent for
@@ -162,11 +199,13 @@ async function sortByCreationDate(
         rep?: string;
       }>
     >(`/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId ?? ''}`, {
-      query: {
-        format: 'json',
-        h: 'index,creation.date,docs.count,health,store.size,pri,rep',
-        s: 'creation.date:desc',
-      },
+      query: serverless
+        ? { format: 'json', h: 'index,docs.count,store.size' }
+        : {
+            format: 'json',
+            h: 'index,creation.date,docs.count,health,store.size,pri,rep',
+            s: 'creation.date:desc',
+          },
     });
     if (!Array.isArray(response)) return nameDescending();
 
@@ -180,19 +219,17 @@ async function sortByCreationDate(
     response.forEach((row) => {
       const ts = Number(row['creation.date']);
       if (row.index && Number.isFinite(ts)) createdByName.set(row.index, ts);
-      const docs = Number(row['docs.count']);
-      if (row.index && Number.isFinite(docs)) docsByName.set(row.index, docs);
+      const docs = parseCount(row['docs.count']);
+      if (row.index && docs !== undefined) docsByName.set(row.index, docs);
       const health = row.health?.toLowerCase();
       if (row.index && (health === 'green' || health === 'yellow' || health === 'red')) {
         healthByName.set(row.index, health);
       }
       if (row.index) {
-        const pri = Number(row.pri);
-        const rep = Number(row.rep);
         metaByName.set(row.index, {
           storeSize: row['store.size'] || undefined,
-          primaryShards: Number.isFinite(pri) ? pri : undefined,
-          replicaCount: Number.isFinite(rep) ? rep : undefined,
+          primaryShards: parseCount(row.pri),
+          replicaCount: parseCount(row.rep),
         });
       }
     });
@@ -216,8 +253,8 @@ async function sortByCreationDate(
       });
   } catch (e) {
     // cat.indices enrichment is best-effort: on ANY failure we still show the list (name-ordered),
-    // just without creation date / docs.count / health / size. A 4xx (e.g. no cat permission) also
-    // raises the one-time "index details unavailable — check permissions" toast.
+    // just without creation date / docs.count / health / size. An auth failure (401/403, e.g. no cat
+    // permission) also raises the one-time "index details unavailable" permission toast.
     maybeNotifyPermissionDenied(services, e);
     return nameDescending();
   }

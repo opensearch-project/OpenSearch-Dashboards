@@ -32,7 +32,16 @@ describe('permission_toast', () => {
       [new Error('security_exception: no permissions for [indices:data/read/search]'), true],
       [new Error('403 Forbidden'), true],
       [{ statusCode: 500 }, false],
-      [{ statusCode: 404 }, true], // 4xx family — still a client error
+      [{ statusCode: 404 }, false], // unsupported API, not a permission problem
+      [{ statusCode: 400 }, false], // e.g. an unsupported sort key on OpenSearch Serverless
+      [{ body: { statusCode: 400 } }, false],
+      [
+        {
+          statusCode: 400,
+          message: 'unsupported_operation_exception: Unable to sort by unknown sort key',
+        },
+        false,
+      ],
       [new Error('some unrelated failure'), false],
       [undefined, false],
     ])('classifies %j → %s', (err, expected) => {
