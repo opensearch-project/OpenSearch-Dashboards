@@ -6,6 +6,7 @@
 import { LineSeriesOption } from 'echarts';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
+import { resolveThresholds } from '../utils/utils';
 import { MetricChartStyle } from './metric_vis_config';
 import { getColors } from '../theme/default_colors';
 import { calculateValue } from '../utils/calculation';
@@ -21,7 +22,7 @@ export const createMetricChartSeries =
     dateField: string;
   }): PipelineFn =>
   (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
+    const { transformedData = [], axisColumnMappings, dataRange } = state;
     const newState = { ...state };
     const colorPalette = getColors();
 
@@ -50,7 +51,12 @@ export const createMetricChartSeries =
           (styles.colorMode === 'value' || styles.colorMode === 'none')
         ) {
           const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
-          const thresholds = styles.thresholdOptions?.thresholds ?? [];
+
+          const thresholds = resolveThresholds(
+            styles.thresholdOptions?.thresholds,
+            styles.thresholdOptions?.thresholdMode,
+            dataRange
+          );
           let thresholdColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
 
           if (calculatedValue !== undefined) {

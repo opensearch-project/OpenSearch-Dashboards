@@ -25,6 +25,7 @@ jest.mock('../utils/utils', () => ({
   formatSeriesValueLabel: jest.fn((value: unknown) => String(value)),
   generateThresholdLines: jest.fn(() => ({})),
   getValueColorByThreshold: jest.fn(() => '#00BFB3'),
+  resolveThresholds: jest.fn((thresholds) => thresholds ?? []),
 }));
 
 describe('formatHistogramBucketValue', () => {
