@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { applyAxisStyling, getAxisConfig, getSchemaByAxis, mergeStyles } from './utils';
+import {
+  applyAxisStyling,
+  getAxisConfig,
+  getSchemaByAxis,
+  mergeStyles,
+  seriesDisplayNameTooltipFormatter,
+} from './utils';
 import { AxisRole, Positions, VisFieldType, StandardAxes } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -121,6 +127,43 @@ describe('getAxisConfig', () => {
     const { xAxis, yAxis } = getAxisConfig({}, {});
     expect(xAxis).toBeUndefined();
     expect(yAxis).toBeUndefined();
+  });
+});
+
+describe('seriesDisplayNameTooltipFormatter', () => {
+  const formatTooltip = seriesDisplayNameTooltipFormatter({
+    seriesDisplayNames: { seriesA: 'Series A', seriesB: 'Series B' },
+    formatValue: (value) => String(value ?? ''),
+    axesMappingEncode: { categoryEncode: 'x', valueEncode: 'y' },
+    styles: {} as any,
+  });
+
+  it('uses the only value in a per-series dataset regardless of series index', () => {
+    const tooltip = formatTooltip([
+      {
+        axisValueLabel: '2023-01-01',
+        seriesIndex: 1,
+        seriesName: 'seriesB',
+        value: ['2023-01-01', 20],
+      },
+    ]);
+
+    expect(tooltip).toContain('Series B');
+    expect(tooltip).toContain('>20</strong>');
+    expect(tooltip).not.toContain('undefined');
+  });
+
+  it('keeps indexing shared datasets by series index', () => {
+    const tooltip = formatTooltip([
+      {
+        axisValueLabel: '2023-01-01',
+        seriesIndex: 1,
+        seriesName: 'seriesB',
+        value: ['2023-01-01', 10, 20],
+      },
+    ]);
+
+    expect(tooltip).toContain('>20</strong>');
   });
 });
 
