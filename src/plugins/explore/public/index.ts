@@ -25,6 +25,8 @@ export type {
   SourceTypeDatasetSelectorProps,
   SourceTypeDefinition,
   SourceTypeDependencies,
+  SourceTypeHistogramColumns,
+  SourceTypeHistogramConfig,
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
   SourceTypeMetricsResourceClient,

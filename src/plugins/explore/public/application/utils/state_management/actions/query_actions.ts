@@ -20,6 +20,7 @@ import {
 import { QueryExecutionStatus, QueryProgress } from '../types';
 import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
 import {
+  clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
 } from '../slices/query_editor/query_editor_slice';
@@ -782,16 +783,6 @@ const executeQueryBase = async (
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
 
-    services.inspectorAdapters.requests.reset();
-
-    const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
-      defaultMessage: 'data',
-    });
-    const description = i18n.translate('explore.discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
-    });
-    const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
-
     // Only ensure default data view exists if no dataset is selected
     // When a dataset is already selected (normal case), this check is redundant
     // as DatasetSelect component already handles default selection during initialization
@@ -834,7 +825,26 @@ const executeQueryBase = async (
 
     let effectiveQuery = queryString;
     let effectiveHistogramConfig = histogramConfig;
-    if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
+    // A source's own builder replaces Explore's, built-in language ids included.
+    const sourceHistogramBuilder = isHistogramQuery
+      ? getSourceTypeRegistry().getHistogramQueryBuilder(query.language, query.dataset)
+      : undefined;
+    if (sourceHistogramBuilder) {
+      const sourceHistogramQuery =
+        histogramConfig &&
+        sourceHistogramBuilder(queryString, {
+          interval: histogramConfig.finalInterval,
+          timeFieldName: histogramConfig.timeFieldName,
+          breakdownField: histogramConfig.breakdownField,
+        });
+      // No histogram for this query: send nothing, and leave the key as if it never ran.
+      if (!sourceHistogramQuery) {
+        activeQueryAbortControllers.delete(cacheKey);
+        dispatch(clearQueryStatusMapByKey(cacheKey));
+        return;
+      }
+      effectiveQuery = sourceHistogramQuery;
+    } else if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     } else if (
       query.language === 'SQL' &&
@@ -872,6 +882,16 @@ const executeQueryBase = async (
       effectiveHistogramConfig = sqlHistogramConfig;
       effectiveQuery = buildSQLHistogramQuery(queryString, sqlHistogramConfig, breakdownValues);
     }
+
+    services.inspectorAdapters.requests.reset();
+
+    const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
+      defaultMessage: 'data',
+    });
+    const description = i18n.translate('explore.discover.inspectorRequestDescription', {
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+    });
+    const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
     const preparedQueryObject = {
       ...query,
