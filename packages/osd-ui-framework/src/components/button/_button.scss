@@ -1,4 +1,5 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
  * 2. Links can be focused when they're "disabled" (since we're just faking this with a class), but

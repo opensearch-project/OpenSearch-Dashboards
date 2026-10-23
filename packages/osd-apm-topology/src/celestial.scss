@@ -1,4 +1,5 @@
 /* Celestial styles. Tailwind v4 directives are processed by @tailwindcss/postcss
+ * SPDX-License-Identifier: Apache-2.0
    in osd-optimizer's postcss-loader step after sass-loader passes them through. */
 @import "tailwindcss/theme" prefix(osd);
 @import "tailwindcss/utilities" prefix(osd);
