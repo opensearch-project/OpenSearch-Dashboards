@@ -516,6 +516,21 @@ describe('LogStreamCard', () => {
       );
     });
 
+    it('formats large doc counts with digit grouping', () => {
+      render(
+        <LogStreamCard
+          {...baseProps}
+          kind="index"
+          docsCount={1234567}
+          storeSize="6.4gb"
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      expect(screen.getByTestId(`logsExploreCardIndexMeta-${baseProps.name}`)).toHaveTextContent(
+        '1,234,567 docs · 6.4gb'
+      );
+    });
+
     it('keeps docs/size inside the health tooltip (no extra header metadata) when health is known', () => {
       render(
         <LogStreamCard

@@ -9,7 +9,7 @@ import { DataStructure, DEFAULT_DATA } from '../../../../../../data/common';
 import type { DataSourceEngineType } from '../../../../../../data_source/common/data_sources';
 import { ExploreServices } from '../../../../types';
 import { BrowsableItem } from '../types';
-import { maybeNotifyPermissionDenied } from '../permission_toast';
+import { getErrorStatus, maybeNotifyPermissionDenied } from '../permission_toast';
 
 interface UseIndexListArgs {
   services: ExploreServices;
@@ -59,6 +59,8 @@ export const useIndexList = ({
 
       setLoading(true);
       setError(undefined);
+      // Start the engine-type lookup now so it runs in parallel with resolve_index.
+      const serverlessPromise = isServerlessDataSource(services, dataSourceId);
       try {
         const datasetService = services.data.query.queryString.getDatasetService();
         const indexType = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX);
@@ -103,7 +105,7 @@ export const useIndexList = ({
         // route) exposes `creation.date.string`; we ask it to sort descending and use that order,
         // falling back to name-descending if the call fails or a row lacks a date (always the
         // case on OpenSearch Serverless, which has no creation date).
-        const sorted = await sortByCreationDate(items, services, dataSourceId);
+        const sorted = await sortByCreationDate(items, services, dataSourceId, serverlessPromise);
 
         if (requestId === requestIdRef.current) {
           setAllItems(sorted);
@@ -161,17 +163,39 @@ const parseCount = (value?: string): number | undefined => {
   return Number.isFinite(n) ? n : undefined;
 };
 
+interface CatIndicesRow {
+  index: string;
+  'creation.date'?: string;
+  'docs.count'?: string;
+  health?: string;
+  'store.size'?: string;
+  pri?: string;
+  rep?: string;
+}
+
+const FULL_CAT_QUERY = {
+  format: 'json',
+  h: 'index,creation.date,docs.count,health,store.size,pri,rep',
+  s: 'creation.date:desc',
+};
+// What OpenSearch Serverless supports: no creation date (sorting by it is rejected with a 400) and
+// no health/pri/rep.
+const REDUCED_CAT_QUERY = { format: 'json', h: 'index,docs.count,store.size' };
+
 /**
  * Orders indexes newest-first using `_cat/indices?h=index,creation.date&s=creation.date:desc`
  * via the directquery route. On any failure (route unavailable, remote-only cluster, etc.) it
  * falls back to name-descending, which approximates newest-first for date-suffixed/rolling
  * index names. OpenSearch Serverless has no creation date, so its rows are ordered by name and the
- * request asks only for the columns serverless returns.
+ * request asks only for the columns serverless returns. Serverless is detected from the data source
+ * engine type; when that isn't saved (e.g. a data source created through the saved-objects API), a
+ * 400 on the full request is retried once with the reduced columns.
  */
 async function sortByCreationDate(
   items: BrowsableItem[],
   services: ExploreServices,
-  dataSourceId?: string
+  dataSourceId?: string,
+  serverlessPromise?: Promise<boolean>
 ): Promise<BrowsableItem[]> {
   const nameDescending = () => [...items].sort((a, b) => b.name.localeCompare(a.name));
 
@@ -182,31 +206,29 @@ async function sortByCreationDate(
   // name-descending ordering.
   if (!dataSourceId) return nameDescending();
 
+  const catIndices = (query: Record<string, string>) =>
+    services.http.get<CatIndicesRow[]>(
+      `/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId}`,
+      { query }
+    );
+
   try {
-    const serverless = await isServerlessDataSource(services, dataSourceId);
+    const serverless = await (serverlessPromise ?? isServerlessDataSource(services, dataSourceId));
     // Also request `docs.count`, `health`, `store.size`, `pri`, `rep` — they ride along on this ONE
     // already-made cat.indices call (the route is a pass-through), so empty-index detection, the
     // health dot AND the health tooltip metadata cost zero extra round-trips. All are absent for
     // remote/closed indices → we leave those fields undefined (unknown), never 0/green.
-    const response = await services.http.get<
-      Array<{
-        index: string;
-        'creation.date'?: string;
-        'docs.count'?: string;
-        health?: string;
-        'store.size'?: string;
-        pri?: string;
-        rep?: string;
-      }>
-    >(`/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId ?? ''}`, {
-      query: serverless
-        ? { format: 'json', h: 'index,docs.count,store.size' }
-        : {
-            format: 'json',
-            h: 'index,creation.date,docs.count,health,store.size,pri,rep',
-            s: 'creation.date:desc',
-          },
-    });
+    let response: CatIndicesRow[];
+    if (serverless) {
+      response = await catIndices(REDUCED_CAT_QUERY);
+    } else {
+      try {
+        response = await catIndices(FULL_CAT_QUERY);
+      } catch (e) {
+        if (getErrorStatus(e) !== 400) throw e;
+        response = await catIndices(REDUCED_CAT_QUERY);
+      }
+    }
     if (!Array.isArray(response)) return nameDescending();
 
     const createdByName = new Map<string, number>();

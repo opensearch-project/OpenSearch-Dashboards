@@ -276,6 +276,49 @@ describe('useIndexList', () => {
     expect(addWarning).not.toHaveBeenCalled();
   });
 
+  it('retries a 400 with the serverless columns when the engine type is not saved', async () => {
+    // e.g. a serverless data source created through the saved-objects API: no dataSourceEngineType.
+    indexFetch.mockResolvedValue(children(['logs-a', 'logs-b']));
+    httpGet
+      .mockRejectedValueOnce({
+        body: { statusCode: 400, message: 'Unable to sort by unknown sort key `creation.date`' },
+      })
+      .mockResolvedValueOnce([
+        { index: 'logs-a', 'docs.count': '7', 'store.size': '1kb' },
+        { index: 'logs-b', 'docs.count': '3', 'store.size': '2kb' },
+      ]);
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(httpGet).toHaveBeenCalledTimes(2);
+    expect(httpGet.mock.calls[0][1].query.s).toBe('creation.date:desc');
+    expect(httpGet.mock.calls[1][1].query).toEqual({
+      format: 'json',
+      h: 'index,docs.count,store.size',
+    });
+    expect(result.items.map((i) => [i.name, i.docsCount, i.storeSize])).toEqual([
+      ['logs-b', 3, '2kb'],
+      ['logs-a', 7, '1kb'],
+    ]);
+    expect(addWarning).not.toHaveBeenCalled();
+  });
+
+  it('does not retry cat.indices for non-400 failures', async () => {
+    indexFetch.mockResolvedValue(children(['a']));
+    httpGet.mockRejectedValue({ statusCode: 500 });
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(httpGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks up the engine type in parallel with resolve_index', async () => {
+    let resolveIndexes: (v: unknown) => void = () => {};
+    indexFetch.mockReturnValue(new Promise((r) => (resolveIndexes = r)));
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(savedObjectsGet).toHaveBeenCalledWith('data-source', 'ds-default'));
+    resolveIndexes(children(['a']));
+    await waitFor(() => expect(result.loading).toBe(false));
+  });
+
   it('still shows the permission toast once when cat.indices is forbidden (403)', async () => {
     indexFetch.mockResolvedValue(children(['a']));
     httpGet.mockRejectedValue({ statusCode: 403 });

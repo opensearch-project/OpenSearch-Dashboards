@@ -42,6 +42,11 @@ describe('permission_toast', () => {
         },
         false,
       ],
+      [
+        { statusCode: 400, message: 'security_exception: no permissions for [indices:monitor]' },
+        true,
+      ],
+      [{ body: { statusCode: 400, message: 'Forbidden' } }, true],
       [new Error('some unrelated failure'), false],
       [undefined, false],
     ])('classifies %j → %s', (err, expected) => {

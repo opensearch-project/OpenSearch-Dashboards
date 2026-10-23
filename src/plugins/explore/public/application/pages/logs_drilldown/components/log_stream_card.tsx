@@ -451,7 +451,7 @@ export const LogStreamCard: React.FC<Props> = ({
           docsCount != null &&
             i18n.translate('explore.logsDrilldown.rows.docsCount', {
               defaultMessage: '{count} docs',
-              values: { count: docsCount },
+              values: { count: docsCount.toLocaleString() },
             }),
           storeSize,
         ]
@@ -459,7 +459,7 @@ export const LogStreamCard: React.FC<Props> = ({
           .join(' · ')
       : '';
   const indexMeta = indexMetaText ? (
-    <EuiFlexItem grow={false} className="logStreamCard__indexMeta">
+    <EuiFlexItem grow={false}>
       <EuiText size="xs">
         <EuiTextColor color="subdued" data-test-subj={`logsExploreCardIndexMeta-${name}`}>
           {indexMetaText}

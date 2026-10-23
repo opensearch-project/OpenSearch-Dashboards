@@ -215,7 +215,7 @@ export const RowsView: React.FC<Props> = ({
           signal
         );
       } catch (e) {
-        // A 4xx (e.g. no read permission on this index) raises the one-time permission toast; the
+        // An auth error (e.g. no read permission on this index) raises the one-time permission toast; the
         // card still shows its own ERROR state from the re-thrown error.
         maybeNotifyPermissionDenied(services, e);
         throw e;
