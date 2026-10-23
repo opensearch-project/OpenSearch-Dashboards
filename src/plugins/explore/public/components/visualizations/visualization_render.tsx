@@ -11,7 +11,7 @@ import dateMath from '@elastic/datemath';
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
-import { VisualizationEmptyState } from './visualization_empty_state';
+import { VisualizationEmptyState, VisualizationEmptyStateProps } from './visualization_empty_state';
 import { Positions, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
@@ -34,6 +34,8 @@ interface Props {
 }
 
 interface CommonProps {
+  /** The query's language and dataset, for the empty state's samples. Defaults to the active query. */
+  query?: VisualizationEmptyStateProps;
   visualizationData: VisData | undefined;
   visConfig: RenderChartConfig | undefined;
   showRawTable: boolean;
@@ -56,6 +58,7 @@ const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
 const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
 
 export const CommonVisualizationRender = ({
+  query,
   visualizationData,
   visConfig,
   showRawTable,
@@ -265,7 +268,7 @@ export const CommonVisualizationRender = ({
     );
   }
 
-  return <VisualizationEmptyState />;
+  return <VisualizationEmptyState {...query} />;
 };
 
 export const VisualizationRender = ({

@@ -16,6 +16,14 @@ export const selectQueryStatusMapByKey = createSelector(
   (statusMap, cacheKey) => statusMap[cacheKey]
 );
 
+/** Scan progress of the query streaming partial rows, if any. Only row queries stream. */
+export const selectQueryProgress = createSelector([selectQueryStatusMap], (statusMap) => {
+  for (const status of Object.values(statusMap)) {
+    if (status?.progress) return status.progress;
+  }
+  return undefined;
+});
+
 export const selectOverallQueryStatus = createSelector(
   [selectState],
   (state) => state.overallQueryStatus
@@ -80,12 +88,8 @@ export const selectHasUserInitiatedQuery = createSelector([selectState], (state)
   return state.hasUserInitiatedQuery;
 });
 
-export const selectShouldShowCancelButton = createSelector(
-  [selectIsLoading, selectHasUserInitiatedQuery, selectOverallQueryStatus],
-  (isLoading, hasUserInitiatedQuery, _overallQueryStatus) => {
-    // Check if query is loading
-
-    const shouldShow = isLoading && hasUserInitiatedQuery;
-    return shouldShow;
-  }
+/** A query the user started is still running, so the run control offers Stop. */
+export const selectIsUserQueryRunning = createSelector(
+  [selectIsLoading, selectHasUserInitiatedQuery],
+  (isLoading, hasUserInitiatedQuery) => isLoading && hasUserInitiatedQuery
 );

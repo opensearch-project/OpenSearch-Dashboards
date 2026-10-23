@@ -41,7 +41,7 @@ const addVisualizationInDashboard = () => {
 const createBarVisualization = () => {
   cy.explore.clearQueryEditor();
   const datasetName = `${INDEX_WITH_TIME_1}*`;
-  const query = `source=${datasetName} | stats count() by category`;
+  const query = `source=${datasetName} | stats count() by category | sort - category`;
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
   cy.explore.setQueryEditor(query);
@@ -84,13 +84,12 @@ export const runApplyDataTransformationTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    let dashboardDataUrl;
-
-    it('should create and save a bar visualization inside dashboard with data transformation', () => {
+    it('should create and update a dashboard visualization with multiple data transformations', () => {
       addVisualizationInDashboard();
       createBarVisualization();
 
       let beforeCanvasDataUrl;
+      let dashboardDataUrl;
       cy.get('.editor-container canvas')
         .should('be.visible')
         .then((canvas) => {
@@ -155,9 +154,7 @@ export const runApplyDataTransformationTests = () => {
             expect(dashboardDataUrl).not.to.be.empty;
           });
         });
-    });
-
-    it('should load visualization with transformations from dashboard and able to apply multiple transformations in sequence', () => {
+      // Load the saved visualization and add another transformation.
       cy.getElementByTestIdLike(`embeddablePanelHeading-${newExploreName}`)
         .parent()
         .findElementByTestId('embeddablePanelToggleMenuIcon')
@@ -169,9 +166,10 @@ export const runApplyDataTransformationTests = () => {
       cy.wait(4000);
 
       cy.getElementByTestId('transformPanelTab').should('be.visible').click();
-      cy.getElementByTestId('draggable').should('have.length', 1);
+      cy.getElementByTestId('transformationPipelineItem').should('have.length', 1);
 
-      // Add sort_by transformation (will be item 1)
+      // The query starts in descending category order, so the default ascending sort
+      // deterministically changes the visualization.
       cy.getElementByTestId('transformPanelAddButton').should('be.visible').click();
       cy.getElementByTestId('transformSelectorPanelFlyout').should('exist');
       cy.wait(500);
@@ -183,7 +181,7 @@ export const runApplyDataTransformationTests = () => {
       cy.get('li[role="option"]').contains('category').trigger('click');
       cy.wait(1500);
 
-      cy.getElementByTestId('draggable').should('have.length', 2);
+      cy.getElementByTestId('transformationPipelineItem').should('have.length', 2);
 
       cy.wait(1000);
       cy.getElementByTestId('saveVisualizationEditorButton').should('be.visible').click();

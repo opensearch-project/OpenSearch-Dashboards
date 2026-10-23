@@ -16,7 +16,7 @@ import {
 /**
  * Returns true when the user query contains a stats/aggregation pipe.
  */
-const hasStatsPipe = (queryString: string): boolean => /\|\s*stats\s/i.test(queryString);
+export const hasStatsPipe = (queryString: string): boolean => /\|\s*stats\s/i.test(queryString);
 
 /**
  * Detect the optimal tab based on the current query and sets it as active.

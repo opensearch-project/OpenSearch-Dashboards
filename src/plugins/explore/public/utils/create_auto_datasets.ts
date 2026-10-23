@@ -82,8 +82,10 @@ async function createOrReuseDataView(
   try {
     // Skip createAndSave so it doesn't silently flip the workspace's default index pattern.
     const dataView = await dataViews.create({ ...spec, fields }, /* skipFetchFields */ true);
-    await dataViews.createSavedObject(dataView);
-    createdId = dataView.id ?? null;
+    // reuseExisting: a legacy engine-typed dataset with the same title/data source is reused
+    // instead of throwing, so re-running detection over it still resolves an id (for correlation).
+    const saved = await dataViews.createSavedObject(dataView, false, true);
+    createdId = saved?.id ?? dataView.id ?? null;
   } catch (error) {
     if (error instanceof DuplicateDataViewError) {
       const dupe = await savedObjectsClient.find({

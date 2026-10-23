@@ -43,4 +43,34 @@ describe('getDataSourceEngineCapabilities', () => {
     expect(caps.supportsRuntimePplGrammar).toBe(true);
     expect(caps.minLanguageVersions).toBeUndefined();
   });
+
+  describe('async PPL streaming', () => {
+    it('is supported on OpenSearch', () => {
+      expect(getDataSourceEngineCapabilities('OpenSearch').supportsAsyncPplStreaming).toBe(true);
+    });
+
+    it('is not supported on legacy Elasticsearch, which has no async endpoint', () => {
+      expect(getDataSourceEngineCapabilities('Elasticsearch').supportsAsyncPplStreaming).toBe(
+        false
+      );
+    });
+
+    it.each([undefined, 'OpenSearch Serverless', 'AnalyticEngine', 'SomethingUnknown'])(
+      'fails open for the unmapped engine %s',
+      (engineType) => {
+        expect(getDataSourceEngineCapabilities(engineType).supportsAsyncPplStreaming).toBe(true);
+      }
+    );
+
+    // The async PPL API is only served from the `/_plugins/_ppl` endpoints, so claiming streaming
+    // support on an Open Distro engine would always be wrong. Guards against a future engine entry
+    // setting one without the other.
+    it.each(['Elasticsearch', 'OpenSearch', 'SomethingUnknown', undefined])(
+      'is never claimed alongside Open Distro endpoints, for %s',
+      (engineType) => {
+        const caps = getDataSourceEngineCapabilities(engineType);
+        expect(caps.usesOpenDistroSqlPpl && caps.supportsAsyncPplStreaming).toBe(false);
+      }
+    );
+  });
 });

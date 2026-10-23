@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 /**
  * Simple lock mechanism to suppress automatic fitView while a
@@ -20,5 +20,6 @@ export const useViewInteractionLock = (duration = 500) => {
 
   const isLocked = useCallback(() => Date.now() < lockedUntilRef.current, []);
 
-  return { lock, isLocked };
+  // Stable identity, so effects depending on the lock do not re-run on every render.
+  return useMemo(() => ({ lock, isLocked }), [lock, isLocked]);
 };

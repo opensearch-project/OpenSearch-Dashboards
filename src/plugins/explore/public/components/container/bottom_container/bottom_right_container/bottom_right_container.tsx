@@ -46,6 +46,18 @@ export const BottomRightContainer = () => {
   const dataTableStatus = useSelector((state: RootState) => {
     return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
+  // Two kinds of query deliver rows before they finish, and both stay LOADING for their whole run:
+  // a polling source reporting scan progress, and a streaming PPL job. Either way the spinner below
+  // would replace the results area for the entire query and hide rows that are already renderable.
+  const hasPartialResults = useSelector((state: RootState) => {
+    const key = defaultPrepareQueryString(query);
+    const tableStatus = selectQueryStatusMapByKey(state, key);
+    const polling = !!tableStatus?.progress && !!state.results[key]?.hasResults;
+    const streaming = Boolean(
+      tableStatus?.streaming?.isPolling || state.queryEditor.overallQueryStatus.streaming?.isPolling
+    );
+    return polling || streaming;
+  });
 
   if (dataset == null) {
     // Show auto-detect callout only for traces flavor
@@ -92,7 +104,11 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.LOADING && dataTableStatus === QueryExecutionStatus.LOADING) {
+  if (
+    status === QueryExecutionStatus.LOADING &&
+    dataTableStatus === QueryExecutionStatus.LOADING &&
+    !hasPartialResults
+  ) {
     return (
       <CanvasPanel>
         <LoadingSpinner />
@@ -101,6 +117,7 @@ export const BottomRightContainer = () => {
   }
 
   if (
+    hasPartialResults ||
     dataTableStatus === QueryExecutionStatus.READY ||
     dataTableStatus === QueryExecutionStatus.ERROR ||
     status === QueryExecutionStatus.READY ||

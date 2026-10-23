@@ -73,6 +73,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return {
       id: index.id,
       title: datasetTitle,
+      ...(indexMeta?.displayName && { displayName: indexMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX,
       timeFieldName: indexMeta?.timeFieldName,
       isRemoteDataset: indexMeta?.isRemoteIndex,
@@ -156,7 +157,10 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      esTypes: field?.esTypes,
+      searchable: field?.searchable,
       aggregatable: field?.aggregatable,
+      readFromDocValues: field?.readFromDocValues,
       subType: field?.subType,
     }));
   },

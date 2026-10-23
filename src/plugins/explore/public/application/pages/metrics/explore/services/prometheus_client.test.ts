@@ -247,3 +247,38 @@ describe('PrometheusClient.queryRange preserves data connection meta', () => {
     expect(passedQuery.dataset.dataSource.meta).toEqual({ name: 'my-prom', sessionId: 'abc' });
   });
 });
+
+describe('PrometheusClient.queryRange language', () => {
+  it('runs as PromQL even when the editor is on another language of the source', async () => {
+    const setFields = jest.fn();
+    const searchSource = { setFields, fetch: jest.fn().mockResolvedValue({ hits: { hits: [] } }) };
+    const dataset = {
+      id: 'my-metrics-source::default',
+      title: 'My metrics',
+      type: 'MY_METRICS_TYPE',
+    };
+    const queryState = { language: 'My Metrics SQL', query: 'SELECT 1', dataset };
+    const dataView = { id: dataset.id, type: dataset.type };
+    const services = {
+      data: {
+        query: {
+          timefilter: { timefilter: { getTime: () => ({ from: 'now-1h', to: 'now' }) } },
+          queryString: { getQuery: () => queryState },
+        },
+        dataViews: {
+          get: jest.fn().mockResolvedValue(dataView),
+          getDefault: jest.fn().mockResolvedValue(dataView),
+        },
+        search: { searchSource: { create: jest.fn().mockResolvedValue(searchSource) } },
+      },
+    } as unknown as ExploreServices;
+
+    await new PrometheusClient(services, dataset.id).queryRange('avg(up)');
+
+    expect(setFields.mock.calls[0][0].query).toMatchObject({
+      query: 'avg(up)',
+      language: 'PROMQL',
+      dataset,
+    });
+  });
+});

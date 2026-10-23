@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
@@ -33,6 +34,7 @@ import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
+import { switchToPromQL } from './utils/switch_to_promql';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 
@@ -59,9 +61,12 @@ export const MetricsExploreTab = () => {
   const setEditorText = useSetEditorText();
   const queryGenRef = useRef(new MetricQueryGenerator());
 
+  // The Metrics page only shows this tab for sources with a metrics resource client.
+  const resourceClientId =
+    getSourceTypeRegistry().getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
   const client = useMemo(() => {
-    return new PrometheusClient(services, dataConnectionId);
-  }, [services, dataConnectionId]);
+    return new PrometheusClient(services, dataConnectionId, resourceClientId);
+  }, [services, dataConnectionId, resourceClientId]);
 
   const maxDataPoints = (queryState.queryOptions as PromQLQueryOptions | undefined)?.maxDataPoints;
 
@@ -181,8 +186,10 @@ export const MetricsExploreTab = () => {
     return () => client.abort();
   }, [client]);
 
+  const activeLanguage = queryState.language;
   const executePromQL = useCallback(
     (promql: string) => {
+      switchToPromQL(services, reduxDispatch, activeLanguage, promql);
       setEditorText(promql);
       reduxDispatch(setMetricsPageMode('query'));
       reduxDispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID));
@@ -190,7 +197,7 @@ export const MetricsExploreTab = () => {
       reduxDispatch(clearLastExecutedData());
       reduxDispatch(runQueryActionCreator(services, promql));
     },
-    [reduxDispatch, services, setEditorText]
+    [activeLanguage, reduxDispatch, services, setEditorText]
   );
 
   function renderContent() {

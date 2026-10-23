@@ -33,6 +33,8 @@ describe('useSwitchDataSourceAction', () => {
 
     mockChatService = {
       setDataSourceId: jest.fn(),
+      getConfirmedDataSourceId: jest.fn().mockReturnValue(undefined),
+      getSessionDataSourceList: jest.fn().mockReturnValue(['ds-a', 'ds-b']),
       validateDataSourceId: jest.fn().mockResolvedValue({
         valid: true,
         dataSource: { id: 'ds-a', title: 'Cluster A' },
@@ -79,6 +81,24 @@ describe('useSwitchDataSourceAction', () => {
           message: 'Confirmed "Cluster A" as the active data source for this conversation.',
         })
       );
+    });
+
+    it('should no-op without validating or mutating when only one data source is in the session', async () => {
+      mockChatService.getSessionDataSourceList.mockReturnValue(['ds-a']);
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: true,
+          skipped: true,
+        })
+      );
+      expect(result.message).toContain('Skipped switch_data_source');
+      expect(result.message).toContain('1 data source');
     });
 
     it('should reject an id that is not a known data source without mutating state', async () => {
@@ -142,6 +162,20 @@ describe('useSwitchDataSourceAction', () => {
 
       expect(screen.getByText('Switched to')).toBeInTheDocument();
       expect(screen.getByText('Cluster A')).toBeInTheDocument();
+    });
+
+    it('should not render switch UI when the tool call was skipped', () => {
+      renderCard({
+        status: 'complete',
+        result: JSON.stringify({
+          success: true,
+          skipped: true,
+          dataSourceId: 'ds-a',
+        }),
+      });
+
+      expect(screen.queryByText('Switched to')).not.toBeInTheDocument();
+      expect(screen.queryByText('ds-a')).not.toBeInTheDocument();
     });
 
     it('should show the failure message when the switch was rejected', () => {

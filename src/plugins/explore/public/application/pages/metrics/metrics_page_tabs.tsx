@@ -22,6 +22,9 @@ import { DatasetSelectWidget } from '../../../components/query_panel/query_panel
 import { RootState } from '../../utils/state_management/store';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_context';
+import { MetricsSourceTypeSelect } from './metrics_source_type_select';
+import { selectDataset } from '../../utils/state_management/selectors';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 
 export { useMetricsPageMode } from './metrics_page_mode_context';
 
@@ -40,18 +43,27 @@ const PAGE_TABS: Array<{ id: MetricsPageMode; label: string; iconType: string }>
 
 export const MetricsPageTabs: React.FC = () => {
   const dispatch = useDispatch();
-  const mode = useSelector((state: RootState) => state.ui.metricsPageMode) || 'explore';
+  const dataset = useSelector(selectDataset);
+  // The Explore tab's metric browser needs the source's metrics resource client; a source
+  // without one gets only the Query tab.
+  const hasMetricBrowser = !!getSourceTypeRegistry().getMetricsResourceClientId(dataset);
+  const selectedMode = useSelector((state: RootState) => state.ui.metricsPageMode) || 'explore';
+  const mode: MetricsPageMode = hasMetricBrowser ? selectedMode : 'query';
+  const tabs = hasMetricBrowser ? PAGE_TABS : PAGE_TABS.filter((tab) => tab.id === 'query');
 
   return (
     <MetricsPageModeContext.Provider value={mode}>
       <div className="metricsPageTabs__tabBar">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
+            <MetricsSourceTypeSelect />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <DatasetSelectWidget />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
-              {PAGE_TABS.map((tab) => (
+              {tabs.map((tab) => (
                 <EuiTab
                   key={tab.id}
                   isSelected={mode === tab.id}
