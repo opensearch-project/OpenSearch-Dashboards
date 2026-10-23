@@ -15,8 +15,8 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
-import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
+import { PATTERNS_AGGREGATION_MODE_PATTERN } from '../../languages/ppl/aggregation_commands';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -115,16 +115,54 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
- * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
- * brackets and quoted strings are masked so that a command inside them is ignored.
+ * Aggregating PPL commands whose rendered rows are buckets that can be counted with a separate
+ * `... | stats count() as bucket_count` probe, so the hit counter can show a bucket denominator.
  *
- * Used to detect queries where the hit counter should show bucket count separately from document
- * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
+ * Kept local to explore (rather than the shared aggregation_commands module) so the hit-counter
+ * feature stays self-contained. `timewrap` is intentionally excluded: its PIVOT reshape runs in the
+ * execution engine after the query plan, so a `stats count()` probe counts the pre-pivot `timechart`
+ * buckets and overcounts — the counter falls back to the plain hits format for it. `patterns` is
+ * excluded here and handled separately below because it only aggregates in `mode=aggregation`.
+ * `table` is also excluded — it is a projection whose row count equals the hit count, so it needs no
+ * separate bucket count.
  */
-export const queryHasAggregation = (queryString: string): boolean => {
+const BUCKET_COUNTABLE_COMMANDS = [
+  'stats',
+  'top',
+  'rare',
+  'chart',
+  'timechart',
+  'transpose',
+  'xyseries',
+];
+
+/**
+ * Checks whether a PPL query's rendered rows are buckets that can be counted with a separate
+ * `... | stats count() as bucket_count` probe, so the hit counter shows a `N / M buckets` denominator
+ * instead of plain hits. Used to detect queries where the hit counter should show a bucket count
+ * separately from the document count.
+ *
+ * `timewrap` is excluded even when its upstream `timechart` matches (its post-plan pivot count can't
+ * be reproduced by a probe), and `patterns` counts only in `mode=aggregation` (its default `label`
+ * mode returns roughly one row per document, so a probe would report documents, not pattern
+ * buckets). Subquery brackets and quoted strings are masked so a command or `mode=aggregation`
+ * inside a string value or nested subquery is not matched.
+ */
+export const queryIsBucketCountable = (queryString: string): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
+
+  // `timewrap` disqualifies the whole query even though it always follows a (countable) `timechart`:
+  // its PIVOT reshape runs after the query plan, so the rendered bucket count can't be probed and the
+  // upstream `timechart` match must not win.
+  if (/\|\s*timewrap\b/i.test(masked)) {
+    return false;
+  }
+
+  if (new RegExp(`\\|\\s*(${BUCKET_COUNTABLE_COMMANDS.join('|')})\\b`, 'i').test(masked)) {
+    return true;
+  }
+
+  return PATTERNS_AGGREGATION_MODE_PATTERN.test(masked);
 };
 
 /** Commands that reshape rows such that the time field may no longer exist downstream. */

@@ -42,7 +42,11 @@ export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 // Commands after which `sort - <dataset time field>` must not be appended: the user already ordered
 // or limited the result, or the command replaced the row type. chart and timechart emit a time
 // column of their own naming (`@timestamp`, or chart's `over` argument), so sorting on the dataset's
-// field turns a working query into `Field [<field>] not found`.
+// field turns a working query into `Field [<field>] not found`. transpose, xyseries, and timewrap
+// likewise pivot/aggregate away the dataset time field, so the same `Field [<field>] not found`
+// results if the default sort is appended. `patterns` is handled separately below, because only
+// `patterns ... mode=aggregation` drops the time field -- default/label-mode patterns keeps document
+// rows (and the time field), so the default sort is still valid for it.
 const DEFAULT_SORT_BLOCKING_COMMANDS = [
   'sort',
   'stats',
@@ -52,20 +56,35 @@ const DEFAULT_SORT_BLOCKING_COMMANDS = [
   'rename',
   'chart',
   'timechart',
+  'transpose',
+  'xyseries',
+  'timewrap',
 ];
 const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
   `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
   'i'
 );
 
+// Only aggregation-mode patterns pivots the time field away; the `[^|]*` ties `mode=aggregation` to
+// the same `patterns` command (a top-level pipe ends its arguments). Kept in sync with the explore
+// plugin's PATTERNS_AGGREGATION_MODE_PATTERN; defined locally to avoid a cross-plugin import.
+const PATTERNS_AGGREGATION_MODE_REGEX = /\|\s*patterns\b[^|]*\bmode\s*=\s*aggregation\b/i;
+
 const canAppendDefaultSort = (queryString: string): boolean => {
   const masked = queryString
-    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+    // [\s\S] (not .) so a multi-line bracketed subquery is fully masked; otherwise an aggregating
+    // command inside a multi-line subquery could leak past the mask and be mistaken for a top-level
+    // command.
+    .replace(/\[[\s\S]*?\]/g, (match) => '\0'.repeat(match.length))
     .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
 
   const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
 
-  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
+  return (
+    !hasFieldsProjection &&
+    !SORT_BLOCKING_COMMAND_REGEX.test(masked) &&
+    !PATTERNS_AGGREGATION_MODE_REGEX.test(masked)
+  );
 };
 
 export class PPLSearchInterceptor extends SearchInterceptor {
