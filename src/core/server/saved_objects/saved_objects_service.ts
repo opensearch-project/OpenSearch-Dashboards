@@ -72,6 +72,17 @@ import { createMigrationOpenSearchClient } from './migrations/core/';
 import { setConditionalFieldFlags } from './migrations/core/build_active_mappings';
 import { Config } from '../config';
 import { SqliteSavedObjectsRepository } from './storage/sqlite_repository';
+import {
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+  annotationReferencePreservationWrapper,
+  registerSavedObjectAnnotationRoutes,
+  savedObjectAnnotationType,
+  SavedObjectAnnotationsSetup,
+  SavedObjectAnnotationServiceImpl,
+  SavedObjectAnnotationTypeRegistry,
+} from './annotations';
+import { SavedObjectAnnotationService } from '../../types';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -110,6 +121,8 @@ import { SqliteSavedObjectsRepository } from './storage/sqlite_repository';
  * @public
  */
 export interface SavedObjectsServiceSetup {
+  annotations: SavedObjectAnnotationsSetup;
+
   /**
    * Set the default {@link SavedObjectsClientFactoryProvider | factory provider} for creating Saved Objects clients.
    * Only one provider can be set, subsequent calls to this method will fail.
@@ -211,6 +224,10 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
  * @public
  */
 export interface SavedObjectsServiceStart {
+  annotations: {
+    getClient: (req: OpenSearchDashboardsRequest) => SavedObjectAnnotationService;
+  };
+
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
@@ -318,6 +335,7 @@ export class SavedObjectsService implements CoreService<
 
   private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private annotationTypeRegistry = new SavedObjectAnnotationTypeRegistry();
   private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
   private started = false;
 
@@ -359,6 +377,10 @@ export class SavedObjectsService implements CoreService<
       .pipe(first())
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+    if (this.config.annotations.enabled) {
+      this.typeRegistry.registerType(savedObjectAnnotationType);
+      registerSavedObjectAnnotationRoutes(setupDeps.http);
+    }
 
     // Recorded before any plugin runs, for callers that build mappings without the raw
     // configuration. Permission control comes from the validated config -- the same source
@@ -402,6 +424,20 @@ export class SavedObjectsService implements CoreService<
 
     return {
       status$: this.savedObjectServiceStatus$.asObservable(),
+      annotations: {
+        enabled: this.config.annotations.enabled,
+        registerAnnotationType: (registration) => {
+          if (this.started) {
+            throw new Error('cannot call `registerAnnotationType` after service startup.');
+          }
+          if (!this.config?.annotations.enabled) {
+            throw new Error(
+              'Saved object annotations are disabled. Set `savedObjects.annotations.enabled` to `true` to register annotation types.'
+            );
+          }
+          this.annotationTypeRegistry.register(registration);
+        },
+      },
       setClientFactoryProvider: (provider) => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
@@ -592,6 +628,13 @@ export class SavedObjectsService implements CoreService<
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
+    if (this.config.annotations.enabled) {
+      clientProvider.addClientWrapperFactory(
+        ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+        ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+        annotationReferencePreservationWrapper
+      );
+    }
     this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
       clientProvider.addClientWrapperFactory(priority, id, factory);
     });
@@ -599,6 +642,16 @@ export class SavedObjectsService implements CoreService<
     this.started = true;
 
     return {
+      annotations: {
+        getClient: (request) =>
+          new SavedObjectAnnotationServiceImpl(
+            clientProvider.getClient(request),
+            clientProvider.getClient(request, {
+              excludedWrappers: [ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID],
+            }),
+            this.annotationTypeRegistry
+          ),
+      },
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
