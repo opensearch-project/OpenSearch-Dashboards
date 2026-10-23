@@ -70,12 +70,10 @@ export function registerSearchRoute(
         );
 
         return res.ok({
-          body: {
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
-            },
-          },
+          body:
+            response.rawResponse === undefined
+              ? response
+              : { ...response, rawResponse: shimHitsTotal(response.rawResponse) },
           withLongNumeralsSupport,
         });
       } catch (err) {
