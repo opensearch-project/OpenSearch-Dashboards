@@ -7,6 +7,15 @@ import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { Dataset } from '../../../../../../../data/common';
 import { PPLService } from './ppl_request_helpers';
 
+/**
+ * Normalizes a field name for use in a PPL `where` clause.
+ *
+ * A `.keyword` multi-field cannot be referenced directly in PPL — the query throws an
+ * AssertionError — so query the base field instead. This defensively handles correlation
+ * mappings that were saved with a `.keyword` field before the selector excluded them.
+ */
+export const toPplFieldName = (fieldName: string): string => fieldName.replace(/\.keyword$/, '');
+
 export interface PPLLogsQueryParams {
   traceId: string;
   dataset: Dataset;
@@ -35,7 +44,7 @@ export async function fetchTraceLogsByTraceId(
 
   try {
     const pplService = new PPLService(dataService);
-    const traceIdFieldName = dataset.schemaMappings?.otelLogs?.traceId || 'traceId';
+    const traceIdFieldName = toPplFieldName(dataset.schemaMappings?.otelLogs?.traceId || 'traceId');
     const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = "${traceId}" | head ${limit}`;
 
     const datasetWithoutTime = {
