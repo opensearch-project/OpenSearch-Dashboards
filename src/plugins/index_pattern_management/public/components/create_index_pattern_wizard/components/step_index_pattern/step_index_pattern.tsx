@@ -354,6 +354,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         data-test-subj="createIndexPatternStep1IndicesList"
         query={query}
         indices={indicesToList}
+        onIndexClick={this.onIndexClick}
       />
     );
   }
@@ -448,6 +449,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       />
     );
   }
+
+  onIndexClick = (indexName: string) => {
+    this.lastQuery = indexName;
+    this.setState({ query: indexName, showingIndexPatternQueryErrors: true });
+    this.fetchIndices(indexName);
+  };
 
   onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
     this.setState({ isIncludingSystemIndices: event.target.checked }, () =>
