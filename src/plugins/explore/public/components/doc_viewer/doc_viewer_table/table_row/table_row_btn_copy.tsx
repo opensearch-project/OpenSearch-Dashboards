@@ -4,34 +4,37 @@
  */
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiCopy, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface Props {
-  onClick: () => void;
+  textToCopy: string;
 }
 
-export function DocViewTableRowBtnCopy({ onClick }: Props) {
+export function DocViewTableRowBtnCopy({ textToCopy }: Props) {
   return (
-    <EuiToolTip
-      content={
+    <EuiCopy
+      textToCopy={textToCopy}
+      beforeMessage={
         <FormattedMessage
           id="explore.docViews.table.copyValueButtonTooltip"
           defaultMessage="Copy value"
         />
       }
     >
-      <EuiButtonIcon
-        aria-label={i18n.translate('explore.docViews.table.copyValueButtonAriaLabel', {
-          defaultMessage: 'Copy value',
-        })}
-        className="exploreDocViewer__actionButton"
-        data-test-subj="copyValueButton"
-        onClick={onClick}
-        iconType={'copy'}
-        iconSize={'s'}
-        size={'xs'}
-      />
-    </EuiToolTip>
+      {(copy) => (
+        <EuiButtonIcon
+          aria-label={i18n.translate('explore.docViews.table.copyValueButtonAriaLabel', {
+            defaultMessage: 'Copy value',
+          })}
+          className="exploreDocViewer__actionButton"
+          data-test-subj="copyValueButton"
+          onClick={copy}
+          iconType={'copy'}
+          iconSize={'s'}
+          size={'xs'}
+        />
+      )}
+    </EuiCopy>
   );
 }

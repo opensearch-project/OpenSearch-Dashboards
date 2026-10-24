@@ -71,41 +71,34 @@ describe('DocViewTableRow', () => {
     expect(html).toContain('Safe content');
   });
 
-  it('renders copy button and copies string value to clipboard when clicked', () => {
-    const mockWriteText = jest.fn();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: mockWriteText,
-      },
-    });
-
+  it('renders copy button with string value for textToCopy', () => {
     const mockOnFilter = jest.fn();
     const wrapper = shallow(
       <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw="test string raw" />
     );
     const copyBtn = wrapper.find('DocViewTableRowBtnCopy');
     expect(copyBtn.exists()).toBe(true);
-
-    copyBtn.prop('onClick')();
-    expect(mockWriteText).toHaveBeenCalledWith('test string raw');
+    expect(copyBtn.prop('textToCopy')).toBe('test string raw');
   });
 
-  it('copies object value formatted as JSON to clipboard when clicked', () => {
-    const mockWriteText = jest.fn();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: mockWriteText,
-      },
-    });
-
+  it('renders copy button with object value formatted as JSON for textToCopy', () => {
     const mockOnFilter = jest.fn();
     const objValue = { key: 'val' };
     const wrapper = shallow(
       <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={objValue} />
     );
     const copyBtn = wrapper.find('DocViewTableRowBtnCopy');
+    expect(copyBtn.exists()).toBe(true);
+    expect(copyBtn.prop('textToCopy')).toBe(JSON.stringify(objValue, null, 2));
+  });
 
-    copyBtn.prop('onClick')();
-    expect(mockWriteText).toHaveBeenCalledWith(JSON.stringify(objValue, null, 2));
+  it('renders copy button with empty string when valueRaw is null or undefined', () => {
+    const mockOnFilter = jest.fn();
+    const wrapper = shallow(
+      <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={null} />
+    );
+    const copyBtn = wrapper.find('DocViewTableRowBtnCopy');
+    expect(copyBtn.exists()).toBe(true);
+    expect(copyBtn.prop('textToCopy')).toBe('');
   });
 });

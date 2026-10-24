@@ -60,6 +60,21 @@ export interface Props {
   valueRaw: unknown;
 }
 
+function getTextToCopy(valueRaw: unknown): string {
+  if (valueRaw === null || valueRaw === undefined) {
+    return '';
+  }
+  try {
+    return typeof valueRaw === 'string'
+      ? valueRaw
+      : typeof valueRaw === 'object'
+        ? JSON.stringify(valueRaw, null, 2)
+        : String(valueRaw);
+  } catch {
+    return String(valueRaw);
+  }
+}
+
 export function DocViewTableRow({
   field,
   fieldMapping,
@@ -75,25 +90,7 @@ export function DocViewTableRow({
   value,
   valueRaw,
 }: Props) {
-  const handleCopy = () => {
-    if (valueRaw === null || valueRaw === undefined) {
-      return;
-    }
-    let textToCopy: string;
-    try {
-      textToCopy =
-        typeof valueRaw === 'string'
-          ? valueRaw
-          : typeof valueRaw === 'object'
-            ? JSON.stringify(valueRaw, null, 2)
-            : String(valueRaw);
-    } catch {
-      textToCopy = String(valueRaw);
-    }
-    if (navigator?.clipboard?.writeText) {
-      Promise.resolve(navigator.clipboard.writeText(textToCopy)).catch(() => {});
-    }
-  };
+  const textToCopy = getTextToCopy(valueRaw);
 
   const valueClassName = classNames({
     osdDocViewer__value: true,
@@ -112,7 +109,7 @@ export function DocViewTableRow({
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '-')}
           />
-          <DocViewTableRowBtnCopy onClick={handleCopy} />
+          <DocViewTableRowBtnCopy textToCopy={textToCopy} />
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}

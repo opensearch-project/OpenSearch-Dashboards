@@ -48,8 +48,8 @@ jest.mock('./table_row_btn_collapse', () => ({
 }));
 
 jest.mock('./table_row_btn_copy', () => ({
-  DocViewTableRowBtnCopy: ({ onClick }: any) => (
-    <button data-test-subj="copyValueButton" onClick={onClick}>
+  DocViewTableRowBtnCopy: ({ textToCopy }: any) => (
+    <button data-test-subj="copyValueButton" data-text-to-copy={textToCopy}>
       Copy Value
     </button>
   ),
@@ -225,38 +225,30 @@ describe('DocViewTableRow', () => {
     expect(html).toContain('Safe content');
   });
 
-  it('renders copy value button and copies string value to clipboard when clicked', () => {
-    const mockWriteText = jest.fn();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: mockWriteText,
-      },
-    });
-
+  it('renders copy value button with string value for textToCopy', () => {
     render(
       <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw="test string payload" />
     );
 
     const copyBtn = screen.getByTestId('copyValueButton');
     expect(copyBtn).toBeInTheDocument();
-
-    fireEvent.click(copyBtn);
-    expect(mockWriteText).toHaveBeenCalledWith('test string payload');
+    expect(copyBtn).toHaveAttribute('data-text-to-copy', 'test string payload');
   });
 
-  it('copies object value formatted as JSON to clipboard when clicked', () => {
-    const mockWriteText = jest.fn();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: mockWriteText,
-      },
-    });
-
+  it('renders copy value button with object value formatted as JSON for textToCopy', () => {
     const objRaw = { foo: 'bar', count: 123 };
     render(<DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={objRaw} />);
 
     const copyBtn = screen.getByTestId('copyValueButton');
-    fireEvent.click(copyBtn);
-    expect(mockWriteText).toHaveBeenCalledWith(JSON.stringify(objRaw, null, 2));
+    expect(copyBtn).toBeInTheDocument();
+    expect(copyBtn).toHaveAttribute('data-text-to-copy', JSON.stringify(objRaw, null, 2));
+  });
+
+  it('renders copy value button with empty string when valueRaw is null or undefined', () => {
+    render(<DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={null} />);
+
+    const copyBtn = screen.getByTestId('copyValueButton');
+    expect(copyBtn).toBeInTheDocument();
+    expect(copyBtn).toHaveAttribute('data-text-to-copy', '');
   });
 });

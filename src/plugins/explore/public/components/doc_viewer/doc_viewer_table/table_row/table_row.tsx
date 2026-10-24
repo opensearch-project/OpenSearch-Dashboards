@@ -35,6 +35,21 @@ export interface Props {
   valueRaw: unknown;
 }
 
+function getTextToCopy(valueRaw: unknown): string {
+  if (valueRaw === null || valueRaw === undefined) {
+    return '';
+  }
+  try {
+    return typeof valueRaw === 'string'
+      ? valueRaw
+      : typeof valueRaw === 'object'
+        ? JSON.stringify(valueRaw, null, 2)
+        : String(valueRaw);
+  } catch {
+    return String(valueRaw);
+  }
+}
+
 export function DocViewTableRow({
   field,
   fieldMapping,
@@ -65,25 +80,7 @@ export function DocViewTableRow({
   const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
   const disableValueFilter = isTimeField || isDateField;
 
-  const handleCopy = () => {
-    if (valueRaw === null || valueRaw === undefined) {
-      return;
-    }
-    let textToCopy: string;
-    try {
-      textToCopy =
-        typeof valueRaw === 'string'
-          ? valueRaw
-          : typeof valueRaw === 'object'
-            ? JSON.stringify(valueRaw, null, 2)
-            : String(valueRaw);
-    } catch {
-      textToCopy = String(valueRaw);
-    }
-    if (navigator?.clipboard?.writeText) {
-      Promise.resolve(navigator.clipboard.writeText(textToCopy)).catch(() => {});
-    }
-  };
+  const textToCopy = getTextToCopy(valueRaw);
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
@@ -101,7 +98,7 @@ export function DocViewTableRow({
               />
             </>
           )}
-          <DocViewTableRowBtnCopy onClick={handleCopy} />
+          <DocViewTableRowBtnCopy textToCopy={textToCopy} />
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
