@@ -35,7 +35,7 @@ import {
   PplRecord,
 } from './session_utils';
 import { ensureAiRootFieldChecked, hasAiRootField, isAiRootRow } from '../../utils/ai_root';
-import { nestedAiRunsAmong } from '../traces/hooks/shadowed_ai_roots';
+import { nestedAiRunsAmong, runKey } from '../traces/hooks/shadowed_ai_roots';
 
 /** Anything that can run a PPL query against a dataset (PPLService in the app and embeddable). */
 export interface PPLQueryRunner {
@@ -237,7 +237,7 @@ export const fetchSessions = async (
           parentSpanId: r.parentSpanId ?? '',
         }))
       ).catch(() => new Set<string>());
-      rootRows = preferAiRoots(spanRows.filter((r) => !nested.has(r.spanId)));
+      rootRows = preferAiRoots(spanRows.filter((r) => !nested.has(runKey(r.traceId, r.spanId))));
       for (const r of pplResponseToRecords(errorsResponse)) {
         if (typeof r.traceId === 'string') errorTraceIds.add(r.traceId);
       }

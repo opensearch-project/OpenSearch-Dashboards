@@ -71,21 +71,28 @@ const fetchParents = async (
     )
   );
   return {
-    parents: new Map(spans.map((s) => [`${s.traceId}:${s.spanId}`, s.parentSpanId])),
+    parents: new Map(spans.map((s) => [runKey(s.traceId, s.spanId), s.parentSpanId])),
     capped: spans.length > CHAIN_SPANS_LIMIT,
   };
 };
 
-/** Span ids of `rows` with an ancestor among the other rows of their trace. */
+/** Identifies one agent run: span ids are only unique within their trace. */
+export const runKey = (traceId: string, spanId: string) => `${traceId}:${spanId}`;
+
+/** Runs of `rows` (as `runKey`s) with an ancestor among the other rows of their trace. */
 const nestedAmong = (rows: SpanLink[], parents: Map<string, string>): Set<string> => {
   const byTrace = new Map<string, SpanLink[]>();
-  for (const row of rows) byTrace.set(row.traceId, [...(byTrace.get(row.traceId) ?? []), row]);
+  for (const row of rows) {
+    const traceRows = byTrace.get(row.traceId);
+    if (traceRows) traceRows.push(row);
+    else byTrace.set(row.traceId, [row]);
+  }
   const nested = new Set<string>();
   for (const [traceId, traceRows] of byTrace) {
     const winners = new Set(traceRows.map((r) => r.spanId));
     for (const row of traceRows) {
-      if (hasAncestorIn(row.spanId, (id) => parents.get(`${traceId}:${id}`), winners)) {
-        nested.add(row.spanId);
+      if (hasAncestorIn(row.spanId, (id) => parents.get(runKey(traceId, id)), winners)) {
+        nested.add(runKey(traceId, row.spanId));
       }
     }
   }
@@ -97,7 +104,8 @@ const nestedAmong = (rows: SpanLink[], parents: Map<string, string>): Set<string
  * session's runs): a run whose ancestor is another of the rows, such as a marked span under
  * a GenAI root, or under a span Data Prepper marked once its late parent arrived. Only traces
  * listed more than once are looked up, and a run is dropped only while the run above it is
- * among the rows, so a filter that matches the inner run alone still shows it.
+ * among the rows, so a filter that matches the inner run alone still shows it. Returns
+ * `runKey`s.
  */
 export const nestedAiRunsAmong = async (
   ppl: PPLRunner,
@@ -143,53 +151,63 @@ export const shadowedAiRootsExclusion = async (
   if (!hasAiRootField(dataset.id)) return { clause: '', capped: false };
   try {
     let capped = false;
-    // Traces with a marked span below their root that also have a GenAI root.
-    const belowRoot = traceIdsOf(
-      await ppl.executeQuery(
-        dataset,
-        `${scopeQuery} | where ${AI_ROOT_FIELD_PPL} = true and parentSpanId != "" | stats count() by traceId | head ${
-          COUNTS_EXCLUSION_LIMIT + 1
-        }`
-      )
-    );
-    if (belowRoot.length > COUNTS_EXCLUSION_LIMIT) capped = true;
-    const withGenAiRoot =
-      belowRoot.length === 0
-        ? []
-        : traceIdsOf(
-            await ppl.executeQuery(
-              dataset,
-              `${scopeQuery} | where ${GENAI_ROOT_CONDITION} and traceId in (${inList(
-                belowRoot.slice(0, COUNTS_EXCLUSION_LIMIT)
-              )}) | stats count() by traceId`
-            )
-          );
+    // Independent lookups, run together: traces with a marked span below their root (then those
+    // of them with a GenAI root), and traces with several marked spans.
+    const [withGenAiRoot, repeatedAll] = await Promise.all([
+      (async () => {
+        const belowRoot = traceIdsOf(
+          await ppl.executeQuery(
+            dataset,
+            `${scopeQuery} | where ${AI_ROOT_FIELD_PPL} = true and parentSpanId != "" | stats count() by traceId | head ${
+              COUNTS_EXCLUSION_LIMIT + 1
+            }`
+          )
+        );
+        if (belowRoot.length > COUNTS_EXCLUSION_LIMIT) capped = true;
+        if (belowRoot.length === 0) return [];
+        return traceIdsOf(
+          await ppl.executeQuery(
+            dataset,
+            `${scopeQuery} | where ${GENAI_ROOT_CONDITION} and traceId in (${inList(
+              belowRoot.slice(0, COUNTS_EXCLUSION_LIMIT)
+            )}) | stats count() by traceId`
+          )
+        );
+      })(),
+      ppl
+        .executeQuery(
+          dataset,
+          `${scopeQuery} | where ${AI_ROOT_FIELD_PPL} = true | stats count() as runs by traceId | where runs > 1 | head ${
+            LOOKUP_TRACES_LIMIT + 1
+          }`
+        )
+        .then(traceIdsOf),
+    ]);
 
     // Marked spans under another marked span, in traces without a GenAI root.
     const genAiTraces = new Set(withGenAiRoot);
-    const repeated = traceIdsOf(
-      await ppl.executeQuery(
-        dataset,
-        `${scopeQuery} | where ${AI_ROOT_FIELD_PPL} = true | stats count() as runs by traceId | where runs > 1 | head ${
-          LOOKUP_TRACES_LIMIT + 1
-        }`
-      )
-    ).filter((id) => !genAiTraces.has(id));
-    if (repeated.length > LOOKUP_TRACES_LIMIT) capped = true;
+    const repeated = repeatedAll.filter((id) => !genAiTraces.has(id));
+    if (repeatedAll.length > LOOKUP_TRACES_LIMIT) capped = true;
     let nested: string[] = [];
     const lookup = repeated.slice(0, LOOKUP_TRACES_LIMIT);
     if (lookup.length > 0) {
-      const marked = spanLinks(
-        await ppl.executeQuery(
-          withoutTimeRange(dataset),
+      const [markedResponse, chains] = await Promise.all([
+        // In the range and scope, like the runs counted: an outer run outside them does not
+        // hide an inner run that is counted.
+        ppl.executeQuery(
+          dataset,
           `${scopeQuery} | where ${AI_ROOT_FIELD_PPL} = true and traceId in (${inList(
             lookup
           )}) | fields traceId, spanId, parentSpanId | head ${CHAIN_SPANS_LIMIT + 1}`
-        )
-      );
-      const chains = await fetchParents(ppl, dataset, sourceCommand, lookup);
+        ),
+        // The chains between them, whatever the range.
+        fetchParents(ppl, dataset, sourceCommand, lookup),
+      ]);
+      const marked = spanLinks(markedResponse);
       if (marked.length > CHAIN_SPANS_LIMIT || chains.capped) capped = true;
-      nested = [...nestedAmong(marked, chains.parents)].sort();
+      nested = [...nestedAmong(marked, chains.parents)]
+        .map((key) => key.slice(key.indexOf(':') + 1))
+        .sort();
     }
 
     const traces = withGenAiRoot.slice(0, COUNTS_EXCLUSION_LIMIT);

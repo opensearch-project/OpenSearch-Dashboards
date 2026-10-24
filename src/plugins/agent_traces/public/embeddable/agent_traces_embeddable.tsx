@@ -54,7 +54,7 @@ import { SessionRow } from '../application/pages/sessions/session_utils';
 import { AgentView, isAgentView } from './agent_view_panel';
 import { OpenSearchSearchHit } from '../types/doc_views_types';
 import { prepareAgentSpansQuery, prepareRootSpansQuery } from '../application/tab_queries';
-import { nestedAiRunsAmong } from '../application/pages/traces/hooks/shadowed_ai_roots';
+import { nestedAiRunsAmong, runKey } from '../application/pages/traces/hooks/shadowed_ai_roots';
 import { dropShadowedAiRoots, ensureAiRootFieldChecked } from '../application/utils/ai_root';
 
 export interface SearchProps {
@@ -450,7 +450,12 @@ export class AgentTracesEmbeddable
           parentSpanId: String(hit._source?.parentSpanId ?? ''),
         }))
       );
-      return nested.size > 0 ? hits.filter((h) => !nested.has(String(h._source?.spanId))) : hits;
+      return nested.size > 0
+        ? hits.filter(
+            (h) =>
+              !nested.has(runKey(String(h._source?.traceId ?? ''), String(h._source?.spanId ?? '')))
+          )
+        : hits;
     } catch {
       return hits;
     }

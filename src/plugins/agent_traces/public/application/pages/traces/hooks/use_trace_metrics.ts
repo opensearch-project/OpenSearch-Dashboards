@@ -88,31 +88,29 @@ const IS_ERROR = `\`status.code\` = 2`;
 /**
  * The metrics' PPL queries. The AI-root condition goes only in `where` clauses, which OpenSearch
  * runs as a query: inside `case()` it becomes a script, and a long exclusion exceeds the script
- * size limit. Trace counts are exact (`stats ... by traceId`): parallel agents are one trace and
- * several agent runs, and `distinct_count` is approximate.
+ * size limit. Trace counts use `distinct_count` (an OpenSearch cardinality aggregation: exact up
+ * to a few thousand traces, within about 0.1% above); counting per trace with
+ * `stats ... by traceId` is exact but 5 to 20 times slower, past the request timeout on the
+ * legacy engine for a week of busy data.
  */
 export const buildMetricsQueries = (
   sourceOnlyQuery: string,
   whereQuery: string,
   rootCase: string,
   filteredRootCase: string = rootCase
-) => {
-  const perTrace = `stats count() as runs, max(err) as err by traceId`;
-  const flagErrors = `eval err = if(${IS_ERROR}, 1, 0)`;
-  return {
-    // Source-only: Total Spans and their errors are unaffected by the user's filter.
-    spans: `${sourceOnlyQuery} | where ${IS_GENAI_SPAN} | stats count() as total_spans, sum(case(${IS_ERROR}, 1 else 0)) as error_spans`,
-    // Source-only: Total Traces, agent runs, and traces with an errored agent run.
-    roots: `${sourceOnlyQuery} | where ${rootCase} | ${flagErrors} | ${perTrace} | stats count() as total_traces, sum(runs) as total_runs, sum(err) as error_traces`,
-    // With the user's filter: tokens and latency of the agent runs.
-    rootStats: `${whereQuery} | where ${filteredRootCase} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens`,
-    // With the user's filter: the traces and agent runs the table lists.
-    filteredRoots: `${whereQuery} | where ${filteredRootCase} | stats count() as runs by traceId | stats count() as filtered_traces, sum(runs) as filtered_runs`,
-    // With the user's filter: spans, for the Spans tab's info bar.
-    filteredSpans: `${whereQuery} | where ${IS_GENAI_SPAN} | stats count() as filtered_spans`,
-    sessions: `${sourceOnlyQuery} | where isnotnull(\`${AGENT_TRACES_SESSION_ID_FIELD}\`) | stats distinct_count(\`${AGENT_TRACES_SESSION_ID_FIELD}\`) as total_sessions`,
-  };
-};
+) => ({
+  // Source-only: Total Spans and their errors are unaffected by the user's filter.
+  spans: `${sourceOnlyQuery} | where ${IS_GENAI_SPAN} | stats count() as total_spans, sum(case(${IS_ERROR}, 1 else 0)) as error_spans`,
+  // Source-only: Total Traces and agent runs (parallel agents are one trace, several runs).
+  roots: `${sourceOnlyQuery} | where ${rootCase} | stats distinct_count(traceId) as total_traces, count() as total_runs`,
+  // Source-only: traces with an errored agent run.
+  errorRoots: `${sourceOnlyQuery} | where (${rootCase}) AND ${IS_ERROR} | stats distinct_count(traceId) as error_traces`,
+  // With the user's filter: tokens, latency, and the traces and agent runs the table lists.
+  rootStats: `${whereQuery} | where ${filteredRootCase} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens, distinct_count(traceId) as filtered_traces, count() as filtered_runs`,
+  // With the user's filter: spans, for the Spans tab's info bar.
+  filteredSpans: `${whereQuery} | where ${IS_GENAI_SPAN} | stats count() as filtered_spans`,
+  sessions: `${sourceOnlyQuery} | where isnotnull(\`${AGENT_TRACES_SESSION_ID_FIELD}\`) | stats distinct_count(\`${AGENT_TRACES_SESSION_ID_FIELD}\`) as total_sessions`,
+});
 
 const doFetchMetrics = async (
   pplService: PPLService,
@@ -148,12 +146,12 @@ const doFetchMetrics = async (
   // Note: User non-where commands (head, sort, etc.) are intentionally excluded from stats queries.
   // When a user types `| head 10`, it limits the data display but should not affect aggregate counts
   // or statistics. The UI hides the "of X total" text when head is detected (see queryEndsWithHead).
-  const [spanStats, rootStats, filteredStats, filteredRoots, filteredCounts, sessionStats] =
+  const [spanStats, rootStats, errorStats, filteredStats, filteredCounts, sessionStats] =
     await Promise.all([
       run(queries.spans),
       run(queries.roots),
+      run(queries.errorRoots),
       run(queries.rootStats),
-      run(queries.filteredRoots),
       run(queries.filteredSpans),
       // Isolated: indices without the session field would otherwise fail the whole batch.
       run(queries.sessions).catch(() => ({}) as ReturnType<typeof parseStatsResponse>),
@@ -162,16 +160,16 @@ const doFetchMetrics = async (
   return {
     totalTraces: rootStats.total_traces ?? 0,
     totalSpans: spanStats.total_spans ?? 0,
-    filteredTraces: filteredRoots.filtered_traces ?? 0,
+    filteredTraces: filteredStats.filtered_traces ?? 0,
     totalAgentRuns: rootStats.total_runs ?? 0,
-    filteredAgentRuns: filteredRoots.filtered_runs ?? 0,
-    // Tokens, latency and agent runs come from the filtered queries.
-    countsMayIncludeDuplicates: (filteredExclusion ?? exclusion).capped,
+    filteredAgentRuns: filteredStats.filtered_runs ?? 0,
+    // Agent runs, tokens and latency may count a few runs twice when either lookup was capped.
+    countsMayIncludeDuplicates: exclusion.capped || !!filteredExclusion?.capped,
     filteredSpans: filteredCounts.filtered_spans ?? 0,
     totalTokens: (filteredStats.input_tokens ?? 0) + (filteredStats.output_tokens ?? 0),
     latencyP50Nanos: filteredStats.p50_latency ?? 0,
     latencyP99Nanos: filteredStats.p99_latency ?? 0,
-    errorTraces: rootStats.error_traces ?? 0,
+    errorTraces: errorStats.error_traces ?? 0,
     errorSpans: spanStats.error_spans ?? 0,
     totalSessions: sessionStats.total_sessions ?? null,
   };

@@ -57,7 +57,7 @@ describe('nestedAiRunsAmong', () => {
       link('t2', 'x', 'h2'),
       link('t2', 'y', 'h2'),
     ]);
-    expect([...nested]).toEqual(['inner']);
+    expect([...nested]).toEqual(['t1:inner']);
     const [usedDataset, query] = executeQuery.mock.calls[0];
     // The chains are read whatever the picked time range.
     expect(usedDataset).not.toHaveProperty('timeFieldName');
@@ -101,43 +101,69 @@ describe('shadowedAiRootsExclusion', () => {
     expect(executeQuery).not.toHaveBeenCalled();
   });
 
+  /** Answers each lookup by what it asks for, whatever order they run in. */
+  const lookups = (answers: {
+    belowRoot?: unknown;
+    withGenAiRoot?: unknown;
+    repeated?: unknown;
+    marked?: unknown;
+    chains?: unknown;
+  }) =>
+    jest.fn(async (_dataset: unknown, query: string) => {
+      if (query.includes('parentSpanId != "" | stats')) return answers.belowRoot ?? ids();
+      if (query.includes('isnotnull(`attributes.gen_ai.operation.name`)'))
+        return answers.withGenAiRoot ?? ids();
+      if (query.includes('where runs > 1')) return answers.repeated ?? ids();
+      if (query.includes('is_root` = true and traceId in')) return answers.marked ?? spans();
+      return answers.chains ?? spans();
+    });
+
   it('excludes marked spans under a GenAI root and marked spans under another marked span', async () => {
     setAiRootFieldPresent('ds-1', true);
-    const executeQuery = jest
-      .fn()
-      // Traces with a marked span below the root, and those of them with a GenAI root.
-      .mockResolvedValueOnce(ids('t-sdk', 't-late'))
-      .mockResolvedValueOnce(ids('t-sdk'))
-      // Traces with several marked spans, their marked spans, and their chains.
-      .mockResolvedValueOnce(ids('t-sdk', 't-late'))
-      .mockResolvedValueOnce(spans(['t-late', 'outer', 'http'], ['t-late', 'inner', 'llm']))
-      .mockResolvedValueOnce(
-        spans(
-          ['t-late', 'http', ''],
-          ['t-late', 'outer', 'http'],
-          ['t-late', 'llm', 'outer'],
-          ['t-late', 'inner', 'llm']
-        )
-      );
+    const timed = { ...dataset, timeFieldName: 'endTime' };
+    const executeQuery = lookups({
+      belowRoot: ids('t-sdk', 't-late'),
+      withGenAiRoot: ids('t-sdk'),
+      repeated: ids('t-sdk', 't-late'),
+      marked: spans(['t-late', 'outer', 'http'], ['t-late', 'inner', 'llm']),
+      chains: spans(
+        ['t-late', 'http', ''],
+        ['t-late', 'outer', 'http'],
+        ['t-late', 'llm', 'outer'],
+        ['t-late', 'inner', 'llm']
+      ),
+    });
 
-    const exclusion = await shadowedAiRootsExclusion({ executeQuery }, dataset, source);
+    const exclusion = await shadowedAiRootsExclusion({ executeQuery }, timed, source);
 
     expect(exclusion).toEqual({
       clause: ' AND NOT (parentSpanId != "" AND traceId in ("t-sdk")) AND NOT spanId in ("inner")',
       capped: false,
     });
-    // t-sdk is already excluded through its GenAI root, so only t-late's chains are read.
-    expect(executeQuery.mock.calls[3][1]).toContain('traceId in ("t-late")');
+    const call = (part: string) => executeQuery.mock.calls.find(([, q]) => q.includes(part));
+    // t-sdk is already excluded through its GenAI root, so only t-late is looked up.
+    const marked = call('is_root` = true and traceId in');
+    expect(marked?.[1]).toContain('traceId in ("t-late")');
+    // The runs that can hide others are read in the picked range; only the chains are not.
+    expect(marked?.[0]).toHaveProperty('timeFieldName', 'endTime');
+    expect(call('| where traceId in')?.[0]).not.toHaveProperty('timeFieldName');
+  });
+
+  it('does not hide a run in range because of an outer run outside it', async () => {
+    setAiRootFieldPresent('ds-1', true);
+    // The outer marked span is before the range, so the in-range lookup does not return it.
+    const executeQuery = lookups({
+      repeated: ids('t1'),
+      marked: spans(['t1', 'inner', 'llm'], ['t1', 'sibling', 'http']),
+      chains: spans(['t1', 'outer', 'http'], ['t1', 'llm', 'outer'], ['t1', 'inner', 'llm']),
+    });
+    expect((await shadowedAiRootsExclusion({ executeQuery }, dataset, source)).clause).toBe('');
   });
 
   it('reports a capped lookup', async () => {
     setAiRootFieldPresent('ds-1', true);
     const many = Array.from({ length: COUNTS_EXCLUSION_LIMIT + 1 }, (_, i) => `t${i}`);
-    const executeQuery = jest
-      .fn()
-      .mockResolvedValueOnce(ids(...many))
-      .mockResolvedValueOnce(ids())
-      .mockResolvedValueOnce(ids());
+    const executeQuery = lookups({ belowRoot: ids(...many) });
     expect((await shadowedAiRootsExclusion({ executeQuery }, dataset, source)).capped).toBe(true);
   });
 

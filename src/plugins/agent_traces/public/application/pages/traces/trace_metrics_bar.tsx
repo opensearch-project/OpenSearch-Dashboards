@@ -177,7 +177,7 @@ export const TraceMetricsBar: React.FC<TraceMetricsBarProps> = ({ metrics, onErr
                             )}
                             content={i18n.translate('agentTraces.metricsBar.mayIncludeDuplicates', {
                               defaultMessage:
-                                'Too many agent runs to check them all for duplicates, so tokens and latency may count a few agent runs twice.',
+                                'Too many agent runs to check them all for duplicates, so agent runs, tokens and latency may count a few runs twice. Trace counts are exact.',
                             })}
                             iconProps={{ 'data-test-subj': 'agentTracesMetricsDuplicatesNotice' }}
                           />

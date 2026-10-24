@@ -24,7 +24,7 @@ import {
 import { getHitId } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import './traces_table.scss';
 import { dropShadowedAiRoots } from '../../utils/ai_root';
-import { nestedAiRunsAmong, SpanLink } from './hooks/shadowed_ai_roots';
+import { nestedAiRunsAmong, runKey, SpanLink } from './hooks/shadowed_ai_roots';
 import { getSourceCommand } from '../sessions/session_utils';
 
 const DEFAULT_TRACE_COLUMNS = [...AGENT_TRACES_DEFAULT_COLUMNS];
@@ -85,11 +85,31 @@ export const TracesDataTable: React.FC = () => {
   const hits = useMemo(
     () =>
       nestedRuns?.hits === rootHits && nestedRuns.spanIds.size > 0
-        ? rootHits.filter((hit) => !nestedRuns.spanIds.has(String(hit._source?.spanId)))
+        ? rootHits.filter(
+            (hit) =>
+              !nestedRuns.spanIds.has(
+                runKey(String(hit._source?.traceId ?? ''), String(hit._source?.spanId ?? ''))
+              )
+          )
         : rootHits,
     [rootHits, nestedRuns]
   );
   const { openFlyout, updateFlyoutFullTree } = useTraceFlyout();
+  // "Agent runs" when a trace is listed more than once (parallel agents), seen in the rows or, for
+  // the rest, when runs clearly outnumber traces (the trace count is approximate, within ~0.1%).
+  const listsAgentRuns = useMemo(() => {
+    const seen = new Set<unknown>();
+    const repeated = hits.some((hit) => {
+      const traceId = hit._source?.traceId;
+      if (seen.has(traceId)) return true;
+      seen.add(traceId);
+      return false;
+    });
+    return (
+      repeated ||
+      (!!traceMetrics && traceMetrics.filteredAgentRuns > traceMetrics.filteredTraces * 1.01)
+    );
+  }, [hits, traceMetrics]);
 
   // Build row metadata map from hits
   const rowMetaMap = useMemo(() => {
@@ -412,11 +432,7 @@ export const TracesDataTable: React.FC = () => {
           hitsCount={hits.length}
           totalCount={traceMetrics?.filteredAgentRuns ?? hits.length}
           elapsedMs={results?.elapsedMs}
-          entityName={
-            traceMetrics && traceMetrics.filteredAgentRuns > traceMetrics.filteredTraces
-              ? 'agentRun'
-              : 'trace'
-          }
+          entityName={listsAgentRuns ? 'agentRun' : 'trace'}
           wrapCellText={wrapCellText}
           onWrapCellTextChange={setWrapCellText}
         />
