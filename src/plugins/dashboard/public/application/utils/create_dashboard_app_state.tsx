@@ -115,6 +115,9 @@ export const createDashboardGlobalAndAppState = ({
               currentState.layout
             )
           );
+          // Writing back the normalized state must not add a history entry, or Back would
+          // land on this URL again.
+          osdUrlStateStorage.flush({ replace: true });
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
           // Sync from state url should be refactored within this application. The app is syncing from
