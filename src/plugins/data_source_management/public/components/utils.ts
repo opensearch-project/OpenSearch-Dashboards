@@ -38,6 +38,7 @@ import {
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
+import { isQueryDatasourcesUnavailable } from './direct_query_data_sources_components/direct_query_data_connection/direct_query_fetch_errors';
 import {
   DataConnectionSavedObjectAttributes,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
@@ -173,8 +174,22 @@ export const fetchDataSourceConnections = async (
       .map((ds) => getDirectQueryConnections(ds.id, http!).catch(() => []));
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
+    // Callers such as the association modal pass a mode string here. Only the Direct
+    // Query table passes boolean `true`; keep that distinction so we do not rethrow
+    // into callers that expect `[]` on failure.
+    const isDirectQueryTable = directQueryTable === true;
     const localClusterConnections =
-      directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+      directQueryTable && !hideLocalCluster
+        ? await getLocalClusterConnections(http!).catch((err) => {
+            if (isQueryDatasourcesUnavailable(err)) {
+              if (isDirectQueryTable && directQueryConnections.length === 0) {
+                throw err;
+              }
+              return [];
+            }
+            throw err;
+          })
+        : undefined;
 
     const remoteClusterConnections = showRemoteOpensearchConnection
       ? await fetchRemoteClusterConnections(dataSources, http)
@@ -186,7 +201,10 @@ export const fetchDataSourceConnections = async (
       remoteClusterConnections,
       localClusterConnections
     );
-  } catch {
+  } catch (error) {
+    if (isQueryDatasourcesUnavailable(error)) {
+      throw error;
+    }
     notifications?.toasts.addDanger(
       i18n.translate('dataSourcesManagement.fetchDataSourceConnections', {
         defaultMessage: 'Cannot fetch data sources',
