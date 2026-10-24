@@ -109,6 +109,27 @@ describe('#dataSourceManagement', () => {
     }).toThrow('cannot call `registerAuthenticationMethod` after data source management startup.');
   });
 
+  it('should register the jwt authentication method only when it is enabled', () => {
+    const setupWithJwtEnabled = (jwtAuthEnabled: boolean) => {
+      const plugin = new DataSourceManagementPlugin(mockInitializerContext);
+      plugin.setup(coreSetup, {
+        management: coreSetup.management,
+        indexPatternManagement: coreSetup.indexPatternManagement,
+        dataSource: {
+          awsSigV4AuthEnabled: true,
+          noAuthenticationTypeEnabled: true,
+          usernamePasswordAuthEnabled: true,
+          jwtAuthEnabled,
+          hideLocalCluster: false,
+        } as any,
+      });
+      return plugin.start(coreStart).getAuthenticationMethodRegistry();
+    };
+
+    expect(setupWithJwtEnabled(true).getAuthenticationMethod('jwt')).toBeDefined();
+    expect(setupWithJwtEnabled(false).getAuthenticationMethod('jwt')).toBeUndefined();
+  });
+
   it('should register application in the management section', () => {
     const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {

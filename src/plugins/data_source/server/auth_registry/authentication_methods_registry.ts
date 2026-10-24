@@ -22,10 +22,11 @@ export class AuthenticationMethodRegistry {
     if (
       method.name === AuthType.NoAuth ||
       method.name === AuthType.UsernamePasswordType ||
-      method.name === AuthType.SigV4
+      method.name === AuthType.SigV4 ||
+      method.name === AuthType.JWT
     ) {
       throw new Error(
-        `Must not be no_auth or username_password or sigv4 for registered auth types`
+        `Must not be no_auth or username_password or sigv4 or jwt for registered auth types`
       );
     }
     if (this.authMethods.has(method.name)) {

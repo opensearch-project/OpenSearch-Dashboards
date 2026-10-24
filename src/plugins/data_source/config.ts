@@ -59,6 +59,9 @@ export const configSchema = schema.object({
     AWSSigV4: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    JWT: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
