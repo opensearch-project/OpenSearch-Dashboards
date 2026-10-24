@@ -15,7 +15,6 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
-  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
 import {
@@ -26,7 +25,6 @@ import {
   pivot,
 } from '../utils/data_transformation';
 import { ceilToTimeUnit, roundToTimeUnit } from '../utils/data_transformation/utils/time';
-import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 const alignTimeRangeToBuckets = (
   timeRange: { from: string; to: string } | undefined,
@@ -106,7 +104,6 @@ export const createBarSpec = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
-    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -276,7 +273,6 @@ export const createGroupedTimeBarChart = (
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,
-    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
