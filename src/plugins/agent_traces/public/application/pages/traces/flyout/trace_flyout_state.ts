@@ -43,19 +43,24 @@ export interface SessionViewState {
   drillTab: 'traces' | 'spans';
 }
 
-/** Flyouts visited since the flyout was opened from a table, and the one shown. */
+/**
+ * Flyouts visited since the flyout was opened from a table, as a stack: the last entry is the
+ * one shown, and Back pops it.
+ */
 export interface FlyoutHistory {
   entries: FlyoutView[];
-  index: number;
 }
 
-export const EMPTY_HISTORY: FlyoutHistory = { entries: [], index: -1 };
+export const EMPTY_HISTORY: FlyoutHistory = { entries: [] };
 
 export const currentView = (history: FlyoutHistory): FlyoutView | null =>
-  history.entries[history.index] ?? null;
+  history.entries[history.entries.length - 1] ?? null;
+
+/** Depth of the flyout shown (0 for one opened from a table); -1 when none is open. */
+export const historyDepth = (history: FlyoutHistory): number => history.entries.length - 1;
 
 /** Start over with one flyout (opened from a table, not from another flyout). */
-export const resetHistory = (view: FlyoutView): FlyoutHistory => ({ entries: [view], index: 0 });
+export const resetHistory = (view: FlyoutView): FlyoutHistory => ({ entries: [view] });
 
 /**
  * Show a flyout reached from the current one. `updateCurrent` records state on the flyout
@@ -66,30 +71,28 @@ export const pushHistory = (
   view: FlyoutView,
   updateCurrent?: (current: FlyoutView) => FlyoutView
 ): FlyoutHistory => {
-  const kept = history.entries.slice(0, history.index + 1);
-  const last = kept.length - 1;
-  if (updateCurrent && last >= 0) kept[last] = updateCurrent(kept[last]);
-  return { entries: [...kept, view], index: kept.length };
+  const entries = [...history.entries];
+  const last = entries.length - 1;
+  if (updateCurrent && last >= 0) entries[last] = updateCurrent(entries[last]);
+  return { entries: [...entries, view] };
 };
 
 /** Return to the flyout the current one was opened from, forgetting the current one. */
 export const backHistory = (history: FlyoutHistory): FlyoutHistory =>
-  history.index > 0
-    ? { entries: history.entries.slice(0, history.index), index: history.index - 1 }
-    : history;
+  history.entries.length > 1 ? { entries: history.entries.slice(0, -1) } : history;
 
 /** The flyout the current one was opened from. */
 export const previousView = (history: FlyoutHistory): FlyoutView | undefined =>
-  history.entries[history.index - 1];
+  history.entries[history.entries.length - 2];
 
 export type TraceView = Extract<FlyoutView, { kind: 'trace' }>;
 export type SessionView = Extract<FlyoutView, { kind: 'session' }>;
 
 /**
- * Open a trace from the session flyout. When the session was itself opened from that trace,
- * go back to it instead of repeating it (no trace -> session -> trace loop), showing the row
- * picked (another agent of the same trace). Otherwise drill down, recording on the session
- * which agent run was opened and where the session was left, so Back restores both.
+ * Open a trace from the session flyout. When the session was itself opened from that same run,
+ * go back to it instead of repeating it (no trace -> session -> trace loop). Otherwise, another
+ * agent run of that trace included, drill down, recording on the session which run was opened
+ * and where the session was left, so Back returns to the session with both restored.
  */
 export const openTraceFromSession = (
   history: FlyoutHistory,
@@ -97,11 +100,12 @@ export const openTraceFromSession = (
   sessionView?: SessionViewState
 ): FlyoutHistory => {
   const previous = previousView(history);
-  if (previous?.kind === 'trace' && previous.trace.traceId === next.trace.traceId) {
-    const back = backHistory(history);
-    const entries = [...back.entries];
-    entries[back.index] = previous.trace.spanId === next.trace.spanId ? previous : next;
-    return { ...back, entries };
+  if (
+    previous?.kind === 'trace' &&
+    previous.trace.traceId === next.trace.traceId &&
+    previous.trace.spanId === next.trace.spanId
+  ) {
+    return backHistory(history);
   }
   return pushHistory(history, next, (current) =>
     current.kind === 'session'

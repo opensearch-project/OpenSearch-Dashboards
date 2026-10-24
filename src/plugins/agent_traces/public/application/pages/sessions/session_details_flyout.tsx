@@ -313,6 +313,8 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
     <EuiFlyout
       onClose={onClose}
       size="l"
+      // The Back row lines up with the close button for this padding (flyout_history_nav.scss).
+      paddingSize="l"
       ownFocus={false}
       className="agtSessionFlyout"
       data-test-subj="agentTracesSessionFlyout"
@@ -430,68 +432,71 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                   })}
                 </EuiLink>
               </div>
-              {traces.map((trace, i) => (
-                <div
-                  role="button"
-                  tabIndex={0}
-                  key={`${trace.traceId}:${trace.root.spanId}`}
-                  className={`agtSessionFlyout__traceItem${
-                    i === focusedIndex ? ' agtSessionFlyout__traceItem--focused' : ''
-                  }`}
-                  aria-current={i === focusedIndex}
-                  onClick={() => focusTrace(i)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      focusTrace(i);
-                    }
-                  }}
-                  data-test-subj={`agentTracesSessionTraceItem-${i + 1}`}
-                >
-                  <span className="agtSessionFlyout__traceItemLabel">
-                    <EuiButtonIcon
-                      size="xs"
-                      color="text"
-                      iconType="arrowRight"
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        openTrace(trace.root);
-                      }}
-                      aria-label={i18n.translate('agentTraces.sessions.flyout.openTrace', {
-                        defaultMessage: 'Open {label}',
-                        values: { label: traceLabel(trace, i + 1) },
-                      })}
-                      data-test-subj={`agentTracesSessionOpenTrace-${i + 1}`}
-                    />
-                    <strong
-                      className="agtSessionFlyout__traceItemName"
-                      title={traceLabel(trace, i + 1)}
-                    >
-                      {traceLabel(trace, i + 1)}
-                    </strong>
-                    {errorSpanCount(trace) > 0 && (
-                      <EuiToolTip
-                        content={i18n.translate('agentTraces.sessions.flyout.traceErrors', {
-                          defaultMessage:
-                            '{count, plural, one {# span} other {# spans}} with errors',
-                          values: { count: errorSpanCount(trace) },
+              {traces.map((trace, i) => {
+                const label = traceLabel(trace, i + 1);
+                return (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    key={`${trace.traceId}:${trace.root.spanId}`}
+                    className={`agtSessionFlyout__traceItem${
+                      i === focusedIndex ? ' agtSessionFlyout__traceItem--focused' : ''
+                    }`}
+                    aria-current={i === focusedIndex}
+                    onClick={() => focusTrace(i)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        focusTrace(i);
+                      }
+                    }}
+                    data-test-subj={`agentTracesSessionTraceItem-${i + 1}`}
+                  >
+                    <span className="agtSessionFlyout__traceItemLabel">
+                      <EuiButtonIcon
+                        size="xs"
+                        color="text"
+                        iconType="arrowRight"
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          openTrace(trace.root);
+                        }}
+                        aria-label={i18n.translate('agentTraces.sessions.flyout.openTrace', {
+                          defaultMessage: 'Open {label}',
+                          values: { label },
                         })}
-                      >
-                        <EuiIcon
-                          type="alert"
-                          color="danger"
-                          size="s"
-                          aria-label={i18n.translate('agentTraces.sessions.flyout.traceHasErrors', {
-                            defaultMessage: 'Trace has errors',
+                        data-test-subj={`agentTracesSessionOpenTrace-${i + 1}`}
+                      />
+                      <strong className="agtSessionFlyout__traceItemName" title={label}>
+                        {label}
+                      </strong>
+                      {errorSpanCount(trace) > 0 && (
+                        <EuiToolTip
+                          content={i18n.translate('agentTraces.sessions.flyout.traceErrors', {
+                            defaultMessage:
+                              '{count, plural, one {# span} other {# spans}} with errors',
+                            values: { count: errorSpanCount(trace) },
                           })}
-                          data-test-subj={`agentTracesSessionTraceError-${i + 1}`}
-                        />
-                      </EuiToolTip>
-                    )}
-                  </span>
-                  <LatencyAndTokens row={trace.root} />
-                </div>
-              ))}
+                        >
+                          <EuiIcon
+                            type="alert"
+                            color="danger"
+                            size="s"
+                            aria-label={i18n.translate(
+                              'agentTraces.sessions.flyout.traceHasErrors',
+                              {
+                                defaultMessage: 'Trace has errors',
+                              }
+                            )}
+                            data-test-subj={`agentTracesSessionTraceError-${i + 1}`}
+                          />
+                        </EuiToolTip>
+                      )}
+                    </span>
+                    <LatencyAndTokens row={trace.root} />
+                  </div>
+                );
+              })}
             </EuiFlexItem>
 
             <EuiFlexItem grow={7} className="agtSessionFlyout__conversation">

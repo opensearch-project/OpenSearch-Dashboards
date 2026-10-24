@@ -330,13 +330,15 @@ describe('TraceFlyoutContext', () => {
       expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
     });
 
-    it('shows the picked agent when the session opens another agent of the same trace', () => {
+    it('drills down to another agent of the trace a session came from, with Back to the session', () => {
       renderProvider();
       click('Open trace');
       click('Session link');
       click('Second agent from session');
       expect(screen.getByTestId('mock-flyout')).toHaveTextContent('Second agent');
-      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
+      click('Back to session sess-from-trace');
+      expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-from-trace');
+      expect(screen.getByText('Back to trace Test Trace')).toBeInTheDocument();
     });
 
     it('gives each trace opened from a table a fresh flyout', () => {

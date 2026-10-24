@@ -85,7 +85,7 @@ describe('moving between a trace and its session', () => {
     expect(currentView(h)).toEqual(run('t', 'agent-2'));
   });
 
-  it('goes back to the trace a session came from, keeping it when the same run is picked', () => {
+  it('goes back to the run a session came from; another run of the trace is a drill-down', () => {
     const start = openSessionFromTrace(resetHistory(run('t', 'agent-1', true)), sessionView('s1'));
     expect(start.entries[1]).toEqual({
       ...sessionView('s1'),
@@ -97,7 +97,12 @@ describe('moving between a trace and its session', () => {
     expect(same.entries).toEqual([run('t', 'agent-1', true)]);
 
     const other = openTraceFromSession(start, run('t', 'agent-2'));
-    expect(other.entries).toEqual([run('t', 'agent-2')]);
+    expect(other.entries).toEqual([
+      run('t', 'agent-1', true),
+      { ...sessionView('s1'), focusTraceId: 't', focusSpanId: 'agent-2', sessionView: undefined },
+      run('t', 'agent-2'),
+    ]);
+    expect(previousView(other)).toEqual(other.entries[1]);
   });
 
   it('goes back to the session a trace came from', () => {

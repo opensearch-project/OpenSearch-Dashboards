@@ -234,6 +234,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      // The Back row lines up with the close button for this padding (flyout_history_nav.scss).
+      paddingSize="l"
       aria-labelledby="trace-details-flyout"
       style={{ ...(flyoutWidth && { width: `${flyoutWidth}px` }), maxWidth: '95vw' }}
     >

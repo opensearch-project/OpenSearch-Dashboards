@@ -22,6 +22,7 @@ import {
   SessionView,
   TraceView,
   currentView,
+  historyDepth,
   backHistory,
   navigationTargets,
   openSessionFromTrace,
@@ -141,7 +142,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {view?.kind === 'trace' && (
         <TraceDetailsFlyout
           // Each history entry gets a fresh flyout (selected span, tab).
-          key={`trace-${history.index}-${view.trace.id}`}
+          key={`trace-${historyDepth(history)}-${view.trace.id}`}
           trace={view.trace}
           onClose={closeFlyout}
           fullTree={view.fullTree}
@@ -154,7 +155,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {view?.kind === 'session' && (
         <SessionFlyoutHost
           // A new session gets a fresh flyout (focused trace, view and tab reset).
-          key={`session-${history.index}-${view.sessionId}`}
+          key={`session-${historyDepth(history)}-${view.sessionId}`}
           sessionId={view.sessionId}
           session={view.session}
           focusTraceId={view.focusTraceId}
