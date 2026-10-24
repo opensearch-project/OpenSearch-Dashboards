@@ -5,5 +5,6 @@
 
 export * from './constants';
 export * from './metrics';
+export * from './ppl_stream_types';
 export * from './types';
 export * from './utils';

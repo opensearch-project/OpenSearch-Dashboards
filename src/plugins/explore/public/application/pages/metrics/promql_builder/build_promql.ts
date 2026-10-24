@@ -9,10 +9,15 @@ import {
   Operation,
   OperationGrouping,
   RANGE_FUNCTIONS,
+  emptyFilter,
   nextFilterId,
 } from './promql_parser';
 import { AGGREGATION_IDS } from './operation_categories';
-import { escapeLabelValue } from '../explore/services/query_generator';
+import {
+  escapeLabelValue,
+  formatLabelName,
+  metricSelector,
+} from '../explore/services/query_generator';
 
 const BINARY_OP_SYMBOLS: Record<string, string> = {
   add: '+',
@@ -44,13 +49,6 @@ export type BuilderAction =
   | { type: 'SET_RANGE'; range: string }
   | { type: 'REMOVE_RANGE' }
   | { type: 'RESET' };
-
-export const emptyFilter = (): LabelFilter => ({
-  id: nextFilterId(),
-  label: '',
-  op: '=',
-  value: '',
-});
 
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
@@ -108,23 +106,20 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
 
 function groupingClause(op: Operation): string {
   return op.grouping?.labels?.length
-    ? ` ${op.grouping.mode} (${op.grouping.labels.join(', ')})`
+    ? ` ${op.grouping.mode} (${op.grouping.labels.map(formatLabelName).join(', ')})`
     : '';
 }
 
 export function buildPromQL(state: BuilderState): string {
   if (!state.metric) return '';
 
-  const matchers = state.labelFilters
-    .filter((f) => f.label && f.value)
-    .map((f) => `${f.label}${f.op}"${escapeLabelValue(f.value)}"`);
+  const matchers = state.labelFilters.flatMap(({ label, op, value }) =>
+    label && value !== undefined
+      ? [`${formatLabelName(label)}${op}"${escapeLabelValue(value)}"`]
+      : []
+  );
 
-  let selector = state.metric;
-  if (matchers.length > 0) {
-    selector = `${state.metric}{${matchers.join(', ')}}`;
-  }
-
-  let expr = selector;
+  let expr = metricSelector(state.metric, matchers);
   const hasRangeFunction = state.operations.some((op) => RANGE_FUNCTIONS.has(op.id));
   if (state.range && !hasRangeFunction) {
     expr = `${expr}[${state.range}]`;

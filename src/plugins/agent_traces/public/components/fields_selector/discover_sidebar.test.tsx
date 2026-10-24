@@ -92,12 +92,27 @@ jest.mock('./field_list', () => ({
 }));
 
 jest.mock('./facet_list', () => ({
-  FacetList: ({ title, fields }: { title: string; fields: any[] }) => (
+  FacetList: ({
+    title,
+    fields,
+    getDetailsByField,
+  }: {
+    title: string;
+    fields: Array<{ name: string }>;
+    getDetailsByField: (field: { name: string }) => {
+      buckets: Array<{ value: string; count: number }>;
+    };
+  }) => (
     <div data-test-subj="mocked-facet-list">
       <h3>{title}</h3>
       {fields.map((field, index) => (
         <div key={index} data-test-subj="facetList-field">
           {field.name}
+          {getDetailsByField(field).buckets.map((b) => (
+            <span key={b.value} data-test-subj="facetList-bucket">
+              {`${b.value}:${b.count}`}
+            </span>
+          ))}
         </div>
       ))}
     </div>
@@ -238,5 +253,20 @@ describe('discover sidebar', function () {
 
     const allFields = screen.getAllByTestId('fieldList-field');
     expect(allFields.length).toBeGreaterThan(0);
+  });
+
+  it('uses tab-supplied facet buckets and hides Selected for fixed-column tabs', function () {
+    mockUseFlavorId.mockReturnValue(AgentTracesFlavor.Traces);
+    const props = getCompProps();
+    render(
+      <DiscoverSidebar
+        {...props}
+        facetFields={['extension']}
+        facetBuckets={{ extension: [{ value: 'jpg', display: 'jpg', count: 7, percent: 100 }] }}
+        fixedColumns
+      />
+    );
+    expect(screen.getByTestId('facetList-bucket')).toHaveTextContent('jpg:7');
+    expect(screen.queryByTestId('mocked-field-list-selected')).not.toBeInTheDocument();
   });
 });

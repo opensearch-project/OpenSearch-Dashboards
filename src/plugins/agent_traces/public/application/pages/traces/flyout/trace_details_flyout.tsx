@@ -20,6 +20,7 @@ import {
   EuiCopy,
   EuiResizableContainer,
   EuiBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { TraceRow } from '../hooks/tree_utils';
 import { TraceFlowView } from '../flow/trace_flow_view';
@@ -32,11 +33,20 @@ import {
   countSpans,
   flattenVisibleNodes,
   calculateTimelineRange,
+  collectExpandableIds,
 } from './tree_helpers';
 import { TraceTreeView } from './trace_tree_view';
 import { TimelineGantt } from './timeline_gantt';
 import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
+import { FlyoutHistoryNav } from './flyout_history_nav';
+import { FlyoutNavigation } from './trace_flyout_state';
+import { TraceLogsTab } from '../../../../../../explore/public';
+import { useTraceLogs } from './use_trace_logs';
+import { TraceLogsNotices } from './trace_logs_notices';
+import { readAttribute } from '../hooks/genai_message_preview';
+import { SessionRow } from '../../sessions/session_utils';
+import { aiRootsOf, isAiRootRow } from '../../../utils/ai_root';
 import './trace_details_flyout.scss';
 
 export interface TraceDetailsProps {
@@ -45,7 +55,46 @@ export interface TraceDetailsProps {
   fullTree?: TraceRow[];
   isLoadingFullTree?: boolean;
   fullTreeError?: string;
+  /** Open this trace's session (replaces this flyout with the session flyout). */
+  onOpenSession?: (session: SessionRow | string) => void;
+  /** Back and Forward through the flyouts the user moved between. */
+  navigation?: FlyoutNavigation;
 }
+
+/** The trace's session id: the first span carrying gen_ai.conversation.id. */
+export const sessionIdOf = (rows: Array<TraceRow | undefined>): string | undefined => {
+  for (const row of rows) {
+    const value = readAttribute(row?.rawDocument, 'gen_ai.conversation.id');
+    if (typeof value === 'string' && value) return value;
+  }
+  return undefined;
+};
+
+/** Every span of a tree, depth first. */
+const flattenRows = (rows: TraceRow[], out: TraceRow[] = []): TraceRow[] => {
+  for (const row of rows) {
+    out.push(row);
+    flattenRows((row.children as TraceRow[] | undefined) ?? [], out);
+  }
+  return out;
+};
+
+/**
+ * The span the flyout is about: the clicked row when it represents its trace (an AI root),
+ * else its nearest AI-root ancestor, else the trace's AI root (`aiRootsOf`), else the top span.
+ */
+export const headerSpanOf = (trace: TraceRow, fullTree: TraceRow[]): TraceRow => {
+  const all = flattenRows(fullTree);
+  const bySpanId = new Map(all.map((r) => [r.spanId, r]));
+  const seen = new Set<string>();
+  let current: TraceRow | undefined = bySpanId.get(trace.spanId) ?? trace;
+  while (current && !seen.has(current.spanId)) {
+    if (isAiRootRow(current)) return current;
+    seen.add(current.spanId);
+    current = current.parentSpanId ? bySpanId.get(current.parentSpanId) : undefined;
+  }
+  return aiRootsOf(all)[0] ?? fullTree[0];
+};
 
 export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   trace,
@@ -53,11 +102,17 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   fullTree,
   isLoadingFullTree,
   fullTreeError,
+  onOpenSession,
+  navigation,
 }) => {
+  // Header span: the agent the row represents (see headerSpanOf), so name, latency and tokens
+  // are that agent's own, also for parallel agents behind one HTTP root.
   const rootTrace = useMemo(() => {
-    if (fullTree && fullTree.length > 0) return fullTree[0];
+    if (fullTree && fullTree.length > 0) return headerSpanOf(trace, fullTree);
     return trace;
   }, [fullTree, trace]);
+  // Logs correlated with this trace (trace-to-logs correlations, as in Explore traces).
+  const traceLogs = useTraceLogs(rootTrace.traceId);
 
   const traceTreeData = useMemo(() => {
     if (fullTree && fullTree.length > 0) {
@@ -67,6 +122,10 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   }, [trace, fullTree]);
 
   const flatNodes = useMemo(() => flattenTree(traceTreeData), [traceTreeData]);
+  const sessionId = useMemo(
+    () => sessionIdOf([trace, ...flatNodes.map((node) => node.traceRow)]),
+    [trace, flatNodes]
+  );
 
   const initialIndex = flatNodes.findIndex((node) => node.id === trace.id);
   const [selectedNodeIndex, setSelectedNodeIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
@@ -102,19 +161,22 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
+  const expandAll = useCallback(
+    () => setExpandedNodes(collectExpandableIds(traceTreeData)),
+    [traceTreeData]
+  );
+  const collapseAll = useCallback(() => setExpandedNodes(new Set()), []);
+
+  // Expand everything when the tree's spans change (a new trace, or its full tree arriving),
+  // not when the same tree is sent again, so the user's expand/collapse choices stay.
+  const expandableKey = useMemo(
+    () => [...collectExpandableIds(traceTreeData)].sort().join(','),
+    [traceTreeData]
+  );
   useEffect(() => {
-    const allExpandable = new Set<string>();
-    const collectExpandable = (nodes: TreeNode[]) => {
-      nodes.forEach((node) => {
-        if (node.children && node.children.length > 0) {
-          allExpandable.add(node.id);
-          collectExpandable(node.children);
-        }
-      });
-    };
-    collectExpandable(traceTreeData);
-    setExpandedNodes(allExpandable);
-  }, [traceTreeData]);
+    expandAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandableKey]);
 
   const timelineVisibleSpans = useMemo(
     () => flattenVisibleNodes(traceTreeData, expandedNodes),
@@ -188,6 +250,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       />
 
       <EuiFlyoutHeader hasBorder>
+        <FlyoutHistoryNav navigation={navigation} />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
@@ -256,6 +319,24 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
             )}
           </div>
 
+          {sessionId && onOpenSession && (
+            <div className="agentTracesFlyout__metaItem">
+              <EuiText size="xs" className="agentTracesFlyout__metaLabel">
+                {i18n.translate('agentTraces.flyout.sessionId', {
+                  defaultMessage: 'SESSION ID',
+                })}
+              </EuiText>
+              <EuiText size="xs" className="agentTracesFlyout__metaValue">
+                <EuiLink
+                  onClick={() => onOpenSession(sessionId)}
+                  data-test-subj="agentTracesFlyoutSessionLink"
+                >
+                  <code>{sessionId}</code>
+                </EuiLink>
+              </EuiText>
+            </div>
+          )}
+
           <div className="agentTracesFlyout__metaItem">
             <EuiText size="xs" className="agentTracesFlyout__metaLabel">
               {i18n.translate('agentTraces.flyout.duration', {
@@ -314,6 +395,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                           fullTreeError={fullTreeError}
                           onSelectNode={selectNode}
                           onToggleExpanded={toggleExpanded}
+                          onExpandAll={expandAll}
+                          onCollapseAll={collapseAll}
                         />
                       ),
                     },
@@ -351,6 +434,41 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                         />
                       ),
                     },
+                    {
+                      id: 'logs',
+                      name: (
+                        <span data-test-subj="agentTracesFlyoutLogsTab">
+                          {/* No badge without a logs correlation: 0 would read as "no logs". */}
+                          {!traceLogs.isLoading && traceLogs.logDatasets.length > 0 && (
+                            <>
+                              <EuiBadge color="hollow" data-test-subj="agentTracesFlyoutLogsCount">
+                                {traceLogs.logCount}
+                                {traceLogs.cappedDatasetIds.length > 0 ? '+' : ''}
+                              </EuiBadge>{' '}
+                            </>
+                          )}
+                          {i18n.translate('agentTraces.flyout.tabRelatedLogs', {
+                            defaultMessage: 'Related logs',
+                          })}
+                        </span>
+                      ),
+                      content: (
+                        <>
+                          <TraceLogsNotices traceLogs={traceLogs} />
+                          {/* A failed correlations lookup is an error, not "set up a correlation". */}
+                          {!(traceLogs.errors.length > 0 && traceLogs.logDatasets.length === 0) && (
+                            <TraceLogsTab
+                              traceId={rootTrace.traceId}
+                              logDatasets={traceLogs.logDatasets}
+                              datasetLogs={traceLogs.datasetLogs}
+                              isLoading={traceLogs.isLoading}
+                              onSpanClick={selectNode}
+                              traceDataset={traceLogs.traceDataset ?? undefined}
+                            />
+                          )}
+                        </>
+                      ),
+                    },
                   ];
                   return (
                     <EuiTabbedContent
@@ -370,6 +488,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                   selectedNode={selectedNode}
                   selectedTraceRow={selectedTraceRow}
                   onSelectNode={selectNode}
+                  traceLogs={traceLogs}
                 />
               </EuiResizablePanel>
             </>

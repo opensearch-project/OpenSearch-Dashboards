@@ -57,16 +57,16 @@ export interface OpenSearchError {
     message: string;
     attributes?: {
       error?: {
-        root_cause?: [
-          {
-            lang: string;
-            script: string;
-          },
-        ];
-        type: string;
-        reason: string;
-        failed_shards: FailedShard[];
-        caused_by: {
+        root_cause?: Array<{
+          type?: string;
+          reason?: string;
+          lang?: string; // Painless-only
+          script?: string; // Painless-only
+        }>;
+        type?: string;
+        reason?: string;
+        failed_shards?: FailedShard[];
+        caused_by?: {
           type: string;
           reason: string;
           phase: string;

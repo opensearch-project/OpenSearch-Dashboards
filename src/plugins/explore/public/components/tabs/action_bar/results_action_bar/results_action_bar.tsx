@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useObservable } from 'react-use';
+import { StreamingQueryStatus } from '../../../../application/utils/state_management/types';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
@@ -35,6 +36,7 @@ export interface DiscoverResultsActionBarProps {
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
   elapsedMs?: number;
+  streaming?: StreamingQueryStatus;
   dataset?: Dataset;
   inspectionHanlder?: () => void;
   extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
@@ -48,6 +50,7 @@ export const DiscoverResultsActionBar = ({
   resetQuery,
   rows,
   elapsedMs,
+  streaming,
   dataset,
   inspectionHanlder,
   extraActions,
@@ -94,6 +97,7 @@ export const DiscoverResultsActionBar = ({
               onResetQuery={resetQuery}
               rows={rows}
               elapsedMs={elapsedMs}
+              streaming={streaming}
               rowsCountOverride={rowsCountOverride}
               hiddenColumnCount={isLogsTab ? hiddenColumnCount : 0}
               onShowHiddenColumns={() => dispatch(setHideEmptyFields(false))}

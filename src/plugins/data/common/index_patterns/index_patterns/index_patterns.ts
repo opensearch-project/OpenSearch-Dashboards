@@ -88,6 +88,7 @@ export class IndexPatternsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
+  private reconciledMissingTimeField = new Set<string>();
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
   constructor({
@@ -225,8 +226,10 @@ export class IndexPatternsService {
     }
     if (id) {
       indexPatternCache.clear(id);
+      this.reconciledMissingTimeField.delete(id);
     } else {
       indexPatternCache.clearAll();
+      this.reconciledMissingTimeField.clear();
     }
   };
 
@@ -522,6 +525,7 @@ export class IndexPatternsService {
     });
 
     const indexPattern = await this.create(spec, true);
+    await this.reconcileMissingTimeField(indexPattern);
     indexPatternCache.set(id, indexPattern);
 
     if (indexPattern.isUnsupportedTimePattern()) {
@@ -535,6 +539,54 @@ export class IndexPatternsService {
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
+
+  /**
+   * `fields` is a snapshot of the mappings from when the pattern was last
+   * written, and get() does not re-fetch it, so `timeFieldName` can name a
+   * field the pattern no longer contains. Refresh on that mismatch only --
+   * refreshing every get() would add a field-caps request to every dashboard
+   * load. If the field is still absent afterwards it does not exist upstream,
+   * which nothing downstream can recover from, so report it instead.
+   */
+  private async reconcileMissingTimeField(indexPattern: IndexPattern) {
+    if (!indexPattern.timeFieldName || indexPattern.getTimeField()) {
+      return;
+    }
+
+    await this.refreshFields(indexPattern);
+    if (indexPattern.getTimeField()) {
+      return;
+    }
+
+    // Report once per pattern; several components resolve the same pattern
+    // around first render and the cache is only set once get() returns.
+    if (indexPattern.id) {
+      if (this.reconciledMissingTimeField.has(indexPattern.id)) {
+        return;
+      }
+      this.reconciledMissingTimeField.add(indexPattern.id);
+    }
+
+    const hasDateField = (indexPattern.fields ?? []).some((field) => field.type === 'date');
+
+    this.onNotification({
+      title: i18n.translate('data.indexPatterns.missingTimeFieldTitle', {
+        defaultMessage: 'Time field "{timeFieldName}" is missing from index pattern "{title}"',
+        values: { timeFieldName: indexPattern.timeFieldName, title: indexPattern.title },
+      }),
+      text: hasDateField
+        ? i18n.translate('data.indexPatterns.missingTimeFieldWithCandidates', {
+            defaultMessage:
+              'Time-based features will not work. Edit the index pattern to use one of its date fields.',
+          })
+        : i18n.translate('data.indexPatterns.missingTimeFieldNoCandidates', {
+            defaultMessage:
+              'Time-based features will not work, and the index has no date fields to use instead.',
+          }),
+      color: 'warning',
+      iconType: 'alert',
+    });
+  }
 
   /**
    * Get an index pattern by title if cached

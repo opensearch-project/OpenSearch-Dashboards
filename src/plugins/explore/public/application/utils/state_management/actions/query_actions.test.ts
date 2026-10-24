@@ -54,6 +54,10 @@ jest.mock('./utils', () => ({
 
 import { configureStore } from '@reduxjs/toolkit';
 import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
+import {
   abortAllActiveQueries,
   defaultPrepareQueryString,
   defaultResultsProcessor,
@@ -68,9 +72,14 @@ import {
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
+import { queryHasAggregation } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import {
+  SAMPLE_SIZE_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
+  ExploreFlavor,
+} from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -143,6 +152,10 @@ jest.mock('../../../../application/legacy/discover/opensearch_dashboards_service
 jest.mock('../slices', () => ({
   setResults: jest.fn(),
   setIndividualQueryStatus: jest.fn(),
+  clearResultsByKey: jest.fn((cacheKey: string) => ({
+    type: 'results/clearResultsByKey',
+    payload: cacheKey,
+  })),
 }));
 
 jest.mock('../../../../components/fields_selector/lib/field_calculator', () => ({
@@ -368,6 +381,27 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(() => defaultPrepareQueryString(unsupportedQuery)).toThrow(
         'defaultPrepareQueryString encountered unhandled language: UNSUPPORTED_LANG'
       );
+    });
+
+    it("passes a source type language's query through unchanged", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+      setSourceTypeRegistry(registry);
+
+      try {
+        expect(
+          defaultPrepareQueryString({ query: 'fields @message | limit 5', language: 'FakeQL' })
+        ).toBe('fields @message | limit 5');
+      } finally {
+        setSourceTypeRegistry(new SourceTypeRegistryService());
+      }
     });
 
     it('should handle empty query string', () => {
@@ -1176,6 +1210,100 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       });
     });
 
+    // Stop renders on `isLoading && hasUserInitiatedQuery`, and the flag used to be set only by the
+    // editor's Run. A page load, time-range change or dataset change goes straight to
+    // executeQueries, so those ran a cancellable query while offering no way to cancel it.
+    it('marks the query as user-initiated, so Stop is offered however it started', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      await executeQueries({ services: {} as any })(mockDispatch, mockGetState, undefined);
+
+      const types = mockDispatch.mock.calls
+        .map(([a]) => (typeof a === 'object' && a !== null ? a.type : undefined))
+        .filter(Boolean);
+      expect(types).toContain('queryEditor/setHasUserInitiatedQuery');
+      const flag = mockDispatch.mock.calls
+        .map(([a]) => a)
+        .find((a) => typeof a === 'object' && a?.type === 'queryEditor/setHasUserInitiatedQuery');
+      expect(flag.payload).toBe(true);
+    });
+
+    // An engine without the async PPL API only reveals that at submit. Nothing has been rendered
+    // at that point, so the query must fall back to the non-streaming path rather than error.
+    describe('when a streaming run reports itself unavailable', () => {
+      const STREAMING_SETTING = 'explore:enableStreamingResults';
+
+      const streamingServices = () =>
+        ({
+          uiSettings: { get: jest.fn((key: string) => key === STREAMING_SETTING) },
+          capabilities: { queryEnhancements: { pplStreaming: true } },
+          data: {
+            query: {
+              timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } },
+              queryString: {
+                getLanguageService: () => ({
+                  getLanguage: () => ({ fields: { formatter: (value: any) => value } }),
+                }),
+              },
+            },
+            dataViews: { get: jest.fn().mockResolvedValue(undefined) },
+          },
+          tabRegistry: { getTab: jest.fn() },
+        }) as any;
+
+      const stateWithPplDataset = () => ({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: {
+            id: 'ds',
+            title: 'logs',
+            type: 'INDEX_PATTERN',
+            dataSource: { engineType: 'OpenSearch' },
+          },
+        },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      // Submit fails here because no http service is stubbed, so the run publishes nothing and
+      // reports itself unavailable.
+      it('re-runs the data table query on the standard path', async () => {
+        mockGetState.mockReturnValue(stateWithPplDataset());
+        // Annotated because the mock references itself for thunk actions, which otherwise
+        // infers as any.
+        const dispatch: jest.Mock = jest.fn((action: any) => {
+          if (typeof action === 'function') return action(dispatch, mockGetState, undefined);
+          return action;
+        });
+
+        await executeQueries({ services: streamingServices() })(
+          dispatch as any,
+          mockGetState,
+          undefined
+        );
+
+        const dispatchedTypes = dispatch.mock.calls
+          .map(([action]: any[]) => action?.type)
+          .filter(Boolean);
+        expect(dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))).toBe(
+          true
+        );
+      });
+    });
+
     it('should return early when no services provided', async () => {
       const mockState = {
         query: { query: '', language: 'PPL', dataset: null },
@@ -1970,6 +2098,169 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         cacheKey: 'source=logs__datatable',
         results: expect.any(Object),
       });
+    });
+  });
+
+  describe('partial results from polling sources', () => {
+    const mockGetState = jest.fn();
+    let mockDispatch: jest.Mock;
+    const finalResults = { hits: { hits: [{ _id: '1' }, { _id: '2' }], total: 2 } };
+    const partialResults = { hits: { hits: [{ _id: '1' }], total: 1 } };
+    const partialFrame = {
+      schema: [{ name: 'message', type: 'string' }],
+      meta: { progress: { recordsMatched: 1, recordsScanned: 10 } },
+    };
+
+    // A polling source reports one partial before the fetch resolves with the final result.
+    const fetchWithOnePartial = (beforePartial?: () => void) =>
+      mockSearchSource.fetch.mockImplementation(async (options: any) => {
+        beforePartial?.();
+        options.onPartialResults?.(partialResults, partialFrame);
+        return finalResults;
+      });
+
+    const runDataTableQuery = (queryString = 'source=logs') =>
+      executeDataTableQuery({
+        services: mockServices,
+        cacheKey: 'partial-cache-key',
+        queryString,
+      })(mockDispatch, mockGetState, undefined);
+
+    const progressDispatches = () =>
+      mockDispatch.mock.calls.filter(
+        ([action]) =>
+          action?.type === 'queryEditor/setIndividualQueryStatus' && action.payload.status.progress
+      );
+
+    // The key's LOADING entry, which a newer query's clearQueryStatusMap would remove.
+    const stateWithKey = (present = true) => ({
+      query: {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { id: 'test', type: 'INDEX_PATTERN' },
+      },
+      queryEditor: {
+        queryStatusMap: present
+          ? { 'partial-cache-key': { status: QueryExecutionStatus.LOADING } }
+          : {},
+      },
+    });
+
+    beforeEach(() => {
+      mockDispatch = jest.fn();
+      mockGetState.mockReturnValue(stateWithKey());
+      (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
+      (queryHasAggregation as jest.Mock).mockReturnValue(false);
+    });
+
+    it('streams partial rows for a row query and reports scan progress', async () => {
+      fetchWithOnePartial();
+
+      await runDataTableQuery();
+
+      expect(setResults).toHaveBeenCalledWith({
+        cacheKey: 'partial-cache-key',
+        results: expect.objectContaining({
+          hits: partialResults.hits,
+          fieldSchema: partialFrame.schema,
+        }),
+      });
+      expect(setResults).toHaveBeenCalledTimes(2); // the partial, then the final result
+      expect(progressDispatches()[0][0].payload.status).toMatchObject({
+        status: QueryExecutionStatus.LOADING,
+        progress: { recordsMatched: 1, recordsScanned: 10 },
+      });
+    });
+
+    it('does not stream partials for an aggregation query', async () => {
+      (queryHasAggregation as jest.Mock).mockReturnValue(true);
+      fetchWithOnePartial();
+
+      await runDataTableQuery('source=logs | stats count() by host');
+
+      expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
+      expect(setResults).toHaveBeenCalledTimes(1); // the final result only
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('ignores a partial once a newer query has cleared its key', async () => {
+      fetchWithOnePartial(() => mockGetState.mockReturnValue(stateWithKey(false)));
+
+      await runDataTableQuery();
+
+      expect(progressDispatches()).toHaveLength(0);
+      expect(setResults).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a partial from a run replaced by a newer run of the same key', async () => {
+      // A fresh controller per run; starting the second run aborts the first.
+      (global.AbortController as jest.Mock).mockImplementation(() => {
+        const controller = {
+          signal: { aborted: false },
+          abort: jest.fn(() => {
+            controller.signal.aborted = true;
+          }),
+        };
+        return controller;
+      });
+      let deliverFirstPartial: () => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(
+          (options: any) =>
+            new Promise((resolve) => {
+              deliverFirstPartial = () => {
+                options.onPartialResults(partialResults, partialFrame);
+                resolve(finalResults);
+              };
+            })
+        )
+        .mockResolvedValueOnce(finalResults);
+
+      const first = runDataTableQuery();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await runDataTableQuery();
+      deliverFirstPartial();
+      await first;
+
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('clears partial rows when the query fails', async () => {
+      mockSearchSource.fetch.mockImplementation(async (options: any) => {
+        options.onPartialResults(partialResults, partialFrame);
+        throw Object.assign(new Error('boom'), { body: { message: 'boom' } });
+      });
+
+      await runDataTableQuery().catch(() => undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'results/clearResultsByKey',
+        payload: 'partial-cache-key',
+      });
+    });
+
+    it('ignores a partial that arrives after the query was aborted', async () => {
+      fetchWithOnePartial(() => {
+        mockAbortController.signal.aborted = true;
+      });
+
+      await runDataTableQuery();
+
+      expect(progressDispatches()).toHaveLength(0);
+      expect(setResults).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the poll interval setting to the fetch', async () => {
+      (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+        key === ASYNC_QUERY_POLL_INTERVAL_SETTING ? 2000 : undefined
+      );
+      mockSearchSource.fetch.mockResolvedValue(finalResults);
+
+      await runDataTableQuery();
+
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({ pollInterval: 2000, onPartialResults: expect.any(Function) })
+      );
     });
   });
 

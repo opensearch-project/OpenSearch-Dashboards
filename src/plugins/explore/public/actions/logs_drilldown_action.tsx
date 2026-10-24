@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { ButtonActionConfig } from '../services/query_panel_actions_registry';
 import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
-import { LOGS_DRILLDOWN_APP_ID } from '../../common';
+import { LOGS_DRILLDOWN_APP_ID, LOGS_DRILLDOWN_APP_ICON } from '../../common';
 
 const label = i18n.translate('explore.queryPanel.logsDrilldownLabel', {
   defaultMessage: 'Explore logs',
@@ -22,7 +22,7 @@ export const logsDrilldownActionConfig: ButtonActionConfig = {
   actionType: 'button',
   order: 150,
   getLabel: () => label,
-  getIcon: () => 'inspect',
+  getIcon: () => LOGS_DRILLDOWN_APP_ICON,
   getIsEnabled: () => true,
   onClick: () => {
     getServices().core.application.navigateToApp(LOGS_DRILLDOWN_APP_ID, { path: '#/' });

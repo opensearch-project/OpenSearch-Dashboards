@@ -59,6 +59,15 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
+const dismissQueryEditorSuggestions = () => {
+  return cy.document().then((document) => {
+    const focusedElement = document.activeElement;
+    if (focusedElement?.matches('[data-test-subj="exploreQueryPanelEditor"] .inputarea')) {
+      return cy.wrap(focusedElement).type('{esc}', { force: true });
+    }
+  });
+};
+
 const selectIndexWildcardMode = (indexPattern) => {
   // UI now auto-appends wildcard when typing single character, so just use the pattern as-is
   const pattern = indexPattern;
@@ -127,7 +136,9 @@ cy.explore.add('clearQueryEditor', () => {
           cy.log(`is editor empty: ${isEmpty}`);
 
           if (isEmpty) {
-            return; // Editor is cleared, we're done
+            // An empty, focused Monaco editor opens autocomplete suggestions. Dismiss them before
+            // returning so the widget cannot cover controls that callers interact with next.
+            return dismissQueryEditorSuggestions();
           }
 
           if (attempt < MAX_RETRIES) {
@@ -137,7 +148,11 @@ cy.explore.add('clearQueryEditor', () => {
           } else {
             cy.log('Failed to clear editor after all attempts');
             // Instead of throwing error, try one last time with extra waiting
-            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
+            return cy
+              .wait(2000)
+              .then(forceFocusEditor)
+              .then(clearMonacoEditor)
+              .then(dismissQueryEditorSuggestions);
           }
         });
       });

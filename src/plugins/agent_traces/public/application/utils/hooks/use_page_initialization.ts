@@ -23,7 +23,8 @@ import {
   setUsingRegexPatterns,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
-import { AgentTracesFlavor } from '../../../../common';
+import { AGENT_TRACES_VISUALIZATION_TAB_ID, AgentTracesFlavor } from '../../../../common';
+import { hasStatsPipe } from '../state_management/actions/detect_optimal_tab/detect_optimal_tab';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
 
@@ -48,6 +49,7 @@ export const useInitPage = () => {
         // Sync query from saved object to data plugin (agent traces doesn't use filters)
         const searchSourceFields = savedAgentTraces.kibanaSavedObjectMeta;
         const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
+        let loadedQueryString = '';
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
@@ -60,6 +62,7 @@ export const useInitPage = () => {
           if (query) {
             dispatch(setQueryState(query));
             setEditorText(query.query);
+            loadedQueryString = typeof query.query === 'string' ? query.query : '';
           }
         }
 
@@ -98,8 +101,11 @@ export const useInitPage = () => {
         // above, clearing activeTabId to '').  Dispatching here ensures
         // BottomRightContainer sees a valid activeTabId and renders the tabs
         // component instead of the "Start searching" placeholder.
+        // A stats query only renders in Visualization, whatever tab the search was saved on.
         const uiState = savedAgentTraces.uiState;
-        if (uiState) {
+        if (hasStatsPipe(loadedQueryString)) {
+          dispatch(setActiveTab(AGENT_TRACES_VISUALIZATION_TAB_ID));
+        } else if (uiState) {
           try {
             const { activeTab } = JSON.parse(uiState);
             dispatch(setActiveTab(activeTab));

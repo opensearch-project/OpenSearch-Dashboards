@@ -170,6 +170,32 @@ describe('useTabResults', () => {
     );
   });
 
+  it('returns results stored under the empty cache key of an empty editor', () => {
+    const cacheData = { data: 'rows for the empty query' };
+    resultsCache.set('', cacheData as any);
+
+    const initialState: MockRootState = {
+      query: { query: '' },
+      ui: { activeTabId: 'tab-1' },
+      results: { '': { total: 20, elapsedMs: 0, hasResults: true } },
+      tab: {
+        logs: {},
+        patterns: {
+          patternsField: 'message',
+          usingRegexPatterns: false,
+        },
+      },
+    };
+
+    mockServices.tabRegistry.getTab.mockReturnValue(mockTab);
+    mockTab.prepareQuery.mockReturnValue('');
+
+    const store = createMockStore(initialState);
+    const { result } = renderHookWithStore(store);
+
+    expect(result.current.results).toEqual(cacheData);
+  });
+
   it('should return null when cache key does not exist', () => {
     const initialState: MockRootState = {
       query: { query: 'test query' },

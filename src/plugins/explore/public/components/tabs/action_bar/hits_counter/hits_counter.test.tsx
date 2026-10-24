@@ -135,6 +135,32 @@ describe('hits counter', () => {
     expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2 hits$/);
   });
 
+  describe('streaming annotation', () => {
+    it('reports progress while a streaming query is polling', () => {
+      component = mountWithIntl(
+        <HitsCounter {...props} streaming={{ isPolling: true, fractionDone: 0.42 } as any} />
+      );
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').text()).toBe(' (42%)');
+    });
+
+    it('reports where a stopped query got to', () => {
+      component = mountWithIntl(
+        <HitsCounter
+          {...props}
+          streaming={{ isPolling: false, aborted: true, fractionDone: 0.72 } as any}
+        />
+      );
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').text()).toBe(
+        ' (Stopped at 72%)'
+      );
+    });
+
+    it('adds nothing for a non-streaming query', () => {
+      component = mountWithIntl(<HitsCounter {...props} />);
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').length).toBe(0);
+    });
+  });
+
   it('expect to render 1,899 hits if 1899 hits given', () => {
     const hitCount = 1899;
     component = mountWithIntl(<HitsCounter {...props} hits={hitCount} />);

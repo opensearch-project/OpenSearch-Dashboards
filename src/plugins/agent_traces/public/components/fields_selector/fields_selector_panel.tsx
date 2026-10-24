@@ -5,6 +5,8 @@
 
 import { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { UI_SETTINGS } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
@@ -30,6 +32,8 @@ export interface IDiscoverPanelProps {
   collapsePanel?: () => void;
 }
 
+const NO_FACET_BUCKETS$ = of(null);
+
 export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
   const { uiSettings } = services;
@@ -37,10 +41,12 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const { onAddFilter } = useChangeQueryEditor();
   const columns = useSelector(selectColumns);
   const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
+  const activeTab = services.tabRegistry.getTab(activeTabId);
+  // Tabs such as Sessions supply their own facet counts (per session, not per fetched span)
+  const tabFacetBuckets = useObservable(activeTab?.facetBuckets$ ?? NO_FACET_BUCKETS$, null);
 
   // Use the active tab's prepareQuery to look up results, matching how executeQueries stores them
   const rawResults = useSelector((state: RootState) => {
-    const activeTab = services.tabRegistry.getTab(activeTabId);
     const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
     const key = prepareQuery(state.query, state.legacy.sort);
     return key ? state.results[key] : null;
@@ -89,6 +95,9 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   return (
     <DiscoverSidebar
       columns={columns || []}
+      facetFields={activeTab?.facetFields}
+      facetBuckets={activeTab?.facetBuckets$ ? tabFacetBuckets : undefined}
+      fixedColumns={activeTab?.fixedColumns}
       fieldCounts={(fieldCounts as any) || {}}
       hits={rows || []}
       onAddField={(fieldName) => {

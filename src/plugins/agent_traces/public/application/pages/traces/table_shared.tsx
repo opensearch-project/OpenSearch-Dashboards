@@ -43,6 +43,7 @@ import { TraceHit } from './trace_details/traces/ppl_to_trace_hits';
 import { selectIsLoading } from '../../utils/state_management/selectors/query_editor/query_editor';
 import { RootState } from '../../utils/state_management/store';
 import { useTraceMetricsContext } from './hooks/use_trace_metrics';
+import { isMarkedAiRoot } from '../../utils/ai_root';
 
 /** Maps UI column field names to PPL index field names */
 export const PPL_SORT_FIELDS: Record<string, string> = {
@@ -92,6 +93,67 @@ export const splitPplWhereAndTail = (
   };
 };
 
+/** PPL commands that filter or annotate span rows without changing their shape. */
+const ROW_LEVEL_COMMANDS = new Set(['where', 'eval', 'parse', 'grok', 'regex', 'fillnull']);
+
+/**
+ * Split a PPL query on top-level pipes, ignoring pipes inside quotes or backticks. Inside a
+ * string literal a backslash escapes the next character, so `"a\"| b"` stays one literal.
+ */
+export const splitPplCommands = (queryString: string): string[] => {
+  const parts: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  let escaped = false;
+  for (const ch of queryString) {
+    if (quote) {
+      if (escaped) escaped = false;
+      // Backticks quote identifiers, which have no escapes.
+      else if (ch === '\\' && quote !== '`') escaped = true;
+      else if (ch === quote) quote = null;
+      current += ch;
+    } else if (ch === "'" || ch === '"' || ch === '`') {
+      quote = ch;
+      current += ch;
+    } else if (ch === '|') {
+      parts.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  parts.push(current.trim());
+  return parts.filter(Boolean);
+};
+
+/**
+ * The span-level filter in a PPL query: the source plus the leading row-level commands
+ * (where, eval, parse, ...), in order. Scanning stops at the first command that reshapes
+ * rows (stats, rename, fields, dedup, head, ...): later filters may reference fields that
+ * only exist after it, so they cannot run against span rows. Commands from that point on
+ * are returned so callers can tell the user they were not applied. `sort` never changes
+ * which rows match, so it is skipped and scanning continues.
+ */
+export const extractSpanFilterQuery = (
+  queryString: string
+): { filterQuery: string; ignoredCommands: string[] } => {
+  const kept: string[] = [];
+  const ignored: string[] = [];
+  let reshaped = false;
+  splitPplCommands(queryString).forEach((part, index) => {
+    const command = part.split(/\s+/)[0].toLowerCase();
+    if (reshaped) {
+      ignored.push(command);
+    } else if ((index === 0 && command.startsWith('source')) || ROW_LEVEL_COMMANDS.has(command)) {
+      kept.push(part);
+    } else if (command !== 'sort') {
+      reshaped = true;
+      ignored.push(command);
+    }
+  });
+  return { filterQuery: kept.join(' | '), ignoredCommands: [...new Set(ignored)] };
+};
+
 /**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
  * Subquery brackets [...] are masked so that head inside subqueries is ignored.
@@ -138,7 +200,7 @@ export const TableEmptyState: React.FC<{
 
 /** Convert an OpenSearchSearchHit _source to a BaseRow for metadata.
  *  The _source from OpenSearch uses flat dotted keys, so we unflatten first.
- *  When `markExpandable` is true, root spans (no parentSpanId) are expandable. */
+ *  When `markExpandable` is true, root spans (no parentSpanId) and AI roots are expandable. */
 export const hitToBaseRow = (
   hit: OpenSearchSearchHit<Record<string, any>>,
   formatTs: (ts: string) => string,
@@ -147,7 +209,9 @@ export const hitToBaseRow = (
   const source = unflattenSource(hit._source || {}) as TraceHit;
   const span = traceHitToAgentSpan(source, 0);
   const row = spanToRow(span, 0, formatTs);
-  row.isExpandable = options?.markExpandable ? !source.parentSpanId : false;
+  row.isExpandable = options?.markExpandable
+    ? !source.parentSpanId || isMarkedAiRoot(source as Record<string, unknown>)
+    : false;
   row.level = 0;
   return row;
 };
@@ -297,7 +361,7 @@ interface DataTableInfoBarProps {
   hitsCount: number;
   totalCount: number;
   elapsedMs: number | undefined;
-  entityName: 'span' | 'trace';
+  entityName: 'span' | 'trace' | 'session';
   wrapCellText: boolean;
   onWrapCellTextChange: (v: boolean) => void;
 }
@@ -318,9 +382,10 @@ const SpanCountMessage: React.FC<InfoBarCountProps> = ({
   hasHead ? (
     <FormattedMessage
       id="agentTraces.spansDataTable.showingCountHeadOnly"
-      defaultMessage="{count} {count, plural, one {span} other {spans}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {span} other {spans}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
         elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
       }}
     />
@@ -346,9 +411,10 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
   hasHead ? (
     <FormattedMessage
       id="agentTraces.tracesDataTable.showingCountHeadOnly"
-      defaultMessage="{count} {count, plural, one {trace} other {traces}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {trace} other {traces}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
         elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
       }}
     />
@@ -365,6 +431,29 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
     />
   );
 
+const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, totalCount, elapsedMs }) =>
+  totalCount > hitsCount ? (
+    <FormattedMessage
+      id="agentTraces.sessionsDataTable.showingCountOfTotal"
+      defaultMessage="{count} of {total} sessions in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        total: <strong>{totalCount.toLocaleString()}</strong>,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="agentTraces.sessionsDataTable.showingCount"
+      defaultMessage="{count} {hitsCount, plural, one {session} other {sessions}} in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  );
+
 export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
   hasHead,
   hitsCount,
@@ -374,7 +463,12 @@ export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
   wrapCellText,
   onWrapCellTextChange,
 }) => {
-  const CountMessage = entityName === 'span' ? SpanCountMessage : TraceCountMessage;
+  const CountMessage =
+    entityName === 'span'
+      ? SpanCountMessage
+      : entityName === 'session'
+        ? SessionCountMessage
+        : TraceCountMessage;
 
   return (
     <EuiFlexGroup

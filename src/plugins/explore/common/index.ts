@@ -16,10 +16,22 @@ export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
+/**
+ * Streaming (asynchronous partial results) for long-running PPL queries: progressive delivery of a
+ * query's own results, as opposed to tolerating partial coverage of the indices it reads.
+ */
+export const STREAMING_RESULTS_SETTING = 'explore:enableStreamingResults';
+
+/**
+ * Strips trailing transform stages (rex/eval/fields) from the histogram query, which cannot change
+ * which documents match. Independent of streaming: it speeds up the chart for any logs query with a
+ * transform pipeline.
+ */
 export const DEFAULT_TRACE_COLUMNS_SETTING = 'explore:defaultTraceColumns';
 export const DEFAULT_LOGS_COLUMNS_SETTING = 'explore:defaultLogsColumns';
 export const ENABLE_EXPERIMENTAL_SETTING = 'explore:experimental';
 export const LOGS_BUILDER_MODE_ONLY_SETTING = 'explore:logsBuilderModeOnly';
+export const ASYNC_QUERY_POLL_INTERVAL_SETTING = 'explore:asyncQueryPollInterval';
 export const EXPLORE_DEFAULT_LANGUAGE = 'PPL';
 export const EXPLORE_LOGS_TAB_ID = 'logs';
 export const EXPLORE_STATISTICS_TAB_ID = 'explore_statistics';
@@ -28,6 +40,7 @@ export const EXPLORE_VISUALIZATION_TAB_ID = 'explore_visualization_tab';
 export const EXPLORE_FIELD_STATS_TAB_ID = 'explore_field_stats_tab';
 export const EXPLORE_NO_TAB_ID = '';
 export const EXPLORE_METRICS_EXPLORE_TAB_ID = 'metrics-explore';
+export const EXPLORE_METRICS_TABLE_TAB_ID = 'metrics';
 export const VISUALIZATION_EDITOR_APP_ID = 'visualization-editor';
 export const VISUALIZATION_EDITOR_APP_NAME = 'VisualizationEditor';
 
@@ -35,6 +48,9 @@ export const VISUALIZATION_EDITOR_APP_NAME = 'VisualizationEditor';
 // with its own lightweight mount (no shared Redux store).
 export const LOGS_DRILLDOWN_APP_ID = `${PLUGIN_ID}/logs-drilldown`;
 export const LOGS_DRILLDOWN_APP_NAME = 'Explore logs';
+// Icon for every logs drilldown entry point (side-nav popover action, query-bar action, empty-state
+// button). Matches the metrics page's "Explore" tab so explore-mode entry points share one glyph.
+export const LOGS_DRILLDOWN_APP_ICON = 'compass';
 
 export enum ExploreFlavor {
   Logs = 'logs',

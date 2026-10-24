@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
@@ -15,13 +15,19 @@ import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
+import { useStreamingStatus } from '../../../components/streaming/use_streaming_status';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
+  selectDataset,
+  selectQueryLanguage,
+  selectQueryProgress,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
+import type { QueryProgress } from '../../../application/utils/state_management/types';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
@@ -32,6 +38,34 @@ import '../../../components/query_panel/query_panel.scss';
 // Fold out EOL/whitespace so an untouched Monaco round-trip isn't mistaken for
 // an edit in handleModeChange, which would fall into the lossy parsePPL path.
 const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim();
+
+// Counts a progressive source reports while it is still scanning, as a
+// "scanning… N records matched" line.
+const scanProgressLabel = ({ recordsMatched, recordsScanned }: QueryProgress): string | null => {
+  if (typeof recordsMatched === 'number' && typeof recordsScanned === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressMatchedScanned', {
+      defaultMessage: 'Scanning… {matched} matched of {scanned} scanned',
+      values: {
+        matched: recordsMatched.toLocaleString(),
+        scanned: recordsScanned.toLocaleString(),
+      },
+    });
+  }
+  if (typeof recordsMatched === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressMatched', {
+      defaultMessage: 'Scanning… {matched} matched',
+      values: { matched: recordsMatched.toLocaleString() },
+    });
+  }
+  if (typeof recordsScanned === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressScanned', {
+      defaultMessage: 'Scanning… {scanned} scanned',
+      values: { scanned: recordsScanned.toLocaleString() },
+    });
+  }
+  // Progress with no counts adds nothing over the bar itself.
+  return null;
+};
 
 /**
  * Logs query panel with a PPL visual builder / code toggle.
@@ -67,8 +101,19 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
+  const { streaming, isPolling: isStreaming } = useStreamingStatus();
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
+  const queryProgress = useSelector(selectQueryProgress);
+  const scanProgress = queryProgress ? scanProgressLabel(queryProgress) : null;
+  // Languages the PPL builder can't represent are code-only: the Builder toggle is hidden and
+  // the editor stays in Code mode.
+  const queryLanguage = useSelector(selectQueryLanguage);
+  const queryDataset = useSelector(selectDataset);
+  const isCodeOnlyLanguage = !getSourceTypeRegistry().supportsVisualBuilder(
+    queryLanguage,
+    queryDataset
+  );
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
@@ -235,7 +280,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
       })
     : undefined;
 
-  const showBuilder = mode === 'builder' && !isPromptMode;
+  const showBuilder = mode === 'builder' && !isPromptMode && !isCodeOnlyLanguage;
 
   // Analyze is only available on the code editor, not the visual builder. Report
   // the live editor mode up so the page can show/hide the analyze panel to match.
@@ -293,6 +338,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
             hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
             hideAskAI={builderOnlyMode}
+            builderOnly={builderOnlyMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -318,7 +364,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             editors
           )}
         </EuiFlexItem>
-        {!isPromptMode && !builderOnlyMode && (
+        {!isPromptMode && !builderOnlyMode && !isCodeOnlyLanguage && (
           <EuiFlexItem grow={false}>
             <ModeButtonGroup
               mode={mode}
@@ -330,13 +376,41 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
         )}
       </EuiFlexGroup>
 
-      {isLoading && (
+      {isStreaming ? (
+        /* Determinate, because a streaming job reports a fraction; falls back to indeterminate when
+           the engine reports none. */
         <EuiProgress
           size="xs"
-          color="accent"
+          color="primary"
           position="absolute"
-          data-test-subj="exploreQueryPanelIsLoading"
+          {...(typeof streaming?.fractionDone === 'number' && streaming.fractionDone >= 0
+            ? { value: streaming.fractionDone, max: 1 }
+            : {})}
+          data-test-subj="exploreQueryPanelStreamingProgress"
         />
+      ) : (
+        isLoading && (
+          <>
+            {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              data-test-subj="exploreQueryPanelIsLoading"
+            />
+            {scanProgress && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                role="status"
+                aria-live="polite"
+                data-test-subj="exploreQueryPanelScanProgress"
+              >
+                {scanProgress}
+              </EuiText>
+            )}
+          </>
+        )
       )}
     </EuiPanel>
   );

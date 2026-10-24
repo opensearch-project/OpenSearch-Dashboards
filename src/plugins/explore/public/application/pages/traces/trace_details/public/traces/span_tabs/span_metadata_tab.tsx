@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { isEmpty } from '../../utils/helper_functions';
 import { formatSpanAttributes, sortAttributes } from '../../utils/span_data_utils';
 import { FlyoutListItem } from '../flyout_list_item';
+import { normalizeSpanKind } from '../../services/dependency_classifier';
 
 export interface SpanMetadataTabProps {
   selectedSpan?: any;
@@ -15,6 +16,7 @@ export interface SpanMetadataTabProps {
 }
 
 interface CategorizedAttributes {
+  dependency: Array<[string, any]>;
   http: Array<[string, any]>;
   infrastructure: Array<[string, any]>;
   application: Array<[string, any]>;
@@ -32,8 +34,15 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
     const attributes = formatSpanAttributes(selectedSpan);
     const sortedAttributes = sortAttributes(attributes);
+    // On outbound spans server.* and the peer address keys name the peer (the
+    // dependency); on SERVER spans they are the service's own listener and its caller,
+    // so they stay uncategorized there.
+    const isOutbound = ['CLIENT', 'PRODUCER', 'CONSUMER'].includes(
+      normalizeSpanKind(selectedSpan.kind)
+    );
 
     const categorized: CategorizedAttributes = {
+      dependency: [],
       http: [],
       infrastructure: [],
       application: [],
@@ -43,7 +52,24 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     sortedAttributes.forEach(([key, value]) => {
       const lowerKey = key.toLowerCase();
 
+      // Dependency attributes (database / messaging / peer) take precedence so
+      // e.g. `peer.service` is not swallowed by the "service" application rule.
+      // Span attributes arrive flattened as "attributes.<key>", so match on the
+      // key without that prefix.
+      const attrKey = lowerKey.replace(/^attributes\./, '');
       if (
+        attrKey.startsWith('db.') ||
+        attrKey.includes('db_system') ||
+        attrKey.startsWith('messaging.') ||
+        attrKey.includes('peer.service') ||
+        (isOutbound &&
+          (attrKey.startsWith('net.peer') ||
+            attrKey.startsWith('network.peer') ||
+            attrKey === 'server.address' ||
+            attrKey === 'server.port'))
+      ) {
+        categorized.dependency.push([key, value]);
+      } else if (
         lowerKey.includes('http') ||
         lowerKey.includes('url') ||
         lowerKey.includes('method') ||
@@ -194,6 +220,13 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
   return (
     <div data-test-subj="span-metadata-tab">
+      {renderSection(
+        i18n.translate('explore.spanMetadataTab.section.dependency', {
+          defaultMessage: 'Dependency',
+        }),
+        categorizedAttributes.dependency
+      )}
+
       {renderSection(
         i18n.translate('explore.spanMetadataTab.section.http', {
           defaultMessage: 'HTTP',

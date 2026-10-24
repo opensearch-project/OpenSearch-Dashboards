@@ -71,7 +71,9 @@ export const DatasetAccordionList: React.FC<DatasetAccordionListProps> = ({
                       <EuiFlexItem>
                         <EuiText size="xs" color="subdued">
                           {i18n.translate('explore.traceLogsTab.recentResults', {
-                            defaultMessage: '10 recent results',
+                            defaultMessage:
+                              '{count, plural, one {# recent result} other {# recent results}}',
+                            values: { count: logs.length },
                           })}
                         </EuiText>
                       </EuiFlexItem>

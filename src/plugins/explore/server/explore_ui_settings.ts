@@ -13,9 +13,24 @@ import {
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
   LOGS_BUILDER_MODE_ONLY_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
+  STREAMING_RESULTS_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
+  [ASYNC_QUERY_POLL_INTERVAL_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalTitle', {
+      defaultMessage: 'Async query poll interval',
+    }),
+    value: 5000,
+    description: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalText', {
+      defaultMessage:
+        'Milliseconds between status checks for queries that run asynchronously. Lower values ' +
+        'show partial results sooner at the cost of more requests.',
+    }),
+    category: ['explore'],
+    schema: schema.number({ min: 250, max: 60000 }),
+  },
   [DEFAULT_TRACE_COLUMNS_SETTING]: {
     name: i18n.translate('explore.advancedSettings.defaultTraceColumnsTitle', {
       defaultMessage: 'Default trace columns',
@@ -72,6 +87,22 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     category: ['explore'],
     scope: UiSettingScope.WORKSPACE,
     requiresCapability: 'explore.logsQueryBuilderEnabled',
+    schema: schema.boolean(),
+  },
+  [STREAMING_RESULTS_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.enableStreamingResultsTitle', {
+      defaultMessage: 'Stream results for long-running queries',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.enableStreamingResultsText', {
+      defaultMessage:
+        'Deliver PPL results progressively instead of waiting for the query to finish. Rows appear ' +
+        'as the engine commits them, with a live count of rows found and the option to stop the ' +
+        'query. Only queries whose plan can expose a stable row prefix stream this way; a query ' +
+        'that sorts or aggregates still returns everything at once, because its intermediate rows ' +
+        'could be revised.',
+    }),
+    category: ['explore'],
     schema: schema.boolean(),
   },
 };
