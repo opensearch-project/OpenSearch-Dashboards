@@ -181,41 +181,52 @@ export const getTableColumns = (
   },
 ];
 
-export const getNoItemsMessage = (createItem: () => void) => (
+export const getNoItemsMessage = (createItem?: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
       <EuiText size="s">
         <h1 id="visualizeListingHeading">
-          <FormattedMessage
-            id="visualize.listing.createNew.title"
-            defaultMessage="Create your first visualization"
-          />
+          {createItem ? (
+            <FormattedMessage
+              id="visualize.listing.createNew.title"
+              defaultMessage="Create your first visualization"
+            />
+          ) : (
+            <FormattedMessage
+              id="visualize.listing.noItems.title"
+              defaultMessage="Looks like you don't have any visualizations."
+            />
+          )}
         </h1>
       </EuiText>
     }
     body={
-      <EuiText size="s">
-        <p>
-          <FormattedMessage
-            id="visualize.listing.createNew.description"
-            defaultMessage="You can create different visualizations based on your data."
-          />
-        </p>
-      </EuiText>
+      createItem ? (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="visualize.listing.createNew.description"
+              defaultMessage="You can create different visualizations based on your data."
+            />
+          </p>
+        </EuiText>
+      ) : undefined
     }
     actions={
-      <EuiSmallButton
-        onClick={createItem}
-        fill
-        iconType="plus"
-        data-test-subj="createVisualizationPromptButton"
-      >
-        <FormattedMessage
-          id="visualize.listing.createNew.createButtonLabel"
-          defaultMessage="Create new visualization"
-        />
-      </EuiSmallButton>
+      createItem ? (
+        <EuiSmallButton
+          onClick={createItem}
+          fill
+          iconType="plus"
+          data-test-subj="createVisualizationPromptButton"
+        >
+          <FormattedMessage
+            id="visualize.listing.createNew.createButtonLabel"
+            defaultMessage="Create new visualization"
+          />
+        </EuiSmallButton>
+      ) : undefined
     }
   />
 );
