@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { IIndexPattern, IFieldType } from '../..';
 import {
   Filter,
@@ -38,7 +39,23 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   buildExistsFilter,
+  RangeFilterParams,
 } from '.';
+
+const DATE_QUERY_FORMAT = 'strict_date_optional_time';
+
+const getAbsoluteDateValue = (value?: string | number) => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && !Number.isNaN(new Date(value).getTime())
+      ? new Date(value).toISOString()
+      : undefined;
+  }
+
+  if (typeof value === 'string' && !value.startsWith('now')) {
+    const parsedValue = dateMath.parse(value);
+    return parsedValue?.isValid() ? parsedValue.toISOString() : undefined;
+  }
+};
 
 export function buildFilter(
   indexPattern: IIndexPattern,
@@ -85,13 +102,38 @@ function buildBaseFilter(
   params: any
 ): Filter {
   switch (type) {
-    case 'phrase':
+    case 'phrase': {
+      const absoluteDateValue = field.type === 'date' ? getAbsoluteDateValue(params) : undefined;
+      if (absoluteDateValue) {
+        const filter = buildRangeFilter(
+          field,
+          {
+            gte: absoluteDateValue,
+            lte: absoluteDateValue,
+            format: DATE_QUERY_FORMAT,
+          },
+          indexPattern
+        );
+        filter.meta.type = FILTERS.PHRASE;
+        filter.meta.params = { query: params };
+        return filter;
+      }
       return buildPhraseFilter(field, params, indexPattern);
+    }
     case 'phrases':
       return buildPhrasesFilter(field, params, indexPattern);
-    case 'range':
-      const newParams = { gte: params.from, lt: params.to };
+    case 'range': {
+      const absoluteFrom = field.type === 'date' ? getAbsoluteDateValue(params.from) : undefined;
+      const absoluteTo = field.type === 'date' ? getAbsoluteDateValue(params.to) : undefined;
+      const newParams: RangeFilterParams = {
+        gte: absoluteFrom ?? params.from,
+        lt: absoluteTo ?? params.to,
+      };
+      if (absoluteFrom || absoluteTo) {
+        newParams.format = DATE_QUERY_FORMAT;
+      }
       return buildRangeFilter(field, newParams, indexPattern);
+    }
     case 'exists':
       return buildExistsFilter(field, indexPattern);
     default:
