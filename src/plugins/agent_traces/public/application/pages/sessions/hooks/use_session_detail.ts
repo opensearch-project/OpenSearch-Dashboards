@@ -8,6 +8,7 @@ import { usePPLQueryDeps } from '../../traces/hooks/use_ppl_query_deps';
 import { transformPPLDataToTraceHits } from '../../traces/trace_details/traces/ppl_to_trace_hits';
 import { TraceRow, buildFullSpanTree, hitsToAgentSpans } from '../../traces/hooks/tree_utils';
 import { buildSessionSpansQuery, getSourceCommand, rawStart } from '../session_utils';
+import { aiRootsOf } from '../../../utils/ai_root';
 
 export interface SessionTrace {
   traceId: string;
@@ -79,9 +80,16 @@ export const useSessionDetail = (
         const result: SessionTrace[] = [];
         for (const [traceId, traceSpans] of byTrace) {
           const tree = buildFullSpanTree(traceSpans, formatTs) as TraceRow[];
-          const root = tree.find((r) => !r.parentSpanId) ?? tree[0];
-          if (!root) continue;
-          result.push({ traceId, root, tree, spans: flatten(tree) });
+          const all = flatten(tree);
+          // One entry per span that represents the trace, by the same rule as the Sessions list
+          // (`aiRootsOf`), so parallel agents behind one HTTP root each show their messages and
+          // tokens. Falls back to the root, or the first span when the root was not exported.
+          const aiRoots = aiRootsOf(all);
+          const roots =
+            aiRoots.length > 0 ? aiRoots : [tree.find((r) => !r.parentSpanId) ?? tree[0]];
+          for (const root of roots) {
+            if (root) result.push({ traceId, root, tree, spans: all });
+          }
         }
         result.sort((a, b) => rawStart(a.root).localeCompare(rawStart(b.root)));
 

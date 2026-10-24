@@ -5,12 +5,14 @@
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { Dataset } from '../../../../../../../data/common';
-import { PPLService } from './ppl_request_helpers';
+import { PPLService, escapePPLValue } from './ppl_request_helpers';
 
 export interface PPLLogsQueryParams {
   traceId: string;
   dataset: Dataset;
   limit?: number;
+  /** Only this span's logs. */
+  spanId?: string;
 }
 
 export interface LogHit {
@@ -27,7 +29,7 @@ export async function fetchTraceLogsByTraceId(
   dataService: DataPublicPluginStart,
   params: PPLLogsQueryParams
 ): Promise<any> {
-  const { traceId, dataset, limit = 1000 } = params;
+  const { traceId, dataset, limit = 1000, spanId } = params;
 
   if (!traceId || !dataset) {
     throw new Error('Missing required parameters: traceId and dataset');
@@ -36,7 +38,15 @@ export async function fetchTraceLogsByTraceId(
   try {
     const pplService = new PPLService(dataService);
     const traceIdFieldName = dataset.schemaMappings?.otelLogs?.traceId || 'traceId';
-    const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = "${traceId}" | head ${limit}`;
+    // Newest first, so a trace with more logs than `limit` keeps its most recent ones.
+    const timeField = dataset.schemaMappings?.otelLogs?.timestamp || dataset.timeFieldName;
+    const sortClause = timeField ? ` | sort - \`${timeField}\`` : '';
+    const spanIdFieldName = dataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+    // Escaped: trace and span ids come from documents and URLs.
+    const spanClause = spanId ? ` and ${spanIdFieldName} = ${escapePPLValue(spanId)}` : '';
+    const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = ${escapePPLValue(
+      traceId
+    )}${spanClause}${sortClause} | head ${limit}`;
 
     const datasetWithoutTime = {
       id: dataset.id,

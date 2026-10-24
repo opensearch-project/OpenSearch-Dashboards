@@ -7,6 +7,7 @@ import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
+import { useStreamingStatus } from '../../streaming/use_streaming_status';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
@@ -79,6 +80,18 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const isLogsTab = activeTabId === EXPLORE_LOGS_TAB_ID;
   const effectiveBucketCount = hasAggregation && !isLogsTab ? bucketCount : undefined;
   const elapsedMs = results?.elapsedMs;
+  // Keyed to the active tab's query, not the results query: the Statistics and Visualization tabs show
+  // a different query's counts, and annotating those with the results query's progress would describe
+  // the wrong query. Their queries are not streamed, so this correctly yields no annotation there.
+  const tabCacheKey = useMemo(() => {
+    try {
+      const activeTab = services.tabRegistry?.getTab(activeTabId);
+      return (activeTab?.prepareQuery || defaultPrepareQueryString)(query);
+    } catch {
+      return undefined;
+    }
+  }, [services, activeTabId, query]);
+  const streaming = useStreamingStatus(tabCacheKey).streaming;
 
   return (
     <DiscoverResultsActionBar
@@ -92,6 +105,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
       }}
       rows={rows}
       elapsedMs={elapsedMs}
+      streaming={streaming}
       dataset={dataset}
       inspectionHanlder={openInspector}
       extraActions={compatibleSlotItems}

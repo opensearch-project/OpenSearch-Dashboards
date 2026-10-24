@@ -251,8 +251,8 @@ describe('VariablesBar — allowCustomValue: the pending "add" row', () => {
     expect(first.label).toBe('p99');
     expect(first.checked).toBeUndefined();
     expect(mountWithIntl(<div>{first.append as ReactNode}</div>).text()).toBe('Hit enter to add');
-    // The real options keep their place after it.
-    expect(rest.map((option) => option.label)).toEqual(['dev', 'prod']);
+    // Search filters the real options too, and 'p99' matches neither.
+    expect(rest.map((option) => option.label)).toEqual([]);
   });
 
   it('does not offer a value that is already an option', () => {
@@ -263,7 +263,7 @@ describe('VariablesBar — allowCustomValue: the pending "add" row', () => {
       getProps().searchProps.onSearch!('prod');
     });
 
-    expect(getProps().options.map((option) => option.label)).toEqual(['dev', 'prod']);
+    expect(getProps().options.map((option) => option.label)).toEqual(['prod']);
     expect(getProps().options.some((option) => option.append)).toBe(false);
   });
 
@@ -280,11 +280,11 @@ describe('VariablesBar — allowCustomValue: the pending "add" row', () => {
     expect(getProps().options.some((option) => option.append)).toBe(false);
   });
 
-  it('does not wire up the add-value hooks when the feature is off', () => {
+  it('always wires onSearch for full-list client-side filtering', () => {
     const { component } = mountBar([makeCustomVariable()]);
     const getProps = openSelector(component);
 
-    expect(getProps().searchProps.onSearch).toBeUndefined();
+    expect(getProps().searchProps.onSearch).toBeDefined();
     expect(getProps().searchProps.placeholder).toBe('Contains...');
   });
 
@@ -534,7 +534,7 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
     ]);
   });
 
-  it('keeps custom values when "All" is checked', () => {
+  it('replaces the selection with the "All" marker when "All" is checked', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({
         allowCustomValue: true,
@@ -551,17 +551,16 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
       getProps().onChange(check(options, allIndex));
     });
 
-    // "All" covers the listed options only.
-    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['dev', 'prod', 'p99']);
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['$__all']);
   });
 
-  it('keeps custom values when "All" is unchecked', () => {
+  it('clears the selection when "All" is unchecked', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({
         allowCustomValue: true,
         multi: true,
         includeAll: true,
-        current: ['dev', 'prod', 'p99'],
+        current: ['$__all'],
       }),
     ]);
     const getProps = openSelector(component);
@@ -574,6 +573,28 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
       getProps().onChange(uncheckedAll);
     });
 
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', []);
+  });
+
+  it('exits "All" to just the custom value when one is committed under "All"', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeCustomVariable({
+        allowCustomValue: true,
+        multi: true,
+        includeAll: true,
+        current: ['$__all'],
+      }),
+    ]);
+    const getProps = openSelector(component);
+
+    act(() => {
+      getProps().searchProps.onSearch!('p99');
+    });
+    act(() => {
+      getProps().searchProps.onKeyDown(keyEvent('Enter'));
+    });
+
+    // Not ['$__all', 'p99'] — the marker must never coexist with a concrete value.
     expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['p99']);
   });
 
@@ -603,5 +624,132 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
     const buttonText = findTestSubject(component, 'variable-selector-button').text();
     expect(buttonText).not.toBe('All');
     expect(buttonText).toContain('3');
+  });
+});
+
+describe('VariablesBar — "All" semantics and client-side search', () => {
+  // 150 options so the display cap (100) and client-side search are exercised.
+  const manyValues = Array.from({ length: 150 }, (_, i) => `v${String(i).padStart(3, '0')}`);
+  const makeLargeVariable = (overrides: Partial<VariableWithState> = {}): VariableWithState =>
+    makeCustomVariable({
+      multi: true,
+      includeAll: true,
+      options: manyValues.map((value) => ({ value })),
+      customOptions: manyValues,
+      current: ['v000'],
+      ...overrides,
+    });
+
+  const labelsOf = (options: SelectableOption[]) => options.map((option) => option.label);
+  const realRows = (options: SelectableOption[]) =>
+    options.filter((option) => option.key?.startsWith('__value:'));
+
+  it('stores the $__all marker when "All" is clicked', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeCustomVariable({ multi: true, includeAll: true, current: ['dev'] }),
+    ]);
+    const getProps = openSelector(component);
+
+    const options = getProps().options;
+    const allIndex = options.findIndex((option) => option.label === 'All');
+    act(() => {
+      getProps().onChange(check(options, allIndex));
+    });
+
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['$__all']);
+  });
+
+  it('shows every option as checked and the total count while "All" is active', () => {
+    const { component } = mountBar([makeLargeVariable({ current: ['$__all'] })]);
+    const getProps = openSelector(component);
+
+    expect(realRows(getProps().options).every((option) => option.checked === 'on')).toBe(true);
+    // Badge reflects the full option count, not the single stored marker.
+    expect(findTestSubject(component, 'variable-selector-button').text()).toContain('150');
+  });
+
+  it('exits "All" and keeps every option except the one unchecked', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeLargeVariable({ current: ['$__all'] }),
+    ]);
+    const getProps = openSelector(component);
+
+    // Uncheck a single visible option; EuiSelectable leaves the "All" row checked.
+    const options = getProps().options;
+    const targetIndex = options.findIndex((option) => option.key === '__value:v005');
+    const toggled = options.map((option, i) =>
+      i === targetIndex ? { ...option, checked: undefined } : option
+    );
+    act(() => {
+      getProps().onChange(toggled);
+    });
+
+    const stored = updateVariableValue.mock.calls[0][1] as string[];
+    expect(stored).toHaveLength(149);
+    expect(stored).not.toContain('v005');
+    expect(stored).toContain('v000');
+    expect(stored).toContain('v149');
+  });
+
+  it('renders a disabled truncation hint when options exceed the display cap', () => {
+    const { component } = mountBar([makeLargeVariable({ current: [] })]);
+    const getProps = openSelector(component);
+
+    const options = getProps().options;
+    expect(realRows(options)).toHaveLength(100);
+    const hint = options.find((option) => option.key === '__truncation_hint__');
+    expect(hint).toBeDefined();
+    expect(hint!.label).toContain('150');
+  });
+
+  it('searches the full option list beyond the display cap and hides "All"', () => {
+    const { component } = mountBar([makeLargeVariable({ current: [] })]);
+    const getProps = openSelector(component);
+
+    act(() => {
+      getProps().searchProps.onSearch!('v149');
+    });
+
+    const labels = labelsOf(getProps().options);
+    // v149 is past the first 100, yet search still finds it.
+    expect(labels).toContain('v149');
+    // "All" is hidden while a search term is active.
+    expect(labels).not.toContain('All');
+  });
+
+  it('ignores the disabled hint row when committing a selection', () => {
+    const { component, updateVariableValue } = mountBar([makeLargeVariable({ current: ['v000'] })]);
+    const getProps = openSelector(component);
+
+    // Re-emit the current options unchanged (hint row present, nothing toggled).
+    act(() => {
+      getProps().onChange(getProps().options);
+    });
+
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['v000']);
+  });
+
+  it('single-select with an active search commits only the visible pick', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeCustomVariable({
+        multi: false,
+        options: [{ value: 'dev' }, { value: 'prod' }],
+        customOptions: ['dev', 'prod'],
+        current: ['dev'],
+      }),
+    ]);
+    const getProps = openSelector(component);
+
+    act(() => {
+      getProps().searchProps.onSearch!('prod');
+    });
+    const options = getProps().options;
+    const prodIndex = options.findIndex((option) => option.key === '__value:prod');
+    act(() => {
+      getProps().onChange(check(options, prodIndex));
+    });
+
+    // Only 'prod' is committed; the search-hidden 'dev' is not retained.
+    expect(updateVariableValue).toHaveBeenLastCalledWith('custom-1', ['prod']);
   });
 });

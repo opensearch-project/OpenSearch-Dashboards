@@ -13,6 +13,7 @@ import {
   previewOutputMessages,
   readAttribute,
 } from '../traces/hooks/genai_message_preview';
+import { AI_ROOT_FIELD, aiRootsOf } from '../../utils/ai_root';
 
 /** Backtick-quoted session id field for use in PPL. */
 export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
@@ -192,11 +193,42 @@ export const buildTraceSessionMapQuery = (
     sessionIds
   )}) | stats count() as spans by traceId, ${SESSION_FIELD_PPL} | head ${limit}`;
 
-/** Root spans of the given traces (they carry per-trace input, output and token totals). */
-export const buildRootSpansQuery = (source: string, traceIds: string[]): string =>
-  `${source} | where parentSpanId = "" and traceId in (${inList(
-    traceIds
-  )}) | sort startTime | head ${Math.max(1, traceIds.length)}`;
+/**
+ * Root spans of the given traces (they carry per-trace input, output and token totals). With
+ * `withAiRoots`, also the AI-root spans marked under non-GenAI roots; see `preferAiRoots`.
+ */
+export const buildRootSpansQuery = (
+  source: string,
+  traceIds: string[],
+  withAiRoots = false
+): string =>
+  `${source} | where ${
+    withAiRoots ? `(parentSpanId = "" or \`${AI_ROOT_FIELD}\` = true)` : 'parentSpanId = ""'
+  } and traceId in (${inList(traceIds)}) | sort startTime | head ${Math.max(
+    1,
+    traceIds.length * (withAiRoots ? 4 : 1)
+  )}`;
+
+/**
+ * The rows that represent each trace (`aiRootsOf`): its GenAI or marked root, else its marked
+ * spans (an agent behind an HTTP handler; several for parallel agents), else the fetched root.
+ * Both the HTTP root and the marked spans carry aggregated tokens, so keeping both would count
+ * them twice.
+ */
+export const preferAiRoots = (rows: BaseRow[]): BaseRow[] => {
+  const byTrace = new Map<string, BaseRow[]>();
+  for (const row of rows) {
+    const list = byTrace.get(row.traceId) ?? [];
+    list.push(row);
+    byTrace.set(row.traceId, list);
+  }
+  const kept = new Set<BaseRow>();
+  for (const traceRows of byTrace.values()) {
+    const roots = aiRootsOf(traceRows);
+    (roots.length > 0 ? roots : traceRows).forEach((r) => kept.add(r));
+  }
+  return rows.filter((r) => kept.has(r));
+};
 
 /** Every span in the given traces, for the session detail flyout. */
 export const buildSessionSpansQuery = (

@@ -97,11 +97,17 @@ export const getSuggestions = async ({
 
     // Add dynamic suggestions (metrics, labels, label values)
     const dataView = indexPattern as DataView;
-    const dataConnectionId = dataView?.id ?? services.data.query.queryString.getQuery().dataset?.id;
+    const dataset = services.data.query.queryString?.getQuery()?.dataset;
+    const dataConnectionId = dataView?.id ?? dataset?.id;
     const meta = dataView?.dataSourceMeta;
 
     if (dataConnectionId) {
-      const prometheusResourceClient = services.data.resourceClientFactory.get<any>('prometheus');
+      // The dataset's type may name its own resource client (a PromQL-compatible store);
+      // otherwise its metrics and labels come from Prometheus.
+      const prometheusResourceClient = services.data.resourceClientFactory.getForDatasetType<any>(
+        dataset?.type,
+        'prometheus'
+      );
 
       if (prometheusResourceClient) {
         const timeRange = services.data.query.timefilter.timefilter.getTime();

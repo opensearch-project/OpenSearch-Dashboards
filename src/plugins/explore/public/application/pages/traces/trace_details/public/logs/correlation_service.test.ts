@@ -367,21 +367,21 @@ describe('CorrelationService', () => {
         mockDataService,
         'trace-id'
       );
-      expect(result1).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0 });
+      expect(result1).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0, errors: [] });
 
       const result2 = await correlationService.checkCorrelationsAndFetchLogs(
         { id: 'dataset-id' } as any,
         null as any,
         'trace-id'
       );
-      expect(result2).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0 });
+      expect(result2).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0, errors: [] });
 
       const result3 = await correlationService.checkCorrelationsAndFetchLogs(
         { id: 'dataset-id' } as any,
         mockDataService,
         ''
       );
-      expect(result3).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0 });
+      expect(result3).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0, errors: [] });
     });
 
     it('should fetch logs when correlations are found', async () => {
@@ -494,7 +494,7 @@ describe('CorrelationService', () => {
         return undefined;
       });
 
-      jest.spyOn(correlationService, 'checkCorrelationsForLogs').mockResolvedValue(mockLogDatasets);
+      jest.spyOn(correlationService, 'findLogDatasets').mockResolvedValue(mockLogDatasets);
       mockFetchTraceLogsByTraceId.mockResolvedValue(mockLogsResponse);
       mockTransformLogsResponseToHits.mockReturnValue(mockTransformedLogs);
 
@@ -516,7 +516,7 @@ describe('CorrelationService', () => {
       const dataset = { id: 'trace-dataset-id' };
       const traceId = 'test-trace-id';
 
-      jest.spyOn(correlationService, 'checkCorrelationsForLogs').mockResolvedValue([]);
+      jest.spyOn(correlationService, 'findLogDatasets').mockResolvedValue([]);
 
       const result = await correlationService.checkCorrelationsAndFetchLogs(
         dataset as any,
@@ -524,7 +524,7 @@ describe('CorrelationService', () => {
         traceId
       );
 
-      expect(result).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0 });
+      expect(result).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0, errors: [] });
       expect(mockFetchTraceLogsByTraceId).not.toHaveBeenCalled();
     });
 
@@ -533,7 +533,7 @@ describe('CorrelationService', () => {
       const traceId = 'test-trace-id';
       const error = new Error('Failed to fetch logs');
 
-      jest.spyOn(correlationService, 'checkCorrelationsForLogs').mockRejectedValue(error);
+      jest.spyOn(correlationService, 'findLogDatasets').mockRejectedValue(error);
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -543,8 +543,13 @@ describe('CorrelationService', () => {
         traceId
       );
 
-      expect(result).toEqual({ logDatasets: [], datasetLogs: {}, logHitCount: 0 });
-      expect(consoleSpy).toHaveBeenCalledWith('Error in checkCorrelationsAndFetchLogs:', error);
+      // The lookup failure is returned, so callers can show it instead of "no correlation".
+      expect(result).toEqual({
+        logDatasets: [],
+        datasetLogs: {},
+        logHitCount: 0,
+        errors: ['Failed to fetch logs'],
+      });
 
       consoleSpy.mockRestore();
     });

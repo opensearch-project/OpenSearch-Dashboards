@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryEditorProps } from '../../../components/query_panel/query_panel_editor/types';
@@ -12,11 +12,27 @@ import { EditorMode } from '../../utils/state_management/types';
 import { useEditorOperations } from './use_editor_operations';
 import { createVariableCompletionProvider } from '../utils/variable_completion_provider';
 
-export const useQueryPanelEditorProps = (): QueryEditorProps => {
+export const useQueryPanelEditorProps = (): QueryEditorProps & { editorKey: number } => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryBuilder, queryState, queryEditorState } = useQueryBuilderState();
   const { switchEditorMode } = useEditorOperations();
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
+
+  const previousEditorModeRef = useRef(queryEditorState.editorMode);
+
+  // use this editorKey to force monaco editor to mount/unmount only for Prompt -> Query
+  const [editorKey, setEditorKey] = useState(0);
+
+  useEffect(() => {
+    const previous = previousEditorModeRef.current;
+    const current = queryEditorState.editorMode;
+
+    if (previous === EditorMode.Prompt && current === EditorMode.Query) {
+      setEditorKey((key) => key + 1);
+    }
+
+    previousEditorModeRef.current = current;
+  }, [queryEditorState.editorMode]);
 
   const onRun = useCallback(
     (queryString: string) => {
@@ -50,6 +66,7 @@ export const useQueryPanelEditorProps = (): QueryEditorProps => {
   );
 
   return {
+    editorKey,
     services,
     editorRef: queryBuilder.editorRef,
     queryState,

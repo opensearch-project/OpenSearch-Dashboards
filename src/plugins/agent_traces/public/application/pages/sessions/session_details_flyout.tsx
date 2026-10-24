@@ -278,7 +278,12 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   }, [focusTraceId, traces, focusTrace]);
 
   const drillItems = useMemo(
-    () => (drillTab === 'traces' ? traces.map((t) => t.root) : traces.flatMap((t) => t.spans)),
+    () =>
+      drillTab === 'traces'
+        ? traces.map((t) => t.root)
+        : traces
+            .filter((t, i) => traces.findIndex((o) => o.traceId === t.traceId) === i)
+            .flatMap((t) => t.spans),
     [drillTab, traces]
   );
 
@@ -402,7 +407,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                 <div
                   role="button"
                   tabIndex={0}
-                  key={trace.traceId}
+                  key={`${trace.traceId}:${trace.root.spanId}`}
                   className={`agtSessionFlyout__traceItem${
                     i === focusedIndex ? ' agtSessionFlyout__traceItem--focused' : ''
                   }`}
@@ -502,7 +507,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                 </div>
                 {traces.map((trace, i) => (
                   <ConversationTurn
-                    key={trace.traceId}
+                    key={`${trace.traceId}:${trace.root.spanId}`}
                     index={i + 1}
                     trace={trace}
                     focused={i === focusedIndex}

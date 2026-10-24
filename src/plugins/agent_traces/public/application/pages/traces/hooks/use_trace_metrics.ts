@@ -11,6 +11,9 @@ import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
 import { extractSpanFilterQuery } from '../table_shared';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
+import { aiRootCondition, ensureAiRootFieldChecked } from '../../../utils/ai_root';
+import { getSourceCommand } from '../../sessions/session_utils';
+import { shadowedAiRootsExclusion } from './shadowed_ai_roots';
 
 export interface TraceMetrics {
   totalTraces: number;
@@ -70,7 +73,17 @@ const doFetchMetrics = async (
   sourceOnlyQuery: string,
   filteredQuery: string
 ): Promise<TraceMetrics> => {
-  const genAiFilter = `where isnotnull(\`attributes.gen_ai.operation.name\`)`;
+  const isGenAiSpan = `isnotnull(\`attributes.gen_ai.operation.name\`)`;
+  await ensureAiRootFieldChecked(pplService, datasetParam, getSourceCommand(sourceOnlyQuery));
+  // AI roots: a GenAI trace root, or a span marked as the agent root (usually the outermost GenAI
+  // span under a non-GenAI root; an SDK may mark a non-GenAI span, so the filter keeps those too).
+  const shadowed = await shadowedAiRootsExclusion(
+    pplService,
+    datasetParam,
+    getSourceCommand(sourceOnlyQuery)
+  );
+  const rootCase = `(${aiRootCondition(datasetParam.id)})${shadowed}`;
+  const spanFilter = `where ${isGenAiSpan} OR (${rootCase})`;
   // Row-level filters only (where, eval, ...): a filter placed after eval still applies.
   const { filterQuery: whereQuery } = extractSpanFilterQuery(filteredQuery);
 
@@ -82,14 +95,14 @@ const doFetchMetrics = async (
     // Query A — Counts (source-only, no user filter):
     // Total Traces, Total Spans, and their error counts are unaffected by user query filters
     (async () => {
-      const countsQuery = `${sourceOnlyQuery} | ${genAiFilter} | stats count() as total_spans, sum(case(parentSpanId = "", 1 else 0)) as total_traces, sum(case(\`status.code\` = 2, 1 else 0)) as error_spans, sum(case(\`status.code\` = 2 AND parentSpanId = "", 1 else 0)) as error_traces`;
+      const countsQuery = `${sourceOnlyQuery} | ${spanFilter} | stats sum(case(${isGenAiSpan}, 1 else 0)) as total_spans, sum(case(${rootCase}, 1 else 0)) as total_traces, sum(case(\`status.code\` = 2 AND ${isGenAiSpan}, 1 else 0)) as error_spans, sum(case(\`status.code\` = 2 AND (${rootCase}), 1 else 0)) as error_traces`;
       const countsResponse = await pplService.executeQuery(datasetParam, countsQuery);
       return parseStatsResponse(countsResponse);
     })(),
     // Query B — Filtered stats (with user query where clauses only):
     // Tokens and Latency respect user query where filters
     (async () => {
-      const rootFilter = `where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`)`;
+      const rootFilter = `where ${rootCase}`;
       const statsQuery = `${whereQuery} | ${rootFilter} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens`;
       const statsResponse = await pplService.executeQuery(datasetParam, statsQuery);
       return parseStatsResponse(statsResponse);
@@ -97,7 +110,7 @@ const doFetchMetrics = async (
     // Query C — Filtered counts (with user query where clauses only):
     // Total traces/spans matching the user's current query, shown in the info bar
     (async () => {
-      const query = `${whereQuery} | ${genAiFilter} | stats count() as filtered_spans, sum(case(parentSpanId = "", 1 else 0)) as filtered_traces`;
+      const query = `${whereQuery} | ${spanFilter} | stats sum(case(${isGenAiSpan}, 1 else 0)) as filtered_spans, sum(case(${rootCase}, 1 else 0)) as filtered_traces`;
       const response = await pplService.executeQuery(datasetParam, query);
       return parseStatsResponse(response);
     })(),

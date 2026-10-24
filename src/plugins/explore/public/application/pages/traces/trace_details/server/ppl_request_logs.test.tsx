@@ -13,6 +13,7 @@ import {
 import { PPLService } from './ppl_request_helpers';
 
 jest.mock('./ppl_request_helpers', () => ({
+  escapePPLValue: jest.requireActual('./ppl_request_helpers').escapePPLValue,
   PPLService: jest.fn().mockImplementation(() => ({
     executeQuery: jest.fn(),
   })),
@@ -91,7 +92,7 @@ describe('ppl_request_logs', () => {
           type: 'INDEX_PATTERN',
           // timeFieldName is omitted to prevent automatic time filtering
         },
-        'source = test-logs-index | where traceId = "test-trace-id-123" | head 1000'
+        'source = test-logs-index | where traceId = "test-trace-id-123" | sort - `@timestamp` | head 1000'
       );
     });
 
@@ -110,7 +111,7 @@ describe('ppl_request_logs', () => {
           title: 'test-logs-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-logs-index | where traceId = "test-trace-id-123" | head 500'
+        'source = test-logs-index | where traceId = "test-trace-id-123" | sort - `@timestamp` | head 500'
       );
     });
 
@@ -125,8 +126,22 @@ describe('ppl_request_logs', () => {
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
         expect.any(Object),
-        'source = test-logs-index | where traceId = "trace-with-"quotes"" | head 1000'
+        'source = test-logs-index | where traceId = "trace-with-\\"quotes\\"" | sort - `@timestamp` | head 1000'
       );
+    });
+
+    it('escapes the span id too', async () => {
+      const mockExecuteQuery = jest.fn().mockResolvedValue({ body: { fields: [] } });
+      (PPLService as jest.Mock).mockImplementation(() => ({
+        executeQuery: mockExecuteQuery,
+      }));
+
+      await fetchTraceLogsByTraceId(mockDataService, {
+        ...defaultParams,
+        spanId: 's1" or 1=1 or "',
+      });
+
+      expect(mockExecuteQuery.mock.calls[0][1]).toContain('and spanId = "s1\\" or 1=1 or \\""');
     });
 
     it('returns the response from PPLService', async () => {
@@ -199,7 +214,7 @@ describe('ppl_request_logs', () => {
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
         expect.any(Object),
-        'source = test-logs-index | where trace_id_otel = "test-trace-id-123" | head 1000'
+        'source = test-logs-index | where trace_id_otel = "test-trace-id-123" | sort - `@timestamp` | head 1000'
       );
     });
 
@@ -226,7 +241,7 @@ describe('ppl_request_logs', () => {
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
         expect.any(Object),
-        'source = test-logs-index | where traceId = "test-trace-id-123" | head 1000'
+        'source = test-logs-index | where traceId = "test-trace-id-123" | sort - `@timestamp` | head 1000'
       );
     });
   });

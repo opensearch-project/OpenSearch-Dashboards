@@ -81,6 +81,9 @@ const computeOverallStatus = (statusMap: QueryStatusMap): QueryResultStatus => {
       startTime: earliestStartTime || Date.now(),
       elapsedMs: undefined,
       error: undefined,
+      // Carried so consumers can distinguish "nothing to show yet" from "in flight with partial
+      // results already rendered".
+      streaming: loadingStatuses.find((s) => s.streaming)?.streaming,
     };
   }
 

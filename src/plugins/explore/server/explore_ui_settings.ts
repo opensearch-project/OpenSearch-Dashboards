@@ -16,6 +16,7 @@ import {
   ASYNC_QUERY_POLL_INTERVAL_SETTING,
   FORMAT_JSON_SETTING,
   ROW_SEPARATORS_SETTING,
+  STREAMING_RESULTS_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -114,6 +115,22 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     category: ['explore'],
     scope: UiSettingScope.WORKSPACE,
     requiresCapability: 'explore.logsQueryBuilderEnabled',
+    schema: schema.boolean(),
+  },
+  [STREAMING_RESULTS_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.enableStreamingResultsTitle', {
+      defaultMessage: 'Stream results for long-running queries',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.enableStreamingResultsText', {
+      defaultMessage:
+        'Deliver PPL results progressively instead of waiting for the query to finish. Rows appear ' +
+        'as the engine commits them, with a live count of rows found and the option to stop the ' +
+        'query. Only queries whose plan can expose a stable row prefix stream this way; a query ' +
+        'that sorts or aggregates still returns everything at once, because its intermediate rows ' +
+        'could be revised.',
+    }),
+    category: ['explore'],
     schema: schema.boolean(),
   },
 };
