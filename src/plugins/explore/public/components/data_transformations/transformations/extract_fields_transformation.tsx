@@ -10,14 +10,14 @@ import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
-import { VisFieldType } from '../../visualizations/types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 import {
   createAppliedResult,
   createInvalidConfigResult,
   createMissingFieldsResult,
   getRowFieldValue,
+  isDateField,
+  isNumericalField,
   rowHasField,
 } from '../transformation_utils';
 
@@ -70,10 +70,7 @@ const ExtractFieldsEditor = ({
   );
 
   const possibleFields = useMemo(
-    () =>
-      availableFields.filter(
-        (f) => f.visFieldType !== VisFieldType.Numerical && f.visFieldType !== VisFieldType.Date
-      ),
+    () => availableFields.filter((field) => !isNumericalField(field) && !isDateField(field)),
     [availableFields]
   );
 
@@ -151,7 +148,7 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
       prefix: '',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: ExtractFieldsConfig) => {
+    transformationMethod: (data, config: ExtractFieldsConfig) => {
       if (!isConfigComplete(config)) {
         return createInvalidConfigResult(data, 'Extract Fields configuration is incomplete.');
       }
@@ -173,10 +170,7 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
             ? extractFromJSON(String(raw), config.prefix)
             : extractFromObject(raw, config.prefix);
 
-        return {
-          ...row,
-          _source: { ...(row._source as Record<string, unknown>), ...extracted },
-        };
+        return { ...row, ...extracted };
       });
 
       if (!hasMissingRows && data.length > 0) {

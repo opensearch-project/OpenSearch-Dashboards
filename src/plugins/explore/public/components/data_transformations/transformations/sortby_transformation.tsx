@@ -16,7 +16,6 @@ import {
   rowHasField,
 } from '../transformation_utils';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 interface SortByConfig {
   field: string | undefined;
@@ -96,7 +95,7 @@ export function createSortByTransformation(): TransformationInstance<SortByConfi
       order: 'asc',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: SortByConfig) => {
+    transformationMethod: (data, config: SortByConfig) => {
       const { field, order } = config;
 
       if (!field) {
@@ -110,7 +109,6 @@ export function createSortByTransformation(): TransformationInstance<SortByConfi
       const sorted = [...data];
 
       sorted.sort((a, b) => {
-        // extract values from OpenSearch hit (_source.field)
         const valueA = getRowFieldValue(a, field);
         const valueB = getRowFieldValue(b, field);
 

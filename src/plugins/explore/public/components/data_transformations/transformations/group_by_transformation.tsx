@@ -14,8 +14,6 @@ import {
   TransformationConfigSchema,
 } from '../types';
 import { FieldSelector } from '../field_selector';
-import { VisFieldType } from '../../visualizations/types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { CalculationMethod, calculateValue } from '../../visualizations/utils/calculation';
 import { ValueCalculationSelector } from '../../visualizations/style_panel/value/value_calculation_selector';
 import {
@@ -23,6 +21,8 @@ import {
   createInvalidConfigResult,
   createMissingFieldsResult,
   getRowFieldValue,
+  isDateField,
+  isNumericalField,
   rowHasField,
 } from '../transformation_utils';
 
@@ -49,25 +49,15 @@ const DATE_DISABLED: CalculationMethod[] = [
 ];
 
 const getDisabledForField = (field: FieldSchema): CalculationMethod[] => {
-  switch (field.visFieldType) {
-    case VisFieldType.Numerical:
-      return [];
-    case VisFieldType.Date:
-      return DATE_DISABLED;
-    default:
-      return STRING_DISABLED;
-  }
+  if (isNumericalField(field)) return [];
+  if (isDateField(field)) return DATE_DISABLED;
+  return STRING_DISABLED;
 };
 
 const defaultMethodForField = (field: FieldSchema): CalculationMethod => {
-  switch (field.visFieldType) {
-    case VisFieldType.Numerical:
-      return 'total';
-    case VisFieldType.Date:
-      return 'first';
-    default:
-      return 'count';
-  }
+  if (isNumericalField(field)) return 'total';
+  if (isDateField(field)) return 'first';
+  return 'count';
 };
 
 interface AggMethod {
@@ -238,12 +228,12 @@ export function createGroupByTransformation(): TransformationInstance<GroupByCon
       aggregations: [],
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: GroupByConfig) => {
+    transformationMethod: (data, config: GroupByConfig) => {
       if (!config.groupByField || config.aggregations.length === 0) {
         return createInvalidConfigResult(data, 'Group By configuration is incomplete.');
       }
 
-      const groups = new Map<string, OpenSearchSearchHit[]>();
+      const groups = new Map<string, typeof data>();
       let missingGroupByRows = 0;
       for (const row of data) {
         if (!rowHasField(row, config.groupByField)) {
@@ -260,7 +250,7 @@ export function createGroupByTransformation(): TransformationInstance<GroupByCon
       }
 
       const result = Array.from(groups.values()).map((rows) => {
-        const source: Record<string, unknown> = {
+        const resultRow: Record<string, unknown> = {
           [config.groupByField!]: getRowFieldValue(rows[0], config.groupByField!),
         };
         for (const agg of config.aggregations) {
@@ -268,9 +258,9 @@ export function createGroupByTransformation(): TransformationInstance<GroupByCon
           const values = rows
             .filter((row) => rowHasField(row, agg.field))
             .map((row) => getRowFieldValue(row, agg.field));
-          source[`${agg.method}_${agg.field}`] = applyAgg(values, agg.method);
+          resultRow[`${agg.method}_${agg.field}`] = applyAgg(values, agg.method);
         }
-        return { ...rows[0], _source: source };
+        return resultRow;
       });
       return missingGroupByRows > 0
         ? createMissingFieldsResult(result, [config.groupByField], 'partially_applied')
