@@ -117,7 +117,7 @@ export const createDashboardGlobalAndAppState = ({
           );
           // Writing back the normalized state must not add a history entry, or Back would
           // land on this URL again.
-          osdUrlStateStorage.flush({ replace: true });
+          flushPreservingHistoryState(osdUrlStateStorage, scopedHistory, true);
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
           // Sync from state url should be refactored within this application. The app is syncing from
@@ -222,7 +222,15 @@ export const updateStateUrl = ({
 }) => {
   osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
   // immediately forces scheduled updates and changes location
-  // scoped history state is preserved to allow embeddable state transfer
+  return flushPreservingHistoryState(osdUrlStateStorage, scopedHistory, replace);
+};
+
+// Scoped history state is preserved to allow embeddable state transfer.
+const flushPreservingHistoryState = (
+  osdUrlStateStorage: IOsdUrlStateStorage,
+  scopedHistory: ScopedHistory,
+  replace: boolean
+) => {
   const previousState = scopedHistory.location.state;
   const changed = osdUrlStateStorage.flush({ replace });
   if (changed) {

@@ -177,6 +177,37 @@ describe('createDashboardGlobalAndAppState', () => {
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
   });
 
+  test('preserves scoped history state when writing back state applied from the URL', () => {
+    const transferState = { type: 'visualization', input: { id: 'panel-1' } };
+    const scopedHistory = scopedHistoryMock.create({
+      pathname: '/view/dashboard-id',
+      state: transferState,
+    });
+    createStateContainer.mockReturnValueOnce({
+      getState: () => dashboardAppStateStub,
+      set: jest.fn(),
+    });
+    createDashboardGlobalAndAppState({
+      stateDefaults: dashboardAppStateStub,
+      osdUrlStateStorage,
+      services: {
+        ...mockServices,
+        history: { location: { pathname: '/view/dashboard-id' } },
+        scopedHistory,
+      } as any,
+      savedDashboardInstance: { ...savedDashboardInstance, id: 'dashboard-id' } as any,
+    });
+    const { stateContainer: syncedContainer } =
+      syncState.mock.calls[syncState.mock.calls.length - 1][0];
+    scopedHistory.replace.mockClear();
+
+    syncedContainer.set({ variables: [{ id: 'var1', current: ['value1'] }] });
+
+    expect(scopedHistory.replace).toHaveBeenCalledWith(
+      expect.objectContaining({ state: transferState })
+    );
+  });
+
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
     expect(stateContainer).toBe('stateContainer');
     stopStateSync();

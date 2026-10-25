@@ -950,6 +950,53 @@ describe('VariableService', () => {
       expect(serviceQueries).toEqual([expect.stringContaining("region = 'eu'")]);
       expect(getOptionValues(service.getVariablesWithState()[1].options)).toEqual(['svc-for-eu']);
     });
+
+    it('should not refresh dependents of a cleared variable after destroy', async () => {
+      mockExecuteVariableQuery.mockImplementation(async (_data: unknown, { query }: any) =>
+        query.includes('dedup region')
+          ? makeQueryResult(['eu', 'us'], 'region')
+          : makeQueryResult(['svc'])
+      );
+      const region = makeQueryVariable({
+        id: 'region-1',
+        name: 'region',
+        current: ['us'],
+        query: 'source=logs | dedup region | fields region',
+      });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        current: ['svc'],
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+      mockExecuteVariableQuery.mockClear();
+
+      service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+      service.destroy();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const serviceQueries = mockExecuteVariableQuery.mock.calls.filter(([, { query }]) =>
+        (query as string).includes('dedup service')
+      );
+      expect(serviceQueries).toHaveLength(0);
+    });
+
+    it('should log instead of rejecting when refreshing a cleared variable fails', async () => {
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { service } = createService([makeQueryVariable({ current: ['web'] })]);
+      const failure = new Error('refresh failed');
+      jest.spyOn(service, 'refreshVariableOptions').mockRejectedValueOnce(failure);
+
+      service.applyCurrentValues([{ id: 'query-1', current: undefined }]);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(consoleError).toHaveBeenCalledWith(
+        '[VariableService] Failed to refresh cleared variables:',
+        failure
+      );
+      consoleError.mockRestore();
+    });
   });
 
   describe('reorderVariables', () => {

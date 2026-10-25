@@ -64,6 +64,7 @@ export class VariableService {
   private variables$ = new BehaviorSubject<Variable[]>([]);
   private refreshControllers: Map<string, AbortController> = new Map();
   private refreshRequests: Map<string, Promise<void>> = new Map();
+  private destroyed = false;
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
@@ -428,7 +429,10 @@ export class VariableService {
       .filter((variable) => !cleared.includes(variable))
       .forEach((variable) => this.refreshDependentVariables(variable.name));
     if (cleared.length > 0) {
-      this.refreshClearedVariables(cleared);
+      this.refreshClearedVariables(cleared).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('[VariableService] Failed to refresh cleared variables:', error);
+      });
     }
   }
 
@@ -442,6 +446,9 @@ export class VariableService {
       // Another refresh (time range change, reload) may have aborted this one before the
       // fallback was chosen; wait for it so dependents see the parent's final value.
       await this.waitForPendingRefresh(variable.id);
+      if (this.destroyed) {
+        return;
+      }
       this.refreshDependentVariables(variable.name);
     }
   }
@@ -900,6 +907,7 @@ export class VariableService {
   }
 
   public destroy(): void {
+    this.destroyed = true;
     this.refreshControllers.forEach((c) => c.abort());
     this.refreshControllers.clear();
     this.refreshRequests.clear();
