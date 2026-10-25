@@ -1210,6 +1210,100 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       });
     });
 
+    // Stop renders on `isLoading && hasUserInitiatedQuery`, and the flag used to be set only by the
+    // editor's Run. A page load, time-range change or dataset change goes straight to
+    // executeQueries, so those ran a cancellable query while offering no way to cancel it.
+    it('marks the query as user-initiated, so Stop is offered however it started', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      await executeQueries({ services: {} as any })(mockDispatch, mockGetState, undefined);
+
+      const types = mockDispatch.mock.calls
+        .map(([a]) => (typeof a === 'object' && a !== null ? a.type : undefined))
+        .filter(Boolean);
+      expect(types).toContain('queryEditor/setHasUserInitiatedQuery');
+      const flag = mockDispatch.mock.calls
+        .map(([a]) => a)
+        .find((a) => typeof a === 'object' && a?.type === 'queryEditor/setHasUserInitiatedQuery');
+      expect(flag.payload).toBe(true);
+    });
+
+    // An engine without the async PPL API only reveals that at submit. Nothing has been rendered
+    // at that point, so the query must fall back to the non-streaming path rather than error.
+    describe('when a streaming run reports itself unavailable', () => {
+      const STREAMING_SETTING = 'explore:enableStreamingResults';
+
+      const streamingServices = () =>
+        ({
+          uiSettings: { get: jest.fn((key: string) => key === STREAMING_SETTING) },
+          capabilities: { queryEnhancements: { pplStreaming: true } },
+          data: {
+            query: {
+              timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } },
+              queryString: {
+                getLanguageService: () => ({
+                  getLanguage: () => ({ fields: { formatter: (value: any) => value } }),
+                }),
+              },
+            },
+            dataViews: { get: jest.fn().mockResolvedValue(undefined) },
+          },
+          tabRegistry: { getTab: jest.fn() },
+        }) as any;
+
+      const stateWithPplDataset = () => ({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: {
+            id: 'ds',
+            title: 'logs',
+            type: 'INDEX_PATTERN',
+            dataSource: { engineType: 'OpenSearch' },
+          },
+        },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      // Submit fails here because no http service is stubbed, so the run publishes nothing and
+      // reports itself unavailable.
+      it('re-runs the data table query on the standard path', async () => {
+        mockGetState.mockReturnValue(stateWithPplDataset());
+        // Annotated because the mock references itself for thunk actions, which otherwise
+        // infers as any.
+        const dispatch: jest.Mock = jest.fn((action: any) => {
+          if (typeof action === 'function') return action(dispatch, mockGetState, undefined);
+          return action;
+        });
+
+        await executeQueries({ services: streamingServices() })(
+          dispatch as any,
+          mockGetState,
+          undefined
+        );
+
+        const dispatchedTypes = dispatch.mock.calls
+          .map(([action]: any[]) => action?.type)
+          .filter(Boolean);
+        expect(dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))).toBe(
+          true
+        );
+      });
+    });
+
     it('should return early when no services provided', async () => {
       const mockState = {
         query: { query: '', language: 'PPL', dataset: null },

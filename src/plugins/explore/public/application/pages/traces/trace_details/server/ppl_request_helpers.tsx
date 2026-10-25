@@ -120,9 +120,13 @@ export const executePPLQuery = async (
 };
 
 // Escape a value for use in PPL queries
+/** Escape backslashes first, then quotes, so a value cannot close the PPL string literal. */
+const escapePPLString = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
 export const escapePPLValue = (value: any): string => {
   if (typeof value === 'string') {
-    return `"${value.replace(/"/g, '\\"')}"`;
+    return `"${escapePPLString(value)}"`;
   } else if (typeof value === 'number') {
     return value.toString();
   } else if (typeof value === 'boolean') {
@@ -130,7 +134,7 @@ export const escapePPLValue = (value: any): string => {
   } else if (value === null || value === undefined) {
     return `"${value}"`;
   } else {
-    return `"${JSON.stringify(value).replace(/"/g, '\\"')}"`;
+    return `"${escapePPLString(JSON.stringify(value))}"`;
   }
 };
 

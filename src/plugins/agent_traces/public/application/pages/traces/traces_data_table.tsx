@@ -23,6 +23,7 @@ import {
 } from './table_shared';
 import { getHitId } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import './traces_table.scss';
+import { dropShadowedAiRoots } from '../../utils/ai_root';
 
 const DEFAULT_TRACE_COLUMNS = [...AGENT_TRACES_DEFAULT_COLUMNS];
 
@@ -38,7 +39,7 @@ export const TracesDataTable: React.FC = () => {
   const {
     dataset,
     results,
-    hits,
+    hits: queryHits,
     isQueryLoading,
     isInitialized,
     traceMetrics,
@@ -57,6 +58,7 @@ export const TracesDataTable: React.FC = () => {
   } = useDataTableCore({ defaultColumns: DEFAULT_TRACE_COLUMNS });
 
   const { pplService, datasetParam } = usePPLQueryDeps();
+  const hits = useMemo(() => dropShadowedAiRoots(queryHits), [queryHits]);
   const { openFlyout, updateFlyoutFullTree } = useTraceFlyout();
 
   // Build row metadata map from hits

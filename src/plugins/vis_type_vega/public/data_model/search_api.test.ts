@@ -263,3 +263,92 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
     expect(await searchAPI.findDataSourceIdbyName('openSearchDataSource')).toBe('os-datasource-id');
   });
 });
+
+describe('SearchAPI.searchPromQL', () => {
+  const mockResponse = { body: { fields: [{ name: 'Time', values: [1000] }] } };
+
+  const makeResponderMock = () => ({
+    json: jest.fn().mockReturnThis(),
+    ok: jest.fn(),
+    error: jest.fn(),
+  });
+
+  const makeInspectorMock = () => {
+    const responder = makeResponderMock();
+    return {
+      inspectorAdapters: { requests: { start: jest.fn(() => responder) } },
+      responder,
+    };
+  };
+
+  const getSearchAPI = ({
+    httpResponse = Promise.resolve(mockResponse),
+    abortSignal,
+    inspectorAdapters,
+  }: {
+    httpResponse?: Promise<unknown>;
+    abortSignal?: AbortSignal;
+    inspectorAdapters?: object;
+  } = {}) => {
+    const httpMock = { post: jest.fn(() => httpResponse) };
+    const dependencies = {
+      http: httpMock,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+      dataSourceEnabled: false,
+    } as unknown as SearchAPIDependencies;
+    return {
+      searchAPI: new SearchAPI(dependencies, abortSignal, inspectorAdapters as any),
+      httpMock,
+    };
+  };
+
+  test('makes a POST to the PromQL endpoint with the serialized request body', async () => {
+    const { searchAPI, httpMock } = getSearchAPI();
+    const requestBody = { query: { query: 'up', language: 'PROMQL' } };
+
+    const result = await searchAPI.searchPromQL('my-request', requestBody);
+
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    const [path, options] = httpMock.post.mock.calls[0];
+    expect(path).toBe('/api/enhancements/search/promql');
+    expect(JSON.parse(options.body)).toEqual(requestBody);
+    expect(result).toEqual(mockResponse);
+  });
+
+  test('forwards the abort signal to the HTTP call', async () => {
+    const controller = new AbortController();
+    const { searchAPI, httpMock } = getSearchAPI({ abortSignal: controller.signal });
+
+    await searchAPI.searchPromQL('req', {});
+
+    expect(httpMock.post.mock.calls[0][1].signal).toBe(controller.signal);
+  });
+
+  test('registers an inspector request, records the body, and marks it ok on success', async () => {
+    const { inspectorAdapters, responder } = makeInspectorMock();
+    const { searchAPI } = getSearchAPI({ inspectorAdapters });
+    const requestBody = { query: { query: 'up' } };
+
+    await searchAPI.searchPromQL('my-request', requestBody);
+
+    expect(inspectorAdapters.requests.start).toHaveBeenCalledWith('my-request', {
+      name: 'my-request',
+    });
+    expect(responder.json).toHaveBeenCalledWith(requestBody);
+    expect(responder.ok).toHaveBeenCalledWith({ json: mockResponse });
+    expect(responder.error).not.toHaveBeenCalled();
+  });
+
+  test('marks the inspector request as error and re-throws on HTTP failure', async () => {
+    const networkError = new Error('connection refused');
+    const { inspectorAdapters, responder } = makeInspectorMock();
+    const { searchAPI } = getSearchAPI({
+      httpResponse: Promise.reject(networkError),
+      inspectorAdapters,
+    });
+
+    await expect(searchAPI.searchPromQL('req', {})).rejects.toThrow('connection refused');
+    expect(responder.error).toHaveBeenCalledWith({ json: { error: networkError } });
+    expect(responder.ok).not.toHaveBeenCalled();
+  });
+});

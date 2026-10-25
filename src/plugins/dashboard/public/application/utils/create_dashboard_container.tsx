@@ -38,6 +38,7 @@ import {
 } from '../../../../embeddable/public';
 import {
   convertPanelStateToSavedDashboardPanel,
+  normalizeSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../utils/embeddable_saved_object_converters';
 import {
@@ -475,7 +476,7 @@ const handleDashboardContainerChanges = (
     if (
       !isEqual(
         convertedPanelStateMap[panelState.explicitInput.id],
-        savedDashboardPanelMap[panelState.explicitInput.id]
+        normalizeSavedDashboardPanel(savedDashboardPanelMap[panelState.explicitInput.id])
       )
     ) {
       // A panel was changed

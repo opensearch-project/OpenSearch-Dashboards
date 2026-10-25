@@ -13,6 +13,7 @@ import {
   QueryExecutionStatus,
   EditorMode,
 } from '../../../application/utils/state_management/types';
+import { SupportLanguageType } from '../query_builder/query_builder';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -21,7 +22,15 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
 }));
 jest.mock('../hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
 jest.mock('../hooks/use_editor_operations', () => ({ useEditorOperations: jest.fn() }));
-jest.mock('../query_builder/query_builder', () => ({ abortAllActiveQueries: jest.fn() }));
+jest.mock('../query_builder/query_builder', () => ({
+  abortAllActiveQueries: jest.fn(),
+  SupportLanguageType: {
+    ppl: 'PPL',
+    promQL: 'PROMQL',
+    ai: 'AI',
+    sql: 'SQL',
+  },
+}));
 jest.mock('./query_execution_button', () => ({
   QueryExecutionButton: () => <div data-test-subj="query-execution-button" />,
 }));
@@ -35,6 +44,8 @@ const buildQueryBuilderState = (options: Record<string, any> = {}) => ({
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
     editorMode: EditorMode.Query,
     userInitiatedQuery: false,
+    activeBottomPanelTab: 'QUERY_TAB',
+    languageType: SupportLanguageType.ppl,
   },
   datasetView: { dataView: undefined },
   queryBuilder: {
@@ -50,6 +61,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   (useQueryBuilderState as jest.Mock).mockReturnValue(buildQueryBuilderState());
   (useEditorOperations as jest.Mock).mockReturnValue({
+    getEditorRef: jest.fn().mockReturnValue({
+      getValue: jest.fn().mockReturnValue('source=logs'),
+    }),
     getEditorText: jest.fn().mockReturnValue('source=logs'),
   });
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({
@@ -93,5 +107,33 @@ describe('TopNav', () => {
     expect(props).not.toHaveProperty('showCancelButton');
     expect(props).not.toHaveProperty('onQueryCancel');
     expect(props).not.toHaveProperty('isQueryRunning');
+  });
+
+  it('does not overwrite builder query from a missing editor before run', async () => {
+    const queryBuilder = {
+      updateQueryEditorState: jest.fn(),
+      updateQueryState: jest.fn(),
+      onQueryExecutionSubmit: jest.fn(),
+      clearResultState: jest.fn(),
+    };
+    (useQueryBuilderState as jest.Mock).mockReturnValue(
+      buildQueryBuilderState({
+        queryBuilder,
+      })
+    );
+    (useEditorOperations as jest.Mock).mockReturnValue({
+      getEditorRef: jest.fn().mockReturnValue(null),
+      getEditorText: jest.fn().mockReturnValue('source=stale_logs'),
+    });
+
+    render(<TopNav />);
+    const props = mockTopNavMenu.mock.calls[mockTopNavMenu.mock.calls.length - 1][0];
+
+    await props.onQuerySubmit();
+
+    expect(queryBuilder.updateQueryState).not.toHaveBeenCalledWith({
+      query: 'source=stale_logs',
+    });
+    expect(queryBuilder.onQueryExecutionSubmit).toHaveBeenCalledTimes(1);
   });
 });

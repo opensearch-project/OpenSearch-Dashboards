@@ -39,7 +39,7 @@ import {
   UrlTransformationState,
 } from '../../../components/data_transformations';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { AutoVisMeta } from './utils';
+import { createAutoVisMeta } from './utils';
 
 export const AUTO_VISUALIZATION_TOOL_NAME = 'auto_create_visualization';
 
@@ -577,6 +577,8 @@ export function ChartPreview({
   return (
     <div style={{ height: 250, width: '100%' }}>
       <CommonVisualizationRender
+        // This chart always runs its own PPL query, whatever is active in Explore.
+        query={{ language: query.language, dataset: query.dataset }}
         visualizationData={visData}
         visConfig={visConfig}
         showRawTable={false}
@@ -687,7 +689,7 @@ export function registerAutoVisualizationAction(
   };
 
   registerAction({
-    ...AutoVisMeta,
+    ...createAutoVisMeta(visualizationRegistry),
     useCustomRenderer: true,
     handler: async (args: AutoVisualizationArgs) => {
       try {

@@ -60,6 +60,7 @@ const createSetupContract = (): Setup => {
     },
     sourceTypes: {
       register: jest.fn(),
+      setLabel: jest.fn(),
     },
   };
   return setupContract;

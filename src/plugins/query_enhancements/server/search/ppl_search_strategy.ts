@@ -14,17 +14,10 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import {
-  getFields,
-  isPPLAggregationQuery,
-  queryEndsWithHead,
-  throwFacetError,
-} from '../../common/utils';
-import { Facet } from '../utils';
+import { getFields, throwFacetError } from '../../common/utils';
+import { Facet, resolvePPLFetchSize } from '../utils';
+import { AGGREGATION_SAMPLE_SIZE_SETTING } from '../utils/resolve_ppl_fetch_size';
 import { QueryAggConfig } from '../../common';
-
-const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-const AGGREGATION_SAMPLE_SIZE_SETTING = 'discover:aggregationSampleSize';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -49,17 +42,11 @@ export const pplSearchStrategyProvider = (
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
 
-        // `fetchSize` lowers to a `head N` over the *final* result rows. An explicit `head` in the
-        // query wins, so send nothing then. Otherwise pick the limit by query shape: an aggregating
-        // query's final rows are buckets, not documents, so it uses its own (larger) sample size —
-        // a document-sized cap would silently drop whole buckets, and with a `span()` key the bucket
-        // count grows with the time range. Document searches keep `discover:sampleSize`, mirroring
-        // DQL where that setting bounds only the doc table.
-        const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
-        const aggregates = typeof query.query === 'string' && isPPLAggregationQuery(query.query);
-        if (!hasHead) {
-          const setting = aggregates ? AGGREGATION_SAMPLE_SIZE_SETTING : SAMPLE_SIZE_SETTING;
-          const fetchSize = await context.core.uiSettings.client.get<number>(setting);
+        const fetchSize = await resolvePPLFetchSize(
+          context.core.uiSettings.client,
+          typeof query.query === 'string' ? query.query : ''
+        );
+        if (fetchSize !== undefined) {
           request.body = { ...request.body, fetchSize };
         }
 

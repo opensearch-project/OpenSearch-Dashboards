@@ -373,6 +373,43 @@ describe('DatasetSelectWidget', () => {
       expect(capturedSupportedTypes).toEqual(['FAKE']);
     });
 
+    it("uses a Metrics source's own selector on the Metrics flavor", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake-metrics',
+        label: 'Fake metrics',
+        datasetTypes: ['FAKE_METRICS'],
+        flavors: ['metrics'],
+        datasetSelector: FakeSelector,
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+      setSourceTypeRegistry(registry);
+      mockUseFlavorId.mockReturnValue('metrics');
+      mockGetQuery.mockReturnValue({
+        query: '',
+        language: 'FakeQL',
+        dataset: { type: 'FAKE_METRICS' },
+      });
+
+      renderWithStore();
+
+      // Like Logs: the source's own selector, not a list mixing in Prometheus.
+      expect(screen.getByTestId('fake-selector')).toBeInTheDocument();
+      expect(mockSelectorProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ flavor: 'metrics' })
+      );
+    });
+
+    it('keeps the Prometheus picker while the Prometheus source is active on Metrics', () => {
+      registerFakeSource();
+      mockUseFlavorId.mockReturnValue('metrics');
+
+      renderWithStore();
+
+      expect(capturedSupportedTypes).toEqual(['PROMETHEUS']);
+    });
+
     it('keeps the default types while OpenSearch is active', () => {
       registerFakeSource();
       mockUseFlavorId.mockReturnValue('logs');

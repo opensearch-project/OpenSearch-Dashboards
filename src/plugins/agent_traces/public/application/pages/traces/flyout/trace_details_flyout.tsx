@@ -41,8 +41,12 @@ import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
 import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
+import { TraceLogsTab } from '../../../../../../explore/public';
+import { useTraceLogs } from './use_trace_logs';
+import { TraceLogsNotices } from './trace_logs_notices';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
+import { aiRootsOf, isAiRootRow } from '../../../utils/ai_root';
 import './trace_details_flyout.scss';
 
 export interface TraceDetailsProps {
@@ -66,6 +70,32 @@ export const sessionIdOf = (rows: Array<TraceRow | undefined>): string | undefin
   return undefined;
 };
 
+/** Every span of a tree, depth first. */
+const flattenRows = (rows: TraceRow[], out: TraceRow[] = []): TraceRow[] => {
+  for (const row of rows) {
+    out.push(row);
+    flattenRows((row.children as TraceRow[] | undefined) ?? [], out);
+  }
+  return out;
+};
+
+/**
+ * The span the flyout is about: the clicked row when it represents its trace (an AI root),
+ * else its nearest AI-root ancestor, else the trace's AI root (`aiRootsOf`), else the top span.
+ */
+export const headerSpanOf = (trace: TraceRow, fullTree: TraceRow[]): TraceRow => {
+  const all = flattenRows(fullTree);
+  const bySpanId = new Map(all.map((r) => [r.spanId, r]));
+  const seen = new Set<string>();
+  let current: TraceRow | undefined = bySpanId.get(trace.spanId) ?? trace;
+  while (current && !seen.has(current.spanId)) {
+    if (isAiRootRow(current)) return current;
+    seen.add(current.spanId);
+    current = current.parentSpanId ? bySpanId.get(current.parentSpanId) : undefined;
+  }
+  return aiRootsOf(all)[0] ?? fullTree[0];
+};
+
 export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   trace,
   onClose,
@@ -75,10 +105,14 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   onOpenSession,
   navigation,
 }) => {
+  // Header span: the agent the row represents (see headerSpanOf), so name, latency and tokens
+  // are that agent's own, also for parallel agents behind one HTTP root.
   const rootTrace = useMemo(() => {
-    if (fullTree && fullTree.length > 0) return fullTree[0];
+    if (fullTree && fullTree.length > 0) return headerSpanOf(trace, fullTree);
     return trace;
   }, [fullTree, trace]);
+  // Logs correlated with this trace (trace-to-logs correlations, as in Explore traces).
+  const traceLogs = useTraceLogs(rootTrace.traceId);
 
   const traceTreeData = useMemo(() => {
     if (fullTree && fullTree.length > 0) {
@@ -400,6 +434,41 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                         />
                       ),
                     },
+                    {
+                      id: 'logs',
+                      name: (
+                        <span data-test-subj="agentTracesFlyoutLogsTab">
+                          {/* No badge without a logs correlation: 0 would read as "no logs". */}
+                          {!traceLogs.isLoading && traceLogs.logDatasets.length > 0 && (
+                            <>
+                              <EuiBadge color="hollow" data-test-subj="agentTracesFlyoutLogsCount">
+                                {traceLogs.logCount}
+                                {traceLogs.cappedDatasetIds.length > 0 ? '+' : ''}
+                              </EuiBadge>{' '}
+                            </>
+                          )}
+                          {i18n.translate('agentTraces.flyout.tabRelatedLogs', {
+                            defaultMessage: 'Related logs',
+                          })}
+                        </span>
+                      ),
+                      content: (
+                        <>
+                          <TraceLogsNotices traceLogs={traceLogs} />
+                          {/* A failed correlations lookup is an error, not "set up a correlation". */}
+                          {!(traceLogs.errors.length > 0 && traceLogs.logDatasets.length === 0) && (
+                            <TraceLogsTab
+                              traceId={rootTrace.traceId}
+                              logDatasets={traceLogs.logDatasets}
+                              datasetLogs={traceLogs.datasetLogs}
+                              isLoading={traceLogs.isLoading}
+                              onSpanClick={selectNode}
+                              traceDataset={traceLogs.traceDataset ?? undefined}
+                            />
+                          )}
+                        </>
+                      ),
+                    },
                   ];
                   return (
                     <EuiTabbedContent
@@ -419,6 +488,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                   selectedNode={selectedNode}
                   selectedTraceRow={selectedTraceRow}
                   onSelectNode={selectNode}
+                  traceLogs={traceLogs}
                 />
               </EuiResizablePanel>
             </>
