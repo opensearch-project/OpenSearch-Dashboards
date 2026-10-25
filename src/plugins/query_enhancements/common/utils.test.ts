@@ -5,6 +5,7 @@
 
 import {
   fetch,
+  formatFieldValue,
   isPPLAggregationQuery,
   isPPLSearchQuery,
   queryEndsWithHead,
@@ -12,6 +13,25 @@ import {
 } from './utils';
 import { EnhancedFetchContext } from './types';
 import { Query } from 'src/plugins/data/common';
+import { OSD_FIELD_TYPES } from '../../data/common';
+
+describe('formatFieldValue', () => {
+  it('formats date values as UTC ISO strings', () => {
+    expect(formatFieldValue('2026-10-01 12:34:56.789', OSD_FIELD_TYPES.DATE)).toBe(
+      '2026-10-01T12:34:56.789+00:00'
+    );
+  });
+
+  it.each([null, undefined])('returns %p date values unchanged', (value) => {
+    expect(formatFieldValue(value, OSD_FIELD_TYPES.DATE)).toBe(value);
+  });
+
+  it('returns non-date values unchanged', () => {
+    expect(formatFieldValue('2026-10-01 12:34:56.789', OSD_FIELD_TYPES.STRING)).toBe(
+      '2026-10-01 12:34:56.789'
+    );
+  });
+});
 
 describe('throwFacetError', () => {
   it('should throw an error with message from response.data.body.message', () => {
