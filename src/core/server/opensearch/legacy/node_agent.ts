@@ -23,10 +23,10 @@ export const getLegacyNodeAgentFactory =
   (log: Logger) =>
   (connector: { createAgent(config: unknown): Agent }, config: unknown): Agent => {
     const agent = connector.createAgent(config);
-    const createConnection = agent.createConnection;
+    const createConnection = agent.createConnection.bind(agent);
     // Both agents the connector can create return the new socket synchronously.
-    agent.createConnection = function guardedCreateConnection(options, callback) {
-      const socket = createConnection.call(this, options, callback);
+    agent.createConnection = (options, callback) => {
+      const socket = createConnection(options, callback);
       if (socket) {
         guardSocket(socket, log);
       }
@@ -36,6 +36,8 @@ export const getLegacyNodeAgentFactory =
   };
 
 function guardSocket(socket: PooledSocket, log: Logger) {
+  // The agent's own error listeners, installed before the socket is returned to us.
+  const agentErrorListeners = socket.listenerCount('error');
   const adopt = (err?: Error) => {
     const request = socket._httpMessage;
     if (request) {
@@ -50,8 +52,9 @@ function guardSocket(socket: PooledSocket, log: Logger) {
       return;
     }
     // agentkeepalive re-emits a socket error only when its listener is the only one, and this one
-    // counts too, so log it here rather than let it vanish. A timeout passes no error.
-    if (err && socket.listenerCount('error') <= 2) {
+    // counts too. If only the agent's listeners and this one remain, log the error rather than
+    // let it vanish. A timeout passes no error.
+    if (err && socket.listenerCount('error') <= agentErrorListeners + 1) {
       warn(log, `Closed a legacy client socket with no request attached: ${err.message}`);
     }
   };
