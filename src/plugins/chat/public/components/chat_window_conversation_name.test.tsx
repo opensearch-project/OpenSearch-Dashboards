@@ -352,9 +352,9 @@ describe('ChatWindow - Conversation Name', () => {
       expect(titleElement?.textContent).toBe('New conversation started');
     });
 
-    it('should prefer generatedTitle over first user message when set via onConversationTitle', async () => {
+    it('should prefer conversationTitle over first user message when set via onConversationTitle', async () => {
       // Simulates restoring a conversation from history: the timeline has user
-      // messages but generatedTitle is set from the saved conversation name.
+      // messages but conversationTitle is set from the saved conversation name.
       // The header should show the generated title, not the first user message.
       const MockedChatEventHandler = ChatEventHandler as jest.MockedClass<typeof ChatEventHandler>;
 
@@ -371,14 +371,14 @@ describe('ChatWindow - Conversation Name', () => {
       ];
       await sendMessageAndUpdateTimeline(messages, rendered);
 
-      // Verify: without generatedTitle, the header shows first user message
+      // Verify: without conversationTitle, the header shows first user message
       let titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('Give me a summary for the selected visualization');
 
       // Now set the generated title via the onConversationTitle callback.
       // This is what handleSelectConversation does when loading from history:
-      // setGeneratedTitle(conversation.name || '')
+      // setConversationTitle(conversation.name || '')
       const config =
         MockedChatEventHandler.mock.calls[MockedChatEventHandler.mock.calls.length - 1][0];
       await act(async () => {
@@ -392,7 +392,7 @@ describe('ChatWindow - Conversation Name', () => {
       expect(titleElement?.textContent).toBe('Summary of Flight Delays');
     });
 
-    it('should clear generatedTitle when starting a new chat', async () => {
+    it('should clear conversationTitle when starting a new chat', async () => {
       // After a conversation with a generated title, starting a new chat
       // should clear the title so the next conversation starts fresh.
       const MockedChatEventHandler = ChatEventHandler as jest.MockedClass<typeof ChatEventHandler>;
@@ -418,7 +418,7 @@ describe('ChatWindow - Conversation Name', () => {
         await new Promise((r) => setTimeout(r, 10));
       });
 
-      // The title should be cleared (new chat resets generatedTitle to '')
+      // The title should be cleared (new chat resets conversationTitle to '')
       titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).not.toBeInTheDocument();
     });
