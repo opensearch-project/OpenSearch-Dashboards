@@ -340,6 +340,7 @@
 # Set enabled false to hide authentication method in OpenSearch Dashboards.
 # If this setting is commented then all 3 options will be available in OpenSearch Dashboards.
 # Default value will be considered to True.
+# NoAuthentication, UsernamePassword and AWSSigV4 default to enabled; JWT defaults to disabled.
 # data_source.authTypes:
 #   NoAuthentication:
 #     enabled: false
@@ -347,6 +348,15 @@
 #     enabled: false
 #   AWSSigV4:
 #     enabled: false
+#   JWT:
+#     # Forwards the signed-in user's 'authorization' header to the data source, so the data
+#     # source applies that user's own permissions instead of a shared service account's. No
+#     # credentials are stored on the data source. Requires the data source cluster to trust
+#     # the same token issuer, signing key and audience as this Dashboards instance, and the
+#     # user's roles to be mapped on that cluster. Disabled by default because enabling it
+#     # sends user tokens to every registered JWT data source endpoint.
+#     # Prefer https endpoints, since the user's token is sent on every request.
+#     enabled: true
 
 # Optional setting that controls the permissions of data source to create, update and delete.
 # "none": The data source is readonly for all users.
