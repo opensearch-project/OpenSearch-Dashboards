@@ -9,7 +9,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
-import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
+import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
@@ -67,6 +67,7 @@ import {
   registerAllTransformations,
 } from '../components/data_transformations';
 import { PanelDataService } from './panel_data_service';
+import { visDataToTabular } from '../components/visualizations/utils/vis_data_to_tabular';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -720,38 +721,11 @@ export class ExploreEmbeddable
       });
     }
 
-    // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
-      const allColumns = [
-        ...(visualizationData.numericalColumns ?? []),
-        ...(visualizationData.categoricalColumns ?? []),
-        ...(visualizationData.dateColumns ?? []),
-        ...(visualizationData.unknownColumns ?? []),
-      ].sort((a, b) => a.id - b.id);
       const indexPattern = searchSource.getField('index');
 
       this.inspectorAdaptors.data.setTabularLoader(
-        () => ({
-          columns: allColumns.map((col) => ({
-            name: col.name,
-            field: col.column,
-          })),
-
-          // format data rows and transform into shape {raw, formatted}
-          rows: visualizationData.transformedData.map((row) => {
-            const formattedRow: Record<string, FormattedData> = {};
-            for (const col of allColumns) {
-              const value = row[col.column];
-              const field = indexPattern?.fields.getByName(col.name);
-              const formatted =
-                field && indexPattern?.getFormatterForField
-                  ? indexPattern.getFormatterForField(field).convert(value)
-                  : String(value ?? '');
-              formattedRow[col.column] = new FormattedData(value, formatted);
-            }
-            return formattedRow;
-          }),
-        }),
+        () => visDataToTabular(visualizationData, indexPattern),
         { returnsFormattedValues: true }
       );
     }

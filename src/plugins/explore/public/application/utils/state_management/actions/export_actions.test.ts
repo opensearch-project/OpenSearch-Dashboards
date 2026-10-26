@@ -40,6 +40,12 @@ describe('export_actions', () => {
       fields: { field1: {}, field2: {} },
       flattenHit: jest.fn((hit) => hit._source),
     };
+    // The Max export formats rows with the Visible export's formatter (csv_utils.formatRowsForCsv)
+    Object.defineProperty(mockDataView.fields, 'getByName', {
+      value: (name: string) => (name === '_source' ? { name, type: '_source' } : { name }),
+    });
+    mockDataView.formatField = jest.fn((hit, name) => hit._source?.[name]);
+    mockDataView.formatHit = jest.fn((hit) => hit._source);
 
     mockServices = {
       data: {
@@ -50,6 +56,12 @@ describe('export_actions', () => {
         dataViews: {
           get: jest.fn().mockResolvedValue(mockDataView),
           getDefault: jest.fn().mockResolvedValue(mockDataView),
+          convertToDataset: jest.fn(async (dataView) => ({
+            id: dataView.id,
+            title: dataView.title,
+            type: 'INDEX_PATTERN',
+            timeFieldName: dataView.timeFieldName,
+          })),
         },
         search: {
           searchSource: {
@@ -66,6 +78,9 @@ describe('export_actions', () => {
       },
       tabRegistry: {
         getTab: jest.fn(),
+      },
+      uiSettings: {
+        get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
       },
     } as any;
 
@@ -294,6 +309,19 @@ describe('export_actions', () => {
 
   describe('exportMaxSizeCsv', () => {
     let mockSearchSource: any;
+    // What the mocked convertToDataset builds from mockDataView
+    const convertedDataset = {
+      id: 'ds-1',
+      title: 'logs-*',
+      type: 'INDEX_PATTERN',
+      timeFieldName: '@timestamp',
+    };
+    const readSavedCsv = (): Promise<string> =>
+      new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).replace(/^\uFEFF/, ''));
+        reader.readAsText((saveAs as jest.MockedFunction<any>).mock.calls[0][0]);
+      });
 
     beforeEach(() => {
       mockSearchSource = {
@@ -362,7 +390,8 @@ describe('export_actions', () => {
       expect(mockSearchSource.setField).toHaveBeenCalledWith('query', {
         query: 'PREPARED QUERY',
         language: 'PPL',
-        dataset: mockState.query.dataset,
+        // dataset: mockState.query.dataset,
+        dataset: convertedDataset,
       });
     });
 
@@ -420,7 +449,8 @@ describe('export_actions', () => {
         expect(mockServices.data.query.timefilter.timefilter.createFilter).toHaveBeenCalledWith(
           mockDataView
         );
-        expect(mockDataView.flattenHit).toHaveBeenCalled();
+        // expect(mockDataView.flattenHit).toHaveBeenCalled();
+        expect(mockDataView.formatField).toHaveBeenCalled();
         expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), 'a.csv');
       });
 
@@ -460,7 +490,8 @@ describe('export_actions', () => {
       expect(mockSearchSource.setField).toHaveBeenCalledWith('query', {
         query: 'source = logs-*',
         language: 'PPL',
-        dataset: mockState.query.dataset,
+        // dataset: mockState.query.dataset,
+        dataset: convertedDataset,
       });
     });
 
@@ -468,6 +499,37 @@ describe('export_actions', () => {
       await exportMaxSizeCsv({ services: mockServices, maxSize: 1000 })(mockDispatch, mockGetState);
 
       expect(mockSearchSource.setField).toHaveBeenCalledWith('fetchSize', 1000);
+    });
+
+    it('writes full-document content for a _source column', async () => {
+      mockGetState.mockReturnValue({
+        ...mockState,
+        legacy: { ...mockState.legacy, columns: ['_source'] },
+      });
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: { hits: [{ _source: { message: 'export this document' } }] },
+      });
+
+      await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+      expect(mockDataView.formatHit).toHaveBeenCalled();
+      const csv = await readSavedCsv();
+      expect(csv).toContain('export this document');
+    });
+
+    it('sends the dataset converted from the DataView so the PPL time filter applies', async () => {
+      // A restored descriptor without timeFieldName; the saved DataView has one
+      mockState.query.dataset = { id: 'ds-1', title: 'logs-*', type: 'INDEX_PATTERN' } as any;
+
+      await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+      expect(mockServices.data.dataViews.convertToDataset).toHaveBeenCalledWith(mockDataView);
+      expect(mockSearchSource.setField).toHaveBeenCalledWith(
+        'query',
+        expect.objectContaining({
+          dataset: expect.objectContaining({ timeFieldName: '@timestamp' }),
+        })
+      );
     });
 
     it('does not set fetchSize when maxSize is not given', async () => {
