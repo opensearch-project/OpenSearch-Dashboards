@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright OpenSearch Contributors
+# SPDX-License-Identifier: Apache-2.0
 
 # Start the VNC server
 export DISPLAY=:99
