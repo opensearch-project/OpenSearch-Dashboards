@@ -182,7 +182,7 @@ async function sortByCreationDate(
 
   const catIndices = (query: Record<string, string>) =>
     services.http.get<CatIndicesRow[]>(
-      `/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId}`,
+      `/api/directquery/dsl/cat.indices/dataSourceMDSId=${encodeURIComponent(dataSourceId)}`,
       { query }
     );
 

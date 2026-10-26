@@ -7,6 +7,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useIndexList } from './use_index_list';
 import { resetPermissionToast } from '../permission_toast';
+import { resetServerlessCaches } from '../serverless';
 
 // The INDEX dataset type's fetch() result (children = indexes) + the _cat/indices creation dates.
 const indexFetch = jest.fn();
@@ -60,6 +61,7 @@ describe('useIndexList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetPermissionToast();
+    resetServerlessCaches();
     // Default: _cat/indices returns nothing usable → name-descending fallback.
     httpGet.mockResolvedValue([]);
     savedObjectsGet.mockRejectedValue(new Error('not found'));
