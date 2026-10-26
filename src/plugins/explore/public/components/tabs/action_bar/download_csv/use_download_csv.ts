@@ -4,17 +4,21 @@
  */
 
 import { useState } from 'react';
-import { unparse } from 'papaparse';
-import moment from 'moment';
-import { saveAs } from 'file-saver';
-import { autoBom } from '@osd/std';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import { useDispatch } from '../../../../application/legacy/discover/application/utils/state_management';
+import {
+  useDispatch,
+  useSelector,
+} from '../../../../application/legacy/discover/application/utils/state_management';
+import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
+import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
+import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
+import { visDataToTabular } from '../../../visualizations/utils/vis_data_to_tabular';
 import { exportMaxSizeCsv } from '../../../../application/utils/state_management/actions/export_actions';
 import { IndexPattern } from '../../../../../../data/common';
 import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { useDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
+import { buildCsv, buildCsvFromTabular, saveDataAsCsv } from './csv_utils';
 
 export interface UseDiscoverDownloadCsvProps {
   hits?: number;
@@ -24,43 +28,6 @@ export interface UseDiscoverDownloadCsvProps {
   onSuccess(): void;
   onError(): void;
 }
-
-export const formatRowsForCsv =
-  ({
-    displayedColumnNames,
-    indexPattern,
-  }: {
-    displayedColumnNames: string[];
-    indexPattern: IndexPattern;
-  }) =>
-  (row: OpenSearchSearchHit) => {
-    return displayedColumnNames.map((colName) => {
-      const fieldInfo = indexPattern.fields.getByName(colName);
-
-      if (typeof row === 'undefined') {
-        return '';
-      }
-
-      if (fieldInfo?.type === '_source') {
-        const formattedRow = indexPattern.formatHit(row, 'text');
-        return JSON.stringify(formattedRow);
-      }
-
-      const formattedValue = indexPattern.formatField(row, colName, 'text');
-
-      if (typeof formattedValue === 'undefined') {
-        return '';
-      }
-
-      return formattedValue;
-    });
-  };
-
-export const saveDataAsCsv = (csvData: string) => {
-  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
-  const fileName = `opensearch_export_${moment().format('YYYY-MM-DD')}`;
-  saveAs(autoBom(blob), fileName);
-};
 
 export const useDiscoverDownloadCsv = ({
   hits,
@@ -76,6 +43,7 @@ export const useDiscoverDownloadCsv = ({
   const [isLoading, setIsLoading] = useState(false);
   // Use shared hook to ensure CSV export columns match DataTable display columns
   const displayedColumnNames = useDisplayedColumnNames({ includeFieldCounts: true });
+  const activeTabId = useSelector(selectActiveTabId);
 
   const downloadCsvForOption = async (option: DownloadCsvFormId) => {
     try {
@@ -96,17 +64,20 @@ export const useDiscoverDownloadCsv = ({
         onSuccess();
         return;
       }
-      const csvRowData = rowsToDownload.map(
-        formatRowsForCsv({ displayedColumnNames, indexPattern })
-      );
-      const csvData = unparse(
-        { fields: displayedColumnNames, data: csvRowData },
-        {
-          quotes: uiSettings.get('csv:quoteValues', true),
-          delimiter: uiSettings.get('csv:separator', ','),
-          header: true,
-        }
-      );
+
+      // The Visualization tab exports the table that exactly matches visualization
+      const visData =
+        activeTabId === EXPLORE_VISUALIZATION_TAB_ID
+          ? getVisualizationBuilder().data$.getValue()
+          : undefined;
+      const csvData = visData
+        ? buildCsvFromTabular(visDataToTabular(visData, indexPattern), uiSettings)
+        : buildCsv({
+            rows: rowsToDownload,
+            displayedColumnNames,
+            indexPattern,
+            uiSettings,
+          });
       saveDataAsCsv(csvData);
       onSuccess();
     } catch (err) {

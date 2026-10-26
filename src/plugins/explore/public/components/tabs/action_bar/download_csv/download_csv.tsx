@@ -19,9 +19,17 @@ export interface DiscoverDownloadCsvProps {
   hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  shouldShowMaxExport?: boolean;
+  visibleRowsCount?: number;
 }
 
-export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
+export const DiscoverDownloadCsv = ({
+  indexPattern,
+  hits,
+  rows,
+  shouldShowMaxExport = true,
+  visibleRowsCount,
+}: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
@@ -90,8 +98,9 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
       ownFocus={false}
     >
       <DiscoverDownloadCsvPopoverContent
-        rowsCount={rows?.length || 0}
+        rowsCount={visibleRowsCount ?? rows?.length ?? 0}
         hitsCount={hits || 0}
+        shouldShowMaxExport={shouldShowMaxExport}
         downloadForOption={handleDownloadCsvForOption}
       />
     </EuiPopover>
