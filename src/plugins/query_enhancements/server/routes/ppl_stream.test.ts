@@ -276,6 +276,22 @@ describe('registerPPLStreamRoutes', () => {
 
       expect(res.custom).toHaveBeenCalledWith({ statusCode: 503, body: 'boom' });
     });
+
+    // The client falls back when a submit is refused; reporting it as 503 would read as an outage.
+    it('keeps a 429 from the cluster a 429', async () => {
+      const { submit } = setup();
+      const res = createResponse();
+
+      await submit.handler(
+        contextWith(
+          jest.fn().mockRejectedValue({ meta: { statusCode: 429 }, message: 'too many jobs' })
+        ),
+        { query: {}, body: { query: 'source=logs' } } as any,
+        res
+      );
+
+      expect(res.custom).toHaveBeenCalledWith({ statusCode: 429, body: 'too many jobs' });
+    });
   });
 
   describe('submit validation', () => {

@@ -910,6 +910,21 @@ describe('executeStreamingQuery', () => {
     expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBe(true);
   });
 
+  // Unlike other 4xx it says nothing about the request, only that the cluster wants fewer of them.
+  it('backs off and retries a 429 rather than giving up on the job', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockRejectedValueOnce({ response: { status: 429 } })
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming?.interrupted).toBeUndefined();
+  });
+
   it('treats an abort during a retry as a stop, not a failure', async () => {
     const abortError = new Error('aborted');
     abortError.name = 'AbortError';
@@ -955,6 +970,16 @@ describe('executeStreamingQuery', () => {
 
       const { statuses } = await run();
 
+      expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    });
+
+    // The cluster is at its job limit; the standard path needs no job, so it still answers.
+    it('falls back when the cluster refuses a new job', async () => {
+      mockSubmit.mockRejectedValue({ response: { status: 429 }, body: { statusCode: 429 } });
+
+      const { action, statuses } = await run();
+
+      expect(isStreamUnavailable(action)).toBe(true);
       expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
     });
 

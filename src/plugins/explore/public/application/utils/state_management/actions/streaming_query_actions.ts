@@ -128,7 +128,8 @@ const isTransientPollError = (error: unknown): boolean => {
   if (isAbort(error) || error instanceof PPLStreamJobNotFoundError) return false;
   const e = error as { response?: { status?: number }; body?: { statusCode?: number } };
   const status = e?.response?.status ?? e?.body?.statusCode;
-  return status === undefined || status >= 500;
+  // 429 is a request to slow down, which the backoff below does.
+  return status === undefined || status === 429 || status >= 500;
 };
 
 /**
