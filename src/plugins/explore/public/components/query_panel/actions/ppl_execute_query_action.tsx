@@ -114,13 +114,28 @@ export function usePPLExecuteQueryAction(
             };
           }
 
-          await dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
+          // The user asked the assistant to run the query: it runs even for a dataset type that
+          // requires an explicit Run.
+          await dispatch(
+            loadQueryActionCreator(services, setEditorTextWithQuery, args.query, undefined, {
+              userInitiated: true,
+            })
+          );
           // Read queryStatusMap from state after execution and derive the cache key using
           // prepareQueryForLanguage (same as visualization tab). For tabs, cache key IS the query string,
           // which keeps stats commands that PPL queries may generate.
           const state = services.store.getState();
           const cacheKey = prepareQueryForLanguage({ ...state.query, query: args.query }).query;
           const queryStatus = state.queryEditor.queryStatusMap[cacheKey];
+          if (!queryStatus) {
+            return {
+              success: false,
+              executed: false,
+              query: args.query,
+              message: `The query is in the editor but did not run. Press Run to run it.${timeRangeMessage}`,
+              error: 'Query did not run',
+            };
+          }
 
           // Check for explicit error status
           if (queryStatus.status === QueryExecutionStatus.ERROR) {

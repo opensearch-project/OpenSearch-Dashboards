@@ -12,6 +12,8 @@ import { ExploreServices } from '../../../types';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults, clearQueryStatusMap } from '../state_management/slices';
 import {
+  queryEditorInitialState,
+  queryEditorReducer,
   queryInitialState,
   queryReducer,
   uiInitialState,
@@ -287,6 +289,60 @@ describe('useTimefilterSubscription', () => {
       autoRefreshSubject.next({});
 
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+    });
+  });
+
+  describe('for a dataset type that requires an explicit Run', () => {
+    const EXPLICIT = { id: 'explicit', title: 'Explicit', type: 'EXPLICIT_RUN_TYPE' };
+
+    const renderExplicit = (queryEditor: Record<string, unknown>) => {
+      const services = {
+        data: {
+          query: {
+            ...mockServices.data.query,
+            queryString: {
+              getDatasetService: () => ({
+                getType: (type: string) =>
+                  type === EXPLICIT.type ? { meta: { requiresExplicitRun: true } } : { meta: {} },
+              }),
+            },
+          },
+        },
+      } as any;
+      const store = configureStore({
+        reducer: { query: queryReducer, queryEditor: queryEditorReducer },
+        preloadedState: {
+          query: { ...queryInitialState, query: 'q', dataset: EXPLICIT },
+          queryEditor: { ...queryEditorInitialState, ...queryEditor },
+        } as any,
+      });
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+      renderHook(() => useTimefilterSubscription(services), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      return services;
+    };
+
+    it('does not run on a tick before the user has run the query (e.g. a restored interval)', () => {
+      renderExplicit({ queryStatusMap: {} });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+    });
+
+    it('does not run on a tick after the query was edited', () => {
+      renderExplicit({
+        queryStatusMap: { someCacheKey: { status: 'READY' } },
+        isQueryEditorDirty: true,
+      });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    it('refreshes a query the user has run', () => {
+      const services = renderExplicit({ queryStatusMap: { someCacheKey: { status: 'READY' } } });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledWith({ services });
     });
   });
 });

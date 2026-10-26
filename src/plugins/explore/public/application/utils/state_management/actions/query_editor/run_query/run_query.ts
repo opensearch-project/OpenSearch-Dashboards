@@ -18,7 +18,8 @@ import { ExploreServices } from '../../../../../../types';
 import { detectAndSetOptimalTab } from '../../detect_optimal_tab';
 
 /**
- * This is called when you want to run the query
+ * This is called when you want to run the query. It always runs: an automatic caller (not a
+ * user's Run) must check `datasetRequiresExplicitRun` before dispatching it.
  */
 export const runQueryActionCreator =
   (services: ExploreServices, query?: string) =>
