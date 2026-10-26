@@ -453,6 +453,14 @@ export const executeQueries = createAsyncThunk<
   const runController = new AbortController();
   if (isUserInitiated) {
     activeQueryAbortControllers.set(runKey, runController);
+    // Stopped runs stop counting at once, not only when the await they are parked on resolves.
+    runController.signal.addEventListener(
+      'abort',
+      () => dispatch(clearQueryStatusMapByKey(runKey)),
+      {
+        once: true,
+      }
+    );
     dispatch(
       setIndividualQueryStatus({
         cacheKey: runKey,

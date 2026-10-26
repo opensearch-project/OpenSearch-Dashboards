@@ -202,7 +202,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
     mockAbortController = {
       abort: jest.fn(),
-      signal: { aborted: false },
+      signal: { aborted: false, addEventListener: jest.fn() },
     };
     (global.AbortController as jest.Mock).mockImplementation(() => mockAbortController);
 
@@ -1330,9 +1330,14 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         dispatch = jest.fn((action: unknown) =>
           typeof action === 'function' ? dataTable : action
         );
-        mockAbortController.signal.aborted = false;
+        // Every AbortController in this file is the one mock, so aborting it aborts them all.
+        const onAbort: Array<() => void> = [];
+        mockAbortController.signal.addEventListener = jest.fn(
+          (_type: string, listener: () => void) => onAbort.push(listener)
+        );
         mockAbortController.abort = jest.fn(() => {
           mockAbortController.signal.aborted = true;
+          onAbort.forEach((listener) => listener());
         });
       });
 
@@ -1370,6 +1375,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         const thunksBeforeStop = thunkCount();
 
         abortAllActiveQueries();
+        // The run stops counting as LOADING right away, not once the data table settles.
+        expect(replay().statusMap).toEqual({});
         resolveDataTable();
         await run;
 

@@ -28,7 +28,8 @@ export const createOverallStatusMiddleware = (): Middleware => {
       const currentOverallStatus = state.queryEditor.overallQueryStatus;
       const statusMap = state.queryEditor.queryStatusMap;
 
-      // A failed query doesn't end the run: Stop stays available while the others are in flight.
+      // The user's run is over once nothing is in flight. A failed query doesn't end it while the
+      // others are still running, so Stop stays available until they settle.
       const clearUserInitiatedOnceSettled = () => {
         const isAnyQueryLoading = Object.values(statusMap).some(
           (s) => s?.status === QueryExecutionStatus.LOADING
@@ -56,13 +57,7 @@ export const createOverallStatusMiddleware = (): Middleware => {
       const newOverallStatus = computeOverallStatus(statusMap);
       store.dispatch(setOverallQueryStatus(newOverallStatus));
 
-      // Reset hasUserInitiatedQuery flag when queries complete (READY, NO_RESULTS, or ERROR)
-      if (
-        newOverallStatus.status !== QueryExecutionStatus.LOADING &&
-        newOverallStatus.status !== QueryExecutionStatus.UNINITIALIZED
-      ) {
-        store.dispatch(setHasUserInitiatedQuery(false));
-      }
+      clearUserInitiatedOnceSettled();
     }
 
     return result;

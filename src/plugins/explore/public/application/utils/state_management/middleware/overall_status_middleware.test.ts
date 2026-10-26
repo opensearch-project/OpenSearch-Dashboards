@@ -487,6 +487,37 @@ describe('createOverallStatusMiddleware with the query editor slice', () => {
     expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
   });
 
+  // As in a run: the run's own status keeps it LOADING, a query fails, then the run's status goes.
+  it('ends the run once its own status is removed after a query failed', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'run', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'logs', status: status(QueryExecutionStatus.ERROR) })
+    );
+    expect(isUserQueryRunning(store)).toBe(true);
+
+    store.dispatch(clearQueryStatusMapByKey('run'));
+
+    expect(store.getState().queryEditor.overallQueryStatus.status).toBe(QueryExecutionStatus.ERROR);
+    expect(isUserQueryRunning(store)).toBe(false);
+    expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
+  });
+
+  // Stopping can leave every query UNINITIALIZED; nothing runs any more, so the run is over.
+  it('ends the run when every query was stopped', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'run', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(clearQueryStatusMapByKey('run'));
+
+    expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
+  });
+
   it('recomputes the overall status when a key is removed', () => {
     const store = makeStore();
     store.dispatch(setHasUserInitiatedQuery(true));
