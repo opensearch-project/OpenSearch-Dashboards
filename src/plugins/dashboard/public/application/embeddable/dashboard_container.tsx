@@ -31,7 +31,7 @@
 import './_dashboard_container.scss';
 
 import { isEqual } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
@@ -142,6 +142,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private readonly logos: Logos;
   private root?: Root;
   private variableSubscriptions: Subscription[] = [];
+  private readonly variableReload$ = new Subject<void>();
   // Transient context passed through the visualization editor.
   private pendingCreateSectionId?: string;
   public readonly variableService: VariableService;
@@ -178,10 +179,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
 
     this.variableService.setInterpolationService(this.variableInterpolationService);
-
-    if (initialInput.variables && initialInput.variables.length > 0) {
-      this.variableService.refreshAllVariableOptions();
-    }
 
     // Subscribe to variable changes and update container input
     // Use getVariablesWithoutState$() to get pure Variables (no runtime state)
@@ -222,36 +219,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       })
     );
 
-    this.initVariableRefreshSubscription();
+    this.startVariableRefreshScheduler();
   }
 
-  private initVariableRefreshSubscription() {
-    let prevTimeRange = this.getInput().timeRange;
-    let prevReloadTime = this.getInput().lastReloadRequestTime;
-
-    this.variableSubscriptions.push(
-      this.getInput$().subscribe((input) => {
-        const variables = this.variableService.getVariables();
-        const hasQueryVariables = variables.some((v) => v.type === 'query');
-        if (!hasQueryVariables) return;
-
-        const timeRangeChanged = !isEqual(input.timeRange, prevTimeRange);
-        const reloadTriggered = input.lastReloadRequestTime !== prevReloadTime;
-
-        if (timeRangeChanged || reloadTriggered) {
-          prevTimeRange = input.timeRange;
-          prevReloadTime = input.lastReloadRequestTime;
-
-          if (reloadTriggered) {
-            // Manual reload: refresh all variables
-            this.variableService.refreshAllVariableOptions();
-          } else if (timeRangeChanged) {
-            // Only time range changed: refresh only time-filtered variables
-            this.variableService.refreshTimeFilteredVariableOptions();
-          }
-        }
-      })
-    );
+  private startVariableRefreshScheduler() {
+    const input$ = this.getInput$();
+    const stop = this.variableService.startRefreshScheduler({
+      // input$ replays the current input, so the first value is the initial time range.
+      time$: input$.pipe(
+        map((input) => input.timeRange),
+        distinctUntilChanged(isEqual)
+      ),
+      // See reload(): covers the Refresh button and lastReloadRequestTime changes.
+      reload$: this.variableReload$,
+    });
+    this.variableSubscriptions.push(new Subscription(stop));
   }
 
   // Keep section membership consistent when a panel is deleted.
@@ -448,6 +430,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>
     );
+  }
+
+  /**
+   * Re-queries the variables along with the panels. The Refresh button calls
+   * this directly, and the embeddable framework calls it when
+   * lastReloadRequestTime changes, so both reach the variables through here.
+   */
+  public reload() {
+    // Undefined if called during the base constructor, before fields are set.
+    this.variableReload$?.next();
+    super.reload();
   }
 
   public destroy() {

@@ -4,10 +4,10 @@
  */
 
 import { isEqual } from 'lodash';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest, merge, Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { DataPublicPluginStart } from '../../../data/public';
+import { DataPublicPluginStart, TimeRange } from '../../../data/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
 import {
   Variable,
@@ -22,6 +22,7 @@ import {
   VariableOptionType,
   NormalizedVariableOption,
   DistributiveOmit,
+  PromQLResourceQuery,
   isAllMarker,
   ALL_OPTION_VALUE,
 } from './types';
@@ -38,7 +39,10 @@ import {
   collectResourceQueryTextFields,
 } from './promql_variable_query_utils';
 import { normalizePersistedVariables } from './variable_query_utils';
-import { IVariableInterpolationService } from './variable_interpolation_service';
+import {
+  IVariableInterpolationService,
+  VariableInterpolationService,
+} from './variable_interpolation_service';
 
 /**
  * Max options rendered at once in the selector. Runtime state keeps the full
@@ -54,6 +58,17 @@ export const MAX_DISPLAY_OPTIONS = 100;
  */
 export type VariableTelemetrySink = (event: { name: string; data: Record<string, any> }) => void;
 
+/** Returns the runtime state fields to change, given the variable's state at that moment. */
+type RuntimeStateUpdate = (current: VariableState) => Partial<VariableState>;
+
+/** External inputs of the refresh scheduler. */
+export interface VariableRefreshSchedulerInputs {
+  /** Current time range. Must emit its initial value on subscribe. */
+  time$: Observable<TimeRange | undefined>;
+  /** Each emission re-queries every query variable, even if its inputs did not change. */
+  reload$: Observable<unknown>;
+}
+
 /**
  * VariableService — a self-contained feature for managing dashboard variables.
  */
@@ -63,12 +78,22 @@ export class VariableService {
   private savedObjectsClient?: SavedObjectsClientContract;
   private variables$ = new BehaviorSubject<Variable[]>([]);
   private refreshControllers: Map<string, AbortController> = new Map();
-  private refreshRequests: Map<string, Promise<void>> = new Map();
-  private destroyed = false;
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
   private telemetrySink?: VariableTelemetrySink;
+
+  // Refresh scheduler state. See startRefreshScheduler().
+  private schedulerSubscription?: Subscription;
+  private schedulerTime?: TimeRange;
+  private schedulerTimeReady = false;
+  private reloadToken = 0;
+  /** Fetch key of the last query started for each variable. */
+  private lastFetchKeys = new Map<string, string>();
+  /** Variables the last reconcile held back (and marked loading) because an upstream was not done. */
+  private waitingIds = new Set<string>();
+  private reconcileScheduled = false;
+  private settledWaiters: Array<() => void> = [];
 
   /**
    * @param dataPlugin - Data plugin for executing queries
@@ -213,7 +238,7 @@ export class VariableService {
     const updatedVariables = [...this.getVariables(), newVariable];
 
     try {
-      await this.saveVariables(updatedVariables);
+      await this.saveVariables(updatedVariables, { id, update: () => initialRuntimeState });
     } catch (error) {
       this.recordTelemetry('variable_create_failed', {
         type: newVariable.type,
@@ -222,11 +247,6 @@ export class VariableService {
       throw error;
     }
     this.recordTelemetry('variable_create_succeeded', { type: newVariable.type });
-    this.updateRuntimeState(id, initialRuntimeState);
-
-    if (newVariable.type === VariableType.Query) {
-      await this.refreshVariableOptions(id);
-    }
   }
 
   public async updateVariable(id: string, updates: Partial<Variable>): Promise<void> {
@@ -238,51 +258,60 @@ export class VariableService {
 
     const existing = currentVariables[index];
     let updatedVariable: Variable;
-    let newRuntimeState: VariableState | undefined;
+    // Computed when the save is applied, not now: a refresh unrelated to this
+    // save may start or finish while the save request is in flight, and its
+    // loading flag and options must not be replaced with a stale snapshot.
+    let runtimeUpdate: RuntimeStateUpdate | undefined;
 
     if (updates.type && updates.type !== existing.type) {
-      // Type changed — rebuild from scratch and clear any error/loading states
+      // Type changed — rebuild from scratch and clear any error/loading states.
+      // Clearing loading is safe: a refresh of the old query variable is
+      // aborted by the next reconcile, and the new type has not been fetched.
       updatedVariable = this.buildVariable(id, { ...existing, ...updates } as DistributiveOmit<
         Variable,
         'id' | 'current'
       >);
-      newRuntimeState = {
-        ...this.deriveRuntimeState(updatedVariable),
-        loading: false,
-        error: undefined,
-      };
+      const derived = this.deriveRuntimeState(updatedVariable);
+      runtimeUpdate = () => ({ ...derived, loading: false, error: undefined });
       if (updatedVariable.type === VariableType.Text) {
         const next = updates.current;
         updatedVariable.current = next && next.length > 0 ? [next[0]] : undefined;
       } else {
         updatedVariable.current =
-          newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+          derived.options.length > 0 ? [derived.options[0].value] : undefined;
       }
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
+      const sortChanged = updates.sort !== undefined && updates.sort !== existing.sort;
 
-      // For Custom variables, re-derive options when customOptions changes
-      if (
-        updatedVariable.type === VariableType.Custom &&
-        (updates as Partial<CustomVariable>).customOptions !== undefined &&
-        !isEqual(
-          (updates as Partial<CustomVariable>).customOptions,
-          (existing as CustomVariable).customOptions
-        )
-      ) {
-        newRuntimeState = {
-          ...this.getRuntimeState(id),
-          ...this.deriveRuntimeState(updatedVariable),
-        };
-        // Keep the "All" marker as-is so it tracks the new option list, instead
-        // of reconciling it away to the first option (it is not a real option).
-        updatedVariable.current = isAllMarker(updatedVariable.current)
-          ? updatedVariable.current
-          : this.resolveCurrentValueForCustom(
-              updatedVariable.current,
-              newRuntimeState.options,
-              updatedVariable.multi
-            );
+      if (updatedVariable.type === VariableType.Custom) {
+        const customOptionsChanged =
+          (updates as Partial<CustomVariable>).customOptions !== undefined &&
+          !isEqual(
+            (updates as Partial<CustomVariable>).customOptions,
+            (existing as CustomVariable).customOptions
+          );
+        if (customOptionsChanged || sortChanged) {
+          // Custom options come from the definition, so derive them now.
+          const derived = this.deriveRuntimeState(updatedVariable);
+          runtimeUpdate = () => derived;
+          if (customOptionsChanged) {
+            // Keep the "All" marker as-is so it tracks the new option list, instead
+            // of reconciling it away to the first option (it is not a real option).
+            updatedVariable.current = isAllMarker(updatedVariable.current)
+              ? updatedVariable.current
+              : this.resolveCurrentValueForCustom(
+                  updatedVariable.current,
+                  derived.options,
+                  updatedVariable.multi
+                );
+          }
+        }
+      } else if (sortChanged) {
+        // Re-sort whatever options the variable has when the save is applied.
+        runtimeUpdate = (state) => ({
+          options: this.sortVariableOptions(state.options, updates.sort),
+        });
       }
 
       // When switching from multi to single, trim current to first value
@@ -295,30 +324,17 @@ export class VariableService {
       if (updates.includeAll === false && existing.includeAll === true) {
         updatedVariable.current = this.clearAllMarker(updatedVariable.current);
       }
-
-      // When sort changes, re-sort the existing options
-      if (updates.sort !== undefined && updates.sort !== existing.sort) {
-        if (updatedVariable.type === VariableType.Custom) {
-          newRuntimeState = {
-            ...this.getRuntimeState(id),
-            ...newRuntimeState,
-            ...this.deriveRuntimeState(updatedVariable),
-          };
-        } else {
-          const currentState = newRuntimeState || this.getRuntimeState(id);
-          newRuntimeState = {
-            ...currentState,
-            options: this.sortVariableOptions(currentState.options, updates.sort),
-          };
-        }
-      }
     }
 
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = updatedVariable;
 
     try {
-      await this.saveVariables(updatedVariables);
+      // Runtime state is applied inside the save, after it succeeds.
+      await this.saveVariables(
+        updatedVariables,
+        runtimeUpdate ? { id, update: runtimeUpdate } : undefined
+      );
     } catch (error) {
       this.recordTelemetry('variable_update_failed', {
         type: updatedVariable.type,
@@ -327,18 +343,6 @@ export class VariableService {
       throw error;
     }
     this.recordTelemetry('variable_update_succeeded', { type: updatedVariable.type });
-
-    // Update runtime state only after successful save
-    if (newRuntimeState) {
-      this.updateRuntimeState(id, newRuntimeState);
-    }
-
-    if (
-      updatedVariable.type === VariableType.Query &&
-      this.shouldRefreshQueryOptions(updates as Partial<QueryVariable>)
-    ) {
-      await this.refreshVariableOptions(id);
-    }
   }
 
   public async removeVariable(id: string): Promise<void> {
@@ -388,8 +392,6 @@ export class VariableService {
     this.variables$.next(updatedVariables);
     // Telemetry: record variable change.
     this.recordTelemetry('variable_value_changed', { type: variable.type });
-
-    this.refreshDependentVariables(variable.name);
   }
 
   /**
@@ -399,7 +401,7 @@ export class VariableService {
    */
   public applyCurrentValues(variables: Array<Pick<Variable, 'id' | 'current'>>): void {
     const currentById = new Map(variables.map((v) => [v.id, v.current]));
-    const changed: Variable[] = [];
+    let changed = false;
     const updatedVariables = this.getVariables().map((variable) => {
       if (!currentById.has(variable.id)) {
         return variable;
@@ -409,69 +411,240 @@ export class VariableService {
       if (isEqual(current, variable.current)) {
         return variable;
       }
-      const updated = { ...variable, current } as Variable;
-      changed.push(updated);
-      return updated;
+      changed = true;
+      // A cleared query variable has nothing to interpolate, and its fetch key does not
+      // depend on its own value. Forget the key so the scheduler re-queries it and falls
+      // back to the first option, as on a fresh load; dependents wait for that query.
+      if (variable.type === VariableType.Query && (!current || current.length === 0)) {
+        this.lastFetchKeys.delete(variable.id);
+      }
+      return { ...variable, current } as Variable;
     });
 
-    if (changed.length === 0) {
-      return;
-    }
-
-    this.variables$.next(updatedVariables);
-    // A query variable whose selection the URL cleared has no value to interpolate.
-    // Re-run its options so it falls back to the first option, matching a fresh load.
-    const cleared = changed.filter(
-      (variable) =>
-        variable.type === VariableType.Query && (!variable.current || variable.current.length === 0)
-    );
-    changed
-      .filter((variable) => !cleared.includes(variable))
-      .forEach((variable) => this.refreshDependentVariables(variable.name));
-    if (cleared.length > 0) {
-      this.refreshClearedVariables(cleared).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('[VariableService] Failed to refresh cleared variables:', error);
-      });
+    if (changed) {
+      this.variables$.next(updatedVariables);
     }
   }
 
   /**
-   * Refresh cleared variables in dashboard order, and their dependents only once the
-   * fallback is chosen, so a cleared variable never resolves against a cleared parent.
+   * Start the refresh scheduler. From then on every query variable is
+   * re-queried whenever its fetch inputs change (see computeFetchKey), so no
+   * mutation needs to trigger a refresh itself. The first reconcile runs once
+   * `time$` has emitted. Returns a function that stops the scheduler; starting
+   * again stops the previous one.
    */
-  private async refreshClearedVariables(cleared: Variable[]): Promise<void> {
-    for (const variable of cleared) {
-      await this.refreshVariableOptions(variable.id);
-      // Another refresh (time range change, reload) may have aborted this one before the
-      // fallback was chosen; wait for it so dependents see the parent's final value.
-      await this.waitForPendingRefresh(variable.id);
-      if (this.destroyed) {
+  public startRefreshScheduler({ time$, reload$ }: VariableRefreshSchedulerInputs): () => void {
+    this.stopRefreshScheduler();
+    const subscription = new Subscription();
+    this.schedulerSubscription = subscription;
+
+    subscription.add(
+      time$.subscribe((time) => {
+        this.schedulerTime = time;
+        this.schedulerTimeReady = true;
+        this.scheduleReconcile();
+      })
+    );
+    subscription.add(
+      reload$.subscribe(() => {
+        this.reloadToken++;
+        this.scheduleReconcile();
+      })
+    );
+    subscription.add(
+      merge(this.variables$, this.runtimeStateChange$).subscribe(() => this.scheduleReconcile())
+    );
+
+    return () => {
+      if (this.schedulerSubscription === subscription) this.stopRefreshScheduler();
+    };
+  }
+
+  private stopRefreshScheduler(): void {
+    this.schedulerSubscription?.unsubscribe();
+    this.schedulerSubscription = undefined;
+    this.schedulerTimeReady = false;
+    // Nothing will refresh the waiting variables any more, so stop showing them as loading.
+    this.waitingIds.forEach((id) => this.stopWaiting(id));
+    this.waitingIds.clear();
+    // Forget the last queries, so starting again always loads every variable.
+    this.lastFetchKeys.clear();
+    this.resolveSettledWaiters();
+  }
+
+  /**
+   * Resolves once no query variable is loading or waiting on an upstream and
+   * no reconcile is pending.
+   */
+  public whenSettled(): Promise<void> {
+    if (this.isSettled()) return Promise.resolve();
+    return new Promise((resolve) => this.settledWaiters.push(resolve));
+  }
+
+  private isSettled(): boolean {
+    return (
+      !this.reconcileScheduled &&
+      this.waitingIds.size === 0 &&
+      !this.getVariables().some((v) => this.runtimeState.get(v.id)?.loading)
+    );
+  }
+
+  private resolveSettledWaiters(): void {
+    if (!this.isSettled() && this.schedulerSubscription) return;
+    const waiters = this.settledWaiters;
+    this.settledWaiters = [];
+    waiters.forEach((resolve) => resolve());
+  }
+
+  /**
+   * Coalesces all state changes in the current task into one reconcile. Must be
+   * asynchronous: reconcile starts refreshes, which emit state changes
+   * synchronously and would otherwise re-enter it.
+   */
+  private scheduleReconcile(): void {
+    if (this.reconcileScheduled) return;
+    this.reconcileScheduled = true;
+    Promise.resolve().then(() => {
+      this.reconcileScheduled = false;
+      if (this.schedulerSubscription && this.schedulerTimeReady) {
+        this.reconcile();
+      }
+      this.resolveSettledWaiters();
+    });
+  }
+
+  /**
+   * Refreshes every query variable whose fetch key changed since its last query.
+   * Variables are visited in list order, and a variable only interpolates
+   * variables listed before it, so its upstreams are visited first. A variable
+   * waits while an upstream is loading or itself waiting; otherwise it would
+   * query with the upstream's old value and query again when it changes.
+   */
+  private reconcile(): void {
+    const variables = this.getVariables();
+    const ids = new Set(variables.map((v) => v.id));
+    const waiting = new Set<string>();
+
+    variables.forEach((variable, index) => {
+      if (variable.type !== VariableType.Query) {
+        // No longer a query variable (or never was): nothing to fetch.
+        this.forgetFetch(variable.id);
+        this.stopWaiting(variable.id);
         return;
       }
-      this.refreshDependentVariables(variable.name);
-    }
-  }
 
-  private async waitForPendingRefresh(id: string): Promise<void> {
-    let pending = this.refreshRequests.get(id);
-    while (pending) {
-      await pending;
-      pending = this.refreshRequests.get(id);
-    }
-  }
-
-  public refreshVariableOptions(id: string): Promise<void> {
-    const request: Promise<void> = this.loadVariableOptions(id).finally(() => {
-      if (this.refreshRequests.get(id) === request) {
-        this.refreshRequests.delete(id);
+      const upstream = this.getUpstreamIds(variable, variables, index);
+      if (upstream.some((id) => waiting.has(id) || this.runtimeState.get(id)?.loading)) {
+        waiting.add(variable.id);
+        // Show a waiting variable as loading. Panels and the editor act only
+        // when no variable is loading, so they would otherwise query with its
+        // old value as soon as its upstream finishes, before it refreshes.
+        if (!this.runtimeState.get(variable.id)?.loading) {
+          this.updateRuntimeState(variable.id, { loading: true });
+        }
+        return;
       }
+
+      const key = this.computeFetchKey(variable as QueryVariable);
+      if (key === this.lastFetchKeys.get(variable.id)) {
+        this.stopWaiting(variable.id);
+        return;
+      }
+
+      this.lastFetchKeys.set(variable.id, key);
+      void this.refreshVariableOptions(variable.id);
     });
-    this.refreshRequests.set(id, request);
-    return request;
+
+    for (const id of [...this.lastFetchKeys.keys()]) {
+      if (!ids.has(id)) this.forgetFetch(id);
+    }
+    this.waitingIds = waiting;
   }
 
-  private async loadVariableOptions(id: string): Promise<void> {
+  /**
+   * Clears the loading flag reconcile set on a variable while it waited, unless
+   * a refresh of its own is running and owns that flag.
+   */
+  private stopWaiting(id: string): void {
+    if (!this.waitingIds.has(id) || this.refreshControllers.has(id)) return;
+    if (this.runtimeState.get(id)?.loading) {
+      this.updateRuntimeState(id, { loading: false });
+    }
+  }
+
+  private forgetFetch(id: string): void {
+    if (!this.lastFetchKeys.has(id)) return;
+    this.lastFetchKeys.delete(id);
+    this.refreshControllers.get(id)?.abort();
+  }
+
+  /** Ids of variables listed before `variable` that its query references. */
+  private getUpstreamIds(variable: Variable, variables: Variable[], index: number): string[] {
+    const referenced = this.getReferencedVariableNames(variable);
+    return variables
+      .slice(0, index)
+      .filter((v) => referenced.has(v.name))
+      .map((v) => v.id);
+  }
+
+  /**
+   * Everything a query variable's options depend on. Upstream values, "All"
+   * expansion, renames, removals and ordering all show up in the interpolated
+   * query, so equal keys mean an identical query.
+   */
+  private computeFetchKey(variable: QueryVariable): string {
+    // The key uses the scheduler's time$ (the container's input.timeRange),
+    // while the query itself reads the global timefilter (searchSource and
+    // executePromQLResourceQuery). On a dashboard the two are kept in sync; if
+    // they ever diverge, the time a query uses could change without its key.
+    const time = variable.useTimeFilter
+      ? { from: this.schedulerTime?.from, to: this.schedulerTime?.to }
+      : undefined;
+    return JSON.stringify({
+      query: this.resolveQueryForFetch(variable),
+      language: variable.language,
+      dataset: variable.dataset,
+      sourceKind: variable.sourceKind,
+      valueField: variable.sourceKind === 'prometheusResource' ? undefined : variable.valueField,
+      labelField: variable.sourceKind === 'prometheusResource' ? undefined : variable.labelField,
+      regex: variable.regex,
+      time,
+      reload: this.reloadToken,
+    });
+  }
+
+  /**
+   * The query a variable will actually send: its query text, or PromQL resource
+   * query, with the variables listed before it interpolated.
+   */
+  private resolveQueryForFetch(variable: QueryVariable): string | PromQLResourceQuery {
+    return variable.sourceKind === 'prometheusResource'
+      ? this.resolveResourceQueryForFetch(variable)
+      : this.resolveQueryTextForFetch(variable);
+  }
+
+  private resolveResourceQueryForFetch(
+    variable: Extract<QueryVariable, { sourceKind: 'prometheusResource' }>
+  ): PromQLResourceQuery {
+    const interpolation = this.interpolationService;
+    if (!interpolation) return variable.promQLResourceQuery;
+    return interpolateResourceQuery(variable.promQLResourceQuery, (value) =>
+      interpolation.hasVariables(value)
+        ? interpolation.interpolate(value, variable.language, variable.name, true)
+        : value
+    );
+  }
+
+  private resolveQueryTextForFetch(
+    variable: Exclude<QueryVariable, { sourceKind: 'prometheusResource' }>
+  ): string {
+    const interpolation = this.interpolationService;
+    if (!interpolation || !interpolation.hasVariables(variable.query)) return variable.query;
+    // Order constraint: only variables listed before this one are interpolated.
+    return interpolation.interpolate(variable.query, variable.language, variable.name);
+  }
+
+  private async refreshVariableOptions(id: string): Promise<void> {
     const variable = this.getVariables().find((v) => v.id === id);
     if (!variable || variable.type !== VariableType.Query) {
       return;
@@ -490,7 +663,6 @@ export class VariableService {
       let optionType: VariableOptionType | undefined;
 
       if (queryVariable.sourceKind === 'prometheusResource') {
-        const promQLResourceQuery = queryVariable.promQLResourceQuery;
         if (!this.dataPlugin) {
           throw new Error('VariableService not initialized with dataPlugin');
         }
@@ -499,30 +671,20 @@ export class VariableService {
           ? this.dataPlugin.query.timefilter.timefilter.getTime()
           : undefined;
 
-        let resolvedQueryType = promQLResourceQuery;
-        if (this.interpolationService) {
-          resolvedQueryType = interpolateResourceQuery(promQLResourceQuery, (value) =>
-            this.interpolationService!.hasVariables(value)
-              ? this.interpolationService!.interpolate(
-                  value,
-                  queryVariable.language,
-                  queryVariable.name,
-                  true
-                )
-              : value
-          );
-        }
-
         const values = await executePromQLResourceQuery(
           this.dataPlugin,
           queryVariable.dataset?.id,
-          resolvedQueryType,
+          this.resolveResourceQueryForFetch(queryVariable),
           timeRange
         );
         options = buildPromQLVariableOptions(values, queryVariable.regex);
         optionType = 'string';
       } else {
-        const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+        const result = await this.fetchOptionsForVariableWithType(
+          queryVariable,
+          this.resolveQueryTextForFetch(queryVariable),
+          controller.signal
+        );
         const builtResult = buildVariableOptionsFromQueryResult(result, {
           valueField: queryVariable.valueField,
           labelField: queryVariable.labelField,
@@ -539,9 +701,17 @@ export class VariableService {
         return;
       }
 
-      const sortedOptions = this.sortVariableOptions(options, queryVariable.sort);
-      // Read `current` again: it may have been changed while the options were loading.
-      const latestCurrent = this.getVariables().find((v) => v.id === id)?.current;
+      // Read current now rather than at the start: the user may have changed
+      // the value while the query was running.
+      const latest = this.getVariables().find((v) => v.id === id);
+      if (!latest || latest.type !== VariableType.Query) {
+        // Removed, or switched to another type before the reconcile aborted this refresh.
+        return;
+      }
+      const latestCurrent = latest.current;
+
+      // Likewise read sort now: it may have been changed by a save in the meantime.
+      const sortedOptions = this.sortVariableOptions(options, (latest as QueryVariable).sort);
       // Keep the "All" marker as-is so it tracks whatever the new options are.
       const preservedCurrent = isAllMarker(latestCurrent)
         ? latestCurrent
@@ -562,6 +732,11 @@ export class VariableService {
       this.variables$.next(updatedVariables);
     } catch (error: any) {
       if (error?.name === 'AbortError') {
+        // A newer refresh aborted this one and owns the loading state. An abort
+        // from elsewhere must not leave the variable loading forever.
+        if (!controller.signal.aborted) {
+          this.updateRuntimeState(id, { loading: false });
+        }
         return;
       }
       this.recordTelemetry('variable_query_failed', {
@@ -580,24 +755,24 @@ export class VariableService {
     }
   }
 
-  public async refreshAllVariableOptions(): Promise<void> {
-    const queryVariables = this.getVariables().filter((v) => v.type === VariableType.Query);
-    for (const v of queryVariables) {
-      await this.refreshVariableOptions(v.id);
+  /** Names of the variables a query variable references, using the interpolation syntax. */
+  private getReferencedVariableNames(variable: Variable): Set<string> {
+    const names = new Set<string>();
+    if (variable.type !== VariableType.Query) return names;
+    const qv = variable as QueryVariable;
+    const texts =
+      qv.sourceKind === 'prometheusResource'
+        ? collectResourceQueryTextFields(qv.promQLResourceQuery)
+        : [qv.query];
+    for (const text of texts) {
+      if (typeof text !== 'string') continue;
+      const pattern = VariableInterpolationService.VARIABLE_PATTERN;
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
+        names.add(match[1] || match[2]);
+      }
     }
-  }
-
-  /**
-   * Refresh only variables that have useTimeFilter enabled.
-   * Called when time range changes.
-   */
-  public async refreshTimeFilteredVariableOptions(): Promise<void> {
-    const queryVariables = this.getVariables().filter(
-      (v) => v.type === VariableType.Query && (v as QueryVariable).useTimeFilter
-    );
-    for (const v of queryVariables) {
-      await this.refreshVariableOptions(v.id);
-    }
+    return names;
   }
 
   private getRuntimeState(id: string): VariableState {
@@ -813,55 +988,13 @@ export class VariableService {
     this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
   }
 
-  private refreshDependentVariables(changedVarName: string): void {
-    const variables = this.getVariables();
-    const changedVarIndex = variables.findIndex((v) => v.name === changedVarName);
-    if (changedVarIndex === -1) return;
-
-    const pattern = new RegExp(`\\$\\{${changedVarName}\\}|\\$${changedVarName}\\b`);
-    // Only refresh variables that come AFTER the changed variable
-    // Variables before the changed variable cannot reference it due to order constraints
-    for (let i = changedVarIndex + 1; i < variables.length; i++) {
-      const v = variables[i];
-      if (v.type === VariableType.Query) {
-        const qv = v as QueryVariable;
-        const referencesChangedVar =
-          qv.sourceKind === 'prometheusResource'
-            ? collectResourceQueryTextFields(qv.promQLResourceQuery).some((field) =>
-                pattern.test(field)
-              )
-            : pattern.test(qv.query);
-        if (referencesChangedVar) {
-          this.refreshVariableOptions(qv.id);
-        }
-      }
-    }
-  }
-
-  private shouldRefreshQueryOptions(updates: Partial<QueryVariable>): boolean {
-    return [
-      'query',
-      'language',
-      'dataset',
-      'valueField',
-      'labelField',
-      'regex',
-      'useTimeFilter',
-      'promQLResourceQuery',
-    ].some((key) => updates[key as keyof QueryVariable] !== undefined);
-  }
-
   private async fetchOptionsForVariableWithType(
     variable: Exclude<QueryVariable, { sourceKind: 'prometheusResource' }>,
+    query: string,
     signal?: AbortSignal
   ): Promise<VariableQueryResult> {
     if (!this.dataPlugin) {
       throw new Error('VariableService not initialized with dataPlugin');
-    }
-    let query = variable.query;
-    if (this.interpolationService && this.interpolationService.hasVariables(query)) {
-      // Enforce order constraint: only interpolate variables that appear before current variable
-      query = this.interpolationService.interpolate(query, variable.language, variable.name);
     }
     return executeVariableQuery(
       this.dataPlugin,
@@ -878,8 +1011,16 @@ export class VariableService {
   /**
    * Save variables - updates internal state and persists configuration to dashboard.
    * @param variables - Updated variables array
+   * @param runtimeState - Runtime state change to apply for one variable once the
+   *   save succeeds. It is written before variables$ emits, so the refresh the
+   *   scheduler starts for the new configuration sees it and is not overwritten
+   *   by it afterwards. `update` receives the runtime state at that moment and
+   *   returns only the fields to change.
    */
-  private async saveVariables(variables: Variable[]): Promise<void> {
+  private async saveVariables(
+    variables: Variable[],
+    runtimeState?: { id: string; update: RuntimeStateUpdate }
+  ): Promise<void> {
     if (!this.savedObjectsClient) {
       throw new Error('SavedObjectsClient is not initialized');
     }
@@ -900,6 +1041,12 @@ export class VariableService {
         variablesJSON,
       });
 
+      if (runtimeState) {
+        // No runtimeStateChange$ emit needed: getVariables$ reads the map when
+        // variables$ emits below, and that emit also schedules the reconcile.
+        const current = this.getRuntimeState(runtimeState.id);
+        this.runtimeState.set(runtimeState.id, { ...current, ...runtimeState.update(current) });
+      }
       this.variables$.next(normalizedVariables);
     } catch (error) {
       throw error;
@@ -907,10 +1054,9 @@ export class VariableService {
   }
 
   public destroy(): void {
-    this.destroyed = true;
+    this.stopRefreshScheduler();
     this.refreshControllers.forEach((c) => c.abort());
     this.refreshControllers.clear();
-    this.refreshRequests.clear();
     this.runtimeState.clear();
     this.runtimeStateChange$.complete();
     this.variables$.complete();
