@@ -100,8 +100,18 @@ describe('parseTitleLine', () => {
     expect(parseTitleLine('CONVERSATION_TITLE:   ')).toBeNull();
   });
 
-  it('returns null for a title longer than 100 chars', () => {
-    expect(parseTitleLine(`CONVERSATION_TITLE: ${'x'.repeat(101)}`)).toBeNull();
+  it('truncates a title longer than 100 chars', () => {
+    expect(parseTitleLine(`CONVERSATION_TITLE: ${'x'.repeat(101)}`)).toBe('x'.repeat(100));
+  });
+
+  it('does not leave trailing whitespace after truncation', () => {
+    const value = `${'a'.repeat(99)} ${'b'.repeat(10)}`;
+    expect(parseTitleLine(`CONVERSATION_TITLE: ${value}`)).toBe('a'.repeat(99));
+  });
+
+  it('does not split a surrogate pair at the truncation boundary', () => {
+    const title = parseTitleLine(`CONVERSATION_TITLE: ${'a'.repeat(99)}😀😀`);
+    expect(title).toBe(`${'a'.repeat(99)}😀`);
   });
 });
 

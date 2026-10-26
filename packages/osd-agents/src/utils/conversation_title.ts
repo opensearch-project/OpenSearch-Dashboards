@@ -88,10 +88,16 @@ export function isFirstRunOfTurn(messages: any[]): boolean {
   return isFirstHumanTurn(messages) && !hasAssistantMessage(messages);
 }
 
+/** Maximum length of an emitted conversation title; longer values are truncated. */
+export const MAX_CONVERSATION_TITLE_LENGTH = 100;
+
 /**
  * Parse a CONVERSATION_TITLE: value from a single line of assistant text.
- * Returns the trimmed title when the line is a well-formed title line and the
- * value is 1..100 chars; otherwise null.
+ * Returns the trimmed title when the line is a well-formed title line with a
+ * non-empty value, truncated to MAX_CONVERSATION_TITLE_LENGTH code points;
+ * otherwise null. Only the leading line is ever passed in (see
+ * createLeadingTitleScanner), so an over-long value is still a title, just a
+ * verbose one -- truncating it is safe and keeps the title instead of dropping it.
  */
 export function parseTitleLine(line: string): string | null {
   const match = /^[ \t]*CONVERSATION_TITLE:[ \t]*(.+?)[ \t]*$/i.exec(line);
@@ -99,11 +105,19 @@ export function parseTitleLine(line: string): string | null {
     return null;
   }
   const title = match[1].trim();
-  return title.length > 0 && title.length <= 100 ? title : null;
+  if (title.length === 0) {
+    return null;
+  }
+  // Truncate by code point (Array.from), not UTF-16 code unit, so an emoji or
+  // other astral character at the boundary is never split into a lone surrogate.
+  const codePoints = Array.from(title);
+  return codePoints.length > MAX_CONVERSATION_TITLE_LENGTH
+    ? codePoints.slice(0, MAX_CONVERSATION_TITLE_LENGTH).join('').trimEnd()
+    : title;
 }
 
-// A title line cannot be longer than "CONVERSATION_TITLE: " + 100 chars; if the
-// leading line runs well past that with no newline, it is not a title, so stop.
+// A leading line that runs well past "CONVERSATION_TITLE: " + a reasonable
+// title with no newline is not a title line, so stop scanning.
 const LEADING_TITLE_SCAN_CAP = 512;
 
 /**

@@ -307,6 +307,55 @@ describe('ChatService', () => {
       delete (window as any).assistantContextStore;
     });
 
+    it('does not start a send that went stale while the data source was resolving', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+      // The user starts a new chat while the data source lookup is in flight.
+      jest.spyOn(chatService, 'getCurrentDataSourceId').mockImplementation(async () => {
+        chatService.newThread();
+        return 'ds-1';
+      });
+
+      const result = await chatService.sendMessage('Hello', []);
+
+      expect(result.dropped).toBe(true);
+      expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      expect((chatService as any).activeRequests.size).toBe(0);
+    });
+
+    it('does not write the data source context of a send the user left mid-lookup', async () => {
+      const store = createStatefulContextStore();
+      (window as any).assistantContextStore = store;
+      chatService.setDataSourceId('ds-1');
+      chatService.setDataSourceId('ds-2');
+      // The user starts a new chat while the context builder loads the data source list.
+      jest.spyOn(chatService, 'getAvailableDataSources').mockImplementation(async () => {
+        chatService.newThread();
+        return [
+          { id: 'ds-1', title: 'One' },
+          { id: 'ds-2', title: 'Two' },
+        ];
+      });
+
+      const result = await chatService.sendMessage('Hello', []);
+
+      expect(result.dropped).toBe(true);
+      expect(store.addContext).not.toHaveBeenCalled();
+      expect(mockAgent.runAgent).not.toHaveBeenCalled();
+    });
+
+    it('uses the signal it was given rather than the conversation current at a later await', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+      const signal = chatService.getConversationSignal();
+      chatService.newThread();
+
+      const result = await chatService.sendMessage('Hello', [], undefined, signal);
+
+      expect(result.dropped).toBe(true);
+      expect(mockAgent.runAgent).not.toHaveBeenCalled();
+    });
+
     it('should send message and return observable with user message', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -1375,6 +1424,29 @@ describe('ChatService', () => {
 
       expect(mockAgent.resetConnection).toHaveBeenCalled();
     });
+
+    it('aborts the signal of the conversation it leaves', () => {
+      const signal = chatService.getConversationSignal();
+
+      chatService.newThread();
+
+      expect(signal.aborted).toBe(true);
+      expect(chatService.getConversationSignal().aborted).toBe(false);
+    });
+  });
+
+  describe('closeConversation', () => {
+    it('aborts the current conversation and resets the thread id', () => {
+      chatService.newThread();
+      const signal = chatService.getConversationSignal();
+
+      mockCoreChatService.resetThreadId = jest.fn();
+
+      chatService.closeConversation();
+
+      expect(signal.aborted).toBe(true);
+      expect(mockCoreChatService.resetThreadId).toHaveBeenCalled();
+    });
   });
 
   describe('saveConversation', () => {
@@ -1839,116 +1911,33 @@ describe('ChatService', () => {
     });
   });
 
-  describe('restoreLatestConversation', () => {
+  describe('openConversation', () => {
+    const mockThreadId = 'thread-load-123';
     const mockMessages = [
       { id: 'msg-1', role: 'user', content: 'Hello' },
-      { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
+      { id: 'msg-2', role: 'assistant', content: 'Hi!' },
     ];
-    const mockThreadId = 'thread-12345';
-    const mockSnapshotEvent = {
-      type: 'MESSAGES_SNAPSHOT',
-      messages: mockMessages,
-      timestamp: Date.now(),
-    };
 
-    it('should return events array including MESSAGES_SNAPSHOT for the latest conversation', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest
-        .fn()
-        .mockResolvedValue([mockSnapshotEvent]);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).not.toBeNull();
-      expect(Array.isArray(result)).toBe(true);
-      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT');
-      expect(snapshot).toBeDefined();
-      expect((snapshot as any).messages).toEqual(mockMessages);
-      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
-    });
-
-    it('should return null and generate new thread when no conversations exist', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [],
-        total: 0,
-      });
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(mockCoreChatService.newThread).toHaveBeenCalled();
-    });
-
-    it('should return null and generate new thread when getConversation returns null', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(mockCoreChatService.newThread).toHaveBeenCalled();
-    });
-
-    it('should return null and skip restore when thread ID is already set', async () => {
-      mockCoreChatService.getThreadId.mockReturnValue('existing-thread-id');
-      chatService.conversationHistoryService.getConversations = jest.fn();
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(chatService.conversationHistoryService.getConversations).not.toHaveBeenCalled();
-      expect(mockCoreChatService.newThread).not.toHaveBeenCalled();
-    });
-
-    it('should inject synthetic tool call events for unfinished tool calls', async () => {
-      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
-      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
-        mockHasAction
-      );
-
-      const messagesWithUnfinished = [
-        { id: 'user-1', role: 'user', content: 'Run it' },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: '',
-          toolCalls: [
-            {
-              id: 'tc-1',
-              type: 'function',
-              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
-            },
-          ],
-        },
-      ];
-
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
+    it('should return events array and set thread ID', async () => {
       chatService.conversationHistoryService.getConversation = jest
         .fn()
         .mockResolvedValue([
-          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
+          { type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() },
         ]);
 
-      const result = await chatService.restoreLatestConversation();
+      const result = await chatService.openConversation(mockThreadId).events;
 
       expect(result).not.toBeNull();
-      const types = result!.map((e: any) => e.type);
-      expect(types).toContain('TOOL_CALL_START');
-      expect(types).toContain('TOOL_CALL_ARGS');
-      expect(types).toContain('TOOL_CALL_END');
+      expect(Array.isArray(result)).toBe(true);
+      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
+    });
 
-      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT') as any;
-      const lastMsg = snapshot.messages[snapshot.messages.length - 1];
-      expect(lastMsg.toolCalls).toHaveLength(0);
+    it('should return null when getConversation returns null', async () => {
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+      const result = await chatService.openConversation(mockThreadId).events;
+
+      expect(result).toBeNull();
     });
 
     it('injects synthetic tool call events before RUN_FINISHED', async () => {
@@ -1977,7 +1966,7 @@ describe('ChatService', () => {
         { type: 'RUN_FINISHED', timestamp: Date.now() },
       ]);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const result = await chatService.openConversation(mockThreadId).events;
 
       const types = result!.map((e: any) => e.type);
       expect(types).toEqual([
@@ -1990,84 +1979,61 @@ describe('ChatService', () => {
       ]);
     });
 
-    it('should not inject synthetic events for non-frontend tool calls', async () => {
-      const mockHasAction = jest.fn().mockReturnValue(false);
-      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
-        mockHasAction
-      );
+    it('aborts the conversation it leaves and returns its own signal right away', () => {
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+      const previous = chatService.getConversationSignal();
 
-      const messagesWithServerTool = [
-        { id: 'user-1', role: 'user', content: 'Run it' },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: '',
-          toolCalls: [
-            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
-          ],
-        },
-      ];
+      const session = chatService.openConversation(mockThreadId);
 
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
+      expect(previous.aborted).toBe(true);
+      expect(session.signal).toBe(chatService.getConversationSignal());
+      expect(session.signal.aborted).toBe(false);
+    });
+
+    it('should not set the thread ID when the load was abandoned while fetching', async () => {
       chatService.conversationHistoryService.getConversation = jest
         .fn()
-        .mockResolvedValue([
-          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
-        ]);
+        .mockImplementation(async () => {
+          // The user starts a new chat while the conversation is loading
+          chatService.newThread();
+          return [{ type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() }];
+        });
 
-      const result = await chatService.restoreLatestConversation();
+      const session = chatService.openConversation(mockThreadId);
+      const result = await session.events;
 
-      expect(result).not.toBeNull();
-      const types = result!.map((e: any) => e.type);
-      expect(types).not.toContain('TOOL_CALL_START');
+      expect(session.signal.aborted).toBe(true);
+
+      expect(result).toBeNull();
+      expect(mockCoreChatService.setThreadId).not.toHaveBeenCalled();
     });
-  });
 
-  describe('loadConversation', () => {
-    const mockThreadId = 'thread-load-123';
-    const mockMessages = [
-      { id: 'msg-1', role: 'user', content: 'Hello' },
-      { id: 'msg-2', role: 'assistant', content: 'Hi!' },
-    ];
-
-    it('should return events array and set thread ID', async () => {
+    it('should not restore the data source state of a load abandoned during the restore', async () => {
       chatService.conversationHistoryService.getConversation = jest
         .fn()
         .mockResolvedValue([
           { type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() },
         ]);
+      (chatService as any).conversationDataSourceStore.set(mockThreadId, {
+        sessionDataSourceList: ['ds-of-aborted-load'],
+        confirmedDataSourceId: 'ds-of-aborted-load',
+      });
+      // Hold the stored data source validation, then leave the conversation (the user starts
+      // a new chat) before it resolves.
+      let resolveValidation!: (value: any) => void;
+      const validation = new Promise<any>((resolve) => {
+        resolveValidation = resolve;
+      });
+      jest.spyOn(chatService, 'validateDataSourceId').mockReturnValue(validation);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const pending = chatService.openConversation(mockThreadId).events;
+      await new Promise((r) => setTimeout(r, 0));
+      chatService.newThread();
+      resolveValidation({ valid: true, availableDataSources: [] });
+      expect(await pending).toBeNull();
 
-      expect(result).not.toBeNull();
-      expect(Array.isArray(result)).toBe(true);
-      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
-    });
-
-    it('should return null when getConversation returns null', async () => {
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
-
-      const result = await chatService.loadConversation(mockThreadId);
-
-      expect(result).toBeNull();
-    });
-
-    it('should not set the thread ID when the load was aborted while fetching', async () => {
-      const controller = new AbortController();
-      chatService.conversationHistoryService.getConversation = jest
-        .fn()
-        .mockImplementation(async () => {
-          controller.abort();
-          return [{ type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() }];
-        });
-
-      const result = await chatService.loadConversation(mockThreadId, controller.signal);
-
-      expect(result).toBeNull();
-      expect(mockCoreChatService.setThreadId).not.toHaveBeenCalled();
+      expect(chatService.getConfirmedDataSourceId()).toBeUndefined();
+      expect(chatService.getSessionDataSourceList()).toEqual([]);
     });
 
     it('should inject synthetic tool call events for unfinished tool calls', async () => {
@@ -2098,7 +2064,7 @@ describe('ChatService', () => {
           { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
         ]);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const result = await chatService.openConversation(mockThreadId).events;
 
       expect(result).not.toBeNull();
       const types = result!.map((e: any) => e.type);
@@ -2134,7 +2100,7 @@ describe('ChatService', () => {
         },
       ]);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const result = await chatService.openConversation(mockThreadId).events;
 
       expect(result).not.toBeNull();
       const startEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_START');
@@ -2175,7 +2141,7 @@ describe('ChatService', () => {
           { type: 'MESSAGES_SNAPSHOT', messages: messagesWithFinished, timestamp: Date.now() },
         ]);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const result = await chatService.openConversation(mockThreadId).events;
 
       expect(result).not.toBeNull();
       const types = result!.map((e: any) => e.type);
@@ -2206,7 +2172,7 @@ describe('ChatService', () => {
           { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
         ]);
 
-      const result = await chatService.loadConversation(mockThreadId);
+      const result = await chatService.openConversation(mockThreadId).events;
 
       expect(result).not.toBeNull();
       const types = result!.map((e: any) => e.type);
@@ -2347,7 +2313,7 @@ describe('ChatService', () => {
       expect(result).toBeUndefined();
     });
 
-    describe('when the thread changes while the default data source lookup is in flight', () => {
+    describe('when the user leaves the conversation while the default data source lookup is in flight', () => {
       let resolveLookup: (id: string) => void;
       let serviceWithSettings: any;
 
@@ -2366,7 +2332,7 @@ describe('ChatService', () => {
         );
       });
 
-      it('commits the default data source to the thread the lookup started in', async () => {
+      it('commits the default data source to the conversation the lookup started in', async () => {
         const pending = serviceWithSettings.getCurrentDataSourceId();
         resolveLookup('workspace-default-id');
 
@@ -2378,7 +2344,7 @@ describe('ChatService', () => {
       it('does not commit it to the conversation the user switched to, but still returns it', async () => {
         const pending = serviceWithSettings.getCurrentDataSourceId();
         // The user moves to another conversation that already has its own data source.
-        mockCoreChatService.setThreadId('thread-switched-to');
+        serviceWithSettings.newThread();
         serviceWithSettings.setDataSourceId('ds-of-other-conversation');
 
         resolveLookup('workspace-default-id');
@@ -2394,6 +2360,95 @@ describe('ChatService', () => {
     afterEach(() => {
       jest.clearAllMocks();
       delete (global as any).window.assistantContextStore;
+    });
+  });
+
+  describe('resolveSendDataSource', () => {
+    let mockSavedObjectsClient: any;
+    let service: ChatService;
+
+    const dataSourceObject = (id: string, title: string, engine?: string) => ({
+      id,
+      attributes: { title, dataSourceEngineType: engine },
+    });
+
+    beforeEach(() => {
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [dataSourceObject('ds-1', 'Source One')],
+        }),
+        get: jest.fn().mockResolvedValue({ attributes: {} }),
+      };
+      service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+      service.newThread();
+    });
+
+    it('returns ok when the current data source is compatible', async () => {
+      service.setDataSourceId('ds-1');
+
+      await expect(service.resolveSendDataSource(service.getConversationSignal())).resolves.toEqual(
+        { status: 'ok', dataSourceId: 'ds-1' }
+      );
+    });
+
+    it('returns unsupported for an AnalyticEngine data source and caches the check', async () => {
+      service.setDataSourceId('ds-analytic');
+      mockSavedObjectsClient.get.mockResolvedValue({
+        attributes: { dataSourceEngineType: 'AnalyticEngine' },
+      });
+
+      const signal = service.getConversationSignal();
+      await expect(service.resolveSendDataSource(signal)).resolves.toEqual({
+        status: 'unsupported',
+      });
+      await expect(service.resolveSendDataSource(signal)).resolves.toEqual({
+        status: 'unsupported',
+      });
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks the user to pick one when the current data source is not usable', async () => {
+      service.setDataSourceId('ds-missing');
+
+      await expect(service.resolveSendDataSource(service.getConversationSignal())).resolves.toEqual(
+        { status: 'needs_selection', options: [{ id: 'ds-1', title: 'Source One' }] }
+      );
+    });
+
+    it('returns none when the workspace has no compatible data source', async () => {
+      service.setDataSourceId('ds-missing');
+      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+
+      await expect(service.resolveSendDataSource(service.getConversationSignal())).resolves.toEqual(
+        { status: 'none' }
+      );
+    });
+
+    it('re-checks the AnalyticEngine engine type after a new chat', async () => {
+      service.setDataSourceId('ds-1');
+      await service.resolveSendDataSource(service.getConversationSignal());
+      service.newThread();
+      service.setDataSourceId('ds-1');
+      await service.resolveSendDataSource(service.getConversationSignal());
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns stale once the user leaves the conversation while it resolves', async () => {
+      service.setDataSourceId('ds-1');
+      const signal = service.getConversationSignal();
+      mockSavedObjectsClient.find.mockImplementation(async () => {
+        // The user starts a new chat while the data source list is loading
+        service.newThread();
+        return { savedObjects: [dataSourceObject('ds-1', 'Source One')] };
+      });
+
+      await expect(service.resolveSendDataSource(signal)).resolves.toEqual({ status: 'stale' });
     });
   });
 
