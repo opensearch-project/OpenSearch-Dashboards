@@ -96,10 +96,10 @@ jest.mock('../../../application/utils/state_management/actions/query_actions', (
   prepareBucketCountCacheKey: () => 'bucketCount:source=logs | stats count()',
 }));
 
-let mockQueryHasAggregation = false;
+let mockQueryIsBucketCountable = false;
 jest.mock('../../../application/utils/state_management/actions/utils', () => ({
   queryEndsWithHead: () => false,
-  queryHasAggregation: () => mockQueryHasAggregation,
+  queryIsBucketCountable: () => mockQueryIsBucketCountable,
 }));
 
 let mockBucketCount: number | undefined;
@@ -141,12 +141,12 @@ describe('ActionBar', () => {
 describe('ActionBar with aggregation query', () => {
   beforeEach(() => {
     mockDiscoverResultsActionBar.mockClear();
-    mockQueryHasAggregation = false;
+    mockQueryIsBucketCountable = false;
     mockBucketCount = undefined;
   });
 
   test('should pass bucketCount when query has stats', () => {
-    mockQueryHasAggregation = true;
+    mockQueryIsBucketCountable = true;
     mockBucketCount = 5050;
 
     render(<ActionBar />);
@@ -165,7 +165,7 @@ describe('ActionBar with aggregation query', () => {
   });
 
   test('should degrade to standard format when bucketCount is unavailable', () => {
-    mockQueryHasAggregation = true;
+    mockQueryIsBucketCountable = true;
 
     render(<ActionBar />);
 
@@ -176,7 +176,7 @@ describe('ActionBar with aggregation query', () => {
   });
 
   test('should pass both hits and bucketCount when both are available', () => {
-    mockQueryHasAggregation = true;
+    mockQueryIsBucketCountable = true;
     mockBucketCount = 5050;
 
     render(<ActionBar />);

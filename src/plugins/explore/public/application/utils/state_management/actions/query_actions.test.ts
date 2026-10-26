@@ -49,7 +49,7 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasAggregation: jest.fn(() => false),
+  queryIsBucketCountable: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -72,7 +72,7 @@ import {
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
-import { queryHasAggregation } from './utils';
+import { queryIsBucketCountable } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
 import {
@@ -2150,7 +2150,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       mockDispatch = jest.fn();
       mockGetState.mockReturnValue(stateWithKey());
       (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
-      (queryHasAggregation as jest.Mock).mockReturnValue(false);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(false);
     });
 
     it('streams partial rows for a row query and reports scan progress', async () => {
@@ -2173,7 +2173,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
 
     it('does not stream partials for an aggregation query', async () => {
-      (queryHasAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(true);
       fetchWithOnePartial();
 
       await runDataTableQuery('source=logs | stats count() by host');

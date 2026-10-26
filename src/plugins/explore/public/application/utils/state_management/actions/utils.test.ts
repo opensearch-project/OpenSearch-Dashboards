@@ -153,149 +153,209 @@ describe('Utils - Histogram Breakdown Support', () => {
     });
   });
 
-  describe('queryHasAggregation', () => {
+  describe('queryIsBucketCountable', () => {
     it('should detect stats in a simple aggregation query', () => {
-      expect(utils.queryHasAggregation('source=logs | stats count() by status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | stats count() by status')).toBe(true);
     });
 
     it('should detect top and rare as bucketing aggregations', () => {
-      expect(utils.queryHasAggregation('source=logs | top 5 status')).toBe(true);
-      expect(utils.queryHasAggregation('source=logs | rare status')).toBe(true);
-      expect(utils.queryHasAggregation('source=logs | TOP 5 status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | top 5 status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | rare status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | TOP 5 status')).toBe(true);
+    });
+
+    it('should detect the broader bucketing aggregations', () => {
+      expect(utils.queryIsBucketCountable('source=logs | chart count() by status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | timechart span=1h count()')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | transpose')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | xyseries extension bytes clientip')).toBe(
+        true
+      );
+    });
+
+    it('should treat patterns as countable only in aggregation mode', () => {
+      expect(utils.queryIsBucketCountable('source=logs | patterns message mode=aggregation')).toBe(
+        true
+      );
+      expect(
+        utils.queryIsBucketCountable('source=logs | patterns message mode = aggregation')
+      ).toBe(true);
+      // Default/label mode returns roughly one row per document, not pattern buckets.
+      expect(utils.queryIsBucketCountable('source=logs | patterns message')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | patterns message mode=label')).toBe(false);
+    });
+
+    it('ties mode=aggregation to the patterns command, not any command in the pipeline', () => {
+      // `mode=aggregation` on a DIFFERENT command must not flip a label-mode patterns query to
+      // countable. (No real PPL command other than `patterns` takes `mode=aggregation`, so
+      // `somecmd` is a stand-in to exercise the anchoring.)
+      expect(
+        utils.queryIsBucketCountable(
+          'source=logs | somecmd mode=aggregation | patterns message mode=label'
+        )
+      ).toBe(false);
+      expect(
+        utils.queryIsBucketCountable(
+          'source=logs | patterns message mode=label | somecmd mode=aggregation'
+        )
+      ).toBe(false);
+      // A genuine aggregation-mode patterns followed by another pipe is still countable.
+      expect(
+        utils.queryIsBucketCountable('source=logs | patterns message mode=aggregation | head 5')
+      ).toBe(true);
+    });
+
+    it('should not treat timewrap as countable even with an upstream timechart', () => {
+      // Its PIVOT reshape runs after the query plan, so a count probe overcounts.
+      expect(
+        utils.queryIsBucketCountable('source=logs | timechart span=1h count() | timewrap 1d')
+      ).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | timechart count() | timewrap 1d')).toBe(
+        false
+      );
     });
 
     it('should not match top or rare inside a string or subquery', () => {
-      expect(utils.queryHasAggregation("source=logs | where msg = '| top 5 host'")).toBe(false);
+      expect(utils.queryIsBucketCountable("source=logs | where msg = '| top 5 host'")).toBe(false);
       expect(
-        utils.queryHasAggregation('source=logs | where id in [source=other | rare status]')
+        utils.queryIsBucketCountable('source=logs | where id in [source=other | rare status]')
       ).toBe(false);
     });
 
     it('should detect stats case-insensitively', () => {
-      expect(utils.queryHasAggregation('source=logs | STATS count() by status')).toBe(true);
-      expect(utils.queryHasAggregation('source=logs | Stats count() by host')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | STATS count() by status')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | Stats count() by host')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | CHART count() by x')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs | Patterns message MODE=AGGREGATION')).toBe(
+        true
+      );
     });
 
     it('should detect stats with extra whitespace', () => {
-      expect(utils.queryHasAggregation('source=logs |   stats count()')).toBe(true);
+      expect(utils.queryIsBucketCountable('source=logs |   stats count()')).toBe(true);
     });
 
-    it('should return false for queries without stats', () => {
-      expect(utils.queryHasAggregation('source=logs | where status = 200')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | head 100')).toBe(false);
+    it('should return false for queries without an aggregation', () => {
+      expect(utils.queryIsBucketCountable('source=logs | where status = 200')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | head 100')).toBe(false);
     });
 
     it('should return false for empty query', () => {
-      expect(utils.queryHasAggregation('')).toBe(false);
+      expect(utils.queryIsBucketCountable('')).toBe(false);
     });
 
     it('should not match stats inside subquery brackets', () => {
       expect(
-        utils.queryHasAggregation('source=logs | where id in [source=other | stats count()]')
+        utils.queryIsBucketCountable('source=logs | where id in [source=other | stats count()]')
       ).toBe(false);
+    });
+
+    it('should count an outer aggregation even when a timewrap sits inside a subquery', () => {
+      // The nested timewrap is masked out, so it does not disqualify the outer stats.
+      expect(
+        utils.queryIsBucketCountable('source=logs | where id in [x | timewrap 1d] | stats count()')
+      ).toBe(true);
     });
 
     it('should detect stats in main query even with subquery', () => {
       expect(
-        utils.queryHasAggregation(
+        utils.queryIsBucketCountable(
           'source=logs | where id in [source=other | head 10] | stats count() by host'
         )
       ).toBe(true);
     });
 
     it('should not match "stats" that is not preceded by a pipe', () => {
-      expect(utils.queryHasAggregation('source=stats_index')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=stats_index')).toBe(false);
     });
 
     it('should not match stats inside single-quoted string', () => {
-      expect(utils.queryHasAggregation("source=logs | where message = '| stats count()'")).toBe(
+      expect(utils.queryIsBucketCountable("source=logs | where message = '| stats count()'")).toBe(
         false
       );
     });
 
     it('should not match stats inside double-quoted string', () => {
-      expect(utils.queryHasAggregation('source=logs | where message = "| stats count()"')).toBe(
+      expect(utils.queryIsBucketCountable('source=logs | where message = "| stats count()"')).toBe(
         false
       );
     });
 
     it('should detect stats after a quoted string containing stats', () => {
       expect(
-        utils.queryHasAggregation("source=logs | where msg = '| stats x' | stats count() by host")
+        utils.queryIsBucketCountable(
+          "source=logs | where msg = '| stats x' | stats count() by host"
+        )
       ).toBe(true);
     });
 
     it('should not match stats inside a string with doubled-quote escaping', () => {
-      expect(utils.queryHasAggregation("source=logs | where msg = 'it''s | stats count()'")).toBe(
-        false
-      );
+      expect(
+        utils.queryIsBucketCountable("source=logs | where msg = 'it''s | stats count()'")
+      ).toBe(false);
     });
 
     it('should not match stats inside multiline subquery brackets', () => {
       expect(
-        utils.queryHasAggregation(
+        utils.queryIsBucketCountable(
           'source=logs | where id in [\nsource=other\n| stats count() by id\n]'
         )
       ).toBe(false);
     });
 
-    it('should not detect other aggregation or non-aggregation PPL commands', () => {
-      // Aggregation-like commands that are not part of the bucketing set (stats/top/rare)
-      expect(utils.queryHasAggregation('source=logs | chart count() by status')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | timechart span=1h count()')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | eventstats count() by status')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | streamstats count() by status')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | patterns message')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | transpose')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | xyseries extension bytes clientip')).toBe(
+    it('should not detect row-preserving or non-aggregation PPL commands', () => {
+      // Row-preserving commands (append fields/summary row, ~one row per document)
+      expect(utils.queryIsBucketCountable('source=logs | eventstats count() by status')).toBe(
         false
       );
-      expect(utils.queryHasAggregation('source=logs | timewrap 1d')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | addtotals')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | addcoltotals')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | streamstats count() by status')).toBe(
+        false
+      );
+      expect(utils.queryIsBucketCountable('source=logs | addtotals')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | addcoltotals')).toBe(false);
       // Document filtering/transformation commands
-      expect(utils.queryHasAggregation('source=logs | where status = 200')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | head 100')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | sort - timestamp')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | dedup status')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | fields status, host')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | rename status as code')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | eval new_field = status + 1')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | parse message "(?<ip>\\d+)"')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | grok message "%{IP:ip}"')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | rex field=message "(?<ip>\\d+)"')).toBe(
+      expect(utils.queryIsBucketCountable('source=logs | where status = 200')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | head 100')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | sort - timestamp')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | dedup status')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | fields status, host')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | rename status as code')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | eval new_field = status + 1')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | parse message "(?<ip>\\d+)"')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | grok message "%{IP:ip}"')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | rex field=message "(?<ip>\\d+)"')).toBe(
         false
       );
-      expect(utils.queryHasAggregation('source=logs | fillnull with 0')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | flatten nested_field')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | expand multi_value')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | trendline sma(5, bytes)')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | lookup accounts uid')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | join left=l right=r on id')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | regex message="error.*"')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | table status, host, message')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | mvcombine message')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | mvexpand multi_value')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | convert num(bytes)')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | replace "error" with "err" in message')).toBe(
-        false
-      );
-      expect(utils.queryHasAggregation('source=logs | reverse')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | spath input=json_field')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | ad')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | append [source=other]')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | appendcol [source=other]')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | appendpipe [stats count()]')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | bin span=1h timestamp')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | describe')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | explain')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | fieldformat bytes=num_format(bytes)')).toBe(
-        false
-      );
-      expect(utils.queryHasAggregation('source=logs | kmeans centroids=3')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | ml action=predict')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | nomv multi_value')).toBe(false);
-      expect(utils.queryHasAggregation('source=logs | search status=200')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | fillnull with 0')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | flatten nested_field')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | expand multi_value')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | trendline sma(5, bytes)')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | lookup accounts uid')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | join left=l right=r on id')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | regex message="error.*"')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | table status, host, message')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | mvcombine message')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | mvexpand multi_value')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | convert num(bytes)')).toBe(false);
+      expect(
+        utils.queryIsBucketCountable('source=logs | replace "error" with "err" in message')
+      ).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | reverse')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | spath input=json_field')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | ad')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | append [source=other]')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | appendcol [source=other]')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | appendpipe [stats count()]')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | bin span=1h timestamp')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | describe')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | explain')).toBe(false);
+      expect(
+        utils.queryIsBucketCountable('source=logs | fieldformat bytes=num_format(bytes)')
+      ).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | kmeans centroids=3')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | ml action=predict')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | nomv multi_value')).toBe(false);
+      expect(utils.queryIsBucketCountable('source=logs | search status=200')).toBe(false);
     });
   });
 
