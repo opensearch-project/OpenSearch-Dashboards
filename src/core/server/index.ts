@@ -136,6 +136,7 @@ export {
   LegacyOpenSearchClientConfig,
   LegacyOpenSearchError,
   LegacyOpenSearchErrorHelpers,
+  getLegacyNodeAgentFactory,
   OpenSearchServiceSetup,
   OpenSearchServiceStart,
   OpenSearchStatusMeta,

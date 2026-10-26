@@ -36,6 +36,7 @@ import { pick } from '@osd/std';
 import { Logger } from '../../logging';
 import { OpenSearchConfig } from '../opensearch_config';
 import { getDefaultHeaders } from '../default_headers';
+import { getLegacyNodeAgentFactory } from './node_agent';
 
 /**
  * @privateRemarks Config that consumers can pass to the OpenSearch JS client is complex and includes
@@ -102,6 +103,8 @@ export function parseOpenSearchClientConfig(
 ) {
   const opensearchClientConfig: ExtendedConfigOptions = {
     keepAlive: true,
+    // Keeps an orphaned pooled socket from crashing the process, see `getLegacyNodeAgentFactory`.
+    createNodeAgent: getLegacyNodeAgentFactory(log),
     ...pick(config, [
       'apiVersion',
       'sniffOnStart',

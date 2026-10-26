@@ -88,6 +88,7 @@ export const configureLegacyClient = async (
       openSearchClientPoolSetup.addClientToPool,
       config,
       registeredSchema,
+      logger,
       rootClient,
       dataSourceId,
       request,
@@ -111,6 +112,7 @@ export const configureLegacyClient = async (
  * @param config data source config
  * @param registeredSchema registered API schema
  * @param addClientToPool function to add client to client pool
+ * @param logger logger for the client's socket guard
  * @param dataSourceId id of data source saved Object
  * @returns child client.
  */
@@ -122,6 +124,7 @@ const getQueryClient = async (
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   config: DataSourcePluginConfigType,
   registeredSchema: any[],
+  logger: Logger,
   rootClient?: LegacyClient,
   dataSourceId?: string,
   request?: OpenSearchDashboardsRequest,
@@ -133,7 +136,7 @@ const getQueryClient = async (
     auth: { type },
     endpoint: nodeUrl,
   } = dataSourceAttr;
-  const clientOptions = parseClientOptions(config, nodeUrl, registeredSchema);
+  const clientOptions = parseClientOptions(config, nodeUrl, registeredSchema, logger);
 
   if (authClientParams !== undefined) {
     credential = authClientParams.credentials;
