@@ -9,11 +9,11 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
  * Whether a keydown belongs to an IME composition (Korean, Japanese, Chinese, ...). Keys pressed
  * then belong to the IME: Enter and Escape only commit or cancel the composed text.
  *
- * `keyCode === 229` covers Safari, which fires `compositionend` before the keydown that commits a
- * Chinese or Japanese composition, so that keydown arrives with `isComposing === false`. This is
- * the check MDN recommends. Chrome with the Korean IME follows a composing Enter with a second,
- * non-composing keydown (`keyCode` 13) once the syllable is committed; it passes, and handlers act
- * on it.
+ * `keyCode === 229` covers Safari, which can fire `compositionend` before the keydown that commits
+ * a composition (reported for Chinese, WebKit bug 324380), so that keydown arrives with
+ * `isComposing === false`. This is the check MDN recommends. Chrome and Firefox with the Korean
+ * IME follow a composing Enter with a second, non-composing keydown (`keyCode` 13) once the
+ * syllable is committed; it passes, and handlers act on it.
  *
  * React's synthetic event does not expose `isComposing`, so for React events read the native
  * event. Native `keydown` listeners (e.g. on `document`) can pass their event directly.
@@ -24,18 +24,19 @@ export const isImeComposing = (event: ReactKeyboardEvent | KeyboardEvent): boole
 };
 
 /**
- * Monaco reads keyCode 229 keydowns on its own input to track the composition, then stops their
- * propagation itself. It does not stop composing keydowns with any other keyCode, so those are
- * guarded like everywhere else.
+ * Monaco's main input (`textarea.inputarea`) reads keyCode 229 keydowns to track the composition,
+ * then stops their propagation itself. The opt-out covers the whole editor, so any other input
+ * inside it (the Monaco build OSD ships has none, e.g. no find widget) would also let keyCode 229
+ * keydowns through. Composing keydowns with any other keyCode are guarded like everywhere else.
  */
 const MONACO_SELECTOR = '.monaco-editor';
 
 /**
  * Stops Enter and Escape keydowns that belong to an IME composition at `window` in the capture
- * phase, so document, React and element listeners never act on half-composed text. Other `window`
- * capture listeners still see them. It only calls `stopPropagation`: the IME still commits or
- * cancels the text. `code` is checked as well as `key` because composing keydowns report
- * `key: "Process"` in Firefox and in Chrome on Windows.
+ * phase, so `window` bubble-phase, document, React and element listeners never act on
+ * half-composed text. Other `window` capture listeners still see them. It only calls
+ * `stopPropagation`: the IME still commits or cancels the text. `code` is checked as well as `key`
+ * because composing keydowns report `key: "Process"` in Firefox and in Chrome on Windows.
  *
  * Only keydown is guarded. Handlers that act on other keys while composing (arrows, Tab, Space),
  * or that listen in the capture phase above a Monaco editor, still need {@link isImeComposing}.

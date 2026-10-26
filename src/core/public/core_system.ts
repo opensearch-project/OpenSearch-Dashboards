@@ -172,8 +172,8 @@ export class CoreSystem {
       });
 
       // Installed here rather than in start(): parts of start() are conditional, and this must
-      // cover every deployment. Installed after FatalErrorsService so that any later setup
-      // failure reaches stop(), which removes it.
+      // cover every deployment. Installed after FatalErrorsService so that a later setup failure
+      // reported as fatal (an Error or a string) reaches stop(), which removes it.
       this.removeImeCompositionGuard = installImeCompositionGuard();
 
       // Initialize Monaco environment with build hash for worker URLs
