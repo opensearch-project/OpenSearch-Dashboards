@@ -46,6 +46,7 @@ import {
 } from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
+import { VariableService } from '../../variables/variable_service';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
@@ -74,6 +75,11 @@ beforeEach(() => {
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
   options.embeddable = doStart();
+});
+
+// Restore spies even when a test fails; some spy on VariableService.prototype.
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 class TestDashboardContainer extends DashboardContainer {
@@ -659,46 +665,45 @@ test('constructor initializes with variables when provided', () => {
   container.destroy();
 });
 
-test('initVariableRefreshSubscription refreshes on timeRange change when query variables exist', async () => {
-  const variables = [
-    { id: 'qv1', name: 'queryVar', type: 'query' as const, value: '', options: [] },
-  ];
-  const initialInput = getSampleDashboardInput({ variables } as any);
-
+test('passes the time range and reload requests to the variable refresh scheduler', () => {
+  const startSpy = jest.spyOn(VariableService.prototype, 'startRefreshScheduler');
+  const initialInput = getSampleDashboardInput({ timeRange: { from: 'now-15m', to: 'now' } });
   const container = new DashboardContainer(initialInput, options);
 
-  const refreshSpy = jest.spyOn(container.variableService, 'refreshTimeFilteredVariableOptions');
-  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
+  expect(startSpy).toHaveBeenCalledTimes(1);
+  const { time$, reload$ } = startSpy.mock.calls[0][0];
+  const times: unknown[] = [];
+  let reloads = 0;
+  const subscriptions = [
+    time$.subscribe((time) => times.push(time)),
+    reload$.subscribe(() => reloads++),
+  ];
 
-  container.updateInput({
-    timeRange: { from: 'now-1h', to: 'now' },
-  });
+  // The first value is the initial time range; an unchanged range is not re-emitted.
+  container.updateInput({ timeRange: { from: 'now-15m', to: 'now' } });
+  container.updateInput({ timeRange: { from: 'now-1h', to: 'now' } });
+  container.updateInput({ lastReloadRequestTime: 12345 });
+  // The Refresh button calls reload() directly, without lastReloadRequestTime.
+  container.reload();
 
-  await new Promise((r) => setTimeout(r, 10));
+  expect(times).toEqual([
+    { from: 'now-15m', to: 'now' },
+    { from: 'now-1h', to: 'now' },
+  ]);
+  expect(reloads).toBe(2);
 
-  expect(refreshSpy).toHaveBeenCalled();
+  subscriptions.forEach((s) => s.unsubscribe());
   container.destroy();
 });
 
-test('initVariableRefreshSubscription refreshes all on reload when query variables exist', async () => {
-  const variables = [
-    { id: 'qv2', name: 'queryVar2', type: 'query' as const, value: '', options: [] },
-  ];
-  const initialInput = getSampleDashboardInput({ variables } as any);
+test('stops the variable refresh scheduler on destroy', () => {
+  const stop = jest.fn();
+  jest.spyOn(VariableService.prototype, 'startRefreshScheduler').mockReturnValue(stop);
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
 
-  const container = new DashboardContainer(initialInput, options);
-
-  const refreshAllSpy = jest.spyOn(container.variableService, 'refreshAllVariableOptions');
-  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
-
-  container.updateInput({
-    lastReloadRequestTime: new Date().getTime(),
-  });
-
-  await new Promise((r) => setTimeout(r, 10));
-
-  expect(refreshAllSpy).toHaveBeenCalled();
   container.destroy();
+
+  expect(stop).toHaveBeenCalled();
 });
 
 test('dashboard id change triggers setDashboardId on variableService', async () => {
