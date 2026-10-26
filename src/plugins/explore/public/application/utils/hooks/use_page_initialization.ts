@@ -150,7 +150,7 @@ export const useInitPage = () => {
     visualizationBuilder,
   ]);
 
-  const pageContext = { savedExplore };
+  const pageContext = { savedExplore, savedExploreError: error };
 
   return pageContext;
 };

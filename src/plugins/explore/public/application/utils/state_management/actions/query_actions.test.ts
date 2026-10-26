@@ -72,6 +72,7 @@ import {
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
+import * as utilsModule from './utils';
 import { queryHasAggregation } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
@@ -1818,6 +1819,165 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    describe("a source's own histogram query", () => {
+      const buildHistogramQuery = jest.fn();
+      const sentQuery = () =>
+        (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query)?.[0]?.query
+          ?.query;
+      const run = (language: string) => {
+        mockGetState.mockReturnValue({
+          query: { query: 'my query', language, dataset: { id: 'test', type: 'MY_SOURCE' } },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        const thunk = executeHistogramQuery({
+          services: mockServices,
+          cacheKey: 'histogram-key',
+          queryString: 'my query',
+          interval: '1h',
+        });
+        return thunk(mockDispatch, mockGetState, undefined);
+      };
+
+      beforeEach(() => {
+        buildHistogramQuery.mockReset();
+        (mockSearchSource.setFields as jest.Mock).mockClear();
+        const registry = new SourceTypeRegistryService();
+        registry.register({
+          id: 'my-source',
+          label: 'My source',
+          datasetTypes: ['MY_SOURCE'],
+          flavors: [ExploreFlavor.Logs],
+          resolveDefaultDataset: async () => undefined,
+          languageSettings: {
+            MyQL: { buildHistogramQuery },
+            PPL: { buildHistogramQuery },
+            SQL: { buildHistogramQuery },
+          },
+        });
+        setSourceTypeRegistry(registry);
+      });
+
+      afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+      it('sends the query the source builds, from the resolved interval', async () => {
+        buildHistogramQuery.mockReturnValue('my query | histogram');
+        await run('MyQL');
+
+        expect(buildHistogramQuery).toHaveBeenCalledWith('my query', {
+          interval: '5m',
+          timeFieldName: 'endTime',
+          breakdownField: undefined,
+        });
+        expect(sentQuery()).toBe('my query | histogram');
+        expect(utilsModule.processRawResultsForHistogram).toHaveBeenCalledWith(
+          'my query | histogram',
+          expect.anything(),
+          expect.anything(),
+          false
+        );
+      });
+
+      it("uses the source's builder over Explore's for a built-in language id", async () => {
+        buildHistogramQuery.mockReturnValue('my ppl histogram');
+        (utilsModule.buildPPLHistogramQuery as jest.Mock).mockClear();
+        await run('PPL');
+
+        expect(utilsModule.buildPPLHistogramQuery).not.toHaveBeenCalled();
+        expect(sentQuery()).toBe('my ppl histogram');
+      });
+
+      it('sends nothing and settles the key with no results when the source builds no query', async () => {
+        buildHistogramQuery.mockReturnValue(undefined);
+        await run('MyQL');
+
+        expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+        // Settled through setIndividualQueryStatus, so the overall status leaves LOADING.
+        expect(mockDispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'queryEditor/setIndividualQueryStatus',
+            payload: expect.objectContaining({
+              cacheKey: 'histogram-key',
+              status: expect.objectContaining({ status: QueryExecutionStatus.NO_RESULTS }),
+            }),
+          })
+        );
+        expect(mockServices.inspectorAdapters.requests.start).not.toHaveBeenCalled();
+      });
+
+      it("parses a source's histogram on the SQL id with the source's columns, not SQL's", async () => {
+        buildHistogramQuery.mockReturnValue('my sql histogram');
+        await run('SQL');
+
+        expect(utilsModule.buildSQLHistogramQuery).not.toHaveBeenCalled();
+        expect(utilsModule.processRawResultsForHistogram).toHaveBeenLastCalledWith(
+          'my sql histogram',
+          expect.anything(),
+          expect.anything(),
+          false
+        );
+      });
+
+      describe('an older run that builds no query', () => {
+        const deferred = () => {
+          let resolve: (v: unknown) => void = () => undefined;
+          const promise = new Promise((r) => (resolve = r));
+          return { promise, resolve };
+        };
+        const settledNoResults = () =>
+          mockDispatch.mock.calls.some(
+            ([action]) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload?.status?.status === QueryExecutionStatus.NO_RESULTS
+          );
+
+        it.each([
+          ['while the newer run is still in flight', true],
+          ['after the newer run finished', false],
+        ])("leaves the newer run's key alone %s", async (_label, olderFirst) => {
+          // A fresh controller per run; starting the second run aborts the first.
+          (global.AbortController as jest.Mock).mockImplementation(() => {
+            const controller = {
+              signal: { aborted: false },
+              abort: jest.fn(() => {
+                controller.signal.aborted = true;
+              }),
+            };
+            return controller;
+          });
+          const older = deferred();
+          const newer = deferred();
+          (mockServices.data.dataViews.get as jest.Mock)
+            .mockReturnValueOnce(older.promise)
+            .mockReturnValueOnce(newer.promise);
+          buildHistogramQuery.mockImplementation(() =>
+            buildHistogramQuery.mock.calls.length === (olderFirst ? 1 : 2)
+              ? undefined
+              : 'newer histogram'
+          );
+
+          const olderRun = run('MyQL');
+          const newerRun = run('MyQL');
+          // Both runs have started and wait on their data view (thunks start a few ticks late).
+          await new Promise((r) => setTimeout(r, 0));
+          if (olderFirst) {
+            older.resolve(mockDataView);
+            await olderRun;
+            expect(settledNoResults()).toBe(false);
+            newer.resolve(mockDataView);
+            await newerRun;
+          } else {
+            newer.resolve(mockDataView);
+            await newerRun;
+            older.resolve(mockDataView);
+            await olderRun;
+          }
+          expect(settledNoResults()).toBe(false);
+        });
+      });
+    });
+
     it('should execute histogram query with formatter in language config', async () => {
       const mockFormatter = jest.fn();
       (mockServices.data.query.queryString.getLanguageService as jest.Mock).mockReturnValue({
@@ -2043,6 +2203,41 @@ describe('Query Actions - Comprehensive Test Suite', () => {
                 },
                 statusCode: 500,
                 originalErrorMessage: 'This is a plain text error message, not JSON',
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('shows the message of an error without a body (e.g. a strategy start failure)', async () => {
+      const error = new Error('The data source rejected the query');
+      mockSearchSource.fetch.mockRejectedValue(error);
+
+      const thunk = executeHistogramQuery({
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '1h',
+      });
+
+      try {
+        await thunk(mockDispatch, mockGetState, undefined);
+      } catch (e) {
+        expect(e).toBe(error);
+      }
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                message: expect.objectContaining({
+                  details: 'The data source rejected the query',
+                  reason: 'The data source rejected the query',
+                }),
               }),
             }),
           }),

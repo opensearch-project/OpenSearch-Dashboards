@@ -304,6 +304,16 @@ describe('table_shared', () => {
       expect(screen.getByText('50')).toBeInTheDocument();
     });
 
+    it('counts agent runs when they outnumber traces', () => {
+      render(
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} entityName="agentRun" />
+        </IntlProvider>
+      );
+      expect(screen.getByText(/agent runs in/)).toBeInTheDocument();
+    });
+
     it('renders em dash when elapsedMs is undefined', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme

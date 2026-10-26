@@ -11,6 +11,7 @@ import {
   dropShadowedAiRoots,
   ensureAiRootFieldChecked,
   GENAI_ROOT_CONDITION,
+  hasAncestorIn,
   hasAiRootField,
   isMarkedAiRoot,
   resetAiRootFieldChecks,
@@ -114,6 +115,24 @@ describe('ai_root', () => {
       expect(aiRootsOf(rows).map((r) => r.spanId)).toEqual(['weather', 'events']);
     });
 
+    it('keeps only the outermost of nested marked spans', () => {
+      const rows = [
+        row('http', '', {}),
+        row('outer', 'http', marked, '1'),
+        row('llm', 'outer', {}, '2'),
+        row('inner', 'llm', marked, '3'),
+      ];
+      expect(aiRootsOf(rows).map((r) => r.spanId)).toEqual(['outer']);
+    });
+
+    it('never hides a span on a malformed parent chain', () => {
+      // A span that is its own parent, and two marked spans that point at each other.
+      const self = [row('http', '', {}), row('loop', 'loop', marked)];
+      expect(aiRootsOf(self).map((r) => r.spanId)).toEqual(['loop']);
+      const cycle = [row('a', 'b', marked, '1'), row('b', 'a', marked, '2')];
+      expect(aiRootsOf(cycle).map((r) => r.spanId)).toEqual(['a', 'b']);
+    });
+
     it('is empty without a GenAI root or a marker', () => {
       expect(aiRootsOf([row('http', '', {})])).toEqual([]);
     });
@@ -140,5 +159,21 @@ describe('ai_root', () => {
     await ensureAiRootFieldChecked(missing, { ...dataset, id: 'ds-2' } as any, 'source = x');
     expect(missing.executeQuery).toHaveBeenCalledTimes(1);
     expect(hasAiRootField('ds-2')).toBe(false);
+  });
+
+  describe('hasAncestorIn', () => {
+    const parents: Record<string, string> = { c: 'b', b: 'a', a: '', self: 'self', x: 'y', y: 'x' };
+    const parentOf = (id: string) => parents[id];
+
+    it('finds an ancestor at any depth, but not the span itself', () => {
+      expect(hasAncestorIn('c', parentOf, new Set(['a']))).toBe(true);
+      expect(hasAncestorIn('c', parentOf, new Set(['c']))).toBe(false);
+      expect(hasAncestorIn('a', parentOf, new Set(['b']))).toBe(false);
+    });
+
+    it('ignores self-parents and cycles', () => {
+      expect(hasAncestorIn('self', parentOf, new Set(['self']))).toBe(false);
+      expect(hasAncestorIn('x', parentOf, new Set(['y']))).toBe(false);
+    });
   });
 });
