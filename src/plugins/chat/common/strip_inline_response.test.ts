@@ -21,15 +21,15 @@ describe('stripAdditionalTextFromResponse', () => {
     expect(stripAdditionalTextFromResponse(content)).toBe('    indented code');
   });
 
-  it('strips a title that sits before the suggestions line', () => {
+  it('only strips a title in the leading position', () => {
     const content = 'Hello world\nCONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]';
-    expect(stripAdditionalTextFromResponse(content)).toBe('Hello world');
+    expect(stripAdditionalTextFromResponse(content)).toBe(
+      'Hello world\nCONVERSATION_TITLE: Greeting'
+    );
   });
 
-  it('strips an incomplete title while it streams', () => {
-    expect(stripAdditionalTextFromResponse('Answer text\nCONVERSATION_TITLE: Partial ti')).toBe(
-      'Answer text'
-    );
+  it('strips a leading title while it streams', () => {
+    expect(stripAdditionalTextFromResponse('CONVERSATION_TITLE: Partial ti')).toBe('');
   });
 
   it('leaves plain text unchanged', () => {

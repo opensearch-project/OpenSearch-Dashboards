@@ -102,7 +102,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       Array<{ id: string; title: string }>
     >([]);
     const [isValidating, setIsValidating] = useState(false);
-    const [generatedTitle, setGeneratedTitle] = useState<string>('');
+    // Explicit conversation title: the agent-generated title from the
+    // conversation_title CUSTOM event, or the saved name restored from history
+    // (which may itself be the first-user-message fallback). Empty means "derive
+    // the name from the timeline".
+    const [conversationTitle, setConversationTitle] = useState<string>('');
 
     const hasActiveToolCalls = useMemo(() => {
       if (toolCallStates instanceof Map) {
@@ -182,7 +186,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onStreamingStateChange: setIsStreaming,
             onStartResponse: setStartResponse,
             getTimeline: () => timelineRef.current,
-            onConversationTitle: setGeneratedTitle,
+            onConversationTitle: setConversationTitle,
           },
         }),
       [service, chatService, confirmationService, telemetryRecorder, setTimelineSynced]
@@ -226,9 +230,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Save conversation to history whenever timeline changes
     useEffect(() => {
       if (timeline.length > 0 && !isLoading) {
-        chatService.saveConversation(timeline, generatedTitle || undefined);
+        chatService.saveConversation(timeline, conversationTitle || undefined);
       }
-    }, [timeline, chatService, isLoading, generatedTitle]);
+    }, [timeline, chatService, isLoading, conversationTitle]);
 
     // Clear thread ID and pending data source selection on unmount
     useUnmount(() => {
@@ -693,7 +697,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setPendingAskUser(null);
       setPendingMessage(null);
       setAvailableDataSources([]);
-      setGeneratedTitle('');
+      setConversationTitle('');
       isValidatingRef.current = false;
       setIsValidating(false);
       confirmationService.cleanAll();
@@ -742,15 +746,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
     }, [toolCallStates, service.getActionRenderer]);
 
-    // Get conversation name: prefer the auto-generated title from the agent's
-    // conversation_title CUSTOM event; otherwise fall back to the first user
-    // message text content. The title value comes only from the CUSTOM event
-    // (handleCustomEvent -> onConversationTitle); the inline CONVERSATION_TITLE:
-    // line is still stripped from displayed content but is no longer parsed as a
-    // title source here.
+    // Get conversation name: prefer the explicit conversationTitle (the agent's
+    // conversation_title CUSTOM event, or the name restored from history);
+    // otherwise fall back to the first user message text content. The inline
+    // CONVERSATION_TITLE: line is only stripped from displayed content, never
+    // parsed as a title source here.
     const conversationName = useMemo(() => {
-      if (generatedTitle) {
-        return generatedTitle;
+      if (conversationTitle) {
+        return conversationTitle;
       }
 
       // Fallback: find first user message that has text content
@@ -772,7 +775,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
 
       return '';
-    }, [timeline, generatedTitle]);
+    }, [timeline, conversationTitle]);
 
     const handleShowHistory = useCallback(() => {
       setShowHistory(true);
@@ -825,7 +828,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             // title or the first-user-message fallback). The name lives on the
             // SavedConversation object but is not included in the replayed
             // AG-UI events, so we must set it explicitly here.
-            setGeneratedTitle(conversation.name || '');
+            setConversationTitle(conversation.name || '');
             confirmationService.cleanAll();
             humanInputService.cleanAll();
             setShowHistory(false);
