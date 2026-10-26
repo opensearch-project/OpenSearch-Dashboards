@@ -22,6 +22,7 @@ import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from './auth_registry';
+import { IDirectQueryConnectionFlowRegistry } from './direct_query_connection_flow_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -39,6 +40,7 @@ export interface DataSourceManagementContext {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   authenticationMethodRegistry: AuthenticationMethodRegistry;
   workspaces: WorkspacesStart;
+  directQueryConnectionFlowRegistry?: IDirectQueryConnectionFlowRegistry;
 }
 
 export enum DataSourceConnectionType {
@@ -57,6 +59,13 @@ export interface DataSourceTableItem {
   relatedConnections?: DataSourceTableItem[];
   // This is used to identify the type of the data connection saved object
   objectType?: string;
+  // Id of the DirectQueryConnectionFlow that owns this data-connection saved object, if any. Set
+  // only when an owning flow is registered and visible to the current user, who can manage data
+  // sources; `undefined` doesn't mean no flow is registered for the connection.
+  directQueryConnectionFlowId?: string;
+  // Workspace ids of the row's saved object (data-source or data-connection). Not set for rows
+  // that aren't saved objects, such as direct query connections nested under a data source.
+  workspaces?: string[];
 }
 
 /**
