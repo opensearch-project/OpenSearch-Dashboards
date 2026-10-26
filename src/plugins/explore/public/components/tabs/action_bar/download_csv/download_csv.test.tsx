@@ -144,6 +144,28 @@ describe('DiscoverDownloadCsv', () => {
     });
   });
 
+  describe('while the rows are still streaming', () => {
+    beforeEach(() => {
+      (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({
+        isLoading: false,
+        downloadCsvForOption: mockDownloadCsvForOption,
+      }));
+    });
+
+    it('cannot be opened, by click or shortcut', async () => {
+      render(<TestHarness isStreaming />);
+      expect(screen.getByTestId('dscDownloadCsvButton')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+
+      const shortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'download_csv'
+      );
+      await act(async () => shortcut[0].execute());
+
+      expect(screen.queryByTestId('dscDownloadCsvPopoverContent')).not.toBeInTheDocument();
+    });
+  });
+
   describe('useDiscoverDownloadCsv().isLoading === true', () => {
     beforeEach(() => {
       (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({

@@ -21,6 +21,8 @@ export interface DiscoverDownloadCsvProps {
   indexPattern: IndexPattern;
   shouldShowMaxExport?: boolean;
   visibleRowsCount?: number;
+  /** The rows are still arriving, so an export would hold an arbitrary part of the result. */
+  isStreaming?: boolean;
 }
 
 export const DiscoverDownloadCsv = ({
@@ -29,6 +31,7 @@ export const DiscoverDownloadCsv = ({
   rows,
   shouldShowMaxExport = true,
   visibleRowsCount,
+  isStreaming = false,
 }: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -46,7 +49,7 @@ export const DiscoverDownloadCsv = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleDownloadCsvShortcut = () => {
-    if (!isLoading) {
+    if (!isLoading && !isStreaming) {
       openPopover();
     }
   };
@@ -74,17 +77,22 @@ export const DiscoverDownloadCsv = ({
   const buttonLabel = i18n.translate('explore.discover.downloadCsvButtonText', {
     defaultMessage: 'Export',
   });
+  const tooltip = isStreaming
+    ? i18n.translate('explore.discover.downloadCsvStreamingTooltip', {
+        defaultMessage: 'Export is available when the query finishes',
+      })
+    : buttonLabel;
 
   // Disable trap foucus, since it can break dismiss
   return (
     <EuiPopover
       button={
         // Icon-only with a hover tooltip carrying the name (Variant A, UXSO #3).
-        <EuiToolTip content={buttonLabel} delay="long">
+        <EuiToolTip content={tooltip} delay="long">
           <EuiButtonIcon
             size="s"
             data-test-subj="dscDownloadCsvButton"
-            disabled={isLoading}
+            disabled={isLoading || isStreaming}
             iconType="download"
             color="text"
             aria-label={buttonLabel}
