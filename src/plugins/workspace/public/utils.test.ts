@@ -19,6 +19,9 @@ import {
   fetchDataSourceConnections,
   getUseCaseUrl,
   fetchRemoteClusterConnections,
+  convertDataSourcesToOpenSearchAndDataConnections,
+  getDataSourceAssociationContext,
+  getWorkspaceFeaturesKey,
 } from './utils';
 import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
@@ -479,6 +482,77 @@ describe('workspace utils: getDataSourcesList', () => {
         workspaces: [],
       },
     ]);
+  });
+
+  it('should load the saved object attributes requested by association filters', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          get: (param: string) => (param === 'owner' ? 'example-plugin' : 'mock_value'),
+        },
+      ],
+    });
+    const result = await getDataSourcesList(mockedSavedObjectClient, [], ['owner']);
+    expect(mockedSavedObjectClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: expect.arrayContaining(['connectionId', 'owner']) }),
+      { withoutClientBasePath: true }
+    );
+    expect(result[0]).toEqual(expect.objectContaining({ attributes: { owner: 'example-plugin' } }));
+    expect(
+      convertDataSourcesToOpenSearchAndDataConnections(result as any).dataConnections[0]
+    ).toEqual(expect.objectContaining({ attributes: { owner: 'example-plugin' } }));
+  });
+
+  it('should pass the requested attributes through for data sources and data connections', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds-1',
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          get: (param: string) => (param === 'owner' ? 'data-source-owner' : 'mock_value'),
+        },
+        {
+          id: 'dc-1',
+          type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          get: (param: string) => (param === 'owner' ? 'data-connection-owner' : 'mock_value'),
+        },
+      ],
+    });
+    const result = await getDataSourcesList(mockedSavedObjectClient, [], ['owner']);
+    const { openSearchConnections, dataConnections } =
+      convertDataSourcesToOpenSearchAndDataConnections(result as any);
+    expect(openSearchConnections[0]).toEqual(
+      expect.objectContaining({ id: 'ds-1', attributes: { owner: 'data-source-owner' } })
+    );
+    expect(dataConnections[0]).toEqual(
+      expect.objectContaining({ id: 'dc-1', attributes: { owner: 'data-connection-owner' } })
+    );
+  });
+
+  it('should request each field once when association filters ask for built-in fields', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({ savedObjects: [] });
+    await getDataSourcesList(mockedSavedObjectClient, [], ['description', 'owner', 'owner']);
+    const { fields } = (mockedSavedObjectClient.find as jest.Mock).mock.calls[0][0];
+    expect(fields).toEqual([
+      'id',
+      'title',
+      'auth',
+      'description',
+      'dataSourceEngineType',
+      'type',
+      'connectionId',
+      'owner',
+    ]);
+  });
+
+  it('should not add attributes when no fields are requested', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [{ id: 'id1', type: DATA_CONNECTION_SAVED_OBJECT_TYPE, get: () => 'x' }],
+    });
+    const result = await getDataSourcesList(mockedSavedObjectClient, []);
+    expect(result[0]).not.toHaveProperty('attributes');
   });
 
   it('should return empty array if no saved objects responded', async () => {
@@ -1328,5 +1402,41 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
         query: { dataSourceId: 'id1' },
       })
     );
+  });
+});
+
+describe('workspace utils: getDataSourceAssociationContext', () => {
+  it('derives the use case from the feature configs', () => {
+    expect(getDataSourceAssociationContext(['discover', 'use-case-observability'])).toEqual({
+      useCaseId: 'observability',
+      features: ['discover', 'use-case-observability'],
+    });
+    expect(getDataSourceAssociationContext(['use-case-all'])).toEqual({
+      useCaseId: 'all',
+      features: ['use-case-all'],
+    });
+  });
+
+  it('has no use case without a use case feature, and nothing for an unknown workspace', () => {
+    expect(getDataSourceAssociationContext([])).toEqual({ useCaseId: undefined, features: [] });
+    expect(getDataSourceAssociationContext(undefined)).toEqual({
+      useCaseId: undefined,
+      features: undefined,
+    });
+  });
+
+  it('copies the features', () => {
+    const features = ['use-case-search'];
+    const context = getDataSourceAssociationContext(features);
+    context.features!.push('changed');
+    expect(features).toEqual(['use-case-search']);
+  });
+});
+
+describe('workspace utils: getWorkspaceFeaturesKey', () => {
+  it('gives the same key for the same features in any order', () => {
+    expect(getWorkspaceFeaturesKey(['b', 'a'])).toBe(getWorkspaceFeaturesKey(['a', 'b']));
+    expect(getWorkspaceFeaturesKey(['a,b'])).not.toBe(getWorkspaceFeaturesKey(['a', 'b']));
+    expect(getWorkspaceFeaturesKey(undefined)).toBeUndefined();
   });
 });
