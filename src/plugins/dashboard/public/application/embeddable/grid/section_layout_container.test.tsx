@@ -238,6 +238,43 @@ describe('SectionLayoutContainer', () => {
       expect(layout.items[0].name).toBe('Renamed Section');
       expect(layout.items[1].name).toBe('Section 2');
     });
+
+    test('rename commits on Enter', async () => {
+      const { container, component } = setup();
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionMenuButton-s1').simulate('click');
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRename-s1').simulate('click');
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRenameInput').simulate('change', {
+          target: { value: 'Renamed Section' },
+        });
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRenameInput').simulate('keydown', {
+          key: 'Enter',
+          keyCode: 13,
+        });
+      });
+      updateAndWait(component);
+
+      expect(findTestSubject(component, 'dashboardSectionRenameInput').length).toBe(0);
+      expect(container.getInput().layout).toMatchObject({
+        items: [
+          { id: 's1', name: 'Renamed Section' },
+          { id: 's2', name: 'Section 2' },
+        ],
+      });
+    });
   });
 
   describe('add panel', () => {
