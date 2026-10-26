@@ -162,10 +162,6 @@ export class CoreSystem {
   }
 
   public async setup() {
-    // Installed here rather than in start(): parts of start() are conditional, and this must
-    // cover every deployment.
-    this.removeImeCompositionGuard = installImeCompositionGuard();
-
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
@@ -174,6 +170,11 @@ export class CoreSystem {
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
+
+      // Installed here rather than in start(): parts of start() are conditional, and this must
+      // cover every deployment. Installed after FatalErrorsService so that any later setup
+      // failure reaches stop(), which removes it.
+      this.removeImeCompositionGuard = installImeCompositionGuard();
 
       // Initialize Monaco environment with build hash for worker URLs
       setBuildHash(injectedMetadata.getOpenSearchDashboardsBuildNumber());
