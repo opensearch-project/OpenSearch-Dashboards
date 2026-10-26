@@ -7,6 +7,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ExploreServices } from '../../../../types';
 import { ClassificationResult, IndexClassification } from '../types';
 import { detectSeverityField, pickTimeField } from '../severity';
+import { fetchTimestampField, isServerlessDataSource } from '../serverless';
 
 /**
  * Lazily classifies an index as time-based (logs) vs no-time-field by fetching its fields
@@ -15,10 +16,17 @@ import { detectSeverityField, pickTimeField } from '../severity';
  * clusters — so we classify on demand (hover/selection) and cache the result. While a fetch is
  * in flight the row reports CLASSIFYING (a real spinner); before any fetch it reports UNKNOWN
  * (no badge), never a false "Classifying…" label.
+ *
+ * On OpenSearch Serverless, every time-series index has an `index.timestamp_field` (`@timestamp` by
+ * default, or a custom field set at creation) that each document must carry and that the index is
+ * sorted on. It is read alongside the fields and preferred as the time field, and it keeps an index
+ * time-based even if the field fetch fails.
  */
 export const useIndexClassification = (services: ExploreServices, dataSourceId?: string) => {
   const cacheRef = useRef<Map<string, ClassificationResult>>(new Map());
   const inFlightRef = useRef<Set<string>>(new Set());
+  // Engine-type lookup, shared by every classification for the current data source.
+  const serverlessRef = useRef<{ dataSourceId?: string; promise?: Promise<boolean> }>({});
   const [, force] = useState(0);
 
   const keyFor = useCallback(
@@ -48,11 +56,36 @@ export const useIndexClassification = (services: ExploreServices, dataSourceId?:
 
       inFlightRef.current.add(cacheKey);
       force((n) => n + 1);
-      try {
-        const fields = await services.indexPatterns.getFieldsForWildcard({
-          pattern: indexName,
+      if (serverlessRef.current.dataSourceId !== dataSourceId || !serverlessRef.current.promise) {
+        serverlessRef.current = {
           dataSourceId,
-        });
+          promise: isServerlessDataSource(services, dataSourceId),
+        };
+      }
+      // Runs in parallel with the field fetch; only serverless indexes have the setting.
+      const timestampFieldPromise = serverlessRef.current.promise.then((serverless) =>
+        serverless ? fetchTimestampField(services, dataSourceId, indexName) : undefined
+      );
+      try {
+        const [fieldsResult, timestampField] = await Promise.all([
+          services.indexPatterns.getFieldsForWildcard({ pattern: indexName, dataSourceId }).then(
+            (fields: Array<{ name: string; type: string }>) => ({ fields }),
+            (error: unknown) => ({ error })
+          ),
+          timestampFieldPromise,
+        ]);
+        if ('error' in fieldsResult) {
+          if (!timestampField) throw fieldsResult.error;
+          // The field fetch failed, but the serverless timestamp field is known: still time-based.
+          const result: ClassificationResult = {
+            classification: IndexClassification.TIME_BASED,
+            timeFieldName: timestampField,
+            dateFields: [timestampField],
+          };
+          cacheRef.current.set(cacheKey, result);
+          return result;
+        }
+        const fields = fieldsResult.fields;
         const dateFields = fields
           .filter((field: { type: string }) => field.type === 'date')
           .map((field: { name: string }) => field.name);
@@ -63,8 +96,12 @@ export const useIndexClassification = (services: ExploreServices, dataSourceId?:
         const result: ClassificationResult = dateFields.length
           ? {
               classification: IndexClassification.TIME_BASED,
-              // Prefer the canonical OTel/PPL timestamp order, not an arbitrary first date field.
-              timeFieldName: pickTimeField(dateFields),
+              // The serverless timestamp field wins; otherwise prefer the canonical OTel/PPL
+              // timestamp order, not an arbitrary first date field.
+              timeFieldName:
+                timestampField && dateFields.includes(timestampField)
+                  ? timestampField
+                  : pickTimeField(dateFields),
               dateFields,
               severityField,
             }
