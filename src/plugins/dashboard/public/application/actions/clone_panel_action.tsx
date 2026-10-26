@@ -49,6 +49,7 @@ import {
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { getUniquePanelCopyTitle } from '../utils/get_unique_panel_copy_title';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -132,25 +133,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   }
 
   private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
-    const clonedTag = i18n.translate('dashboard.panel.title.clonedTag', {
-      defaultMessage: 'copy',
-    });
-    const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
-    const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
-    const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
-
-    const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
-      type: embeddableType,
-      perPage: 0,
-      fields: ['title'],
-      searchFields: ['title'],
-      search: `"${baseTitle}"`,
-    });
-    const similarBaseTitlesCount: number = similarSavedObjects.total - 1;
-
-    return similarBaseTitlesCount <= 0
-      ? baseTitle + ` (${clonedTag})`
-      : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount})`;
+    return getUniquePanelCopyTitle(this.core.savedObjects.client, rawTitle, embeddableType);
   }
 
   private async cloneEmbeddable(

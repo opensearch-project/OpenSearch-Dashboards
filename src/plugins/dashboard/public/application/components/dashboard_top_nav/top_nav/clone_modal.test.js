@@ -72,7 +72,29 @@ test('title', () => {
     <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
   );
   const event = { target: { value: 'a' } };
-  component.find('input').simulate('change', event);
+  findTestSubject(component, 'clonedDashboardTitle').simulate('change', event);
   findTestSubject(component, 'cloneConfirmButton').simulate('click');
   sinon.assert.calledWith(onClone, 'a');
+});
+
+const cloneConfirmDisabled = (wrapper) =>
+  wrapper
+    .findWhere((node) => node.prop('data-test-subj') === 'cloneConfirmButton')
+    .first()
+    .prop('disabled');
+
+test('copy panels: Confirm stays enabled when the template is only {{panelTitle}}', () => {
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  component.setState({ copyPanels: true, titleTemplate: '{{panelTitle}}' });
+  expect(cloneConfirmDisabled(component)).toBe(false);
+});
+
+test('copy panels: Confirm is disabled when the template is empty', () => {
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  component.setState({ copyPanels: true, titleTemplate: '' });
+  expect(cloneConfirmDisabled(component)).toBe(true);
 });

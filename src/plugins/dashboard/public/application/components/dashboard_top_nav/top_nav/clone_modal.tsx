@@ -44,13 +44,26 @@ import {
   EuiSpacer,
   EuiText,
   EuiCallOut,
+  EuiCompressedCheckbox,
+  EuiCompressedFormRow,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+
+import {
+  DEFAULT_PANEL_COPY_TITLE_TEMPLATE,
+  isPanelCopyTitleTemplateValid,
+} from '../../../utils/panel_copy_title_template';
 
 interface Props {
   onClone: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
+    onTitleDuplicate: () => void,
+    copyPanels: boolean,
+    titleTemplate: string,
+    signal: AbortSignal
   ) => Promise<void>;
   onClose: () => void;
   title: string;
@@ -61,10 +74,13 @@ interface State {
   isTitleDuplicateConfirmed: boolean;
   hasTitleDuplicate: boolean;
   isLoading: boolean;
+  copyPanels: boolean;
+  titleTemplate: string;
 }
 
 export class DashboardCloneModal extends React.Component<Props, State> {
   private isMounted = false;
+  private abortController?: AbortController;
 
   constructor(props: Props) {
     super(props);
@@ -74,6 +90,8 @@ export class DashboardCloneModal extends React.Component<Props, State> {
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
       isLoading: false,
+      copyPanels: false,
+      titleTemplate: DEFAULT_PANEL_COPY_TITLE_TEMPLATE,
     };
   }
   componentDidMount() {
@@ -91,15 +109,26 @@ export class DashboardCloneModal extends React.Component<Props, State> {
     });
   };
 
+  // Cancel aborts an in-flight copy so no further requests are sent, then closes.
+  onCancel = () => {
+    this.abortController?.abort();
+    this.props.onClose();
+  };
+
   cloneDashboard = async () => {
     this.setState({
       isLoading: true,
     });
 
+    this.abortController = new AbortController();
+
     await this.props.onClone(
       this.state.newDashboardName,
       this.state.isTitleDuplicateConfirmed,
-      this.onTitleDuplicate
+      this.onTitleDuplicate,
+      this.state.copyPanels,
+      this.state.titleTemplate,
+      this.abortController.signal
     );
 
     if (this.isMounted) {
@@ -160,6 +189,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
   };
 
   render() {
+    const templateValid = isPanelCopyTitleTemplateValid(this.state.titleTemplate);
     return (
       <EuiModal
         data-test-subj="dashboardCloneModal"
@@ -203,10 +233,69 @@ export class DashboardCloneModal extends React.Component<Props, State> {
           />
 
           {this.renderDuplicateTitleCallout()}
+
+          <EuiSpacer />
+
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiCompressedCheckbox
+                id="dashboardCloneCopyPanels"
+                data-test-subj="cloneCopyPanelsCheckbox"
+                checked={this.state.copyPanels}
+                onChange={(e) => this.setState({ copyPanels: e.target.checked })}
+                label={i18n.translate('dashboard.topNav.cloneModal.copyPanelsLabel', {
+                  defaultMessage: 'Copy panels',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="questionInCircle"
+                content={i18n.translate('dashboard.topNav.cloneModal.copyPanelsTooltip', {
+                  defaultMessage:
+                    'Also duplicate this dashboard\u2019s panels and point the clone at the copies, so edits in the clone do not affect the original. Shared data (index patterns, data sources) stays shared.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {this.state.copyPanels && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCompressedFormRow
+                label={i18n.translate('dashboard.topNav.cloneModal.copyPanelsTitleTemplateLabel', {
+                  defaultMessage: 'Copied panel title',
+                })}
+                isInvalid={!templateValid}
+                error={i18n.translate('dashboard.topNav.cloneModal.copyPanelsTitleTemplateError', {
+                  defaultMessage: 'Enter a title that includes {panelToken}.',
+                  values: { panelToken: '{{panelTitle}}' },
+                })}
+                helpText={i18n.translate(
+                  'dashboard.topNav.cloneModal.copyPanelsTitleTemplateHelp',
+                  {
+                    defaultMessage:
+                      'Use {panelToken} for the original panel title and {dashboardToken} for the new dashboard title.',
+                    values: {
+                      panelToken: '{{panelTitle}}',
+                      dashboardToken: '{{dashboardTitle}}',
+                    },
+                  }
+                )}
+              >
+                <EuiCompressedFieldText
+                  data-test-subj="cloneCopyPanelsTitleTemplate"
+                  value={this.state.titleTemplate}
+                  isInvalid={!templateValid}
+                  onChange={(e) => this.setState({ titleTemplate: e.target.value })}
+                />
+              </EuiCompressedFormRow>
+            </>
+          )}
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiSmallButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="cloneCancelButton" onClick={this.onCancel}>
             <FormattedMessage
               id="dashboard.topNav.cloneModal.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -218,6 +307,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
             data-test-subj="cloneConfirmButton"
             onClick={this.cloneDashboard}
             isLoading={this.state.isLoading}
+            disabled={this.state.copyPanels && !templateValid}
           >
             <FormattedMessage
               id="dashboard.topNav.cloneModal.confirmButtonLabel"
