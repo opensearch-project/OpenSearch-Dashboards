@@ -19,12 +19,6 @@ describe('isImeComposing', () => {
     expect(isImeComposing(reactKeyDown({ key: 'Enter', keyCode: 13 }))).toBe(false);
   });
 
-  it('is true while the native event is composing', () => {
-    expect(isImeComposing(reactKeyDown({ key: 'Enter', keyCode: 229, isComposing: true }))).toBe(
-      true
-    );
-  });
-
   it('is true for the keyCode 229 Enter Safari sends after compositionend', () => {
     expect(isImeComposing(reactKeyDown({ key: 'Enter', keyCode: 229 }))).toBe(true);
   });
@@ -119,7 +113,34 @@ describe('installImeCompositionGuard', () => {
     input.dispatchEvent(
       nativeKeyDown({ key: ' ', code: 'Space', keyCode: 229, isComposing: true })
     );
-    expect(received).toEqual(['ArrowDown/ArrowDown/229', ' /Space/229']);
+    input.dispatchEvent(
+      nativeKeyDown({ key: 'Tab', code: 'Tab', keyCode: 229, isComposing: true })
+    );
+    expect(received).toEqual(['ArrowDown/ArrowDown/229', ' /Space/229', 'Tab/Tab/229']);
+  });
+
+  it('keeps the composing Escape from window bubble-phase listeners', () => {
+    const seen: number[] = [];
+    const onWindowKeyDown = (event: globalThis.KeyboardEvent) => seen.push(event.keyCode);
+    window.addEventListener('keydown', onWindowKeyDown);
+    input.dispatchEvent(
+      nativeKeyDown({ key: 'Escape', code: 'Escape', keyCode: 229, isComposing: true })
+    );
+    input.dispatchEvent(nativeKeyDown({ key: 'Escape', code: 'Escape', keyCode: 27 }));
+    window.removeEventListener('keydown', onWindowKeyDown);
+    expect(seen).toEqual([27]);
+  });
+
+  it('leaves other window capture listeners to see the composing Enter', () => {
+    const seen: number[] = [];
+    const onWindowCapture = (event: globalThis.KeyboardEvent) => seen.push(event.keyCode);
+    window.addEventListener('keydown', onWindowCapture, { capture: true });
+    input.dispatchEvent(
+      nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true })
+    );
+    window.removeEventListener('keydown', onWindowCapture, { capture: true });
+    expect(seen).toEqual([229]);
+    expect(received).toEqual([]);
   });
 
   it('does not cancel the default action, so the IME still commits', () => {
@@ -148,10 +169,27 @@ describe('installImeCompositionGuard', () => {
 
     afterEach(() => editor.remove());
 
-    it('lets keyCode 229 keydowns through for Monaco to handle', () => {
+    it('lets keyCode 229 keydowns through for Monaco to handle, composing or not', () => {
       textarea.dispatchEvent(
         nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true })
       );
+      textarea.dispatchEvent(nativeKeyDown({ key: 'Enter', code: 'Enter', keyCode: 229 }));
+      expect(received).toEqual(['Enter/Enter/229', 'Enter/Enter/229']);
+    });
+
+    it('finds a Monaco editor inside a shadow root from the composed path', () => {
+      const host = document.body.appendChild(document.createElement('div'));
+      const shadowEditor = host.attachShadow({ mode: 'open' }).appendChild(editor.cloneNode(true));
+      shadowEditor.firstChild!.dispatchEvent(
+        nativeKeyDown({
+          key: 'Enter',
+          code: 'Enter',
+          keyCode: 229,
+          isComposing: true,
+          composed: true,
+        })
+      );
+      host.remove();
       expect(received).toEqual(['Enter/Enter/229']);
     });
 
