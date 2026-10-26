@@ -17,6 +17,7 @@ import { openSearchSourceType, OPENSEARCH_SOURCE_TYPE_ID } from './opensearch_so
 import { BUILT_IN_LANGUAGE_GUIDES } from './built_in_language_guides';
 
 export { OPENSEARCH_SOURCE_TYPE_ID };
+export { HISTOGRAM_RESULT_COLUMNS, SourceTypeHistogramColumns } from './histogram_columns';
 
 /** Languages Explore supports itself; their default behavior applies unless a source lists them. */
 const BUILT_IN_LANGUAGES = ['PPL', 'SQL', 'PROMQL'];
@@ -88,8 +89,18 @@ export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
    * page shows: the Logs tab on Logs and Traces, the Table and Visualization tabs on Metrics.
    */
   tabs?: string[];
-  /** Run Explore's histogram query. Off by default: that query is built in PPL. */
+  /**
+   * Run Explore's built-in histogram query. Off by default. It is built in PPL or SQL, so it only
+   * applies to those languages; any other language provides `buildHistogramQuery` instead.
+   */
   supportsHistogram?: boolean;
+  /**
+   * Builds the histogram query for a query as typed, or returns undefined to show no histogram for
+   * it (for example when the query already aggregates). The query returns the columns named by
+   * {@link SourceTypeHistogramColumns}. Setting it enables the histogram for this language on this
+   * source's datasets and replaces Explore's built-in one, also for a built-in language id.
+   */
+  buildHistogramQuery?: (query: string, config: SourceTypeHistogramConfig) => string | undefined;
   /** Offer the Logs page's visual query builder. Off by default: the builder emits PPL. */
   supportsVisualBuilder?: boolean;
   /**
@@ -98,6 +109,16 @@ export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
    * and any other language gets a single code editor.
    */
   metricsQueryEditor?: ComponentType<SourceTypeQueryEditorProps>;
+}
+
+/** What a source's `buildHistogramQuery` receives. */
+export interface SourceTypeHistogramConfig {
+  /** The bucket interval Explore resolved for the time range, e.g. `30s`, `5m`, `1d`, `1M`. */
+  interval: string;
+  /** The dataset's time field. */
+  timeFieldName: string;
+  /** The field the user broke the histogram down by, if any. */
+  breakdownField?: string;
 }
 
 /** Where the last run of the query stands, for a source's own query editor. */
@@ -428,10 +449,24 @@ export class SourceTypeRegistryService {
     );
   }
 
-  /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */
+  /**
+   * Whether Explore should run a histogram query: the source's own, or for a built-in language
+   * Explore's. Built-in languages no source lists keep their behavior.
+   */
   public supportsHistogram(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);
-    return settings ? !!settings.supportsHistogram : languageId !== 'PROMQL';
+    if (!settings) return languageId !== 'PROMQL';
+    if (settings.buildHistogramQuery) return true;
+    // Explore's own histogram query is PPL or SQL, which no other language can run.
+    return !!settings.supportsHistogram && ['PPL', 'SQL'].includes(languageId ?? '');
+  }
+
+  /** The source's own histogram query builder for a language, if it has one. */
+  public getHistogramQueryBuilder(
+    languageId?: string,
+    dataset?: { type?: string }
+  ): SourceTypeLanguageSettings['buildHistogramQuery'] {
+    return this.settingsFor(languageId, dataset)?.buildHistogramQuery;
   }
 
   /** Whether the Logs page may show its visual builder. Built-in languages keep their behavior. */
