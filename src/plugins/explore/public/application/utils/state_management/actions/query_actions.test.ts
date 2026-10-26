@@ -1226,7 +1226,11 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
-      await executeQueries({ services: {} as any })(mockDispatch, mockGetState, undefined);
+      await executeQueries({ services: { tabRegistry: { getTab: jest.fn() } } as any })(
+        mockDispatch,
+        mockGetState,
+        undefined
+      );
 
       const types = mockDispatch.mock.calls
         .map(([a]) => (typeof a === 'object' && a !== null ? a.type : undefined))
@@ -1236,6 +1240,86 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         .map(([a]) => a)
         .find((a) => typeof a === 'object' && a?.type === 'queryEditor/setHasUserInitiatedQuery');
       expect(flag.payload).toBe(true);
+    });
+
+    // Tab queries are dispatched only once the data table settles. Unless they count as running
+    // from the start, the overall status settles in between and Stop turns back into Run while
+    // the tab query is still to come.
+    describe('tab queries queued behind the data table', () => {
+      const TAB_QUERY = 'source=logs | stats count() by host';
+
+      const tabServices = () =>
+        ({
+          tabRegistry: {
+            getTab: jest.fn((id: string) =>
+              id === 'explore_visualization_tab' ? { prepareQuery: () => TAB_QUERY } : undefined
+            ),
+          },
+        }) as any;
+
+      const statusesFor = (dispatch: jest.Mock, cacheKey: string) =>
+        dispatch.mock.calls
+          .map(([action]) => action)
+          .filter(
+            (action) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload.cacheKey === cacheKey
+          )
+          .map((action) => action.payload.status.status);
+
+      const thunkCount = (dispatch: jest.Mock) =>
+        dispatch.mock.calls.filter(([action]) => typeof action === 'function').length;
+
+      let resolveDataTable: () => void;
+      let dispatch: jest.Mock;
+
+      beforeEach(() => {
+        mockGetState.mockReturnValue({
+          query: {
+            query: TAB_QUERY,
+            language: 'PPL',
+            dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+          },
+          ui: { activeTabId: 'logs' },
+          results: {},
+          legacy: { interval: '1h' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        const dataTable = new Promise<void>((resolve) => (resolveDataTable = resolve));
+        // Only the data table query is awaited; every thunk shares its promise.
+        dispatch = jest.fn((action: any) => (typeof action === 'function' ? dataTable : action));
+      });
+
+      it('marks them LOADING while the data table query is still running', async () => {
+        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(statusesFor(dispatch, TAB_QUERY)).toEqual([QueryExecutionStatus.LOADING]);
+        const thunksBeforeSettle = thunkCount(dispatch);
+
+        resolveDataTable();
+        await run;
+
+        // The tab query itself is dispatched once the data table settles.
+        expect(thunkCount(dispatch)).toBe(thunksBeforeSettle + 1);
+      });
+
+      it('does not run them once the user has stopped the run', async () => {
+        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const thunksBeforeStop = thunkCount(dispatch);
+
+        abortAllActiveQueries();
+        expect(statusesFor(dispatch, TAB_QUERY)).toEqual([
+          QueryExecutionStatus.LOADING,
+          QueryExecutionStatus.UNINITIALIZED,
+        ]);
+
+        resolveDataTable();
+        await run;
+
+        expect(thunkCount(dispatch)).toBe(thunksBeforeStop);
+      });
     });
 
     // An engine without the async PPL API only reveals that at submit. Nothing has been rendered

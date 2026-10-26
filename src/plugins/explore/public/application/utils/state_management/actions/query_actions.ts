@@ -80,6 +80,9 @@ import { getSourceTypeRegistry } from '../../../../services/source_type_registry
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
+// Cancels `executeQueries` runs still waiting on the data table, before their tab queries start.
+const pendingTabQueryCancellers = new Set<() => void>();
+
 // Helper function to abort all active queries
 // Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
@@ -89,6 +92,8 @@ export const abortAllActiveQueries = () => {
     controller.abort();
   });
   activeQueryAbortControllers.clear();
+  pendingTabQueryCancellers.forEach((cancel) => cancel());
+  pendingTabQueryCancellers.clear();
 };
 
 /**
@@ -433,11 +438,44 @@ export const executeQueries = createAsyncThunk<
     getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
+  // Tab queries run only after the data table settles. Worked out here so they can be marked
+  // LOADING up front: otherwise the overall status settles in between, which clears Stop while the
+  // tab query is still to come.
+  const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
+  const visualizationTabCacheKey = visualizationTab?.prepareQuery
+    ? visualizationTab.prepareQuery(query)
+    : defaultCacheKey;
+
+  let activeTabCacheKey = defaultCacheKey;
+  if (activeTabId && activeTabId !== '') {
+    const activeTab = services.tabRegistry.getTab(activeTabId);
+    if (activeTab?.prepareQuery) {
+      activeTabCacheKey = activeTab.prepareQuery(query);
+    }
+  }
+
+  // Check what needs execution. An empty key means that tab's `prepareQuery`
+  // cannot build a query yet, so there is nothing to run.
+  const needsVisualizationTabQuery =
+    !!visualizationTabCacheKey &&
+    visualizationTabCacheKey !== defaultCacheKey &&
+    !results[visualizationTabCacheKey];
+  const needsActiveTabQuery =
+    !!activeTabCacheKey &&
+    activeTabCacheKey !== visualizationTabCacheKey &&
+    activeTabCacheKey !== defaultCacheKey &&
+    !results[activeTabCacheKey];
+
+  const pendingTabCacheKeys = [
+    ...(needsVisualizationTabQuery ? [visualizationTabCacheKey] : []),
+    ...(needsActiveTabQuery ? [activeTabCacheKey] : []),
+  ];
+
   // Stop is offered while a user-initiated query runs, and every path through here is one: a page
   // load, a time-range or dataset change, an interval change, as well as the editor's Run. Setting
   // it only in `onEditorRun` left those other paths running a cancellable query with no way to
   // cancel it. Cleared by `overall_status_middleware` when the queries settle.
-  if (needsDataTableQuery || needsHistogramQuery) {
+  if (needsDataTableQuery || needsHistogramQuery || pendingTabCacheKeys.length > 0) {
     dispatch(setHasUserInitiatedQuery(true));
   }
 
@@ -575,113 +613,125 @@ export const executeQueries = createAsyncThunk<
     }
   }
 
-  // Wait only for data table query to complete (not histogram)
-  await Promise.all(promises);
+  // Stop pressed before the data table settles must also stop the work queued behind it.
+  let runCancelled = false;
+  const cancelRun = () => {
+    runCancelled = true;
+    pendingTabCacheKeys.forEach((cacheKey) =>
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            startTime: undefined,
+            elapsedMs: undefined,
+            error: undefined,
+          },
+        })
+      )
+    );
+  };
+  if (pendingTabCacheKeys.length > 0) {
+    const pendingSince = Date.now();
+    pendingTabCacheKeys.forEach((cacheKey) =>
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.LOADING,
+            startTime: pendingSince,
+            elapsedMs: undefined,
+            error: undefined,
+          },
+        })
+      )
+    );
+  }
+  pendingTabQueryCancellers.add(cancelRun);
 
-  // After main queries complete, check if we should execute trace aggregation queries
-  const flavorId = await getCurrentFlavor(services);
+  try {
+    // Wait only for data table query to complete (not histogram)
+    await Promise.all(promises);
 
-  if (flavorId === ExploreFlavor.Traces) {
-    // Get the latest results from state after the data table query has completed
-    const latestState = getState();
-    const dataTableResults = latestState.results[dataTableCacheKey];
+    // After main queries complete, check if we should execute trace aggregation queries
+    const flavorId = await getCurrentFlavor(services);
 
-    // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hasResults) {
-      const dataset = query.dataset
-        ? await services.data.dataViews.get(
-            query.dataset.id,
-            query.dataset.type !== 'INDEX_PATTERN'
-          )
-        : await services.data.dataViews.getDefault();
+    if (flavorId === ExploreFlavor.Traces) {
+      // Get the latest results from state after the data table query has completed
+      const latestState = getState();
+      const dataTableResults = latestState.results[dataTableCacheKey];
 
-      if (dataset?.timeFieldName) {
-        const rawInterval = latestState.legacy?.interval || 'auto';
+      // Only execute RED metrics queries if we have table results with data
+      if (dataTableResults && dataTableResults.hasResults) {
+        const dataset = query.dataset
+          ? await services.data.dataViews.get(
+              query.dataset.id,
+              query.dataset.type !== 'INDEX_PATTERN'
+            )
+          : await services.data.dataViews.getDefault();
 
-        const histogramConfig = createHistogramConfigWithInterval(
-          dataset,
-          rawInterval,
-          services,
-          getState,
-          TRACES_CHART_BAR_TARGET
-        );
-        const calculatedInterval = histogramConfig?.finalInterval || '5m';
+        if (dataset?.timeFieldName && !runCancelled) {
+          const rawInterval = latestState.legacy?.interval || 'auto';
 
-        const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
-
-        const baseQuery = defaultPrepareQueryString(query);
-
-        const config = createTraceAggregationConfig(
-          dataset.timeFieldName,
-          calculatedInterval,
-          breakdownField
-        );
-
-        // Execute all 3 RED metrics queries in background (non-blocking)
-        // These are histogram queries that shouldn't block tab queries
-        dispatch(
-          executeRequestCountQuery({
+          const histogramConfig = createHistogramConfigWithInterval(
+            dataset,
+            rawInterval,
             services,
-            cacheKey: requestCacheKey,
-            baseQuery,
-            config,
-          })
-        );
-        dispatch(
-          executeErrorCountQuery({
-            services,
-            cacheKey: errorCacheKey,
-            baseQuery,
-            config,
-          })
-        );
-        dispatch(
-          executeLatencyQuery({
-            services,
-            cacheKey: latencyCacheKey,
-            baseQuery,
-            config,
-          })
-        );
+            getState,
+            TRACES_CHART_BAR_TARGET
+          );
+          const calculatedInterval = histogramConfig?.finalInterval || '5m';
+
+          const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
+
+          const baseQuery = defaultPrepareQueryString(query);
+
+          const config = createTraceAggregationConfig(
+            dataset.timeFieldName,
+            calculatedInterval,
+            breakdownField
+          );
+
+          // Execute all 3 RED metrics queries in background (non-blocking)
+          // These are histogram queries that shouldn't block tab queries
+          dispatch(
+            executeRequestCountQuery({
+              services,
+              cacheKey: requestCacheKey,
+              baseQuery,
+              config,
+            })
+          );
+          dispatch(
+            executeErrorCountQuery({
+              services,
+              cacheKey: errorCacheKey,
+              baseQuery,
+              config,
+            })
+          );
+          dispatch(
+            executeLatencyQuery({
+              services,
+              cacheKey: latencyCacheKey,
+              baseQuery,
+              config,
+            })
+          );
+        }
       }
     }
+  } catch (error) {
+    // The tab queries will not run, so they must not stay LOADING.
+    cancelRun();
+    throw error;
+  } finally {
+    // From here each tab query registers its own abort controller.
+    pendingTabQueryCancellers.delete(cancelRun);
   }
-
-  // Handle tab queries as before (keeping existing tab logic)
-  const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
-  let visualizationTabPrepareQuery = defaultPrepareQueryString;
-  if (visualizationTab?.prepareQuery) {
-    const prepareQuery = visualizationTab.prepareQuery;
-    visualizationTabPrepareQuery = (queryParam: Query): string => {
-      return prepareQuery(queryParam);
-    };
+  if (runCancelled) {
+    return;
   }
-  const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
-
-  let activeTabCacheKey = defaultCacheKey;
-  if (activeTabId && activeTabId !== '') {
-    const activeTab = services.tabRegistry.getTab(activeTabId);
-    let activeTabPrepareQuery = defaultPrepareQueryString;
-    if (activeTab?.prepareQuery) {
-      const prepareQuery = activeTab.prepareQuery;
-      activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(queryParam);
-      };
-    }
-    activeTabCacheKey = activeTabPrepareQuery(query);
-  }
-
-  // Check what needs execution. An empty key means that tab's `prepareQuery`
-  // cannot build a query yet, so there is nothing to run.
-  const needsVisualizationTabQuery =
-    !!visualizationTabCacheKey &&
-    visualizationTabCacheKey !== defaultCacheKey &&
-    !results[visualizationTabCacheKey];
-  const needsActiveTabQuery =
-    !!activeTabCacheKey &&
-    activeTabCacheKey !== visualizationTabCacheKey &&
-    activeTabCacheKey !== defaultCacheKey &&
-    !results[activeTabCacheKey];
 
   const tabPromises = [];
   // Execute visualization tab query independently
