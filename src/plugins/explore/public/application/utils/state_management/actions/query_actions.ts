@@ -71,6 +71,7 @@ import { ExploreFlavor } from '../../../../../common';
 import { TRACES_CHART_BAR_TARGET } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
 import {
+  abortAllTraceQueries,
   prepareTraceCacheKeys,
   executeRequestCountQuery,
   executeErrorCountQuery,
@@ -93,6 +94,7 @@ export const abortAllActiveQueries = () => {
     controller.abort();
   });
   activeQueryAbortControllers.clear();
+  abortAllTraceQueries();
 };
 
 /**
@@ -754,7 +756,8 @@ export const executeQueries = createAsyncThunk<
       );
     }
   } finally {
-    // Each tab query now counts as LOADING under its own key, so the run's status can go.
+    // Each tab query now counts as LOADING under its own key, so the run's status can go. That
+    // holds because executeTabQuery reports LOADING before its first await (see its tests).
     if (isUserInitiated) {
       if (activeQueryAbortControllers.get(runKey) === runController) {
         activeQueryAbortControllers.delete(runKey);

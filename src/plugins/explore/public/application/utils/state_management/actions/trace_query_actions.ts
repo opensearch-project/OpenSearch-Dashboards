@@ -23,6 +23,12 @@ import { defaultPreparePplQuery } from '../../languages';
 // Module-level storage for abort controllers keyed by cacheKey
 const activeTraceQueryAbortControllers = new Map<string, AbortController>();
 
+/** Aborts every RED metrics query in flight. Called by `abortAllActiveQueries`, so Stop reaches them. */
+export const abortAllTraceQueries = () => {
+  activeTraceQueryAbortControllers.forEach((controller) => controller.abort());
+  activeTraceQueryAbortControllers.clear();
+};
+
 /**
  * Query preparation for trace queries
  */

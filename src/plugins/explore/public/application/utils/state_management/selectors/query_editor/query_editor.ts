@@ -36,10 +36,13 @@ export const selectExecutionStatus = createSelector(
   (overallStatus) => overallStatus.status
 );
 
-export const selectIsLoading = createSelector([selectOverallQueryStatus], (overallStatus) => {
-  const isLoading = overallStatus.status === QueryExecutionStatus.LOADING;
-  return isLoading;
-});
+/**
+ * Some query is still in flight. Read from the status map rather than the overall status, which
+ * turns ERROR when one query fails while others run on.
+ */
+export const selectIsLoading = createSelector([selectQueryStatusMap], (statusMap) =>
+  Object.values(statusMap).some((status) => status?.status === QueryExecutionStatus.LOADING)
+);
 
 export const selectPromptModeIsAvailable = createSelector(
   [selectState],
@@ -88,13 +91,8 @@ export const selectHasUserInitiatedQuery = createSelector([selectState], (state)
   return state.hasUserInitiatedQuery;
 });
 
-/**
- * A query the user started is still running, so the run control offers Stop. Read from the status
- * map rather than the overall status, which turns ERROR when one query fails while others run on.
- */
+/** A query the user started is still running, so the run control offers Stop. */
 export const selectIsUserQueryRunning = createSelector(
-  [selectQueryStatusMap, selectHasUserInitiatedQuery],
-  (statusMap, hasUserInitiatedQuery) =>
-    hasUserInitiatedQuery &&
-    Object.values(statusMap).some((status) => status?.status === QueryExecutionStatus.LOADING)
+  [selectIsLoading, selectHasUserInitiatedQuery],
+  (isLoading, hasUserInitiatedQuery) => isLoading && hasUserInitiatedQuery
 );

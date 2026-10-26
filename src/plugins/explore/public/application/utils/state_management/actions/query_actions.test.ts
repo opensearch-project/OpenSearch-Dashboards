@@ -108,6 +108,7 @@ jest.mock('moment', () => {
 // Import the actual modules for mocking
 import * as languagesModule from '../../languages';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import * as traceQueryActionsModule from './trace_query_actions';
 import * as chartUtilsModule from '../../../../components/chart/utils';
 import * as dataPublicModule from '../../../../../../data/public';
 import * as fieldCalculatorModule from '../../../../components/fields_selector/lib/field_calculator';
@@ -320,6 +321,14 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('abortAllActiveQueries', () => {
+    // Stop stays up while the Traces RED metrics queries run, so it must be able to cancel them.
+    it('also aborts the RED metrics queries', () => {
+      const abortTraceQueries = jest.spyOn(traceQueryActionsModule, 'abortAllTraceQueries');
+      abortAllActiveQueries();
+      expect(abortTraceQueries).toHaveBeenCalledTimes(1);
+      abortTraceQueries.mockRestore();
+    });
+
     it('should abort all active queries and clear controllers', () => {
       expect(() => abortAllActiveQueries()).not.toThrow();
     });
@@ -2483,6 +2492,28 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
         took: 5,
       });
+    });
+
+    // executeQueries drops its own LOADING status right after dispatching the tab queries, so each
+    // one must already count as LOADING by then: before its first await.
+    it('reports LOADING synchronously, before its fetch settles', () => {
+      mockSearchSource.fetch.mockReturnValue(new Promise(() => undefined));
+
+      executeTabQuery({
+        services: mockServices,
+        cacheKey: 'tab-cache-key',
+        queryString: 'source=logs | stats count()',
+      })(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'tab-cache-key',
+            status: expect.objectContaining({ status: QueryExecutionStatus.LOADING }),
+          }),
+        })
+      );
     });
 
     it('should execute tab query successfully', async () => {
