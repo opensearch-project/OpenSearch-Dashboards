@@ -107,6 +107,7 @@ jest.mock('moment', () => {
 
 // Import the actual modules for mocking
 import * as languagesModule from '../../languages';
+import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import * as chartUtilsModule from '../../../../components/chart/utils';
 import * as dataPublicModule from '../../../../../../data/public';
 import * as fieldCalculatorModule from '../../../../components/fields_selector/lib/field_calculator';
@@ -1226,11 +1227,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
-      await executeQueries({ services: { tabRegistry: { getTab: jest.fn() } } as any })(
-        mockDispatch,
-        mockGetState,
-        undefined
-      );
+      await executeQueries({
+        services: { tabRegistry: { getTab: jest.fn() } } as unknown as ExploreServices,
+      })(mockDispatch, mockGetState, undefined);
 
       const types = mockDispatch.mock.calls
         .map(([a]) => (typeof a === 'object' && a !== null ? a.type : undefined))
@@ -1242,83 +1241,180 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(flag.payload).toBe(true);
     });
 
-    // Tab queries are dispatched only once the data table settles. Unless they count as running
-    // from the start, the overall status settles in between and Stop turns back into Run while
+    // Tab queries are dispatched only once the data table settles. Unless the run itself counts as
+    // running until then, the overall status settles in between and Stop turns back into Run while
     // the tab query is still to come.
     describe('tab queries queued behind the data table', () => {
       const TAB_QUERY = 'source=logs | stats count() by host';
+      const PATTERNS_TAB = 'patterns';
+
+      interface Dispatched {
+        type?: string;
+        payload?: unknown;
+      }
+      interface StatusPayload {
+        cacheKey: string;
+        status: { status: QueryExecutionStatus };
+      }
+
+      let resolveDataTable: () => void;
+      let dataTableSettled: boolean;
+      let dispatch: jest.Mock<unknown, [unknown]>;
 
       const tabServices = () =>
         ({
+          uiSettings: { get: jest.fn(() => false) },
+          capabilities: { queryEnhancements: {} },
           tabRegistry: {
-            getTab: jest.fn((id: string) =>
-              id === 'explore_visualization_tab' ? { prepareQuery: () => TAB_QUERY } : undefined
-            ),
+            getTab: jest.fn((id: string) => {
+              if (id === 'explore_visualization_tab') return { prepareQuery: () => TAB_QUERY };
+              // Like the patterns tab, this one can only build its query from the logs results.
+              if (id === PATTERNS_TAB) {
+                return {
+                  prepareQuery: () => (dataTableSettled ? 'source=logs | patterns message' : ''),
+                };
+              }
+              return undefined;
+            }),
           },
-        }) as any;
+        }) as unknown as ExploreServices;
 
-      const statusesFor = (dispatch: jest.Mock, cacheKey: string) =>
-        dispatch.mock.calls
-          .map(([action]) => action)
-          .filter(
-            (action) =>
-              action?.type === 'queryEditor/setIndividualQueryStatus' &&
-              action.payload.cacheKey === cacheKey
-          )
-          .map((action) => action.payload.status.status);
-
-      const thunkCount = (dispatch: jest.Mock) =>
-        dispatch.mock.calls.filter(([action]) => typeof action === 'function').length;
-
-      let resolveDataTable: () => void;
-      let dispatch: jest.Mock;
-
-      beforeEach(() => {
-        mockGetState.mockReturnValue({
-          query: {
-            query: TAB_QUERY,
-            language: 'PPL',
-            dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
-          },
-          ui: { activeTabId: 'logs' },
-          results: {},
-          legacy: { interval: '1h' },
-          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
-        });
-        const dataTable = new Promise<void>((resolve) => (resolveDataTable = resolve));
-        // Only the data table query is awaited; every thunk shares its promise.
-        dispatch = jest.fn((action: any) => (typeof action === 'function' ? dataTable : action));
+      const stateFor = (activeTabId: string) => ({
+        query: {
+          query: TAB_QUERY,
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
-      it('marks them LOADING while the data table query is still running', async () => {
-        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
-        await new Promise((resolve) => setTimeout(resolve, 0));
+      const thunkCount = () =>
+        dispatch.mock.calls.filter(([action]) => typeof action === 'function').length;
 
-        expect(statusesFor(dispatch, TAB_QUERY)).toEqual([QueryExecutionStatus.LOADING]);
-        const thunksBeforeSettle = thunkCount(dispatch);
+      // Replays the status actions in dispatch order. `atThunks` records, for each thunk
+      // dispatched, whether some query counted as LOADING at that moment.
+      const replay = () => {
+        const statusMap: Record<string, QueryExecutionStatus> = {};
+        const atThunks: boolean[] = [];
+        for (const [action] of dispatch.mock.calls) {
+          if (typeof action === 'function') {
+            atThunks.push(Object.values(statusMap).includes(QueryExecutionStatus.LOADING));
+            continue;
+          }
+          const { type, payload } = action as Dispatched;
+          if (type === 'queryEditor/setIndividualQueryStatus') {
+            const { cacheKey, status } = payload as StatusPayload;
+            statusMap[cacheKey] = status.status;
+          } else if (type === 'queryEditor/clearQueryStatusMapByKey') {
+            delete statusMap[payload as string];
+          }
+        }
+        return { statusMap, atThunks };
+      };
+
+      const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+      beforeEach(() => {
+        mockGetState.mockReturnValue(stateFor('logs'));
+        dataTableSettled = false;
+        const dataTable = new Promise<void>((resolve) => {
+          resolveDataTable = () => {
+            dataTableSettled = true;
+            resolve();
+          };
+        });
+        // Only the data table query is awaited; every thunk shares its promise.
+        dispatch = jest.fn((action: unknown) =>
+          typeof action === 'function' ? dataTable : action
+        );
+        mockAbortController.signal.aborted = false;
+        mockAbortController.abort = jest.fn(() => {
+          mockAbortController.signal.aborted = true;
+        });
+      });
+
+      it('keeps the run LOADING until its tab query has been dispatched', async () => {
+        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
+        await flush();
+        const thunksBeforeSettle = thunkCount();
 
         resolveDataTable();
         await run;
 
-        // The tab query itself is dispatched once the data table settles.
-        expect(thunkCount(dispatch)).toBe(thunksBeforeSettle + 1);
+        // The tab query is dispatched once the data table settles, while the run still counts
+        // as LOADING.
+        expect(thunkCount()).toBe(thunksBeforeSettle + 1);
+        const { atThunks } = replay();
+        expect(atThunks[atThunks.length - 1]).toBe(true);
+      });
+
+      it("builds the active tab's query from the data table results", async () => {
+        mockGetState.mockReturnValue(stateFor(PATTERNS_TAB));
+        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
+        await flush();
+        const thunksBeforeSettle = thunkCount();
+
+        resolveDataTable();
+        await run;
+
+        // Both the visualization and the patterns tab query run.
+        expect(thunkCount()).toBe(thunksBeforeSettle + 2);
       });
 
       it('does not run them once the user has stopped the run', async () => {
         const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        const thunksBeforeStop = thunkCount(dispatch);
+        await flush();
+        const thunksBeforeStop = thunkCount();
 
         abortAllActiveQueries();
-        expect(statusesFor(dispatch, TAB_QUERY)).toEqual([
-          QueryExecutionStatus.LOADING,
-          QueryExecutionStatus.UNINITIALIZED,
-        ]);
-
         resolveDataTable();
         await run;
 
-        expect(thunkCount(dispatch)).toBe(thunksBeforeStop);
+        expect(thunkCount()).toBe(thunksBeforeStop);
+        // Stopping leaves no status behind for queries that never ran.
+        expect(replay().statusMap).toEqual({});
+      });
+
+      it('runs nothing when stopped before the data table query is sent', async () => {
+        const run = executeQueries({ services: tabServices() })(dispatch, mockGetState, undefined);
+        abortAllActiveQueries();
+        resolveDataTable();
+        await run;
+
+        expect(thunkCount()).toBe(0);
+        expect(replay().statusMap).toEqual({});
+      });
+
+      // A run whose follow-up work fails must only clean up after itself: the same tab key may by
+      // then belong to a newer run.
+      it("leaves a newer run's tab status alone when an older run fails", async () => {
+        (getCurrentFlavor as jest.Mock).mockRejectedValueOnce(new Error('flavor lookup failed'));
+        const older = executeQueries({ services: tabServices() })(
+          dispatch,
+          mockGetState,
+          undefined
+        );
+        const newer = executeQueries({ services: tabServices() })(
+          dispatch,
+          mockGetState,
+          undefined
+        );
+        await flush();
+
+        resolveDataTable();
+        await Promise.all([older, newer]);
+
+        const tabStatuses = dispatch.mock.calls
+          .map(([action]) => action as Dispatched)
+          .filter((action) => action.type === 'queryEditor/setIndividualQueryStatus')
+          .map((action) => action.payload as StatusPayload)
+          .filter((payload) => payload.cacheKey === TAB_QUERY)
+          .map((payload) => payload.status.status);
+        expect(tabStatuses).not.toContain(QueryExecutionStatus.UNINITIALIZED);
+        expect(replay().statusMap).toEqual({});
       });
     });
 

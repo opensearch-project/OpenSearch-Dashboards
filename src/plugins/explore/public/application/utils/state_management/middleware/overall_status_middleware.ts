@@ -19,26 +19,40 @@ export const createOverallStatusMiddleware = (): Middleware => {
   return (store) => (next) => (action) => {
     const result = next(action);
 
-    // Only recompute when individual status changes
-    if (action.type === 'queryEditor/setIndividualQueryStatus') {
+    // Only recompute when an individual status changes or is removed
+    if (
+      action.type === 'queryEditor/setIndividualQueryStatus' ||
+      action.type === 'queryEditor/clearQueryStatusMapByKey'
+    ) {
       const state = store.getState() as RootState;
       const currentOverallStatus = state.queryEditor.overallQueryStatus;
+      const statusMap = state.queryEditor.queryStatusMap;
+
+      // A failed query doesn't end the run: Stop stays available while the others are in flight.
+      const clearUserInitiatedOnceSettled = () => {
+        const isAnyQueryLoading = Object.values(statusMap).some(
+          (s) => s?.status === QueryExecutionStatus.LOADING
+        );
+        if (!isAnyQueryLoading && state.queryEditor.hasUserInitiatedQuery) {
+          store.dispatch(setHasUserInitiatedQuery(false));
+        }
+      };
 
       if (currentOverallStatus.status === QueryExecutionStatus.ERROR) {
+        clearUserInitiatedOnceSettled();
         return result;
       }
 
-      const incomingStatus = action.payload.status;
-
       // If incoming status is ERROR, set it as overall status
-      if (incomingStatus.status === QueryExecutionStatus.ERROR) {
+      const incomingStatus =
+        action.type === 'queryEditor/setIndividualQueryStatus' ? action.payload.status : undefined;
+      if (incomingStatus?.status === QueryExecutionStatus.ERROR) {
         store.dispatch(setOverallQueryStatus(incomingStatus));
-        store.dispatch(setHasUserInitiatedQuery(false));
+        clearUserInitiatedOnceSettled();
         return result;
       }
 
       // Otherwise, compute overall status from the status map
-      const statusMap = state.queryEditor.queryStatusMap;
       const newOverallStatus = computeOverallStatus(statusMap);
       store.dispatch(setOverallQueryStatus(newOverallStatus));
 

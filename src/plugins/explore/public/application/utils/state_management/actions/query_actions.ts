@@ -20,6 +20,7 @@ import {
 import { QueryExecutionStatus, QueryProgress } from '../types';
 import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
 import {
+  clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
 } from '../slices/query_editor/query_editor_slice';
@@ -80,8 +81,8 @@ import { getSourceTypeRegistry } from '../../../../services/source_type_registry
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
-// Cancels `executeQueries` runs still waiting on the data table, before their tab queries start.
-const pendingTabQueryCancellers = new Set<() => void>();
+// Numbers each `executeQueries` run, giving it a status key of its own.
+let executeQueriesRunCount = 0;
 
 // Helper function to abort all active queries
 // Backend cancellation is handled automatically via AbortSignal in search strategies
@@ -92,8 +93,6 @@ export const abortAllActiveQueries = () => {
     controller.abort();
   });
   activeQueryAbortControllers.clear();
-  pendingTabQueryCancellers.forEach((cancel) => cancel());
-  pendingTabQueryCancellers.clear();
 };
 
 /**
@@ -438,220 +437,179 @@ export const executeQueries = createAsyncThunk<
     getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
-  // Tab queries run only after the data table settles. Worked out here so they can be marked
-  // LOADING up front: otherwise the overall status settles in between, which clears Stop while the
-  // tab query is still to come.
-  const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
-  const visualizationTabCacheKey = visualizationTab?.prepareQuery
-    ? visualizationTab.prepareQuery(query)
-    : defaultCacheKey;
-
-  let activeTabCacheKey = defaultCacheKey;
-  if (activeTabId && activeTabId !== '') {
-    const activeTab = services.tabRegistry.getTab(activeTabId);
-    if (activeTab?.prepareQuery) {
-      activeTabCacheKey = activeTab.prepareQuery(query);
-    }
-  }
-
-  // Check what needs execution. An empty key means that tab's `prepareQuery`
-  // cannot build a query yet, so there is nothing to run.
-  const needsVisualizationTabQuery =
-    !!visualizationTabCacheKey &&
-    visualizationTabCacheKey !== defaultCacheKey &&
-    !results[visualizationTabCacheKey];
-  const needsActiveTabQuery =
-    !!activeTabCacheKey &&
-    activeTabCacheKey !== visualizationTabCacheKey &&
-    activeTabCacheKey !== defaultCacheKey &&
-    !results[activeTabCacheKey];
-
-  const pendingTabCacheKeys = [
-    ...(needsVisualizationTabQuery ? [visualizationTabCacheKey] : []),
-    ...(needsActiveTabQuery ? [activeTabCacheKey] : []),
-  ];
-
   // Stop is offered while a user-initiated query runs, and every path through here is one: a page
   // load, a time-range or dataset change, an interval change, as well as the editor's Run. Setting
   // it only in `onEditorRun` left those other paths running a cancellable query with no way to
   // cancel it. Cleared by `overall_status_middleware` when the queries settle.
-  if (needsDataTableQuery || needsHistogramQuery || pendingTabCacheKeys.length > 0) {
+  const isUserInitiated = needsDataTableQuery || needsHistogramQuery;
+  if (isUserInitiated) {
     dispatch(setHasUserInitiatedQuery(true));
   }
 
-  const promises = [];
-  // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
-  let streamedHistogram = false;
-  // Execute query without aggregations
-  if (needsDataTableQuery) {
-    // Streaming replaces the single-shot data-table fetch when enabled.
-    const streamingConfig = await getStreamingConfig(state, services, getState);
-    if (streamingConfig) {
-      // Identifies this run so a superseded one cannot publish over, or unregister, its successor.
-      const tableToken = {};
-      // Register before dispatch so the token owns the key when executeStreamingQuery's synchronous
-      // LOADING claim runs isCurrentStreamingRun(); registering after would let that claim be skipped
-      // while a prior run for the same key still holds the token. The real abort is patched in once
-      // the thunk returns the promise.
-      let abortTable: () => void = () => undefined;
-      registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
-      const run = dispatch(
-        executeStreamingQuery({
-          services,
-          cacheKey: dataTableCacheKey,
-          queryString: streamingConfig.tableQuery,
-          indexName: query.dataset?.title,
-          dataSourceId: query.dataset?.dataSource?.id,
-          isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
-        })
-      );
-      abortTable = () => run.abort();
-      run
-        .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
-        .catch(() => undefined);
-      // An engine without the async PPL API only fails at submit, with nothing rendered, so the
-      // query is re-run on the standard path.
-      promises.push(
-        run.then((outcome) =>
-          isStreamUnavailable(outcome)
-            ? dispatch(
-                executeDataTableQuery({
-                  services,
-                  cacheKey: dataTableCacheKey,
-                  queryString,
-                })
-              )
-            : outcome
-        )
-      );
-
-      // Stream the histogram as its own job, so its counts come from the engine and no raw rows are
-      // transferred to compute them. In practice the chart arrives whole and later than the table:
-      // the engine publishes on an output-row threshold, which for an aggregation means buckets, and
-      // a histogram sized for a bar target never has enough of them to cross it.
-      if (streamingConfig.histogram && needsHistogramQuery) {
-        const histogramKey = streamingConfig.histogram.cacheKey;
-        const histogramToken = {};
-        // Register before dispatch, as with the table run above, so the LOADING claim's
-        // isCurrentStreamingRun() sees this token rather than a prior run's.
-        let abortHistogram: () => void = () => undefined;
-        registerStreamingAbort(histogramKey, () => abortHistogram(), histogramToken);
-        const histogramRun = dispatch(
-          executeStreamingQuery({
-            services,
-            cacheKey: histogramKey,
-            queryString: streamingConfig.histogram.queryString,
-            indexName: query.dataset?.title,
-            dataSourceId: query.dataset?.dataSource?.id,
-            asHistogram: { aggId: streamingConfig.histogram.aggId },
-            isCurrent: () => isCurrentStreamingRun(histogramKey, histogramToken),
-          })
-        );
-        abortHistogram = () => histogramRun.abort();
-        // If submit fails the chart has nothing, so run the standard histogram query instead.
-        // Not awaited, so the chain is terminated here rather than left floating.
-        histogramRun
-          .then((outcome) => {
-            if (isStreamUnavailable(outcome)) {
-              dispatch(
-                executeHistogramQuery({
-                  services,
-                  cacheKey: histogramCacheKey,
-                  queryString,
-                  interval: state.legacy?.interval,
-                })
-              );
-            }
-          })
-          .catch(() => undefined)
-          .finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
-        streamedHistogram = true;
-      }
-    } else {
-      promises.push(
-        dispatch(
-          executeDataTableQuery({
-            services,
-            cacheKey: dataTableCacheKey,
-            queryString,
-          })
-        )
-      );
-    }
-  }
-
-  // Execute histogram query in background (non-blocking)
-  if (needsHistogramQuery && !streamedHistogram) {
-    const interval = state.legacy?.interval;
+  // The run itself counts as a query until its tab queries are dispatched. They start only once
+  // the data table settles, so without this the overall status settles in between and Stop turns
+  // back into Run while they are still to come. Stop aborts the run like any other query.
+  const runKey = `executeQueries:${++executeQueriesRunCount}`;
+  const runController = new AbortController();
+  if (isUserInitiated) {
+    activeQueryAbortControllers.set(runKey, runController);
     dispatch(
-      executeHistogramQuery({
-        services,
-        cacheKey: histogramCacheKey,
-        queryString,
-        interval,
+      setIndividualQueryStatus({
+        cacheKey: runKey,
+        status: {
+          status: QueryExecutionStatus.LOADING,
+          startTime: Date.now(),
+          elapsedMs: undefined,
+          error: undefined,
+        },
       })
     );
   }
 
-  // Execute bucket count query for aggregation queries (non-blocking)
-  // This appends | stats count() to get the true total bucket count
-  const originalQueryString = typeof query.query === 'string' ? query.query : '';
-  if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
-    const bucketCountCacheKey = prepareBucketCountCacheKey(query);
-    const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
-    const needsBucketCountQuery =
-      !bucketCountQueryStatus ||
-      bucketCountQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
-    if (needsBucketCountQuery) {
+  const tabPromises = [];
+  try {
+    const promises = [];
+    // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
+    let streamedHistogram = false;
+    // Execute query without aggregations
+    if (needsDataTableQuery) {
+      // Streaming replaces the single-shot data-table fetch when enabled.
+      const streamingConfig = await getStreamingConfig(state, services, getState);
+      if (runController.signal.aborted) {
+        return;
+      }
+      if (streamingConfig) {
+        // Identifies this run so a superseded one cannot publish over, or unregister, its successor.
+        const tableToken = {};
+        // Register before dispatch so the token owns the key when executeStreamingQuery's synchronous
+        // LOADING claim runs isCurrentStreamingRun(); registering after would let that claim be skipped
+        // while a prior run for the same key still holds the token. The real abort is patched in once
+        // the thunk returns the promise.
+        let abortTable: () => void = () => undefined;
+        registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
+        const run = dispatch(
+          executeStreamingQuery({
+            services,
+            cacheKey: dataTableCacheKey,
+            queryString: streamingConfig.tableQuery,
+            indexName: query.dataset?.title,
+            dataSourceId: query.dataset?.dataSource?.id,
+            isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
+          })
+        );
+        abortTable = () => run.abort();
+        run
+          .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
+          .catch(() => undefined);
+        // An engine without the async PPL API only fails at submit, with nothing rendered, so the
+        // query is re-run on the standard path.
+        promises.push(
+          run.then((outcome) =>
+            isStreamUnavailable(outcome)
+              ? dispatch(
+                  executeDataTableQuery({
+                    services,
+                    cacheKey: dataTableCacheKey,
+                    queryString,
+                  })
+                )
+              : outcome
+          )
+        );
+
+        // Stream the histogram as its own job, so its counts come from the engine and no raw rows are
+        // transferred to compute them. In practice the chart arrives whole and later than the table:
+        // the engine publishes on an output-row threshold, which for an aggregation means buckets, and
+        // a histogram sized for a bar target never has enough of them to cross it.
+        if (streamingConfig.histogram && needsHistogramQuery) {
+          const histogramKey = streamingConfig.histogram.cacheKey;
+          const histogramToken = {};
+          // Register before dispatch, as with the table run above, so the LOADING claim's
+          // isCurrentStreamingRun() sees this token rather than a prior run's.
+          let abortHistogram: () => void = () => undefined;
+          registerStreamingAbort(histogramKey, () => abortHistogram(), histogramToken);
+          const histogramRun = dispatch(
+            executeStreamingQuery({
+              services,
+              cacheKey: histogramKey,
+              queryString: streamingConfig.histogram.queryString,
+              indexName: query.dataset?.title,
+              dataSourceId: query.dataset?.dataSource?.id,
+              asHistogram: { aggId: streamingConfig.histogram.aggId },
+              isCurrent: () => isCurrentStreamingRun(histogramKey, histogramToken),
+            })
+          );
+          abortHistogram = () => histogramRun.abort();
+          // If submit fails the chart has nothing, so run the standard histogram query instead.
+          // Not awaited, so the chain is terminated here rather than left floating.
+          histogramRun
+            .then((outcome) => {
+              if (isStreamUnavailable(outcome)) {
+                dispatch(
+                  executeHistogramQuery({
+                    services,
+                    cacheKey: histogramCacheKey,
+                    queryString,
+                    interval: state.legacy?.interval,
+                  })
+                );
+              }
+            })
+            .catch(() => undefined)
+            .finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
+          streamedHistogram = true;
+        }
+      } else {
+        promises.push(
+          dispatch(
+            executeDataTableQuery({
+              services,
+              cacheKey: dataTableCacheKey,
+              queryString,
+            })
+          )
+        );
+      }
+    }
+
+    // Execute histogram query in background (non-blocking)
+    if (needsHistogramQuery && !streamedHistogram) {
+      const interval = state.legacy?.interval;
       dispatch(
-        executeBucketCountQuery({
+        executeHistogramQuery({
           services,
-          cacheKey: bucketCountCacheKey,
-          queryString: prepareBucketCountQueryString(query),
+          cacheKey: histogramCacheKey,
+          queryString,
+          interval,
         })
       );
     }
-  }
 
-  // Stop pressed before the data table settles must also stop the work queued behind it.
-  let runCancelled = false;
-  const cancelRun = () => {
-    runCancelled = true;
-    pendingTabCacheKeys.forEach((cacheKey) =>
-      dispatch(
-        setIndividualQueryStatus({
-          cacheKey,
-          status: {
-            status: QueryExecutionStatus.UNINITIALIZED,
-            startTime: undefined,
-            elapsedMs: undefined,
-            error: undefined,
-          },
-        })
-      )
-    );
-  };
-  if (pendingTabCacheKeys.length > 0) {
-    const pendingSince = Date.now();
-    pendingTabCacheKeys.forEach((cacheKey) =>
-      dispatch(
-        setIndividualQueryStatus({
-          cacheKey,
-          status: {
-            status: QueryExecutionStatus.LOADING,
-            startTime: pendingSince,
-            elapsedMs: undefined,
-            error: undefined,
-          },
-        })
-      )
-    );
-  }
-  pendingTabQueryCancellers.add(cancelRun);
+    // Execute bucket count query for aggregation queries (non-blocking)
+    // This appends | stats count() to get the true total bucket count
+    const originalQueryString = typeof query.query === 'string' ? query.query : '';
+    if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
+      const bucketCountCacheKey = prepareBucketCountCacheKey(query);
+      const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
+      const needsBucketCountQuery =
+        !bucketCountQueryStatus ||
+        bucketCountQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+      if (needsBucketCountQuery) {
+        dispatch(
+          executeBucketCountQuery({
+            services,
+            cacheKey: bucketCountCacheKey,
+            queryString: prepareBucketCountQueryString(query),
+          })
+        );
+      }
+    }
 
-  try {
     // Wait only for data table query to complete (not histogram)
     await Promise.all(promises);
+    if (runController.signal.aborted) {
+      return;
+    }
 
     // After main queries complete, check if we should execute trace aggregation queries
     const flavorId = await getCurrentFlavor(services);
@@ -670,7 +628,7 @@ export const executeQueries = createAsyncThunk<
             )
           : await services.data.dataViews.getDefault();
 
-        if (dataset?.timeFieldName && !runCancelled) {
+        if (dataset?.timeFieldName && !runController.signal.aborted) {
           const rawInterval = latestState.legacy?.interval || 'auto';
 
           const histogramConfig = createHistogramConfigWithInterval(
@@ -721,43 +679,80 @@ export const executeQueries = createAsyncThunk<
         }
       }
     }
-  } catch (error) {
-    // The tab queries will not run, so they must not stay LOADING.
-    cancelRun();
-    throw error;
+
+    if (runController.signal.aborted) {
+      return;
+    }
+
+    // Handle tab queries as before (keeping existing tab logic)
+    const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
+    let visualizationTabPrepareQuery = defaultPrepareQueryString;
+    if (visualizationTab?.prepareQuery) {
+      const prepareQuery = visualizationTab.prepareQuery;
+      visualizationTabPrepareQuery = (queryParam: Query): string => {
+        return prepareQuery(queryParam);
+      };
+    }
+    const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
+
+    let activeTabCacheKey = defaultCacheKey;
+    if (activeTabId && activeTabId !== '') {
+      const activeTab = services.tabRegistry.getTab(activeTabId);
+      let activeTabPrepareQuery = defaultPrepareQueryString;
+      if (activeTab?.prepareQuery) {
+        const prepareQuery = activeTab.prepareQuery;
+        activeTabPrepareQuery = (queryParam: Query): string => {
+          return prepareQuery(queryParam);
+        };
+      }
+      activeTabCacheKey = activeTabPrepareQuery(query);
+    }
+
+    // Check what needs execution. An empty key means that tab's `prepareQuery`
+    // cannot build a query yet, so there is nothing to run.
+    const needsVisualizationTabQuery =
+      !!visualizationTabCacheKey &&
+      visualizationTabCacheKey !== defaultCacheKey &&
+      !results[visualizationTabCacheKey];
+    const needsActiveTabQuery =
+      !!activeTabCacheKey &&
+      activeTabCacheKey !== visualizationTabCacheKey &&
+      activeTabCacheKey !== defaultCacheKey &&
+      !results[activeTabCacheKey];
+
+    // Execute visualization tab query independently
+    if (needsVisualizationTabQuery) {
+      tabPromises.push(
+        dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: visualizationTabCacheKey,
+            queryString: visualizationTabCacheKey, // For tabs, cache key IS the query string
+          })
+        )
+      );
+    }
+
+    // Execute active tab query if needed and different from default and visualization tab
+    if (needsActiveTabQuery) {
+      tabPromises.push(
+        dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: activeTabCacheKey,
+            queryString: activeTabCacheKey, // For tabs, cache key IS the query string
+          })
+        )
+      );
+    }
   } finally {
-    // From here each tab query registers its own abort controller.
-    pendingTabQueryCancellers.delete(cancelRun);
-  }
-  if (runCancelled) {
-    return;
-  }
-
-  const tabPromises = [];
-  // Execute visualization tab query independently
-  if (needsVisualizationTabQuery) {
-    tabPromises.push(
-      dispatch(
-        executeTabQuery({
-          services,
-          cacheKey: visualizationTabCacheKey,
-          queryString: visualizationTabCacheKey, // For tabs, cache key IS the query string
-        })
-      )
-    );
-  }
-
-  // Execute active tab query if needed and different from default and visualization tab
-  if (needsActiveTabQuery) {
-    tabPromises.push(
-      dispatch(
-        executeTabQuery({
-          services,
-          cacheKey: activeTabCacheKey,
-          queryString: activeTabCacheKey, // For tabs, cache key IS the query string
-        })
-      )
-    );
+    // Each tab query now counts as LOADING under its own key, so the run's status can go.
+    if (isUserInitiated) {
+      if (activeQueryAbortControllers.get(runKey) === runController) {
+        activeQueryAbortControllers.delete(runKey);
+      }
+      dispatch(clearQueryStatusMapByKey(runKey));
+    }
   }
 
   // Wait for all tab queries to complete

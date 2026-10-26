@@ -88,8 +88,13 @@ export const selectHasUserInitiatedQuery = createSelector([selectState], (state)
   return state.hasUserInitiatedQuery;
 });
 
-/** A query the user started is still running, so the run control offers Stop. */
+/**
+ * A query the user started is still running, so the run control offers Stop. Read from the status
+ * map rather than the overall status, which turns ERROR when one query fails while others run on.
+ */
 export const selectIsUserQueryRunning = createSelector(
-  [selectIsLoading, selectHasUserInitiatedQuery],
-  (isLoading, hasUserInitiatedQuery) => isLoading && hasUserInitiatedQuery
+  [selectQueryStatusMap, selectHasUserInitiatedQuery],
+  (statusMap, hasUserInitiatedQuery) =>
+    hasUserInitiatedQuery &&
+    Object.values(statusMap).some((status) => status?.status === QueryExecutionStatus.LOADING)
 );
