@@ -43,6 +43,7 @@ import { executeStreamingQuery, isStreamUnavailable } from './streaming_query_ac
 import {
   isCurrentStreamingRun,
   registerStreamingAbort,
+  supersedeOtherStreamingQueries,
   unregisterStreamingAbort,
 } from '../../streaming/streaming_abort_registry';
 import { findDateHistogramAggId, isStreamingEligible } from '../../streaming/streaming_config';
@@ -516,6 +517,12 @@ export const executeQueries = createAsyncThunk<
     const firstRows = new Promise<void>((resolve) => (reportFirstRows = resolve));
     // Execute query without aggregations
     if (needsDataTableQuery) {
+      // This query's results replace the page's, so streams for any earlier query stop here.
+      supersedeOtherStreamingQueries([
+        dataTableCacheKey,
+        histogramCacheKey,
+        prepareHistogramCacheKey(query),
+      ]);
       // Streaming replaces the single-shot data-table fetch when enabled.
       const streamingConfig = await getStreamingConfig(state, services, getState);
       if (runController.signal.aborted) {

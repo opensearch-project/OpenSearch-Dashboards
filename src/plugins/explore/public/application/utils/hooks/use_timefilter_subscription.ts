@@ -7,9 +7,25 @@ import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
-import { executeQueries } from '../state_management/actions/query_actions';
+import {
+  defaultPrepareQueryString,
+  executeQueries,
+} from '../state_management/actions/query_actions';
 import { clearQueryStatusMap, clearResults } from '../state_management/slices';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
+import { isStreamingQueryAbortable } from '../streaming/streaming_abort_registry';
+
+/**
+ * Whether the results query is still streaming. A refresh would supersede it, and when the refresh
+ * interval is shorter than the query, every run is superseded before it renders anything.
+ */
+const isResultsQueryStreaming = (query: RootState['query']): boolean => {
+  try {
+    return isStreamingQueryAbortable(defaultPrepareQueryString(query));
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Hook to handle auto-refresh subscription only.
@@ -37,7 +53,7 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
     const subscription = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
       .subscribe(() => {
-        if (!query.dataset) return;
+        if (!query.dataset || isResultsQueryStreaming(query)) return;
         if (
           !hasRunCurrentQueryRef.current &&
           datasetRequiresExplicitRun(services.data.query.queryString, query.dataset)

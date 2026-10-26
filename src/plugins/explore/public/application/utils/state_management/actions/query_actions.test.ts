@@ -76,6 +76,10 @@ import { setResults } from '../slices';
 import * as utilsModule from './utils';
 import { queryIsAggregation, queryIsBucketCountable } from './utils';
 import * as streamingQueryActions from './streaming_query_actions';
+import {
+  abortAllStreamingQueries,
+  registerStreamingAbort,
+} from '../../streaming/streaming_abort_registry';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
 import {
@@ -1622,6 +1626,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       afterEach(() => {
         streamSpy.mockRestore();
+        abortAllStreamingQueries();
         flavorModule.getCurrentFlavor.mockResolvedValue('logs');
       });
 
@@ -1669,6 +1674,20 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         finishTable();
         await promise;
         expect(types(dispatch)).not.toContain('query/executeRequestCountQuery/pending');
+      });
+
+      // A changed query, dataset or time range has different keys, so the new run replaces nothing
+      // by registering; an earlier query left streaming would write into this one's page.
+      it("stops an earlier query's streams, which run under other keys", async () => {
+        const earlier = jest.fn();
+        registerStreamingAbort('source=earlier-query', earlier, {});
+
+        const { promise } = start();
+        await flush();
+
+        expect(earlier).toHaveBeenCalledTimes(1);
+        finishTable();
+        await promise;
       });
     });
 

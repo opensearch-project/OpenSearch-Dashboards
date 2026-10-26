@@ -27,6 +27,12 @@ import { Subject, Subscription } from 'rxjs';
 // Mock the query actions
 jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
+  defaultPrepareQueryString: jest.fn(() => 'results-key'),
+}));
+
+let mockStreamingKeys: string[] = [];
+jest.mock('../streaming/streaming_abort_registry', () => ({
+  isStreamingQueryAbortable: (cacheKey: string) => mockStreamingKeys.includes(cacheKey),
 }));
 
 jest.mock('../state_management/slices', () => ({
@@ -163,6 +169,43 @@ describe('useTimefilterSubscription', () => {
       expect(mockClearQueryStatusMap).toHaveBeenCalledTimes(3);
       expect(mockExecuteQueries).toHaveBeenCalledTimes(3);
       expect(mockDispatch).toHaveBeenCalledTimes(9); // 3 actions × 3 events
+    });
+  });
+
+  // A refresh interval shorter than the query would otherwise supersede every run before it renders.
+  describe('while the results query is still streaming', () => {
+    const state = {
+      query: {
+        ...queryInitialState,
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+      },
+    };
+
+    afterEach(() => {
+      mockStreamingKeys = [];
+    });
+
+    it('skips the refresh, and resumes refreshing once the run finishes', () => {
+      mockStreamingKeys = ['results-key'];
+      renderHookWithProvider(mockServices, state as any);
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+
+      mockStreamingKeys = [];
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    it('still refreshes while some other query streams', () => {
+      mockStreamingKeys = ['another-key'];
+      renderHookWithProvider(mockServices, state as any);
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
     });
   });
 

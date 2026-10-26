@@ -9,6 +9,7 @@ import {
   isCurrentStreamingRun,
   isStreamingQueryAbortable,
   registerStreamingAbort,
+  supersedeOtherStreamingQueries,
   unregisterStreamingAbort,
 } from './streaming_abort_registry';
 
@@ -101,5 +102,43 @@ describe('streamingAbortRegistry', () => {
     expect(a).toHaveBeenCalled();
     expect(b).toHaveBeenCalled();
     expect(isStreamingQueryAbortable('a')).toBe(false);
+  });
+});
+
+describe('supersedeOtherStreamingQueries', () => {
+  afterEach(() => abortAllStreamingQueries());
+
+  // A new query's keys differ from its predecessor's, so registering it replaces nothing.
+  it('aborts the runs of every other key, and keeps the ones named', () => {
+    const old = { abort: jest.fn(), token: {} };
+    const kept = { abort: jest.fn(), token: {} };
+    registerStreamingAbort('old-table', old.abort, old.token);
+    registerStreamingAbort('new-table', kept.abort, kept.token);
+
+    supersedeOtherStreamingQueries(['new-table']);
+
+    expect(old.abort).toHaveBeenCalledTimes(1);
+    expect(kept.abort).not.toHaveBeenCalled();
+    expect(isStreamingQueryAbortable('old-table')).toBe(false);
+    expect(isStreamingQueryAbortable('new-table')).toBe(true);
+  });
+
+  // Its entry is gone, which on its own would read as "current" and let it publish its cancellation.
+  it('stops a superseded run from publishing', () => {
+    const token = {};
+    registerStreamingAbort('old-table', jest.fn(), token);
+
+    supersedeOtherStreamingQueries([]);
+
+    expect(isCurrentStreamingRun('old-table', token)).toBe(false);
+  });
+
+  it('leaves a run stopped by the user free to report how far it got', () => {
+    const token = {};
+    registerStreamingAbort('table', jest.fn(), token);
+
+    abortStreamingQuery('table');
+
+    expect(isCurrentStreamingRun('table', token)).toBe(true);
   });
 });
