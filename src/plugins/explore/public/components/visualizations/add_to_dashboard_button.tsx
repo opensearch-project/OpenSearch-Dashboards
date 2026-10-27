@@ -29,7 +29,6 @@ import { useIsQueryComplex } from '../../application/utils/hooks/use_is_query_co
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
-import { UrlTransformationState } from '../data_transformations';
 
 export interface DashboardAttributes {
   title?: string;
@@ -95,12 +94,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     selectDashboard,
     newDashboardName,
   }: OnSaveProps) => {
-    const pipeline = transformationService.pipeline$.getValue();
-    const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
-      definitionId: instance.definition_id,
-      config: instance.config,
-      hide: instance.hide,
-    }));
+    const serializedPipeline = transformationService.serializePipeline();
 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
