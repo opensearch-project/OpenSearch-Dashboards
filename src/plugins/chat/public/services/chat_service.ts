@@ -1147,10 +1147,14 @@ export class ChatService {
   /**
    * Load a specific conversation from history by thread ID.
    * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
+   *
+   * Pass `signal` so an abandoned load (the user started a new chat or picked another
+   * conversation while this one was still loading) does not switch the active thread to
+   * `threadId` after the fact. An aborted load returns null without side effects.
    */
-  public async loadConversation(threadId: string): Promise<Event[] | null> {
+  public async loadConversation(threadId: string, signal?: AbortSignal): Promise<Event[] | null> {
     const events = await this.conversationHistoryService.getConversation(threadId);
-    if (!events) {
+    if (!events || signal?.aborted) {
       return null;
     }
 

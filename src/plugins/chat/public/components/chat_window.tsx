@@ -270,9 +270,31 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       [services.core?.savedObjects?.client]
     );
 
+    /**
+     * Snapshot the conversation a send belongs to, so the send can be dropped if the user
+     * leaves that conversation while it is still awaiting (data source validation, slash
+     * command execution). Call it synchronously at the entry of a send, before the first
+     * await. The returned check is true once the user started a new chat (the thread id
+     * changed) or switched to another conversation (a history load is in flight, or it
+     * finished and the thread id changed).
+     */
+    const createStaleCheck = useCallback(() => {
+      const threadId = chatService.getThreadId();
+      return () =>
+        chatService.getThreadId() !== threadId ||
+        conversationLoadAbortControllerRef.current !== null;
+    }, [chatService]);
+
     // Helper function to handle message streaming with observable subscription
     const subscribeToMessageStream = useCallback(
-      async (messages: Message[], userMessage: UserMessage) => {
+      async (
+        messages: Message[],
+        userMessage: UserMessage,
+        isStale: () => boolean = () => false
+      ) => {
+        // Drop a send whose conversation the user has left. This must run before
+        // chatService.sendMessage(), which registers the request as active.
+        if (isStale()) return;
         isStreamingRef.current = true;
         setIsStreaming(true);
         setStartResponse(false);
@@ -339,9 +361,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       async (
         messageContent: string,
         messagesToSend: Message[],
-        pendingUserMessage?: UserMessage
+        pendingUserMessage?: UserMessage,
+        isStale: () => boolean = () => false
       ): Promise<boolean> => {
         const commandResult = await slashCommandRegistry.execute(messageContent);
+        // The command handler has already run; only its follow-up (timeline update and
+        // stream) is dropped. Report a stale send as handled so the caller stops too.
+        if (isStale()) return true;
         if (!commandResult.handled) return false;
 
         if (commandResult.localMessage) {
@@ -372,7 +398,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           } else {
             setTimelineSynced((prev) => [...prev, userMsg]);
           }
-          subscribeToMessageStream(messagesToSend, userMsg);
+          subscribeToMessageStream(messagesToSend, userMsg, isStale);
           return true;
         }
         return true;
@@ -383,6 +409,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Handler for when user selects a data source from the prompt
     const handleDataSourceSelect = useCallback(
       async (id: string) => {
+        const isStale = createStaleCheck();
         chatService.setDataSourceId(id);
         setAvailableDataSources([]);
         const pending = pendingMessage;
@@ -393,13 +420,25 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         const historyMessages = timeline.slice(0, -1);
 
         // Pending user message is already in the timeline — replace it if a slash command
-        const handled = await executeSlashCommand(messageContent, historyMessages, pending);
+        const handled = await executeSlashCommand(
+          messageContent,
+          historyMessages,
+          pending,
+          isStale
+        );
         if (handled) return;
 
         // Normal message: user message already in timeline, just stream
-        subscribeToMessageStream(historyMessages, pending);
+        subscribeToMessageStream(historyMessages, pending, isStale);
       },
-      [chatService, pendingMessage, executeSlashCommand, subscribeToMessageStream, timeline]
+      [
+        chatService,
+        createStaleCheck,
+        pendingMessage,
+        executeSlashCommand,
+        subscribeToMessageStream,
+        timeline,
+      ]
     );
 
     /**
@@ -408,15 +447,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
      */
     const validateDataSource = useCallback(
       async (
-        userMsg: UserMessage
+        userMsg: UserMessage,
+        isStale: () => boolean = () => false
       ): Promise<
         | { valid: true }
-        | { valid: false; reason: 'unsupported' | 'needs_selection' | 'no_data_sources' }
+        | {
+            valid: false;
+            reason: 'unsupported' | 'needs_selection' | 'no_data_sources' | 'stale';
+          }
       > => {
         const currentDataSourceId = await chatService.getCurrentDataSourceId();
+        // The user left this conversation while we were awaiting: stop before any further
+        // lookup or prompt, so nothing shows up in the conversation the user is now looking at.
+        if (isStale()) return { valid: false, reason: 'stale' };
+        const unsupported = currentDataSourceId
+          ? await isUnsupportedDataSource(currentDataSourceId)
+          : false;
+        if (isStale()) return { valid: false, reason: 'stale' };
 
         // 1. Check if current data source is unsupported (e.g. AnalyticEngine)
-        if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
+        if (unsupported) {
           const systemMsg: SystemMessage = {
             id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
             role: 'system',
@@ -430,6 +480,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         // 2. Check if current data source is valid (exists in available list)
         const compatibleDataSources = await chatService.getAvailableDataSources();
+        if (isStale()) return { valid: false, reason: 'stale' };
         const isValid =
           currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
 
@@ -470,6 +521,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       // Use ref for immediate check since React 18 batches state updates
       if (isEmpty || isStreamingRef.current || isValidatingRef.current || hasPendingResend) return;
 
+      // Pin this send to the current conversation before the first await below.
+      const isStale = createStaleCheck();
+
       // Prepare additional messages for sending (but don't add to timeline yet)
       const additionalMessages = options?.messages ?? [];
 
@@ -502,19 +556,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsValidating(true);
 
       try {
-        const result = await validateDataSource(userMsg);
+        const result = await validateDataSource(userMsg, isStale);
         if (!result.valid) return;
 
         // Check if this is a slash command — pass userMsg so executeSlashCommand
         // can replace it (by id) with the resolved command message. Only plain-text
         // input can be a command (a multimodal message carries an image block).
         if (typeof messageContent === 'string') {
-          const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
+          const handled = await executeSlashCommand(
+            messageContent,
+            messagesToSend,
+            userMsg,
+            isStale
+          );
           if (handled) return;
         }
 
         // Normal message flow — the content can be multimodal
-        return subscribeToMessageStream(messagesToSend, userMsg);
+        return subscribeToMessageStream(messagesToSend, userMsg, isStale);
       } finally {
         isValidatingRef.current = false;
         setIsValidating(false);
@@ -613,6 +672,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const handleNewChat = useCallback(() => {
       // Stop any ongoing streaming before starting a new chat
       stopStreaming();
+
+      // Abandon a history load that is still in flight, so it neither replays the old
+      // conversation into the new chat nor switches the thread back when it finishes.
+      if (conversationLoadAbortControllerRef.current) {
+        conversationLoadAbortControllerRef.current.abort();
+        conversationLoadAbortControllerRef.current = null;
+        setIsLoading(false);
+      }
 
       // Clear all event handler state (pending tool calls, assistant messages,
       // and toolCallStates) so stale pending/executing entries from the previous
@@ -738,7 +805,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         try {
           // Load the conversation and get AG-UI event array
-          const events = await chatService.loadConversation(conversation.threadId);
+          const events = await chatService.loadConversation(
+            conversation.threadId,
+            abortController.signal
+          );
 
           // Check if this load was aborted (user switched to another conversation)
           if (abortController.signal.aborted) {

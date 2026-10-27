@@ -2055,6 +2055,21 @@ describe('ChatService', () => {
       expect(result).toBeNull();
     });
 
+    it('should not set the thread ID when the load was aborted while fetching', async () => {
+      const controller = new AbortController();
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockImplementation(async () => {
+          controller.abort();
+          return [{ type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() }];
+        });
+
+      const result = await chatService.loadConversation(mockThreadId, controller.signal);
+
+      expect(result).toBeNull();
+      expect(mockCoreChatService.setThreadId).not.toHaveBeenCalled();
+    });
+
     it('should inject synthetic tool call events for unfinished tool calls', async () => {
       const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
       (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(

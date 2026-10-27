@@ -1467,7 +1467,10 @@ describe('ChatWindow', () => {
       });
 
       // Verify loadConversation was called
-      expect(mockChatService.loadConversation).toHaveBeenCalledWith('thread-1');
+      expect(mockChatService.loadConversation).toHaveBeenCalledWith(
+        'thread-1',
+        expect.any(AbortSignal)
+      );
     });
 
     it('should show error toast when loading conversation fails', async () => {
@@ -1828,7 +1831,10 @@ describe('ChatWindow', () => {
       expect(unsubscribeMock).toHaveBeenCalled();
 
       // Verify conversation was loaded
-      expect(mockChatService.loadConversation).toHaveBeenCalledWith('thread-1');
+      expect(mockChatService.loadConversation).toHaveBeenCalledWith(
+        'thread-1',
+        expect.any(AbortSignal)
+      );
     });
 
     it('should prevent streaming events from previous conversation affecting new conversation', async () => {
@@ -2562,6 +2568,332 @@ describe('ChatWindow', () => {
         name: 'chat_window_hide',
         data: {},
       });
+    });
+  });
+
+  describe('send dropped when the user leaves the conversation mid-validation', () => {
+    // Deferred promise so a test controls when the data source lookup resolves.
+    const deferred = <T,>() => {
+      let resolve!: (value: T) => void;
+      const promise = new Promise<T>((r) => (resolve = r));
+      return { promise, resolve };
+    };
+    const flush = () =>
+      act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+    let threadId: string;
+
+    beforeEach(() => {
+      // Stateful thread id: newThread() / loadConversation() move it like the real service.
+      threadId = 'thread-A';
+      mockChatService.getThreadId.mockImplementation(() => threadId);
+      mockChatService.newThread.mockImplementation(() => {
+        threadId = `thread-new-${Math.random()}`;
+      });
+    });
+
+    it('does not send or prompt when New chat is clicked while the data source lookup is pending', async () => {
+      const lookup = deferred<Array<{ id: string; title: string }>>();
+      mockChatService.getAvailableDataSources.mockReturnValueOnce(lookup.promise);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+      await flush();
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await flush();
+
+      // Leave the conversation before validation finishes.
+      act(() => {
+        ref.current?.startNewChat();
+      });
+
+      // Validation finishes with no matching data source, which would normally show the
+      // selection prompt and never send.
+      await act(async () => {
+        lookup.resolve([{ id: 'other-ds', title: 'Other DS' }]);
+      });
+      await flush();
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(queryByText('Other DS')).not.toBeInTheDocument();
+      // The composer is usable in the new chat (not stuck in the validating state).
+      expect(getByRole('textbox')).not.toBeDisabled();
+    });
+
+    it('drops the follow-up of a slash command when the user leaves while the command runs', async () => {
+      const { slashCommandRegistry } = jest.requireActual('../services/slash_commands');
+      const command = deferred<string>();
+      const handler = jest.fn().mockReturnValue(command.promise);
+      slashCommandRegistry.register({
+        command: 'stale-cmd',
+        description: 'Slow test command',
+        handler,
+      });
+
+      try {
+        const ref = React.createRef<ChatWindowInstance>();
+        const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+        await flush();
+
+        const input = getByRole('textbox');
+        fireEvent.change(input, { target: { value: '/stale-cmd args' } });
+        fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+        await flush();
+        expect(handler).toHaveBeenCalledWith('args');
+
+        // Leave the conversation while the command is still running.
+        act(() => {
+          ref.current?.startNewChat();
+        });
+
+        await act(async () => {
+          command.resolve('resolved command message');
+        });
+        await flush();
+
+        expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+        expect(getByRole('textbox')).not.toBeDisabled();
+      } finally {
+        slashCommandRegistry.unregister('stale-cmd');
+      }
+    });
+
+    it('does not send when another conversation is selected while the data source lookup is pending', async () => {
+      const lookup = deferred<Array<{ id: string; title: string }>>();
+      mockChatService.getAvailableDataSources.mockReturnValueOnce(lookup.promise);
+      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            id: 'conv-B',
+            threadId: 'thread-B',
+            name: 'Saved conversation B',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
+      // Keep the history load in flight while validation finishes, like a slow remote load.
+      const load = deferred<any[]>();
+      mockChatService.loadConversation.mockImplementation(async (id: string) => {
+        const events = await load.promise;
+        threadId = id;
+        return events;
+      });
+
+      const { getByRole, getByLabelText, getByText } = renderWithContext(
+        <ChatWindow onClose={jest.fn()} />
+      );
+      await flush();
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await flush();
+
+      await act(async () => {
+        getByLabelText('Show conversation history').click();
+      });
+      await flush();
+      await act(async () => {
+        getByText('Saved conversation B').click();
+      });
+
+      // Validation succeeds while the history load is still in flight.
+      await act(async () => {
+        lookup.resolve([{ id: 'mock-ds-id', title: 'Mock DS' }]);
+      });
+      await flush();
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+
+      await act(async () => {
+        load.resolve([]);
+      });
+      await flush();
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(getByRole('textbox')).not.toBeDisabled();
+    });
+
+    it('still sends when the user stays in the conversation', async () => {
+      const lookup = deferred<Array<{ id: string; title: string }>>();
+      mockChatService.getAvailableDataSources.mockReturnValueOnce(lookup.promise);
+
+      const { getByRole } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await flush();
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await flush();
+
+      await act(async () => {
+        lookup.resolve([{ id: 'mock-ds-id', title: 'Mock DS' }]);
+      });
+      await flush();
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'first question',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+
+    it('still sends a message started via the window instance after a new chat (sendMessageWithWindow path)', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+      await flush();
+
+      // sendMessageWithWindow({ clearConversation: true }) calls startNewChat, then sendMessage.
+      await act(async () => {
+        ref.current?.startNewChat();
+        await ref.current?.sendMessage({ content: 'ask ai question' });
+      });
+      await flush();
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'ask ai question',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+
+    describe('while a history conversation is still loading', () => {
+      const openHistoryAndSelect = async (
+        getByLabelText: (t: string) => HTMLElement,
+        getByText: (t: string) => HTMLElement
+      ) => {
+        await act(async () => {
+          getByLabelText('Show conversation history').click();
+        });
+        await flush();
+        await act(async () => {
+          getByText('Saved conversation B').click();
+        });
+        await flush();
+      };
+
+      let load: ReturnType<typeof deferred>;
+
+      beforeEach(() => {
+        mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+          conversations: [
+            {
+              id: 'conv-B',
+              threadId: 'thread-B',
+              name: 'Saved conversation B',
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 10,
+        });
+        // Mirror the real service: the thread id moves only for a load that was not aborted.
+        load = deferred<any[]>();
+        mockChatService.loadConversation.mockImplementation(
+          async (id: string, signal?: AbortSignal) => {
+            const events = await load.promise;
+            if (signal?.aborted) return null;
+            threadId = id;
+            return events;
+          }
+        );
+      });
+
+      it('still sends a window-instance message after a new chat (sendMessageWithWindow with clearConversation)', async () => {
+        const ref = React.createRef<ChatWindowInstance>();
+        const { getByLabelText, getByText } = renderWithContext(
+          <ChatWindow ref={ref} onClose={jest.fn()} />
+        );
+        await flush();
+        await openHistoryAndSelect(getByLabelText, getByText);
+
+        await act(async () => {
+          ref.current?.startNewChat();
+          await ref.current?.sendMessage({ content: 'ask ai question' });
+        });
+        await flush();
+
+        expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+        expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+          'ask ai question',
+          expect.any(Array),
+          expect.any(Object)
+        );
+      });
+
+      it('does not replay the abandoned conversation into the new chat when it finishes loading', async () => {
+        const ref = React.createRef<ChatWindowInstance>();
+        const { getByLabelText, getByText, queryByText } = renderWithContext(
+          <ChatWindow ref={ref} onClose={jest.fn()} />
+        );
+        await flush();
+        await openHistoryAndSelect(getByLabelText, getByText);
+
+        act(() => {
+          ref.current?.startNewChat();
+        });
+        const newThreadId = threadId;
+
+        await act(async () => {
+          load.resolve([
+            {
+              type: 'MESSAGES_SNAPSHOT',
+              messages: [{ id: 'b1', role: 'user', content: 'message from B' }],
+              timestamp: Date.now(),
+            },
+          ]);
+        });
+        await flush();
+
+        expect(threadId).toBe(newThreadId);
+        expect(queryByText('message from B')).not.toBeInTheDocument();
+        expect(queryByText('Loading conversation...')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does not show the unsupported data source message in a new chat (first validation check)', async () => {
+      const lookup = deferred<string | undefined>();
+      mockChatService.getCurrentDataSourceId.mockReturnValueOnce(lookup.promise);
+      mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
+        attributes: { dataSourceEngineType: 'AnalyticEngine' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+      await flush();
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await flush();
+
+      act(() => {
+        ref.current?.startNewChat();
+      });
+      await act(async () => {
+        lookup.resolve('ds-analytic');
+      });
+      await flush();
+
+      expect(
+        queryByText('The current data source does not support AI features.')
+      ).not.toBeInTheDocument();
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
     });
   });
 });
