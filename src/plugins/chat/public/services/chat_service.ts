@@ -410,8 +410,12 @@ export class ChatService {
         : UiSettingScope.GLOBAL;
 
       // Get default data source with proper scope
+      const threadId = this.getThreadId();
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
+      // Only commit it to the conversation this lookup started in. If the user started a new
+      // chat or switched conversations while the lookup was in flight, the default belongs to
+      // neither, so skip the write; still return it and let the caller decide what to do.
+      if (!readOnly && this.getThreadId() === threadId) {
         this.setDataSourceId(dataSourceId || undefined);
       }
       return dataSourceId || undefined;
