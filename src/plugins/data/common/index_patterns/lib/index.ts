@@ -35,3 +35,4 @@ export { isDefault } from './is_default';
 
 export * from './types';
 export { validateIndexPattern } from './validate_index_pattern';
+export { isPayloadTooLargeError, getPayloadTooLargeToast } from './payload_too_large';
