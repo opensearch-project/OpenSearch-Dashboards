@@ -21,7 +21,7 @@ export interface DiscoverDownloadCsvProps {
   indexPattern: IndexPattern;
   shouldShowMaxExport?: boolean;
   visibleRowsCount?: number;
-  /** The rows are still arriving, so an export would hold an arbitrary part of the result. */
+  /** The rows are still arriving, so exporting them would capture an arbitrary part of the result. */
   isStreaming?: boolean;
 }
 
@@ -92,7 +92,7 @@ export const DiscoverDownloadCsv = ({
           <EuiButtonIcon
             size="s"
             data-test-subj="dscDownloadCsvButton"
-            disabled={isLoading || isStreaming}
+            isDisabled={isLoading || isStreaming}
             iconType="download"
             color="text"
             aria-label={buttonLabel}
