@@ -46,6 +46,7 @@ import {
 } from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
+import { Variable, VariableType } from '../../variables/types';
 import { VariableService } from '../../variables/variable_service';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
@@ -704,6 +705,44 @@ test('stops the variable refresh scheduler on destroy', () => {
   container.destroy();
 
   expect(stop).toHaveBeenCalled();
+});
+
+test('variable values changed in container input are applied to variableService', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
+  ];
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
+
+  container.updateInput({ variables: [{ ...variables[0], current: ['prod'] }] });
+
+  expect(container.variableService.getVariables()[0].current).toEqual(['prod']);
+  container.destroy();
+});
+
+test('unchanged variables in container input are not re-applied to variableService', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
+  ];
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
+  const applySpy = jest.spyOn(container.variableService, 'applyCurrentValues');
+
+  container.updateInput({ timeRange: { from: 'now-1h', to: 'now' } });
+
+  expect(applySpy).not.toHaveBeenCalled();
+  container.destroy();
+});
+
+test('variable value changes in variableService still update container input', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
+  ];
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
+
+  container.variableService.updateVariableValue('env', ['prod']);
+
+  expect(container.getInput().variables?.[0].current).toEqual(['prod']);
+  expect(container.variableService.getVariables()[0].current).toEqual(['prod']);
+  container.destroy();
 });
 
 test('dashboard id change triggers setDashboardId on variableService', async () => {

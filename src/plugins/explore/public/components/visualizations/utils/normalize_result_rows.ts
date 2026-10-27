@@ -4,11 +4,17 @@
  */
 
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { NormalizedRow } from '../../data_transformations/types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
 
-export const normalizeResultRows = <T = unknown>(
-  rows: Array<OpenSearchSearchHit<T>>,
+export const normalizeSearchHits = <T = unknown>(
+  hits: Array<OpenSearchSearchHit<T>>
+): NormalizedRow[] =>
+  hits.map((hit) => ({ ...((hit._source as NormalizedRow | undefined) ?? {}) }));
+
+export const normalizeResultRows = (
+  rows: NormalizedRow[],
   schema: Array<{ type?: string; name?: string }>
 ) => {
   const columns: VisColumn[] = schema.map((field, index) => {
@@ -20,12 +26,10 @@ export const normalizeResultRows = <T = unknown>(
     };
   });
 
-  const transformedData = rows.map((row: OpenSearchSearchHit) => {
+  const transformedData = rows.map((row) => {
     const transformedRow: Record<string, any> = {};
     for (const column of columns) {
-      // Type assertion for _source since it's marked as unknown
-      const source = row._source as Record<string, any>;
-      transformedRow[column.column] = source[column.name];
+      transformedRow[column.column] = row[column.name];
     }
     return transformedRow;
   });

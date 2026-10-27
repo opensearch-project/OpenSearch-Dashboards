@@ -4,26 +4,20 @@
  */
 
 import { createAddFieldTransformation, generateAlias } from './add_field_transformation';
-import { VisFieldType } from '../../visualizations/types';
 
-const createHit = (source: Record<string, unknown>) => ({
-  _index: 'test',
-  _id: '1',
-  _score: 1,
-  _source: source,
-});
+const createRow = (source: Record<string, unknown>) => source;
 
 describe('add_field_transformation', () => {
   const instance = createAddFieldTransformation();
-  type TestHit = ReturnType<typeof createHit>;
+  type TestRow = ReturnType<typeof createRow>;
   type TestConfig = Parameters<typeof instance.transformationMethod>[1];
-  const transform = (data: TestHit[], config: TestConfig) =>
+  const transform = (data: TestRow[], config: TestConfig) =>
     instance.transformationMethod(data, config).rows;
 
   describe('transformationMethod', () => {
     const data = [
-      createHit({ price: 100, quantity: 3, tax: 10 }),
-      createHit({ price: 200, quantity: 5, tax: 20 }),
+      createRow({ price: 100, quantity: 3, tax: 10 }),
+      createRow({ price: 200, quantity: 5, tax: 20 }),
     ];
 
     describe('binary mode', () => {
@@ -63,11 +57,11 @@ describe('add_field_transformation', () => {
           field2CustomValue: '',
           alias,
         });
-        expect((result[0]._source as Record<string, unknown>)[alias]).toBeCloseTo(expected);
+        expect(result[0][alias] as number).toBeCloseTo(expected);
       });
 
       it('handles division by zero', () => {
-        const zeroData = [createHit({ a: 10, b: 0 })];
+        const zeroData = [createRow({ a: 10, b: 0 })];
         const result = transform(zeroData, {
           ...instance.config,
           mode: 'binary',
@@ -78,7 +72,7 @@ describe('add_field_transformation', () => {
           field2CustomValue: '',
           alias: 'result',
         });
-        expect((result[0]._source as Record<string, unknown>).result).toBeUndefined();
+        expect(result[0].result).toBeUndefined();
       });
 
       it('supports custom value for field', () => {
@@ -92,7 +86,7 @@ describe('add_field_transformation', () => {
           field2CustomValue: '2',
           alias: 'doubled',
         });
-        expect((result[0]._source as Record<string, unknown>).doubled).toBe(200);
+        expect(result[0].doubled).toBe(200);
       });
     });
 
@@ -103,14 +97,14 @@ describe('add_field_transformation', () => {
         { operator: 'floor' as const, value: 3.9, expected: 3 },
         { operator: 'round' as const, value: 3.5, expected: 4 },
       ])('applies $operator', ({ operator, value, expected }) => {
-        const result = transform([createHit({ val: value })], {
+        const result = transform([createRow({ val: value })], {
           ...instance.config,
           mode: 'unary',
           unaryOperator: operator,
           unaryField: 'val',
           alias: 'result',
         });
-        expect((result[0]._source as Record<string, unknown>).result).toBe(expected);
+        expect(result[0].result).toBe(expected);
       });
     });
 
@@ -123,13 +117,10 @@ describe('add_field_transformation', () => {
           ...instance.config,
           mode: 'crossFields',
           crossFieldsOperator: operator,
-          crossFields: [
-            { name: 'price', visFieldType: VisFieldType.Numerical },
-            { name: 'tax', visFieldType: VisFieldType.Numerical },
-          ],
+          crossFields: [{ name: 'price' }, { name: 'tax' }],
           alias,
         });
-        expect((result[0]._source as Record<string, unknown>)[alias]).toBe(expected);
+        expect(result[0][alias]).toBe(expected);
       });
 
       it('evaluates expression with field references', () => {
@@ -141,11 +132,11 @@ describe('add_field_transformation', () => {
           crossFields: [],
           alias: 'computed',
         });
-        expect((result[0]._source as Record<string, unknown>).computed).toBe(310);
+        expect(result[0].computed).toBe(310);
       });
 
       it('evaluates expression fields using nested paths', () => {
-        const nestedData = [createHit({ details: { price: 100 }, quantity: 3 })];
+        const nestedData = [createRow({ details: { price: 100 }, quantity: 3 })];
         const result = transform(nestedData, {
           ...instance.config,
           mode: 'crossFields',
@@ -155,7 +146,7 @@ describe('add_field_transformation', () => {
           alias: 'computed',
         });
 
-        expect((result[0]._source as Record<string, unknown>).computed).toBe(300);
+        expect(result[0].computed).toBe(300);
       });
     });
   });
@@ -189,10 +180,7 @@ describe('add_field_transformation', () => {
         generateAlias({
           mode: 'crossFields',
           crossFieldsOperator: 'total',
-          crossFields: [
-            { name: 'a', visFieldType: VisFieldType.Numerical },
-            { name: 'b', visFieldType: VisFieldType.Numerical },
-          ],
+          crossFields: [{ name: 'a' }, { name: 'b' }],
         })
       ).toBe('total(a, b)');
     });
@@ -210,7 +198,7 @@ describe('add_field_transformation', () => {
   });
 
   describe('execution diagnostics', () => {
-    const data = [createHit({ price: 100, tax: 10 })];
+    const data = [createRow({ price: 100, tax: 10 })];
 
     it('skips when a binary field no longer exists', () => {
       const config = {
@@ -244,15 +232,12 @@ describe('add_field_transformation', () => {
         ...instance.config,
         mode: 'crossFields' as const,
         crossFieldsOperator: 'total' as const,
-        crossFields: [
-          { name: 'price', visFieldType: VisFieldType.Numerical },
-          { name: 'removed', visFieldType: VisFieldType.Numerical },
-        ],
+        crossFields: [{ name: 'price' }, { name: 'removed' }],
       };
       const result = instance.transformationMethod(data, config);
 
       expect(result).toMatchObject({
-        rows: [createHit({ price: 100, tax: 10, 'total(price, removed)': 100 })],
+        rows: [createRow({ price: 100, tax: 10, 'total(price, removed)': 100 })],
         status: 'partially_applied',
         issues: [{ code: 'missing_fields', fields: ['removed'] }],
       });
@@ -266,10 +251,10 @@ describe('add_field_transformation', () => {
         field2: 'tax',
         alias: 'total',
       };
-      const mixedData = [createHit({ price: 100, tax: 10 }), createHit({ price: 200 })];
+      const mixedData = [createRow({ price: 100, tax: 10 }), createRow({ price: 200 })];
 
       expect(instance.transformationMethod(mixedData, config)).toMatchObject({
-        rows: [createHit({ price: 100, tax: 10, total: 110 }), createHit({ price: 200 })],
+        rows: [createRow({ price: 100, tax: 10, total: 110 }), createRow({ price: 200 })],
         status: 'partially_applied',
         issues: [{ code: 'missing_fields', fields: ['tax'] }],
       });
@@ -282,12 +267,12 @@ describe('add_field_transformation', () => {
         unaryField: 'price',
         alias: 'absolute_price',
       };
-      const mixedData = [createHit({ price: -10 }), createHit({ label: 'missing price' })];
+      const mixedData = [createRow({ price: -10 }), createRow({ label: 'missing price' })];
 
       expect(instance.transformationMethod(mixedData, config)).toMatchObject({
         rows: [
-          createHit({ price: -10, absolute_price: 10 }),
-          createHit({ label: 'missing price' }),
+          createRow({ price: -10, absolute_price: 10 }),
+          createRow({ label: 'missing price' }),
         ],
         status: 'partially_applied',
         issues: [{ code: 'missing_fields', fields: ['price'] }],

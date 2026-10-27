@@ -6,7 +6,7 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
-import type { ToolDefinition } from '../../../context_provider/public';
+import type { AssistantContextOptions, ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
 import type { PPLLintFixRequestCategory } from '../../../data/public';
 import type { ChatWindowInstance } from '../components/chat_window';
@@ -334,13 +334,20 @@ export class ChatService {
    * fails to compile here.
    */
   private getAgentContexts(): Array<{ description: string; value: string }> {
+    return this.getAgentVisibleContexts().map((ctx) => ({
+      description: ctx.description,
+      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+    }));
+  }
+
+  /**
+   * The contexts the agent is allowed to see, before they are encoded for the wire.
+   */
+  public getAgentVisibleContexts(): AssistantContextOptions[] {
     const pplLintFixRequestCategory: PPLLintFixRequestCategory = 'ppl-lint-fix-request';
-    return this.getAllAssistantContexts()
-      .filter((ctx) => !ctx.categories?.includes(pplLintFixRequestCategory))
-      .map((ctx) => ({
-        description: ctx.description,
-        value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-      }));
+    return this.getAllAssistantContexts().filter(
+      (ctx) => !ctx.categories?.includes(pplLintFixRequestCategory)
+    );
   }
 
   /**
@@ -652,7 +659,9 @@ export class ChatService {
       tools: this.availableTools || [], // Pass available tools to AG-UI server
       context, // All contexts (static + dynamic) with stringified values
       state: {}, // Empty for agent internal use only
-      forwardedProps: {},
+      // Client capability signal: this client can parse and strip the inline
+      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
+      forwardedProps: { allowConversationTitle: true },
     };
 
     const observable = this.agent.runAgent(runInput, dataSourceId);
@@ -745,7 +754,9 @@ export class ChatService {
       tools: this.availableTools || [],
       context, // All contexts (static + dynamic) with stringified values
       state: {}, // Empty for agent internal use only
-      forwardedProps: {},
+      // Client capability signal: this client can parse and strip the inline
+      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
+      forwardedProps: { allowConversationTitle: true },
     };
 
     // Abort the halted main run so it does not overlap the continuation.
@@ -916,7 +927,9 @@ export class ChatService {
       tools: this.availableTools || [],
       context,
       state: {},
-      forwardedProps: {},
+      // Client capability signal: this client can parse and strip the inline
+      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
+      forwardedProps: { allowConversationTitle: true },
     };
 
     // Abort the halted main run so it does not overlap the continuation.
@@ -945,13 +958,13 @@ export class ChatService {
   /**
    * Save messages to conversation history
    */
-  public async saveConversation(messages: Message[]): Promise<void> {
+  public async saveConversation(messages: Message[], title?: string): Promise<void> {
     if (messages.length > 0) {
       const threadId = this.getThreadId();
       if (!threadId) {
         throw new Error('Thread ID is required to save conversation');
       }
-      await this.conversationHistoryService.saveConversation(threadId, messages);
+      await this.conversationHistoryService.saveConversation(threadId, messages, title);
     }
   }
 

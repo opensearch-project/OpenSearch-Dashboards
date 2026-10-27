@@ -28,13 +28,17 @@ import {
 } from '../../../components/visualizations/types';
 import { VisData } from '../../../components/visualizations/visualization_builder.types';
 import { CommonVisualizationRender } from '../../../components/visualizations/visualization_render';
-import { normalizeResultRows } from '../../../components/visualizations/utils/normalize_result_rows';
+import {
+  normalizeResultRows,
+  normalizeSearchHits,
+} from '../../../components/visualizations/utils/normalize_result_rows';
 import { isValidMapping } from '../../../components/visualizations/visualization_builder_utils';
 import { visualizationRegistry } from '../../../components/visualizations/visualization_registry';
 import { SAMPLE_SIZE_SETTING, VISUALIZATION_EDITOR_APP_ID } from '../../../../common';
 import { VisEditorNoResults } from '../../../application/in_context_vis_editor/component/vis_editor_no_results';
 import {
   TransformationService,
+  NormalizedRow,
   registerAllTransformations,
   UrlTransformationState,
 } from '../../../components/data_transformations';
@@ -356,14 +360,15 @@ function applyTransformationPipeline(
   rawRows: OpenSearchSearchHit[],
   rawSchema: Array<{ name?: string; type?: string }>,
   transformations: UrlTransformationState[] | undefined
-): { rows: OpenSearchSearchHit[]; finalSchema: Array<{ name?: string; type?: string }> } {
+): { rows: NormalizedRow[]; finalSchema: Array<{ name?: string; type?: string }> } {
+  const normalizedRows = normalizeSearchHits(rawRows);
   if (!transformations || transformations.length === 0) {
-    return { rows: rawRows, finalSchema: rawSchema };
+    return { rows: normalizedRows, finalSchema: rawSchema };
   }
   const service = new TransformationService();
   registerAllTransformations(service);
   service.restoreFromState(transformations);
-  return service.applyPipeline(rawRows, rawSchema);
+  return service.applyPipeline(normalizedRows, rawSchema);
 }
 
 /**
@@ -725,7 +730,9 @@ export function registerAutoVisualizationAction(
           preparedQuery: query,
           resolvedTimeRange,
           transformations: args.transformations,
-          message: `Created ${resolvedChartType} visualization for ${args.indexName}`,
+          message:
+            `Created a ${resolvedChartType} visualization preview for ${args.indexName}. ` +
+            `PREVIEW ONLY: this tool does not save the visualization${originatingApp ? ' or add a panel to the dashboard' : ''}. Instead, the user needs to click "Open in Editor" and then ${originatingApp ? '"Save and back"' : '"Save"'} in the editor manually.`,
         };
       } catch (error) {
         return {
