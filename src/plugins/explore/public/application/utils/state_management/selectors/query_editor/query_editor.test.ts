@@ -240,8 +240,16 @@ describe('query_editor selectors', () => {
   });
 
   describe('selectIsLoading', () => {
-    it('should return true when execution status === LOADING', () => {
+    it('should return true when a query is LOADING', () => {
       const state = createMockState({
+        queryStatusMap: {
+          'source=logs': {
+            status: QueryExecutionStatus.LOADING,
+            elapsedMs: undefined,
+            startTime: undefined,
+            error: undefined,
+          },
+        },
         overallQueryStatus: {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
@@ -253,6 +261,28 @@ describe('query_editor selectors', () => {
       const result = selectIsLoading(state);
 
       expect(result).toBe(true);
+    });
+
+    // The overall status turns ERROR as soon as one query fails, while the others run on.
+    it('should return true while a query runs after another one failed', () => {
+      const state = createMockState({
+        queryStatusMap: {
+          'source=logs': {
+            status: QueryExecutionStatus.LOADING,
+            elapsedMs: undefined,
+            startTime: undefined,
+            error: undefined,
+          },
+        },
+        overallQueryStatus: {
+          status: QueryExecutionStatus.ERROR,
+          elapsedMs: 10,
+          startTime: undefined,
+          error: undefined,
+        },
+      });
+
+      expect(selectIsLoading(state)).toBe(true);
     });
 
     it('should return false when execution status !== LOADING', () => {
