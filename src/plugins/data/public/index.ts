@@ -553,6 +553,7 @@ export {
   QueryStringContract,
   QueryStringManager,
   DatasetTypeConfig,
+  datasetTypeRequiresExplicitRun,
   DatasetService,
   DatasetServiceContract,
   LanguageConfig,

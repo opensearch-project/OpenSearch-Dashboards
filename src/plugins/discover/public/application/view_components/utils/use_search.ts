@@ -14,6 +14,7 @@ import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import {
+  datasetTypeRequiresExplicitRun,
   Filter,
   Query,
   search,
@@ -192,6 +193,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     const { queryString } = data.query;
     const { dataset } = queryString.getQuery();
     const typeConfig = dataset ? queryString.getDatasetService().getType(dataset.type) : undefined;
+    // A dataset type that requires an explicit Run never searches on page load, whatever the
+    // other preferences say.
+    if (datasetTypeRequiresExplicitRun(typeConfig, dataset)) {
+      return false;
+    }
     const datasetPreference =
       typeConfig?.meta?.searchOnLoad ?? uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING);
 

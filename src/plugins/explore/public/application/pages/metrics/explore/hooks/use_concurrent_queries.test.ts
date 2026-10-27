@@ -239,4 +239,42 @@ describe('useConcurrentQueries', () => {
     rerender({ dep: 2 });
     expect(result.current.results.size).toBe(0);
   });
+
+  it('fetches nothing while disabled, then fetches the visible keys once enabled', async () => {
+    const fetchFn = jest.fn().mockImplementation((key: string) => Promise.resolve(`v-${key}`));
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useConcurrentQueries(fetchFn, [enabled], undefined, enabled),
+      { initialProps: { enabled: false } }
+    );
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(fetchFn).not.toHaveBeenCalled();
+    expect(result.current.results.size).toBe(0);
+
+    rerender({ enabled: true });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(result.current.results.get('a')).toBe('v-a');
+    expect(result.current.results.get('b')).toBe('v-b');
+  });
+
+  it('fetches as before when enabled is not passed', async () => {
+    const fetchFn = jest.fn().mockResolvedValue('data');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
 });

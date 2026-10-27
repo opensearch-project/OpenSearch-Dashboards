@@ -1,6 +1,9 @@
 // Same height in the trace and session flyouts, and room for the close button on the right.
+// The row sits on the close button's line: the flyout header is padded $euiSizeL from the top
+// and the close button sits $euiSizeS from it, so pull the row up by the difference.
 .agtFlyoutHistoryNav {
   min-height: $euiSizeL;
+  margin-top: -($euiSizeL - $euiSizeS);
   margin-bottom: $euiSizeXS;
   padding-right: $euiSizeXL;
 }

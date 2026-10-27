@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 import { TransformPanel } from './transform_panel';
 import { TransformationService } from './transformation_service';
 import { TransformationInstance, TransformationPipeline } from './types';
-import { VisFieldType } from '../visualizations/types';
 
 jest.mock('./transform_selector_overlay', () => ({
   TransformSelectorButton: ({ onSelectTransformation }: any) => (
@@ -62,9 +61,7 @@ describe('TransformPanel', () => {
   it('renders transformation cards when pipeline has items', () => {
     const instance = createMockInstance('inst-1', 'limit');
     const service = createMockService([instance]);
-    service.stageFields$.next(
-      new Map([['inst-1', [{ name: 'input_field', visFieldType: VisFieldType.Categorical }]]])
-    );
+    service.stageFields$.next(new Map([['inst-1', [{ name: 'input_field', type: 'string' }]]]));
     render(<TransformPanel transformationService={service} />);
     expect(screen.getByText('1 - Limit')).toBeInTheDocument();
     expect(screen.getByTestId('editor-inst-1')).toHaveTextContent('input_field');

@@ -8,29 +8,16 @@ import { FlyoutHistoryNav } from './flyout_history_nav';
 
 describe('FlyoutHistoryNav', () => {
   it('renders nothing without history', () => {
-    const { container } = render(
-      <FlyoutHistoryNav navigation={{ onBack: jest.fn(), onForward: jest.fn() }} />
-    );
+    const { container } = render(<FlyoutHistoryNav navigation={{ onBack: jest.fn() }} />);
     expect(container).toBeEmptyDOMElement();
     expect(render(<FlyoutHistoryNav />).container).toBeEmptyDOMElement();
   });
 
-  it('labels Back and Forward by what they lead to', () => {
+  it('labels Back by what it leads to', () => {
     const onBack = jest.fn();
-    const onForward = jest.fn();
-    render(
-      <FlyoutHistoryNav
-        navigation={{
-          back: { kind: 'session', label: 's1' },
-          forward: { kind: 'trace', label: 'POST /plan' },
-          onBack,
-          onForward,
-        }}
-      />
-    );
+    render(<FlyoutHistoryNav navigation={{ back: { kind: 'session', label: 's1' }, onBack }} />);
     fireEvent.click(screen.getByText('Back to session'));
-    fireEvent.click(screen.getByText('Forward to trace'));
     expect(onBack).toHaveBeenCalled();
-    expect(onForward).toHaveBeenCalled();
+    expect(screen.queryByText(/Forward/)).not.toBeInTheDocument();
   });
 });

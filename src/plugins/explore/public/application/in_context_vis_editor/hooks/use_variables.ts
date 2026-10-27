@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect } from 'react';
+import { EMPTY } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import {
   Variable,
   VariableService,
@@ -56,22 +58,19 @@ export const useVariables = (containerVariables?: Variable[]) => {
     }
   }, [queryBuilder, interpolationService]);
 
-  // Initial refresh
-  const hasRefreshed = useRef(false);
-  useEffect(() => {
-    if (variableService && !hasRefreshed.current) {
-      hasRefreshed.current = true;
-      variableService.refreshAllVariableOptions();
-    }
-  }, [variableService]);
-
-  // Refresh on time range change (only variables with useTimeFilter enabled)
+  // Refresh variable options whenever their queries or the time range change.
   useEffect(() => {
     if (!variableService) return;
-    const sub = services.data.query.timefilter.timefilter
-      .getTimeUpdate$()
-      .subscribe(() => variableService.refreshTimeFilteredVariableOptions());
-    return () => sub.unsubscribe();
+    const { timefilter } = services.data.query.timefilter;
+    return variableService.startRefreshScheduler({
+      time$: timefilter.getTimeUpdate$().pipe(
+        map(() => timefilter.getTime()),
+        startWith(timefilter.getTime())
+      ),
+      // The editor's run button only re-runs the panel query; time changes
+      // still refresh the variables through time$.
+      reload$: EMPTY,
+    });
   }, [variableService, services.data]);
 
   // When values settle: give the table preview the values for its data links,

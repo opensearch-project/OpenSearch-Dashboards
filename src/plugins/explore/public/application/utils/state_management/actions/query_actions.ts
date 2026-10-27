@@ -388,7 +388,11 @@ const getStreamingConfig = async (
 };
 
 /**
- * Enhanced executeQueries orchestrator - executes queries independently without blocking
+ * Enhanced executeQueries orchestrator - executes queries independently without blocking.
+ *
+ * A dataset type can require an explicit Run (DatasetTypeConfig meta.requiresExplicitRun): code
+ * that dispatches this on its own (not for a user's Run or time range update) must check
+ * `datasetRequiresExplicitRun` first, see `../../requires_explicit_run`.
  */
 export const executeQueries = createAsyncThunk<
   void,
@@ -782,16 +786,6 @@ const executeQueryBase = async (
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
 
-    services.inspectorAdapters.requests.reset();
-
-    const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
-      defaultMessage: 'data',
-    });
-    const description = i18n.translate('explore.discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
-    });
-    const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
-
     // Only ensure default data view exists if no dataset is selected
     // When a dataset is already selected (normal case), this check is redundant
     // as DatasetSelect component already handles default selection during initialization
@@ -834,7 +828,44 @@ const executeQueryBase = async (
 
     let effectiveQuery = queryString;
     let effectiveHistogramConfig = histogramConfig;
-    if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
+    // A source's own builder replaces Explore's, built-in language ids included.
+    const sourceHistogramBuilder = isHistogramQuery
+      ? getSourceTypeRegistry().getHistogramQueryBuilder(query.language, query.dataset)
+      : undefined;
+    if (sourceHistogramBuilder) {
+      // Without a histogram config (no time field, or it can't be bucketed) the source gets no
+      // histogram. Falling through to the PPL/SQL branches would send its query as one.
+      const sourceHistogramQuery =
+        histogramConfig &&
+        sourceHistogramBuilder(queryString, {
+          interval: histogramConfig.finalInterval,
+          timeFieldName: histogramConfig.timeFieldName,
+          breakdownField: histogramConfig.breakdownField,
+        });
+      // No histogram for this query: send nothing and settle the key with no results. Settling it
+      // through setIndividualQueryStatus lets the overall status leave LOADING, which a run of only
+      // the histogram (an interval or breakdown change) would otherwise never do.
+      if (!sourceHistogramQuery) {
+        // A newer run of this key aborted this one: the key is that run's to settle.
+        if (isSuperseded() || abortController.signal.aborted) {
+          return;
+        }
+        activeQueryAbortControllers.delete(cacheKey);
+        dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: {
+              status: QueryExecutionStatus.NO_RESULTS,
+              startTime: queryStartTime,
+              elapsedMs: Date.now() - queryStartTime,
+              error: undefined,
+            },
+          })
+        );
+        return;
+      }
+      effectiveQuery = sourceHistogramQuery;
+    } else if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     } else if (
       query.language === 'SQL' &&
@@ -872,6 +903,16 @@ const executeQueryBase = async (
       effectiveHistogramConfig = sqlHistogramConfig;
       effectiveQuery = buildSQLHistogramQuery(queryString, sqlHistogramConfig, breakdownValues);
     }
+
+    services.inspectorAdapters.requests.reset();
+
+    const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
+      defaultMessage: 'data',
+    });
+    const description = i18n.translate('explore.discover.inspectorRequestDescription', {
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+    });
+    const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
     const preparedQueryObject = {
       ...query,
@@ -982,7 +1023,8 @@ const executeQueryBase = async (
         effectiveQuery,
         rawResultsWithMeta,
         effectiveHistogramConfig,
-        query.language === 'SQL'
+        // A source's own query returns HISTOGRAM_RESULT_COLUMNS, not Explore's SQL shape.
+        !sourceHistogramBuilder && query.language === 'SQL'
       );
     }
 
@@ -1047,7 +1089,7 @@ const executeQueryBase = async (
       parsedError = {
         error: {
           reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          details: error.body?.error || error.message || 'An error occurred',
           type: error.name,
         },
       };

@@ -221,6 +221,76 @@ describe('useChangeQueryEditor', () => {
     );
   });
 
+  describe('dataset types that require an explicit Run (meta.requiresExplicitRun)', () => {
+    const withDatasetTypes = (types: Record<string, { meta: Record<string, unknown> }>) => {
+      (mockQueryString as any).getDatasetService = jest.fn(() => ({
+        getType: (type: string) => types[type],
+      }));
+    };
+
+    afterEach(() => {
+      delete (mockQueryString as any).getDatasetService;
+    });
+
+    it('stages the filter and marks the editor dirty instead of running', () => {
+      withDatasetTypes({ FAKE_EXPLICIT_RUN: { meta: { requiresExplicitRun: true } } });
+      (useDatasetContext as jest.Mock).mockReturnValue({
+        dataset: { id: 'fake-dataset', type: 'FAKE_EXPLICIT_RUN' },
+      });
+      mockLanguageConfig.addFiltersToQuery = jest
+        .fn()
+        .mockReturnValue("source = logs service='web'");
+
+      const { result } = renderHook(() => useChangeQueryEditor());
+      result.current.onAddFilter('service', 'web', '+');
+
+      expect(mockSetQuery).toHaveBeenCalledWith({
+        query: "source = logs service='web'",
+        language: 'PPL',
+      });
+      expect(mockSetEditorText).toHaveBeenCalledWith("source = logs service='web'");
+      expect(onEditorRunActionCreator).not.toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
+      expect(mockFocusOnEditor).toHaveBeenCalled();
+    });
+
+    it('still runs for a dataset type without the flag', () => {
+      withDatasetTypes({ FAKE_AUTO_RUN: { meta: {} } });
+      (useDatasetContext as jest.Mock).mockReturnValue({
+        dataset: { id: 'fake-dataset', type: 'FAKE_AUTO_RUN' },
+      });
+      mockLanguageConfig.addFiltersToQuery = jest
+        .fn()
+        .mockReturnValue("source = logs service='web'");
+
+      const { result } = renderHook(() => useChangeQueryEditor());
+      result.current.onAddFilter('service', 'web', '+');
+
+      expect(onEditorRunActionCreator).toHaveBeenCalledWith(
+        mockServices,
+        "source = logs service='web'"
+      );
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'run' });
+    });
+  });
+
+  it('does not re-run (or touch the draft) when the filter leaves the query unchanged', () => {
+    // A language that can't express the filter returns the text as is (or nothing).
+    for (const serialized of [undefined, 'source = logs']) {
+      jest.clearAllMocks();
+      mockLanguageConfig.addFiltersToQuery = jest.fn().mockReturnValue(serialized);
+
+      const { result } = renderHook(() => useChangeQueryEditor());
+      result.current.onAddFilter('service', 'web', '+');
+
+      expect(mockSetQuery).not.toHaveBeenCalled();
+      expect(mockSetEditorText).not.toHaveBeenCalled();
+      expect(onEditorRunActionCreator).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockFocusOnEditor).toHaveBeenCalled();
+    }
+  });
+
   it('should accept a DatasetField object as the field parameter', () => {
     const mockField = {
       name: 'service',
