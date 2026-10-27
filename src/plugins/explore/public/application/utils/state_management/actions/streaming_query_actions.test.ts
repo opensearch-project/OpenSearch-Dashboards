@@ -97,6 +97,10 @@ const run = async (args: Record<string, unknown> = {}) => {
   return { action, results, statuses };
 };
 
+/** How the http client reports a connection that never got a response. */
+const networkError = () =>
+  Object.assign(new TypeError('Failed to fetch'), { request: { url: '/api/job' } });
+
 const exhausted = (total: number) =>
   snapshot({
     id: 'job-1',
@@ -628,7 +632,7 @@ describe('executeStreamingQuery', () => {
     mockSubmit.mockResolvedValue(
       snapshot({ id: 'job-1', total: 1, datarows: [['2026-09-15 10:00:00', 1]] })
     );
-    mockPoll.mockRejectedValue(new Error('network exploded'));
+    mockPoll.mockRejectedValue(networkError());
 
     const { action, results, statuses } = await run();
     const final = statuses[statuses.length - 1]?.status;
@@ -645,7 +649,7 @@ describe('executeStreamingQuery', () => {
   });
 
   it.each([
-    ['a dropped connection', new Error('network exploded')],
+    ['a dropped connection', networkError()],
     ['a 5xx', { body: { statusCode: 503 } }],
   ])('retries %s and carries on', async (_, failure) => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
@@ -663,7 +667,7 @@ describe('executeStreamingQuery', () => {
 
   it('waits longer before each retry', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockRejectedValue(new Error('network exploded'));
+    mockPoll.mockRejectedValue(networkError());
     const dispatch: jest.Mock = jest.fn((action: any) =>
       typeof action === 'function' ? action(dispatch, () => ({})) : action
     );
@@ -900,6 +904,17 @@ describe('executeStreamingQuery', () => {
     });
   });
 
+  // A malformed response or a bug of ours has no status either, but fails the same way on retry.
+  it('does not retry an error that never reached the network layer', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
+
+    const { statuses } = await run();
+
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBe(true);
+  });
+
   it('does not retry a client error, which would fail again', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockRejectedValue({ response: { status: 400 } });
@@ -929,7 +944,7 @@ describe('executeStreamingQuery', () => {
     const abortError = new Error('aborted');
     abortError.name = 'AbortError';
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockRejectedValueOnce(new Error('network exploded')).mockRejectedValue(abortError);
+    mockPoll.mockRejectedValueOnce(networkError()).mockRejectedValue(abortError);
 
     const { statuses } = await run();
     const final = statuses[statuses.length - 1]?.status;
@@ -1143,7 +1158,7 @@ describe('executeStreamingQuery', () => {
       total: 25,
     });
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(new Error('tail poll exploded'));
+    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(networkError());
 
     const { results, statuses } = await run();
 

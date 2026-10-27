@@ -123,13 +123,23 @@ const untilVisible = (signal: AbortSignal): Promise<void> =>
 /** Delays before each retry of a poll that failed transiently. */
 const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
 
-/** A dropped connection (no status) or a server-side 5xx; a 4xx will not succeed on retry. */
+/**
+ * A dropped connection, a 5xx or a 429. The http client reports a connection that never got a
+ * response as a `TypeError` carrying the request; any other error without a status, such as a
+ * response that would not parse, fails the same way on retry.
+ */
 const isTransientPollError = (error: unknown): boolean => {
   if (isAbort(error) || error instanceof PPLStreamJobNotFoundError) return false;
-  const e = error as { response?: { status?: number }; body?: { statusCode?: number } };
+  const e = error as {
+    name?: string;
+    request?: unknown;
+    response?: { status?: number };
+    body?: { statusCode?: number };
+  };
   const status = e?.response?.status ?? e?.body?.statusCode;
+  if (status === undefined) return e?.name === 'TypeError' && e.request !== undefined;
   // 429 is a request to slow down, which the backoff below does.
-  return status === undefined || status === 429 || status >= 500;
+  return status === 429 || status >= 500;
 };
 
 /**
