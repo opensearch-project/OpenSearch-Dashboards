@@ -115,7 +115,7 @@ describe('supersedeOtherStreamingQueries', () => {
     registerStreamingAbort('old-table', old.abort, old.token);
     registerStreamingAbort('new-table', kept.abort, kept.token);
 
-    supersedeOtherStreamingQueries(['new-table']);
+    expect(supersedeOtherStreamingQueries(['new-table'])).toEqual(['old-table']);
 
     expect(old.abort).toHaveBeenCalledTimes(1);
     expect(kept.abort).not.toHaveBeenCalled();
@@ -131,6 +131,16 @@ describe('supersedeOtherStreamingQueries', () => {
     supersedeOtherStreamingQueries([]);
 
     expect(isCurrentStreamingRun('old-table', token)).toBe(false);
+  });
+
+  // The registry's default token is the abort function itself.
+  it('stops a run registered with the default token from publishing', () => {
+    const abort = jest.fn();
+    registerStreamingAbort('old-table', abort);
+
+    supersedeOtherStreamingQueries([]);
+
+    expect(isCurrentStreamingRun('old-table', abort)).toBe(false);
   });
 
   it('leaves a run stopped by the user free to report how far it got', () => {

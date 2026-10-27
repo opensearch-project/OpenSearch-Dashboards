@@ -518,11 +518,13 @@ export const executeQueries = createAsyncThunk<
     // Execute query without aggregations
     if (needsDataTableQuery) {
       // This query's results replace the page's, so streams for any earlier query stop here.
-      supersedeOtherStreamingQueries([
+      for (const supersededKey of supersedeOtherStreamingQueries([
         dataTableCacheKey,
         histogramCacheKey,
         prepareHistogramCacheKey(query),
-      ]);
+      ])) {
+        dispatch(clearQueryStatusMapByKey(supersededKey));
+      }
       // Streaming replaces the single-shot data-table fetch when enabled.
       const streamingConfig = await getStreamingConfig(state, services, getState);
       if (runController.signal.aborted) {

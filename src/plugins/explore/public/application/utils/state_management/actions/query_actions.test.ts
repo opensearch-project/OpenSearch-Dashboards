@@ -1682,10 +1682,17 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         const earlier = jest.fn();
         registerStreamingAbort('source=earlier-query', earlier, {});
 
-        const { promise } = start();
+        const { dispatch, promise } = start();
         await flush();
 
         expect(earlier).toHaveBeenCalledTimes(1);
+        // It can no longer publish, so its last "loading" status must go, or the page stays loading.
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'queryEditor/clearQueryStatusMapByKey',
+            payload: 'source=earlier-query',
+          })
+        );
         finishTable();
         await promise;
       });

@@ -20,7 +20,9 @@ const runs = new Map<string, StreamingRun>();
 /** Runs a newer query replaced; they must not publish, not even their own cancellation. */
 const superseded = new WeakSet<object>();
 
-const isObject = (value: unknown): value is object => typeof value === 'object' && value !== null;
+/** Tokens are identities, so any object or function qualifies; the default token is a function. */
+const isWeakKey = (value: unknown): value is object =>
+  (typeof value === 'object' && value !== null) || typeof value === 'function';
 
 /**
  * Registers a run, superseding any already in flight for the same key. Without this a re-run leaves
@@ -47,7 +49,7 @@ export const unregisterStreamingAbort = (cacheKey: string, token?: unknown): voi
  * removed on completion, and suppressing a terminal update would strand the UI mid-flight.
  */
 export const isCurrentStreamingRun = (cacheKey: string, token: unknown): boolean => {
-  if (isObject(token) && superseded.has(token)) return false;
+  if (isWeakKey(token) && superseded.has(token)) return false;
   const current = runs.get(cacheKey);
   return !current || current.token === token;
 };
@@ -56,14 +58,20 @@ export const isCurrentStreamingRun = (cacheKey: string, token: unknown): boolean
  * Aborts the runs for every key not in `keep`, as a new query does to its predecessor's. Keys differ
  * when the query text, dataset or time range changed, so registering the new run does not replace
  * them; left alone, they keep polling and write their results and status into the new query's page.
+ *
+ * Returns the keys it aborted. A superseded run cannot publish, so its last status ("loading") is
+ * left behind, and the caller must clear it or the page's overall status stays loading.
  */
-export const supersedeOtherStreamingQueries = (keep: readonly string[]): void => {
+export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[] => {
+  const aborted: string[] = [];
   for (const [cacheKey, run] of runs) {
     if (keep.includes(cacheKey)) continue;
     runs.delete(cacheKey);
-    if (isObject(run.token)) superseded.add(run.token);
+    if (isWeakKey(run.token)) superseded.add(run.token);
     run.abort();
+    aborted.push(cacheKey);
   }
+  return aborted;
 };
 
 /** Returns true when there was a query to abort, so callers can avoid a redundant state update. */
