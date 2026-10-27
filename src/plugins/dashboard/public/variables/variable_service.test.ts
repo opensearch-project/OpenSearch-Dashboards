@@ -985,6 +985,203 @@ describe('VariableService', () => {
     });
   });
 
+  describe('applyCurrentValues', () => {
+    it('should update current values and emit the new variables', () => {
+      const { service } = createService([makeCustomVariable()]);
+      const emitted: Variable[][] = [];
+      const subscription = service
+        .getVariablesWithoutState$()
+        .subscribe((variables) => emitted.push(variables));
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['prod'] }]);
+
+      expect(service.getVariables()[0].current).toEqual(['prod']);
+      expect(emitted).toHaveLength(2);
+      expect(emitted[1][0].current).toEqual(['prod']);
+      subscription.unsubscribe();
+    });
+
+    it('should only take current from the given variables', () => {
+      const { service } = createService([makeCustomVariable()]);
+
+      service.applyCurrentValues([
+        { ...makeCustomVariable({ name: 'renamed', customOptions: ['x'] }), current: ['staging'] },
+      ]);
+
+      const [variable] = service.getVariables() as CustomVariable[];
+      expect(variable.current).toEqual(['staging']);
+      expect(variable.name).toBe('env');
+      expect(variable.customOptions).toEqual(['dev', 'staging', 'prod']);
+    });
+
+    it('should ignore unknown variable ids', () => {
+      const { service } = createService([makeCustomVariable()]);
+      const before = service.getVariables();
+
+      service.applyCurrentValues([{ id: 'nonexistent', current: ['prod'] }]);
+
+      expect(service.getVariables()).toBe(before);
+    });
+
+    it('should not emit when the current values are unchanged', () => {
+      const { service } = createService([makeCustomVariable({ current: ['dev'] })]);
+      const before = service.getVariables();
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['dev'] }]);
+
+      expect(service.getVariables()).toBe(before);
+    });
+
+    it('should drop the "All" marker when concrete values are also present', () => {
+      const { service } = createService([
+        makeCustomVariable({ multi: true, includeAll: true, current: ['dev'] }),
+      ]);
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['$__all', 'prod'] }]);
+
+      expect(service.getVariables()[0].current).toEqual(['prod']);
+    });
+
+    it('should re-query dependent query variables', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-a', 'svc-b']));
+      const region = makeCustomVariable({ id: 'region-1', name: 'region', current: ['us-east'] });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        query: "source=logs | where region = '${region}' | dedup service | fields service",
+      });
+      const { service } = createService([region, svc]);
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+      await startLoaded(service);
+
+      service.applyCurrentValues([{ id: 'region-1', current: ['eu-west'] }]);
+      await service.whenSettled();
+
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteVariableQuery.mock.calls[0][1].query).toContain("region = 'eu-west'");
+    });
+
+    it('should not re-query a query variable whose value it sets', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['api', 'web']));
+      const { service } = createService([makeQueryVariable({ current: ['api'] })]);
+      await startLoaded(service);
+
+      service.applyCurrentValues([{ id: 'query-1', current: ['web'] }]);
+      await service.whenSettled();
+
+      expect(mockExecuteVariableQuery).not.toHaveBeenCalled();
+      expect(service.getVariables()[0].current).toEqual(['web']);
+    });
+
+    it('should not record a value change telemetry event', () => {
+      const { service, telemetrySink } = createService([makeCustomVariable()]);
+      telemetrySink.mockClear();
+
+      service.applyCurrentValues([{ id: 'custom-1', current: ['prod'] }]);
+
+      expect(telemetrySink).not.toHaveBeenCalled();
+    });
+
+    it('should default a cleared query variable to the first option', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['api', 'web']));
+      const { service } = createService([makeQueryVariable({ current: ['web'] })]);
+      await startLoaded(service);
+
+      service.applyCurrentValues([{ id: 'query-1', current: undefined }]);
+      await service.whenSettled();
+
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+      expect(service.getVariables()[0].current).toEqual(['api']);
+    });
+
+    describe('with a cleared upstream', () => {
+      beforeEach(() => {
+        mockExecuteVariableQuery.mockImplementation(async (_data: unknown, { query }: any) =>
+          query.includes('dedup region')
+            ? makeQueryResult(['eu', 'us'], 'region')
+            : makeQueryResult([`svc-for-${query.match(/region = '([^']*)'/)?.[1] ?? '?'}`])
+        );
+      });
+
+      function createRegionAndService(regionOverrides: Partial<QueryVariable> = {}) {
+        const region = makeQueryVariable({
+          id: 'region-1',
+          name: 'region',
+          current: ['us'],
+          query: 'source=logs | dedup region | fields region',
+          ...regionOverrides,
+        });
+        const svc = makeQueryVariable({
+          id: 'service-1',
+          name: 'service',
+          current: ['svc-for-us'],
+          query: "source=logs | where region = '${region}' | dedup service | fields service",
+        });
+        const { service } = createService([region, svc]);
+        service.setInterpolationService(
+          new VariableInterpolationService(() => service.getVariablesWithState())
+        );
+        return service;
+      }
+
+      function getServiceQueries(): string[] {
+        return mockExecuteVariableQuery.mock.calls
+          .map(([, { query }]) => query as string)
+          .filter((query) => query.includes('dedup service'));
+      }
+
+      it('should query dependents once, with the fallback value', async () => {
+        const service = createRegionAndService();
+        await startLoaded(service);
+
+        service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+        await service.whenSettled();
+
+        expect(service.getVariables()[0].current).toEqual(['eu']);
+        expect(getServiceQueries()).toEqual([expect.stringContaining("region = 'eu'")]);
+        expect(getOptionValues(service.getVariablesWithState()[1].options)).toEqual(['svc-for-eu']);
+      });
+
+      it('should default a cleared dependent to the first option for the fallback value', async () => {
+        const service = createRegionAndService();
+        await startLoaded(service);
+
+        service.applyCurrentValues([
+          { id: 'region-1', current: undefined },
+          { id: 'service-1', current: undefined },
+        ]);
+        await service.whenSettled();
+
+        expect(getCurrentValues(service)).toEqual({ region: ['eu'], service: ['svc-for-eu'] });
+      });
+
+      it('should query dependents with the fallback value when the time range also changes', async () => {
+        const service = createRegionAndService({ useTimeFilter: true });
+        const { time$ } = await startLoaded(service);
+
+        service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+        time$.next({ from: 'now-1h', to: 'now' });
+        await service.whenSettled();
+
+        expect(service.getVariables()[0].current).toEqual(['eu']);
+        expect(getServiceQueries()).toEqual([expect.stringContaining("region = 'eu'")]);
+      });
+
+      it('should not query dependents after destroy', async () => {
+        const service = createRegionAndService();
+        await startLoaded(service);
+
+        service.applyCurrentValues([{ id: 'region-1', current: undefined }]);
+        service.destroy();
+        await flushMicrotasks();
+
+        expect(getServiceQueries()).toHaveLength(0);
+      });
+    });
+  });
+
   describe('reorderVariables', () => {
     it('should swap variable positions', () => {
       const v1 = makeCustomVariable({ id: '1', name: 'a' });

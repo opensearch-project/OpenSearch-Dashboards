@@ -194,6 +194,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       })
     );
 
+    // Variable values can also change from the dashboard URL without remounting the
+    // container (a link to the same dashboard, browser back/forward).
+    this.variableSubscriptions.push(
+      this.getInput$()
+        .pipe(
+          map((input) => input.variables),
+          distinctUntilChanged(isEqual)
+        )
+        .subscribe((variables) => {
+          if (variables) {
+            this.variableService.applyCurrentValues(variables);
+          }
+        })
+    );
+
     // Subscribe to container input changes to update VariableService dashboardId
     this.variableSubscriptions.push(
       this.getInput$().subscribe((input) => {

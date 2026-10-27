@@ -395,6 +395,38 @@ export class VariableService {
   }
 
   /**
+   * Apply selected values that changed outside the service, e.g. when the dashboard URL
+   * changes without remounting the dashboard (a link to the same dashboard, browser back/forward).
+   * Only `current` is taken from the given variables; their definitions are ignored.
+   */
+  public applyCurrentValues(variables: Array<Pick<Variable, 'id' | 'current'>>): void {
+    const currentById = new Map(variables.map((v) => [v.id, v.current]));
+    let changed = false;
+    const updatedVariables = this.getVariables().map((variable) => {
+      if (!currentById.has(variable.id)) {
+        return variable;
+      }
+      const next = currentById.get(variable.id);
+      const current = next ? this.normalizeAllSelection(next) : next;
+      if (isEqual(current, variable.current)) {
+        return variable;
+      }
+      changed = true;
+      // A cleared query variable has nothing to interpolate, and its fetch key does not
+      // depend on its own value. Forget the key so the scheduler re-queries it and falls
+      // back to the first option, as on a fresh load; dependents wait for that query.
+      if (variable.type === VariableType.Query && (!current || current.length === 0)) {
+        this.lastFetchKeys.delete(variable.id);
+      }
+      return { ...variable, current } as Variable;
+    });
+
+    if (changed) {
+      this.variables$.next(updatedVariables);
+    }
+  }
+
+  /**
    * Start the refresh scheduler. From then on every query variable is
    * re-queried whenever its fetch inputs change (see computeFetchKey), so no
    * mutation needs to trigger a refresh itself. The first reconcile runs once
