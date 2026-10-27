@@ -1,0 +1,2 @@
+fix:
+- Add support for create api when there is no specifying id ([#11020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11020))
