@@ -4,13 +4,15 @@
  */
 
 import { get, has } from 'lodash';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES, PPL_FIELD_TYPES } from '../../../../data/common';
 import {
+  FieldSchema,
   TransformationInstance,
   TransformationPipeline,
   TransformationExecutionResult,
   TransformationExecutionStatus,
+  NormalizedRow,
 } from './types';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
 
 const ISO_DATE_PATTERN =
   /^\d{4}-\d{2}-\d{2}(?:[T ][0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
@@ -18,6 +20,36 @@ const ISO_DATE_PATTERN =
 const isDateValue = (value: unknown): boolean =>
   value instanceof Date ||
   (typeof value === 'string' && ISO_DATE_PATTERN.test(value) && !isNaN(Date.parse(value)));
+
+const NUMERICAL_FIELD_TYPES = new Set<string>([
+  OSD_FIELD_TYPES.NUMBER,
+  OSD_FIELD_TYPES.HISTOGRAM,
+  OPENSEARCH_FIELD_TYPES.FLOAT,
+  OPENSEARCH_FIELD_TYPES.HALF_FLOAT,
+  OPENSEARCH_FIELD_TYPES.SCALED_FLOAT,
+  OPENSEARCH_FIELD_TYPES.DOUBLE,
+  OPENSEARCH_FIELD_TYPES.INTEGER,
+  OPENSEARCH_FIELD_TYPES.INT,
+  OPENSEARCH_FIELD_TYPES.LONG,
+  OPENSEARCH_FIELD_TYPES.SHORT,
+  OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG,
+  PPL_FIELD_TYPES.TINYINT,
+  PPL_FIELD_TYPES.SMALLINT,
+  PPL_FIELD_TYPES.BIGINT,
+]);
+
+const DATE_FIELD_TYPES = new Set<string>([
+  OSD_FIELD_TYPES.DATE,
+  OPENSEARCH_FIELD_TYPES.DATE_NANOS,
+  PPL_FIELD_TYPES.TIMESTAMP,
+  PPL_FIELD_TYPES.TIME,
+]);
+
+export const isNumericalField = (field?: FieldSchema): boolean =>
+  !!field?.type && NUMERICAL_FIELD_TYPES.has(field.type);
+
+export const isDateField = (field?: FieldSchema): boolean =>
+  !!field?.type && DATE_FIELD_TYPES.has(field.type);
 
 export function addTransformation(
   currentPipe: TransformationPipeline,
@@ -54,12 +86,12 @@ export function toggleTransformationHide(
   );
 }
 
-export function createAppliedResult(rows: OpenSearchSearchHit[]): TransformationExecutionResult {
+export function createAppliedResult(rows: NormalizedRow[]): TransformationExecutionResult {
   return { rows, status: 'applied', issues: [] };
 }
 
 export function createInvalidConfigResult(
-  rows: OpenSearchSearchHit[],
+  rows: NormalizedRow[],
   message: string
 ): TransformationExecutionResult {
   return {
@@ -70,7 +102,7 @@ export function createInvalidConfigResult(
 }
 
 export function createMissingFieldsResult(
-  rows: OpenSearchSearchHit[],
+  rows: NormalizedRow[],
   fields: string[],
   status: Extract<TransformationExecutionStatus, 'partially_applied' | 'skipped'> = 'skipped'
 ): TransformationExecutionResult {
@@ -93,14 +125,12 @@ export function createMissingFieldsResult(
   };
 }
 
-export function rowHasField(row: OpenSearchSearchHit, field: string): boolean {
-  const source = (row._source as Record<string, unknown>) ?? {};
-  return Object.prototype.hasOwnProperty.call(source, field) || has(source, field);
+export function rowHasField(row: NormalizedRow, field: string): boolean {
+  return Object.prototype.hasOwnProperty.call(row, field) || has(row, field);
 }
 
-export function getRowFieldValue(row: OpenSearchSearchHit, field: string): unknown {
-  const source = (row._source as Record<string, unknown>) ?? {};
-  return Object.prototype.hasOwnProperty.call(source, field) ? source[field] : get(source, field);
+export function getRowFieldValue(row: NormalizedRow, field: string): unknown {
+  return Object.prototype.hasOwnProperty.call(row, field) ? row[field] : get(row, field);
 }
 
 const inferType = (value: unknown): string => {
@@ -122,14 +152,11 @@ const inferType = (value: unknown): string => {
   return 'unknown';
 };
 
-export function inferSchemaFromRows(
-  rows: OpenSearchSearchHit[]
-): Array<{ name: string; type: string }> {
+export function inferSchemaFromRows(rows: NormalizedRow[]): Array<{ name: string; type: string }> {
   const fieldValues = new Map<string, unknown>();
 
   for (const row of rows) {
-    const source = (row._source as Record<string, unknown>) ?? {};
-    for (const [name, value] of Object.entries(source)) {
+    for (const [name, value] of Object.entries(row)) {
       if (!fieldValues.has(name) || fieldValues.get(name) == null) {
         fieldValues.set(name, value);
       }
