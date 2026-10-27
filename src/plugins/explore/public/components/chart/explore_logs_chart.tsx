@@ -28,6 +28,7 @@ import {
   setDateRange,
 } from '../../application/utils/state_management/slices';
 import { RootState } from '../../application/utils/state_management/store';
+import { supersedeStreamingQuery } from '../../application/utils/streaming/streaming_abort_registry';
 import {
   executeQueries,
   executeHistogramQuery,
@@ -72,6 +73,11 @@ export const ExploreLogsChart = ({
   const dispatch = useDispatch();
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
   const onChangeInterval = (newInterval: string) => {
+    // A streamed histogram for the old setting would keep writing its buckets into the chart.
+    const streamedHistogramKey = prepareHistogramCacheKey(query);
+    if (supersedeStreamingQuery(streamedHistogramKey)) {
+      dispatch(clearQueryStatusMapByKey(streamedHistogramKey));
+    }
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));

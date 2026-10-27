@@ -10,6 +10,7 @@ import {
   isStreamingQueryAbortable,
   registerStreamingAbort,
   supersedeOtherStreamingQueries,
+  supersedeStreamingQuery,
   unregisterStreamingAbort,
 } from './streaming_abort_registry';
 
@@ -150,5 +151,25 @@ describe('supersedeOtherStreamingQueries', () => {
     abortStreamingQuery('table');
 
     expect(isCurrentStreamingRun('table', token)).toBe(true);
+  });
+});
+
+describe('supersedeStreamingQuery', () => {
+  afterEach(() => abortAllStreamingQueries());
+
+  // The caller re-runs the key another way; Stop's "how far it got" would land on the new status.
+  it('aborts the run and stops it from publishing', () => {
+    const run = { abort: jest.fn(), token: {} };
+    registerStreamingAbort('hist', run.abort, run.token);
+
+    expect(supersedeStreamingQuery('hist')).toBe(true);
+
+    expect(run.abort).toHaveBeenCalledTimes(1);
+    expect(isStreamingQueryAbortable('hist')).toBe(false);
+    expect(isCurrentStreamingRun('hist', run.token)).toBe(false);
+  });
+
+  it('reports when there was nothing to supersede', () => {
+    expect(supersedeStreamingQuery('hist')).toBe(false);
   });
 });

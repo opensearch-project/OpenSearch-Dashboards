@@ -62,16 +62,24 @@ export const isCurrentStreamingRun = (cacheKey: string, token: unknown): boolean
  * Returns the keys it aborted. A superseded run cannot publish, so its last status ("loading") is
  * left behind, and the caller must clear it or the page's overall status stays loading.
  */
-export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[] => {
-  const aborted: string[] = [];
-  for (const [cacheKey, run] of runs) {
-    if (keep.includes(cacheKey)) continue;
-    runs.delete(cacheKey);
-    if (isWeakKey(run.token)) superseded.add(run.token);
-    run.abort();
-    aborted.push(cacheKey);
-  }
-  return aborted;
+export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[] =>
+  [...runs.keys()].filter(
+    (cacheKey) => !keep.includes(cacheKey) && supersedeStreamingQuery(cacheKey)
+  );
+
+/**
+ * Aborts the run for `cacheKey` so that it cannot publish, for a caller about to re-run that key
+ * another way. Unlike `abortStreamingQuery`, which is Stop, the run does not report how far it got:
+ * that would land on the replacement's status. Returns whether there was a run, whose status the
+ * caller must then clear.
+ */
+export const supersedeStreamingQuery = (cacheKey: string): boolean => {
+  const run = runs.get(cacheKey);
+  if (!run) return false;
+  runs.delete(cacheKey);
+  if (isWeakKey(run.token)) superseded.add(run.token);
+  run.abort();
+  return true;
 };
 
 /** Returns true when there was a query to abort, so callers can avoid a redundant state update. */
