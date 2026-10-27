@@ -32,6 +32,16 @@ import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service'
 
 const createStartContractMock = () => {
   const mock: jest.Mocked<SavedObjectsStart> = {
+    annotations: {
+      createAnnotation: jest.fn(),
+      updateAnnotation: jest.fn(),
+      deleteAnnotation: jest.fn(),
+      findAnnotations: jest.fn(),
+      addAnnotationToObject: jest.fn(),
+      removeAnnotationFromObject: jest.fn(),
+      setAnnotationsForObject: jest.fn(),
+      getAnnotationsForObject: jest.fn(),
+    },
     client: {
       create: jest.fn(),
       bulkCreate: jest.fn(),

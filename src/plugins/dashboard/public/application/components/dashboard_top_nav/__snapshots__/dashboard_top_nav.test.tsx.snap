@@ -987,7 +987,23 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
@@ -2220,7 +2236,23 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
@@ -3453,7 +3485,23 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
@@ -4686,7 +4734,23 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
@@ -5919,7 +5983,23 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
@@ -7152,7 +7232,23 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "show": [MockFunction],
               },
             },
+            "savedObjectTags": Object {
+              "ui": Object {
+                "TagAssignmentModal": [Function],
+                "TagList": [Function],
+                "TagSelector": [Function],
+              },
+            },
             "savedObjects": Object {
+              "annotations": Object {
+                "addAnnotationToObject": [MockFunction],
+                "createAnnotation": [MockFunction],
+                "deleteAnnotation": [MockFunction],
+                "findAnnotations": [MockFunction],
+                "getAnnotationsForObject": [MockFunction],
+                "removeAnnotationFromObject": [MockFunction],
+                "updateAnnotation": [MockFunction],
+              },
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
