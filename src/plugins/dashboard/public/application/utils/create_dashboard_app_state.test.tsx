@@ -152,6 +152,68 @@ describe('createDashboardGlobalAndAppState', () => {
     );
   });
 
+  test('forces view mode when write controls are hidden and URL state requests edit mode', () => {
+    const readOnlyServices = createDashboardServicesMock();
+    readOnlyServices.dashboardConfig.getHideWriteControls.mockReturnValue(true);
+    const readOnlyUrlStateStorage = {
+      ...osdUrlStateStorage,
+      get: jest.fn(() => ({ viewMode: ViewMode.EDIT })),
+    } as unknown as IOsdUrlStateStorage;
+
+    createDashboardGlobalAndAppState({
+      stateDefaults: {
+        ...dashboardAppStateStub,
+        viewMode: ViewMode.VIEW,
+      },
+      osdUrlStateStorage: readOnlyUrlStateStorage,
+      services: readOnlyServices,
+      savedDashboardInstance,
+    });
+
+    expect(createStateContainer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ viewMode: ViewMode.VIEW }),
+      expect.any(Object)
+    );
+  });
+
+  test('keeps URL-synchronized state in view mode when write controls are hidden', () => {
+    const readOnlyServices = createDashboardServicesMock();
+    readOnlyServices.dashboardConfig.getHideWriteControls.mockReturnValue(true);
+    readOnlyServices.history.location.pathname = '/view/dashboard-1';
+    const currentState = {
+      ...dashboardAppStateStub,
+      viewMode: ViewMode.VIEW,
+    };
+    const setState = jest.fn();
+    createStateContainer.mockReturnValueOnce({
+      get: jest.fn(() => currentState),
+      getState: jest.fn(() => currentState),
+      set: setState,
+    });
+
+    createDashboardGlobalAndAppState({
+      stateDefaults: currentState,
+      osdUrlStateStorage,
+      services: readOnlyServices,
+      savedDashboardInstance: {
+        ...savedDashboardInstance,
+        id: 'dashboard-1',
+      },
+    });
+    const syncStateCall = syncState.mock.calls[syncState.mock.calls.length - 1][0];
+
+    syncStateCall.stateContainer.set({
+      ...currentState,
+      viewMode: ViewMode.EDIT,
+    });
+
+    expect(setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        viewMode: ViewMode.VIEW,
+      })
+    );
+  });
+
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
     expect(stateContainer).toBe('stateContainer');
     stopStateSync();
@@ -167,6 +229,33 @@ describe('createDashboardGlobalAndAppState', () => {
         ...dashboardAppStateStub,
         query: newQuery,
       });
+    });
+
+    test('does not enter edit mode when write controls are hidden', () => {
+      const readOnlyServices = createDashboardServicesMock();
+      readOnlyServices.dashboardConfig.getHideWriteControls.mockReturnValue(true);
+      createDashboardGlobalAndAppState({
+        stateDefaults: {
+          ...dashboardAppStateStub,
+          viewMode: ViewMode.VIEW,
+        },
+        osdUrlStateStorage,
+        services: readOnlyServices,
+        savedDashboardInstance,
+      });
+      const readOnlyTransitions =
+        createStateContainer.mock.calls[createStateContainer.mock.calls.length - 1][1];
+      const viewState = {
+        ...dashboardAppStateStub,
+        viewMode: ViewMode.VIEW,
+      };
+
+      expect(readOnlyTransitions.set(viewState)('viewMode', ViewMode.EDIT)).toEqual(viewState);
+      expect(
+        readOnlyTransitions.setDashboard(viewState)({
+          viewMode: ViewMode.EDIT,
+        })
+      ).toEqual(viewState);
     });
 
     test('setOption', () => {

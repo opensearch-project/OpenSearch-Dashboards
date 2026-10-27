@@ -70,9 +70,15 @@ export const VisualizeListing = () => {
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
   const { setAppRightControls } = application;
+  const hideWriteControls = application.capabilities.dashboard?.showWriteControls === false;
 
   useEffect(() => {
     if (pathname === '/new') {
+      if (hideWriteControls) {
+        history.replace(VisualizeConstants.LANDING_PAGE_PATH);
+        return;
+      }
+
       // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
       closeNewVisModal.current = visualizations.showNewVisModal({
         onClose: () => {
@@ -84,7 +90,7 @@ export const VisualizeListing = () => {
       // close modal window if exists
       closeNewVisModal.current();
     }
-  }, [history, pathname, visualizations]);
+  }, [hideWriteControls, history, pathname, visualizations]);
 
   useMount(() => {
     if (showUpdatedUx) {
@@ -141,7 +147,10 @@ export const VisualizeListing = () => {
     [visualizeServices, application]
   );
 
-  const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
+  const noItemsFragment = useMemo(
+    () => getNoItemsMessage(hideWriteControls ? undefined : createNewVis),
+    [createNewVis, hideWriteControls]
+  );
   const tableColumns = useMemo(
     () => getTableColumns(application, history, uiSettings),
     [application, history, uiSettings]
@@ -196,7 +205,7 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {showUpdatedUx && (
+      {showUpdatedUx && !hideWriteControls && (
         <HeaderControl
           setMountPoint={setAppRightControls}
           controls={[
@@ -214,13 +223,13 @@ export const VisualizeListing = () => {
       )}
       <TableListView
         headingId="visualizeListingHeading"
-        // we allow users to create visualizations even if they can't save them
-        // for data exploration purposes
-        createItem={createNewVis}
+        // Saving can be unavailable while unsaved data exploration remains allowed.
+        // Hidden dashboard write controls represent workspace-wide library read-only access.
+        createItem={hideWriteControls ? undefined : createNewVis}
         findItems={fetchItems}
-        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-        editItem={visualizeCapabilities.save ? editItem : undefined}
-        visbuilderEditItem={visbuilderEditItem}
+        deleteItems={!hideWriteControls && visualizeCapabilities.delete ? deleteItems : undefined}
+        editItem={!hideWriteControls && visualizeCapabilities.save ? editItem : undefined}
+        visbuilderEditItem={hideWriteControls ? undefined : visbuilderEditItem}
         tableColumns={tableColumns}
         listingLimit={listingLimit}
         initialPageSize={savedObjectsPublic.settings.getPerPage()}

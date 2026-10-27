@@ -239,7 +239,7 @@ describe('Dashboard top nav', () => {
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();
 
-      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+      expect(mockRegister).toHaveBeenCalledWith({
         id: 'toggle_dashboard_edit',
         pluginId: 'dashboard',
         name: expect.any(String),
@@ -247,6 +247,56 @@ describe('Dashboard top nav', () => {
         keys: 'shift+e',
         execute: expect.any(Function),
       });
+    });
+
+    test('does not register toggle edit shortcut when write controls are hidden', async () => {
+      mockServices.application.capabilities = {
+        ...mockServices.application.capabilities,
+        dashboard: {
+          ...mockServices.application.capabilities.dashboard,
+          showWriteControls: false,
+        },
+      };
+      mockServices.dashboardConfig.getHideWriteControls.mockReturnValue(true);
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.VIEW })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(mockUseKeyboardShortcut).not.toHaveBeenCalled();
+      expect(mockRegister).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'toggle_dashboard_edit',
+        })
+      );
+    });
+
+    test('does not register save or add shortcuts for stale read-only edit state', async () => {
+      mockServices.application.capabilities = {
+        ...mockServices.application.capabilities,
+        dashboard: {
+          ...mockServices.application.capabilities.dashboard,
+          showWriteControls: false,
+        },
+      };
+      mockServices.dashboardConfig.getHideWriteControls.mockReturnValue(true);
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(mockRegister).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'save_dashboard',
+        })
+      );
+      expect(mockRegister).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'add_panel_to_dashboard',
+        })
+      );
     });
 
     test('registers save and add shortcuts in edit mode', async () => {

@@ -7,6 +7,7 @@ import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
+  savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'opensearch-dashboards/server/mocks';
 import { WorkspacePlugin, WorkspacePluginDependencies } from './plugin';
@@ -71,18 +72,142 @@ describe('Workspace server plugin', () => {
     let result;
     updateWorkspaceState(request, { isDashboardAdmin: false });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
-    result = registerSwitcher(request, capabilities);
+    result = await registerSwitcher(request, capabilities);
     expect(result).toEqual({ dashboards: { isDashboardAdmin: false } });
 
     updateWorkspaceState(request, { isDashboardAdmin: true });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
-    result = registerSwitcher(request, capabilities);
+    result = await registerSwitcher(request, capabilities);
     expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
 
     updateWorkspaceState(request, { isDashboardAdmin: undefined });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
-    result = registerSwitcher(request, capabilities);
+    result = await registerSwitcher(request, capabilities);
     expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
+  });
+
+  it('hides dashboard and visualization write controls for a read-only workspace collaborator', async () => {
+    const setupMock = coreMock.createSetup();
+    const startMock = coreMock.createStart();
+    const savedObjectsClient = savedObjectsClientMock.create();
+    startMock.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'workspace-1',
+          type: 'workspace',
+          attributes: { name: 'workspace-1' },
+          references: [],
+          permissions: {
+            library_read: { users: ['user1'] },
+            read: { users: ['user1'] },
+          },
+        },
+      ],
+    });
+    jest
+      .spyOn(serverUtils, 'getPrincipalsFromRequest')
+      .mockImplementation(() => ({ users: ['user1'] }));
+
+    const initializerContextConfigMock = coreMock.createPluginInitializerContext({
+      enabled: true,
+      permission: { enabled: true },
+    });
+    const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
+    await workspacePlugin.setup(setupMock, mockDeps);
+    await workspacePlugin.start(startMock);
+
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(request, {
+      isDashboardAdmin: false,
+      requestWorkspaceId: 'workspace-1',
+    });
+    const capabilitySwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+
+    expect(
+      await capabilitySwitcher(request, {
+        dashboard: {
+          createNew: true,
+          show: true,
+          showWriteControls: true,
+          saveQuery: true,
+        },
+        visualize: {
+          createShortUrl: true,
+          delete: true,
+          save: true,
+          saveQuery: true,
+          show: true,
+        },
+        dashboards: { isDashboardAdmin: false },
+      } as any)
+    ).toEqual({
+      dashboard: {
+        createNew: false,
+        showWriteControls: false,
+        saveQuery: false,
+      },
+      visualize: {
+        createShortUrl: false,
+        delete: false,
+        save: false,
+        saveQuery: false,
+      },
+      dashboards: { isDashboardAdmin: false },
+    });
+  });
+
+  it('keeps write controls for a workspace collaborator with library write access', async () => {
+    const setupMock = coreMock.createSetup();
+    const startMock = coreMock.createStart();
+    const savedObjectsClient = savedObjectsClientMock.create();
+    startMock.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'workspace-1',
+          type: 'workspace',
+          attributes: { name: 'workspace-1' },
+          references: [],
+          permissions: {
+            library_write: { users: ['user1'] },
+            read: { users: ['user1'] },
+          },
+        },
+      ],
+    });
+    jest
+      .spyOn(serverUtils, 'getPrincipalsFromRequest')
+      .mockImplementation(() => ({ users: ['user1'] }));
+
+    const initializerContextConfigMock = coreMock.createPluginInitializerContext({
+      enabled: true,
+      permission: { enabled: true },
+    });
+    const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
+    await workspacePlugin.setup(setupMock, mockDeps);
+    await workspacePlugin.start(startMock);
+
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(request, {
+      isDashboardAdmin: false,
+      requestWorkspaceId: 'workspace-1',
+    });
+    const capabilitySwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+
+    expect(
+      await capabilitySwitcher(request, {
+        dashboard: {
+          createNew: true,
+          show: true,
+          showWriteControls: true,
+          saveQuery: true,
+        },
+        dashboards: { isDashboardAdmin: false },
+      } as any)
+    ).toEqual({
+      dashboards: { isDashboardAdmin: false },
+    });
   });
 
   it('#proxyWorkspaceTrafficToRealHandler', async () => {
