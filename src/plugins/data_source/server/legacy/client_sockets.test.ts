@@ -130,4 +130,29 @@ describe('legacy data source client sockets', () => {
     expect(warnings[0][0]).toContain('(POST /_plugins/_security/authinfo)');
     expect(warnings[0][0]).toContain(error);
   });
+
+  test("returns a socket to the pool after the connector's clean-up", async () => {
+    // Sent the way the connector sends its requests, with the response ending first.
+    const request: http.ClientRequest = getConnection(client).hand.request({
+      host: '127.0.0.1',
+      port,
+      method: 'POST',
+      path: '/_plugins/_security/authinfo',
+      agent,
+      headers: { 'content-length': 10 },
+    });
+    request.write('12345');
+    const [response] = await once(request, 'response');
+    response.resume();
+    await once(response, 'end');
+    const socket = request.socket!;
+    request.removeAllListeners();
+    request.end('67890');
+    await nextCheckPhase();
+
+    expect({
+      inUse: Object.values(agent.sockets).flat().includes(socket),
+      free: Object.values(agent.freeSockets).flat().includes(socket),
+    }).toEqual({ inUse: false, free: true });
+  });
 });

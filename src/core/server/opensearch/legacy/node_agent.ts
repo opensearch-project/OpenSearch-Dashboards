@@ -10,10 +10,18 @@ import { Logger } from '../../logging';
 /** The request a pooled socket is serving: Node's `_httpMessage`, which agentkeepalive reads too. */
 type PooledSocket = Duplex & { _httpMessage?: ClientRequest | null };
 
+/** The parts of the legacy client's `HttpConnector` the hook uses. */
+interface LegacyHttpConnector {
+  createAgent(config: unknown): Agent;
+  /** The `http` or `https` module the connector sends its requests with. */
+  hand?: { request?: (...args: unknown[]) => ClientRequest };
+}
+
 /**
  * Returns a `createNodeAgent` hook for legacy `elasticsearch` clients. It creates the agent the
- * connector would create, and logs a warning instead of crashing the server when a socket times
- * out or fails while attached to a request that has already finished.
+ * connector would create, and keeps the connector from leaking that agent's sockets. It also logs
+ * a warning instead of crashing the server when a socket times out or fails while attached to a
+ * request that has already finished.
  * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/12791
  *
  * @param log - Logger for the socket errors the hook handles.
@@ -21,7 +29,8 @@ type PooledSocket = Duplex & { _httpMessage?: ClientRequest | null };
  */
 export const getLegacyNodeAgentFactory =
   (log: Logger) =>
-  (connector: { createAgent(config: unknown): Agent }, config: unknown): Agent => {
+  (connector: LegacyHttpConnector, config: unknown): Agent => {
+    keepNodeRequestListeners(connector);
     const agent = connector.createAgent(config);
     const createConnection = agent.createConnection.bind(agent);
     // Both agents the connector can create return the new socket synchronously.
@@ -34,6 +43,31 @@ export const getLegacyNodeAgentFactory =
     };
     return agent;
   };
+
+/**
+ * Makes the connector's clean-up remove only its own listener from the requests it sends. Its
+ * `removeAllListeners()` would also remove Node's, which returns the socket to the pool when the
+ * response ends before the request has finished.
+ */
+function keepNodeRequestListeners(connector: LegacyHttpConnector) {
+  const { hand } = connector;
+  if (!hand || typeof hand.request !== 'function') {
+    return;
+  }
+  connector.hand = Object.create(hand, {
+    request: {
+      value: (...args: unknown[]) => {
+        const req = hand.request!(...args);
+        const { removeAllListeners } = req;
+        // The clean-up passes no event, and its only listener left on the request is for errors.
+        req.removeAllListeners = function (this: ClientRequest, ...events: [(string | symbol)?]) {
+          return removeAllListeners.apply(this, events.length > 0 ? events : ['error']);
+        };
+        return req;
+      },
+    },
+  });
+}
 
 function guardSocket(socket: PooledSocket, log: Logger) {
   // The agent's own error listeners, installed before the socket is returned to us.

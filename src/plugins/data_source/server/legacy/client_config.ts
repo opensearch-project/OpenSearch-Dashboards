@@ -69,7 +69,7 @@ export function parseClientOptions(
     requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
     suggestCompression: config.globalOpenSearchConfig.requestCompression,
-    // Keeps an orphaned pooled socket from crashing the process, see `getLegacyNodeAgentFactory`.
+    // Keeps pooled sockets from leaking or from crashing the process, see `getLegacyNodeAgentFactory`.
     createNodeAgent: getLegacyNodeAgentFactory(logger),
   };
 

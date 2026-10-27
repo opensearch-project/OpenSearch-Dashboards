@@ -133,6 +133,45 @@ describe('getLegacyNodeAgentFactory', () => {
     expect(() => socket.emit('timeout')).not.toThrow();
     expect(log.warn).not.toHaveBeenCalled();
   });
+
+  describe("the connector's requests", () => {
+    const createConnector = () => {
+      const hand = { request: jest.fn((..._: unknown[]) => new EventEmitter() as ClientRequest) };
+      const connector = { createAgent: jest.fn(() => new Agent()), hand };
+      getLegacyNodeAgentFactory(log)(connector, {});
+      return { connector, hand };
+    };
+
+    test('keep all but their error listeners when the connector removes all of them', () => {
+      const { connector, hand } = createConnector();
+      const request = connector.hand.request('options', 'callback');
+      expect(hand.request).toHaveBeenCalledWith('options', 'callback');
+      const onFinish = () => {};
+      request.on('finish', onFinish).on('error', () => {});
+
+      request.removeAllListeners();
+      expect(request.listeners('finish')).toEqual([onFinish]);
+      expect(request.listenerCount('error')).toBe(0);
+
+      request.removeAllListeners('finish');
+      expect(request.listenerCount('finish')).toBe(0);
+    });
+
+    test('are the only ones that change', () => {
+      const { connector, hand } = createConnector();
+      expect(Object.getPrototypeOf(connector.hand)).toBe(hand);
+      expect(hand.request().removeAllListeners).toBe(EventEmitter.prototype.removeAllListeners);
+    });
+
+    test.each([
+      ['no module', undefined],
+      ['a module without request', { request: undefined }],
+    ])('are left alone by a connector with %s', (_, hand) => {
+      const connector = { createAgent: jest.fn(() => new Agent()), hand };
+      getLegacyNodeAgentFactory(log)(connector, {});
+      expect(connector.hand).toBe(hand);
+    });
+  });
 });
 
 /** A self-signed certificate for 127.0.0.1, which the clients below trust as their CA. */
@@ -244,6 +283,15 @@ const sendWhileBusy = (send: () => Promise<unknown>) =>
     setTimeout(() => busyWait(50), 1);
   });
 
+/** Calls `listener` with each request the agent serves, once its response has ended. */
+function onResponseEnd(agent: Agent, listener: (request: ClientRequest) => void) {
+  const addRequest = (agent as any).addRequest;
+  (agent as any).addRequest = function (request: ClientRequest, ...rest: unknown[]) {
+    request.once('response', (response) => response.once('end', () => listener(request)));
+    return addRequest.call(this, request, ...rest);
+  };
+}
+
 describe('legacy cluster clients', () => {
   let server: ChildProcess;
   let config: LegacyOpenSearchClientConfig;
@@ -251,6 +299,7 @@ describe('legacy cluster clients', () => {
   /** OpenSearch, a firewall or a load balancer resetting the connection (TCP RST). */
   const resetByServer = (socket: Socket) => server.stdin!.write(`${socket.localPort}\n`);
 
+  // Starting the stand-in's Node process can exceed Jest's default 5 s when the whole suite runs.
   beforeAll(async () => {
     const { key, cert } = createCertificate();
     server = spawn(process.execPath, ['-e', SERVER_SOURCE], {
@@ -278,7 +327,7 @@ describe('legacy cluster clients', () => {
         alwaysPresentCertificate: false,
       },
     };
-  });
+  }, 30000);
 
   afterAll(() => {
     server.kill();
@@ -374,6 +423,29 @@ describe('legacy cluster clients', () => {
       closeClusterClient(clusterClient);
     });
 
+    test('return the socket to the pool when the response ends before the request finishes', async () => {
+      // Open one keep-alive socket and return it to the pool.
+      await send(clusterClient);
+      const agent = getAgent(getRawClient(clusterClient));
+      const raced: ClientRequest[] = [];
+      onResponseEnd(agent, (request) => !request.writableFinished && raced.push(request));
+
+      for (let attempt = 0; attempt < 10 && raced.length === 0; attempt++) {
+        await expect(sendWhileBusy(() => send(clusterClient))).resolves.toEqual({});
+        await nextCheckPhase();
+      }
+      expect(raced).not.toHaveLength(0);
+      const socket = raced[0].socket as TLSSocket;
+      expect(socket.authorized).toBe(true);
+      expect(raced[0].writableFinished).toBe(true);
+
+      // Without the hook, the connector's clean-up left the socket in use, attached to the request.
+      expect({
+        inUse: getSockets(agent).includes(socket),
+        free: Object.values(agent.freeSockets).flat().includes(socket),
+      }).toEqual({ inUse: false, free: true });
+    });
+
     test.each([
       [
         // agentkeepalive times such a socket out after 120 s and destroys it with
@@ -391,6 +463,9 @@ describe('legacy cluster clients', () => {
         // Open one keep-alive socket and return it to the pool.
         await send(clusterClient);
         const agent = getAgent(getRawClient(clusterClient));
+        // The hook keeps the connector from leaving such a socket. Strip each request's listeners
+        // when its response ends, as the connector's clean-up did, to leave one anyway.
+        onResponseEnd(agent, (request) => EventEmitter.prototype.removeAllListeners.call(request));
 
         let orphan: Socket | undefined;
         for (let attempt = 0; attempt < 10 && !orphan; attempt++) {

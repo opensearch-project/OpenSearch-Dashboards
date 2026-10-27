@@ -103,7 +103,7 @@ export function parseOpenSearchClientConfig(
 ) {
   const opensearchClientConfig: ExtendedConfigOptions = {
     keepAlive: true,
-    // Keeps an orphaned pooled socket from crashing the process, see `getLegacyNodeAgentFactory`.
+    // Keeps pooled sockets from leaking or from crashing the process, see `getLegacyNodeAgentFactory`.
     createNodeAgent: getLegacyNodeAgentFactory(log),
     ...pick(config, [
       'apiVersion',
