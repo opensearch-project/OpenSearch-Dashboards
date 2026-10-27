@@ -200,5 +200,49 @@ describe('useDashboardAppAndGlobalState', () => {
       expect(first.destroy).toHaveBeenCalledTimes(1);
       expect(second.destroy).not.toHaveBeenCalled();
     });
+
+    it('stops syncing with the container before destroying it', async () => {
+      const calls: string[] = [];
+      handleDashboardContainerInputs.mockReturnValue(() => calls.push('stop inputs'));
+      handleDashboardContainerOutputs.mockReturnValue(() => calls.push('stop outputs'));
+      const container = { destroy: jest.fn(() => calls.push('destroy')) };
+      createDashboardContainer.mockResolvedValue(container);
+      const { result, unmount } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(container));
+
+      unmount();
+
+      expect(calls).toEqual(['stop inputs', 'stop outputs', 'destroy']);
+    });
+
+    it('clears the current container while the next dashboard loads', async () => {
+      const first = createContainerMock();
+      createDashboardContainer
+        .mockResolvedValueOnce(first)
+        .mockReturnValueOnce(new Promise(() => {})); // the next one never finishes loading
+      const { result, rerender } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(first));
+
+      const otherDashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
+      rerender({ savedDashboardInstance, dashboard: otherDashboard });
+
+      expect(first.destroy).toHaveBeenCalledTimes(1);
+      expect(result.current.currentContainer).toBeUndefined();
+    });
+
+    it('does not fail when the dashboard is left and no container is created', async () => {
+      let resolveContainer: (value: unknown) => void = () => {};
+      createDashboardContainer.mockReturnValue(
+        new Promise((resolve) => {
+          resolveContainer = resolve;
+        })
+      );
+      const { unmount } = renderAppState();
+
+      unmount();
+      await act(async () => resolveContainer(undefined));
+
+      expect(handleDashboardContainerInputs).not.toHaveBeenCalled();
+    });
   });
 });
