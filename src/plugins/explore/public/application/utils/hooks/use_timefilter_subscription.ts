@@ -4,27 +4,32 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, useStore } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import {
   defaultPrepareQueryString,
   executeQueries,
 } from '../state_management/actions/query_actions';
+import { STREAMING_MAX_HELD_ROWS } from '../state_management/actions/streaming_query_actions';
 import { clearQueryStatusMap, clearResults } from '../state_management/slices';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { isStreamingQueryAbortable } from '../streaming/streaming_abort_registry';
 
-/**
- * Whether the results query is still streaming. A refresh would supersede it, and when the refresh
- * interval is shorter than the query, every run is superseded before it renders anything.
- */
-const isResultsQueryStreaming = (query: RootState['query']): boolean => {
+// A refresh would supersede the run, and with an interval shorter than the query nothing would
+// ever render. Past the row cap the run only polls for status, so refreshes may resume.
+const isTableStillFilling = (state: RootState): boolean => {
+  let cacheKey: string;
   try {
-    return isStreamingQueryAbortable(defaultPrepareQueryString(query));
+    cacheKey = defaultPrepareQueryString(state.query);
   } catch {
     return false;
   }
+  if (!isStreamingQueryAbortable(cacheKey)) return false;
+  const streaming = state.queryEditor?.queryStatusMap?.[cacheKey]?.streaming;
+  if (!streaming?.isPolling) return false;
+  // `total` counts only the rows produced so far, so a client that has caught up is not done.
+  return streaming.rowsFetched < STREAMING_MAX_HELD_ROWS;
 };
 
 /**
@@ -37,6 +42,7 @@ const isResultsQueryStreaming = (query: RootState['query']): boolean => {
  */
 export const useTimefilterSubscription = (services: ExploreServices) => {
   const dispatch = useDispatch();
+  const store = useStore<RootState>();
   const query = useSelector((state: RootState) => state.query);
   const hasRunCurrentQuery = useSelector(
     (state: RootState) =>
@@ -53,7 +59,7 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
     const subscription = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
       .subscribe(() => {
-        if (!query.dataset || isResultsQueryStreaming(query)) return;
+        if (!query.dataset || isTableStillFilling(store.getState())) return;
         if (
           !hasRunCurrentQueryRef.current &&
           datasetRequiresExplicitRun(services.data.query.queryString, query.dataset)
@@ -69,5 +75,5 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [services, dispatch, query]);
+  }, [services, dispatch, store, query]);
 };

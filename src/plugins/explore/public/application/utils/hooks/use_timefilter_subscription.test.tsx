@@ -30,6 +30,10 @@ jest.mock('../state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn(() => 'results-key'),
 }));
 
+jest.mock('../state_management/actions/streaming_query_actions', () => ({
+  STREAMING_MAX_HELD_ROWS: 100,
+}));
+
 let mockStreamingKeys: string[] = [];
 jest.mock('../streaming/streaming_abort_registry', () => ({
   isStreamingQueryAbortable: (cacheKey: string) => mockStreamingKeys.includes(cacheKey),
@@ -52,6 +56,7 @@ interface MockRootState {
   query: QueryState;
   ui: any;
   results: any;
+  queryEditor?: any;
 }
 
 describe('useTimefilterSubscription', () => {
@@ -99,6 +104,7 @@ describe('useTimefilterSubscription', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
+        queryEditor: (state = initialState.queryEditor ?? { queryStatusMap: {} }) => state,
       },
       preloadedState,
     });
@@ -174,22 +180,30 @@ describe('useTimefilterSubscription', () => {
 
   // A refresh interval shorter than the query would otherwise supersede every run before it renders.
   describe('while the results query is still streaming', () => {
-    const state = {
-      query: {
-        ...queryInitialState,
-        query: 'source=logs',
-        language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
-      },
-    };
+    const withStreaming = (streaming: Record<string, unknown>) =>
+      ({
+        query: {
+          ...queryInitialState,
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+        },
+        queryEditor: { queryStatusMap: { 'results-key': { streaming } } },
+      }) as any;
+
+    beforeEach(() => {
+      mockStreamingKeys = ['results-key'];
+    });
 
     afterEach(() => {
       mockStreamingKeys = [];
     });
 
-    it('skips the refresh, and resumes refreshing once the run finishes', () => {
-      mockStreamingKeys = ['results-key'];
-      renderHookWithProvider(mockServices, state as any);
+    it('skips the refresh while rows are still arriving, and resumes once the run ends', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 500 })
+      );
 
       autoRefreshSubject.next({});
       expect(mockExecuteQueries).not.toHaveBeenCalled();
@@ -200,9 +214,54 @@ describe('useTimefilterSubscription', () => {
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
     });
 
+    it('skips while nothing has rendered yet, before the total is known', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 0, total: 0 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    // A slow query: the client has read every row produced so far, but more are coming.
+    it('skips while the client has caught up with a query that is still producing rows', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 40 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    it('refreshes once a run below the cap has finished', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: false, rowsFetched: 40, total: 40 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    // Past the cap the run only polls for status, which could hold refreshes back for minutes.
+    it('refreshes once the table reaches the row cap', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
     it('still refreshes while some other query streams', () => {
       mockStreamingKeys = ['another-key'];
-      renderHookWithProvider(mockServices, state as any);
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 500 })
+      );
 
       autoRefreshSubject.next({});
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
