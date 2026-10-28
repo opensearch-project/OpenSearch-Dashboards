@@ -166,7 +166,8 @@
     "**/fast-xml-parser": "^5.7.0",
     "**/mime-db": "^1.54.0",
     "**/mocha/diff": "^8.0.4",
-    "**/tmp": "^0.2.7"
+    "**/tmp": "^0.2.7",
+    "**/zod": "4.6.7"
   },
   "workspaces": {
     "packages": [
