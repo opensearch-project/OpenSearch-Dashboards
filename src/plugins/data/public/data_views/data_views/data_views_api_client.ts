@@ -19,9 +19,10 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query: any) {
+  private _request(url: string, query: any, method: 'GET' | 'POST' = 'GET') {
     return this.http
       .fetch(url, {
+        method,
         query,
       })
       .catch((resp: any) => {
@@ -60,5 +61,19 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     };
 
     return this._request(url, query).then((resp: any) => resp.fields);
+  }
+
+  refreshFields(id: string, options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'> = {}) {
+    const { metaFields, dataSourceId } = options;
+    const url = this._getUrl([id, '_refresh_fields']);
+
+    return this._request(
+      url,
+      {
+        meta_fields: metaFields,
+        data_source: dataSourceId,
+      },
+      'POST'
+    );
   }
 }

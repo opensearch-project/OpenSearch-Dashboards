@@ -114,8 +114,7 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
   const refreshFields = () => {
     overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
       if (isConfirmed) {
-        await data.dataViews.refreshFields(dataset);
-        await data.dataViews.updateSavedObject(dataset);
+        await data.dataViews.refreshFieldsAndSave(dataset);
         setFields(dataset.getNonScriptedFields());
       }
     });

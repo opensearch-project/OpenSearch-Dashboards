@@ -385,17 +385,35 @@ export class IndexPatternsService {
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-          values: { id: indexPattern.id, title: indexPattern.title },
-        }),
-      });
+      this.onRefreshFieldsError(err, indexPattern);
     }
+  };
+
+  refreshFieldsAndSave = async (indexPattern: IndexPattern) => {
+    try {
+      const { fields, version } = await this.apiClient.refreshFields(indexPattern.id as string, {
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+        dataSourceId: indexPattern.dataSourceRef?.id,
+      });
+      indexPattern.fields.replaceAll(fields);
+      indexPattern.version = version;
+      indexPattern.resetOriginalSavedObjectBody();
+    } catch (err) {
+      this.onRefreshFieldsError(err, indexPattern);
+    }
+  };
+
+  private onRefreshFieldsError = (err: Error, indexPattern: IndexPattern) => {
+    if (err instanceof IndexPatternMissingIndices) {
+      this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+    }
+
+    this.onError(err, {
+      title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+        defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+        values: { id: indexPattern.id, title: indexPattern.title },
+      }),
+    });
   };
 
   /**
@@ -666,8 +684,11 @@ export class IndexPatternsService {
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.create(spec, skipFetchFields);
+    const indexPattern = await this.create(spec, true);
     await this.createSavedObject(indexPattern, override);
+    if (!skipFetchFields) {
+      await this.refreshFieldsAndSave(indexPattern);
+    }
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
   }

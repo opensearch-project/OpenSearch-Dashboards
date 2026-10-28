@@ -368,9 +368,39 @@ describe('IndexPatterns', () => {
     const title = 'opensearch-dashboards-*';
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
+    indexPatterns.refreshFields = jest.fn();
+    indexPatterns.refreshFieldsAndSave = jest.fn();
     await indexPatterns.createAndSave({ title });
+    expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
     expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.refreshFieldsAndSave).toHaveBeenCalled();
     expect(indexPatterns.setDefault).toHaveBeenCalled();
+  });
+
+  test('createAndSave skips fetching fields when skipFetchFields is true', async () => {
+    indexPatterns.createSavedObject = jest.fn();
+    indexPatterns.setDefault = jest.fn();
+    indexPatterns.refreshFieldsAndSave = jest.fn();
+    await indexPatterns.createAndSave({ title: 'opensearch-dashboards-*' }, false, true);
+    expect(indexPatterns.refreshFieldsAndSave).not.toHaveBeenCalled();
+  });
+
+  test('refreshFieldsAndSave', async () => {
+    const apiClient = { ...createFieldsFetcher(), refreshFields: jest.fn() };
+    indexPatterns = newService(apiClient);
+    const indexPattern = await indexPatterns.create(
+      { id: 'id', title: 'opensearch-dashboards-*' },
+      true
+    );
+    const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
+    apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
+    await indexPatterns.refreshFieldsAndSave(indexPattern);
+    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', {
+      metaFields: false,
+      dataSourceId: undefined,
+    });
+    expect(indexPattern.fields.getByName('foo')).toBeDefined();
+    expect(indexPattern.version).toBe('v2');
   });
 
   test('savedObjectToSpec', () => {

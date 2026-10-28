@@ -63,4 +63,13 @@ describe('IndexPatternsApiClient', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
+
+  test('posts to the right URI to refresh fields', async function () {
+    await indexPatternsApiClient.refreshFields('id', { metaFields: ['_id'], dataSourceId: 'ds' });
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/id/_refresh_fields', {
+      method: 'POST',
+      query: { meta_fields: ['_id'], data_source: 'ds' },
+    });
+  });
 });
