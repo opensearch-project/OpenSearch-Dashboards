@@ -170,7 +170,7 @@ describe('CellValue', () => {
       {
         id: '1',
         title: 'Open',
-        url: '/app?s=${__data.fields.missing}&env=$unknown',
+        url: '/app?s=${__data.fields.missing}&env=${unknown}',
         openInNewTab: false,
         fields: ['col1'],
       },
@@ -179,8 +179,25 @@ describe('CellValue', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText('TestValue')).toHaveAttribute(
       'title',
-      'No link: ${__data.fields.missing}, $unknown could not be resolved for this row'
+      'No link: ${__data.fields.missing}, ${unknown} could not be resolved for this row'
     );
+  });
+
+  it.each([
+    {
+      name: 'OData query options',
+      url: "https://api.example.com/odata/Orders?$filter=Ext eq '${__value.text}'&$top=10",
+      href: "https://api.example.com/odata/Orders?$filter=Ext eq 'TestValue'&$top=10",
+    },
+    { name: 'a price', url: '/shop?price=$5', href: '/shop?price=$5' },
+  ])('keeps a link whose bare $word names no variable: $name', ({ url, href }) => {
+    const links: DataLink[] = [
+      { id: '1', title: 'Open', url, openInNewTab: false, fields: ['col1'] },
+    ];
+    render(<CellValue {...baseProps} dataLinks={links} />);
+    const link = screen.getByRole('link', { name: 'TestValue' });
+    expect(link).toHaveAttribute('href', href);
+    expect(link).not.toHaveAttribute('title');
   });
 
   it('does not render a link with a script scheme', () => {
@@ -216,8 +233,8 @@ describe('CellValue', () => {
 
   it('names each unresolved placeholder once, across links', () => {
     const links: DataLink[] = [
-      { id: '1', title: 'A', url: '/a/$unknown', openInNewTab: false, fields: ['col1'] },
-      { id: '2', title: 'B', url: '/b/$unknown', openInNewTab: false, fields: ['col1'] },
+      { id: '1', title: 'A', url: '/a/${unknown}', openInNewTab: false, fields: ['col1'] },
+      { id: '2', title: 'B', url: '/b/${unknown}', openInNewTab: false, fields: ['col1'] },
       // eslint-disable-next-line no-script-url
       { id: '3', title: 'C', url: 'javascript:alert(1)', openInNewTab: false, fields: ['col1'] },
     ];
@@ -225,7 +242,7 @@ describe('CellValue', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText('TestValue')).toHaveAttribute(
       'title',
-      'No link: $unknown could not be resolved for this row'
+      'No link: ${unknown} could not be resolved for this row'
     );
   });
 

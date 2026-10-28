@@ -19,6 +19,9 @@ import { cellValueText } from './table_vis_utils';
  * A `:rison` format suffix may follow the body of any placeholder, for example
  * ${__value.text:rison} or $<variable>:rison. Field names containing `}` are
  * not supported.
+ *
+ * A bare `$word` that names no variable is literal text, such as OData's
+ * `$filter` or `?price=$5`, so it neither changes nor hides the link.
  */
 
 /** Outer form: a braced body, or a bare variable with an optional format. */
@@ -98,9 +101,9 @@ export interface ResolvedDataLink {
 
 /**
  * Resolves the placeholders of a table data link URL in one pass, so a
- * substituted value is never expanded again. Placeholders for missing fields,
- * unknown variables or unknown suffixes stay as they are and are reported in
- * `unresolved`, so the caller can decide not to show the link.
+ * substituted value is never expanded again. Braced placeholders for missing
+ * fields, unknown variables or unknown suffixes stay as they are and are
+ * reported in `unresolved`, so the caller can decide not to show the link.
  */
 export const resolveDataLink = (
   url: string,
@@ -117,7 +120,9 @@ export const resolveDataLink = (
           ? resolveBraced(braced, value, row, variables)
           : resolveVariable(bareVariable as string, bareFormat === RISON, variables);
       if (resolved === undefined) {
-        unresolved.push(match);
+        if (braced !== undefined) {
+          unresolved.push(match);
+        }
         return match;
       }
       return resolved;

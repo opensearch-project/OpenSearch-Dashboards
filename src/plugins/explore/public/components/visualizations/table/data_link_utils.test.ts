@@ -148,8 +148,8 @@ describe('resolveDataLink', () => {
     { name: 'field not in the row, with :rison', placeholder: '${__data.fields.missing:rison}' },
     { name: 'inherited property', placeholder: '${__data.fields.constructor}' },
     { name: 'prototype', placeholder: '${__data.fields.__proto__}' },
-    { name: 'unknown variable', placeholder: '$unknown' },
-    { name: 'variable without variables', placeholder: '$env', vars: [] },
+    { name: 'unknown variable', placeholder: '${unknown}' },
+    { name: 'variable without variables', placeholder: '${env}', vars: [] },
     { name: 'unknown suffix on a variable', placeholder: '${env:raw}' },
     { name: 'unknown suffix on the clicked value', placeholder: '${__value.text:uri}' },
   ])('keeps and reports an unresolved placeholder: $name', ({ placeholder, vars = variables }) => {
@@ -159,12 +159,35 @@ describe('resolveDataLink', () => {
 
   it('resolves the other placeholders when some cannot be resolved', () => {
     expect(
-      resolveDataLink('?a=${__data.fields.missing}&b=$unknown&c=${__value.text}', 'v', row, [])
+      resolveDataLink('?a=${__data.fields.missing}&b=${unknown}&c=${__value.text}', 'v', row, [])
     ).toEqual({
-      url: '?a=${__data.fields.missing}&b=$unknown&c=v',
-      unresolved: ['${__data.fields.missing}', '$unknown'],
+      url: '?a=${__data.fields.missing}&b=${unknown}&c=v',
+      unresolved: ['${__data.fields.missing}', '${unknown}'],
     });
   });
+
+  it.each([
+    {
+      name: 'OData query options',
+      url: "https://api.example.com/odata/Orders?$filter=Ext eq '${__value.text}'&$top=10",
+      value: 'css',
+      expected: "https://api.example.com/odata/Orders?$filter=Ext eq 'css'&$top=10",
+    },
+    {
+      name: 'a price',
+      url: '/shop?price=$5&q=${__value.text}',
+      value: 'x',
+      expected: '/shop?price=$5&q=x',
+    },
+    { name: 'an unknown name', url: '?b=$unknown', expected: '?b=$unknown' },
+    { name: 'a known name without variables', url: '?e=$env', vars: [], expected: '?e=$env' },
+    { name: 'next to a known variable', url: '?e=$env&$top=10', expected: '?e=prod&$top=10' },
+  ])(
+    'keeps a bare $word that names no variable as literal text: $name',
+    ({ url, value = 'x', vars = variables, expected }) => {
+      expect(resolveDataLink(url, value, row, vars)).toEqual({ url: expected, unresolved: [] });
+    }
+  );
 
   it.each([
     {
