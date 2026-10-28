@@ -147,6 +147,8 @@ export class ExploreEmbeddable
   implements IEmbeddable<ExploreInput, ExploreOutput>
 {
   private abortController?: AbortController;
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
@@ -496,11 +498,22 @@ export class ExploreEmbeddable
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
+    // Pause fetching while not visible (e.g. a collapsed section); record the
+    // owed fetch (resumeFetch) and flush it once on resume. All fetch paths
+    // funnel through here. See EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      this.pendingFetchOnResume = true;
+      return;
+    }
+    const resumeFetch = this.pendingFetchOnResume;
+    this.pendingFetchOnResume = false;
+
     const { filters, query, timeRange } = this.input;
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
     const needFetch =
       this.node &&
       (force ||
+        resumeFetch ||
         !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
         !isEqual(query, this.prevState.query) ||
         !isEqual(timeRange, this.prevState.timeRange));

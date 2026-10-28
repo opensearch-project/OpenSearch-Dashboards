@@ -635,6 +635,37 @@ describe('ExploreEmbeddable', () => {
     expect(fetchSpy).toHaveBeenCalled();
   });
 
+  test('updateHandler skips fetch while not visible and records one is owed', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore - set input directly to avoid retriggering the input subscription
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+  });
+
+  test('updateHandler runs the owed fetch once when the panel becomes visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // Owe a fetch from a prior not-visible cycle; input is otherwise unchanged.
+    // @ts-ignore
+    embeddable.pendingFetchOnResume = true;
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, false);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+  });
+
   test('fetch handles missing searchProps gracefully', async () => {
     // @ts-ignore
     embeddable.searchProps = undefined;
