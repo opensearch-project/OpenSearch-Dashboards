@@ -7,7 +7,11 @@ import { useCallback, useMemo, useRef } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../data/common';
 import { ExploreServices } from '../../../types';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../common';
+import { EXPLORE_DEFAULT_LANGUAGE, ExploreFlavor } from '../../../../common';
+import {
+  getSourceTypeRegistry,
+  OPENSEARCH_SOURCE_TYPE_ID,
+} from '../../../services/source_type_registry';
 
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useEditorOperations } from '../hooks/use_editor_operations';
@@ -18,7 +22,7 @@ import '../visualization_editor.scss';
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
-  const { queryEditorState, queryBuilder } = useQueryBuilderState();
+  const { queryEditorState, queryBuilder, queryState } = useQueryBuilderState();
 
   const { clearEditor } = useEditorOperations();
 
@@ -66,7 +70,15 @@ export const DatasetSelectWidget = () => {
     [queryString, clearEditor, queryBuilder, services.notifications?.toasts]
   );
 
+  // The active dataset's source type decides the picker, as in Explore's main query panel: its own
+  // datasetSelector if it has one, else the generic picker limited to its dataset types.
+  const activeDataset = queryState?.dataset;
+  const activeSourceType = getSourceTypeRegistry().getForDataset(activeDataset);
+  const isRegisteredSource = activeSourceType.id !== OPENSEARCH_SOURCE_TYPE_ID;
+
   const supportedTypes = useMemo(() => {
+    if (isRegisteredSource) return activeSourceType.datasetTypes;
+
     if (queryEditorState.languageType === SupportLanguageType.promQL) return ['PROMETHEUS'];
 
     return (
@@ -75,12 +87,36 @@ export const DatasetSelectWidget = () => {
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       ]
     );
-  }, [services.supportedTypes, queryEditorState.languageType]);
+  }, [
+    services.supportedTypes,
+    queryEditorState.languageType,
+    isRegisteredSource,
+    activeSourceType,
+  ]);
 
   const signalTypes = useMemo(
     () => getRequiredSignalType(queryEditorState.languageType),
     [queryEditorState.languageType]
   );
+
+  // Its choice still goes through handleDatasetSelect, so the initial query applies.
+  const { datasetSelector: SourceDatasetSelector } = activeSourceType;
+  if (SourceDatasetSelector) {
+    return (
+      <div ref={containerRef} className="exploreDatasetSelectWrapper">
+        <SourceDatasetSelector
+          dataset={activeDataset}
+          onSelect={handleDatasetSelect}
+          data={services.data}
+          flavor={
+            getSourceTypeRegistry().isMetricsLanguage(queryEditorState.languageType)
+              ? ExploreFlavor.Metrics
+              : null
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="exploreDatasetSelectWrapper">
