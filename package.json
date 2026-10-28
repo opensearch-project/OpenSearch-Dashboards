@@ -155,7 +155,6 @@
     "**/nth-check": "^2.0.1",
     "**/postcss-selector-parser": "^7.1.6",
     "**/semver": "^7.5.3",
-    "**/serialize-javascript": "^7.0.3",
     "**/trim": "^0.0.3",
     "**/typescript": "~6.0.2",
     "**/yaml": "^2.2.2",
@@ -165,7 +164,6 @@
     "**/qs": "^6.17.0",
     "**/fast-xml-parser": "^5.7.0",
     "**/mime-db": "^1.54.0",
-    "**/mocha/diff": "^8.0.4",
     "**/tmp": "^0.2.7"
   },
   "workspaces": {
@@ -488,7 +486,7 @@
     "load-json-file": "^6.2.0",
     "luxon": "^3.2.1",
     "markdown-it": "^14.3.2",
-    "mocha": "^11.7.6",
+    "mocha": "^12.0.3",
     "mock-fs": "^4.12.0",
     "monaco-editor": "^0.52.0",
     "ms-chromium-edge-driver": "^0.4.3",
