@@ -70,4 +70,52 @@ export class PPLFilterUtils extends FilterUtils {
   public static addFiltersToQuery(query: string, filters: Filter[]): string {
     return filters.reduce(PPLFilterUtils.addFilterToQuery, query);
   }
+
+  /**
+   * Extracts the index named after the first `source=` in a PPL query, stripped of
+   * surrounding backticks/quotes. Returns `undefined` when no `source=` is found.
+   *
+   * Intentionally simple: it reads the first `source=` token only and does not
+   * resolve aliases or handle multi-source/subquery forms. Kept as a pure function so
+   * the out-of-dataset heuristic (`sourceDiffersFromDataset`) can be revised in one place.
+   *
+   * @param queryString - The raw PPL query string
+   * @returns The source index name, or `undefined`
+   */
+  public static extractSourceIndex(queryString: string): string | undefined {
+    const match = /\bsource\s*=\s*([`'"]?)([^\s`'"|,]+)\1/i.exec(queryString);
+    return match?.[2];
+  }
+
+  /**
+   * True when the query's `source=` clearly names a different index than the given
+   * dataset title. When they differ, the dataset's time field almost certainly does
+   * not exist on the queried index, so callers skip time-filter injection and the
+   * default time-sort to avoid a `field <timeField> not found` failure.
+   *
+   * The dataset title is treated as a comma-separated list of index patterns where `*`
+   * matches anything (e.g. `logs-*` covers `source=logs-2026.10`); comparison is
+   * case-insensitive. Returns `false` when either side is missing, so the caller falls
+   * back to its normal (always-inject) behavior.
+   *
+   * @param queryString - The raw PPL query string
+   * @param datasetTitle - The selected dataset's title (may be `undefined`)
+   * @returns Whether the queried source differs from the dataset
+   */
+  public static sourceDiffersFromDataset(
+    queryString: string,
+    datasetTitle: string | undefined
+  ): boolean {
+    const source = PPLFilterUtils.extractSourceIndex(queryString);
+    if (!source || !datasetTitle) return false;
+    const target = source.toLowerCase();
+    return !datasetTitle
+      .split(',')
+      .map((pattern) => pattern.trim().toLowerCase())
+      .filter(Boolean)
+      .some((pattern) => {
+        const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+        return new RegExp(`^${escaped}$`).test(target);
+      });
+  }
 }

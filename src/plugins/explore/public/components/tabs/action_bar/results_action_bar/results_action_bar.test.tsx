@@ -23,9 +23,11 @@ const mockSetShowRawTable = jest.fn();
 // The count comes from the results cache and dataset context, neither of which this mock store
 // carries; the action bar's job here is only to pass it through to the hits counter.
 const mockUseHiddenColumnCount = jest.fn(() => 0);
+const mockUseIsNonTimeSeries = jest.fn(() => false);
 jest.mock('../../../../helpers/use_displayed_columns', () => ({
   ...jest.requireActual('../../../../helpers/use_displayed_columns'),
   useHiddenColumnCount: () => mockUseHiddenColumnCount(),
+  useIsNonTimeSeries: () => mockUseIsNonTimeSeries(),
 }));
 
 jest.mock('../download_csv', () => ({
@@ -74,6 +76,26 @@ describe('ResultsActionBar', () => {
       </Provider>
     );
     expect(screen.getByTestId('dscResultsActionBar')).toBeInTheDocument();
+  });
+
+  test('shows the non-time-series badge when the result set is non-time-series', () => {
+    mockUseIsNonTimeSeries.mockReturnValue(true);
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.getByTestId('exploreNonTimeSeriesBadge')).toBeInTheDocument();
+    mockUseIsNonTimeSeries.mockReturnValue(false);
+  });
+
+  test('omits the non-time-series badge for time-series results', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.queryByTestId('exploreNonTimeSeriesBadge')).not.toBeInTheDocument();
   });
 
   test('should render the hits counter component', () => {

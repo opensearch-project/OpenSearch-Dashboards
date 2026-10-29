@@ -9,6 +9,7 @@ import { httpServiceMock, loggingSystemMock } from '../../../../core/server/mock
 import { IRouter } from '../../../../core/server';
 import { Readable } from 'stream';
 import { configSchema } from '../../config';
+import { BulkIndexForbiddenError } from '../utils/util';
 
 describe('Import file route', () => {
   let router: jest.Mocked<IRouter>;
@@ -45,6 +46,13 @@ describe('Import file route', () => {
         exists: jest.fn().mockResolvedValue({ body: false }),
         create: jest.fn().mockResolvedValue({}),
         updateAliases: jest.fn().mockResolvedValue({}),
+        // Default: the lookup alias does not exist yet (the client throws a 404 ResponseError)
+        getAlias: jest
+          .fn()
+          .mockRejectedValue(Object.assign(new Error('alias missing'), { statusCode: 404 })),
+        getMapping: jest.fn().mockResolvedValue({
+          body: { 'test-index': { mappings: { properties: { zip: { type: 'keyword' } } } } },
+        }),
       },
     };
 
@@ -118,6 +126,7 @@ describe('Import file route', () => {
           failedRows: [],
         },
         success: true,
+        partial: false,
       },
     });
   });
@@ -244,48 +253,266 @@ describe('Import file route', () => {
     });
   });
 
-  it('should not create alias when there are failed rows', async () => {
-    mockProcessor.ingestFile.mockResolvedValue({
-      total: 5,
-      failedRows: [1, 3],
-    });
-
+  const runImport = async (query: Record<string, unknown> = {}, mapping?: string) => {
     importFileRoute(router, config, fileProcessors, false);
-
-    const fileStream = Readable.from(['test data']);
     const request = {
       query: {
         indexName: 'test-index',
         createMode: true,
         fileExtension: 'json',
         importIdentifier: 'my-upload',
+        ...query,
       },
       body: {
-        file: fileStream,
+        file: Readable.from(['test data']),
+        ...(mapping && { mapping }),
       },
     };
-
     const response = {
       ok: jest.fn((args) => args),
       badRequest: jest.fn((args) => args),
       notFound: jest.fn((args) => args),
       internalError: jest.fn((args) => args),
+      forbidden: jest.fn((args) => args),
     };
-
     const handler = router.post.mock.calls[0][1];
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
+    return response;
+  };
+
+  const partialFailure = {
+    total: 3,
+    message: 'Indexed 2 documents',
+    failedRows: [2],
+    errorSummary: [
+      {
+        type: 'mapper_parsing_exception',
+        reason: 'failed to parse field [age] of type [integer]',
+        count: 1,
+        sampleRows: [2],
+      },
+    ],
+  };
+
+  it('should report success with partial=false and create the alias when every row lands', async () => {
+    const allSuccess = {
+      total: 3,
+      message: 'Indexed 3 documents',
+      failedRows: [],
+      errorSummary: [],
+    };
+    mockProcessor.ingestFile.mockResolvedValue(allSuccess);
+
+    const response = await runImport();
+
+    expect(mockClient.indices.updateAliases).toHaveBeenCalledTimes(1);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { message: allSuccess, success: true, partial: false, aliasCreated: true },
+    });
+  });
+
+  it('should still create the alias on partial failure so landed rows are not orphaned', async () => {
+    mockProcessor.ingestFile.mockResolvedValue(partialFailure);
+
+    const response = await runImport();
+
+    const lookupId = mockProcessor.ingestFile.mock.calls[0][1].lookupId;
+    expect(mockClient.indices.updateAliases).toHaveBeenCalledWith({
+      body: {
+        actions: [
+          {
+            add: {
+              index: 'test-index',
+              alias: 'my-upload',
+              filter: { term: { __lookup: lookupId } },
+            },
+          },
+        ],
+      },
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { message: partialFailure, success: false, partial: true, aliasCreated: true },
+    });
+  });
+
+  it('should move an existing alias off the previous index atomically on re-import', async () => {
+    // The lookup was previously imported into another index; re-importing must overwrite the
+    // alias, not make it span both indices (which returns a union of old and new rows).
+    mockClient.indices.getAlias.mockResolvedValue({
+      body: {
+        'old-index': { aliases: { 'my-upload': { filter: { term: { __lookup: 'old' } } } } },
+      },
+    });
+
+    const response = await runImport();
+
+    const lookupId = mockProcessor.ingestFile.mock.calls[0][1].lookupId;
+    expect(mockClient.indices.getAlias).toHaveBeenCalledWith({ name: 'my-upload' });
+    expect(mockClient.indices.updateAliases).toHaveBeenCalledTimes(1);
+    expect(mockClient.indices.updateAliases).toHaveBeenCalledWith({
+      body: {
+        actions: [
+          { remove: { index: 'old-index', alias: 'my-upload' } },
+          {
+            add: {
+              index: 'test-index',
+              alias: 'my-upload',
+              filter: { term: { __lookup: lookupId } },
+            },
+          },
+        ],
+      },
+    });
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ aliasCreated: true }) })
+    );
+  });
+
+  it('should flag aliasCreated=false and log when looking up the existing alias fails', async () => {
+    mockClient.indices.getAlias.mockRejectedValue(
+      Object.assign(new Error('security_exception'), { statusCode: 403 })
+    );
+
+    const response = await runImport();
+
+    expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          aliasCreated: false,
+          aliasError:
+            'You do not have permission to manage aliases. Try creating an index directly.',
+        }),
+      })
+    );
+    expect(context.dataImporter.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create alias my-upload')
+    );
+  });
+
+  it('should not create an alias when no rows landed', async () => {
+    const allFailed = {
+      total: 2,
+      message: 'Indexed 0 documents',
+      failedRows: [1, 2],
+      errorSummary: [
+        {
+          type: 'mapper_parsing_exception',
+          reason: 'failed to parse field [age] of type [integer]',
+          count: 2,
+          sampleRows: [1, 2],
+        },
+      ],
+    };
+    mockProcessor.ingestFile.mockResolvedValue(allFailed);
+
+    const response = await runImport();
 
     expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
+      body: { message: allFailed, success: false, partial: false, aliasCreated: false },
+    });
+  });
+
+  it('responds forbidden (not internalError) when the ingester throws a bulk permission error', async () => {
+    mockProcessor.ingestFile.mockRejectedValue(
+      new BulkIndexForbiddenError(
+        'You do not have permission to write to index "test-index". ' +
+          'Importing requires the bulk write privilege (for example the ' +
+          '"indices:data/write/bulk" action).'
+      )
+    );
+
+    const response = await runImport();
+
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: expect.stringMatching(/indices:data\/write\/bulk/),
+    });
+    expect(response.internalError).not.toHaveBeenCalled();
+    expect(response.ok).not.toHaveBeenCalled();
+    // No rows landed, so no alias should be created
+    expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
+  });
+
+  it('should report partial=true without aliasCreated when no importIdentifier is given', async () => {
+    mockProcessor.ingestFile.mockResolvedValue(partialFailure);
+
+    const response = await runImport({ importIdentifier: undefined });
+
+    expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { message: partialFailure, success: false, partial: true },
+    });
+  });
+
+  describe('target mapping for type coercion', () => {
+    it('should pass the create-mode mapping (incl. __lookup) to the processor', async () => {
+      await runImport({}, JSON.stringify({ properties: { zip: { type: 'keyword' } } }));
+
+      expect(mockClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toEqual({
+        properties: { zip: { type: 'keyword' }, __lookup: { type: 'keyword' } },
+      });
+    });
+
+    it('should fetch and pass the existing index mapping when not in create mode', async () => {
+      mockClient.indices.exists.mockResolvedValue({ body: true });
+
+      await runImport({ createMode: false });
+
+      expect(mockClient.indices.getMapping).toHaveBeenCalledWith({ index: 'test-index' });
+      expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toEqual({
+        properties: { zip: { type: 'keyword' } },
+      });
+    });
+
+    it('should use the single concrete index mapping when importing through an alias', async () => {
+      mockClient.indices.exists.mockResolvedValue({ body: true });
+      mockClient.indices.getMapping.mockResolvedValue({
+        body: { 'lookups-000001': { mappings: { properties: { id: { type: 'keyword' } } } } },
+      });
+
+      await runImport({ createMode: false });
+
+      expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toEqual({
+        properties: { id: { type: 'keyword' } },
+      });
+    });
+
+    it('should continue without coercion and log when the mapping fetch fails', async () => {
+      mockClient.indices.exists.mockResolvedValue({ body: true });
+      mockClient.indices.getMapping.mockRejectedValue(new Error('security_exception'));
+
+      const response = await runImport({ createMode: false });
+
+      expect(mockProcessor.ingestFile).toHaveBeenCalled();
+      expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toBeUndefined();
+      expect(response.ok).toHaveBeenCalled();
+      expect(context.dataImporter.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to fetch mapping for test-index')
+      );
+    });
+  });
+
+  it('should flag aliasCreated=false on partial failure when alias creation is denied', async () => {
+    mockProcessor.ingestFile.mockResolvedValue(partialFailure);
+    mockClient.indices.updateAliases.mockRejectedValue(new Error('security_exception'));
+
+    const response = await runImport();
+
+    expect(response.ok).toHaveBeenCalledWith({
       body: {
-        message: {
-          total: 5,
-          failedRows: [1, 3],
-        },
+        message: partialFailure,
         success: false,
+        partial: true,
+        aliasCreated: false,
+        aliasError: 'security_exception',
       },
     });
+    expect(context.dataImporter.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create alias my-upload')
+    );
   });
 
   it('should not fail import when alias creation fails', async () => {
@@ -317,7 +544,7 @@ describe('Import file route', () => {
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
-    // Verify import still succeeds despite alias failure
+    // Verify import still succeeds despite alias failure, but the response says the alias is missing
     expect(response.ok).toHaveBeenCalledWith({
       body: {
         message: {
@@ -325,6 +552,9 @@ describe('Import file route', () => {
           failedRows: [],
         },
         success: true,
+        partial: false,
+        aliasCreated: false,
+        aliasError: 'Alias creation failed',
       },
     });
 

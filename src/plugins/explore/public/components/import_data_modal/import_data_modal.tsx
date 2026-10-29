@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -14,7 +14,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../types';
-import type { DataImporterPluginAppProps } from '../../../../data_importer/public';
+import type {
+  DataImporterHandle,
+  DataImporterPluginAppProps,
+} from '../../../../data_importer/public';
 
 interface ImportDataModalProps {
   services: ExploreServices;
@@ -35,8 +38,21 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
   isVisible,
   onClose,
 }) => {
-  const [DataImporterApp, setDataImporterApp] =
-    useState<React.ComponentType<DataImporterPluginAppProps> | null>(null);
+  const [DataImporterApp, setDataImporterApp] = useState<React.ComponentType<
+    DataImporterPluginAppProps & React.RefAttributes<DataImporterHandle>
+  > | null>(null);
+  const importerRef = useRef<DataImporterHandle>(null);
+
+  // Every close affordance (X, Escape, Done) goes through the importer so it can guard
+  // un-imported input with a discard confirmation. Before the importer has lazy-loaded
+  // there is nothing to lose, so close directly.
+  const requestClose = useCallback(() => {
+    if (importerRef.current) {
+      importerRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  }, [onClose]);
 
   // Lazy load the data importer component when modal is opened
   useEffect(() => {
@@ -62,7 +78,7 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
   }
 
   return (
-    <EuiModal onClose={onClose} maxWidth="1200px" className="importDataModal">
+    <EuiModal onClose={requestClose} maxWidth="1200px" className="importDataModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{label}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -70,6 +86,8 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
       <EuiModalBody className="importDataModal__body">
         {DataImporterApp && (
           <DataImporterApp
+            ref={importerRef}
+            onClose={onClose}
             basename=""
             notifications={services.notifications}
             http={services.http}
@@ -86,7 +104,9 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={onClose} fill>
+        {/* Secondary on purpose: Import (inside the importer) is the primary action, and Done
+            is a separate terminal action so several files can be imported before closing. */}
+        <EuiButton onClick={requestClose} data-test-subj="importDataModalDoneButton">
           {i18n.translate('explore.queryPanel.importDataDone', {
             defaultMessage: 'Done',
           })}

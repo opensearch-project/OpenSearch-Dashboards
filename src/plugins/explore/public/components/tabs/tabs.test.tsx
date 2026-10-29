@@ -20,6 +20,7 @@ import {
 import { executeTabQuery } from '../../application/utils/state_management/actions/query_actions';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../common';
+import { useDatasetContext } from '../../application/context';
 
 jest.mock('../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
@@ -52,6 +53,11 @@ jest.mock('./error_guard/error_guard', () => ({
 
 jest.mock('../../application/context', () => ({
   useDatasetContext: jest.fn(() => ({ dataset: undefined })),
+}));
+
+const mockUseIsNonTimeSeries = jest.fn(() => false);
+jest.mock('../../helpers/use_displayed_columns', () => ({
+  useIsNonTimeSeries: () => mockUseIsNonTimeSeries(),
 }));
 
 jest.mock(
@@ -138,6 +144,7 @@ describe('ExploreTabsComponent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsNonTimeSeries.mockReturnValue(false);
   });
 
   it('should render tabs correctly', () => {
@@ -408,6 +415,117 @@ describe('ExploreTabsComponent', () => {
       // EXPLORE_DEFAULT_LANGUAGE is 'PPL'; query.language is always uppercase.
       renderWithLanguage(['PPL'], 'PPL');
       expect(screen.getByText('Gated')).toBeInTheDocument();
+    });
+  });
+
+  describe('non-time-series tab-set mode swap', () => {
+    const servicesWithStatistics = {
+      tabRegistry: {
+        getAllTabs: jest.fn(() => [
+          {
+            id: 'logs',
+            label: 'Logs',
+            component: () => <div>Logs Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
+          {
+            id: 'explore_visualization_tab',
+            label: 'Visualization',
+            component: () => <div>Visualization Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
+          {
+            id: 'explore_statistics',
+            label: 'Statistics',
+            component: () => <div>Statistics Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
+        ]),
+        getTab: jest.fn((id: string) => ({
+          id,
+          label: id,
+          component: () => <div>{id} Content</div>,
+          prepareQuery: undefined,
+          flavor: [ExploreFlavor.Logs],
+        })),
+      },
+    };
+
+    const renderSwap = () => {
+      const store = createMockStore({
+        ui: { activeTabId: 'logs', showHistogram: true },
+        queryEditor: { overallQueryStatus: { status: 'ready' } },
+      });
+      return render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={servicesWithStatistics}>
+            <ExploreTabs />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+    };
+
+    it('shows the full time-series tab set when results are time-series', () => {
+      mockUseIsNonTimeSeries.mockReturnValue(false);
+      renderSwap();
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+      expect(screen.getByText('Visualization')).toBeInTheDocument();
+      expect(screen.getByText('Statistics')).toBeInTheDocument();
+      expect(screen.queryByText('Query Results')).not.toBeInTheDocument();
+    });
+
+    it('collapses to a single relabeled Query Results tab for non-time-series results', () => {
+      mockUseIsNonTimeSeries.mockReturnValue(true);
+      renderSwap();
+      // Logs and Visualization are hidden; only the (relabeled) Statistics surface remains.
+      expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+      expect(screen.queryByText('Visualization')).not.toBeInTheDocument();
+      expect(screen.queryByText('Statistics')).not.toBeInTheDocument();
+      expect(screen.getByText('Query Results')).toBeInTheDocument();
+    });
+
+    it('falls back to the first available tab when Logs is hidden mid-session', () => {
+      // activeTabId is 'logs', which no longer exists in non-time-series mode; the component
+      // must fall back rather than render an empty panel.
+      mockUseIsNonTimeSeries.mockReturnValue(true);
+      renderSwap();
+      expect(screen.getByText('Statistics Content')).toBeInTheDocument();
+    });
+
+    describe('dataset without a time field', () => {
+      const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<
+        typeof useDatasetContext
+      >;
+
+      beforeEach(() => {
+        // Run the real detection so this exercises dataset -> mode, not just the mock's return.
+        const { useIsNonTimeSeries } = jest.requireActual('../../helpers/use_displayed_columns');
+        mockUseIsNonTimeSeries.mockImplementation(useIsNonTimeSeries);
+      });
+
+      afterEach(() => {
+        mockUseDatasetContext.mockReturnValue({ dataset: undefined } as any);
+      });
+
+      it('collapses to Query Results immediately, before any results arrive', () => {
+        mockUseDatasetContext.mockReturnValue({
+          dataset: { id: 'lookup', title: 'lookup', timeFieldName: undefined },
+        } as any);
+        // The store has no results: the swap must not wait for them, or Logs would flash first.
+        renderSwap();
+        expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+        expect(screen.queryByText('Visualization')).not.toBeInTheDocument();
+        expect(screen.getByText('Query Results')).toBeInTheDocument();
+      });
+
+      it('keeps the time-series tab set for a time-based dataset with no results yet', () => {
+        mockUseDatasetContext.mockReturnValue({
+          dataset: { id: 'logs', title: 'logs', timeFieldName: '@timestamp' },
+        } as any);
+        renderSwap();
+        expect(screen.getByText('Logs')).toBeInTheDocument();
+        expect(screen.queryByText('Query Results')).not.toBeInTheDocument();
+      });
     });
   });
 

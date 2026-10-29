@@ -31,6 +31,9 @@ jest.mock('./filters', () => ({
     convertFiltersToWhereClause: jest.fn(),
     getTimeFilter: jest.fn(),
     insertWhereCommand: jest.requireActual('./filters').PPLFilterUtils.insertWhereCommand,
+    extractSourceIndex: jest.requireActual('./filters').PPLFilterUtils.extractSourceIndex,
+    sourceDiffersFromDataset:
+      jest.requireActual('./filters').PPLFilterUtils.sourceDiffersFromDataset,
   },
 }));
 

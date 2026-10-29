@@ -146,4 +146,80 @@ describe('PPLFilterUtils', () => {
       expect(result).toBe("| WHERE `field1` = 'value1'");
     });
   });
+
+  describe('extractSourceIndex', () => {
+    it('extracts the index from a simple source= query', () => {
+      expect(PPLFilterUtils.extractSourceIndex('source=my_index | head 10')).toBe('my_index');
+    });
+
+    it('tolerates whitespace around the equals sign', () => {
+      expect(PPLFilterUtils.extractSourceIndex('source = my_index')).toBe('my_index');
+    });
+
+    it('strips surrounding backticks and quotes', () => {
+      expect(PPLFilterUtils.extractSourceIndex('source=`my_index`')).toBe('my_index');
+      expect(PPLFilterUtils.extractSourceIndex("source='my_index'")).toBe('my_index');
+      expect(PPLFilterUtils.extractSourceIndex('source="my_index"')).toBe('my_index');
+    });
+
+    it('is case-insensitive on the keyword', () => {
+      expect(PPLFilterUtils.extractSourceIndex('SOURCE=my_index')).toBe('my_index');
+    });
+
+    it('returns undefined when there is no source clause', () => {
+      expect(PPLFilterUtils.extractSourceIndex('search field=1')).toBeUndefined();
+      expect(PPLFilterUtils.extractSourceIndex('')).toBeUndefined();
+    });
+
+    it('matches the first source= token only', () => {
+      expect(PPLFilterUtils.extractSourceIndex('source=first | join source=second')).toBe('first');
+    });
+  });
+
+  describe('sourceDiffersFromDataset', () => {
+    it('is false when the source matches the dataset title', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=request_logs', 'request_logs')).toBe(
+        false
+      );
+    });
+
+    it('ignores a trailing wildcard on the dataset title', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=request_logs', 'request_logs*')).toBe(
+        false
+      );
+    });
+
+    it('compares case-insensitively', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=Request_Logs', 'request_logs')).toBe(
+        false
+      );
+    });
+
+    it('is true when the source names a different index (the lookup case)', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=endpoints', 'request_logs*')).toBe(
+        true
+      );
+    });
+
+    it('is false when the source is a concrete index covered by the dataset pattern', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logs-2026.10', 'logs-*')).toBe(false);
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logs-a-prod', 'logs-*-prod')).toBe(
+        false
+      );
+    });
+
+    it('is false when the source matches any entry of a comma-separated dataset title', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=b', 'a, b*')).toBe(false);
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=c', 'a,b*')).toBe(true);
+    });
+
+    it('treats pattern characters other than * literally', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logsXprod', 'logs.prod')).toBe(true);
+    });
+
+    it('is false (fall back to normal behavior) when either side is missing', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('search field=1', 'request_logs')).toBe(false);
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=endpoints', undefined)).toBe(false);
+    });
+  });
 });

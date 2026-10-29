@@ -7,6 +7,14 @@ import { parse } from 'ndjson';
 import { Readable } from 'stream';
 import { IFileProcessor, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 import { isValidObject } from '../utils/util';
+import {
+  applyBackpressure,
+  BulkIngester,
+  BULK_CHUNK_SIZE,
+  INVALID_ROW_ERROR_REASON,
+  INVALID_ROW_ERROR_TYPE,
+  PARSE_ERROR_TYPE,
+} from '../utils/bulk_ingest';
 
 export class NDJSONProcessor implements IFileProcessor {
   public async validateText(text: string, _: ValidationOptions) {
@@ -31,100 +39,64 @@ export class NDJSONProcessor implements IFileProcessor {
   }
 
   public async ingestText(text: string, options: IngestOptions) {
-    const { client, indexName, lookupId, lookupField } = options;
+    const { client, indexName, lookupId, lookupField, mapping } = options;
     const stringStream = new Readable();
     stringStream._read = () => {};
     stringStream.push(text);
     stringStream.push(null);
 
-    const failedRows: number[] = [];
+    const ingester = new BulkIngester(client, indexName, BULK_CHUNK_SIZE, mapping);
     const numDocuments = await new Promise<number>((promise) => {
-      const tasks: Array<Promise<void>> = [];
       let numDocumentsCount = 0;
 
-      stringStream
-        .pipe(parse({ strict: true }))
-        .on('error', (_) => {
+      const parser = stringStream.pipe(parse({ strict: true }));
+      parser
+        .on('error', (e) => {
           const curRow = ++numDocumentsCount;
-          failedRows.push(curRow);
+          ingester.addFailure(curRow, PARSE_ERROR_TYPE, String(e));
         })
         .on('data', (document: Record<string, any>) => {
-          const task = (async () => {
-            const curRow = ++numDocumentsCount;
-            try {
-              // Inject lookup field if provided
-              const doc =
-                lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
-
-              await client.index({
-                index: indexName,
-                body: doc,
-              });
-            } catch {
-              failedRows.push(curRow);
-            }
-          })();
-          tasks.push(task);
+          const curRow = ++numDocumentsCount;
+          // Inject lookup field if provided
+          const doc = lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
+          applyBackpressure(parser, ingester.add(curRow, doc));
         })
-        .on('end', async () => {
-          await Promise.all(tasks);
+        .on('end', () => {
           promise(numDocumentsCount);
         });
     });
 
-    return {
-      total: numDocuments,
-      message: `Indexed ${numDocuments - failedRows.length} documents`,
-      failedRows: failedRows.sort((n1, n2) => n1 - n2),
-    };
+    return await ingester.finish(numDocuments);
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
-    const { client, indexName, lookupId, lookupField } = options;
+    const { client, indexName, lookupId, lookupField, mapping } = options;
 
-    const failedRows: number[] = [];
+    const ingester = new BulkIngester(client, indexName, BULK_CHUNK_SIZE, mapping);
     const numDocuments = await new Promise<number>((resolve, reject) => {
-      const tasks: Array<Promise<void>> = [];
       let numDocumentsCount = 0;
 
-      file
-        .pipe(parse({ strict: true }))
+      const parser = file.pipe(parse({ strict: true }));
+      parser
         .on('error', (e) =>
           reject(new Error(`Stopped processing after ${numDocumentsCount} rows due to: ${e}`))
         )
         .on('data', (document: Record<string, any>) => {
-          const task = (async () => {
-            const curRow = ++numDocumentsCount;
-            if (!isValidObject(document)) {
-              failedRows.push(curRow);
-            } else {
-              try {
-                // Inject lookup field if provided
-                const doc =
-                  lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
-
-                await client.index({
-                  index: indexName,
-                  body: doc,
-                });
-              } catch (_) {
-                failedRows.push(curRow);
-              }
-            }
-          })();
-          tasks.push(task);
+          const curRow = ++numDocumentsCount;
+          if (!isValidObject(document)) {
+            ingester.addFailure(curRow, INVALID_ROW_ERROR_TYPE, INVALID_ROW_ERROR_REASON);
+            return;
+          }
+          // Inject lookup field if provided
+          const doc = lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+          applyBackpressure(parser, ingester.add(curRow, doc));
         })
-        .on('end', async () => {
-          await Promise.all(tasks);
+        .on('end', () => {
           resolve(numDocumentsCount);
         });
     });
 
-    return {
-      total: numDocuments,
-      message: `Indexed ${numDocuments - failedRows.length} documents`,
-      failedRows: failedRows.sort((n1, n2) => n1 - n2),
-    };
+    return await ingester.finish(numDocuments);
   }
 
   public async parseFile(file: Readable, limit: number, _: ParseOptions) {

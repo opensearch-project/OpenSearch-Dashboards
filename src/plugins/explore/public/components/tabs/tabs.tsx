@@ -25,12 +25,14 @@ import {
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_STATISTICS_TAB_ID,
 } from '../../../common';
 import { DEFAULT_DATA } from '../../../../data/common';
 import { DiscoverUninitialized } from '../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { DiscoverNoResults } from '../../application/legacy/discover/application/components/no_results/no_results';
 import { LoadingSpinner } from '../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { useIsNonTimeSeries } from '../../helpers/use_displayed_columns';
 import { useDatasetContext } from '../../application/context';
 import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_mode_context';
 import {
@@ -51,6 +53,9 @@ export const ExploreTabs = () => {
   const activeTabId = useSelector(selectActiveTab);
   const { dataset } = useDatasetContext();
   const metricsPageMode = useMetricsPageMode();
+  // Non-time-series mode: the dataset has no time field, or the result set came from a source
+  // without the dataset's time field (e.g. a lookup). Drives the tab-set mode swap below.
+  const isNonTimeSeries = useIsNonTimeSeries();
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
@@ -89,6 +94,28 @@ export const ExploreTabs = () => {
 
   const filteredTabs = useMemo(() => {
     if (flavorId == null) return [];
+    // Non-time-series mode: when the results have no usable time field (a dataset without one, or
+    // a source such as a lookup lacking the dataset's time field), collapse the tab bar to a
+    // single "Query Results" tab. Logs/Visualization/Patterns/Fields all assume a timestamp, so
+    // hiding them avoids a partially broken experience. Query Results reuses the Statistics
+    // surface (a schema-driven table), relabeled only in this mode.
+    if (isNonTimeSeries) {
+      const statisticsTab = registryTabs.find(
+        (t) => t.id === EXPLORE_STATISTICS_TAB_ID && t.flavor.includes(flavorId)
+      );
+      if (statisticsTab) {
+        return [
+          {
+            ...statisticsTab,
+            label: i18n.translate('explore.queryResultsTab.label', {
+              defaultMessage: 'Query Results',
+            }),
+          },
+        ];
+      }
+      // No Statistics tab for this flavor (shouldn't happen in Logs); fall through to the normal
+      // list rather than render an empty tab bar.
+    }
     return registryTabs.filter((registryTab) => {
       const registeredFlavor = registryTab.flavor.includes(flavorId);
       const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
@@ -118,7 +145,7 @@ export const ExploreTabs = () => {
       }
       return registeredFlavor;
     });
-  }, [flavorId, registryTabs, query, metricsPageMode]);
+  }, [flavorId, registryTabs, query, metricsPageMode, isNonTimeSeries]);
 
   const activeRegistryTab = useMemo(() => {
     return filteredTabs.find((tab) => tab.id === activeTabId) || filteredTabs[0];
