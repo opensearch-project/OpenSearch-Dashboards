@@ -696,7 +696,12 @@ export class SearchSource {
     body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
 
     if (!body.hasOwnProperty('_source') && index && index.getSourceFiltering) {
-      body._source = index.getSourceFiltering();
+      const sourceFiltering = index.getSourceFiltering();
+      // An empty `excludes` array is a no-op, and newer OpenSearch versions log a
+      // deprecation warning for it, so only send `_source` when there is something to exclude.
+      if (sourceFiltering?.excludes?.length) {
+        body._source = sourceFiltering;
+      }
     }
 
     if (body._source) {

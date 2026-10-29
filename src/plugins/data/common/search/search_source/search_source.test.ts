@@ -122,6 +122,16 @@ describe('SearchSource', () => {
           expect(request._source).toBe(mockSource);
         });
 
+        test('omits _source when the index pattern has no source filters', async () => {
+          const searchSource = new SearchSource({}, searchSourceDependencies);
+          searchSource.setField('index', {
+            ...indexPattern,
+            getSourceFiltering: () => ({ excludes: [] }),
+          } as any);
+          const request = await searchSource.getSearchRequestBody();
+          expect(request).not.toHaveProperty('_source');
+        });
+
         test('removes created searchSource filter on removal', async () => {
           const searchSource = new SearchSource({}, searchSourceDependencies);
           searchSource.setField('index', indexPattern);
