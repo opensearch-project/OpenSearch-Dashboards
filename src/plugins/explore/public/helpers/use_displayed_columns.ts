@@ -93,8 +93,24 @@ export const processDisplayedColumns = (
     );
   }
 
-  // Step 2: Handle edge case where only time field remains
-  if (filteredColumns.length === 1 && filteredColumns[0] === dataset?.timeFieldName) {
+  // Whether the dataset's time field actually appears in the result set. When we have processed
+  // results, trust their field counts: a time-based dataset queried via `source=<lookup>` returns
+  // rows without the time field, so it won't appear in fieldCounts. With no processed results
+  // (fieldCounts not requested), assume present to preserve legacy behavior.
+  const timeFieldName = dataset?.timeFieldName as string | undefined;
+  const timeFieldPresent =
+    !timeFieldName || !processedResults?.fieldCounts
+      ? true
+      : (processedResults.fieldCounts[timeFieldName] ?? 0) > 0;
+
+  // Step 2: Handle edge case where only time field remains — but only when the time field is
+  // actually in the data. For a lookup query the time field is absent, so this fallback must not
+  // fire (it would re-introduce the phantom time column via a lone-timeField assumption).
+  if (
+    timeFieldPresent &&
+    filteredColumns.length === 1 &&
+    filteredColumns[0] === dataset?.timeFieldName
+  ) {
     filteredColumns = [...filteredColumns, '_source'];
   }
 
@@ -103,7 +119,8 @@ export const processDisplayedColumns = (
     filteredColumns,
     dataset,
     uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
-    uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING)
+    uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
+    timeFieldPresent
   );
 };
 
@@ -217,4 +234,94 @@ export const useHiddenColumnCount = (): number => {
 
     return Math.max(0, all - shown);
   }, [columns, dataset, uiSettings, processedResults, hideEmptyFields]);
+};
+
+/**
+ * Pure form of {@link useQueryingOutsideDataset}: whether `processedResults` appear to come from
+ * somewhere other than `dataset` — the case where a user types `source=<other index>` (e.g. a
+ * lookup) while a time-based dataset is selected. Detected the same way the Time column drop is:
+ * the dataset declares a time field, but it's absent from the returned rows' field counts.
+ *
+ * Returns false when there's nothing to judge from (no results yet, or a dataset with no time
+ * field), so callers can treat it as "querying within the dataset" by default.
+ */
+export const isQueryingOutsideDatasetResult = (dataset: any, processedResults: any): boolean => {
+  const timeFieldName = dataset?.timeFieldName as string | undefined;
+  // Need a time-based dataset and a populated result set to make the call.
+  if (!timeFieldName || !processedResults?.fieldCounts) return false;
+  const hasRows = (processedResults.hits?.hits?.length ?? 0) > 0;
+  if (!hasRows) return false;
+  // Dataset has a time field, results have rows, but none carry that time field → the rows came
+  // from a different source than the dataset.
+  return (processedResults.fieldCounts[timeFieldName] ?? 0) === 0;
+};
+
+/**
+ * Pure form of {@link useIsNonTimeSeries}: whether the current view is non-time-series, i.e. the
+ * time-based features (Logs/Visualization/Patterns tabs, histogram, Time column) have no
+ * timestamp to work with. True when either:
+ *  - the selected dataset declares no time field at all (e.g. a lookup index pattern picked
+ *    directly in the dataset selector), or
+ *  - a time-based dataset is being queried outside itself ({@link isQueryingOutsideDatasetResult}).
+ *
+ * The no-time-field case is decided from the dataset alone and applies immediately on selection,
+ * without waiting for results: the answer can't change once rows arrive, and waiting would make
+ * the tab bar flash the time-series set (Logs etc.) before swapping. The outside-dataset case is
+ * only knowable from returned rows, so it still requires populated results.
+ *
+ * False with no dataset selected — nothing to judge from, so default to the time-series flow.
+ */
+export const isNonTimeSeriesResult = (dataset: any, processedResults: any): boolean => {
+  if (!dataset) return false;
+  if (!dataset.timeFieldName) return true;
+  return isQueryingOutsideDatasetResult(dataset, processedResults);
+};
+
+/**
+ * Processed results for the current query's default cache key, or null before any have arrived.
+ * Shared by the dataset/result-shape detection hooks below.
+ */
+const useCurrentProcessedResults = (dataset: any) => {
+  const query = useSelector((state: RootState) => state.query);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
+  const metadata = useSelector((state: RootState) => state.results[cacheKey]);
+  return useMemo(() => {
+    if (!metadata) return null;
+    const rawResults = resultsCache.get(cacheKey);
+    return rawResults && dataset ? defaultResultsProcessor(rawResults, dataset) : null;
+  }, [metadata, cacheKey, dataset]);
+};
+
+/**
+ * Whether the current result set appears to come from somewhere other than the active dataset —
+ * the case where a user types `source=<other index>` (e.g. a lookup) while a time-based dataset
+ * is selected. Detected the same way the Time column drop is: the dataset declares a time field,
+ * but it's absent from the returned rows' field counts.
+ *
+ * Returns false when there's nothing to judge from (no results yet, or a dataset with no time
+ * field), so callers can treat it as "querying within the dataset" by default.
+ *
+ * UI mode decisions (tab-set swap, notice) should use {@link useIsNonTimeSeries} instead, which
+ * also covers datasets that have no time field at all.
+ */
+export const useQueryingOutsideDataset = (): boolean => {
+  const { dataset } = useDatasetContext();
+  const processedResults = useCurrentProcessedResults(dataset);
+  return useMemo(
+    () => isQueryingOutsideDatasetResult(dataset, processedResults),
+    [dataset, processedResults]
+  );
+};
+
+/**
+ * Whether Explore should be in non-time-series mode (single Query Results tab + notice). See
+ * {@link isNonTimeSeriesResult} for the conditions.
+ */
+export const useIsNonTimeSeries = (): boolean => {
+  const { dataset } = useDatasetContext();
+  const processedResults = useCurrentProcessedResults(dataset);
+  return useMemo(
+    () => isNonTimeSeriesResult(dataset, processedResults),
+    [dataset, processedResults]
+  );
 };

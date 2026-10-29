@@ -34,6 +34,10 @@ import {
   useDisplayedColumns,
   useDisplayedColumnNames,
   useHiddenColumnCount,
+  useIsNonTimeSeries,
+  useQueryingOutsideDataset,
+  isNonTimeSeriesResult,
+  isQueryingOutsideDatasetResult,
   processDisplayedColumns,
 } from './use_displayed_columns';
 import { filterColumns } from './view_component_utils/filter_columns';
@@ -181,7 +185,8 @@ describe('useDisplayedColumns', () => {
         mockFilteredColumns,
         mockDataset,
         false,
-        false
+        false,
+        true
       );
 
       expect(result.current).toEqual(mockDisplayedColumns);
@@ -219,7 +224,8 @@ describe('useDisplayedColumns', () => {
         ['@timestamp', '_source'], // Should include _source
         mockDataset,
         false,
-        false
+        false,
+        true
       );
     });
   });
@@ -438,5 +444,106 @@ describe('useHiddenColumnCount', () => {
     const { result } = setup({ columns: ['empty_field'], hideEmptyFields: true });
 
     expect(result.current).toBe(0);
+  });
+});
+
+describe('isQueryingOutsideDatasetResult', () => {
+  const timeDataset = { timeFieldName: '@timestamp' };
+  const withTime = { hits: { hits: [{}, {}] }, fieldCounts: { '@timestamp': 2, app: 2 } };
+  const withoutTime = { hits: { hits: [{}, {}] }, fieldCounts: { key: 2, value: 2 } };
+
+  it('is true when a time-based dataset returns rows lacking its time field', () => {
+    expect(isQueryingOutsideDatasetResult(timeDataset, withoutTime)).toBe(true);
+  });
+
+  it('is false when the rows carry the time field', () => {
+    expect(isQueryingOutsideDatasetResult(timeDataset, withTime)).toBe(false);
+  });
+
+  it('is false with no rows to judge from', () => {
+    expect(
+      isQueryingOutsideDatasetResult(timeDataset, { hits: { hits: [] }, fieldCounts: {} })
+    ).toBe(false);
+    expect(isQueryingOutsideDatasetResult(timeDataset, null)).toBe(false);
+  });
+
+  it('is false for a dataset without a time field (nothing to be outside of)', () => {
+    expect(isQueryingOutsideDatasetResult({}, withoutTime)).toBe(false);
+  });
+});
+
+describe('isNonTimeSeriesResult', () => {
+  const withTime = { hits: { hits: [{}] }, fieldCounts: { '@timestamp': 1 } };
+  const withoutTime = { hits: { hits: [{}] }, fieldCounts: { key: 1 } };
+
+  it('is false with no dataset selected', () => {
+    expect(isNonTimeSeriesResult(undefined, withoutTime)).toBe(false);
+  });
+
+  it('is true for a dataset without a time field, even before any results arrive', () => {
+    // Applies on dataset selection so the tab bar never flashes the time-series set first.
+    expect(isNonTimeSeriesResult({ timeFieldName: undefined }, null)).toBe(true);
+    expect(isNonTimeSeriesResult({}, withTime)).toBe(true);
+    expect(isNonTimeSeriesResult({ timeFieldName: '' }, null)).toBe(true);
+  });
+
+  it('is true when a time-based dataset is queried outside itself (e.g. source=<lookup>)', () => {
+    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, withoutTime)).toBe(true);
+  });
+
+  it('is false for a time-based dataset whose rows carry the time field', () => {
+    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, withTime)).toBe(false);
+  });
+
+  it('is false for a time-based dataset before results arrive', () => {
+    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, null)).toBe(false);
+  });
+});
+
+describe('useIsNonTimeSeries / useQueryingOutsideDataset', () => {
+  const CACHE_KEY = 'cache-key';
+
+  const setup = ({ dataset, processedResults }: { dataset: any; processedResults: any | null }) => {
+    mockUseDatasetContext.mockReturnValue({ dataset } as any);
+    (defaultPrepareQueryString as jest.Mock).mockReturnValue(CACHE_KEY);
+    (defaultResultsProcessor as jest.Mock).mockReturnValue(processedResults);
+    resultsCache.clear();
+    if (processedResults) resultsCache.set(CACHE_KEY, {} as any);
+    const state = {
+      query: { query: 'source=logs', language: 'PPL' },
+      results: processedResults ? { [CACHE_KEY]: { status: 'READY' } } : {},
+    };
+    mockUseSelector.mockImplementation((selector: any) => selector(state));
+  };
+
+  const lookupRows = { hits: { hits: [{}, {}] }, fieldCounts: { key: 2 } };
+  const logRows = { hits: { hits: [{}, {}] }, fieldCounts: { '@timestamp': 2 } };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('flags a no-time-field dataset as non-time-series with no results yet', () => {
+    setup({ dataset: { ...mockDataset, timeFieldName: undefined }, processedResults: null });
+    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
+    // Not "outside" the dataset: the rows come from the dataset itself.
+    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(false);
+  });
+
+  it('flags a lookup queried over a time-based dataset', () => {
+    setup({ dataset: mockDataset, processedResults: lookupRows });
+    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
+    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(true);
+  });
+
+  it('leaves a time-based dataset with time-stamped rows as time-series', () => {
+    setup({ dataset: mockDataset, processedResults: logRows });
+    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
+    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(false);
+  });
+
+  it('is false with no dataset selected', () => {
+    setup({ dataset: undefined, processedResults: null });
+    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
   });
 });
