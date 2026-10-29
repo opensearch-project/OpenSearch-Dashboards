@@ -94,12 +94,11 @@ export const ExploreTabs = () => {
 
   const filteredTabs = useMemo(() => {
     if (flavorId == null) return [];
-    // Tab-set mode swap (POC): when the result set is non-time-series (a dataset with no time
-    // field, or a lookup or other source lacking the dataset's time field), collapse the tab bar to a single "Query Results" tab.
-    // Logs/Visualization/Patterns/Fields all assume a timestamp, so hiding them removes the
-    // partial/broken experience rather than labeling it with a badge. Query Results reuses the
-    // Statistics surface (a schema-driven table), relabeled only in this mode so the global
-    // Statistics tab name is untouched in time-series mode.
+    // Non-time-series mode: when the results have no usable time field (a dataset without one, or
+    // a source such as a lookup lacking the dataset's time field), collapse the tab bar to a
+    // single "Query Results" tab. Logs/Visualization/Patterns/Fields all assume a timestamp, so
+    // hiding them avoids a partially broken experience. Query Results reuses the Statistics
+    // surface (a schema-driven table), relabeled only in this mode.
     if (isNonTimeSeries) {
       const statisticsTab = registryTabs.find(
         (t) => t.id === EXPLORE_STATISTICS_TAB_ID && t.flavor.includes(flavorId)

@@ -237,8 +237,7 @@ export const useHiddenColumnCount = (): number => {
 };
 
 /**
- * Pure form of {@link useQueryingOutsideDataset}: whether `processedResults` appear to come from
- * somewhere other than `dataset` — the case where a user types `source=<other index>` (e.g. a
+ * Whether `processedResults` appear to come from somewhere other than `dataset` — the case where a user types `source=<other index>` (e.g. a
  * lookup) while a time-based dataset is selected. Detected the same way the Time column drop is:
  * the dataset declares a time field, but it's absent from the returned rows' field counts.
  *
@@ -290,27 +289,6 @@ const useCurrentProcessedResults = (dataset: any) => {
     const rawResults = resultsCache.get(cacheKey);
     return rawResults && dataset ? defaultResultsProcessor(rawResults, dataset) : null;
   }, [metadata, cacheKey, dataset]);
-};
-
-/**
- * Whether the current result set appears to come from somewhere other than the active dataset —
- * the case where a user types `source=<other index>` (e.g. a lookup) while a time-based dataset
- * is selected. Detected the same way the Time column drop is: the dataset declares a time field,
- * but it's absent from the returned rows' field counts.
- *
- * Returns false when there's nothing to judge from (no results yet, or a dataset with no time
- * field), so callers can treat it as "querying within the dataset" by default.
- *
- * UI mode decisions (tab-set swap, notice) should use {@link useIsNonTimeSeries} instead, which
- * also covers datasets that have no time field at all.
- */
-export const useQueryingOutsideDataset = (): boolean => {
-  const { dataset } = useDatasetContext();
-  const processedResults = useCurrentProcessedResults(dataset);
-  return useMemo(
-    () => isQueryingOutsideDatasetResult(dataset, processedResults),
-    [dataset, processedResults]
-  );
 };
 
 /**

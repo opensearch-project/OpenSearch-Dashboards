@@ -35,7 +35,6 @@ import {
   useDisplayedColumnNames,
   useHiddenColumnCount,
   useIsNonTimeSeries,
-  useQueryingOutsideDataset,
   isNonTimeSeriesResult,
   isQueryingOutsideDatasetResult,
   processDisplayedColumns,
@@ -500,7 +499,7 @@ describe('isNonTimeSeriesResult', () => {
   });
 });
 
-describe('useIsNonTimeSeries / useQueryingOutsideDataset', () => {
+describe('useIsNonTimeSeries', () => {
   const CACHE_KEY = 'cache-key';
 
   const setup = ({ dataset, processedResults }: { dataset: any; processedResults: any | null }) => {
@@ -526,20 +525,16 @@ describe('useIsNonTimeSeries / useQueryingOutsideDataset', () => {
   it('flags a no-time-field dataset as non-time-series with no results yet', () => {
     setup({ dataset: { ...mockDataset, timeFieldName: undefined }, processedResults: null });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
-    // Not "outside" the dataset: the rows come from the dataset itself.
-    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(false);
   });
 
   it('flags a lookup queried over a time-based dataset', () => {
     setup({ dataset: mockDataset, processedResults: lookupRows });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
-    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(true);
   });
 
   it('leaves a time-based dataset with time-stamped rows as time-series', () => {
     setup({ dataset: mockDataset, processedResults: logRows });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
-    expect(renderHook(() => useQueryingOutsideDataset()).result.current).toBe(false);
   });
 
   it('is false with no dataset selected', () => {
