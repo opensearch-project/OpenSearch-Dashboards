@@ -2611,9 +2611,9 @@
     "@hapi/validate" "^2.0.1"
 
 "@hapi/content@^6.0.1", "@hapi/content@^6.0.2":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-6.0.2.tgz#de71e00e555d9a36b950f645626aa0ab4cd1adec"
-  integrity sha512-OKyCOTjNR1hftwSjk9ueyAQTw8AwapvzBrPIWMGn39vhR5PmqLdYFmLc35bsSBye7gSMnlkXfc679bUdMIcRyQ==
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-6.0.3.tgz#f0e0a363fbba62c942ef3cedd5a3c0df44077245"
+  integrity sha512-ksXemMNZAwPq/mu1a9TZ7LDUSgMR9sexBgpalF3nrP6SM42ARlnBZs58IS5Ay+o4o7y6tFNXL+rMJkQ5ghvCSw==
   dependencies:
     "@hapi/boom" "^10.0.0"
 
