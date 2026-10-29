@@ -237,6 +237,7 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
       />
       <button
         class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+        data-test-subj="dataImporterPreviewButton"
         disabled=""
         type="button"
       >
@@ -254,7 +255,8 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
         class="euiSpacer euiSpacer--s"
       />
       <button
-        class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+        class="euiButton euiButton--primary euiButton--fill euiButton--fullWidth euiButton-isDisabled"
+        data-test-subj="dataImporterImportButton"
         disabled=""
         type="button"
       >
@@ -719,6 +721,7 @@ exports[`App should render with MDS 1`] = `
             />
             <button
               class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterPreviewButton"
               disabled=""
               type="button"
             >
@@ -736,7 +739,8 @@ exports[`App should render with MDS 1`] = `
               class="euiSpacer euiSpacer--s"
             />
             <button
-              class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              class="euiButton euiButton--primary euiButton--fill euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterImportButton"
               disabled=""
               type="button"
             >
@@ -1121,6 +1125,7 @@ exports[`App should render with Router when embedded is false 1`] = `
             />
             <button
               class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterPreviewButton"
               disabled=""
               type="button"
             >
@@ -1138,7 +1143,8 @@ exports[`App should render with Router when embedded is false 1`] = `
               class="euiSpacer euiSpacer--s"
             />
             <button
-              class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              class="euiButton euiButton--primary euiButton--fill euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterImportButton"
               disabled=""
               type="button"
             >
@@ -1523,6 +1529,7 @@ exports[`App should render without MDS 1`] = `
             />
             <button
               class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterPreviewButton"
               disabled=""
               type="button"
             >
@@ -1540,7 +1547,8 @@ exports[`App should render without MDS 1`] = `
               class="euiSpacer euiSpacer--s"
             />
             <button
-              class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              class="euiButton euiButton--primary euiButton--fill euiButton--fullWidth euiButton-isDisabled"
+              data-test-subj="dataImporterImportButton"
               disabled=""
               type="button"
             >

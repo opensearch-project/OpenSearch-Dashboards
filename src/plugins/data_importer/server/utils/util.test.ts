@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { decideClient, fetchDepthLimit, isValidObject, validateFileTypes } from './util';
+import {
+  decideClient,
+  checkIndexExists,
+  getErrorStatusCode,
+  IndexAccessForbiddenError,
+  fetchDepthLimit,
+  isValidObject,
+  validateFileTypes,
+} from './util';
 import { coreMock, opensearchServiceMock } from '../../../../core/server/mocks';
 import { FileProcessorService } from '../processors/file_processor_service';
 import { IFileProcessor } from '../types';
@@ -56,6 +64,69 @@ describe('util', () => {
         expect(client).toMatchObject(mockContext.core.opensearch.client.asCurrentUser);
       }
     );
+  });
+
+  describe('getErrorStatusCode()', () => {
+    it('reads statusCode directly off the error', () => {
+      expect(getErrorStatusCode({ statusCode: 403 })).toBe(403);
+    });
+
+    it('reads statusCode from meta when not top-level', () => {
+      expect(getErrorStatusCode({ meta: { statusCode: 404 } })).toBe(404);
+    });
+
+    it('returns undefined when no status code is present', () => {
+      expect(getErrorStatusCode(new Error('boom'))).toBeUndefined();
+      expect(getErrorStatusCode(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('checkIndexExists()', () => {
+    const makeClient = (existsImpl: jest.Mock) =>
+      ({
+        indices: { exists: existsImpl },
+      }) as unknown as any;
+
+    it('returns the exists body when the call succeeds', async () => {
+      const client = makeClient(jest.fn().mockResolvedValue({ body: true }));
+      await expect(checkIndexExists(client, 'my_index')).resolves.toBe(true);
+      expect(client.indices.exists).toHaveBeenCalledWith({ index: 'my_index' });
+    });
+
+    it('returns false when the index does not exist', async () => {
+      const client = makeClient(jest.fn().mockResolvedValue({ body: false }));
+      await expect(checkIndexExists(client, 'my_index')).resolves.toBe(false);
+    });
+
+    it('translates a 403 (empty-body HEAD denial) into an actionable permission error', async () => {
+      // The exists API is a HEAD request, so a security-plugin 403 comes back
+      // with an empty body: the raw error stringifies to "" without this.
+      const client = makeClient(jest.fn().mockRejectedValue({ statusCode: 403, body: '' }));
+      await expect(checkIndexExists(client, 'lookup_hosts')).rejects.toThrow(
+        /do not have permission to access index "lookup_hosts"/
+      );
+    });
+
+    it('throws a 403-carrying IndexAccessForbiddenError so routes can respond forbidden', async () => {
+      const client = makeClient(jest.fn().mockRejectedValue({ statusCode: 403 }));
+      await expect(checkIndexExists(client, 'lookup_hosts')).rejects.toBeInstanceOf(
+        IndexAccessForbiddenError
+      );
+      await checkIndexExists(client, 'lookup_hosts').catch((e) => {
+        expect(e.statusCode).toBe(403);
+      });
+    });
+
+    it('translates a 403 reported under meta.statusCode', async () => {
+      const client = makeClient(jest.fn().mockRejectedValue({ meta: { statusCode: 403 } }));
+      await expect(checkIndexExists(client, 'lookup_hosts')).rejects.toThrow(/indices:admin\/get/);
+    });
+
+    it('rethrows non-403 errors unchanged', async () => {
+      const original = new Error('connection refused');
+      const client = makeClient(jest.fn().mockRejectedValue(original));
+      await expect(checkIndexExists(client, 'my_index')).rejects.toBe(original);
+    });
   });
 
   describe('validateEnabledFileTypes()', () => {
