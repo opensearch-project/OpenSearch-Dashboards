@@ -36,4 +36,5 @@ export {
 export { ILegacyScopedClusterClient, LegacyScopedClusterClient } from './scoped_cluster_client';
 export { LegacyOpenSearchClientConfig } from './opensearch_client_config';
 export { LegacyOpenSearchError, LegacyOpenSearchErrorHelpers } from './errors';
+export { getLegacyNodeAgentFactory } from './node_agent';
 export * from './api_types';
