@@ -4,6 +4,7 @@
  */
 
 import { fetchSessions, sessionFilterFor } from './fetch_sessions';
+import { resetGenAiDataChecks } from '../../utils/genai_data_check';
 
 const SESSION = 'attributes.gen_ai.conversation.id';
 const ppl = (schema: string[], rows: unknown[][]) => ({
@@ -12,6 +13,29 @@ const ppl = (schema: string[], rows: unknown[][]) => ({
 });
 
 describe('fetchSessions', () => {
+  it('runs no session query on a dataset without GenAI spans', async () => {
+    const unmapped = { body: { error: { code: 'FIELD_NOT_FOUND' } } };
+    const executeQuery = jest.fn(async (_dataset: unknown, query: string) => {
+      if (query.includes('| head 1')) throw unmapped;
+      return ppl([], []);
+    });
+    const dataset = { id: 'no-genai', title: 'apm-spans', type: 'INDEX_PATTERN' };
+
+    const result = await fetchSessions(
+      { executeQuery },
+      dataset as never,
+      'source = apm-spans',
+      (t) => t
+    );
+
+    expect(result.sessions).toEqual([]);
+    expect(result.totalSessions).toBe(0);
+    // Only the two mapping probes ran.
+    expect(executeQuery).toHaveBeenCalledTimes(2);
+    expect(executeQuery.mock.calls.every(([, q]) => q.includes('| head 1'))).toBe(true);
+    resetGenAiDataChecks();
+  });
+
   it('reports ignored commands and whether the query filters', () => {
     expect(sessionFilterFor('source = t | where a = 1 | head 5')).toEqual({
       whereQuery: 'source = t | where a = 1',

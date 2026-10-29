@@ -26,7 +26,7 @@ import {
   DetectionResult,
   IndexPatternSignalType,
 } from '../../../explore/public';
-import { DiscoverNoIndexPatterns } from '../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
+import { AgentTracesGetStarted } from './empty_states';
 
 const DISMISSED_KEY = 'agentTraces:traces:autoDetectDismissed';
 
@@ -169,7 +169,7 @@ export const TraceAutoDetectCallout: React.FC = () => {
 
   // Always show default empty state while detecting, after dismissal, or when no trace data found
   if (isDetecting || isDismissed || detections.length === 0) {
-    return <DiscoverNoIndexPatterns />;
+    return <AgentTracesGetStarted />;
   }
 
   return (

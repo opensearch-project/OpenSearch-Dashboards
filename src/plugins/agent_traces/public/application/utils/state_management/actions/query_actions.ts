@@ -23,6 +23,7 @@ import { getFieldValueCounts } from '../../../../components/fields_selector/lib/
 import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../interfaces';
 import { defaultPreparePplQuery } from '../../languages';
 import { ensureAiRootFieldChecked } from '../../ai_root';
+import { ensureGenAiFieldChecked, lacksGenAiData } from '../../genai_data_check';
 import { PPLService } from '../../../pages/traces/trace_details/data_fetching/ppl_request_helpers';
 
 // Module-level storage for abort controllers keyed by cacheKey
@@ -197,13 +198,17 @@ export const executeQueries = createAsyncThunk<
     return;
   }
 
-  // The AI-root query only names the marker field once it is known to be mapped.
+  // The AI-root query only names the marker field once it is known to be mapped. Every query
+  // names `gen_ai.operation.name`, so a dataset without it (no GenAI spans) runs none of them and
+  // the page shows that it has no agent traces instead of query errors.
   if (services.data && query.dataset) {
-    await ensureAiRootFieldChecked(
-      new PPLService(services.data),
-      query.dataset,
-      defaultPrepareQueryString({ ...query, query: '' })
-    );
+    const ppl = new PPLService(services.data);
+    const sourceCommand = defaultPrepareQueryString({ ...query, query: '' });
+    await Promise.all([
+      ensureAiRootFieldChecked(ppl, query.dataset, sourceCommand),
+      ensureGenAiFieldChecked(ppl, query.dataset, sourceCommand),
+    ]);
+    if (lacksGenAiData(query.dataset.id)) return;
   }
 
   // Collect all tab cache keys that need execution
@@ -509,6 +514,9 @@ export const executeTabQuery = createAsyncThunk<
 >('query/executeTabQuery', async (params, thunkAPI) => {
   const { services } = params;
   const { getState } = thunkAPI;
+
+  // Every tab query names `gen_ai.operation.name`, which fails on a dataset without GenAI spans.
+  if (lacksGenAiData(getState().query.dataset?.id)) return;
 
   /**
    * below activeTabCustomQueryErrorHandler logic to be removed when datasets
