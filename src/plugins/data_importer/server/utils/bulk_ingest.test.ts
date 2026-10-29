@@ -247,6 +247,40 @@ describe('BulkIngester', () => {
     await expect(ingester.finish(4)).rejects.toBeInstanceOf(BulkIndexForbiddenError);
   });
 
+  it('says how many rows already landed when a 403 hits after earlier chunks succeeded', async () => {
+    client.bulk
+      .mockResolvedValueOnce(bulkResponse([ok(), ok()]))
+      .mockRejectedValueOnce(Object.assign(new Error('denied'), { statusCode: 403 }));
+
+    const ingester = new BulkIngester(client, 'foo', 2);
+    for (let row = 1; row <= 4; row++) {
+      await ingester.add(row, { a: row });
+    }
+    await expect(ingester.finish(4)).rejects.toThrow(
+      '2 of 4 rows were indexed into "foo" before the permission error and remain there.'
+    );
+  });
+
+  it('counts rows that succeeded within the chunk carrying the per-item 403', async () => {
+    client.bulk.mockResolvedValueOnce(
+      bulkResponse([ok(), fail('security_exception', 'no permissions', 403)])
+    );
+
+    const ingester = new BulkIngester(client, 'foo', 2);
+    await ingester.add(1, { a: 1 });
+    await ingester.add(2, { a: 2 });
+    await expect(ingester.finish(2)).rejects.toThrow('1 of 2 rows were indexed');
+  });
+
+  it('does not mention landed rows when nothing was indexed', async () => {
+    client.bulk.mockRejectedValueOnce(Object.assign(new Error('denied'), { statusCode: 403 }));
+
+    const ingester = new BulkIngester(client, 'foo', 2);
+    await ingester.add(1, { a: 1 });
+    await ingester.add(2, { a: 2 });
+    await expect(ingester.finish(2)).rejects.not.toThrow('were indexed');
+  });
+
   it('includes locally-rejected rows (never sent to OpenSearch) in failures and summary', async () => {
     const ingester = new BulkIngester(client, 'foo', 10);
     await ingester.add(1, { a: 1 });

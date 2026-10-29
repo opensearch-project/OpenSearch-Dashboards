@@ -19,7 +19,7 @@ import {
   LOOKUP_FIELD,
 } from '../utils/util';
 import { fetchIndexMapping } from '../utils/coerce_to_mapping';
-import { describeAliasError, pointLookupAlias } from '../utils/lookup_alias';
+import { finishImport } from '../utils/import_result';
 import { FileStream } from '../types';
 
 export function importFileRoute(
@@ -178,49 +178,15 @@ export function importFileRoute(
           mapping: targetMapping,
         });
 
-        const indexedCount = message.total - message.failedRows.length;
-        const success = message.failedRows.length < 1;
-        // Some rows landed and some did not: the UI should warn with message.errorSummary
-        const partial = indexedCount > 0 && !success;
-
-        // Create the filtered alias whenever ANY rows landed. On partial failure the landed rows
-        // already carry the __lookup uuid; skipping the alias would orphan them on the (shared)
-        // index with no way to address or clean them up.
-        let aliasCreated: boolean | undefined;
-        let aliasError: string | undefined;
-        if (request.query.importIdentifier && lookupId) {
-          aliasCreated = false;
-          if (indexedCount > 0) {
-            try {
-              // Atomically moves the alias off any previous import so a re-import overwrites the
-              // lookup instead of unioning old and new indices
-              await pointLookupAlias(client, {
-                indexName: request.query.indexName,
-                alias: request.query.importIdentifier,
-                lookupId,
-                lookupField: LOOKUP_FIELD,
-              });
-              aliasCreated = true;
-            } catch (err) {
-              // The rows are already indexed, so this stays a 200, but the lookup is unreachable
-              // without its alias: aliasError tells the client to fail loudly with a usable message
-              aliasError = describeAliasError(err);
-              // @ts-expect-error TS2339 TODO(ts-error): fixme
-              context.dataImporter?.logger.error(
-                `Failed to create alias ${request.query.importIdentifier}: ${err}`
-              );
-            }
-          }
-        }
-
         return response.ok({
-          body: {
-            message,
-            success,
-            partial,
-            ...(aliasCreated !== undefined && { aliasCreated }),
-            ...(aliasError !== undefined && { aliasError }),
-          },
+          body: await finishImport(message, {
+            client,
+            indexName: request.query.indexName,
+            importIdentifier: request.query.importIdentifier,
+            lookupId,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            logger: context.dataImporter?.logger,
+          }),
         });
       } catch (e) {
         if (e instanceof BulkIndexForbiddenError) {

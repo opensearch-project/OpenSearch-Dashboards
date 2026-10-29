@@ -159,7 +159,10 @@ export class BulkIngester {
    * whole-import authorization failure, so once set, `finish()` throws instead of returning a
    * per-row failure report.
    */
-  private fatalForbidden: BulkIndexForbiddenError | undefined;
+  private fatalForbidden: { reason?: string } | undefined;
+
+  /** Rows OpenSearch confirmed as indexed so far (reported if a later chunk is denied) */
+  private indexedRows = 0;
 
   /**
    * @param mapping resolved target index mapping; when given, numbers/booleans bound for
@@ -201,7 +204,7 @@ export class BulkIngester {
   public async finish(total: number): Promise<IngestResponse> {
     await this.flush();
     if (this.fatalForbidden) {
-      throw this.fatalForbidden;
+      throw this.buildForbiddenError(this.fatalForbidden.reason, total);
     }
     const failedRows = this.failures.map(({ row }) => row).sort((n1, n2) => n1 - n2);
     return {
@@ -221,14 +224,20 @@ export class BulkIngester {
 
   /**
    * Build the single permission error surfaced when the user lacks bulk-write access, whether the
-   * 403 arrived as a thrown ResponseError or per-item in the bulk response body.
+   * 403 arrived as a thrown ResponseError or per-item in the bulk response body. Earlier chunks
+   * may already have landed (e.g. permissions changed mid-import); say so rather than implying
+   * nothing was written.
    */
-  private buildForbiddenError(reason?: string): BulkIndexForbiddenError {
+  private buildForbiddenError(reason: string | undefined, total: number): BulkIndexForbiddenError {
     return new BulkIndexForbiddenError(
       `You do not have permission to write to index "${this.indexName}". ` +
         `Importing requires the bulk write privilege (for example the ` +
         `"indices:data/write/bulk" action).` +
-        (reason ? ` OpenSearch reported: ${reason}` : '')
+        (reason ? ` OpenSearch reported: ${reason}` : '') +
+        (this.indexedRows > 0
+          ? ` ${this.indexedRows} of ${total} rows were indexed into "${this.indexName}" before ` +
+            `the permission error and remain there.`
+          : '')
     );
   }
 
@@ -249,7 +258,7 @@ export class BulkIngester {
       // actionable permission error instead of "failed to upload" with a bucket per row.
       if (getErrorStatusCode(e) === 403) {
         const { reason } = describeThrownError(e);
-        this.fatalForbidden = this.buildForbiddenError(reason);
+        this.fatalForbidden = { reason };
         return;
       }
       // Any other whole-request failure (network, cluster block...): every row in it failed
@@ -259,6 +268,7 @@ export class BulkIngester {
     }
 
     if (!responseBody?.errors) {
+      this.indexedRows += chunk.length;
       return;
     }
 
@@ -280,14 +290,16 @@ export class BulkIngester {
         // problem. Flag it as fatal so finish() surfaces one actionable permission error instead
         // of a failed-document bucket per row.
         if (result.status === 403 && !this.fatalForbidden) {
-          this.fatalForbidden = this.buildForbiddenError(result.error.reason ?? result.error.type);
+          this.fatalForbidden = { reason: result.error.reason ?? result.error.type };
         }
         this.failures.push({
           row,
           type: result.error.type ?? 'unknown_error',
           reason: result.error.reason ?? result.error.type ?? 'Unknown error',
         });
+        return;
       }
+      this.indexedRows++;
     });
   }
 }
