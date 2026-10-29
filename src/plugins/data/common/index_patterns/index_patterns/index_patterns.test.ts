@@ -373,6 +373,57 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
+  describe('payload too large (HTTP 413)', () => {
+    const payloadTooLarge = { res: { status: 413 } };
+
+    beforeEach(() => {
+      setDocsourcePayload(null, {
+        id: 'foo',
+        version: 'foo',
+        attributes: { title: 'big-*' },
+      });
+    });
+
+    test('updateSavedObject shows a toast naming the size limit and rethrows', async () => {
+      const pattern = await indexPatterns.get('foo');
+      savedObjectsClient.update = jest.fn().mockRejectedValue(payloadTooLarge);
+
+      await expect(indexPatterns.updateSavedObject(pattern)).rejects.toBe(payloadTooLarge);
+      expect(onNotification).toHaveBeenCalledTimes(1);
+      const toast = onNotification.mock.calls[0][0];
+      expect(toast.title).toContain(pattern.title);
+      expect(toast.text).toContain('server.maxPayloadBytes');
+      expect(toast.color).toBe('danger');
+    });
+
+    test('updateSavedObject stays silent when ignoreErrors is set', async () => {
+      const pattern = await indexPatterns.get('foo');
+      savedObjectsClient.update = jest.fn().mockRejectedValue(payloadTooLarge);
+
+      await expect(indexPatterns.updateSavedObject(pattern, 0, true)).rejects.toBe(payloadTooLarge);
+      expect(onNotification).not.toHaveBeenCalled();
+    });
+
+    test('createSavedObject shows a toast and rethrows', async () => {
+      const pattern = await indexPatterns.create({ title: 'new-big-*' }, true);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue(payloadTooLarge);
+
+      await expect(indexPatterns.createSavedObject(pattern)).rejects.toBe(payloadTooLarge);
+      expect(onNotification).toHaveBeenCalledTimes(1);
+      expect(onNotification.mock.calls[0][0].title).toContain('new-big-*');
+    });
+
+    test('other errors do not show the payload toast', async () => {
+      const pattern = await indexPatterns.get('foo');
+      const serverError = { res: { status: 500 } };
+      savedObjectsClient.update = jest.fn().mockRejectedValue(serverError);
+
+      await expect(indexPatterns.updateSavedObject(pattern)).rejects.toBe(serverError);
+      expect(onNotification).not.toHaveBeenCalled();
+    });
+  });
+
   test('savedObjectToSpec', () => {
     const savedObject = {
       id: 'id',

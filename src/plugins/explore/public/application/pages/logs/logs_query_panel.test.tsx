@@ -166,7 +166,7 @@ const makeStreamingStore = (streaming?: Record<string, unknown>, loading = true)
     preloadedState: {
       query: { query: 'source = logs', language: 'PPL', dataset: { id: '1', title: 'logs' } },
       queryEditor: {
-        queryStatusMap: streaming ? { 'source = logs': { status: 'loading', streaming } } : {},
+        queryStatusMap: loading ? { 'source = logs': { status: 'loading', streaming } } : {},
         overallQueryStatus: { status: loading ? 'loading' : 'ready' },
         promptModeIsAvailable: false,
         promptToQueryIsLoading: false,
@@ -255,14 +255,12 @@ describe('LogsQueryPanel', () => {
           startTime: Date.now(),
         })
       );
-      if (progress) {
-        store.dispatch(
-          setIndividualQueryStatus({
-            cacheKey: 'rows',
-            status: { status: QueryExecutionStatus.LOADING, progress },
-          })
-        );
-      }
+      store.dispatch(
+        setIndividualQueryStatus({
+          cacheKey: 'rows',
+          status: { status: QueryExecutionStatus.LOADING, progress },
+        })
+      );
     });
     render(
       <Provider store={store}>
