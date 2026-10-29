@@ -30,6 +30,7 @@ export interface PPLQueryRequest {
               title: string;
               type: string;
             };
+            schemaMappings?: Record<string, Record<string, string>>;
           };
         }>;
       };
@@ -46,6 +47,7 @@ export const buildPPLDataset = (dataset: Dataset) => {
     title: dataset.title,
     type: dataset.type,
     timeFieldName: dataset.timeFieldName,
+    ...(dataset.schemaMappings && { schemaMappings: dataset.schemaMappings }),
   };
 
   if (dataset.dataSource) {
