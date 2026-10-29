@@ -6,7 +6,6 @@
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
@@ -24,7 +23,9 @@ import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
 import {
   DashboardContainer,
   IVariableInterpolationService,
+  VariableValue,
   createNoOpVariableInterpolationService,
+  hasLoadingVariables,
 } from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
@@ -87,6 +88,7 @@ export interface SearchProps {
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  variables?: VariableValue[];
   axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
@@ -313,9 +315,7 @@ export class ExploreEmbeddable
         this.variableSubscription = dashboardContainer.variableService
           .getVariables$()
           .subscribe((variables) => {
-            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
-            if (hasLoading) return;
-
+            if (hasLoadingVariables(variables)) return;
             this.handleVariablesChange();
           });
       }
@@ -323,34 +323,46 @@ export class ExploreEmbeddable
   }
 
   /**
-   * Handle variable changes - interpolate query and refetch
+   * Handle variable changes. Table data links can use dashboard variables, so
+   * keep them in searchProps first. Then refetch when the interpolated query
+   * changes, and otherwise re-render only if the link variables changed.
+   * Variable option reloads (e.g. on a time range change) emit with the same
+   * values, and must not re-render the panel.
    */
   private handleVariablesChange() {
-    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
-      return;
+    const variables = this.interpolationService.getVariables();
+    let linkVariablesChanged = false;
+    if (this.searchProps && !isEqual(variables, this.searchProps.variables)) {
+      this.searchProps.variables = variables;
+      linkVariablesChanged = true;
     }
 
-    const { searchSource } = this.savedExplore;
-    const currentQuery = searchSource.getField('query');
-    const interpolatedQuery = this.interpolationService.interpolate(
-      this.originalQuery,
-      currentQuery?.language
-    );
+    if (this.originalQuery && this.interpolationService.hasVariables(this.originalQuery)) {
+      const { searchSource } = this.savedExplore;
+      const currentQuery = searchSource.getField('query');
+      const interpolatedQuery = this.interpolationService.interpolate(
+        this.originalQuery,
+        currentQuery?.language
+      );
 
-    if (interpolatedQuery === this.lastInterpolatedQuery) {
-      return;
+      if (interpolatedQuery !== this.lastInterpolatedQuery) {
+        this.lastInterpolatedQuery = interpolatedQuery;
+        if (currentQuery) {
+          searchSource.setField('query', {
+            ...currentQuery,
+            query: interpolatedQuery,
+          });
+        }
+        if (this.searchProps) {
+          // The refetch re-renders with the new variables.
+          this.updateHandler(this.searchProps, true);
+          return;
+        }
+      }
     }
-    this.lastInterpolatedQuery = interpolatedQuery;
 
-    if (currentQuery) {
-      searchSource.setField('query', {
-        ...currentQuery,
-        query: interpolatedQuery,
-      });
-    }
-
-    if (this.searchProps) {
-      this.updateHandler(this.searchProps, true);
+    if (linkVariablesChanged && this.node && this.searchProps) {
+      this.renderComponent(this.node, this.searchProps);
     }
   }
 
@@ -366,6 +378,7 @@ export class ExploreEmbeddable
       isLoading: false,
       displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
+      variables: this.interpolationService.getVariables(),
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -409,34 +422,35 @@ export class ExploreEmbeddable
       this.updateInput({ sort: newSort });
     };
 
+    // Column actions read this.searchProps, not the local object: updateHandler
+    // writes the current columns and sort onto whatever this.searchProps is now.
     searchProps.onAddColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = buildColumns(
-        columnActions.addColumn(searchProps.columns, { column: columnName })
-      );
+      const updatedColumns = buildColumns(columnActions.addColumn(columns, { column: columnName }));
       this.updateInput({ columns: updatedColumns });
     };
 
     searchProps.onRemoveColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = columnActions.removeColumn(searchProps.columns, columnName);
-      const updatedSort =
-        searchProps.sort && searchProps.sort.length
-          ? searchProps.sort.filter((s) => s[0] !== columnName)
-          : [];
+      const sort = this.searchProps?.sort;
+      const updatedColumns = columnActions.removeColumn(columns, columnName);
+      const updatedSort = sort && sort.length ? sort.filter((s) => s[0] !== columnName) : [];
       this.updateInput({ sort: updatedSort, columns: updatedColumns });
     };
 
     searchProps.onMoveColumn = (columnName, newIndex: number) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const oldIndex = searchProps.columns.indexOf(columnName);
-      const updatedColumns = columnActions.reorderColumn(searchProps.columns, oldIndex, newIndex);
+      const oldIndex = columns.indexOf(columnName);
+      const updatedColumns = columnActions.reorderColumn(columns, oldIndex, newIndex);
       this.updateInput({ columns: updatedColumns });
     };
 
@@ -776,8 +790,7 @@ export class ExploreEmbeddable
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(<ExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {

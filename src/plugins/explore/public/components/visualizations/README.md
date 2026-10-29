@@ -86,6 +86,33 @@ The `findBestMatch` method returns the highest-priority rule with an exact colum
 
 For a complete reference of all currently defined rules, see the [Visualization Rules Reference](./RULES.md).
 
+## Table Data Links
+
+A table column can carry data links (`table/data_link_options.tsx`). Each link has a URL template that `resolveDataLink` (`table/data_link_utils.ts`) fills in when a cell renders. The grammar follows Grafana data links:
+
+| Placeholder                                                | Resolves to                                                                                                                                                                            |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `${__value.text}`                                          | The clicked cell value, at every occurrence                                                                                                                                            |
+| `${__data.fields.<name>}`                                  | A field of the same row. Flat field names; dots are allowed (`resource.service.name`)                                                                                                  |
+| `${__data.fields["<name>"]}`, `${__data.fields['<name>']}` | The same, for field names with spaces or other characters                                                                                                                              |
+| `$var`, `${var}`                                           | The current value of a dashboard variable. A multi-value variable joins its values with `,`; with "All" selected it gives the `$__all` marker, so the target dashboard selects All too |
+| `${...:rison}`                                             | Any of the above, encoded with `rison.encode_uri` instead of `encodeURIComponent`                                                                                                      |
+
+Rules:
+
+- All placeholders are resolved in one pass, so a substituted value is never expanded again.
+- Each value is encoded on its own. The default is `encodeURIComponent`. Use `:rison` for a value placed inside dashboard URL state (`_a`, `_g`), because percent-encoding does not protect `'` and `!` there.
+- An object value is JSON-stringified, as the cell displays it. `null` and `undefined` give an empty string.
+- A placeholder for a field that is not in the row, an unknown variable, or an unknown suffix stays in the URL unchanged, and the cell shows no link for that URL (the cell's tooltip names the placeholder).
+
+Example, a link that opens another dashboard with two variables set from the row and the clicked cell:
+
+```
+#/view/endpoint-dashboard?_a=(variables:!((id:service,current:!(${__data.fields.service:rison})),(id:endpoint,current:!(${__value.text:rison}))))
+```
+
+On a dashboard, the Explore embeddable passes the current variable values to `TableVis` through `SearchProps.variables`, and re-renders the panel when they change. In the in-context visualization editor, `useVariables` passes them through `VisualizationBuilder.setVariables`, so the preview resolves the same links.
+
 ## Usage and Extension
 
 ### Basic Usage

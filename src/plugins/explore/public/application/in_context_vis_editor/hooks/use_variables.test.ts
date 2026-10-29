@@ -13,6 +13,8 @@ jest.mock('../../../../../dashboard/public', () => ({
   VariableService: jest.fn(),
   VariableInterpolationService: jest.fn(),
   createNoOpVariableInterpolationService: jest.fn(),
+  hasLoadingVariables: jest.requireActual('../../../../../dashboard/public/variables/types')
+    .hasLoadingVariables,
 }));
 
 // Mock opensearch_dashboards_react
@@ -30,11 +32,16 @@ jest.mock('../../utils/languages', () => ({
   prepareQueryForLanguage: jest.fn((state) => ({ query: state.query })),
 }));
 
+jest.mock('./use_visualization_builder', () => ({
+  useVisualizationBuilder: jest.fn(),
+}));
+
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { useVariables } from './use_variables';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryBuilderState } from './use_query_builder_state';
+import { useVisualizationBuilder } from './use_visualization_builder';
 import { VARIABLE_VALUES_URL_KEY } from '../types';
 import {
   Variable,
@@ -48,6 +55,7 @@ import {
 describe('useVariables', () => {
   let mockServices: any;
   let mockQueryBuilder: any;
+  let mockVisualizationBuilder: any;
   let mockVariableService: any;
   let mockInterpolationService: any;
   let mockTimeUpdate$: Subject<any>;
@@ -86,6 +94,11 @@ describe('useVariables', () => {
     mockInterpolationService = {
       interpolate: jest.fn((query) => `interpolated-${query}`),
       hasVariables: jest.fn(() => true),
+      getVariables: jest.fn(() => [{ name: 'region', value: 'us-east' }]),
+    };
+
+    mockVisualizationBuilder = {
+      setVariables: jest.fn(),
     };
 
     mockQueryBuilder = {
@@ -117,6 +130,9 @@ describe('useVariables', () => {
 
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: mockServices });
     (useQueryBuilderState as jest.Mock).mockReturnValue({ queryBuilder: mockQueryBuilder });
+    (useVisualizationBuilder as jest.Mock).mockReturnValue({
+      visualizationBuilderForEditor: mockVisualizationBuilder,
+    });
     (VariableService as unknown as jest.Mock).mockImplementation(() => mockVariableService);
     (VariableInterpolationService as unknown as jest.Mock).mockImplementation(
       () => mockInterpolationService
@@ -317,6 +333,37 @@ describe('useVariables', () => {
       mockVariables$.next([createMockVariable('region', ['us-east'])]);
 
       expect(mockQueryBuilder.executeQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('table data link variables', () => {
+    it('gives the visualization builder the variable values when they change', () => {
+      renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
+      mockVisualizationBuilder.setVariables.mockClear();
+
+      mockInterpolationService.getVariables.mockReturnValue([{ name: 'region', value: 'eu' }]);
+      mockVariables$.next([createMockVariable('region', ['eu'])]);
+
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledTimes(1);
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledWith([
+        { name: 'region', value: 'eu' },
+      ]);
+    });
+
+    it('does not update the builder while variables are loading', () => {
+      renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
+      mockVisualizationBuilder.setVariables.mockClear();
+
+      const loadingVariable = { ...createMockVariable('region', ['us-east']), loading: true };
+      mockVariables$.next([loadingVariable as any]);
+
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
+    });
+
+    it('does not touch the builder without container variables', () => {
+      renderHook(() => useVariables(undefined));
+
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
     });
   });
 
