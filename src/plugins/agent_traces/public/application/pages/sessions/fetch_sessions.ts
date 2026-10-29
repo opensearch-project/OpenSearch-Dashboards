@@ -34,6 +34,7 @@ import {
   pplResponseToRecords,
   PplRecord,
 } from './session_utils';
+import { ensureGenAiFieldChecked, lacksGenAiData } from '../../utils/genai_data_check';
 import { ensureAiRootFieldChecked, hasAiRootField, isAiRootRow } from '../../utils/ai_root';
 import { nestedAiRunsAmong, runKey } from '../traces/hooks/shadowed_ai_roots';
 
@@ -117,7 +118,21 @@ export const fetchSessions = async (
   const source = getSourceCommand(whereQuery);
 
   const wholeSession = withoutTimeRange(dataset);
-  await ensureAiRootFieldChecked(ppl, dataset, source);
+  await Promise.all([
+    ensureAiRootFieldChecked(ppl, dataset, source),
+    ensureGenAiFieldChecked(ppl, dataset, source),
+  ]);
+  // The session queries name `gen_ai.operation.name`; a dataset without it has no sessions.
+  if (lacksGenAiData(dataset.id)) {
+    return {
+      sessions: [],
+      totalSessions: 0,
+      ignoredCommands,
+      hasFilter,
+      partial: false,
+      errorsPartial: false,
+    };
+  }
   let sessionIds: string[];
   let total: number;
   let errorsPartial = false;

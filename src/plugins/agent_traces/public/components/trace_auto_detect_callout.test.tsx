@@ -23,13 +23,10 @@ jest.mock('../../../explore/public', () => ({
 const autoDetectModule = explorePublic;
 const createDatasetsModule = explorePublic;
 
-// Mock the DiscoverNoIndexPatterns component
-jest.mock(
-  '../application/legacy/discover/application/components/no_index_patterns/no_index_patterns',
-  () => ({
-    DiscoverNoIndexPatterns: () => <div data-testid="no-index-patterns">No Index Patterns</div>,
-  })
-);
+// Mock the get-started empty state
+jest.mock('./empty_states', () => ({
+  AgentTracesGetStarted: () => <div data-testid="agent-traces-get-started">Get started</div>,
+}));
 
 describe('TraceAutoDetectCallout', () => {
   const mockCore = coreMock.createStart();
@@ -112,13 +109,13 @@ describe('TraceAutoDetectCallout', () => {
     );
   };
 
-  it('should render DiscoverNoIndexPatterns when no trace data is detected', async () => {
+  it('should render the get-started state when no trace data is detected', async () => {
     mockDetectTraceDataAcrossDataSources.mockResolvedValue([]);
 
     renderWithContext();
 
     await waitFor(() => {
-      expect(screen.getByText('No Index Patterns')).toBeInTheDocument();
+      expect(screen.getByText('Get started')).toBeInTheDocument();
     });
   });
 
@@ -183,7 +180,7 @@ describe('TraceAutoDetectCallout', () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(screen.getByText('No Index Patterns')).toBeInTheDocument();
+      expect(screen.getByText('Get started')).toBeInTheDocument();
       expect(screen.queryByText('Trace Data Detected')).not.toBeInTheDocument();
     });
   });
@@ -236,7 +233,7 @@ describe('TraceAutoDetectCallout', () => {
 
     await waitFor(() => {
       expect(localStorageMock.getItem('agentTraces:traces:autoDetectDismissed')).toBe('true');
-      expect(screen.getByText('No Index Patterns')).toBeInTheDocument();
+      expect(screen.getByText('Get started')).toBeInTheDocument();
     });
   });
 
@@ -397,7 +394,7 @@ describe('TraceAutoDetectCallout', () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(screen.getByText('No Index Patterns')).toBeInTheDocument();
+      expect(screen.getByText('Get started')).toBeInTheDocument();
       expect(screen.queryByText('Trace Data Detected')).not.toBeInTheDocument();
     });
 
