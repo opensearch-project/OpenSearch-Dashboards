@@ -25,6 +25,7 @@ import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
+import { isPayloadTooLargeError, getPayloadTooLargeToast } from '../../index_patterns/lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, MissingDataViewError } from '../errors';
 
@@ -705,7 +706,14 @@ export class DataViewsService {
         }
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
+      this.notifyIfPayloadTooLarge(err, dataView);
       throw err;
+    }
+  }
+
+  private notifyIfPayloadTooLarge(err: any, dataView: DataView) {
+    if (isPayloadTooLargeError(err)) {
+      this.onNotification(getPayloadTooLargeToast(dataView.title, dataView.fields?.length ?? 0));
     }
   }
 
@@ -784,6 +792,9 @@ export class DataViewsService {
           dataView.version = samePattern.version;
           this.patterns.clearCache(dataView.id!);
           return this.updateSavedObject(dataView, saveAttempts, ignoreErrors);
+        }
+        if (!ignoreErrors) {
+          this.notifyIfPayloadTooLarge(err, dataView);
         }
         throw err;
       });

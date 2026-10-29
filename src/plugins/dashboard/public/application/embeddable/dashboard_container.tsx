@@ -31,7 +31,8 @@
 import './_dashboard_container.scss';
 
 import { isEqual } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
@@ -71,7 +72,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { DashboardLayout } from '../../../common';
-import { removeMemberFromLayout } from './section_layout_utils';
+import { removeMemberFromLayout, getCollapsedMemberIds } from './section_layout_utils';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -106,6 +107,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   useSharedCrosshair?: boolean;
+  isVisible?: boolean;
   id: string;
 }
 
@@ -141,6 +143,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private readonly logos: Logos;
   private root?: Root;
   private variableSubscriptions: Subscription[] = [];
+  private readonly variableReload$ = new Subject<void>();
   // Transient context passed through the visualization editor.
   private pendingCreateSectionId?: string;
   public readonly variableService: VariableService;
@@ -178,10 +181,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.variableService.setInterpolationService(this.variableInterpolationService);
 
-    if (initialInput.variables && initialInput.variables.length > 0) {
-      this.variableService.refreshAllVariableOptions();
-    }
-
     // Subscribe to variable changes and update container input
     // Use getVariablesWithoutState$() to get pure Variables (no runtime state)
     this.variableSubscriptions.push(
@@ -196,6 +195,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       })
     );
 
+    // Variable values can also change from the dashboard URL without remounting the
+    // container (a link to the same dashboard, browser back/forward).
+    this.variableSubscriptions.push(
+      this.getInput$()
+        .pipe(
+          map((input) => input.variables),
+          distinctUntilChanged(isEqual)
+        )
+        .subscribe((variables) => {
+          if (variables) {
+            this.variableService.applyCurrentValues(variables);
+          }
+        })
+    );
+
     // Subscribe to container input changes to update VariableService dashboardId
     this.variableSubscriptions.push(
       this.getInput$().subscribe((input) => {
@@ -206,36 +220,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       })
     );
 
-    this.initVariableRefreshSubscription();
+    this.startVariableRefreshScheduler();
   }
 
-  private initVariableRefreshSubscription() {
-    let prevTimeRange = this.getInput().timeRange;
-    let prevReloadTime = this.getInput().lastReloadRequestTime;
-
-    this.variableSubscriptions.push(
-      this.getInput$().subscribe((input) => {
-        const variables = this.variableService.getVariables();
-        const hasQueryVariables = variables.some((v) => v.type === 'query');
-        if (!hasQueryVariables) return;
-
-        const timeRangeChanged = !isEqual(input.timeRange, prevTimeRange);
-        const reloadTriggered = input.lastReloadRequestTime !== prevReloadTime;
-
-        if (timeRangeChanged || reloadTriggered) {
-          prevTimeRange = input.timeRange;
-          prevReloadTime = input.lastReloadRequestTime;
-
-          if (reloadTriggered) {
-            // Manual reload: refresh all variables
-            this.variableService.refreshAllVariableOptions();
-          } else if (timeRangeChanged) {
-            // Only time range changed: refresh only time-filtered variables
-            this.variableService.refreshTimeFilteredVariableOptions();
-          }
-        }
-      })
-    );
+  private startVariableRefreshScheduler() {
+    const input$ = this.getInput$();
+    const stop = this.variableService.startRefreshScheduler({
+      // input$ replays the current input, so the first value is the initial time range.
+      time$: input$.pipe(
+        map((input) => input.timeRange),
+        distinctUntilChanged(isEqual)
+      ),
+      // See reload(): covers the Refresh button and lastReloadRequestTime changes.
+      reload$: this.variableReload$,
+    });
+    this.variableSubscriptions.push(new Subscription(stop));
   }
 
   // Keep section membership consistent when a panel is deleted.
@@ -434,6 +433,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
   }
 
+  /**
+   * Re-queries the variables along with the panels. The Refresh button calls
+   * this directly, and the embeddable framework calls it when
+   * lastReloadRequestTime changes, so both reach the variables through here.
+   */
+  public reload() {
+    // Undefined if called during the base constructor, before fields are set.
+    this.variableReload$?.next();
+    super.reload();
+  }
+
   public destroy() {
     super.destroy();
     this.variableSubscriptions.forEach((s) => s.unsubscribe());
@@ -498,7 +508,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       filters,
       useSharedCrosshair,
+      layout,
     } = this.input;
+    // Members of a collapsed section are not visible. `this.options` may be
+    // undefined here: the base Container constructor emits input (creating
+    // children) before this subclass assigns options.
+    const collapsedMemberIds =
+      this.options?.allowDashboardSections && layout?.type === 'SectionLayout'
+        ? getCollapsedMemberIds(layout.items)
+        : undefined;
     return {
       filters,
       hidePanelTitles,
@@ -507,6 +525,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       timeRange,
       refreshConfig,
       viewMode,
+      isVisible: collapsedMemberIds ? !collapsedMemberIds.has(id) : true,
       id,
     };
   }

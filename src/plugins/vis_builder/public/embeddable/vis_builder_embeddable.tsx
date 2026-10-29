@@ -76,6 +76,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   private query?: Query;
   private filters?: Filter[];
   private abortController?: AbortController;
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
   public expression: string = '';
   private autoRefreshFetchSubscription: Subscription;
   private subscriptions: Subscription[] = [];
@@ -280,6 +282,13 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   }
 
   private async updateHandler() {
+    // Pause fetching while not visible (e.g. a collapsed section); record the
+    // owed fetch and flush it once on resume (in handleChanges). See
+    // EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      this.pendingFetchOnResume = true;
+      return;
+    }
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -328,6 +337,12 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     // Check if rootState has changed
     if (this.getSerializedState() !== this.serializedState) {
       this.serializedState = this.getSerializedState();
+      dirty = true;
+    }
+
+    // Resume edge: flush the fetch owed while hidden.
+    if (this.pendingFetchOnResume && this.input.isVisible !== false) {
+      this.pendingFetchOnResume = false;
       dirty = true;
     }
 

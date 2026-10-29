@@ -4,6 +4,7 @@
  */
 
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
+import { DataSourceAssociationFilters } from './services/data_source_association_filters';
 
 type IResponse<T> =
   | {
@@ -21,6 +22,7 @@ export const createMockWorkspaceClient = (): jest.Mocked<
     init: () => {};
     refreshWorkspace: (id: string) => Promise<IResponse<any>>;
     setPermissionEnabled: (enabled: boolean) => void;
+    getDataSourceAssociationFilters: () => DataSourceAssociationFilters;
   }
 > => ({
   getCurrentWorkspaceId: jest.fn(),
@@ -39,6 +41,7 @@ export const createMockWorkspaceClient = (): jest.Mocked<
   batchDelete: jest.fn(),
   refreshWorkspace: jest.fn(),
   setPermissionEnabled: jest.fn(),
+  getDataSourceAssociationFilters: jest.fn(() => new DataSourceAssociationFilters()),
 });
 
 export const workspaceClientMock = createMockWorkspaceClient();

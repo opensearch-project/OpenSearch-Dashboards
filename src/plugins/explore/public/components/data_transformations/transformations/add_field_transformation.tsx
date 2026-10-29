@@ -14,10 +14,14 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import {
+  TransformationInstance,
+  TransformationDefinition,
+  FieldReference,
+  FieldSchema,
+  NormalizedRow,
+} from '../index';
 import { FieldSelector } from '../field_selector';
-import { VisFieldType } from '../../visualizations/types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 import {
   binaryOperatorOptions,
@@ -30,6 +34,7 @@ import {
   createInvalidConfigResult,
   createMissingFieldsResult,
   getRowFieldValue,
+  isNumericalField,
   rowHasField,
 } from '../transformation_utils';
 
@@ -53,7 +58,7 @@ interface AddFieldConfig {
   unaryField: string | undefined;
   // cross-field
   crossFieldsOperator: CrossFieldsOperator;
-  crossFields: FieldSchema[];
+  crossFields: FieldReference[];
   expression: string;
 
   alias: string;
@@ -178,7 +183,7 @@ const parseArithmetic = (input: string): number | null => {
   return result !== null && isFinite(result) ? result : null;
 };
 
-const evaluateExpression = (expression: string, row: OpenSearchSearchHit): number | null => {
+const evaluateExpression = (expression: string, row: NormalizedRow): number | null => {
   const expr = expression.replace(/\$\{([^}]+)\}/g, (_, fieldName) => {
     const val = Number(getRowFieldValue(row, fieldName));
     return isNaN(val) ? 'NaN' : String(val);
@@ -312,7 +317,7 @@ const AddFieldEditor = ({
 
   // add field only supports numerical currently
   const numericalFields = useMemo(
-    () => availableFields.filter((f) => f.visFieldType === VisFieldType.Numerical),
+    () => availableFields.filter(isNumericalField),
     [availableFields]
   );
 
@@ -472,7 +477,9 @@ const AddFieldEditor = ({
               <FieldSelector
                 configFields={(config.crossFields ?? []).map((f) => f.name)}
                 availableFields={numericalFields}
-                updateConfigFields={(fields) => update({ crossFields: fields })}
+                updateConfigFields={(fields) =>
+                  update({ crossFields: fields.map(({ name }) => ({ name })) })
+                }
                 supportMulti
                 testSubjPrefix="addFieldCrossFields"
               />
@@ -525,7 +532,7 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
       alias: '',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: AddFieldConfig) => {
+    transformationMethod: (data, config: AddFieldConfig) => {
       if (!isConfigComplete(config)) {
         return createInvalidConfigResult(data, 'Add Field configuration is incomplete.');
       }
@@ -595,12 +602,7 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
             result = config.crossFieldsOperator === 'total' ? sum : sum / values.length;
           }
         }
-        const newSource =
-          result !== null
-            ? { ...(row._source as Record<string, unknown>), [alias]: result }
-            : { ...(row._source as Record<string, unknown>) };
-
-        return { ...row, _source: newSource };
+        return result !== null ? { ...row, [alias]: result } : { ...row };
       });
 
       if (missingFields.size === 0) {

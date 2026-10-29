@@ -5,14 +5,7 @@
 
 import { TransformationService } from './transformation_service';
 import { TransformationDefinition, TransformationInstance } from './types';
-import { VisFieldType } from '../visualizations/types';
-
-const createHit = (source: Record<string, unknown>) => ({
-  _index: 'test',
-  _id: '1',
-  _score: 1,
-  _source: source,
-});
+const createRow = (source: Record<string, unknown>) => source;
 
 const createMockDefinition = (
   id: string,
@@ -152,12 +145,16 @@ describe('TransformationService', () => {
   });
 
   describe('applyPipeline', () => {
-    it('returns raw rows when pipeline is empty', () => {
-      const rows = [createHit({ a: 1 }), createHit({ b: 2 })];
-      const originalSchema = [{ name: 'a', type: 'integer' }];
+    it('returns raw rows and reconciles the schema when the pipeline is empty', () => {
+      const rows = [createRow({ a: 1, b: 'value' }), createRow({ a: 2, c: true })];
+      const originalSchema = [{ name: 'a', type: 'long' }, { name: 'b' }, { type: 'string' }];
       const { rows: result, finalSchema, steps } = service.applyPipeline(rows, originalSchema);
       expect(result).toEqual(rows);
-      expect(finalSchema).toEqual(originalSchema);
+      expect(finalSchema).toEqual([
+        { name: 'a', type: 'long' },
+        { name: 'b', type: 'string' },
+        { name: 'c', type: 'boolean' },
+      ]);
       expect(steps).toEqual([]);
     });
 
@@ -169,7 +166,7 @@ describe('TransformationService', () => {
       service.updateInstanceConfig(instanceId, { limit: 1 });
       service.toggleInstanceHide(instanceId);
 
-      const rows = [createHit({ a: 1 }), createHit({ a: 2 })];
+      const rows = [createRow({ a: 1 }), createRow({ a: 2 })];
       const result = service.applyPipeline(rows);
       expect(result.rows).toEqual(rows);
       expect(result.steps).toEqual([
@@ -197,7 +194,7 @@ describe('TransformationService', () => {
           transformationMethod: (data) => ({
             rows: data.map((row) => ({
               ...row,
-              _source: { ...(row._source as Record<string, unknown>), added: true },
+              added: true,
             })),
             status: 'applied',
             issues: [],
@@ -212,12 +209,12 @@ describe('TransformationService', () => {
       service.addInstance('add_field');
       service.addInstance('limit');
 
-      const rows = [createHit({ a: 1 }), createHit({ a: 2 })];
+      const rows = [createRow({ a: 1 }), createRow({ a: 2 })];
       const { rows: result, finalSchema } = service.applyPipeline(rows, [
         { name: 'a', type: 'integer' },
       ]);
       expect(result).toHaveLength(1);
-      expect((result[0]._source as Record<string, unknown>).added).toBe(true);
+      expect(result[0].added).toBe(true);
       expect(finalSchema).toEqual([
         { name: 'a', type: 'integer' },
         { name: 'added', type: 'boolean' },
@@ -234,12 +231,9 @@ describe('TransformationService', () => {
           hide: false,
           transformationMethod: (data) => ({
             rows: data.map((row) => ({
-              ...row,
-              _source: {
-                Series: (row._source as Record<string, unknown>).Series,
-                Time: (row._source as Record<string, unknown>).Time,
-                derived: true,
-              },
+              Series: row.Series,
+              Time: row.Time,
+              derived: true,
             })),
             status: 'applied',
             issues: [],
@@ -251,7 +245,7 @@ describe('TransformationService', () => {
       service.addInstance('add_field');
 
       const result = service.applyPipeline(
-        [createHit({ Time: 1000, Series: 'requests', Value: 1 })],
+        [createRow({ Time: 1000, Series: 'requests', Value: 1 })],
         [
           { name: 'Value', type: 'number' },
           { name: 'Time', type: 'time' },
@@ -277,7 +271,7 @@ describe('TransformationService', () => {
           transformationMethod: (data) => ({
             rows: data.map((row) => ({
               ...row,
-              _source: { ...(row._source as Record<string, unknown>), count: 42 },
+              count: 42,
             })),
             status: 'applied',
             issues: [],
@@ -290,7 +284,7 @@ describe('TransformationService', () => {
       service.addInstance('convert');
 
       const result = service.applyPipeline(
-        [createHit({ count: '42' })],
+        [createRow({ count: '42' })],
         [{ name: 'count', type: 'keyword' }]
       );
 
@@ -308,7 +302,7 @@ describe('TransformationService', () => {
           transformationMethod: (data) => ({
             rows: data.map((row) => ({
               ...row,
-              _source: { ...(row._source as Record<string, unknown>), added: true },
+              added: true,
             })),
             status: 'applied',
             issues: [],
@@ -323,15 +317,15 @@ describe('TransformationService', () => {
       service.addInstance('following');
       const [addFieldInstance, followingInstance] = service.pipeline$.getValue();
 
-      service.applyPipeline([createHit({ original: 1 })]);
+      service.applyPipeline([createRow({ original: 1 })]);
       const stageFields = service.stageFields$.getValue();
 
       expect(stageFields.get(addFieldInstance.instance_id)).toEqual([
-        { name: 'original', visFieldType: VisFieldType.Numerical },
+        { name: 'original', type: 'integer' },
       ]);
       expect(stageFields.get(followingInstance.instance_id)).toEqual([
-        { name: 'original', visFieldType: VisFieldType.Numerical },
-        { name: 'added', visFieldType: VisFieldType.Categorical },
+        { name: 'original', type: 'integer' },
+        { name: 'added', type: 'boolean' },
       ]);
     });
 
@@ -365,7 +359,7 @@ describe('TransformationService', () => {
       service.registerDefinition(def);
       service.addInstance('validated');
 
-      const rows = [createHit({ name: 'Alice' })];
+      const rows = [createRow({ name: 'Alice' })];
       const result = service.applyPipeline(rows);
 
       expect(transformationMethod).toHaveBeenCalledWith(rows, { field: 'removed' });
@@ -382,7 +376,7 @@ describe('TransformationService', () => {
       service.addInstance('limit');
 
       const originalSchema = [{ name: 'name', type: 'string' }];
-      const result = service.applyPipeline([createHit({ name: 'Alice' })], originalSchema);
+      const result = service.applyPipeline([createRow({ name: 'Alice' })], originalSchema);
 
       expect(result.rows).toEqual([]);
       expect(result.finalSchema).toEqual(originalSchema);
@@ -406,7 +400,7 @@ describe('TransformationService', () => {
       const followingDefinition = createMockDefinition('following', (data) =>
         data.map((row) => ({
           ...row,
-          _source: { ...(row._source as Record<string, unknown>), continued: true },
+          continued: true,
         }))
       );
       service.registerDefinition(failingDefinition);
@@ -414,10 +408,10 @@ describe('TransformationService', () => {
       service.addInstance('failing');
       service.addInstance('following');
 
-      const result = service.applyPipeline([createHit({ name: 'Alice' })]);
+      const result = service.applyPipeline([createRow({ name: 'Alice' })]);
       consoleError.mockRestore();
 
-      expect(result.rows[0]._source).toEqual({ name: 'Alice', continued: true });
+      expect(result.rows[0]).toEqual({ name: 'Alice', continued: true });
       expect(result.steps[0]).toMatchObject({
         status: 'failed',
         issues: [{ code: 'execution_error', message: 'execution failed' }],

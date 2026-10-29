@@ -49,12 +49,15 @@ export const RecentQueriesButton = () => {
     const updatedQuery = typeof selectedQuery.query === 'string' ? selectedQuery.query : '';
     setPopoverIsOpen(false);
     if (timeRange) {
-      handleTimeChange({
-        start: timeRange.from,
-        end: timeRange.to,
-        isInvalid: false,
-        isQuickSelection: true,
-      });
+      handleTimeChange(
+        {
+          start: timeRange.from,
+          end: timeRange.to,
+          isInvalid: false,
+          isQuickSelection: true,
+        },
+        { fromRecentQuery: true }
+      );
     }
     dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
     // Loading a recent query only replaces the query text; Run executes it against the current

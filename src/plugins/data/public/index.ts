@@ -302,6 +302,8 @@ export { DuplicateDataViewError } from '../common/data_views/errors';
 
 import { isNestedField, isFilterable, setOverrides, getOverrides } from '../common';
 
+export { isPayloadTooLargeError } from '../common';
+
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
@@ -553,6 +555,7 @@ export {
   QueryStringContract,
   QueryStringManager,
   DatasetTypeConfig,
+  datasetTypeRequiresExplicitRun,
   DatasetService,
   DatasetServiceContract,
   LanguageConfig,

@@ -57,7 +57,7 @@ export interface TraceDetailsProps {
   fullTreeError?: string;
   /** Open this trace's session (replaces this flyout with the session flyout). */
   onOpenSession?: (session: SessionRow | string) => void;
-  /** Back and Forward through the flyouts the user moved between. */
+  /** Back to the flyout the user came from. */
   navigation?: FlyoutNavigation;
 }
 
@@ -239,6 +239,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      // The Back row lines up with the close button for this padding (flyout_history_nav.scss).
+      paddingSize="l"
       aria-labelledby="trace-details-flyout"
       style={{ ...(flyoutWidth && { width: `${flyoutWidth}px` }), maxWidth: '95vw' }}
     >
@@ -366,7 +368,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               })}
             </EuiText>
             <EuiText size="xs" className="agentTracesFlyout__metaValue">
-              {rootTrace.totalTokens || '—'}
+              {rootTrace.totalTokens ?? '—'}
             </EuiText>
           </div>
         </div>

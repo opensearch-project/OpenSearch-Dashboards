@@ -114,6 +114,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                   assignedDataSourceConnections={formData.selectedDataSourceConnections}
                   data-test-subj={`workspaceForm-dataSourcePanel`}
                   showDataSourceManagement={true}
+                  workspaceFeatures={formData.features}
                 />
               </EuiPanel>
             </>

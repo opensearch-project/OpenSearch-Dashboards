@@ -34,7 +34,8 @@ import {
   pplResponseToRecords,
   PplRecord,
 } from './session_utils';
-import { ensureAiRootFieldChecked, hasAiRootField } from '../../utils/ai_root';
+import { ensureAiRootFieldChecked, hasAiRootField, isAiRootRow } from '../../utils/ai_root';
+import { nestedAiRunsAmong, runKey } from '../traces/hooks/shadowed_ai_roots';
 
 /** Anything that can run a PPL query against a dataset (PPLService in the app and embeddable). */
 export interface PPLQueryRunner {
@@ -223,9 +224,20 @@ export const fetchSessions = async (
       ]);
       // The root-span query returns span rows in the PPL response shape.
       const rootHits = transformPPLDataToTraceHits(rootsResponse as PPLResponse);
-      rootRows = preferAiRoots(
-        hitsToAgentSpans(rootHits).map((span, i) => spanToRow(span, i, formatTs))
-      );
+      const spanRows = hitsToAgentSpans(rootHits).map((span, i) => spanToRow(span, i, formatTs));
+      // A marked span under another of the trace's AI roots is part of that run, not its own.
+      const aiRootRows = spanRows.filter((r) => isAiRootRow(r));
+      const nested = await nestedAiRunsAmong(
+        ppl,
+        dataset,
+        source,
+        aiRootRows.map((r) => ({
+          traceId: r.traceId,
+          spanId: r.spanId,
+          parentSpanId: r.parentSpanId ?? '',
+        }))
+      ).catch(() => new Set<string>());
+      rootRows = preferAiRoots(spanRows.filter((r) => !nested.has(runKey(r.traceId, r.spanId))));
       for (const r of pplResponseToRecords(errorsResponse)) {
         if (typeof r.traceId === 'string') errorTraceIds.add(r.traceId);
       }

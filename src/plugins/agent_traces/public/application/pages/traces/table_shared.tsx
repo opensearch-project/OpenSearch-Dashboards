@@ -361,7 +361,7 @@ interface DataTableInfoBarProps {
   hitsCount: number;
   totalCount: number;
   elapsedMs: number | undefined;
-  entityName: 'span' | 'trace' | 'session';
+  entityName: 'span' | 'trace' | 'agentRun' | 'session';
   wrapCellText: boolean;
   onWrapCellTextChange: (v: boolean) => void;
 }
@@ -431,6 +431,36 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
     />
   );
 
+/** Traces table rows when parallel agents make them outnumber the traces. */
+const AgentRunCountMessage: React.FC<InfoBarCountProps> = ({
+  hasHead,
+  hitsCount,
+  totalCount,
+  elapsedMs,
+}) =>
+  hasHead ? (
+    <FormattedMessage
+      id="agentTraces.tracesDataTable.showingAgentRunsHeadOnly"
+      defaultMessage="{count} {hitsCount, plural, one {agent run} other {agent runs}} in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="agentTraces.tracesDataTable.showingAgentRuns"
+      defaultMessage="{count} of {total} {totalCount, plural, one {agent run} other {agent runs}} in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        total: <strong>{totalCount.toLocaleString()}</strong>,
+        totalCount,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  );
+
 const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, totalCount, elapsedMs }) =>
   totalCount > hitsCount ? (
     <FormattedMessage
@@ -468,7 +498,9 @@ export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
       ? SpanCountMessage
       : entityName === 'session'
         ? SessionCountMessage
-        : TraceCountMessage;
+        : entityName === 'agentRun'
+          ? AgentRunCountMessage
+          : TraceCountMessage;
 
   return (
     <EuiFlexGroup
