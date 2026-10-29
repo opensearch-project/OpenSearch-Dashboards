@@ -25,7 +25,10 @@ import {
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { TableActionsPopoverButton } from '../table_actions/table_actions_popover_button';
 import { setHideEmptyFields } from '../../../../application/utils/state_management/slices';
-import { useHiddenColumnCount } from '../../../../helpers/use_displayed_columns';
+import {
+  useHiddenColumnCount,
+  useIsNonTimeSeries,
+} from '../../../../helpers/use_displayed_columns';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { SlotItemsForType } from '../../../../services/slot_registry';
 
@@ -59,6 +62,7 @@ export const DiscoverResultsActionBar = ({
   const dispatch = useDispatch();
   const currentTab = useSelector(selectActiveTabId);
   const hiddenColumnCount = useHiddenColumnCount();
+  const isNonTimeSeries = useIsNonTimeSeries();
   // A dataset change resets the active tab to EXPLORE_NO_TAB_ID while the logs table stays on
   // screen, so an empty id means logs here just as it does in detectAndSetOptimalTab.
   const isLogsTab = (currentTab || EXPLORE_LOGS_TAB_ID) === EXPLORE_LOGS_TAB_ID;
@@ -101,6 +105,7 @@ export const DiscoverResultsActionBar = ({
               rowsCountOverride={rowsCountOverride}
               hiddenColumnCount={isLogsTab ? hiddenColumnCount : 0}
               onShowHiddenColumns={() => dispatch(setHideEmptyFields(false))}
+              isNonTimeSeries={isNonTimeSeries}
             />
           </EuiFlexItem>
           {/* TODO: Fix data consistency issue with inspection panel */}

@@ -188,6 +188,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       dataset &&
       dataset.timeFieldName &&
       !skipTimeFilter && // Skip time filters if skipTimeFilter is true
+      // Skip time filter when source= names a different index than the dataset — its time field
+      // won't exist there. Removing this reverts to the always-inject behavior.
+      !PPLFilterUtils.sourceDiffersFromDataset(query.query ?? '', dataset.title) &&
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
@@ -239,6 +242,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     if (
       !isPPLSearchQuery(query) ||
       !query.dataset?.timeFieldName ||
+      // Don't sort on the dataset time field when querying a different source.
+      PPLFilterUtils.sourceDiffersFromDataset(query.query ?? '', query.dataset?.title) ||
       !canAppendDefaultSort(query.query)
     ) {
       return query;

@@ -90,6 +90,16 @@ describe('hits counter', () => {
     expect(hits.text()).toBe(props.hits?.toString());
   });
 
+  it('renders the non-time-series badge when isNonTimeSeries is true', () => {
+    component = mountWithIntl(<HitsCounter {...props} isNonTimeSeries={true} />);
+    expect(findTestSubject(component, 'exploreNonTimeSeriesBadge').length).toBeGreaterThan(0);
+  });
+
+  it('does not render the non-time-series badge by default', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    expect(findTestSubject(component, 'exploreNonTimeSeriesBadge').length).toBe(0);
+  });
+
   it('renders a sub-second duration in milliseconds', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedMs = findTestSubject(component, 'discoverQueryElapsedMs');
