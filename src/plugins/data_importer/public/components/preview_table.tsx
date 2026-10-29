@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { isStringFieldType, isValueCompatibleWithType } from '../lib/type_compatibility';
 import './preview_table.scss';
 
 interface PreviewComponentProps {
@@ -46,25 +47,66 @@ export const PreviewComponent = ({
     )
   );
 
-  const getCellStyle = (field: string) => {
-    const predictedType = predictedMapping?.properties?.[field]?.type;
-    const existingType = existingMapping?.properties?.[field]?.type;
-    if (predictedType && existingType && predictedType !== existingType) {
-      return { color: '#BD271E' };
+  const getTypes = (field: string) => ({
+    predictedType: predictedMapping?.properties?.[field]?.type as string | undefined,
+    existingType: existingMapping?.properties?.[field]?.type as string | undefined,
+  });
+
+  /**
+   * Column-level flag: shown once on the header when the predicted type differs from the existing
+   * one. A non-string value going into a string field (e.g. integer -> keyword) is not an error,
+   * because the server coerces those values to strings (see server/utils/coerce_to_mapping.ts).
+   */
+  const renderHeaderFlag = (field: string) => {
+    const { predictedType, existingType } = getTypes(field);
+    if (!predictedType || !existingType || predictedType === existingType) {
+      return null;
     }
-    return {};
+    const typeMismatch = i18n.translate('dataImporter.typeMismatchTooltip', {
+      defaultMessage: 'Predicted type: {predictedType}, Existing type: {existingType}',
+      values: { predictedType, existingType },
+    });
+    if (isStringFieldType(existingType)) {
+      const coerced = i18n.translate('dataImporter.typeCoercedTooltip', {
+        defaultMessage: 'Values will be stored as strings.',
+      });
+      return (
+        <EuiToolTip position="top" content={`${typeMismatch}. ${coerced}`}>
+          <EuiIcon
+            type="iInCircle"
+            color="subdued"
+            className="previewTable__headerIcon"
+            data-test-subj={`dataImporterPreviewHeaderCoerced-${field}`}
+          />
+        </EuiToolTip>
+      );
+    }
+    return (
+      <EuiToolTip position="top" content={typeMismatch}>
+        <EuiIcon
+          type="alert"
+          color="danger"
+          className="previewTable__headerIcon"
+          data-test-subj={`dataImporterPreviewHeaderMismatch-${field}`}
+        />
+      </EuiToolTip>
+    );
   };
 
-  const getTooltipContent = (field: string) => {
-    const predictedType = predictedMapping?.properties?.[field]?.type;
-    const existingType = existingMapping?.properties?.[field]?.type;
-    if (predictedType && existingType && predictedType !== existingType) {
-      return i18n.translate('dataImporter.typeMismatchTooltip', {
-        defaultMessage: 'Predicted type: {predictedType}, Existing type: {existingType}',
-        values: { predictedType, existingType },
-      });
+  /**
+   * Cell-level flag: only for values that cannot be indexed into the existing field type, so a
+   * mixed column highlights just the bad rows.
+   */
+  const getCellError = (field: string, value: unknown): string | undefined => {
+    const { existingType } = getTypes(field);
+    if (!existingType || isValueCompatibleWithType(value, existingType)) {
+      return undefined;
     }
-    return '';
+    return i18n.translate('dataImporter.incompatibleValueTooltip', {
+      defaultMessage:
+        "''{value}'' is not a valid {existingType} for existing field type {existingType}",
+      values: { value: String(value), existingType },
+    });
   };
 
   return (
@@ -94,7 +136,10 @@ export const PreviewComponent = ({
             <EuiTableHeaderCell>#</EuiTableHeaderCell>
             {previewData?.length > 0 ? (
               Object.keys(previewData[0]).map((key) => (
-                <EuiTableHeaderCell key={key}>{key}</EuiTableHeaderCell>
+                <EuiTableHeaderCell key={key}>
+                  {key}
+                  {renderHeaderFlag(key)}
+                </EuiTableHeaderCell>
               ))
             ) : (
               <EuiTableHeaderCell>Column</EuiTableHeaderCell>
@@ -106,16 +151,27 @@ export const PreviewComponent = ({
               filteredData?.slice(0, loadedRows).map((row, rowIndex) => (
                 <EuiTableRow key={rowIndex}>
                   <EuiTableRowCell>{rowIndex + 1}</EuiTableRowCell>
-                  {Object.keys(row).map((field, colIndex) => (
-                    <EuiTableRowCell key={colIndex} style={getCellStyle(field)}>
-                      {row[field]}
-                      {getTooltipContent(field) && (
-                        <EuiToolTip position="top" content={getTooltipContent(field)}>
-                          <EuiIcon type="alert" color="danger" style={{ marginLeft: '5px' }} />
-                        </EuiToolTip>
-                      )}
-                    </EuiTableRowCell>
-                  ))}
+                  {Object.keys(row).map((field, colIndex) => {
+                    const cellError = getCellError(field, row[field]);
+                    return (
+                      <EuiTableRowCell
+                        key={colIndex}
+                        className={cellError ? 'previewTable__cell--invalid' : undefined}
+                        data-test-subj={cellError ? 'dataImporterPreviewCellInvalid' : undefined}
+                      >
+                        {row[field]}
+                        {cellError && (
+                          <EuiToolTip position="top" content={cellError}>
+                            <EuiIcon
+                              type="alert"
+                              color="danger"
+                              className="previewTable__cellIcon"
+                            />
+                          </EuiToolTip>
+                        )}
+                      </EuiTableRowCell>
+                    );
+                  })}
                 </EuiTableRow>
               ))}
           </EuiTableBody>
