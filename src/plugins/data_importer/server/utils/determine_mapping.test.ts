@@ -4,7 +4,7 @@
  */
 
 import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
-import { determineMapping } from './determine_mapping';
+import { determineMapping, determineMappingFromDocuments } from './determine_mapping';
 
 describe('determine_mapping', () => {
   describe('determineType()', () => {
@@ -644,6 +644,108 @@ describe('determine_mapping', () => {
 
     it('should error out when the object is too deeply nested', () => {
       expect(() => determineMapping(document, 4)).toThrow();
+    });
+  });
+
+  describe('determineMappingFromDocuments()', () => {
+    const TEXT = {
+      type: 'text',
+      fields: { keyword: { type: 'keyword', ignore_above: 256 } },
+    };
+
+    it('should consider every sampled row, not just the first (mixed-type column -> text)', () => {
+      // A CSV column that is numeric in row 1 but not in row 2 must not be mapped integer,
+      // otherwise every non-numeric row fails with mapper_parsing_exception
+      const result = determineMappingFromDocuments(
+        [
+          { code: '123', name: 'a' },
+          { code: 'N/A', name: 'b' },
+        ],
+        20
+      );
+      expect(result.properties).toEqual({ code: TEXT, name: TEXT });
+    });
+
+    it('should keep a numeric type when every row agrees', () => {
+      const result = determineMappingFromDocuments([{ n: '1' }, { n: '22' }, { n: '-3' }], 20);
+      expect(result.properties).toEqual({ n: { type: 'integer' } });
+    });
+
+    it('should widen integer + float to float', () => {
+      const result = determineMappingFromDocuments([{ n: '1' }, { n: '2.5' }], 20);
+      expect(result.properties).toEqual({ n: { type: 'float' } });
+    });
+
+    it('should widen a numeric column with empty cells to text', () => {
+      // An empty string cannot be indexed into a numeric field
+      const result = determineMappingFromDocuments([{ n: '1' }, { n: '' }], 20);
+      expect(result.properties).toEqual({ n: TEXT });
+    });
+
+    it('should treat boolean + number conflicts as text', () => {
+      const result = determineMappingFromDocuments([{ f: 'true' }, { f: '1' }], 20);
+      expect(result.properties).toEqual({ f: TEXT });
+    });
+
+    it('should take the non-null type when a field is null in some rows', () => {
+      const result = determineMappingFromDocuments([{ n: null }, { n: 4 }], 20);
+      expect(result.properties).toEqual({ n: { type: 'integer' } });
+    });
+
+    it('should union fields that only appear in some rows', () => {
+      const result = determineMappingFromDocuments([{ a: '1' }, { b: 'x' }], 20);
+      expect(result.properties).toEqual({ a: { type: 'integer' }, b: TEXT });
+    });
+
+    it('should merge nested objects field by field', () => {
+      const result = determineMappingFromDocuments(
+        [{ o: { x: '1', y: 'a' } }, { o: { x: 'oops', z: true } }],
+        20
+      );
+      expect(result.properties).toEqual({
+        o: { properties: { x: TEXT, y: TEXT, z: { type: 'boolean' } } },
+      });
+    });
+
+    it('should keep the top-level dynamic settings', () => {
+      const result = determineMappingFromDocuments([{ a: 'x' }], 20);
+      expect(result).toMatchObject({ dynamic: true, date_detection: true });
+    });
+
+    it('should return an empty mapping for no documents', () => {
+      expect(determineMappingFromDocuments([], 20)).toEqual({
+        dynamic: true,
+        date_detection: true,
+        properties: {},
+      });
+    });
+  });
+
+  describe('numeric string detection', () => {
+    const TEXT = {
+      type: 'text',
+      fields: { keyword: { type: 'keyword', ignore_above: 256 } },
+    };
+
+    it.each(['007', '00123', '0x1F', '1e3', ' ', 'Infinity', '+5', '1.', '.5'])(
+      'should map identifier-like / non-decimal string %p as text, not a number',
+      (value) => {
+        expect(determineMapping({ v: value }, 20).properties).toEqual({ v: TEXT });
+      }
+    );
+
+    it.each([
+      ['0', 'integer'],
+      ['42', 'integer'],
+      ['-17', 'integer'],
+      ['0.5', 'float'],
+      ['-3.25', 'float'],
+    ])('should still map decimal string %p as %p', (value, type) => {
+      expect(determineMapping({ v: value }, 20).properties).toEqual({ v: { type } });
+    });
+
+    it('should still map real JS numbers as numbers', () => {
+      expect(determineMapping({ v: 7 }, 20).properties).toEqual({ v: { type: 'integer' } });
     });
   });
 });
