@@ -201,6 +201,22 @@ describe('PPLFilterUtils', () => {
       );
     });
 
+    it('is false when the source is a concrete index covered by the dataset pattern', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logs-2026.10', 'logs-*')).toBe(false);
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logs-a-prod', 'logs-*-prod')).toBe(
+        false
+      );
+    });
+
+    it('is false when the source matches any entry of a comma-separated dataset title', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=b', 'a, b*')).toBe(false);
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=c', 'a,b*')).toBe(true);
+    });
+
+    it('treats pattern characters other than * literally', () => {
+      expect(PPLFilterUtils.sourceDiffersFromDataset('source=logsXprod', 'logs.prod')).toBe(true);
+    });
+
     it('is false (fall back to normal behavior) when either side is missing', () => {
       expect(PPLFilterUtils.sourceDiffersFromDataset('search field=1', 'request_logs')).toBe(false);
       expect(PPLFilterUtils.sourceDiffersFromDataset('source=endpoints', undefined)).toBe(false);

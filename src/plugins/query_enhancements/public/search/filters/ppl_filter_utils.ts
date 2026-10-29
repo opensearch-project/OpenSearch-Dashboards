@@ -75,11 +75,9 @@ export class PPLFilterUtils extends FilterUtils {
    * Extracts the index named after the first `source=` in a PPL query, stripped of
    * surrounding backticks/quotes. Returns `undefined` when no `source=` is found.
    *
-   * NOTE: intentionally simple — it matches the first `source=` token only and does
-   * NOT resolve aliases, handle multi-source/subquery forms, or normalize index
-   * patterns. It is isolated here as a pure function so the out-of-dataset heuristic
-   * (see `sourceDiffersFromDataset`) can be revised in one place if this proves too
-   * coarse. See REVIEW-GUIDE-urgent-bugfixes.md "Known gaps".
+   * Intentionally simple: it reads the first `source=` token only and does not
+   * resolve aliases or handle multi-source/subquery forms. Kept as a pure function so
+   * the out-of-dataset heuristic (`sourceDiffersFromDataset`) can be revised in one place.
    *
    * @param queryString - The raw PPL query string
    * @returns The source index name, or `undefined`
@@ -95,9 +93,10 @@ export class PPLFilterUtils extends FilterUtils {
    * not exist on the queried index, so callers skip time-filter injection and the
    * default time-sort to avoid a `field <timeField> not found` failure.
    *
-   * Comparison is case-insensitive and ignores a single trailing `*` on the dataset
-   * title (e.g. `request_logs*`). Returns `false` when either side is missing, so the
-   * caller falls back to its normal (always-inject) behavior.
+   * The dataset title is treated as a comma-separated list of index patterns where `*`
+   * matches anything (e.g. `logs-*` covers `source=logs-2026.10`); comparison is
+   * case-insensitive. Returns `false` when either side is missing, so the caller falls
+   * back to its normal (always-inject) behavior.
    *
    * @param queryString - The raw PPL query string
    * @param datasetTitle - The selected dataset's title (may be `undefined`)
@@ -109,7 +108,14 @@ export class PPLFilterUtils extends FilterUtils {
   ): boolean {
     const source = PPLFilterUtils.extractSourceIndex(queryString);
     if (!source || !datasetTitle) return false;
-    const normalize = (value: string) => value.toLowerCase().replace(/\*$/, '');
-    return normalize(source) !== normalize(datasetTitle);
+    const target = source.toLowerCase();
+    return !datasetTitle
+      .split(',')
+      .map((pattern) => pattern.trim().toLowerCase())
+      .filter(Boolean)
+      .some((pattern) => {
+        const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+        return new RegExp(`^${escaped}$`).test(target);
+      });
   }
 }
