@@ -5,6 +5,7 @@
 
 import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
+import { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,7 +14,7 @@ import { StreamingQueryStatus } from '../../../../application/utils/state_manage
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
-import { DataView as Dataset } from '../../../../../../data/common';
+import { DataView as Dataset, IFieldType } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
 import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
@@ -41,6 +42,7 @@ export interface DiscoverResultsActionBarProps {
   inspectionHanlder?: () => void;
   extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
   rowsCountOverride?: number;
+  fieldSchema?: Array<Partial<IFieldType>>;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -55,6 +57,7 @@ export const DiscoverResultsActionBar = ({
   inspectionHanlder,
   extraActions,
   rowsCountOverride,
+  fieldSchema,
 }: DiscoverResultsActionBarProps) => {
   const dispatch = useDispatch();
   const currentTab = useSelector(selectActiveTabId);
@@ -64,8 +67,14 @@ export const DiscoverResultsActionBar = ({
   const isLogsTab = (currentTab || EXPLORE_LOGS_TAB_ID) === EXPLORE_LOGS_TAB_ID;
   const shouldShowAddToDashboardButton =
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
-  const shouldShowExportButton =
-    currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
+  const shouldShowExportButton = currentTab !== EXPLORE_PATTERNS_TAB_ID;
+  const isStatisticsTab = currentTab === EXPLORE_STATISTICS_TAB_ID;
+  // Statistics columns come from the response schema, not the Logs tab.
+  const statisticsColumnNames = useMemo(
+    () =>
+      isStatisticsTab ? (fieldSchema ?? []).flatMap(({ name }) => (name ? [name] : [])) : undefined,
+    [isStatisticsTab, fieldSchema]
+  );
   const showTabSpecificSettings = currentTab === EXPLORE_PATTERNS_TAB_ID;
   const visualizationBuilder = getVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
@@ -144,7 +153,13 @@ export const DiscoverResultsActionBar = ({
                   )}
                   {shouldShowExportButton && (
                     <EuiFlexItem grow={false}>
-                      <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                      <DiscoverDownloadCsv
+                        indexPattern={dataset}
+                        rows={rows}
+                        hits={hits}
+                        columnNamesOverride={statisticsColumnNames}
+                        disableMaxOption={isStatisticsTab}
+                      />
                     </EuiFlexItem>
                   )}
                   {shouldShowAddToDashboardButton && (

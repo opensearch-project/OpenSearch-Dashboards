@@ -28,8 +28,12 @@ jest.mock('../../../../helpers/use_displayed_columns', () => ({
   useHiddenColumnCount: () => mockUseHiddenColumnCount(),
 }));
 
+const mockDiscoverDownloadCsv = jest.fn();
 jest.mock('../download_csv', () => ({
-  DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+  DiscoverDownloadCsv: (downloadProps: unknown) => {
+    mockDiscoverDownloadCsv(downloadProps);
+    return <div data-test-subj="discoverDownloadCsvButton" />;
+  },
 }));
 jest.mock('../../../visualizations/add_to_dashboard_button', () => ({
   SaveAndAddButtonWithModal: () => <div data-test-subj="saveAndAddButtonWithModal" />,
@@ -149,6 +153,37 @@ describe('ResultsActionBar', () => {
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
+  });
+
+  test('should export the response schema columns without the max option on statistics tab', () => {
+    const statisticsStore = mockStore({ ui: { activeTabId: 'explore_statistics' } });
+    render(
+      <Provider store={statisticsStore}>
+        <DiscoverResultsActionBar
+          {...props}
+          fieldSchema={[{ name: 'count()' }, { name: 'category' }, { name: '' }]}
+        />
+      </Provider>
+    );
+    expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnNamesOverride: ['count()', 'category'],
+        disableMaxOption: true,
+      })
+    );
+  });
+
+  test('should keep the logs export behavior outside of the statistics tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} fieldSchema={[{ name: 'count()' }]} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ columnNamesOverride: undefined, disableMaxOption: false })
+    );
   });
 
   test('should render the table actions menu on logs tab', () => {

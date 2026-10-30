@@ -19,9 +19,19 @@ export interface DiscoverDownloadCsvProps {
   hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  /** Query response columns to export as raw values, in place of the Logs columns. */
+  columnNamesOverride?: string[];
+  /** Hides "Max available", which re-runs the Logs query and returns raw documents. */
+  disableMaxOption?: boolean;
 }
 
-export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
+export const DiscoverDownloadCsv = ({
+  indexPattern,
+  hits,
+  rows,
+  columnNamesOverride,
+  disableMaxOption = false,
+}: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
@@ -29,6 +39,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     rows,
     hits,
     indexPattern,
+    columnNamesOverride,
     onSuccess,
     onError,
     onLoading,
@@ -91,7 +102,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     >
       <DiscoverDownloadCsvPopoverContent
         rowsCount={rows?.length || 0}
-        hitsCount={hits || 0}
+        hitsCount={disableMaxOption ? rows?.length || 0 : hits || 0}
         downloadForOption={handleDownloadCsvForOption}
       />
     </EuiPopover>

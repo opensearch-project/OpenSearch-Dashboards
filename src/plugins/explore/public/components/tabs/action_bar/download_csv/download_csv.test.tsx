@@ -121,6 +121,23 @@ describe('DiscoverDownloadCsv', () => {
       ).toBeInTheDocument();
     });
 
+    it('passes columnNamesOverride to useDiscoverDownloadCsv', () => {
+      const columnNamesOverride = ['count()'];
+      render(<TestHarness columnNamesOverride={columnNamesOverride} />);
+      expect(useDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ columnNamesOverride })
+      );
+    });
+
+    it('hides the max option when disableMaxOption is set', () => {
+      render(<TestHarness disableMaxOption />);
+      fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+      expect(
+        screen.getByLabelText(`Visible (${mockRows.length.toLocaleString()})`)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('dscDownloadCsvOptionMax')).not.toBeInTheDocument();
+    });
+
     it('Clicking on visible option calls downloadCsvForOption correctly', () => {
       render(<TestHarness />);
       fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
