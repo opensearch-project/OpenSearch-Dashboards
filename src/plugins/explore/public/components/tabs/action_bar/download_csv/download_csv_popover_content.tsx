@@ -14,12 +14,14 @@ export interface DiscoverDownloadCsvPopoverContentProps {
   downloadForOption: (option: DownloadCsvFormId) => Promise<void>;
   hitsCount: number;
   rowsCount: number;
+  shouldShowMaxExport?: boolean;
 }
 
 export const DiscoverDownloadCsvPopoverContent = ({
   downloadForOption,
   hitsCount,
   rowsCount,
+  shouldShowMaxExport = true,
 }: DiscoverDownloadCsvPopoverContentProps) => {
   const [selectedOption, setSelectedOption] = useState<DownloadCsvFormId>(
     DownloadCsvFormId.Visible
@@ -32,11 +34,11 @@ export const DiscoverDownloadCsvPopoverContent = ({
   }>(() => {
     const maxCount = Math.min(hitsCount, MAX_DOWNLOAD_CSV_COUNT);
     return {
-      showMaxOption: maxCount > rowsCount,
+      showMaxOption: shouldShowMaxExport && maxCount > rowsCount,
       maxCountString: maxCount.toLocaleString(),
       rowsCountString: rowsCount.toLocaleString(),
     };
-  }, [hitsCount, rowsCount]);
+  }, [hitsCount, rowsCount, shouldShowMaxExport]);
 
   const downloadOptions = useMemo(() => {
     const options = [

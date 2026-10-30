@@ -21,6 +21,7 @@ import {
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { TableActionsPopoverButton } from '../table_actions/table_actions_popover_button';
@@ -66,10 +67,17 @@ export const DiscoverResultsActionBar = ({
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
   const shouldShowExportButton =
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
+  const shouldShowMaxExport = currentTab !== EXPLORE_VISUALIZATION_TAB_ID;
   const showTabSpecificSettings = currentTab === EXPLORE_PATTERNS_TAB_ID;
   const visualizationBuilder = getVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const showRawTable = useObservable(visualizationBuilder.showRawTable$);
+
+  // visualization tab exports its own table, read count from it.
+  // This is for visualization using transfromationn such as limit
+  const visData = useObservable(visualizationBuilder.data$);
+  const visibleRowsCount =
+    currentTab === EXPLORE_VISUALIZATION_TAB_ID ? visData?.transformedData.length : undefined;
   const isNonTableChart = !!visConfig?.type && visConfig.type !== 'table';
 
   return (
@@ -144,7 +152,13 @@ export const DiscoverResultsActionBar = ({
                   )}
                   {shouldShowExportButton && (
                     <EuiFlexItem grow={false}>
-                      <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                      <DiscoverDownloadCsv
+                        indexPattern={dataset}
+                        rows={rows}
+                        hits={hits}
+                        shouldShowMaxExport={shouldShowMaxExport}
+                        visibleRowsCount={visibleRowsCount}
+                      />
                     </EuiFlexItem>
                   )}
                   {shouldShowAddToDashboardButton && (

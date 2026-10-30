@@ -11,6 +11,7 @@ import { AppDispatch, RootState } from '../store';
 import { processDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
 import { defaultResultsProcessor, defaultPrepareQueryString } from './query_actions';
 import { resultsCache } from '../slices';
+import { buildCsv } from '../../../../components/tabs/action_bar/download_csv/csv_utils';
 
 /**
  * Utility function to get filtered displayed column names for use in Redux thunks.
@@ -136,26 +137,46 @@ export const exportMaxSizeCsv = (
     // Get tab definition
     const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
-    // Prepare query for the tab
-    const preparedQuery = tabDefinition?.prepareQuery ? tabDefinition.prepareQuery(query) : query;
+    // Prepare the query string the same way the Logs tab does, so the CSV has the same rows and
+    // columns as the table. A tab's prepareQuery returns a string.
+    const queryString = tabDefinition?.prepareQuery
+      ? tabDefinition.prepareQuery(query)
+      : defaultPrepareQueryString(query);
 
     try {
       // Create new SearchSource for export
       const searchSource = await services.data.search.searchSource.create();
 
+      // The dataset in Redux state is a plain object; resolve it to a DataView
+      const dataView = query.dataset
+        ? await services.data.dataViews.get(
+            query.dataset.id,
+            query.dataset.type !== 'INDEX_PATTERN'
+          )
+        : await services.data.dataViews.getDefault();
+      if (!dataView) {
+        throw new Error('Dataset not found for CSV export');
+      }
+      // get dataset built from the DataView for timeFieldName
+      const dataset = await services.data.dataViews.convertToDataset(dataView);
+
       // Configure SearchSource
-      const indexPattern = preparedQuery.dataset || services.data.indexPatterns;
-      const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
+      const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(dataView);
 
       searchSource
-        .setField('index', indexPattern)
+        .setField('index', dataView)
         .setField('query', {
-          query: preparedQuery.query,
-          language: preparedQuery.language,
-          dataset: preparedQuery.dataset,
+          query: queryString,
+          language: query.language,
+          dataset,
         })
         .setField('filter', timeRangeFilter ? [timeRangeFilter] : [])
         .setField('size', options.maxSize || 500);
+
+      // Honored by the PPL strategy only; `size` does not reach a PPL request.
+      if (options.maxSize) {
+        searchSource.setField('fetchSize', options.maxSize);
+      }
 
       // Execute query
       const results = await searchSource.fetch();
@@ -164,10 +185,15 @@ export const exportMaxSizeCsv = (
       const rows = results.hits.hits;
 
       // Get filtered columns (same as DataTable display and CSV download)
-      const columns = getFilteredDisplayedColumnNames(state, indexPattern, services);
+      const columns = getFilteredDisplayedColumnNames(state, dataView, services);
 
       // Generate CSV
-      const csv = generateCsv(rows, indexPattern, columns);
+      const csv = buildCsv({
+        rows,
+        displayedColumnNames: columns,
+        indexPattern: dataView,
+        uiSettings: services.uiSettings,
+      });
 
       // Download CSV
       const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
