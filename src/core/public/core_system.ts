@@ -60,6 +60,7 @@ import { KeyboardShortcutService } from './keyboard_shortcut';
 import { ChatService } from './chat';
 import { TelemetryCoreService } from './telemetry';
 import { setupSessionExpiredInterceptor } from './http/session_expired_interceptor';
+import { installImeCompositionGuard } from './utils/ime';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -120,6 +121,7 @@ export class CoreSystem {
   private readonly chat: ChatService;
   private readonly telemetry: TelemetryCoreService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
+  private removeImeCompositionGuard?: () => void;
 
   constructor(params: Params) {
     const { rootDomElement, injectedMetadata } = params;
@@ -168,6 +170,11 @@ export class CoreSystem {
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
+
+      // Installed here rather than in start(): parts of start() are conditional, and this must
+      // cover every deployment. Installed after FatalErrorsService so that a later setup failure
+      // reported as fatal (an Error or a string) reaches stop(), which removes it.
+      this.removeImeCompositionGuard = installImeCompositionGuard();
 
       // Initialize Monaco environment with build hash for worker URLs
       setBuildHash(injectedMetadata.getOpenSearchDashboardsBuildNumber());
@@ -365,6 +372,7 @@ export class CoreSystem {
     this.chat.stop();
     this.telemetry.stop();
     this.keyboardShortcut.stop();
+    this.removeImeCompositionGuard?.();
     this.rootDomElement.textContent = '';
   }
 }

@@ -143,14 +143,9 @@ describe('Welcome page', () => {
   });
 
   describe('Escape key handling', () => {
-    it('does not skip on Escape during IME composition but skips on plain Escape', () => {
+    it('skips on Escape', () => {
       const props = makeProps();
       const component = mount(<Welcome {...props} />);
-
-      document.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, bubbles: true })
-      );
-      expect(props.onSkip).not.toHaveBeenCalled();
 
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       expect(props.onSkip).toHaveBeenCalledTimes(1);

@@ -42,7 +42,6 @@ import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
 import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
-import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
 
 export interface ChatWindowInstance {
@@ -524,7 +523,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     handleSendRef.current = handleSend;
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey && !isImeComposing(e)) {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
