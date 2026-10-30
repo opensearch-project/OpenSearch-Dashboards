@@ -15,9 +15,11 @@ import { CalculationMethod, calculateValue } from '../../calculation';
 export const aggregateValues = (
   aggregationType?: AggregationType,
   values?: number[],
-  calculateType?: CalculationMethod
+  calculateType?: CalculationMethod,
+  options?: { preserveNull?: boolean }
 ) => {
-  if (!values || values.length === 0) return null;
+  // return null if only one null is being aggregated
+  if (!values || values.length === 0 || options?.preserveNull) return null;
 
   if (calculateType) {
     return calculateValue(values, calculateType);
