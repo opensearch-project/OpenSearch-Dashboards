@@ -186,7 +186,11 @@
 # ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English - en , by default , Chinese - zh-CN .
+# Supported languages are the following: English - en (default), German - de-DE, Spanish - es-ES,
+# Spanish (Latin America) - es-419, French - fr-FR, French (Canada) - fr-CA, Indonesian - id-ID,
+# Italian - it-IT, Japanese - ja-JP, Korean - ko-KR, Portuguese - pt-PT, Portuguese (Brazil) - pt-BR,
+# Turkish - tr-TR, Chinese (Simplified) - zh-CN, Chinese (Traditional) - zh-TW.
+# In Docker, this can be set with the I18N_LOCALE environment variable.
 # i18n.locale: "en"
 
 # Set the allowlist to check input graphite Url. Allowlist is the default check list.
