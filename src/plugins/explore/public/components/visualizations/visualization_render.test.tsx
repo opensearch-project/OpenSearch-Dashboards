@@ -246,6 +246,76 @@ describe('VisualizationRender', () => {
     expect(parseSpy).toHaveBeenCalledWith('now', { roundUp: true });
   });
 
+  it.each([
+    {
+      name: 'relative',
+      inputTimeRange: { from: 'now-15m', to: 'now' },
+      refreshedTimeRange: '2026-10-29T07:50:00.000Z / 2026-10-29T08:05:00.000Z',
+    },
+    {
+      name: 'absolute',
+      inputTimeRange: {
+        from: '2026-10-29T07:45:00.000Z',
+        to: '2026-10-29T08:00:00.000Z',
+      },
+      refreshedTimeRange: '2026-10-29T07:45:00.000Z / 2026-10-29T08:00:00.000Z',
+    },
+  ])(
+    'resolves $name bounds when refreshed results arrive',
+    ({ inputTimeRange, refreshedTimeRange }) => {
+      jest.useFakeTimers({ now: new Date('2026-10-29T08:00:00.000Z') });
+
+      try {
+        const initialTimeRange = '2026-10-29T07:45:00.000Z / 2026-10-29T08:00:00.000Z';
+        const chartRender = ({ timeRange }: { timeRange: { from: string; to: string } }) => (
+          <div data-test-subj="chartTimeRange">
+            {new Date(timeRange.from).toISOString()} / {new Date(timeRange.to).toISOString()}
+          </div>
+        );
+        mockFindRuleByAxesMapping.mockReturnValue({ render: chartRender });
+        const { rerender } = render(
+          <CommonVisualizationRender
+            visualizationData={mockVisData}
+            visConfig={mockChartConfig}
+            showRawTable={false}
+            timeRange={inputTimeRange}
+          />
+        );
+
+        expect(screen.getByTestId('chartTimeRange')).toHaveTextContent(initialTimeRange);
+
+        jest.setSystemTime(new Date('2026-10-29T08:05:00.000Z'));
+        // Updating presentation without fetching keeps the range aligned with the current results.
+        rerender(
+          <CommonVisualizationRender
+            visualizationData={mockVisData}
+            visConfig={mockChartConfig}
+            showRawTable={false}
+            timeRange={inputTimeRange}
+            crosshairGroup="dashboard-123"
+          />
+        );
+        expect(screen.getByTestId('chartTimeRange')).toHaveTextContent(initialTimeRange);
+
+        rerender(
+          <CommonVisualizationRender
+            visualizationData={{
+              ...mockVisData,
+              transformedData: [{ field1: 'new-value', count: 30 }],
+            }}
+            visConfig={mockChartConfig}
+            showRawTable={false}
+            timeRange={inputTimeRange}
+            crosshairGroup="dashboard-123"
+          />
+        );
+        expect(screen.getByTestId('chartTimeRange')).toHaveTextContent(refreshedTimeRange);
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
+
   it('renders raw table when showRawTable is true', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);

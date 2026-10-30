@@ -6,7 +6,7 @@
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
-import React from 'react';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
@@ -18,7 +18,6 @@ import {
   getTime,
   Query,
   UI_SETTINGS,
-  IFieldType,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
 import {
@@ -35,12 +34,11 @@ import {
   ISearchSource,
 } from '../application/legacy/discover/opensearch_dashboards_services';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
-import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
-import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
+import { ExpressionRenderError } from '../../../expressions/public';
+import { AxisFieldNameMappings, RenderChartConfig } from '../components/visualizations/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
@@ -52,7 +50,6 @@ import {
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
 import {
   adaptLegacyData,
-  convertStringsToMappings,
   isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
 import {
@@ -62,49 +59,19 @@ import {
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
-import { SplitLayout } from '../components/visualizations/visualization_builder.types';
-import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
-import { RenderChartConfig } from '../components/visualizations/types';
+import { SplitLayout, VisData } from '../components/visualizations/visualization_builder.types';
 import {
   TransformationService,
   registerAllTransformations,
 } from '../components/data_transformations';
+import { NormalizedRow, UrlTransformationState } from '../components/data_transformations/types';
 import { PanelDataService } from './panel_data_service';
-
-// TODO cleanup unused props
-export interface SearchProps {
-  description?: string;
-  sort?: SortOrder[];
-  inspectorAdapters?: Adapters;
-  rows?: any[];
-  indexPattern?: IndexPattern;
-  hits?: number;
-  isLoading?: boolean;
-  error?: ExpressionRenderError;
-  services: ExploreServices;
-  chartRender?: () => any;
-  sharedItemTitle?: string;
-  chartType?: ChartType;
-  activeTab?: string;
-  styleOptions?: StyleOptions;
-  axisColumnMappings?: AxisColumnMappings;
-  displayTimeColumn: boolean;
-  title: string;
-  columns?: string[];
-  onSort?: (sort: SortOrder[]) => void;
-  onAddColumn?: (column: string) => void;
-  onRemoveColumn?: (column: string) => void;
-  onReorderColumn?: (col: string, source: number, destination: number) => void;
-  onMoveColumn?: (column: string, index: number) => void;
-  onSetColumns?: (columns: string[]) => void;
-  onFilter?: (field: IFieldType, value: string[], operator: string) => void;
-  onExpressionEvent?: (e: ExpressionRendererEvent) => void;
-  onSelectTimeRange?: (range?: TimeRange) => void;
-  tableData?: {
-    rows: Array<Record<string, any>>;
-    columns: VisColumn[];
-  };
-}
+import {
+  ExploreEmbeddableContent,
+  ExploreEmbeddableError,
+  ExploreEmbeddableState,
+} from './explore_embeddable_state';
+import { DocViewFilterFn } from '../types/doc_views_types';
 
 interface ExploreEmbeddableConfig {
   savedExplore: SavedExplore;
@@ -122,16 +89,22 @@ interface VisualizationMetadata {
   description?: string;
 }
 
-const getVisualizationMetadata = (visualization?: string): VisualizationMetadata => {
-  if (!visualization) {
-    return {};
-  }
+interface SavedVisualizationState extends VisualizationMetadata {
+  chartType?: ChartType;
+  params?: StyleOptions;
+  axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: SplitLayout;
+  showSplitLabel?: boolean;
+  dataTransformations?: UrlTransformationState[];
+}
 
+const parseJson = <T extends object>(value?: string): T => {
   try {
-    const { title, description } = JSON.parse(visualization);
-    return { title, description };
+    const parsed = value ? JSON.parse(value) : undefined;
+    return parsed && typeof parsed === 'object' ? (parsed as T) : ({} as T);
   } catch {
-    return {};
+    return {} as T;
   }
 };
 
@@ -151,15 +124,15 @@ export class ExploreEmbeddable
   private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
-  private searchProps?: SearchProps;
   private filtersSearchSource?: ISearchSource;
-  private subscription: Subscription;
+  private inputSubscription?: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
   private panelMetadataVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
-  private panelTitle: string = '';
   private filterManager: FilterManager;
   private services: ExploreServices;
+  private readonly indexPattern?: IndexPattern;
+  private state?: ExploreEmbeddableState;
   private prevState = {
     filters: undefined as Filter[] | undefined,
     query: undefined as Query | undefined,
@@ -177,7 +150,8 @@ export class ExploreEmbeddable
 
   // Data transformation support
   private transformationService: TransformationService;
-  private readonly visualizationMetadata: VisualizationMetadata;
+  private readonly activeTab?: string;
+  private readonly visualization: SavedVisualizationState;
 
   constructor(
     {
@@ -194,12 +168,13 @@ export class ExploreEmbeddable
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
-    const visualizationMetadata = getVisualizationMetadata(savedExplore.visualization);
+    const activeTab = parseJson<{ activeTab?: string }>(savedExplore.uiState).activeTab;
+    const visualization = parseJson<SavedVisualizationState>(savedExplore.visualization);
     super(
       initialInput,
       {
-        defaultTitle: visualizationMetadata.title || savedExplore.title,
-        description: visualizationMetadata.description,
+        defaultTitle: visualization.title || savedExplore.title,
+        description: visualization.description,
         editUrl,
         editPath,
         editApp,
@@ -211,7 +186,9 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
-    this.visualizationMetadata = visualizationMetadata;
+    this.activeTab = activeTab;
+    this.visualization = visualization;
+    this.indexPattern = savedExplore.searchSource.getField('index') ?? undefined;
     // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
@@ -223,23 +200,18 @@ export class ExploreEmbeddable
 
     this.initializeTransformationPipeline();
 
-    // Initialize variable support BEFORE search props so the interpolation
-    // service is available for the initial query setup.
+    // Initialize variable support before SearchSource setup so the interpolation
+    // service is available for the initial query.
     this.initializeVariableSubscription(parent);
-    this.initializeSearchProps();
+    this.initializeSearchSource();
 
-    this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-      this.panelTitle = this.output.title || '';
-      if (this.searchProps) {
-        this.updateHandler(this.searchProps);
-      }
+    this.inputSubscription = this.getInput$().subscribe(() => {
+      this.handleInputChange();
     });
     this.autoRefreshFetchSubscription = getServices()
       .timefilter.getAutoRefreshFetch$()
       .subscribe(() => {
-        if (this.searchProps) {
-          this.updateHandler(this.searchProps, true);
-        }
+        this.handleInputChange(true);
       });
     // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
     // fires input$.next() (which triggers handlePanelMetadataVariables correctly) but then immediately
@@ -250,7 +222,10 @@ export class ExploreEmbeddable
       const dashboardContainer = parent as unknown as DashboardContainer;
       this.panelMetadataVariableSubscription = merge(
         this.getInput$(),
-        this.getOutput$(),
+        this.getOutput$().pipe(
+          map(({ title }) => title),
+          distinctUntilChanged()
+        ),
         dashboardContainer.variableService.getVariables$()
       ).subscribe(this.handlePanelMetadataVariables);
     }
@@ -258,17 +233,9 @@ export class ExploreEmbeddable
 
   // initialize transformation pipeline from saved explore
   private initializeTransformationPipeline() {
-    if (!this.savedExplore.visualization) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(this.savedExplore.visualization);
-      if (parsed?.dataTransformations) {
-        this.transformationService.restoreFromState(parsed?.dataTransformations);
-      }
-    } catch (error) {
-      // skip failed pipeline, no transformations applied
+    const { dataTransformations } = this.visualization;
+    if (dataTransformations) {
+      this.transformationService.restoreFromState(dataTransformations);
     }
   }
 
@@ -277,20 +244,19 @@ export class ExploreEmbeddable
     if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
       panelTitle = this.interpolationService.interpolate(this.input.title);
     } else {
-      const defaultTitle = this.visualizationMetadata.title || this.savedExplore.title;
+      const defaultTitle = this.visualization.title || this.savedExplore.title;
       if (this.interpolationService.hasVariables(defaultTitle)) {
         panelTitle = this.interpolationService.interpolate(defaultTitle);
       }
     }
 
-    const description = this.visualizationMetadata.description;
+    const description = this.visualization.description;
     const panelDescription =
       description && this.interpolationService.hasVariables(description)
         ? this.interpolationService.interpolate(description)
         : description;
 
     this.updateOutput({ title: panelTitle, description: panelDescription });
-    this.panelTitle = panelTitle;
   };
 
   public getDescription() {
@@ -349,38 +315,23 @@ export class ExploreEmbeddable
       });
     }
 
-    if (this.searchProps) {
-      this.updateHandler(this.searchProps, true);
-    }
+    this.handleInputChange(true);
   }
 
-  private initializeSearchProps() {
+  private initializeSearchSource() {
     const { searchSource } = this.savedExplore;
-    const indexPattern = searchSource.getField('index');
-    const searchProps: SearchProps = {
-      inspectorAdapters: this.inspectorAdaptors,
-      rows: [],
-      description: this.savedExplore.description,
-      services: this.services,
-      indexPattern,
-      isLoading: false,
-      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-      title: this.savedExplore.title,
-    };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchProps || !this.input.timeRange) return;
-      return getTime(indexPattern, this.input.timeRange);
+      if (!this.input.timeRange) return;
+      return getTime(this.indexPattern, this.input.timeRange);
     });
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
     const query = this.savedExplore.searchSource.getField('query');
-    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
-    const activeTab = uiState.activeTab;
     if (query) {
       // If the active tab is logs, we need to prepare the query for the logs tab
-      if (activeTab === 'logs') {
+      if (this.activeTab === 'logs') {
         query.query = defaultPrepareQueryString(query);
       } else {
         query.query = prepareQueryForLanguage(query).query;
@@ -399,108 +350,104 @@ export class ExploreEmbeddable
     }
 
     searchSource.setFields({
-      index: indexPattern,
+      index: this.indexPattern,
       query,
       highlightAll: true,
       version: true,
     });
-
-    searchProps.onSort = (newSort) => {
-      this.updateInput({ sort: newSort });
-    };
-
-    searchProps.onAddColumn = (columnName: string) => {
-      if (!searchProps.columns) {
-        return;
-      }
-      const updatedColumns = buildColumns(
-        columnActions.addColumn(searchProps.columns, { column: columnName })
-      );
-      this.updateInput({ columns: updatedColumns });
-    };
-
-    searchProps.onRemoveColumn = (columnName: string) => {
-      if (!searchProps.columns) {
-        return;
-      }
-      const updatedColumns = columnActions.removeColumn(searchProps.columns, columnName);
-      const updatedSort =
-        searchProps.sort && searchProps.sort.length
-          ? searchProps.sort.filter((s) => s[0] !== columnName)
-          : [];
-      this.updateInput({ sort: updatedSort, columns: updatedColumns });
-    };
-
-    searchProps.onMoveColumn = (columnName, newIndex: number) => {
-      if (!searchProps.columns) {
-        return;
-      }
-      const oldIndex = searchProps.columns.indexOf(columnName);
-      const updatedColumns = columnActions.reorderColumn(searchProps.columns, oldIndex, newIndex);
-      this.updateInput({ columns: updatedColumns });
-    };
-
-    searchProps.onSetColumns = (columnNames: string[]) => {
-      const columns = buildColumns(columnNames);
-      this.updateInput({ columns });
-    };
-
-    searchProps.onFilter = async (field, value, operator) => {
-      let filters = opensearchFilters.generateFilters(
-        this.filterManager,
-        field,
-        value,
-        operator,
-        indexPattern?.id!
-      );
-      filters = filters.map((filter) => ({
-        ...filter,
-        $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
-      }));
-      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-        embeddable: this,
-        filters,
-      });
-    };
-
-    searchProps.onExpressionEvent = async (e: ExpressionRendererEvent) => {
-      if (e.name === 'applyFilter') {
-        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-          embeddable: this,
-          ...e.data,
-        });
-      }
-    };
-
-    searchProps.onSelectTimeRange = async (range?: TimeRange) => {
-      if (!range) {
-        return;
-      }
-      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-        embeddable: this,
-        filters: [
-          {
-            // @ts-expect-error TS2353 TODO(ts-error): fixme
-            range: {
-              '*': {
-                mode: 'absolute',
-                gte: moment(range.from),
-                lte: moment(range.to),
-              },
-            },
-          },
-        ],
-        timeFieldName: '*',
-      });
-    };
-
-    this.searchProps = searchProps;
   }
 
-  private async updateHandler(searchProps: SearchProps, force = false) {
+  private getSelectedColumns() {
+    return this.input.columns || this.savedExplore.columns;
+  }
+
+  private onAddColumn = (columnName: string) => {
+    const columns = this.getSelectedColumns();
+    if (!columns) {
+      return;
+    }
+
+    const updatedColumns = buildColumns(columnActions.addColumn(columns, { column: columnName }));
+    this.updateInput({ columns: updatedColumns });
+  };
+
+  private onRemoveColumn = (columnName: string) => {
+    const columns = this.getSelectedColumns();
+    if (!columns) {
+      return;
+    }
+
+    const sort = this.input.sort || this.savedExplore.sort;
+    const updatedColumns = columnActions.removeColumn(columns, columnName);
+    const updatedSort = sort?.length ? sort.filter(([field]) => field !== columnName) : [];
+    this.updateInput({ sort: updatedSort, columns: updatedColumns });
+  };
+
+  private onFilter: DocViewFilterFn = (mapping, value, mode) => {
+    if (!this.indexPattern) {
+      return;
+    }
+
+    const fieldName =
+      typeof mapping === 'string'
+        ? mapping
+        : mapping && typeof mapping === 'object' && 'name' in mapping
+          ? mapping.name
+          : undefined;
+    if (!fieldName) {
+      return;
+    }
+
+    const field = this.indexPattern.getFieldByName(fieldName);
+    if (!field) {
+      return;
+    }
+
+    const values = Array.isArray(value) ? value.map(String) : [String(value)];
+    let filters = opensearchFilters.generateFilters(
+      this.filterManager,
+      field,
+      values,
+      mode,
+      this.indexPattern.id!
+    );
+    filters = filters.map((filter) => ({
+      ...filter,
+      $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
+    }));
+
+    this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      filters,
+    });
+  };
+
+  private onSelectTimeRange = (range?: TimeRange) => {
+    if (!range) {
+      return;
+    }
+
+    this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      filters: [
+        {
+          // @ts-expect-error TS2353 TODO(ts-error): fixme
+          range: {
+            '*': {
+              mode: 'absolute',
+              gte: moment(range.from),
+              lte: moment(range.to),
+            },
+          },
+        },
+      ],
+      timeFieldName: '*',
+    });
+  };
+
+  private async handleInputChange(force = false) {
     // Pause fetching while not visible (e.g. a collapsed section); record the
-    // owed fetch (resumeFetch) and flush it once on resume. All fetch paths
-    // funnel through here. See EmbeddableInput.isVisible.
+    // owed fetch and flush it once on resume. All fetch paths funnel through here.
     if (this.input.isVisible === false) {
       this.pendingFetchOnResume = true;
       return;
@@ -510,65 +457,66 @@ export class ExploreEmbeddable
 
     const { filters, query, timeRange } = this.input;
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
-    const needFetch =
+    const needFetch = Boolean(
       this.node &&
       (force ||
         resumeFetch ||
         !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
         !isEqual(query, this.prevState.query) ||
-        !isEqual(timeRange, this.prevState.timeRange));
-
-    // If there is column or sort data on the panel, that means the original columns or sort settings have
-    // been overridden in a dashboard.
-    searchProps.columns = this.input.columns || this.savedExplore.columns;
-    searchProps.sort = this.input.sort || this.savedExplore.sort;
-    searchProps.sharedItemTitle = this.panelTitle;
+        !isEqual(timeRange, this.prevState.timeRange))
+    );
 
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
-      this.searchProps = searchProps;
 
       // Apply dashboard filters to the SearchSource (same as PPL)
       if (this.filtersSearchSource) {
         this.filtersSearchSource.setField('filter', filters || []);
       }
 
-      try {
-        await this.fetch();
-      } catch (error: any) {
-        if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
-          return;
-        }
-        this.searchProps.isLoading = false;
-        this.searchProps.error = {
-          name: error?.body?.error || error?.name || 'Error',
-          message: error?.body?.message || error?.message || 'An error occurred',
-        };
-        this.updateOutput({
-          loading: false,
-          error: this.searchProps.error,
-        });
-      }
-    } else if (searchProps) {
-      this.searchProps = searchProps;
+      await this.fetch();
+      return;
     }
-    if (this.node && this.searchProps) {
-      this.renderComponent(this.node, this.searchProps);
-    }
+
+    this.renderComponent();
   }
 
   public reload() {
-    if (this.searchProps) {
-      this.updateHandler(this.searchProps, true);
-    }
+    this.handleInputChange(true);
   }
 
   private fetch = async () => {
-    if (!this.searchProps) return;
+    this.abortController?.abort();
+    const abortController = new AbortController();
+    this.abortController = abortController;
+
+    this.updateOutput({ loading: true, error: undefined });
+
+    try {
+      const content = await this.fetchContent(abortController.signal, { ...this.input.timeRange });
+      if (abortController.signal.aborted) {
+        return;
+      }
+      this.transitionToReady(content);
+    } catch (error) {
+      if (abortController.signal.aborted || this.isAbortError(error)) {
+        return;
+      }
+      this.transitionToError(this.normalizeError(error));
+    } finally {
+      if (this.abortController === abortController) {
+        this.abortController = undefined;
+      }
+    }
+  };
+
+  private fetchContent = async (
+    abortSignal: AbortSignal,
+    timeRange: TimeRange
+  ): Promise<ExploreEmbeddableContent> => {
     const { searchSource } = this.savedExplore;
-    if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    const sampleSize = this.services.uiSettings.get(SAMPLE_SIZE_SETTING);
+    searchSource.setField('size', sampleSize);
 
     this.inspectorAdaptors.requests.reset();
     const title = i18n.translate('explore.embeddable.inspectorRequestDataTitle', {
@@ -582,16 +530,13 @@ export class ExploreEmbeddable
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
-    this.updateOutput({ loading: true, error: undefined });
-    this.searchProps.isLoading = true;
-    this.searchProps.error = undefined;
     const query = searchSource.getField('query');
-    const languageConfig = this.services.data.query.queryString
-      .getLanguageService()
-      .getLanguage(query!.language);
+    const languageConfig = query
+      ? this.services.data.query.queryString.getLanguageService().getLanguage(query.language)
+      : undefined;
     const resp = await searchSource.fetch({
-      abortSignal: this.abortController.signal,
-      withLongNumeralsSupport: await getServices().uiSettings.get(
+      abortSignal,
+      withLongNumeralsSupport: await this.services.uiSettings.get(
         UI_SETTINGS.DATA_WITH_LONG_NUMERALS
       ),
       ...(languageConfig &&
@@ -599,6 +544,7 @@ export class ExploreEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
+
     const rawRows = resp.hits.hits;
     const dataFrame = searchSource.getDataFrame();
     const fieldSchema = dataFrame?.schema;
@@ -608,138 +554,128 @@ export class ExploreEmbeddable
       fieldSchema ?? []
     );
 
-    const visualizationData = {
+    const visualizationData: VisData = {
       ...normalizeResultRows(transformedRows, finalSchema ?? []),
       seriesDisplayNames: dataFrame?.meta?.seriesDisplayNames as Record<string, string>,
     };
 
-    // TODO: Confirm if tab is in visualization but visualization is null, what to display?
-    // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
-    const visualization = JSON.parse(this.savedExplore.visualization || '{}');
-    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
+    const visualization = this.visualization;
     const selectedChartType = visualization.chartType ?? 'line';
-    const vis = visualizationRegistry.getVisualization(selectedChartType);
-    this.searchProps.chartType = selectedChartType;
-    this.searchProps.activeTab = uiState.activeTab;
-    this.searchProps.styleOptions = visualization.params;
-    if (uiState.activeTab !== 'logs' && visualizationData) {
-      const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
-        visualizationData;
-      const allColumns = [
-        ...(numericalColumns ?? []),
-        ...(categoricalColumns ?? []),
-        ...(dateColumns ?? []),
-        ...(unknownColumns ?? []),
-      ];
+    const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } = visualizationData;
+    const allColumns = [
+      ...(numericalColumns ?? []),
+      ...(categoricalColumns ?? []),
+      ...(dateColumns ?? []),
+      ...(unknownColumns ?? []),
+    ];
 
-      // Check if there's data to visualize
-      if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
-        if (selectedChartType === 'table') {
-          this.searchProps.tableData = {
-            columns: allColumns,
-            rows: visualizationData.transformedData ?? [],
-          };
-        } else {
-          const savedAxesMapping = visualization.axesMapping ?? {};
-          const styleOptions = visualization.params;
+    let content: ExploreEmbeddableContent;
+    if (this.activeTab === 'logs') {
+      if (!this.indexPattern) {
+        throw new Error('Cannot render the Explore logs table without a data view');
+      }
 
-          // Apply legacy migration (FACET→splitField, threshold conversions)
-          const migratedConfig = adaptLegacyData({
-            type: selectedChartType,
-            styles: styleOptions,
-            axesMapping: savedAxesMapping,
-          });
-          let effectiveAxesMapping = migratedConfig?.axesMapping ?? savedAxesMapping;
-          let styles = migratedConfig?.styles;
+      content = {
+        kind: 'logs',
+        dataset: this.indexPattern,
+        sampleSize,
+        rows: rawRows,
+        // NOTE: PPL response is not the same as an OpenSearch response, so resp.hits.total is 0.
+        hits: rawRows.length,
+      };
+    } else if (selectedChartType === 'table') {
+      content = {
+        kind: 'table',
+        rows: visualizationData.transformedData as NormalizedRow[],
+        columns: allColumns,
+        config: {
+          type: 'table',
+          axesMapping: visualization.axesMapping,
+          styles: (visualization.params ?? {}) as RenderChartConfig['styles'],
+          splitField: visualization.splitField,
+          splitLayout: visualization.splitLayout ?? 'auto',
+          showSplitLabel: visualization.showSplitLabel ?? false,
+        },
+      };
+    } else {
+      const savedAxesMapping = visualization.axesMapping ?? {};
+      const styleOptions = visualization.params;
+      let effectiveAxesMapping = savedAxesMapping;
+      let styles = styleOptions;
+      let splitField = visualization.splitField;
 
-          // Check if the axes mapping is still compatible with the current data columns.
-          if (!isValidMapping(effectiveAxesMapping, allColumns)) {
-            const reusedMapping = visualizationRegistry.reuseAxesMapping(
-              selectedChartType,
-              effectiveAxesMapping,
-              allColumns
-            );
+      if (visualizationData.transformedData.length > 0) {
+        // Apply legacy migration (FACET→splitField, threshold conversions).
+        const migratedConfig = adaptLegacyData({
+          type: selectedChartType,
+          styles: styleOptions,
+          axesMapping: savedAxesMapping,
+        });
+        effectiveAxesMapping = migratedConfig?.axesMapping ?? savedAxesMapping;
+        styles = migratedConfig?.styles;
+        splitField = visualization.splitField ?? migratedConfig?.splitField;
 
-            if (reusedMapping) {
-              effectiveAxesMapping = reusedMapping;
-            }
-          }
-
-          const axesMapping = convertStringsToMappings(effectiveAxesMapping, allColumns);
-          this.searchProps.axisColumnMappings = axesMapping;
-          const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+        // Check if the axes mapping is still compatible with the current data columns.
+        if (!isValidMapping(effectiveAxesMapping, allColumns)) {
+          const reusedMapping = visualizationRegistry.reuseAxesMapping(
             selectedChartType,
             effectiveAxesMapping,
             allColumns
           );
-          if (!matchedRule) {
-            throw new Error(
-              `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
-            );
+          if (reusedMapping) {
+            effectiveAxesMapping = reusedMapping;
           }
-          const searchContext = {
-            query: this.input.query,
-            filters: this.input.filters,
-            timeRange: this.input.timeRange,
-          };
+        }
 
-          if (vis) {
-            styles = mergeStyles(vis.ui.style.defaults, styles);
-          }
-          this.searchProps.styleOptions = styles;
-
-          const splitField =
-            (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
-          const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
-          const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
-
-          const visConfig: RenderChartConfig = {
-            type: selectedChartType,
-            axesMapping: effectiveAxesMapping,
-            styles: styles || styleOptions,
-            splitField,
-            splitLayout,
-            showSplitLabel,
-          };
-
-          const chartRender = () => (
-            <CommonVisualizationRender
-              // The panel's saved query, not the dashboard's, picks the empty state's samples.
-              query={{ language: query?.language, dataset: query?.dataset }}
-              visualizationData={visualizationData}
-              visConfig={visConfig}
-              showRawTable={false}
-              timeRange={searchContext.timeRange}
-              onSelectTimeRange={this.searchProps?.onSelectTimeRange}
-              crosshairGroup={getCrosshairGroup(
-                this.input.useSharedCrosshair,
-                this.parent?.getInput().id
-              )}
-            />
+        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+          selectedChartType,
+          effectiveAxesMapping,
+          allColumns
+        );
+        if (!matchedRule) {
+          throw new Error(
+            `Cannot load saved visualization "${this.getTitle()}" with id ${this.savedExplore.id}`
           );
-          this.searchProps.chartRender = chartRender;
+        }
+
+        const vis = visualizationRegistry.getVisualization(selectedChartType);
+        if (vis) {
+          styles = mergeStyles(vis.ui.style.defaults, styles);
         }
       }
+
+      const config: RenderChartConfig = {
+        type: selectedChartType,
+        axesMapping: effectiveAxesMapping,
+        styles: (styles ?? styleOptions ?? {}) as RenderChartConfig['styles'],
+        splitField,
+        splitLayout: visualization.splitLayout ?? 'auto',
+        showSplitLabel: visualization.showSplitLabel ?? false,
+      };
+      content = {
+        kind: 'chart',
+        // The panel's saved query picks the empty state's samples.
+        query: { language: query?.language, dataset: query?.dataset },
+        data: visualizationData,
+        config,
+        timeRange,
+      };
     }
-    this.updateOutput({ loading: false, error: undefined });
+
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
-    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = rawRows.length;
-    this.searchProps.isLoading = false;
 
     // Update shared panel data store so the global fetch_panel_data tool returns fresh data
     const savedExploreId = this.savedExplore.id;
     if (savedExploreId) {
       PanelDataService.getInstance()?.setPanelData(savedExploreId, {
         rows: transformedRows,
-        panelTitle: this.panelTitle || this.savedExplore.title,
+        panelTitle: this.getTitle() || this.savedExplore.title,
       });
     }
 
     // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
-      const allColumns = [
+      const tabularColumns = [
         ...(visualizationData.numericalColumns ?? []),
         ...(visualizationData.categoricalColumns ?? []),
         ...(visualizationData.dateColumns ?? []),
@@ -749,7 +685,7 @@ export class ExploreEmbeddable
 
       this.inspectorAdaptors.data.setTabularLoader(
         () => ({
-          columns: allColumns.map((col) => ({
+          columns: tabularColumns.map((col) => ({
             name: col.name,
             field: col.column,
           })),
@@ -757,7 +693,7 @@ export class ExploreEmbeddable
           // format data rows and transform into shape {raw, formatted}
           rows: visualizationData.transformedData.map((row) => {
             const formattedRow: Record<string, FormattedData> = {};
-            for (const col of allColumns) {
+            for (const col of tabularColumns) {
               const value = row[col.column];
               const field = indexPattern?.fields.getByName(col.name);
               const formatted =
@@ -772,18 +708,65 @@ export class ExploreEmbeddable
         { returnsFormattedValues: true }
       );
     }
+    return content;
   };
 
-  private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+  private isAbortError(error: unknown) {
+    return Boolean(
+      error && typeof error === 'object' && 'name' in error && error.name === 'AbortError'
+    );
+  }
+
+  private normalizeError(error: unknown): ExploreEmbeddableError {
+    const requestError = error as {
+      name?: string;
+      message?: string;
+      body?: { error?: string; message?: string };
+    };
+    return {
+      name: requestError?.body?.error || requestError?.name || 'Error',
+      message: requestError?.body?.message || requestError?.message || 'An error occurred',
+    };
+  }
+
+  private transitionToReady(content: ExploreEmbeddableContent) {
+    this.state = { status: 'ready', content };
+    this.renderComponent();
+    this.updateOutput({ loading: false, error: undefined });
+  }
+
+  private transitionToError(error: ExploreEmbeddableError) {
+    this.state = { status: 'error', error };
+    this.renderComponent();
+    this.updateOutput({ loading: false, error });
+  }
+
+  private renderComponent() {
+    if (!this.state || !this.root) {
+      return;
+    }
+
+    this.root.render(
+      <ExploreEmbeddableComponent
+        state={this.state}
+        selectedColumns={this.getSelectedColumns()}
+        hideTimeColumn={this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
+        onAddColumn={this.onAddColumn}
+        onRemoveColumn={this.onRemoveColumn}
+        onFilter={this.onFilter}
+        onSelectTimeRange={this.onSelectTimeRange}
+        crosshairGroup={getCrosshairGroup(
+          this.input.useSharedCrosshair,
+          this.parent?.getInput().id
+        )}
+      />
+    );
   }
 
   public destroy() {
     super.destroy();
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
     }
 
     if (this.autoRefreshFetchSubscription) {
@@ -811,33 +794,30 @@ export class ExploreEmbeddable
     if (this.abortController) {
       this.abortController.abort();
     }
-    if (this.searchProps) {
-      delete this.searchProps;
-    }
     if (this.root) {
       this.root.unmount();
+      this.root = undefined;
     }
+    this.node = undefined;
   }
 
   onContainerError = (error: ExpressionRenderError) => {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-    this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
+    this.abortController?.abort();
+    this.abortController = undefined;
+    this.transitionToError(this.normalizeError(error));
   };
 
   public render(node: HTMLElement) {
-    if (!this.searchProps) {
-      throw new Error('Search scope not defined');
-    }
     if (this.root) {
       this.root.unmount();
     }
+    // TODO: Integrate with Embeddable's RenderCompleteDispatcher once DataTable, TableVis,
+    // and CommonVisualizationRender expose reliable renderer-level completion signals.
+    // Calling super.render(node) before then would leave the panel marked incomplete.
     this.node = node;
     this.node.style.height = '100%';
     this.root = createRoot(node);
-    this.updateHandler(this.searchProps);
+    this.handleInputChange();
   }
 
   public getInspectorAdapters() {

@@ -159,6 +159,67 @@ describe('DefaultDiscoverTable', () => {
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
   });
 
+  it('resets pagination when a new result set is rendered', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(undefined, true));
+
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+    expect(
+      container
+        .querySelector('[data-test-subj="pagination-button-1"]')
+        ?.getAttribute('aria-current')
+    ).toBe('true');
+
+    rerender(getDataTable(mockRows.slice(0, 10), true));
+
+    await waitFor(() => {
+      expect(
+        container
+          .querySelector('[data-test-subj="pagination-button-0"]')
+          ?.getAttribute('aria-current')
+      ).toBe('true');
+    });
+  });
+
+  it('preserves the selected page when the result set is unchanged', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(mockRows, true));
+
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+    const currentRows = container.querySelector('tbody')?.textContent;
+
+    rerender(getDataTable(mockRows, true));
+
+    expect(
+      container
+        .querySelector('[data-test-subj="pagination-button-1"]')
+        ?.getAttribute('aria-current')
+    ).toBe('true');
+    expect(container.querySelector('tbody')?.textContent).toBe(currentRows);
+  });
+
+  it('shows fresh rows and resets pagination after a refetch with the same row count', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(mockRows, true));
+
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+
+    const freshRows = mockRows.map((row) => ({
+      ...row,
+      _source: { ...row._source, category: 'refreshed-category' },
+      fields: { ...row.fields, category: ['refreshed-category'] },
+    }));
+    rerender(getDataTable(freshRows, true));
+
+    expect(
+      container
+        .querySelector('[data-test-subj="pagination-button-0"]')
+        ?.getAttribute('aria-current')
+    ).toBe('true');
+    expect(container.querySelector('tbody tr')).toHaveTextContent('refreshed-category');
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(50);
+  });
+
   describe('Column Width Algorithm', () => {
     // Mock DOM methods needed for width calculation
     beforeEach(() => {

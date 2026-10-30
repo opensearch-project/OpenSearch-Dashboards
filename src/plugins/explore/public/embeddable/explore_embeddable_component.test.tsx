@@ -5,19 +5,12 @@
 
 import { render, screen } from '@testing-library/react';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
-import { SearchProps } from './explore_embeddable';
+import { ExploreEmbeddableContent, ExploreEmbeddableViewProps } from './explore_embeddable_state';
+import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
 
 jest.mock('../application/legacy/discover/opensearch_dashboards_services', () => ({
   getDocViewsRegistry: jest.fn(() => ({
     getDocViewsSorted: jest.fn(() => []),
-  })),
-  getServices: jest.fn(() => ({
-    uiSettings: {
-      get: jest.fn((key) => {
-        if (key === 'discover:sampleSize') return 500;
-        return false;
-      }),
-    },
   })),
 }));
 
@@ -30,21 +23,27 @@ jest.mock('../components/data_table/data_table', () => ({
   )),
 }));
 
-jest.mock('../helpers/data_table_helper', () => ({
-  getLegacyDisplayedColumns: jest.fn((columns) =>
-    columns.map((col: string, idx: number) => ({
-      name: col,
-      displayName: col,
-      isSortable: true,
-      isRemoveable: true,
-      colLeftIdx: idx - 1,
-      colRightIdx: idx + 1,
-    }))
-  ),
-}));
-
 jest.mock('../components/visualizations/table/table_vis', () => ({
   TableVis: jest.fn(() => <div data-test-subj="mockTableVis">Table Visualization</div>),
+}));
+
+jest.mock('../components/visualizations/visualization_render', () => ({
+  CommonVisualizationRender: jest.fn(() => (
+    <div data-test-subj="mockChartRender">Chart Visualization</div>
+  )),
+}));
+
+jest.mock('../helpers/data_table_helper', () => ({
+  getLegacyDisplayedColumns: jest.fn((columns) =>
+    columns.map((column: string, index: number) => ({
+      name: column,
+      displayName: column,
+      isSortable: true,
+      isRemoveable: true,
+      colLeftIdx: index - 1,
+      colRightIdx: index + 1,
+    }))
+  ),
 }));
 
 jest.mock('../../../visualizations/public', () => ({
@@ -55,136 +54,128 @@ jest.mock('../../../visualizations/public', () => ({
 }));
 
 describe('ExploreEmbeddableComponent', () => {
-  const mockSearchProps: SearchProps = {
-    columns: ['column1', 'column2'],
-    indexPattern: { id: 'test-index' } as any,
-    onAddColumn: jest.fn(),
-    onFilter: jest.fn(),
-    onMoveColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
-    onReorderColumn: jest.fn(),
-    onSort: jest.fn(),
-    onSetColumns: jest.fn(),
+  const onAddColumn = jest.fn();
+  const onRemoveColumn = jest.fn();
+  const onFilter = jest.fn();
+  const onSelectTimeRange = jest.fn();
+
+  const logContent: ExploreEmbeddableContent = {
+    kind: 'logs',
+    dataset: { id: 'test-index' } as any,
+    sampleSize: 500,
     rows: [
-      { _id: '1', _source: { field1: 'value1' } },
-      { _id: '2', _source: { field1: 'value2' } },
+      {
+        _index: 'test-index',
+        _id: '1',
+        _score: null,
+        _source: { field1: 'value1' },
+      },
+      {
+        _index: 'test-index',
+        _id: '2',
+        _score: null,
+        _source: { field1: 'value2' },
+      },
     ],
-    sort: [['column1', 'asc']],
-    displayTimeColumn: true,
-    services: {} as any,
     hits: 2,
-    title: 'Test Explore',
-    description: 'Test description',
-    activeTab: 'logs',
   };
+
+  const chartContent: ExploreEmbeddableContent = {
+    kind: 'chart',
+    query: {
+      language: 'SQL',
+      dataset: { id: 'panel-dataset', type: 'INDEXES', title: 'logs' },
+    },
+    data: {
+      transformedData: [{ value: 10 }],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+      unknownColumns: [],
+    },
+    config: {
+      type: 'bar',
+      styles: {} as any,
+    },
+    timeRange: { from: 'now-15m', to: 'now' },
+  };
+
+  const renderView = (
+    state: ExploreEmbeddableViewProps['state'],
+    overrides: Partial<ExploreEmbeddableViewProps> = {}
+  ) =>
+    render(
+      <ExploreEmbeddableComponent
+        state={state}
+        selectedColumns={['column1', 'column2']}
+        hideTimeColumn={false}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+        onFilter={onFilter}
+        onSelectTimeRange={onSelectTimeRange}
+        {...overrides}
+      />
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders data grid table when activeTab is logs and rows exist', () => {
-    render(<ExploreEmbeddableComponent searchProps={mockSearchProps} />);
+  test('renders log content from a ready state', () => {
+    renderView({ status: 'ready', content: logContent });
 
     expect(screen.getByTestId('mockDataGridTable')).toBeInTheDocument();
     expect(screen.getByTestId('mockColumns')).toHaveTextContent('column1');
     expect(screen.getByTestId('mockColumns')).toHaveTextContent('column2');
   });
 
-  test('renders chartRender output when activeTab is visualization and chartRender is provided', () => {
-    const visualizationProps: SearchProps = {
-      ...mockSearchProps,
-      activeTab: 'visualization',
-      chartRender: () => <div data-test-subj="mockChartRender">Chart Render</div>,
-    };
-
-    render(<ExploreEmbeddableComponent searchProps={visualizationProps} />);
+  test('renders chart content from a ready state', () => {
+    renderView({ status: 'ready', content: chartContent });
 
     expect(screen.getByTestId('mockChartRender')).toBeInTheDocument();
+    expect(CommonVisualizationRender).toHaveBeenCalledWith(
+      expect.objectContaining({ query: chartContent.query }),
+      expect.anything()
+    );
   });
 
-  test('renders no results when rows are empty', () => {
-    const noResultsProps = {
-      ...mockSearchProps,
-      rows: [],
-    };
-
-    render(<ExploreEmbeddableComponent searchProps={noResultsProps} />);
-
-    expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
-  });
-
-  test('renders with the correct data-test-subj attributes', () => {
-    render(<ExploreEmbeddableComponent searchProps={mockSearchProps} />);
-
-    expect(screen.getByTestId('embeddedSavedExplore')).toBeInTheDocument();
-    expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
-  });
-
-  test('renders TableVis when chartType is table', () => {
-    const tableProps: SearchProps = {
-      ...mockSearchProps,
-      activeTab: 'visualization',
-      chartType: 'table' as any,
-      tableData: {
-        rows: [{ col1: 'val1' }],
-        columns: [],
+  test('renders table content from a ready state', () => {
+    const tableContent: ExploreEmbeddableContent = {
+      kind: 'table',
+      rows: [{ col1: 'val1' }],
+      columns: [],
+      config: {
+        type: 'table',
+        styles: {} as any,
       },
     };
 
-    render(<ExploreEmbeddableComponent searchProps={tableProps} />);
+    renderView({ status: 'ready', content: tableContent });
 
     expect(screen.getByTestId('mockTableVis')).toBeInTheDocument();
   });
 
-  test('renders gracefully with missing optional fields in searchProps', () => {
-    const minimalProps = {
-      services: {} as any,
-      displayTimeColumn: true,
-      title: 'Minimal',
-      rows: [{ _id: '1' }],
-    };
+  test('renders no results for empty ready content', () => {
+    renderView({
+      status: 'ready',
+      content: { ...logContent, rows: [], hits: 0 },
+    });
 
-    render(<ExploreEmbeddableComponent searchProps={minimalProps as any} />);
-
-    expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
+    expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
   });
 
-  test('renders error message when searchProps.error is present', () => {
-    const errorProps: SearchProps = {
-      ...mockSearchProps,
+  test('renders an error instead of content', () => {
+    renderView({
+      status: 'error',
       error: {
         name: 'QueryError',
         message: 'PPL query failed: syntax error',
       },
-    };
+    });
 
-    render(<ExploreEmbeddableComponent searchProps={errorProps} />);
-
-    expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
     expect(screen.getByTestId('mockRequestError')).toHaveTextContent(
       'PPL query failed: syntax error'
     );
-  });
-
-  test('shows error instead of old data when error occurs', () => {
-    const errorPropsWithOldData: SearchProps = {
-      ...mockSearchProps,
-      error: {
-        name: 'Error',
-        message: 'Failed to execute query',
-      },
-      rows: [{ _id: '1', _source: { field1: 'value1' } }],
-      tableData: {
-        rows: [{ col1: 'val1' }],
-        columns: [],
-      },
-    };
-
-    render(<ExploreEmbeddableComponent searchProps={errorPropsWithOldData} />);
-
-    // Should show error, not the table or old data
-    expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
     expect(screen.queryByTestId('mockDataGridTable')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockTableVis')).not.toBeInTheDocument();
   });
 });
