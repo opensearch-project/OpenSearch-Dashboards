@@ -1,0 +1,25 @@
+{
+  "description": "Dashboard 7.0.0: Multiple panels with mixed types",
+  "type": "dashboard",
+  "migrationVersion": "7.0.0",
+  "input": {
+    "id": "dash-mixed-panels",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Dashboard with mixed panel types",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      },
+      "panelsJSON": "[{\"id\":\"viz-1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15}},{\"id\":\"viz-2\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15}},{\"id\":\"search-1\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":15,\"w\":48,\"h\":15}}]"
+    },
+    "references": []
+  },
+  "expected": {
+    "references_length": 3,
+    "references_contain": [
+      { "type": "visualization", "id": "viz-1" },
+      { "type": "visualization", "id": "viz-2" },
+      { "type": "search", "id": "search-1" }
+    ]
+  }
+}
