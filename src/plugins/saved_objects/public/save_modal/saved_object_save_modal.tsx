@@ -60,7 +60,10 @@ export interface OnSaveProps {
 }
 
 interface Props {
-  onSave: (props: OnSaveProps) => void;
+  // onSave may return a promise (e.g. a consumer that copies panels before
+  // saving); the modal awaits it so the confirm button stays loading until it
+  // settles. The resolved value is not used here, hence `unknown`.
+  onSave: (props: OnSaveProps) => void | Promise<unknown>;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
@@ -85,6 +88,7 @@ const generateId = htmlIdGenerator();
 
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
+  private isMounted = false;
   public readonly state = {
     title: this.props.title,
     copyOnSave: Boolean(this.props.initialCopyOnSave),
@@ -93,6 +97,14 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     isLoading: false,
     visualizationDescription: this.props.description ? this.props.description : '',
   };
+
+  public componentDidMount() {
+    this.isMounted = true;
+  }
+
+  public componentWillUnmount() {
+    this.isMounted = false;
+  }
 
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
@@ -223,13 +235,24 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      // If onSave settled without closing the modal (a consumer rejected the
+      // input and kept the modal open, or its promise rejected), re-enable the
+      // button so it is not stuck loading. On success/error the modal is
+      // unmounted and this setState is a no-op. In the duplicate-title path
+      // onTitleDuplicate already reset isLoading, so this is idempotent.
+      if (this.isMounted) {
+        this.setState({ isLoading: false });
+      }
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

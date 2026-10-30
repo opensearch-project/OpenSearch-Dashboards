@@ -1,63 +1,11 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`renders DashboardSaveModal 1`] = `
-<SavedObjectSaveModal
+<MockSavedObjectSaveModal
   objectType="dashboard"
   onClose={[Function]}
   onSave={[Function]}
-  options={
-    <React.Fragment>
-      <EuiCompressedFormRow
-        describedByIds={Array []}
-        display="rowCompressed"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label={
-          <FormattedMessage
-            defaultMessage="Description"
-            id="dashboard.topNav.saveModal.descriptionFormRowLabel"
-            values={Object {}}
-          />
-        }
-        labelType="label"
-      >
-        <EuiCompressedTextArea
-          data-test-subj="dashboardDescription"
-          onChange={[Function]}
-          value="dash description"
-        />
-      </EuiCompressedFormRow>
-      <EuiCompressedFormRow
-        describedByIds={Array []}
-        display="rowCompressed"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        helpText={
-          <FormattedMessage
-            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-            id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-            values={Object {}}
-          />
-        }
-        labelType="label"
-      >
-        <EuiCompressedSwitch
-          checked={true}
-          data-test-subj="storeTimeWithDashboard"
-          label={
-            <FormattedMessage
-              defaultMessage="Store time with dashboard"
-              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-              values={Object {}}
-            />
-          }
-          onChange={[Function]}
-        />
-      </EuiCompressedFormRow>
-    </React.Fragment>
-  }
+  options={[Function]}
   showCopyOnSave={true}
   showDescription={false}
   title="dash title"

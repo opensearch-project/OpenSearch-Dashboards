@@ -10,7 +10,9 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import {
   SaveResult,
   SavedObjectSaveOpts,
+  checkForDuplicateTitle,
   getSavedObjectFinder,
+  isErrorNonFatal,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../types';
@@ -36,6 +38,12 @@ import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
 import { convertSavedDashboardPanelToPanelState } from './embeddable_saved_object_converters';
+import {
+  applyCopyPanels,
+  revertCopyPanels,
+  CreatedPanelCopy,
+  PanelCopyFailure,
+} from './apply_copy_panels';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -77,6 +85,25 @@ export const getNavActions = (
     return navActions;
   }
   const appState = stateContainer.getState();
+
+  // Surface panels whose backing object could not be copied during "Copy panels".
+  // The dashboard still saved (those panels remain shared); this is a non-fatal
+  // warning listing what was not duplicated.
+  const warnCopyPanelFailures = (failures: PanelCopyFailure[]) => {
+    if (!failures.length) {
+      return;
+    }
+    const names = failures.map((f) => f.title || `${f.type}:${f.id}`).join(', ');
+    notifications.toasts.addWarning({
+      title: i18n.translate('dashboard.topNav.copyPanels.partialFailureTitle', {
+        defaultMessage:
+          '{count, plural, one {# panel was not copied and still points to the original} other {# panels were not copied and still point to the original}}',
+        values: { count: failures.length },
+      }),
+      text: names,
+    });
+  };
+
   navActions[TopNavIds.FULL_SCREEN] = () => {
     stateContainer.transitions.set('fullScreenMode', true);
   };
@@ -86,11 +113,13 @@ export const getNavActions = (
     const currentTitle = appState.title;
     const currentDescription = appState.description;
     const currentTimeRestore = appState.timeRestore;
-    const onSave = ({
+    const onSave = async ({
       newTitle,
       newDescription,
       newCopyOnSave,
       newTimeRestore,
+      newCopyPanels,
+      newCopyPanelsTitleTemplate,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }: {
@@ -98,6 +127,8 @@ export const getNavActions = (
       newDescription: string;
       newCopyOnSave: boolean;
       newTimeRestore: boolean;
+      newCopyPanels?: boolean;
+      newCopyPanelsTitleTemplate?: string;
       isTitleDuplicateConfirmed: boolean;
       onTitleDuplicate: () => void;
     }) => {
@@ -113,7 +144,94 @@ export const getNavActions = (
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
-      return save(saveOptions).then((response: SaveResult) => {
+
+      // "Copy panels" only applies when saving as a new dashboard.
+      const copyPanels = Boolean(newCopyOnSave && newCopyPanels);
+      let copied: {
+        originalPanels: typeof appState.panels;
+        createdObjects: CreatedPanelCopy[];
+        failures: PanelCopyFailure[];
+      } | null = null;
+      if (copyPanels) {
+        // Detect a duplicate title BEFORE copying. On an unconfirmed duplicate,
+        // copying first would create panel copies that the save then reverts, only
+        // to re-copy them after the user confirms (a wasted 2N-create/N-delete
+        // round-trip that can also leave orphans). Checking up front avoids that.
+        //
+        // The pre-check must see the object exactly as saveSavedObject will: with
+        // copyOnSave set, the save deletes the id before running its own duplicate
+        // check, so the self-match escape (duplicate.id === savedObject.id) only
+        // holds there when the id is absent. Running this pre-check against the
+        // live savedDashboard id would wrongly pass "copy keeps the source title"
+        // (the most common duplicate), then the save would re-detect it and fire
+        // the exact round-trip this guards against. Use a detached object literal
+        // with id: undefined -- not a spread, which drops the prototype methods.
+        try {
+          await checkForDuplicateTitle(
+            {
+              id: undefined,
+              title: newTitle,
+              lastSavedTitle: savedDashboard.lastSavedTitle,
+              copyOnSave: true,
+              getDisplayName: () => savedDashboard.getDisplayName(),
+              getOpenSearchType: () => savedDashboard.getOpenSearchType(),
+            },
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+            {
+              savedObjectsClient: savedObjects.client,
+              overlays,
+            }
+          );
+        } catch (error) {
+          // Restore the fields written on entry (matching the no-copy duplicate
+          // path) so a cancelled duplicate or a failed check leaves no unsaved
+          // title/description/timeRestore in app state.
+          stateContainer.transitions.setDashboard({
+            title: currentTitle,
+            description: currentDescription,
+            timeRestore: currentTimeRestore,
+          });
+          // A duplicate title is non-fatal: onTitleDuplicate has surfaced the
+          // confirm UI. An empty id (no error) keeps the modal open for the user
+          // to confirm, without copying.
+          if (isErrorNonFatal(error as { message: string })) {
+            return { id: '' } as SaveResult;
+          }
+          // A fatal check failure (e.g. the _find request failed) would otherwise
+          // close the modal with no feedback; report it as the save path does.
+          notifications.toasts.addDanger({
+            title: i18n.translate('dashboard.topNav.saveModal.duplicateCheckErrorMessage', {
+              defaultMessage: 'Could not check for a duplicate title. The dashboard was not saved.',
+            }),
+          });
+          return { error: error as Error } as SaveResult;
+        }
+        // The pre-check used the same object shape the save will, so its verdict
+        // is final: tell the save to skip its identical _find rather than repeat
+        // the read. (On a confirmed duplicate this flag was already true.)
+        saveOptions.isTitleDuplicateConfirmed = true;
+        try {
+          copied = await applyCopyPanels(savedObjects.client, stateContainer, {
+            titleTemplate: newCopyPanelsTitleTemplate,
+            dashboardTitle: newTitle,
+          });
+        } catch (error) {
+          stateContainer.transitions.setDashboard({
+            title: currentTitle,
+            description: currentDescription,
+            timeRestore: currentTimeRestore,
+          });
+          notifications.toasts.addDanger({
+            title: i18n.translate('dashboard.topNav.saveModal.copyPanelsErrorMessage', {
+              defaultMessage: 'Could not copy the dashboard panels. The dashboard was not saved.',
+            }),
+          });
+          return { error: error as Error } as SaveResult;
+        }
+      }
+
+      return save(saveOptions).then(async (response: SaveResult) => {
         // If the save wasn't successful, put the original values back.
         if (!(response as { id: string }).id) {
           stateContainer.transitions.setDashboard({
@@ -121,6 +239,19 @@ export const getNavActions = (
             description: currentDescription,
             timeRestore: currentTimeRestore,
           });
+          if (copied) {
+            await revertCopyPanels(
+              savedObjects.client,
+              stateContainer,
+              copied.originalPanels,
+              copied.createdObjects
+            );
+          }
+        }
+
+        // On a successful save-as, warn about any panels that could not be copied.
+        if ((response as { id: string }).id && copied) {
+          warnCopyPanelFailures(copied.failures);
         }
 
         // If the save was successful, then set the dashboard isDirty back to false
@@ -144,10 +275,13 @@ export const getNavActions = (
 
   navActions[TopNavIds.CLONE] = () => {
     const currentTitle = appState.title;
-    const onClone = (
+    const onClone = async (
       newTitle: string,
       isTitleDuplicateConfirmed: boolean,
-      onTitleDuplicate: () => void
+      onTitleDuplicate: () => void,
+      copyPanels: boolean,
+      titleTemplate?: string,
+      signal?: AbortSignal
     ) => {
       savedDashboard.copyOnSave = true;
       stateContainer.transitions.set('title', newTitle);
@@ -156,10 +290,107 @@ export const getNavActions = (
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
-      return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
+
+      // When "Copy panels" is selected, duplicate each by-reference panel's own
+      // backing object and repoint the panels to the copies BEFORE saving, so the
+      // cloned dashboard references the copies. Downstream references (index-pattern,
+      // dataset, saved search, data-source) are kept shared. Layout/sections are
+      // preserved because only the saved object id changes.
+      let copied: {
+        originalPanels: typeof appState.panels;
+        createdObjects: CreatedPanelCopy[];
+        failures: PanelCopyFailure[];
+      } | null = null;
+      if (copyPanels) {
+        // Detect a duplicate title BEFORE copying (see the save-as path): avoids
+        // copying, reverting, then re-copying after the user confirms a duplicate.
+        //
+        // Match the object shape saveSavedObject uses: copyOnSave deletes the id
+        // before the save's own duplicate check, so the self-match escape only
+        // holds with id absent. A pre-check against the live id would miss a clone
+        // that keeps the source title and let the save re-trigger the round-trip.
+        // Detached literal with id: undefined (a spread would drop the methods).
+        try {
+          await checkForDuplicateTitle(
+            {
+              id: undefined,
+              title: newTitle,
+              lastSavedTitle: savedDashboard.lastSavedTitle,
+              copyOnSave: true,
+              getDisplayName: () => savedDashboard.getDisplayName(),
+              getOpenSearchType: () => savedDashboard.getOpenSearchType(),
+            },
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+            {
+              savedObjectsClient: savedObjects.client,
+              overlays,
+            }
+          );
+        } catch (error) {
+          // A duplicate title is non-fatal: onTitleDuplicate has surfaced the
+          // confirm UI. An empty id (no error) keeps the clone modal open for the
+          // user to confirm, without copying. showCloneModal keeps the modal open
+          // only when the response has neither an id nor an error. The title is
+          // left as the new title, matching the existing clone duplicate path.
+          if (isErrorNonFatal(error as { message: string })) {
+            return { id: '' };
+          }
+          // A fatal check failure would otherwise close the modal with no
+          // feedback; restore the title and report it.
+          stateContainer.transitions.set('title', currentTitle);
+          notifications.toasts.addDanger({
+            title: i18n.translate('dashboard.topNav.cloneModal.duplicateCheckErrorMessage', {
+              defaultMessage:
+                'Could not check for a duplicate title. The dashboard was not cloned.',
+            }),
+          });
+          return { error: error as Error };
+        }
+        // The pre-check used the same object shape the save will, so its verdict
+        // is final: tell the save to skip its identical _find. (Already true on a
+        // confirmed duplicate.)
+        saveOptions.isTitleDuplicateConfirmed = true;
+        try {
+          copied = await applyCopyPanels(savedObjects.client, stateContainer, {
+            titleTemplate,
+            dashboardTitle: newTitle,
+            signal,
+          });
+        } catch (error) {
+          stateContainer.transitions.set('title', currentTitle);
+          // Cancellation is not an error -- stay silent and abort.
+          if ((error as Error)?.name !== 'AbortError') {
+            notifications.toasts.addDanger({
+              title: i18n.translate('dashboard.topNav.cloneModal.copyPanelsErrorMessage', {
+                defaultMessage:
+                  'Could not copy the dashboard panels. The dashboard was not cloned.',
+              }),
+            });
+          }
+          return { error: error as Error };
+        }
+      }
+
+      return save(saveOptions).then(async (response: { id?: string } | { error: Error }) => {
+        const succeeded = Boolean((response as { id?: string }).id);
+        // On any non-success (error or an unconfirmed duplicate title), undo the
+        // copies so a retry starts clean and no orphan copies are left behind.
+        if (!succeeded && copied) {
+          await revertCopyPanels(
+            savedObjects.client,
+            stateContainer,
+            copied.originalPanels,
+            copied.createdObjects
+          );
+        }
         // If the save wasn't successful, put the original title back.
         if ((response as { error: Error }).error) {
           stateContainer.transitions.set('title', currentTitle);
+        }
+        // On a successful clone, warn about any panels that could not be copied.
+        if (succeeded && copied) {
+          warnCopyPanelFailures(copied.failures);
         }
         // updateNavBar();
         return response;

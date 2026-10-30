@@ -49,7 +49,7 @@ interface OriginSaveModalProps {
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
-  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
+  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void | Promise<unknown>;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -104,7 +104,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   };
 
   const onModalSave = (onSaveProps: OnSaveProps) => {
-    props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
+    return props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
   };
 
   const confirmButtonLabel = returnToOriginMode

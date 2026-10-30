@@ -29,16 +29,28 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiCompressedTextArea, EuiCompressedSwitch } from '@elastic/eui';
+import {
+  EuiCompressedFormRow,
+  EuiCompressedTextArea,
+  EuiCompressedSwitch,
+  EuiCompressedFieldText,
+} from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
+import {
+  DEFAULT_PANEL_COPY_TITLE_TEMPLATE,
+  isPanelCopyTitleTemplateValid,
+} from '../../../utils/panel_copy_title_template';
 
 interface SaveOptions {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
+  newCopyPanels: boolean;
+  newCopyPanelsTitleTemplate: string;
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
 }
@@ -49,6 +61,8 @@ interface Props {
     newDescription,
     newCopyOnSave,
     newTimeRestore,
+    newCopyPanels,
+    newCopyPanelsTitleTemplate,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: SaveOptions) => void;
@@ -62,12 +76,16 @@ interface Props {
 interface State {
   description: string;
   timeRestore: boolean;
+  copyPanels: boolean;
+  titleTemplate: string;
 }
 
 export class DashboardSaveModal extends React.Component<Props, State> {
   state: State = {
     description: this.props.description,
     timeRestore: this.props.timeRestore,
+    copyPanels: false,
+    titleTemplate: DEFAULT_PANEL_COPY_TITLE_TEMPLATE,
   };
 
   constructor(props: Props) {
@@ -85,11 +103,22 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
-    this.props.onSave({
+    const copyPanels = newCopyOnSave && this.state.copyPanels;
+    // Block the save when the copied-panel title template is invalid.
+    if (copyPanels && !isPanelCopyTitleTemplateValid(this.state.titleTemplate)) {
+      return;
+    }
+    // Return the onSave promise so the upstream modal awaits the full copy+save
+    // and keeps the confirm button in its loading state until it resolves,
+    // preventing a double-submit. A validation early-return above still returns
+    // undefined, so the button is re-enabled for the user to fix the template.
+    return this.props.onSave({
       newTitle,
       newDescription: this.state.description,
       newCopyOnSave,
       newTimeRestore: this.state.timeRestore,
+      newCopyPanels: copyPanels,
+      newCopyPanelsTitleTemplate: this.state.titleTemplate,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     });
@@ -107,7 +136,13 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     });
   };
 
-  renderDashboardSaveOptions() {
+  onCopyPanelsChange = (event: any) => {
+    this.setState({
+      copyPanels: event.target.checked,
+    });
+  };
+
+  renderDashboardSaveOptions(copyOnSave: boolean) {
     return (
       <Fragment>
         <EuiCompressedFormRow
@@ -145,6 +180,57 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             }
           />
         </EuiCompressedFormRow>
+
+        {copyOnSave && (
+          <EuiCompressedFormRow
+            helpText={
+              <FormattedMessage
+                id="dashboard.topNav.saveModal.copyPanelsFormRowHelpText"
+                defaultMessage="Copy panels so edits in the new dashboard do not affect the original."
+              />
+            }
+          >
+            <EuiCompressedSwitch
+              data-test-subj="copyPanelsOnSave"
+              checked={this.state.copyPanels}
+              onChange={this.onCopyPanelsChange}
+              label={
+                <FormattedMessage
+                  id="dashboard.topNav.saveModal.copyPanelsFormRowLabel"
+                  defaultMessage="Copy panels"
+                />
+              }
+            />
+          </EuiCompressedFormRow>
+        )}
+
+        {copyOnSave && this.state.copyPanels && (
+          <EuiCompressedFormRow
+            label={i18n.translate('dashboard.topNav.saveModal.copyPanelsTitleTemplateLabel', {
+              defaultMessage: 'Copied panel title',
+            })}
+            isInvalid={!isPanelCopyTitleTemplateValid(this.state.titleTemplate)}
+            error={i18n.translate('dashboard.topNav.saveModal.copyPanelsTitleTemplateError', {
+              defaultMessage: 'Enter a title that includes {panelToken}.',
+              values: { panelToken: '{{panelTitle}}' },
+            })}
+            helpText={i18n.translate('dashboard.topNav.saveModal.copyPanelsTitleTemplateHelp', {
+              defaultMessage:
+                'Use {panelToken} for the original panel title and {dashboardToken} for the new dashboard title.',
+              values: {
+                panelToken: '{{panelTitle}}',
+                dashboardToken: '{{dashboardTitle}}',
+              },
+            })}
+          >
+            <EuiCompressedFieldText
+              data-test-subj="copyPanelsTitleTemplate"
+              value={this.state.titleTemplate}
+              isInvalid={!isPanelCopyTitleTemplateValid(this.state.titleTemplate)}
+              onChange={(e) => this.setState({ titleTemplate: e.target.value })}
+            />
+          </EuiCompressedFormRow>
+        )}
       </Fragment>
     );
   }
@@ -157,7 +243,9 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
         objectType="dashboard"
-        options={this.renderDashboardSaveOptions()}
+        options={(state: { copyOnSave: boolean }) =>
+          this.renderDashboardSaveOptions(state.copyOnSave)
+        }
         showDescription={false}
       />
     );

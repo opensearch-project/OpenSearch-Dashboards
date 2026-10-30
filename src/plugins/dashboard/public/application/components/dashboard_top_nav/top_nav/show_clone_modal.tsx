@@ -37,13 +37,22 @@ export function showCloneModal(
   onClone: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
+    onTitleDuplicate: () => void,
+    copyPanels: boolean,
+    titleTemplate: string,
+    signal: AbortSignal
   ) => Promise<{ id?: string } | { error: Error }>,
   title: string
 ) {
   const container = document.createElement('div');
   const root = createRoot(container);
   const closeModal = () => {
+    // Idempotent: Cancel-during-copy closes the modal synchronously, then the
+    // aborted copy promise resolves and would try to close again. Guard against
+    // a double removeChild (NotFoundError / unhandled rejection).
+    if (!container.parentNode) {
+      return;
+    }
     root.unmount();
     document.body.removeChild(container);
   };
@@ -51,17 +60,33 @@ export function showCloneModal(
   const onCloneConfirmed = async (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
+    onTitleDuplicate: () => void,
+    copyPanels: boolean,
+    titleTemplate: string,
+    signal: AbortSignal
   ) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(
-      (response: { id?: string } | { error: Error }) => {
-        // The only time you don't want to close the modal is if it's asking you
-        // to confirm a duplicate title, in which case there will be no error and no id.
-        if ((response as { error: Error }).error || (response as { id?: string }).id) {
-          closeModal();
-        }
+    // Return the promise so DashboardCloneModal's `await this.props.onClone(...)`
+    // keeps the Confirm button in its loading state for the ENTIRE copy + save
+    // operation. Without this, a slow "Copy panels" clone could be submitted
+    // again mid-flight and create a second set of copies.
+    return onClone(
+      newTitle,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+      copyPanels,
+      titleTemplate,
+      signal
+    ).then((response: { id?: string } | { error: Error }) => {
+      // Cancel already closed the modal; an aborted copy must not close it again.
+      if ((response as { error: Error }).error?.name === 'AbortError') {
+        return;
       }
-    );
+      // The only time you don't want to close the modal is if it's asking you
+      // to confirm a duplicate title, in which case there will be no error and no id.
+      if ((response as { error: Error }).error || (response as { id?: string }).id) {
+        closeModal();
+      }
+    });
   };
   document.body.appendChild(container);
   const element = (
