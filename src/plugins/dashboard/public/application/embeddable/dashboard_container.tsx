@@ -72,7 +72,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { DashboardLayout } from '../../../common';
-import { removeMemberFromLayout } from './section_layout_utils';
+import { removeMemberFromLayout, getCollapsedMemberIds } from './section_layout_utils';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -107,6 +107,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   useSharedCrosshair?: boolean;
+  isVisible?: boolean;
   id: string;
 }
 
@@ -507,7 +508,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       filters,
       useSharedCrosshair,
+      layout,
     } = this.input;
+    // Members of a collapsed section are not visible. `this.options` may be
+    // undefined here: the base Container constructor emits input (creating
+    // children) before this subclass assigns options.
+    const collapsedMemberIds =
+      this.options?.allowDashboardSections && layout?.type === 'SectionLayout'
+        ? getCollapsedMemberIds(layout.items)
+        : undefined;
     return {
       filters,
       hidePanelTitles,
@@ -516,6 +525,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       timeRange,
       refreshConfig,
       viewMode,
+      isVisible: collapsedMemberIds ? !collapsedMemberIds.has(id) : true,
       id,
     };
   }

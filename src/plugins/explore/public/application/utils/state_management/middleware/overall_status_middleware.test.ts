@@ -9,8 +9,13 @@ import { QueryExecutionStatus, QueryResultStatus } from '../types';
 import {
   setIndividualQueryStatus,
   setOverallQueryStatus,
+  setHasUserInitiatedQuery,
+  clearQueryStatusMapByKey,
+  queryEditorReducer,
   QueryStatusMap,
 } from '../slices/query_editor/query_editor_slice';
+import { selectIsUserQueryRunning } from '../selectors/query_editor/query_editor';
+import { RootState } from '../store';
 
 const initialState = {
   queryStatusMap: {} as QueryStatusMap,
@@ -430,5 +435,109 @@ describe('createOverallStatusMiddleware', () => {
     const overall = store.getState().queryEditor.overallQueryStatus;
     expect(overall.status).toBe(QueryExecutionStatus.LOADING);
     expect(overall.streaming?.isPolling).toBe(true);
+  });
+});
+
+// Driven through the real slice, so the user-initiated flag and key removal behave as in the app.
+describe('createOverallStatusMiddleware with the query editor slice', () => {
+  const makeStore = () =>
+    configureStore({
+      reducer: { queryEditor: queryEditorReducer },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({ serializableCheck: false, immutableCheck: false }).concat(
+          createOverallStatusMiddleware()
+        ),
+    });
+
+  const status = (s: QueryExecutionStatus, elapsedMs?: number): QueryResultStatus => ({
+    status: s,
+    startTime: 1000,
+    elapsedMs,
+    error: undefined,
+  });
+
+  const isUserQueryRunning = (store: ReturnType<typeof makeStore>) =>
+    selectIsUserQueryRunning(store.getState() as RootState);
+
+  // One query failing does not end the run: the others keep running, so Stop must stay available.
+  it('keeps Stop available after an error while other queries are still running', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'stats', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(
+      setIndividualQueryStatus({
+        cacheKey: 'histogram',
+        status: status(QueryExecutionStatus.ERROR),
+      })
+    );
+
+    expect(store.getState().queryEditor.overallQueryStatus.status).toBe(QueryExecutionStatus.ERROR);
+    expect(isUserQueryRunning(store)).toBe(true);
+
+    store.dispatch(
+      setIndividualQueryStatus({
+        cacheKey: 'stats',
+        status: status(QueryExecutionStatus.READY, 50),
+      })
+    );
+
+    expect(isUserQueryRunning(store)).toBe(false);
+    expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
+  });
+
+  // As in a run: the run's own status keeps it LOADING, a query fails, then the run's status goes.
+  it('ends the run once its own status is removed after a query failed', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'run', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'logs', status: status(QueryExecutionStatus.ERROR) })
+    );
+    expect(isUserQueryRunning(store)).toBe(true);
+
+    store.dispatch(clearQueryStatusMapByKey('run'));
+
+    expect(store.getState().queryEditor.overallQueryStatus.status).toBe(QueryExecutionStatus.ERROR);
+    expect(isUserQueryRunning(store)).toBe(false);
+    expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
+  });
+
+  // Stopping can leave every query UNINITIALIZED; nothing runs any more, so the run is over.
+  it('ends the run when every query was stopped', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'run', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(clearQueryStatusMapByKey('run'));
+
+    expect(store.getState().queryEditor.hasUserInitiatedQuery).toBe(false);
+  });
+
+  it('recomputes the overall status when a key is removed', () => {
+    const store = makeStore();
+    store.dispatch(setHasUserInitiatedQuery(true));
+    store.dispatch(
+      setIndividualQueryStatus({ cacheKey: 'run', status: status(QueryExecutionStatus.LOADING) })
+    );
+    store.dispatch(
+      setIndividualQueryStatus({
+        cacheKey: 'logs',
+        status: status(QueryExecutionStatus.READY, 50),
+      })
+    );
+    expect(isUserQueryRunning(store)).toBe(true);
+
+    store.dispatch(clearQueryStatusMapByKey('run'));
+
+    expect(store.getState().queryEditor.overallQueryStatus).toMatchObject({
+      status: QueryExecutionStatus.READY,
+      elapsedMs: 50,
+    });
+    expect(isUserQueryRunning(store)).toBe(false);
   });
 });

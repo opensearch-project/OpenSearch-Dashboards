@@ -48,6 +48,10 @@ export const useDashboardAppAndGlobalState = ({
   useEffect(() => {
     if (savedDashboardInstance && dashboard) {
       let unsubscribeFromDashboardContainer: () => void;
+      // The container this effect created, destroyed in the cleanup so its panels stop their
+      // in-flight requests and subscriptions when the dashboard is left or switched.
+      let createdContainer: DashboardContainer | undefined;
+      let isCleanedUp = false;
 
       const {
         dashboardConfig,
@@ -125,6 +129,12 @@ export const useDashboardAppAndGlobalState = ({
         if (!dashboardContainer) {
           return;
         }
+        // The dashboard was left (or switched) while the container was being created.
+        if (isCleanedUp) {
+          dashboardContainer.destroy();
+          return;
+        }
+        createdContainer = dashboardContainer;
 
         // Ensure empty state is attached to current container being dispatched
         dashboardContainer.renderEmpty = () =>
@@ -225,6 +235,9 @@ export const useDashboardAppAndGlobalState = ({
         stopSyncingAppFilters();
         stopSyncingQueryServiceStateWithUrl();
         unsubscribeFromDashboardContainer?.();
+        isCleanedUp = true;
+        createdContainer?.destroy();
+        setCurrentContainer(undefined);
       };
     }
   }, [dashboard, eventEmitter, savedDashboardInstance, services]);

@@ -730,7 +730,9 @@ export function registerAutoVisualizationAction(
           preparedQuery: query,
           resolvedTimeRange,
           transformations: args.transformations,
-          message: `Created ${resolvedChartType} visualization for ${args.indexName}`,
+          message:
+            `Created a ${resolvedChartType} visualization preview for ${args.indexName}. ` +
+            `PREVIEW ONLY: this tool does not save the visualization${originatingApp ? ' or add a panel to the dashboard' : ''}. Instead, the user needs to click "Open in Editor" and then ${originatingApp ? '"Save and back"' : '"Save"'} in the editor manually.`,
         };
       } catch (error) {
         return {

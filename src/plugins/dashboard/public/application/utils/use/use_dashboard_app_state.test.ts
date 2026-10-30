@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
@@ -29,6 +29,7 @@ describe('useDashboardAppAndGlobalState', () => {
   const stateContainer = {
     getState: stateContainerGetStateMock,
     state$: new Observable(),
+    subscribe: jest.fn(() => jest.fn()),
     transitions: {
       set: jest.fn(),
     },
@@ -130,5 +131,118 @@ describe('useDashboardAppAndGlobalState', () => {
     expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
     expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
     expect(stopSyncingQueryServiceStateWithUrlMock).toHaveBeenCalledTimes(1);
+  });
+
+  describe('dashboard container lifecycle', () => {
+    const {
+      createDashboardContainer,
+      handleDashboardContainerInputs,
+      handleDashboardContainerOutputs,
+    } = jest.requireMock('../create_dashboard_container.tsx');
+
+    const createContainerMock = () => ({ destroy: jest.fn() });
+
+    beforeEach(() => {
+      handleDashboardContainerInputs.mockReset().mockReturnValue(jest.fn());
+      handleDashboardContainerOutputs.mockReset().mockReturnValue(jest.fn());
+    });
+
+    afterEach(() => {
+      createDashboardContainer.mockReset();
+    });
+
+    const renderAppState = (props = { savedDashboardInstance, dashboard }) =>
+      renderHook(
+        (current: { savedDashboardInstance: SavedObjectDashboard; dashboard: Dashboard }) =>
+          useDashboardAppAndGlobalState({ services: mockServices, eventEmitter, ...current }),
+        { initialProps: props }
+      );
+
+    it('destroys the container when the dashboard is left', async () => {
+      const container = createContainerMock();
+      createDashboardContainer.mockResolvedValue(container);
+      const { result, unmount } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(container));
+
+      unmount();
+
+      expect(container.destroy).toHaveBeenCalledTimes(1);
+    });
+
+    it('destroys a container that finishes loading after the dashboard was left', async () => {
+      const container = createContainerMock();
+      let resolveContainer: (value: unknown) => void = () => {};
+      createDashboardContainer.mockReturnValue(
+        new Promise((resolve) => {
+          resolveContainer = resolve;
+        })
+      );
+      const { unmount } = renderAppState();
+
+      unmount();
+      await act(async () => resolveContainer(container));
+
+      expect(container.destroy).toHaveBeenCalledTimes(1);
+      expect(handleDashboardContainerInputs).not.toHaveBeenCalled();
+    });
+
+    it('destroys the previous container when switching to another dashboard', async () => {
+      const first = createContainerMock();
+      const second = createContainerMock();
+      createDashboardContainer.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+      const { result, rerender } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(first));
+
+      const otherDashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
+      rerender({ savedDashboardInstance, dashboard: otherDashboard });
+      await waitFor(() => expect(result.current.currentContainer).toBe(second));
+
+      expect(first.destroy).toHaveBeenCalledTimes(1);
+      expect(second.destroy).not.toHaveBeenCalled();
+    });
+
+    it('stops syncing with the container before destroying it', async () => {
+      const calls: string[] = [];
+      handleDashboardContainerInputs.mockReturnValue(() => calls.push('stop inputs'));
+      handleDashboardContainerOutputs.mockReturnValue(() => calls.push('stop outputs'));
+      const container = { destroy: jest.fn(() => calls.push('destroy')) };
+      createDashboardContainer.mockResolvedValue(container);
+      const { result, unmount } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(container));
+
+      unmount();
+
+      expect(calls).toEqual(['stop inputs', 'stop outputs', 'destroy']);
+    });
+
+    it('clears the current container while the next dashboard loads', async () => {
+      const first = createContainerMock();
+      createDashboardContainer
+        .mockResolvedValueOnce(first)
+        .mockReturnValueOnce(new Promise(() => {})); // the next one never finishes loading
+      const { result, rerender } = renderAppState();
+      await waitFor(() => expect(result.current.currentContainer).toBe(first));
+
+      const otherDashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
+      rerender({ savedDashboardInstance, dashboard: otherDashboard });
+
+      expect(first.destroy).toHaveBeenCalledTimes(1);
+      expect(result.current.currentContainer).toBeUndefined();
+    });
+
+    it('does not fail when the dashboard is left and no container is created', async () => {
+      let resolveContainer: (value: unknown) => void = () => {};
+      createDashboardContainer.mockReturnValue(
+        new Promise((resolve) => {
+          resolveContainer = resolve;
+        })
+      );
+      const { unmount } = renderAppState();
+
+      unmount();
+      await act(async () => resolveContainer(undefined));
+
+      expect(handleDashboardContainerInputs).not.toHaveBeenCalled();
+    });
   });
 });

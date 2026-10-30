@@ -147,6 +147,8 @@ export class ExploreEmbeddable
   implements IEmbeddable<ExploreInput, ExploreOutput>
 {
   private abortController?: AbortController;
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
@@ -497,13 +499,25 @@ export class ExploreEmbeddable
 
   private async updateHandler(searchProps: SearchProps, force = false) {
     const { filters, query, timeRange } = this.input;
+    const fetchRequested =
+      force ||
+      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      !isEqual(query, this.prevState.query) ||
+      !isEqual(timeRange, this.prevState.timeRange);
+
+    // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
+    // only when one was actually requested, so a visibility-only change (the
+    // collapse itself) does not trigger a refetch on expand. See
+    // EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      if (fetchRequested) this.pendingFetchOnResume = true;
+      return;
+    }
+    const resumeFetch = this.pendingFetchOnResume;
+    this.pendingFetchOnResume = false;
+
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
-    const needFetch =
-      this.node &&
-      (force ||
-        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-        !isEqual(query, this.prevState.query) ||
-        !isEqual(timeRange, this.prevState.timeRange));
+    const needFetch = this.node && (fetchRequested || resumeFetch);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.

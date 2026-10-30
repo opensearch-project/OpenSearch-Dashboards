@@ -273,12 +273,14 @@ describe('QueryExecutionButton', () => {
   });
 
   describe('Run and Stop', () => {
+    const loading = {
+      status: QueryExecutionStatus.LOADING,
+      elapsedMs: undefined,
+      startTime: Date.now(),
+    };
     const running = {
-      overallQueryStatus: {
-        status: QueryExecutionStatus.LOADING,
-        elapsedMs: undefined,
-        startTime: Date.now(),
-      },
+      queryStatusMap: { 'source=logs': loading },
+      overallQueryStatus: loading,
       hasUserInitiatedQuery: true,
     };
 
@@ -325,6 +327,16 @@ describe('QueryExecutionButton', () => {
       });
 
       expect(screen.getByTestId('exploreQueryExecutionButton')).toHaveTextContent('Refresh');
+    });
+
+    // The overall status reads ERROR as soon as one query fails, while the others run on.
+    it('keeps Stop while other queries run after one has failed', () => {
+      renderWithProvider(<QueryExecutionButton onCancel={jest.fn()} />, {
+        ...running,
+        overallQueryStatus: { status: QueryExecutionStatus.ERROR, elapsedMs: 10, startTime: 0 },
+      });
+
+      expect(screen.getByTestId('exploreQueryStopButton')).toHaveTextContent('Stop');
     });
 
     it('offers Stop even when the time range is invalid', () => {
