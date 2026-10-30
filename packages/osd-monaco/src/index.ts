@@ -81,7 +81,7 @@ export type {
 } from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';
 export { BarePluginApi };
 import './monaco_environment';
 export { setBuildHash } from './monaco_environment';

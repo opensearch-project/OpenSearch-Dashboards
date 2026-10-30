@@ -1,0 +1,4 @@
+{
+  "main": "../target/monaco_environment.js",
+  "types": "../target/monaco_environment.d.ts"
+}
