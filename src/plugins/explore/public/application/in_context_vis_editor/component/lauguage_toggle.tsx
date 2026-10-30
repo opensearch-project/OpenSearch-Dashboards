@@ -15,6 +15,10 @@ import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
+import {
+  getSourceTypeRegistry,
+  OPENSEARCH_SOURCE_TYPE_ID,
+} from '../../../services/source_type_registry';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
   defaultMessage: 'AI',
@@ -51,10 +55,32 @@ export const LanguageToggle = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { focusEditor, switchEditorMode } = useEditorOperations();
-  const { queryBuilder, queryEditorState } = useQueryBuilderState();
+  const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
+  const dataset = queryState?.dataset;
+
+  // A dataset owned by a registered source type offers that source's languages (as its dataset
+  // type declares them) in place of the built-in list.
+  const sourceLanguages = useMemo(() => {
+    if (
+      !dataset ||
+      getSourceTypeRegistry().getForDataset(dataset).id === OPENSEARCH_SOURCE_TYPE_ID
+    ) {
+      return undefined;
+    }
+    const datasetType = services.data.query.queryString.getDatasetService().getType(dataset.type);
+    return datasetType?.supportedLanguages(dataset) ?? [];
+  }, [dataset, services]);
+
+  const getLabel = useCallback(
+    (languageType: SupportLanguageType) =>
+      sourceLanguages && languageType !== SupportLanguageType.ai
+        ? getSourceTypeRegistry().getLanguageLabel(languageType, dataset)
+        : getLanguageDisplayLabel(languageType),
+    [sourceLanguages, dataset]
+  );
 
   const [languageLabel, setlanguageLabel] = useState<string>(
-    getLanguageDisplayLabel(queryEditorState.languageType)
+    getLabel(queryEditorState.languageType)
   );
   const { clearEditor } = useEditorOperations();
 
@@ -71,8 +97,8 @@ export const LanguageToggle = () => {
         ? SupportLanguageType.ai
         : queryEditorState.languageType;
 
-    setlanguageLabel(getLanguageDisplayLabel(switchLanguage));
-  }, [queryEditorState.editorMode, queryEditorState.languageType]);
+    setlanguageLabel(getLabel(switchLanguage));
+  }, [queryEditorState.editorMode, queryEditorState.languageType, getLabel]);
 
   const onLanguageItemClick = useCallback(
     async (option: string) => {
@@ -107,7 +133,32 @@ export const LanguageToggle = () => {
     [closePopover, focusEditor, switchEditorMode, clearEditor, queryBuilder]
   );
 
+  const onSourceLanguageClick = useCallback(
+    (languageId: string) => {
+      closePopover();
+      switchEditorMode(EditorMode.Query);
+      clearEditor();
+      // Switching languages triggers a new query preparation in queryBuilder
+      queryBuilder.updateQueryEditorState({ languageType: languageId as SupportLanguageType });
+      setTimeout(() => focusEditor(true), 100);
+    },
+    [closePopover, focusEditor, switchEditorMode, clearEditor, queryBuilder]
+  );
+
   const items = useMemo(() => {
+    if (sourceLanguages) {
+      return sourceLanguages.map((languageId) => (
+        <EuiContextMenuItem
+          key={languageId}
+          onClick={() => onSourceLanguageClick(languageId)}
+          disabled={!isPromptMode && language === languageId}
+          data-test-subj={`queryPanelFooterLanguageToggle-${languageId}`}
+        >
+          {getSourceTypeRegistry().getLanguageLabel(languageId, dataset)}
+        </EuiContextMenuItem>
+      ));
+    }
+
     const output = [
       <EuiContextMenuItem
         key={pplOptionText}
@@ -157,10 +208,13 @@ export const LanguageToggle = () => {
     return output;
   }, [
     onLanguageItemClick,
+    onSourceLanguageClick,
     isPromptMode,
     language,
     promptModeIsAvailable,
     services.sqlSupportEnabled,
+    sourceLanguages,
+    dataset,
   ]);
 
   return (

@@ -34,6 +34,7 @@ describe('useSwitchSourceType', () => {
   const focusOnEditor = jest.fn();
   const setUserQueryLanguage = jest.fn();
   const cacheDataset = jest.fn();
+  const getType = jest.fn();
   const addWarning = jest.fn();
   const addError = jest.fn();
   let currentQuery: Record<string, unknown>;
@@ -55,7 +56,7 @@ describe('useSwitchSourceType', () => {
           setQuery,
           getInitialQueryByDataset,
           getLanguageService: () => ({ setUserQueryLanguage }),
-          getDatasetService: () => ({ cacheDataset }),
+          getDatasetService: () => ({ cacheDataset, getType }),
         },
       },
     },
@@ -122,6 +123,25 @@ describe('useSwitchSourceType', () => {
     expect(focusOnEditor).toHaveBeenCalled();
     expect(onEditorRunActionCreator).toHaveBeenCalledWith(services, '');
     expect(dispatch).toHaveBeenCalledWith({ type: 'run', text: '' });
+  });
+
+  it('opens the dataset but does not run it when its type requires an explicit Run', async () => {
+    const explicit = { ...dataset, type: 'EXPLICIT_RUN_TYPE' };
+    getType.mockImplementation((type: string) =>
+      type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined
+    );
+    const { result } = renderHook(() => useSwitchSourceType(ExploreFlavor.Logs));
+
+    await act(() => result.current(sourceType('explicit-source', explicit)));
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(currentQuery).toEqual(expect.objectContaining({ query: '', dataset: explicit }));
+    expect(clearEditors).toHaveBeenCalled();
+    expect(focusOnEditor).toHaveBeenCalled();
+    expect(onEditorRunActionCreator).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'run' }));
   });
 
   it('still switches when the dataset cannot be cached', async () => {

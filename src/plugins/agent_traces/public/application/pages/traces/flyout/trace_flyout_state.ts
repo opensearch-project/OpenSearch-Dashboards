@@ -10,8 +10,8 @@ import { SessionRow } from '../../sessions/session_utils';
 /**
  * One flyout slot for Agent Traces: either a trace or a session, never both stacked.
  * Moving between them (session -> one of its traces, trace -> its session) replaces the
- * flyout and is recorded in a history, so Back and Forward retrace the user's path
- * (session -> trace -> back to the session -> forward to the trace again).
+ * flyout and is recorded as a drill-down: Back returns to the flyout the user came from and
+ * forgets the one left, so there is no Forward and no loop between a trace and its session.
  *
  * Kept free of component imports so the trace and session flyouts can both use the
  * context without a circular import with the provider that renders them.
@@ -31,6 +31,8 @@ export type FlyoutView =
       session?: SessionRow;
       /** Trace to focus when the session shows again (the one the user opened from it). */
       focusTraceId?: string;
+      /** The agent run of that trace, when the trace lists several (parallel agents). */
+      focusSpanId?: string;
       /** Session view and table tab the user left the session on, restored on Back. */
       sessionView?: SessionViewState;
     };
@@ -41,42 +43,101 @@ export interface SessionViewState {
   drillTab: 'traces' | 'spans';
 }
 
-/** Flyouts visited since the flyout was opened from a table, and the one shown. */
+/**
+ * Flyouts visited since the flyout was opened from a table, as a stack: the last entry is the
+ * one shown, and Back pops it.
+ */
 export interface FlyoutHistory {
   entries: FlyoutView[];
-  index: number;
 }
 
-export const EMPTY_HISTORY: FlyoutHistory = { entries: [], index: -1 };
+export const EMPTY_HISTORY: FlyoutHistory = { entries: [] };
 
 export const currentView = (history: FlyoutHistory): FlyoutView | null =>
-  history.entries[history.index] ?? null;
+  history.entries[history.entries.length - 1] ?? null;
+
+/** Depth of the flyout shown (0 for one opened from a table); -1 when none is open. */
+export const historyDepth = (history: FlyoutHistory): number => history.entries.length - 1;
 
 /** Start over with one flyout (opened from a table, not from another flyout). */
-export const resetHistory = (view: FlyoutView): FlyoutHistory => ({ entries: [view], index: 0 });
+export const resetHistory = (view: FlyoutView): FlyoutHistory => ({ entries: [view] });
 
 /**
- * Show a flyout reached from the current one. Entries after the current one are dropped,
- * as in a browser. `updateCurrent` records state on the flyout being left (e.g. the trace
- * a session was left for), so going back restores it.
+ * Show a flyout reached from the current one. `updateCurrent` records state on the flyout
+ * being left (e.g. the trace a session was left for), so going back restores it.
  */
 export const pushHistory = (
   history: FlyoutHistory,
   view: FlyoutView,
   updateCurrent?: (current: FlyoutView) => FlyoutView
 ): FlyoutHistory => {
-  const kept = history.entries.slice(0, history.index + 1);
-  const last = kept.length - 1;
-  if (updateCurrent && last >= 0) kept[last] = updateCurrent(kept[last]);
-  return { entries: [...kept, view], index: kept.length };
+  const entries = [...history.entries];
+  const last = entries.length - 1;
+  if (updateCurrent && last >= 0) entries[last] = updateCurrent(entries[last]);
+  return { entries: [...entries, view] };
 };
 
-export const moveHistory = (history: FlyoutHistory, step: -1 | 1): FlyoutHistory => {
-  const index = history.index + step;
-  return index >= 0 && index < history.entries.length ? { ...history, index } : history;
+/** Return to the flyout the current one was opened from, forgetting the current one. */
+export const backHistory = (history: FlyoutHistory): FlyoutHistory =>
+  history.entries.length > 1 ? { entries: history.entries.slice(0, -1) } : history;
+
+/** The flyout the current one was opened from. */
+export const previousView = (history: FlyoutHistory): FlyoutView | undefined =>
+  history.entries[history.entries.length - 2];
+
+export type TraceView = Extract<FlyoutView, { kind: 'trace' }>;
+export type SessionView = Extract<FlyoutView, { kind: 'session' }>;
+
+/**
+ * Open a trace from the session flyout. When the session was itself opened from that same run,
+ * go back to it instead of repeating it (no trace -> session -> trace loop). Otherwise, another
+ * agent run of that trace included, drill down, recording on the session which run was opened
+ * and where the session was left, so Back returns to the session with both restored.
+ */
+export const openTraceFromSession = (
+  history: FlyoutHistory,
+  next: TraceView,
+  sessionView?: SessionViewState
+): FlyoutHistory => {
+  const previous = previousView(history);
+  if (
+    previous?.kind === 'trace' &&
+    previous.trace.traceId === next.trace.traceId &&
+    previous.trace.spanId === next.trace.spanId
+  ) {
+    return backHistory(history);
+  }
+  return pushHistory(history, next, (current) =>
+    current.kind === 'session'
+      ? {
+          ...current,
+          focusTraceId: next.trace.traceId,
+          focusSpanId: next.trace.spanId,
+          sessionView,
+        }
+      : current
+  );
 };
 
-/** Where Back or Forward leads, for its label. */
+/**
+ * Open a session from the trace flyout. When the trace was opened from that session, go back
+ * to it; otherwise drill down with the trace (and its agent run) focused in the session.
+ */
+export const openSessionFromTrace = (history: FlyoutHistory, next: SessionView): FlyoutHistory => {
+  const previous = previousView(history);
+  if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
+    return backHistory(history);
+  }
+  const current = currentView(history);
+  return pushHistory(
+    history,
+    current?.kind === 'trace'
+      ? { ...next, focusTraceId: current.trace.traceId, focusSpanId: current.trace.spanId }
+      : next
+  );
+};
+
+/** Where Back leads, for its label. */
 export interface FlyoutHistoryTarget {
   kind: FlyoutView['kind'];
   /** Session id or trace name. */
@@ -90,17 +151,14 @@ const targetOf = (view: FlyoutView | undefined): FlyoutHistoryTarget | undefined
     : { kind: 'trace', label: view.trace.name || view.trace.traceId };
 };
 
-/** Back and Forward for the flyout that is shown. */
+/** Back for the flyout that is shown. */
 export interface FlyoutNavigation {
   back?: FlyoutHistoryTarget;
-  forward?: FlyoutHistoryTarget;
   onBack: () => void;
-  onForward: () => void;
 }
 
 export const navigationTargets = (history: FlyoutHistory) => ({
-  back: targetOf(history.entries[history.index - 1]),
-  forward: targetOf(history.entries[history.index + 1]),
+  back: targetOf(previousView(history)),
 });
 
 export interface OpenTraceOptions {
@@ -126,8 +184,8 @@ export interface TraceFlyoutContextValue {
   /** Close the currently open flyout. */
   closeFlyout: () => void;
   /**
-   * Keep a session row that was fetched by id in its history entries, so Back/Forward to the
-   * session reuse it instead of fetching it again.
+   * Keep a session row that was fetched by id in its history entries, so going back to the
+   * session reuses it instead of fetching it again.
    */
   cacheSession: (session: SessionRow) => void;
   /**

@@ -26,6 +26,7 @@ describe('App', () => {
   it('should render without MDS', () => {
     const dataSourceManagementMock = {
       registerAuthenticationMethod: jest.fn(),
+      registerDirectQueryConnectionFlow: jest.fn(),
       ui: {
         DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
         getDataSourceMenu: jest.fn(),
@@ -78,6 +79,7 @@ describe('App', () => {
   it('should render in embedded mode without Router and page wrappers', () => {
     const dataSourceManagementMock = {
       registerAuthenticationMethod: jest.fn(),
+      registerDirectQueryConnectionFlow: jest.fn(),
       ui: {
         DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
         getDataSourceMenu: jest.fn(),
@@ -106,6 +108,7 @@ describe('App', () => {
   it('should render with Router when embedded is false', () => {
     const dataSourceManagementMock = {
       registerAuthenticationMethod: jest.fn(),
+      registerDirectQueryConnectionFlow: jest.fn(),
       ui: {
         DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
         getDataSourceMenu: jest.fn(),

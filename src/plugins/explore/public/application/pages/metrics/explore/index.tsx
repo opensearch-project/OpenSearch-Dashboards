@@ -37,6 +37,8 @@ import { MetricQueryGenerator } from './services/query_generator';
 import { switchToPromQL } from './utils/switch_to_promql';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
+import { usePreviewGate } from './hooks/use_preview_gate';
+import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 
 export const MetricsExploreTab = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -67,6 +69,12 @@ export const MetricsExploreTab = () => {
   const client = useMemo(() => {
     return new PrometheusClient(services, dataConnectionId, resourceClientId);
   }, [services, dataConnectionId, resourceClientId]);
+
+  // A dataset type that requires an explicit Run loads no sparklines until the user asks.
+  const { previewsEnabled, requestPreviews } = usePreviewGate(
+    datasetRequiresExplicitRun(services.data?.query?.queryString, queryState.dataset),
+    `${queryState.dataset?.type}::${queryState.dataset?.id}`
+  );
 
   const maxDataPoints = (queryState.queryOptions as PromQLQueryOptions | undefined)?.maxDataPoints;
 
@@ -159,12 +167,14 @@ export const MetricsExploreTab = () => {
         }
       }
       client.clearCache();
+      requestPreviews();
       setRefreshCounter((c) => c + 1);
       reduxDispatch(setHasUserInitiatedQuery(false));
     }
   }, [
     hasUserInitiatedQuery,
     client,
+    requestPreviews,
     reduxDispatch,
     dateRange,
     services.data?.query?.timefilter?.timefilter,
@@ -235,6 +245,8 @@ export const MetricsExploreTab = () => {
         refreshCounter,
         onTimeRangeChange: handleTimeRangeChange,
         timeBounds,
+        previewsEnabled,
+        requestPreviews,
       }}
     >
       <CursorContext.Provider value={cursorBus}>

@@ -332,6 +332,44 @@ describe('SourceTypeRegistryService', () => {
       expect(registry.isExploreLanguage('kuery')).toBe(false);
     });
 
+    describe('histogram query builders', () => {
+      const buildHistogramQuery = () => 'histogram';
+
+      beforeEach(() => {
+        registry.register(
+          fakeSource({
+            id: 'store',
+            datasetTypes: ['STORE'],
+            flavors: [ExploreFlavor.Logs],
+            languageSettings: {
+              StoreQL: { buildHistogramQuery },
+              SQL: { buildHistogramQuery },
+              OtherQL: { supportsHistogram: true },
+            },
+          })
+        );
+      });
+
+      it("returns a source's builder on its own datasets, built-in language ids included", () => {
+        expect(registry.getHistogramQueryBuilder('StoreQL', { type: 'STORE' })).toBe(
+          buildHistogramQuery
+        );
+        expect(registry.getHistogramQueryBuilder('SQL', { type: 'STORE' })).toBe(
+          buildHistogramQuery
+        );
+        expect(registry.getHistogramQueryBuilder('SQL', { type: 'INDEX_PATTERN' })).toBeUndefined();
+      });
+
+      it('enables the histogram with a builder', () => {
+        expect(registry.supportsHistogram('StoreQL', { type: 'STORE' })).toBe(true);
+        expect(registry.supportsHistogram('SQL', { type: 'STORE' })).toBe(true);
+      });
+
+      it("doesn't run Explore's PPL/SQL histogram for another language", () => {
+        expect(registry.supportsHistogram('OtherQL', { type: 'STORE' })).toBe(false);
+      });
+    });
+
     it('keeps built-in behavior for languages no source lists', () => {
       expect(registry.supportsHistogram('SQL', { type: 'INDEX_PATTERN' })).toBe(true);
       expect(registry.supportsHistogram('PROMQL')).toBe(false);

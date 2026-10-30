@@ -15,15 +15,18 @@ import {
   EMPTY_HISTORY,
   FlyoutHistory,
   FlyoutNavigation,
-  FlyoutView,
   OpenSessionOptions,
   OpenTraceOptions,
   TraceFlyoutContext,
   TraceFlyoutContextValue,
+  SessionView,
+  TraceView,
   currentView,
-  moveHistory,
+  historyDepth,
+  backHistory,
   navigationTargets,
-  pushHistory,
+  openSessionFromTrace,
+  openTraceFromSession,
   resetHistory,
 } from './trace_flyout_state';
 
@@ -31,8 +34,8 @@ export { useTraceFlyout } from './trace_flyout_state';
 
 /**
  * Hosts the single Agent Traces flyout. A trace and a session never stack: opening one
- * replaces the other. Moves between them are kept in a history, so Back and Forward in
- * the flyout header follow the user's path.
+ * replaces the other. Moves between them are kept in a history, so Back in the flyout
+ * header returns to the flyout the user came from.
  */
 export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<FlyoutHistory>(EMPTY_HISTORY);
@@ -50,7 +53,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const openFlyout = useCallback(
     (trace: TraceRow, options?: OpenTraceOptions) => {
       collapseSidebar();
-      const next: FlyoutView = {
+      const next: TraceView = {
         kind: 'trace',
         trace,
         fullTree: undefined,
@@ -59,11 +62,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       };
       setHistory((prev) =>
         options?.fromSession
-          ? pushHistory(prev, next, (current) =>
-              current.kind === 'session'
-                ? { ...current, focusTraceId: trace.traceId, sessionView: options.sessionView }
-                : current
-            )
+          ? openTraceFromSession(prev, next, options.sessionView)
           : resetHistory(next)
       );
     },
@@ -73,19 +72,13 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const openSession = useCallback(
     (session: SessionRow | string, options?: OpenSessionOptions) => {
       collapseSidebar();
-      const next: FlyoutView =
+      const next: SessionView =
         typeof session === 'string'
           ? { kind: 'session', sessionId: session }
           : { kind: 'session', sessionId: session.sessionId, session };
-      setHistory((prev) => {
-        if (!options?.fromTrace) return resetHistory(next);
-        // The session this trace was opened from: go back to it instead of repeating it.
-        const previous = prev.entries[prev.index - 1];
-        if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
-          return moveHistory(prev, -1);
-        }
-        return pushHistory(prev, next);
-      });
+      setHistory((prev) =>
+        options?.fromTrace ? openSessionFromTrace(prev, next) : resetHistory(next)
+      );
     },
     [collapseSidebar]
   );
@@ -124,8 +117,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const navigation = useMemo<FlyoutNavigation>(
     () => ({
       ...navigationTargets(history),
-      onBack: () => setHistory((prev) => moveHistory(prev, -1)),
-      onForward: () => setHistory((prev) => moveHistory(prev, 1)),
+      onBack: () => setHistory((prev) => backHistory(prev)),
     }),
     [history]
   );
@@ -150,7 +142,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {view?.kind === 'trace' && (
         <TraceDetailsFlyout
           // Each history entry gets a fresh flyout (selected span, tab).
-          key={`trace-${history.index}-${view.trace.id}`}
+          key={`trace-${historyDepth(history)}-${view.trace.id}`}
           trace={view.trace}
           onClose={closeFlyout}
           fullTree={view.fullTree}
@@ -163,10 +155,11 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {view?.kind === 'session' && (
         <SessionFlyoutHost
           // A new session gets a fresh flyout (focused trace, view and tab reset).
-          key={`session-${history.index}-${view.sessionId}`}
+          key={`session-${historyDepth(history)}-${view.sessionId}`}
           sessionId={view.sessionId}
           session={view.session}
           focusTraceId={view.focusTraceId}
+          focusSpanId={view.focusSpanId}
           sessionView={view.sessionView}
           onLoaded={cacheSession}
           formatTs={formatTs}

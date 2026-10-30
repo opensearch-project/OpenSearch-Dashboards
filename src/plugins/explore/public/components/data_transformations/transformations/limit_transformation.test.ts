@@ -5,22 +5,17 @@
 
 import { createLimitTransformation } from './limit_transformation';
 
-const createHit = (source: Record<string, unknown>) => ({
-  _index: 'test',
-  _id: '1',
-  _score: 1,
-  _source: source,
-});
+const createRow = (source: Record<string, unknown>) => source;
 
 describe('limit_transformation', () => {
   const instance = createLimitTransformation();
   describe('transformationMethod', () => {
     const data = [
-      createHit({ name: 'a' }),
-      createHit({ name: 'b' }),
-      createHit({ name: 'c' }),
-      createHit({ name: 'd' }),
-      createHit({ name: 'e' }),
+      createRow({ name: 'a' }),
+      createRow({ name: 'b' }),
+      createRow({ name: 'c' }),
+      createRow({ name: 'd' }),
+      createRow({ name: 'e' }),
     ];
 
     it.each([
@@ -32,9 +27,7 @@ describe('limit_transformation', () => {
       const result = instance.transformationMethod(data, { limit });
 
       expect(result).toEqual({
-        rows: data.filter((row) =>
-          expectedNames.includes((row._source as Record<string, string>).name)
-        ),
+        rows: data.filter((row) => expectedNames.includes(row.name as string)),
         status: 'applied',
         issues: [],
       });

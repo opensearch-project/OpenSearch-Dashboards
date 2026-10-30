@@ -28,23 +28,36 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
 import { DataView, DataViewField } from '../../../../../data/public';
 
-export function getIndexPatternFieldList(dataSet?: DataView, fieldCounts?: Record<string, number>) {
+/**
+ * Fields present in the current hits (`fieldCounts`) but absent from the index pattern, e.g.
+ * keys under an `enabled: false` object. They are surfaced in the sidebar as `unknown` type.
+ */
+export function getUnknownFieldList(
+  dataSet?: DataView,
+  fieldCounts?: Record<string, number>
+): DataViewField[] {
   if (!dataSet || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = dataSet.fields.getAll().map((fld) => fld.name);
+  if (fieldNamesInDocs.length === 0) return [];
   const unknownTypes: DataViewField[] = [];
 
-  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
+  fieldNamesInDocs.forEach((fieldName) => {
+    if (dataSet.fields.getByName(fieldName)) return;
     unknownTypes.push({
-      displayName: String(unknownFieldName),
-      name: String(unknownFieldName),
+      displayName: String(fieldName),
+      name: String(fieldName),
       type: 'unknown',
     } as DataViewField);
   });
 
-  return [...dataSet.fields.getAll(), ...unknownTypes];
+  return unknownTypes;
+}
+
+export function getIndexPatternFieldList(dataSet?: DataView, fieldCounts?: Record<string, number>) {
+  if (!dataSet || !fieldCounts) return [];
+
+  return [...dataSet.fields.getAll(), ...getUnknownFieldList(dataSet, fieldCounts)];
 }

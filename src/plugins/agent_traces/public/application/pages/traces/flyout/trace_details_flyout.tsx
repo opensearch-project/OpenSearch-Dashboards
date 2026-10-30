@@ -41,6 +41,9 @@ import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
 import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
+import { TraceLogsTab } from '../../../../../../explore/public';
+import { useTraceLogs } from './use_trace_logs';
+import { TraceLogsNotices } from './trace_logs_notices';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
 import { aiRootsOf, isAiRootRow } from '../../../utils/ai_root';
@@ -54,7 +57,7 @@ export interface TraceDetailsProps {
   fullTreeError?: string;
   /** Open this trace's session (replaces this flyout with the session flyout). */
   onOpenSession?: (session: SessionRow | string) => void;
-  /** Back and Forward through the flyouts the user moved between. */
+  /** Back to the flyout the user came from. */
   navigation?: FlyoutNavigation;
 }
 
@@ -108,6 +111,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
     if (fullTree && fullTree.length > 0) return headerSpanOf(trace, fullTree);
     return trace;
   }, [fullTree, trace]);
+  // Logs correlated with this trace (trace-to-logs correlations, as in Explore traces).
+  const traceLogs = useTraceLogs(rootTrace.traceId);
 
   const traceTreeData = useMemo(() => {
     if (fullTree && fullTree.length > 0) {
@@ -234,6 +239,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      // The Back row lines up with the close button for this padding (flyout_history_nav.scss).
+      paddingSize="l"
       aria-labelledby="trace-details-flyout"
       style={{ ...(flyoutWidth && { width: `${flyoutWidth}px` }), maxWidth: '95vw' }}
     >
@@ -361,7 +368,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               })}
             </EuiText>
             <EuiText size="xs" className="agentTracesFlyout__metaValue">
-              {rootTrace.totalTokens || '—'}
+              {rootTrace.totalTokens ?? '—'}
             </EuiText>
           </div>
         </div>
@@ -429,6 +436,41 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                         />
                       ),
                     },
+                    {
+                      id: 'logs',
+                      name: (
+                        <span data-test-subj="agentTracesFlyoutLogsTab">
+                          {/* No badge without a logs correlation: 0 would read as "no logs". */}
+                          {!traceLogs.isLoading && traceLogs.logDatasets.length > 0 && (
+                            <>
+                              <EuiBadge color="hollow" data-test-subj="agentTracesFlyoutLogsCount">
+                                {traceLogs.logCount}
+                                {traceLogs.cappedDatasetIds.length > 0 ? '+' : ''}
+                              </EuiBadge>{' '}
+                            </>
+                          )}
+                          {i18n.translate('agentTraces.flyout.tabRelatedLogs', {
+                            defaultMessage: 'Related logs',
+                          })}
+                        </span>
+                      ),
+                      content: (
+                        <>
+                          <TraceLogsNotices traceLogs={traceLogs} />
+                          {/* A failed correlations lookup is an error, not "set up a correlation". */}
+                          {!(traceLogs.errors.length > 0 && traceLogs.logDatasets.length === 0) && (
+                            <TraceLogsTab
+                              traceId={rootTrace.traceId}
+                              logDatasets={traceLogs.logDatasets}
+                              datasetLogs={traceLogs.datasetLogs}
+                              isLoading={traceLogs.isLoading}
+                              onSpanClick={selectNode}
+                              traceDataset={traceLogs.traceDataset ?? undefined}
+                            />
+                          )}
+                        </>
+                      ),
+                    },
                   ];
                   return (
                     <EuiTabbedContent
@@ -448,6 +490,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                   selectedNode={selectedNode}
                   selectedTraceRow={selectedTraceRow}
                   onSelectNode={selectNode}
+                  traceLogs={traceLogs}
                 />
               </EuiResizablePanel>
             </>

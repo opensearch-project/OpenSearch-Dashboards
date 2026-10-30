@@ -9,6 +9,8 @@ export type {
   TransformationDefinition,
   ITransformationService,
   FieldSchema,
+  FieldReference,
+  NormalizedRow,
   UrlTransformationState,
   TransformationConfigSchema,
   ConfigFieldSpec,
@@ -16,11 +18,7 @@ export type {
   ConfigEnumOption,
 } from './types';
 
-export {
-  TransformationService,
-  createNoOpTransformationService,
-  TRANSFORMATION_STATE_KEY,
-} from './transformation_service';
+export { TransformationService, TRANSFORMATION_STATE_KEY } from './transformation_service';
 export { addTransformation, removeTransformation } from './transformation_utils';
 export {
   createLimitTransformation,

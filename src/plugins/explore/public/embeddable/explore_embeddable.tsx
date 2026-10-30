@@ -55,7 +55,10 @@ import {
   convertStringsToMappings,
   isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
-import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
+import {
+  normalizeResultRows,
+  normalizeSearchHits,
+} from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
@@ -144,6 +147,8 @@ export class ExploreEmbeddable
   implements IEmbeddable<ExploreInput, ExploreOutput>
 {
   private abortController?: AbortController;
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
@@ -494,13 +499,25 @@ export class ExploreEmbeddable
 
   private async updateHandler(searchProps: SearchProps, force = false) {
     const { filters, query, timeRange } = this.input;
+    const fetchRequested =
+      force ||
+      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      !isEqual(query, this.prevState.query) ||
+      !isEqual(timeRange, this.prevState.timeRange);
+
+    // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
+    // only when one was actually requested, so a visibility-only change (the
+    // collapse itself) does not trigger a refetch on expand. See
+    // EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      if (fetchRequested) this.pendingFetchOnResume = true;
+      return;
+    }
+    const resumeFetch = this.pendingFetchOnResume;
+    this.pendingFetchOnResume = false;
+
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
-    const needFetch =
-      this.node &&
-      (force ||
-        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-        !isEqual(query, this.prevState.query) ||
-        !isEqual(timeRange, this.prevState.timeRange));
+    const needFetch = this.node && (fetchRequested || resumeFetch);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -586,8 +603,9 @@ export class ExploreEmbeddable
     const rawRows = resp.hits.hits;
     const dataFrame = searchSource.getDataFrame();
     const fieldSchema = dataFrame?.schema;
+    const normalizedRows = normalizeSearchHits(rawRows);
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      rawRows,
+      normalizedRows,
       fieldSchema ?? []
     );
 
@@ -687,6 +705,8 @@ export class ExploreEmbeddable
 
           const chartRender = () => (
             <CommonVisualizationRender
+              // The panel's saved query, not the dashboard's, picks the empty state's samples.
+              query={{ language: query?.language, dataset: query?.dataset }}
               visualizationData={visualizationData}
               visConfig={visConfig}
               showRawTable={false}
@@ -704,9 +724,9 @@ export class ExploreEmbeddable
     }
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = transformedRows;
+    this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = transformedRows.length;
+    this.searchProps.hits = rawRows.length;
     this.searchProps.isLoading = false;
 
     // Update shared panel data store so the global fetch_panel_data tool returns fresh data

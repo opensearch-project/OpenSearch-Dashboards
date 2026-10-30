@@ -834,4 +834,122 @@ describe('DatasetSelect', () => {
       });
     });
   });
+
+  describe('datasets not in the quick list', () => {
+    const PLUGIN_TYPE = 'example-direct-query';
+    const pluginDataset = { id: 'example-dataset-1', title: 'example-dataset', type: PLUGIN_TYPE };
+
+    it('shows a selected dataset that is not in an empty list once loading completes', async () => {
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: pluginDataset });
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(makeDatasetService(makeIndexPatternType([])));
+      mockDataViews.get = jest.fn().mockResolvedValue(undefined);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('example-dataset')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Select dataset')).not.toBeInTheDocument();
+      expect(mockDataViews.get).toHaveBeenCalledWith('example-dataset-1', true);
+    });
+
+    it('does not list the intermediate children of a type whose root has further levels', async () => {
+      const indexPatternType = makeIndexPatternType([defaultChild]);
+      const pluginType = {
+        id: PLUGIN_TYPE,
+        title: 'Example',
+        meta: { icon: { type: 'database' } },
+        fetch: jest.fn().mockResolvedValue({
+          id: PLUGIN_TYPE,
+          title: 'Example',
+          type: PLUGIN_TYPE,
+          hasNext: true,
+          children: [
+            { id: 'example-connection', title: 'example-child', type: 'example-child-type' },
+          ],
+        }),
+        toDataset: jest.fn((path: DataStructure[]) => ({
+          id: path[path.length - 1].id,
+          title: path[path.length - 1].title,
+          type: PLUGIN_TYPE,
+        })),
+      };
+      mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
+        getType: jest.fn((type: string) => (type === PLUGIN_TYPE ? pluginType : indexPatternType)),
+        cacheDataset: jest.fn(),
+        isDatasetAllowed: jest.fn().mockReturnValue(true),
+      });
+
+      renderWithContext({ ...defaultProps, supportedTypes: [INDEX_PATTERN, PLUGIN_TYPE] });
+
+      await openPopover();
+
+      expect(pluginType.fetch).toHaveBeenCalled();
+      expect(pluginType.toDataset).not.toHaveBeenCalled();
+      expect(screen.queryByText('example-child')).not.toBeInTheDocument();
+    });
+
+    it('keeps the other datasets when one type fails to fetch', async () => {
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const indexPatternType = makeIndexPatternType([defaultChild]);
+      const toDataset = (path: DataStructure[], type: string) => ({
+        id: path[path.length - 1].id,
+        title: path[path.length - 1].title,
+        type,
+        timeFieldName: '@timestamp',
+      });
+      const failingType = {
+        id: PLUGIN_TYPE,
+        title: 'Example',
+        meta: { icon: { type: 'database' } },
+        fetch: jest.fn().mockRejectedValue(new Error('unavailable')),
+        toDataset: jest.fn((path: DataStructure[]) => toDataset(path, PLUGIN_TYPE)),
+      };
+      const workingType = {
+        id: 'other-direct-query',
+        title: 'Other',
+        meta: { icon: { type: 'database' } },
+        fetch: jest.fn().mockResolvedValue({
+          id: 'other-direct-query',
+          title: 'Other',
+          type: 'other-direct-query',
+          children: [{ id: 'other-1', title: 'other-dataset', type: 'other-direct-query' }],
+        }),
+        toDataset: jest.fn((path: DataStructure[]) => toDataset(path, 'other-direct-query')),
+      };
+      mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
+        getType: jest.fn((type: string) =>
+          type === PLUGIN_TYPE
+            ? failingType
+            : type === 'other-direct-query'
+              ? workingType
+              : indexPatternType
+        ),
+        cacheDataset: jest.fn(),
+        isDatasetAllowed: jest.fn().mockReturnValue(true),
+      });
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+        supportedTypes: [INDEX_PATTERN, PLUGIN_TYPE, 'other-direct-query'],
+      });
+
+      // The working type's dataset sorts first, so it becomes the auto-selected default: the list
+      // survived the other type's failure (without the per-type catch it would be empty).
+      await waitFor(() => {
+        expect(mockOnSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'other-1' }));
+      });
+      expect(failingType.fetch).toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining(PLUGIN_TYPE),
+        expect.any(Error)
+      );
+      consoleError.mockRestore();
+    });
+  });
 });

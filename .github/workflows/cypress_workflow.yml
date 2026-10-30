@@ -299,7 +299,7 @@ jobs:
         matrix.config == 'observability' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
         matrix.config == 'dashboard_sections' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true --uiSettings.overrides[''home:useNewHomePage'']=true --dashboard.allowDashboardSections=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --datasetManagement.enabled=true --home.disableExperienceModal=true --dashboard.allowDashboardSections=true' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true' ||
         'node ../scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true' }}
@@ -425,7 +425,7 @@ jobs:
       # Run tests based on configuration
       - name: Run FT repo tests
         if: matrix.test_location == 'ftr'
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
@@ -503,7 +503,7 @@ jobs:
       # Run OSD Cypress tests within the source repo
       - name: Run OSD Cypress tests with query enhancements
         if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
@@ -517,7 +517,7 @@ jobs:
 
       - name: Run OSD Cypress observability tests (traces)
         if: matrix.test_location == 'source' && matrix.config == 'observability' && matrix.group == '1Observability'
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
@@ -526,7 +526,7 @@ jobs:
 
       - name: Run OSD Cypress observability tests (metrics with Prometheus)
         if: matrix.test_location == 'source' && matrix.config == 'observability' && matrix.group == '2Observability'
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
@@ -537,7 +537,7 @@ jobs:
 
       - name: Run OSD Cypress tests without query enhancements
         if: matrix.test_location == 'source' && (matrix.config == 'dashboard' || matrix.config == 'dashboard_sections')
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npx cypress install --force
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
