@@ -417,8 +417,12 @@ export class ChatService {
         : UiSettingScope.GLOBAL;
 
       // Get default data source with proper scope
+      const threadId = this.getThreadId();
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
+      // Only commit it to the conversation this lookup started in. If the user started a new
+      // chat or switched conversations while the lookup was in flight, the default belongs to
+      // neither, so skip the write; still return it and let the caller decide what to do.
+      if (!readOnly && this.getThreadId() === threadId) {
         this.setDataSourceId(dataSourceId || undefined);
       }
       return dataSourceId || undefined;
@@ -1154,10 +1158,14 @@ export class ChatService {
   /**
    * Load a specific conversation from history by thread ID.
    * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
+   *
+   * Pass `signal` so an abandoned load (the user started a new chat or picked another
+   * conversation while this one was still loading) does not switch the active thread to
+   * `threadId` after the fact. An aborted load returns null without side effects.
    */
-  public async loadConversation(threadId: string): Promise<Event[] | null> {
+  public async loadConversation(threadId: string, signal?: AbortSignal): Promise<Event[] | null> {
     const events = await this.conversationHistoryService.getConversation(threadId);
-    if (!events) {
+    if (!events || signal?.aborted) {
       return null;
     }
 

@@ -8,9 +8,8 @@ import { stripInlineConversationTitle } from './parse_inline_title';
 
 /**
  * Strippers for the inline control lines the agent writes into its response
- * text, each removing one kind of line. Suggestions are stripped first so the
- * trailing SUGGESTIONS: line is gone before the title strip inspects the end of
- * the content for a partially streamed title.
+ * text, each removing one kind of line: the trailing SUGGESTIONS: line and the
+ * leading CONVERSATION_TITLE: line.
  */
 const RESPONSE_STRIPPERS: Array<(content: string) => string> = [
   stripInlineSuggestions,
