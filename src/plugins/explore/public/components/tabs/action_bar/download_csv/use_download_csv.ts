@@ -20,18 +20,30 @@ export interface UseDiscoverDownloadCsvProps {
   hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  /** Query response columns to export as raw values, in place of the Logs columns. */
+  columnNamesOverride?: string[];
   onLoading(): void;
   onSuccess(): void;
   onError(): void;
 }
 
+const getRawValueForCsv = (row: OpenSearchSearchHit, colName: string) => {
+  const rawValue = (row._source as Record<string, unknown> | undefined)?.[colName];
+  if (rawValue === undefined || rawValue === null) {
+    return '';
+  }
+  return typeof rawValue === 'object' ? JSON.stringify(rawValue) : String(rawValue);
+};
+
 export const formatRowsForCsv =
   ({
     displayedColumnNames,
     indexPattern,
+    useRawValues = false,
   }: {
     displayedColumnNames: string[];
     indexPattern: IndexPattern;
+    useRawValues?: boolean;
   }) =>
   (row: OpenSearchSearchHit) => {
     return displayedColumnNames.map((colName) => {
@@ -39,6 +51,10 @@ export const formatRowsForCsv =
 
       if (typeof row === 'undefined') {
         return '';
+      }
+
+      if (useRawValues) {
+        return getRawValueForCsv(row, colName);
       }
 
       if (fieldInfo?.type === '_source') {
@@ -66,6 +82,7 @@ export const useDiscoverDownloadCsv = ({
   hits,
   rows,
   indexPattern,
+  columnNamesOverride,
   onLoading,
   onSuccess,
   onError,
@@ -75,7 +92,8 @@ export const useDiscoverDownloadCsv = ({
   const { uiSettings } = services;
   const [isLoading, setIsLoading] = useState(false);
   // Use shared hook to ensure CSV export columns match DataTable display columns
-  const displayedColumnNames = useDisplayedColumnNames({ includeFieldCounts: true });
+  const logsColumnNames = useDisplayedColumnNames({ includeFieldCounts: true });
+  const displayedColumnNames = columnNamesOverride ?? logsColumnNames;
 
   const downloadCsvForOption = async (option: DownloadCsvFormId) => {
     try {
@@ -97,7 +115,11 @@ export const useDiscoverDownloadCsv = ({
         return;
       }
       const csvRowData = rowsToDownload.map(
-        formatRowsForCsv({ displayedColumnNames, indexPattern })
+        formatRowsForCsv({
+          displayedColumnNames,
+          indexPattern,
+          useRawValues: columnNamesOverride !== undefined,
+        })
       );
       const csvData = unparse(
         { fields: displayedColumnNames, data: csvRowData },

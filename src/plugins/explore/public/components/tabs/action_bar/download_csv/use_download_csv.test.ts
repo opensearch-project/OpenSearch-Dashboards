@@ -148,6 +148,48 @@ describe('useDiscoverDownloadCsv', () => {
     });
   });
 
+  describe('forematRowsForCsv with useRawValues', () => {
+    const aggregatedRow = {
+      _source: {
+        'count()': 42,
+        bytes: 1444079,
+        zero: 0,
+        empty: null,
+        'values(a)': ['x', 'y'],
+      },
+    } as unknown as OpenSearchSearchHit;
+    const format = (colName: string) =>
+      formatRowsForCsv({
+        displayedColumnNames: [colName],
+        indexPattern: {
+          fields: { getByName: () => undefined },
+          formatField: () => '1,444,079',
+        } as unknown as IndexPattern,
+        useRawValues: true,
+      })(aggregatedRow)[0];
+
+    it('reads columns that are not in the mapping from the row', () => {
+      expect(format('count()')).toBe('42');
+    });
+
+    it('does not apply the field formatter of a column sharing a field name', () => {
+      expect(format('bytes')).toBe('1444079');
+    });
+
+    it('keeps a zero value', () => {
+      expect(format('zero')).toBe('0');
+    });
+
+    it('returns an empty string for null and missing values', () => {
+      expect(format('empty')).toBe('');
+      expect(format('missing')).toBe('');
+    });
+
+    it('serializes array and object values as JSON', () => {
+      expect(format('values(a)')).toBe('["x","y"]');
+    });
+  });
+
   describe('saveDataAsCsv', () => {
     afterEach(() => {
       (saveAs as jest.MockedFunction<any>).mockClear();
@@ -262,6 +304,20 @@ describe('useDiscoverDownloadCsv', () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
       expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it('uses columnNamesOverride instead of the displayed columns when provided', async () => {
+      const columnNamesOverride = ['count()', 'category'];
+      const { result } = renderHook(() =>
+        useDiscoverDownloadCsv({ ...mockProps, columnNamesOverride })
+      );
+      await act(async () => {
+        await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+      });
+      expect(unparse).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: columnNamesOverride }),
+        expect.anything()
+      );
     });
 
     it('uses rows provided by props if option is visible', async () => {
