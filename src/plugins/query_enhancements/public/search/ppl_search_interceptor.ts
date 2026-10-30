@@ -104,6 +104,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
         timeRange: request.params?.body?.timeRange,
         ...(!isAsync && { queryId: uuidv4() }),
+        // Only the plain PPL strategy honors a requested row limit; async and custom strategies
+        // do not implement it.
+        ...(strategy === SEARCH_STRATEGY.PPL &&
+          request.params?.body?.fetchSize && { fetchSize: request.params.body.fetchSize }),
       },
     };
 

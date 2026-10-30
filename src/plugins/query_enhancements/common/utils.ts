@@ -77,6 +77,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     ...(context.body?.options && { options: context.body.options }),
     ...(highlight && { highlight }),
     ...(context.body?.queryId && { queryId: context.body.queryId }),
+    ...(context.body?.fetchSize && { fetchSize: context.body.fetchSize }),
   });
 
   return from(

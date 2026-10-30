@@ -61,6 +61,7 @@ export interface EnhancedFetchContext {
     timeRange?: TimeRange;
     options?: Record<string, unknown>;
     queryId?: string;
+    fetchSize?: number;
   };
 }
 

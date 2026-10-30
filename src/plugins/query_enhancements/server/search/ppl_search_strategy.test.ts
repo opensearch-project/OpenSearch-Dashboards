@@ -428,6 +428,62 @@ describe('pplSearchStrategyProvider', () => {
     expect(mockDescribeQuery.mock.calls[1][1].body.fetchSize).toBe(2000);
   });
 
+  describe('requested fetchSize', () => {
+    const search = async (body: Record<string, unknown>) => {
+      const mockDescribeQuery = jest.fn().mockResolvedValue({
+        success: true,
+        data: {
+          schema: [{ name: 'field1', type: 'long' }],
+          datarows: [[1]],
+        },
+        took: 100,
+      });
+      jest
+        .spyOn(facet, 'Facet')
+        .mockImplementation(() => ({ describeQuery: mockDescribeQuery }) as unknown as facet.Facet);
+      (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+      const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+      await strategy.search(
+        mockRequestHandlerContext,
+        { body } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+      return mockDescribeQuery;
+    };
+
+    it('honors a requested fetchSize over discover:sampleSize', async () => {
+      const mockDescribeQuery = await search({
+        query: { query: 'source = table', dataset: { id: 'test-dataset' } },
+        fetchSize: 1000,
+      });
+
+      expect(mockDescribeQuery.mock.calls[0][1].body.fetchSize).toBe(1000);
+    });
+
+    it('drops a requested fetchSize when the query ends with head', async () => {
+      const mockDescribeQuery = await search({
+        query: { query: 'source = table | head 5', dataset: { id: 'test-dataset' } },
+        fetchSize: 1000,
+      });
+
+      expect(mockDescribeQuery.mock.calls[0][1].body.fetchSize).toBeUndefined();
+    });
+
+    it('keeps the requested fetchSize out of the histogram queries', async () => {
+      const mockDescribeQuery = await search({
+        query: { query: 'source = table', dataset: { id: 'test-dataset' } },
+        aggConfig: {
+          qs: { '1': 'source = table | stats count() by span(`@timestamp`, 1h)' },
+        },
+        fetchSize: 1000,
+      });
+
+      expect(mockDescribeQuery.mock.calls[0][1].body.fetchSize).toBe(1000);
+      expect(mockDescribeQuery.mock.calls[1][1].body.fetchSize).toBe(2000);
+    });
+  });
+
   it('should attach highlights to dataFrame meta when rawResponse contains _highlight column', async () => {
     const mockHighlights = [{ title: ['<em>OpenSearch</em>'] }, { title: ['<em>Dashboards</em>'] }];
     const mockResponse = {
