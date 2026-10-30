@@ -6,7 +6,13 @@
 import { HistogramChartStyle } from './histogram_vis_config';
 import { AxisRole, VisColumn, VisFieldType } from '../types';
 import { getAxisConfig } from '../utils/utils';
-import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
+import {
+  assembleSpec,
+  buildAxisConfigs,
+  buildDataRange,
+  createBaseConfig,
+  pipe,
+} from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { bin } from '../utils/data_transformation/bin';
 import { createHistogramSeries } from './histogram_chart_utils';
@@ -33,6 +39,7 @@ export const createNumericalHistogramChart = (
     ),
     createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
+    buildDataRange({ seriesFields: ['value'], fromBase: true }),
     createHistogramSeries({
       styles,
       binStartField: 'start',
@@ -68,6 +75,7 @@ export const createSingleHistogramChart = (
     ),
     createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
+    buildDataRange({ seriesFields: ['value'], fromBase: true }),
     createHistogramSeries({
       styles,
       binStartField: 'start',

@@ -5,7 +5,13 @@
 
 import { MetricChartStyle } from './metric_vis_config';
 import { AxisRole, VisColumn } from '../types';
-import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
+import {
+  assembleSpec,
+  buildAxisConfigs,
+  buildDataRange,
+  createBaseConfig,
+  pipe,
+} from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { assembleForMetric, createMetricChartSeries } from './metric_utils';
 
@@ -35,6 +41,9 @@ export const createSingleMetric = (
     transform(convertTo2DArray()),
     createBaseConfig({}),
     buildAxisConfigs,
+    buildDataRange({
+      seriesFields: [numericField],
+    }),
     createMetricChartSeries({
       styles,
       dateField,
