@@ -761,6 +761,9 @@ describe('pplSearchStrategyProvider', () => {
           { name: 'field1', type: 'long', values: [] },
           { name: 'field2', type: 'text', values: [] },
         ],
+        // aggs is initialised to {} before the loop, so it is always present when aggConfig is
+        // set — even when every individual aggregation request fails (all keys are skipped).
+        aggs: {},
         meta: {
           date_histogram: {
             field: 'timestamp',
@@ -775,5 +778,90 @@ describe('pplSearchStrategyProvider', () => {
       took: 10,
     });
     expect(usage.trackSuccess).toHaveBeenCalledWith(10);
+  });
+
+  it('should accumulate all keys when aggConfig.qs has multiple entries', async () => {
+    // Primary search response
+    const mockPrimaryResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 10,
+    };
+    // Per-key agg responses: key '1' → bucketA, key '2' → bucketB
+    const mockAggResponse1 = {
+      success: true,
+      data: {
+        datarows: [
+          [10, '2024-01-01'],
+          [20, '2024-01-02'],
+        ],
+      },
+    };
+    const mockAggResponse2 = {
+      success: true,
+      data: {
+        datarows: [
+          [30, '2024-01-01'],
+          [40, '2024-01-02'],
+        ],
+      },
+    };
+    const mockDescribeQuery = jest
+      .fn()
+      .mockResolvedValueOnce(mockPrimaryResponse)
+      .mockResolvedValueOnce(mockAggResponse1)
+      .mockResolvedValueOnce(mockAggResponse2);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const originalQuery = 'source = my_table';
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: {
+          query: { query: originalQuery, dataset: { id: 'test-dataset' } },
+          aggConfig: {
+            qs: {
+              '1': 'source = my_table | stats count() by span(ts, 1h)',
+              '2': 'source = my_table | stats avg(val) by span(ts, 1h)',
+            },
+          },
+        },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    // Both keys must be present — neither should overwrite the other
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    expect(result.body.aggs).toEqual({
+      '1': [
+        { key: '2024-01-01', value: 10 },
+        { key: '2024-01-02', value: 20 },
+      ],
+      '2': [
+        { key: '2024-01-01', value: 30 },
+        { key: '2024-01-02', value: 40 },
+      ],
+    });
+
+    // The original query string on the request must not have been mutated
+    expect(mockDescribeQuery.mock.calls[1][1].body.query.query).toBe(
+      'source = my_table | stats count() by span(ts, 1h)'
+    );
+    expect(mockDescribeQuery.mock.calls[2][1].body.query.query).toBe(
+      'source = my_table | stats avg(val) by span(ts, 1h)'
+    );
+    // The two agg calls must receive independent request objects (not the same reference)
+    expect(mockDescribeQuery.mock.calls[1][1]).not.toBe(mockDescribeQuery.mock.calls[2][1]);
+    expect(mockDescribeQuery.mock.calls[1][1].body).not.toBe(
+      mockDescribeQuery.mock.calls[2][1].body
+    );
   });
 });
