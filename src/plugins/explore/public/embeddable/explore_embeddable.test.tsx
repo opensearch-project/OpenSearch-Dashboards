@@ -666,6 +666,153 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.pendingFetchOnResume).toBe(false);
   });
 
+  test('updateHandler does not owe a fetch for a visibility-only change', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // Initial visible load establishes prevState.
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // Hide the panel; input$ emits with only isVisible changed.
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // The collapse itself must not record an owed fetch.
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // Show the panel again; no data input changed while hidden.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updateHandler fetches once on resume after a forced refresh while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // A forced refresh (e.g. auto-refresh or reload) arrives while hidden.
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+    // Expand with no data change; the owed fetch runs exactly once.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('updateHandler fetches once on resume after a data change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    embeddable.input.timeRange = { from: 'now-1h', to: 'now' };
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // The data change while hidden records an owed fetch.
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('updateHandler does not owe a fetch when only disabled filters change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    embeddable.input.filters = [];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // Adding a disabled filter does not change the query, so no fetch is owed.
+    // @ts-ignore
+    embeddable.input.filters = [
+      {
+        meta: { alias: null, negate: false, disabled: true },
+        query: { match_phrase: { 'machine.os': 'win 8' } },
+      },
+    ];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updateHandler does not owe a fetch for a columns or sort change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // Columns and sort are display-only and never fetch, even while visible.
+    // @ts-ignore
+    embeddable.input.columns = ['machine.os'];
+    // @ts-ignore
+    embeddable.input.sort = [['machine.os', 'asc']];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // On resume the new columns and sort are applied without a fetch.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.searchProps.columns).toEqual(['machine.os']);
+    // @ts-ignore
+    expect(embeddable.searchProps.sort).toEqual([['machine.os', 'asc']]);
+  });
+
   test('fetch handles missing searchProps gracefully', async () => {
     // @ts-ignore
     embeddable.searchProps = undefined;
