@@ -231,4 +231,94 @@ describe('DataSourceManagement: Form Validation', () => {
       expect(result).toBe(true);
     });
   });
+
+  describe('validate create/edit datasource for OAuth2 auth type', () => {
+    const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+
+    const oauth2Form = (
+      credentials: Record<string, string>
+    ): CreateDataSourceState | EditDataSourceState =>
+      ({
+        formErrorsByField: { ...defaultValidation },
+        title: 'oauth2 datasource',
+        description: '',
+        endpoint: 'https://prometheus.example.com',
+        auth: {
+          type: AuthType.OAuth2,
+          credentials,
+        },
+      }) as unknown as CreateDataSourceState | EditDataSourceState;
+
+    const blank = {
+      clientId: '',
+      clientSecret: '',
+      tokenUrl: '',
+      scopes: '',
+      audience: '',
+      grantType: 'client_credentials',
+    };
+
+    test('should NOT fail validation for an existing OAuth2 data source whose credentials were stripped on read', () => {
+      // stripCredentials sets auth.credentials to undefined, so extractRegisteredAuthTypeCredentials
+      // rebuilds every field as ''. Rejecting that left Save and Test disabled for every existing
+      // OAuth2 data source before the user had touched anything.
+      const result = performDataSourceFormValidation(
+        oauth2Form(blank),
+        [],
+        'oauth2 datasource',
+        authenticationMethodRegistry,
+        AuthType.OAuth2
+      );
+      expect(result).toBe(true);
+    });
+
+    test('should fail validation when switching an existing data source to OAuth2 with blank credentials', () => {
+      // Nothing is stored to fall back on here, so the fields are genuinely required.
+      const result = performDataSourceFormValidation(
+        oauth2Form(blank),
+        [],
+        'oauth2 datasource',
+        authenticationMethodRegistry,
+        AuthType.UsernamePasswordType
+      );
+      expect(result).toBe(false);
+    });
+
+    test('should fail validation on create when OAuth2 credentials are blank', () => {
+      const result = performDataSourceFormValidation(
+        oauth2Form(blank),
+        [],
+        '',
+        authenticationMethodRegistry
+      );
+      expect(result).toBe(false);
+    });
+
+    test('should fail validation when a token URL is supplied but malformed', () => {
+      // A value the user actually typed is still shape-checked, stored OAuth2 or not.
+      const result = performDataSourceFormValidation(
+        oauth2Form({ ...blank, tokenUrl: 'not-a-url' }),
+        [],
+        'oauth2 datasource',
+        authenticationMethodRegistry,
+        AuthType.OAuth2
+      );
+      expect(result).toBe(false);
+    });
+
+    test('should NOT fail validation with a full, well-formed OAuth2 credential set', () => {
+      const result = performDataSourceFormValidation(
+        oauth2Form({
+          ...blank,
+          clientId: 'client-id',
+          clientSecret: 'client-secret',
+          tokenUrl: 'https://idp.example.com/token',
+        }),
+        [],
+        '',
+        authenticationMethodRegistry
+      );
+      expect(result).toBe(true);
+    });
+  });
 });

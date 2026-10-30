@@ -27,6 +27,7 @@ describe('Workspace server plugin', () => {
       return new DataSourceError({});
     },
     dataSourceEnabled: jest.fn(() => true),
+    oauth2AuthEnabled: jest.fn(() => true),
     registerCredentialProvider: jest.fn(),
     registerCustomApiSchema(schema: any): void {
       throw new Error('Function not implemented.');

@@ -553,6 +553,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                               "text": "AWS Signature Version 4",
                               "value": "awssigv4",
                             },
+                            Object {
+                              "text": "OAuth2 / OIDC",
+                              "value": "oauth2",
+                            },
                           ]
                         }
                         value="basicauth"
@@ -576,6 +580,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                               Object {
                                 "text": "AWS Signature Version 4",
                                 "value": "awssigv4",
+                              },
+                              Object {
+                                "text": "OAuth2 / OIDC",
+                                "value": "oauth2",
                               },
                             ]
                           }
@@ -626,6 +634,12 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                                       value="awssigv4"
                                     >
                                       AWS Signature Version 4
+                                    </option>
+                                    <option
+                                      key="3"
+                                      value="oauth2"
+                                    >
+                                      OAuth2 / OIDC
                                     </option>
                                   </select>
                                 </EuiValidatableControl>
