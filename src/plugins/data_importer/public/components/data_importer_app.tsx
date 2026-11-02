@@ -313,12 +313,13 @@ const DataImporterPluginAppComponent = (
       setIsImporting(false);
     }
 
-    // Rows may have landed while the lookup's alias could not be created: the lookup is then
-    // unreachable, so this is a failure the user must see (and act on), never a silent success.
+    // Rows may have landed while the lookup's alias was not created or moved (permission error,
+    // name collision, or a partial re-import that keeps the previous lookup). The user must see
+    // this and act on it; it is never a silent success.
     if (response?.aliasError) {
       notifications.toasts.addDanger(
         i18n.translate('dataImporter.aliasCreationFailed', {
-          defaultMessage: `Data was indexed into {indexName}, but the lookup could not be created: {aliasError}`,
+          defaultMessage: `Data was indexed into {indexName}, but the lookup was not updated: {aliasError}`,
           values: { indexName, aliasError: response.aliasError },
         })
       );

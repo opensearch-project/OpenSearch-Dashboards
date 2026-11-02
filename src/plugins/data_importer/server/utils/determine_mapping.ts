@@ -125,7 +125,7 @@ const determineType = (
       return { type: determineExactNumberType(Number(value)) };
     case isValidDate(_.toString(value)):
       // TODO Dates need further parsing since OpenSearch expects a certain timestamp format.
-      // Not trivially fixable (U3b, see u3_findings.md): moment's ISO_8601/RFC_2822 accept formats
+      // Not trivially fixable: moment's ISO_8601/RFC_2822 accept formats
       // that OpenSearch's default date format rejects
       return defaultType();
     case Array.isArray(value) && value.length > 0:

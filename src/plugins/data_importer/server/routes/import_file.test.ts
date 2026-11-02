@@ -53,6 +53,7 @@ describe('Import file route', () => {
         getMapping: jest.fn().mockResolvedValue({
           body: { 'test-index': { mappings: { properties: { zip: { type: 'keyword' } } } } },
         }),
+        putMapping: jest.fn().mockResolvedValue({}),
       },
     };
 
@@ -446,6 +447,132 @@ describe('Import file route', () => {
     });
   });
 
+  describe('lookup field on an existing index (createMode=false)', () => {
+    beforeEach(() => {
+      mockClient.indices.exists.mockResolvedValue({ body: true });
+    });
+
+    it('maps __lookup as keyword before ingesting when the index lacks it', async () => {
+      const response = await runImport({ createMode: false });
+
+      expect(mockClient.indices.putMapping).toHaveBeenCalledWith({
+        index: 'test-index',
+        body: { properties: { __lookup: { type: 'keyword' } } },
+      });
+      expect(mockClient.indices.putMapping.mock.invocationCallOrder[0]).toBeLessThan(
+        mockProcessor.ingestFile.mock.invocationCallOrder[0]
+      );
+      const lookupId = mockProcessor.ingestFile.mock.calls[0][1].lookupId;
+      expect(mockClient.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [
+            {
+              add: {
+                index: 'test-index',
+                alias: 'my-upload',
+                filter: { term: { __lookup: lookupId } },
+              },
+            },
+          ],
+        },
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('filters the alias on __lookup.keyword when __lookup is already dynamic text', async () => {
+      mockClient.indices.getMapping.mockResolvedValue({
+        body: {
+          'test-index': {
+            mappings: {
+              properties: {
+                __lookup: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+              },
+            },
+          },
+        },
+      });
+
+      await runImport({ createMode: false });
+
+      expect(mockClient.indices.putMapping).not.toHaveBeenCalled();
+      const lookupId = mockProcessor.ingestFile.mock.calls[0][1].lookupId;
+      expect(mockClient.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [
+            {
+              add: {
+                index: 'test-index',
+                alias: 'my-upload',
+                filter: { term: { '__lookup.keyword': lookupId } },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('fails with badRequest before ingesting when __lookup has an unusable type', async () => {
+      mockClient.indices.getMapping.mockResolvedValue({
+        body: { 'test-index': { mappings: { properties: { __lookup: { type: 'long' } } } } },
+      });
+
+      const response = await runImport({ createMode: false });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: expect.stringMatching(/"__lookup" in index "test-index" is mapped as "long"/),
+      });
+      expect(mockProcessor.ingestFile).not.toHaveBeenCalled();
+      expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
+    });
+
+    it('fails with forbidden before ingesting when put_mapping is denied', async () => {
+      mockClient.indices.putMapping.mockRejectedValue(
+        Object.assign(new Error('security_exception'), { statusCode: 403 })
+      );
+
+      const response = await runImport({ createMode: false });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: expect.stringMatching(/indices:admin\/mapping\/put/),
+      });
+      expect(mockProcessor.ingestFile).not.toHaveBeenCalled();
+    });
+
+    it('does not touch the mapping when no import identifier is given', async () => {
+      await runImport({ createMode: false, importIdentifier: undefined });
+      expect(mockClient.indices.putMapping).not.toHaveBeenCalled();
+    });
+  });
+
+  it('does not call put_mapping in create mode (the index is created with __lookup)', async () => {
+    await runImport();
+    expect(mockClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('keeps an existing lookup on its previous import when a re-import is partial', async () => {
+    mockProcessor.ingestFile.mockResolvedValue(partialFailure);
+    mockClient.indices.getAlias.mockResolvedValue({
+      body: {
+        'old-index': { aliases: { 'my-upload': { filter: { term: { __lookup: 'old' } } } } },
+      },
+    });
+
+    const response = await runImport();
+
+    expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        message: partialFailure,
+        success: false,
+        partial: true,
+        aliasCreated: false,
+        aliasError:
+          "1 of 3 rows failed, so lookup 'my-upload' still points at the previous import. " +
+          'Fix the failed rows and re-import to update it.',
+      },
+    });
+  });
+
   describe('target mapping for type coercion', () => {
     it('should pass the create-mode mapping (incl. __lookup) to the processor', async () => {
       await runImport({}, JSON.stringify({ properties: { zip: { type: 'keyword' } } }));
@@ -478,6 +605,23 @@ describe('Import file route', () => {
       expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toEqual({
         properties: { id: { type: 'keyword' } },
       });
+    });
+
+    it('should skip coercion and warn when an alias spans indices with different mappings', async () => {
+      mockClient.indices.exists.mockResolvedValue({ body: true });
+      mockClient.indices.getMapping.mockResolvedValue({
+        body: {
+          'idx-1': { mappings: { properties: { zip: { type: 'keyword' } } } },
+          'idx-2': { mappings: { properties: { zip: { type: 'long' } } } },
+        },
+      });
+
+      await runImport({ createMode: false, importIdentifier: undefined });
+
+      expect(mockProcessor.ingestFile.mock.calls[0][1].mapping).toBeUndefined();
+      expect(context.dataImporter.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('importing without type coercion')
+      );
     });
 
     it('should continue without coercion and log when the mapping fetch fails', async () => {

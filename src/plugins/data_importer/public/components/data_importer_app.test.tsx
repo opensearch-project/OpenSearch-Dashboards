@@ -359,6 +359,26 @@ describe('App', () => {
       expect(confirmModal()).toBeInTheDocument();
     });
 
+    it('refreshes the index list when some rows were indexed on a partial import', async () => {
+      mockImportFile.mockResolvedValue({
+        success: false,
+        partial: true,
+        message: { total: 3, message: 'Indexed 1 documents', failedRows: [2, 3] },
+      });
+      const { ref } = renderEmbedded();
+      // A new index name puts the selector in create mode; the refresh then picks it up.
+      await selectIndex('dim_host');
+      await attachFile('dim_host.csv');
+      mockCatIndices.mockResolvedValue({ indices: ['lookups', 'dim_host'] });
+      const catCallsBefore = mockCatIndices.mock.calls.length;
+      await clickImport();
+
+      await waitFor(() => expect(mockCatIndices.mock.calls.length).toBe(catCallsBefore + 1));
+      // Still not a clean import.
+      requestClose(ref);
+      expect(confirmModal()).toBeInTheDocument();
+    });
+
     it('renders the bucketed errorSummary (cause + count + sample rows), not a raw row dump', async () => {
       mockImportFile.mockResolvedValue({
         success: false,
@@ -426,7 +446,7 @@ describe('App', () => {
       await waitFor(() => expect(notificationsMock.toasts.addDanger).toHaveBeenCalled());
       const msg = (notificationsMock.toasts.addDanger as jest.Mock).mock.calls.pop()[0];
       const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
-      expect(text).toContain('the lookup could not be created');
+      expect(text).toContain('the lookup was not updated');
       expect(text).toContain(aliasError);
       expect(notificationsMock.toasts.addSuccess).not.toHaveBeenCalled();
 
@@ -457,6 +477,34 @@ describe('App', () => {
       expect(texts.some((t) => t.includes('an index exists with the same name as the alias'))).toBe(
         true
       );
+    });
+
+    it('shows the server aliasError explaining the lookup was not moved on a partial import', async () => {
+      const aliasError =
+        'Some rows failed to import, so the lookup dim_host was not moved to the new data.';
+      mockImportFile.mockResolvedValue({
+        success: false,
+        partial: true,
+        aliasCreated: false,
+        aliasError,
+        message: { total: 3, message: 'Indexed 1 documents', failedRows: [2, 3] },
+      });
+      const { ref } = renderEmbedded();
+      await selectIndex('dim_host');
+      await attachFile('dim_host.csv');
+      const catCallsBefore = mockCatIndices.mock.calls.length;
+      await clickImport();
+
+      await waitFor(() => expect(notificationsMock.toasts.addDanger).toHaveBeenCalledTimes(2));
+      const texts = (notificationsMock.toasts.addDanger as jest.Mock).mock.calls.map(([m]) =>
+        typeof m === 'string' ? m : JSON.stringify(m)
+      );
+      expect(texts.some((t) => t.includes(aliasError))).toBe(true);
+      expect(notificationsMock.toasts.addSuccess).not.toHaveBeenCalled();
+      // Rows did land, so the index list is still refreshed, and the form stays dirty.
+      await waitFor(() => expect(mockCatIndices.mock.calls.length).toBe(catCallsBefore + 1));
+      requestClose(ref);
+      expect(confirmModal()).toBeInTheDocument();
     });
   });
 });

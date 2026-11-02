@@ -29,7 +29,7 @@ describe('finishImport', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPointLookupAlias.mockResolvedValue(undefined);
+    mockPointLookupAlias.mockResolvedValue(true);
   });
 
   it('reports success without alias fields when no import identifier was requested', async () => {
@@ -46,17 +46,66 @@ describe('finishImport', () => {
       alias: 'my-lookup',
       lookupId: 'uuid',
       lookupField: '__lookup',
+      filterField: '__lookup',
+      keepExisting: false,
     });
   });
 
-  it('still creates the alias on partial failure so landed rows stay addressable', async () => {
+  it('moves an existing lookup on a full import (keepExisting=false)', async () => {
+    await finishImport(allOk, params);
+    expect(mockPointLookupAlias.mock.calls[0][1]).toMatchObject({ keepExisting: false });
+  });
+
+  it('creates the alias on partial failure when no previous lookup binding exists', async () => {
     const body = await finishImport(someFailed, params);
+    expect(mockPointLookupAlias.mock.calls[0][1]).toMatchObject({ keepExisting: true });
     expect(body).toEqual({
       message: someFailed,
       success: false,
       partial: true,
       aliasCreated: true,
     });
+  });
+
+  it('keeps an existing lookup on its previous import when this import is partial', async () => {
+    // Moving the alias onto incomplete data would silently break a working lookup
+    mockPointLookupAlias.mockResolvedValue(false);
+
+    const body = await finishImport(someFailed, params);
+
+    expect(body).toEqual({
+      message: someFailed,
+      success: false,
+      partial: true,
+      aliasCreated: false,
+      aliasError:
+        "2 of 3 rows failed, so lookup 'my-lookup' still points at the previous import. " +
+        'Fix the failed rows and re-import to update it.',
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('passes the lookup filter field through to the alias', async () => {
+    await finishImport(allOk, { ...params, lookupFilterField: '__lookup.keyword' });
+    expect(mockPointLookupAlias.mock.calls[0][1]).toMatchObject({
+      lookupField: '__lookup',
+      filterField: '__lookup.keyword',
+    });
+  });
+
+  it('surfaces a name collision with a non-importer alias as aliasError', async () => {
+    mockPointLookupAlias.mockRejectedValue(
+      new Error(
+        'The name "my-lookup" is already used by an alias not managed by the importer. ' +
+          'Choose another import identifier.'
+      )
+    );
+    const body = await finishImport(allOk, params);
+    expect(body.aliasCreated).toBe(false);
+    expect(body.aliasError).toBe(
+      'The name "my-lookup" is already used by an alias not managed by the importer. ' +
+        'Choose another import identifier.'
+    );
   });
 
   it('skips the alias when no rows landed', async () => {

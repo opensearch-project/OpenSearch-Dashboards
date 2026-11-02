@@ -4,16 +4,20 @@
  */
 
 import { MappingProperty, MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
+import { isEqual } from 'lodash';
 import { OpenSearchClient } from '../../../../core/server';
 
 /**
  * Fetch the mapping of an existing target index (the same call the preview route makes). When
- * `indexName` is an alias the response is keyed by the concrete index; a single backing index is
- * used, otherwise undefined is returned (no coercion). Throws if the request fails.
+ * `indexName` is an alias the response is keyed by the concrete index. A single backing index, or
+ * several whose mappings are deep-equal, yields that mapping; backing indices with differing
+ * mappings yield undefined (no coercion), with a warning logged since coercing to one index's
+ * types could be wrong for another. Throws if the request fails.
  */
 export const fetchIndexMapping = async (
   client: OpenSearchClient,
-  indexName: string
+  indexName: string,
+  logger?: { warn: (message: string) => void }
 ): Promise<MappingTypeMapping | undefined> => {
   const body = (await client.indices.getMapping({ index: indexName })).body as
     Record<string, { mappings?: MappingTypeMapping }> | undefined;
@@ -23,8 +27,19 @@ export const fetchIndexMapping = async (
   if (body[indexName]) {
     return body[indexName].mappings;
   }
-  const entries = Object.values(body);
-  return entries.length === 1 ? entries[0].mappings : undefined;
+  const entries = Object.entries(body);
+  if (entries.length === 0) {
+    return undefined;
+  }
+  const [[, first], ...rest] = entries;
+  if (rest.every(([, entry]) => isEqual(entry.mappings, first.mappings))) {
+    return first.mappings;
+  }
+  logger?.warn(
+    `"${indexName}" resolves to ${entries.length} indices with different mappings ` +
+      `(${entries.map(([index]) => index).join(', ')}); importing without type coercion`
+  );
+  return undefined;
 };
 
 /**

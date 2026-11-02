@@ -5,6 +5,9 @@
 
 import { opensearchServiceMock } from '../../../../core/server/mocks';
 import {
+  BULK_MAX_ATTEMPTS,
+  BULK_MAX_CHUNK_BYTES,
+  BULK_RETRY_BASE_DELAY_MS,
   BulkIngester,
   MAX_ERROR_SUMMARY_TYPES,
   normalizeErrorReason,
@@ -345,6 +348,185 @@ describe('BulkIngester', () => {
       message: 'Indexed 0 documents',
       failedRows: [],
       errorSummary: [],
+    });
+  });
+
+  describe('429 / es_rejected_execution_exception retry', () => {
+    // Injected so tests never actually wait; records the requested back-off delays
+    let sleep: jest.Mock;
+    const rejected = (status = 429) =>
+      Object.assign(new Error('Response Error'), {
+        meta: {
+          statusCode: status,
+          body: {
+            error: {
+              type: 'es_rejected_execution_exception',
+              reason: 'rejected execution of coordinating operation',
+            },
+          },
+        },
+      });
+    const itemRejected = () =>
+      fail('es_rejected_execution_exception', 'rejected execution of primary operation', 429);
+    const bodyRows = (callIndex: number) =>
+      (client.bulk.mock.calls[callIndex][0] as { body: Array<{ n?: number }> }).body
+        .filter((_line, i) => i % 2 === 1)
+        .map((doc) => doc.n);
+
+    beforeEach(() => {
+      sleep = jest.fn().mockResolvedValue(undefined);
+    });
+
+    it('retries a whole-request 429 with a growing delay and then succeeds', async () => {
+      client.bulk
+        .mockRejectedValueOnce(rejected())
+        .mockRejectedValueOnce(rejected())
+        .mockResolvedValueOnce(bulkResponse([ok(), ok()]));
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      await ingester.add(1, { n: 1 });
+      await ingester.add(2, { n: 2 });
+      const result = await ingester.finish(2);
+
+      expect(client.bulk).toHaveBeenCalledTimes(3);
+      expect(sleep.mock.calls).toEqual([
+        [BULK_RETRY_BASE_DELAY_MS],
+        [BULK_RETRY_BASE_DELAY_MS * 2],
+      ]);
+      expect(result.failedRows).toEqual([]);
+    });
+
+    it('recognizes es_rejected_execution_exception by type even without a 429 status', async () => {
+      client.bulk.mockRejectedValueOnce(rejected(503)).mockResolvedValueOnce(bulkResponse([ok()]));
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      await ingester.add(1, { n: 1 });
+      const result = await ingester.finish(1);
+
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      expect(result.failedRows).toEqual([]);
+    });
+
+    it('fails every row of the request once whole-request retries are exhausted', async () => {
+      client.bulk.mockRejectedValue(rejected());
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      await ingester.add(1, { n: 1 });
+      await ingester.add(2, { n: 2 });
+      const result = await ingester.finish(2);
+
+      expect(client.bulk).toHaveBeenCalledTimes(BULK_MAX_ATTEMPTS);
+      expect(sleep).toHaveBeenCalledTimes(BULK_MAX_ATTEMPTS - 1);
+      expect(result.failedRows).toEqual([1, 2]);
+      expect(result.errorSummary).toEqual([
+        {
+          type: 'es_rejected_execution_exception',
+          reason: 'rejected execution of coordinating operation',
+          count: 2,
+          sampleRows: [1, 2],
+        },
+      ]);
+    });
+
+    it('retries ONLY the per-item 429s and maps the retry results back to the right rows', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          bulkResponse([
+            ok(),
+            itemRejected(),
+            fail('mapper_parsing_exception', 'failed to parse field [n]'),
+            itemRejected(),
+          ])
+        )
+        .mockResolvedValueOnce(bulkResponse([ok(), ok()]));
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      for (let n = 1; n <= 4; n++) {
+        await ingester.add(n, { n });
+      }
+      const result = await ingester.finish(4);
+
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      expect(bodyRows(1)).toEqual([2, 4]);
+      expect(sleep).toHaveBeenCalledWith(BULK_RETRY_BASE_DELAY_MS);
+      // Row 3 failed for a data reason and is NOT retried
+      expect(result.failedRows).toEqual([3]);
+    });
+
+    it('fails the still-rejected rows per row once per-item retries are exhausted', async () => {
+      client.bulk.mockImplementation(((params: { body: unknown[] }) =>
+        Promise.resolve(
+          bulkResponse(Array.from({ length: params.body.length / 2 }, itemRejected))
+        )) as unknown as typeof client.bulk);
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      await ingester.add(1, { n: 1 });
+      await ingester.add(2, { n: 2 });
+      const result = await ingester.finish(2);
+
+      expect(client.bulk).toHaveBeenCalledTimes(BULK_MAX_ATTEMPTS);
+      expect(result.failedRows).toEqual([1, 2]);
+      expect(result.errorSummary).toEqual([
+        expect.objectContaining({ type: 'es_rejected_execution_exception', count: 2 }),
+      ]);
+    });
+
+    it('does not retry other whole-request failures', async () => {
+      client.bulk.mockRejectedValueOnce(new Error('socket hang up'));
+
+      const ingester = new BulkIngester(client, 'foo', 10, undefined, { sleep });
+      await ingester.add(1, { n: 1 });
+      await ingester.finish(1);
+
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(sleep).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('byte cap per chunk', () => {
+    const okForEach = ((params: { body: unknown[] }) =>
+      Promise.resolve(
+        bulkResponse(Array.from({ length: params.body.length / 2 }, ok))
+      )) as unknown as typeof client.bulk;
+    const ndjsonBytes = (body: unknown[]) =>
+      body.reduce<number>((sum, line) => sum + Buffer.byteLength(JSON.stringify(line)) + 1, 0);
+
+    it('defaults to roughly 10MB of serialized NDJSON', () => {
+      expect(BULK_MAX_CHUNK_BYTES).toBe(10 * 1024 * 1024);
+    });
+
+    it('splits a chunk before it exceeds the byte cap even below the document count', async () => {
+      client.bulk.mockImplementation(okForEach);
+      // Each document serializes to ~1KB, so a 2.5KB cap fits 2 documents per request
+      const wide = (n: number) => ({ n, pad: 'x'.repeat(1000) });
+
+      const ingester = new BulkIngester(client, 'foo', 1000, undefined, { maxChunkBytes: 2500 });
+      for (let n = 1; n <= 5; n++) {
+        await ingester.add(n, wide(n));
+      }
+      const result = await ingester.finish(5);
+
+      expect(client.bulk).toHaveBeenCalledTimes(3);
+      const sizes = client.bulk.mock.calls.map(([params]) =>
+        ndjsonBytes((params as { body: unknown[] }).body)
+      );
+      sizes.forEach((size) => expect(size).toBeLessThanOrEqual(2500));
+      expect(result.failedRows).toEqual([]);
+    });
+
+    it('sends a single document larger than the cap on its own', async () => {
+      client.bulk.mockImplementation(okForEach);
+
+      const ingester = new BulkIngester(client, 'foo', 1000, undefined, { maxChunkBytes: 100 });
+      await ingester.add(1, { n: 1 });
+      await ingester.add(2, { n: 2, pad: 'x'.repeat(500) });
+      await ingester.add(3, { n: 3 });
+      await ingester.finish(3);
+
+      const docsPerCall = client.bulk.mock.calls.map(
+        ([params]) => (params as { body: unknown[] }).body.length / 2
+      );
+      expect(docsPerCall).toEqual([1, 1, 1]);
     });
   });
 

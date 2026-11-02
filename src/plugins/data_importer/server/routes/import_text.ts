@@ -20,6 +20,8 @@ import {
 } from '../utils/util';
 import { fetchIndexMapping } from '../utils/coerce_to_mapping';
 import { finishImport } from '../utils/import_result';
+import { ensureLookupField } from '../utils/lookup_alias';
+import { LookupFieldError } from '../utils/lookup_field_error';
 
 export function importTextRoute(
   router: IRouter,
@@ -149,7 +151,12 @@ export function importTextRoute(
           Object.keys(mappingObj).length > 0 ? (mappingObj as MappingTypeMapping) : undefined;
       } else {
         try {
-          targetMapping = await fetchIndexMapping(client, request.query.indexName);
+          targetMapping = await fetchIndexMapping(
+            client,
+            request.query.indexName,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            context.dataImporter?.logger
+          );
         } catch (mappingError) {
           // Not fatal: import without coercion; any type mismatch is reported per row by _bulk
           // @ts-expect-error TS2339 TODO(ts-error): fixme
@@ -176,6 +183,28 @@ export function importTextRoute(
         });
       }
 
+      // On an existing index, make the lookup field exact-match filterable before any row lands;
+      // otherwise it is dynamically mapped as text and the alias term filter matches nothing
+      let lookupFilterField: string | undefined;
+      if (request.query.importIdentifier && !request.query.createMode) {
+        try {
+          lookupFilterField = await ensureLookupField(
+            client,
+            request.query.indexName,
+            LOOKUP_FIELD
+          );
+        } catch (e) {
+          if (e instanceof LookupFieldError) {
+            return e.statusCode === 403
+              ? response.forbidden({ body: e.message })
+              : response.badRequest({ body: e.message });
+          }
+          return response.internalError({
+            body: `Error preparing the lookup field: ${e}`,
+          });
+        }
+      }
+
       try {
         const message = await processor.ingestText(request.body.text, {
           indexName: request.query.indexName,
@@ -193,6 +222,7 @@ export function importTextRoute(
             indexName: request.query.indexName,
             importIdentifier: request.query.importIdentifier,
             lookupId,
+            lookupFilterField,
             // @ts-expect-error TS2339 TODO(ts-error): fixme
             logger: context.dataImporter?.logger,
           }),

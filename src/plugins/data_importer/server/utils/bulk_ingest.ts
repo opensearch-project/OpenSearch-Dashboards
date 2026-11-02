@@ -17,6 +17,47 @@ import { BulkIndexForbiddenError, getErrorStatusCode } from './util';
 export const BULK_CHUNK_SIZE = 1000;
 
 /**
+ * Maximum serialized NDJSON size of one `_bulk` request. Applied alongside BULK_CHUNK_SIZE so that
+ * wide rows don't push a request past `http.max_content_length` (default 100MB) and get a 413;
+ * ~10MB is the commonly recommended bulk request size. A single document larger than this is sent
+ * on its own.
+ */
+export const BULK_MAX_CHUNK_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Total attempts (first try + retries) for a `_bulk` request, or its individual items, that
+ * OpenSearch rejected for back-pressure (HTTP 429 / es_rejected_execution_exception)
+ */
+export const BULK_MAX_ATTEMPTS = 3;
+
+/**
+ * Delay before the first back-pressure retry; doubles on each further retry (1s, 2s, ...)
+ */
+export const BULK_RETRY_BASE_DELAY_MS = 1000;
+
+const REJECTED_EXECUTION_ERROR_TYPE = 'es_rejected_execution_exception';
+
+/**
+ * True for OpenSearch back-pressure rejections, which are transient and worth retrying: the write
+ * thread pool queue was full. Every other failure is a data or cluster problem and is not retried.
+ */
+const isRejectedExecution = (status: number | undefined, type: string | undefined) =>
+  status === 429 || type === REJECTED_EXECUTION_ERROR_TYPE;
+
+const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export interface BulkIngesterOptions {
+  /** Serialized NDJSON byte cap per request; defaults to BULK_MAX_CHUNK_BYTES */
+  maxChunkBytes?: number;
+  /** Attempts for back-pressure rejections; defaults to BULK_MAX_ATTEMPTS */
+  maxAttempts?: number;
+  /** First retry delay, doubled per retry; defaults to BULK_RETRY_BASE_DELAY_MS */
+  retryBaseDelayMs?: number;
+  /** Waits between retries; injectable so tests don't sleep */
+  sleep?: (ms: number) => Promise<void>;
+}
+
+/**
  * Maximum number of distinct failure buckets returned in `errorSummary`
  */
 export const MAX_ERROR_SUMMARY_TYPES = 5;
@@ -164,30 +205,63 @@ export class BulkIngester {
   /** Rows OpenSearch confirmed as indexed so far (reported if a later chunk is denied) */
   private indexedRows = 0;
 
+  /** Serialized NDJSON size of the buffered documents (action + source lines + newlines) */
+  private bufferBytes = 0;
+  /** Serialized size of the action line every document is preceded by */
+  private readonly actionLineBytes: number;
+  private readonly maxChunkBytes: number;
+  private readonly maxAttempts: number;
+  private readonly retryBaseDelayMs: number;
+  private readonly sleep: (ms: number) => Promise<void>;
+
   /**
    * @param mapping resolved target index mapping; when given, numbers/booleans bound for
    *   text/keyword fields are sent as strings. Omit to send documents unchanged.
+   * @param options byte cap and back-pressure retry tuning (defaults suit production)
    */
   constructor(
     private readonly client: OpenSearchClient,
     private readonly indexName: string,
     private readonly chunkSize: number = BULK_CHUNK_SIZE,
-    mapping?: MappingTypeMapping
+    mapping?: MappingTypeMapping,
+    {
+      maxChunkBytes = BULK_MAX_CHUNK_BYTES,
+      maxAttempts = BULK_MAX_ATTEMPTS,
+      retryBaseDelayMs = BULK_RETRY_BASE_DELAY_MS,
+      sleep = defaultSleep,
+    }: BulkIngesterOptions = {}
   ) {
     this.stringFields = getStringFieldPaths(mapping);
+    this.actionLineBytes = Buffer.byteLength(JSON.stringify(this.actionLine()));
+    this.maxChunkBytes = maxChunkBytes;
+    this.maxAttempts = maxAttempts;
+    this.retryBaseDelayMs = retryBaseDelayMs;
+    this.sleep = sleep;
   }
 
   /**
-   * Queue a document. When the buffer reaches the chunk size a flush is scheduled and a promise is
-   * returned that resolves once that flush completes, so stream callers can pause until it does to
-   * apply backpressure. Returns undefined when no flush was triggered.
+   * Queue a document. When the buffer reaches the chunk size or byte cap a flush is scheduled and a
+   * promise is returned that resolves once that flush completes, so stream callers can pause until
+   * it does to apply backpressure. Returns undefined when no flush was triggered.
    */
   public add(row: number, document: Record<string, unknown>): Promise<void> | undefined {
-    this.buffer.push({ row, document: coerceToStringFields(document, this.stringFields) });
-    if (this.buffer.length >= this.chunkSize) {
+    const coerced = coerceToStringFields(document, this.stringFields);
+    // Action line + source line, each newline-terminated in the NDJSON body
+    const bytes = this.actionLineBytes + Buffer.byteLength(JSON.stringify(coerced)) + 2;
+
+    // Flush first if this document would push the buffered request past the byte cap
+    let flushed: Promise<void> | undefined;
+    if (this.buffer.length > 0 && this.bufferBytes + bytes > this.maxChunkBytes) {
+      flushed = this.flush();
+    }
+
+    this.buffer.push({ row, document: coerced });
+    this.bufferBytes += bytes;
+    if (this.buffer.length >= this.chunkSize || this.bufferBytes >= this.maxChunkBytes) {
+      // Flushes are chained, so this promise also covers the one above
       return this.flush();
     }
-    return undefined;
+    return flushed;
   }
 
   /**
@@ -215,9 +289,14 @@ export class BulkIngester {
     };
   }
 
+  private actionLine() {
+    return { index: { _index: this.indexName } };
+  }
+
   private flush(): Promise<void> {
     const chunk = this.buffer;
     this.buffer = [];
+    this.bufferBytes = 0;
     this.inFlight = this.inFlight.then(() => this.sendChunk(chunk));
     return this.inFlight;
   }
@@ -241,12 +320,35 @@ export class BulkIngester {
     );
   }
 
+  /**
+   * Send a chunk, retrying back-pressure rejections (HTTP 429 / es_rejected_execution_exception)
+   * up to `maxAttempts` times with a doubling delay. A whole-request rejection retries the whole
+   * chunk; per-item rejections retry only those items. Once attempts are exhausted the rejected
+   * rows are recorded as per-row failures like any other.
+   */
   private async sendChunk(chunk: PendingDocument[]) {
+    let pending = chunk;
+    for (let attempt = 1; pending.length > 0 && !this.fatalForbidden; attempt++) {
+      pending = await this.sendOnce(pending, attempt < this.maxAttempts);
+      if (pending.length > 0) {
+        await this.sleep(this.retryBaseDelayMs * 2 ** (attempt - 1));
+      }
+    }
+  }
+
+  /**
+   * Send one `_bulk` request and record its outcome.
+   * @param canRetry whether back-pressure rejections may be retried; when false they are recorded
+   *   as failures
+   * @returns the documents rejected for back-pressure that should be retried (empty when
+   *   `canRetry` is false)
+   */
+  private async sendOnce(chunk: PendingDocument[], canRetry: boolean): Promise<PendingDocument[]> {
     if (chunk.length === 0 || this.fatalForbidden) {
-      return;
+      return [];
     }
 
-    const body = chunk.flatMap(({ document }) => [{ index: { _index: this.indexName } }, document]);
+    const body = chunk.flatMap(({ document }) => [this.actionLine(), document]);
 
     let responseBody: BulkResponseBody;
     try {
@@ -259,21 +361,27 @@ export class BulkIngester {
       if (getErrorStatusCode(e) === 403) {
         const { reason } = describeThrownError(e);
         this.fatalForbidden = { reason };
-        return;
+        return [];
+      }
+      const { type, reason } = describeThrownError(e);
+      // The cluster is shedding load: retry the whole request after a delay
+      if (canRetry && isRejectedExecution(getErrorStatusCode(e), type)) {
+        return chunk;
       }
       // Any other whole-request failure (network, cluster block...): every row in it failed
-      const { type, reason } = describeThrownError(e);
       chunk.forEach(({ row }) => this.failures.push({ row, type, reason }));
-      return;
+      return [];
     }
 
     if (!responseBody?.errors) {
       this.indexedRows += chunk.length;
-      return;
+      return [];
     }
 
+    const retry: PendingDocument[] = [];
     const items = responseBody.items ?? [];
-    chunk.forEach(({ row }, i) => {
+    chunk.forEach((pendingDocument, i) => {
+      const { row } = pendingDocument;
       const item = items[i];
       const result = item ? item[Object.keys(item)[0]] : undefined;
       if (!result) {
@@ -285,6 +393,11 @@ export class BulkIngester {
         return;
       }
       if (result.error) {
+        // Per-item back-pressure rejection: resend just this document after a delay
+        if (canRetry && isRejectedExecution(result.status, result.error.type)) {
+          retry.push(pendingDocument);
+          return;
+        }
         // A per-item 403 (the common shape: _bulk returns HTTP 200 with each item carrying a
         // security_exception) is a whole-import authorization failure, not a per-document data
         // problem. Flag it as fatal so finish() surfaces one actionable permission error instead
@@ -301,5 +414,6 @@ export class BulkIngester {
       }
       this.indexedRows++;
     });
+    return retry;
   }
 }

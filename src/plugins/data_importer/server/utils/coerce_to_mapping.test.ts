@@ -4,7 +4,7 @@
  */
 
 import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
-import { coerceToStringFields, getStringFieldPaths } from './coerce_to_mapping';
+import { coerceToStringFields, fetchIndexMapping, getStringFieldPaths } from './coerce_to_mapping';
 
 describe('getStringFieldPaths()', () => {
   it('collects dotted paths of string-typed fields, including nested objects', () => {
@@ -78,5 +78,76 @@ describe('coerceToStringFields()', () => {
     expect(coerceToStringFields(doc, new Set())).toBe(doc);
     coerceToStringFields(doc, stringFields);
     expect(doc).toEqual({ zip: 1 });
+  });
+});
+
+describe('fetchIndexMapping()', () => {
+  const mapping = (properties: Record<string, unknown>) => ({ mappings: { properties } });
+  let client: any;
+  let logger: { warn: jest.Mock };
+
+  beforeEach(() => {
+    client = { indices: { getMapping: jest.fn() } };
+    logger = { warn: jest.fn() };
+  });
+
+  it('returns the mapping of the named concrete index', async () => {
+    client.indices.getMapping.mockResolvedValue({
+      body: { idx: mapping({ zip: { type: 'keyword' } }) },
+    });
+    await expect(fetchIndexMapping(client, 'idx', logger)).resolves.toEqual({
+      properties: { zip: { type: 'keyword' } },
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns the single backing index mapping for an alias', async () => {
+    client.indices.getMapping.mockResolvedValue({
+      body: { 'idx-1': mapping({ zip: { type: 'keyword' } }) },
+    });
+    await expect(fetchIndexMapping(client, 'my-alias', logger)).resolves.toEqual({
+      properties: { zip: { type: 'keyword' } },
+    });
+  });
+
+  it('returns the shared mapping when every backing index of an alias has the same mapping', async () => {
+    client.indices.getMapping.mockResolvedValue({
+      body: {
+        'idx-1': mapping({
+          zip: { type: 'keyword' },
+          host: { properties: { ip: { type: 'ip' } } },
+        }),
+        'idx-2': mapping({
+          host: { properties: { ip: { type: 'ip' } } },
+          zip: { type: 'keyword' },
+        }),
+      },
+    });
+    await expect(fetchIndexMapping(client, 'my-alias', logger)).resolves.toEqual({
+      properties: { zip: { type: 'keyword' }, host: { properties: { ip: { type: 'ip' } } } },
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('skips coercion and warns when backing indices of an alias have different mappings', async () => {
+    client.indices.getMapping.mockResolvedValue({
+      body: {
+        'idx-1': mapping({ zip: { type: 'keyword' } }),
+        'idx-2': mapping({ zip: { type: 'long' } }),
+      },
+    });
+    await expect(fetchIndexMapping(client, 'my-alias', logger)).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /"my-alias" resolves to 2 indices with different mappings \(idx-1, idx-2\).*without type coercion/
+      )
+    );
+  });
+
+  it('skips coercion without a logger', async () => {
+    client.indices.getMapping.mockResolvedValue({
+      body: { a: mapping({ x: { type: 'text' } }), b: mapping({ x: { type: 'long' } }) },
+    });
+    await expect(fetchIndexMapping(client, 'my-alias')).resolves.toBeUndefined();
   });
 });
