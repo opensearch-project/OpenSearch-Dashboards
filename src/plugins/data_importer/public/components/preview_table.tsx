@@ -103,8 +103,7 @@ export const PreviewComponent = ({
       return undefined;
     }
     return i18n.translate('dataImporter.incompatibleValueTooltip', {
-      defaultMessage:
-        "''{value}'' is not a valid {existingType} for existing field type {existingType}",
+      defaultMessage: "'{value}' is not a valid value for existing field type {existingType}",
       values: { value: String(value), existingType },
     });
   };

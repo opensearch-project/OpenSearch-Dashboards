@@ -6,24 +6,37 @@
 import { isStringFieldType, isValueCompatibleWithType } from './type_compatibility';
 
 describe('isValueCompatibleWithType', () => {
-  it.each([null, undefined, '', '   '])('treats empty value %p as compatible', (value) => {
+  it.each([null, undefined, ''])('treats empty value %p as compatible', (value) => {
+    // OpenSearch indexes an empty string into a (coercing) numeric field as null.
     expect(isValueCompatibleWithType(value, 'integer')).toBe(true);
+    expect(isValueCompatibleWithType(value, 'float')).toBe(true);
     expect(isValueCompatibleWithType(value, 'boolean')).toBe(true);
     expect(isValueCompatibleWithType(value, 'date')).toBe(true);
   });
 
+  // Not-a-decimal strings that Number() would happily turn into a number.
+  const NON_DECIMAL_STRINGS = ['0x1F', '0b11', '0o7', '   ', ' 4', '4 ', 'Infinity', 'NaN'];
+
   describe.each(['integer', 'long', 'short', 'byte', 'unsigned_long'])('%s', (type) => {
     it('accepts integer-looking values', () => {
       expect(isValueCompatibleWithType('4', type)).toBe(true);
-      expect(isValueCompatibleWithType(' -12 ', type)).toBe(true);
+      expect(isValueCompatibleWithType('-3', type)).toBe(true);
       expect(isValueCompatibleWithType(7, type)).toBe(true);
     });
 
-    it('rejects letters and decimals', () => {
+    it('accepts decimals and exponents, which OpenSearch coerces (truncates) by default', () => {
+      expect(isValueCompatibleWithType('1.5', type)).toBe(true);
+      expect(isValueCompatibleWithType(1.5, type)).toBe(true);
+      expect(isValueCompatibleWithType('1e3', type)).toBe(true);
+    });
+
+    it('rejects letters', () => {
       expect(isValueCompatibleWithType('A', type)).toBe(false);
-      expect(isValueCompatibleWithType('1.5', type)).toBe(false);
-      expect(isValueCompatibleWithType(1.5, type)).toBe(false);
       expect(isValueCompatibleWithType('4x', type)).toBe(false);
+    });
+
+    it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(false);
     });
   });
 
@@ -31,14 +44,19 @@ describe('isValueCompatibleWithType', () => {
     it('accepts any number', () => {
       expect(isValueCompatibleWithType('4', type)).toBe(true);
       expect(isValueCompatibleWithType('-1.25', type)).toBe(true);
+      expect(isValueCompatibleWithType('1.5', type)).toBe(true);
+      expect(isValueCompatibleWithType('-3', type)).toBe(true);
       expect(isValueCompatibleWithType('1e3', type)).toBe(true);
       expect(isValueCompatibleWithType(3.14, type)).toBe(true);
     });
 
     it('rejects non-numbers', () => {
       expect(isValueCompatibleWithType('B', type)).toBe(false);
-      expect(isValueCompatibleWithType('NaN', type)).toBe(false);
       expect(isValueCompatibleWithType(true, type)).toBe(false);
+    });
+
+    it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(false);
     });
   });
 

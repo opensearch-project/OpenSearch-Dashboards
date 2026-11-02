@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { PreviewComponent } from './preview_table';
 
 const mixedRows = [
@@ -52,6 +52,19 @@ describe('PreviewComponent', () => {
     );
     expect(screen.getByTestId('dataImporterPreviewHeaderMismatch-criticality')).toBeTruthy();
     expect(screen.queryByTestId('dataImporterPreviewHeaderMismatch-name')).toBeNull();
+  });
+
+  it('explains an incompatible cell without repeating the field type', async () => {
+    const { container } = renderPreview(
+      mixedRows,
+      { properties: { name: { type: 'keyword' }, criticality: { type: 'keyword' } } },
+      { properties: { name: { type: 'keyword' }, criticality: { type: 'integer' } } }
+    );
+    const icon = invalidCells(container)[0].querySelector('.previewTable__cellIcon')!;
+    fireEvent.mouseOver(icon);
+    expect(
+      await screen.findByText("'A' is not a valid value for existing field type integer")
+    ).toBeInTheDocument();
   });
 
   it('flags only the incompatible cells of a mixed column mapped as integer', () => {

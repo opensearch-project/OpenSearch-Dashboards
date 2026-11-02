@@ -25,28 +25,31 @@ const STRING_FIELD_TYPES = new Set([
   'constant_keyword',
 ]);
 
-const INTEGER_PATTERN = /^[+-]?\d+$/;
+/**
+ * A plain decimal number string, optionally signed, with an optional fraction and exponent.
+ * Based on DECIMAL_STRING_REGEX in server/utils/determine_mapping.ts, widened to what OpenSearch
+ * actually accepts at index time (a leading `+`, leading zeros, `.5`, `1e3`). Unlike `Number()`,
+ * it rejects hex/binary/octal literals, `Infinity`/`NaN` and whitespace padding.
+ */
+const DECIMAL_NUMBER_PATTERN = /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
 const DIGITS_PATTERN = /^\d+$/;
 
 export const isStringFieldType = (type: string | undefined): boolean =>
   !!type && STRING_FIELD_TYPES.has(type);
 
-const isEmpty = (value: unknown) =>
-  value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
+// Only the truly empty string: OpenSearch indexes '' into a (coercing) numeric field as null, but
+// a whitespace-only string is parsed, and rejected, like any other value.
+const isEmpty = (value: unknown) => value === null || value === undefined || value === '';
 
+/**
+ * Numeric field types (integer and float alike) default to `coerce: true`, so OpenSearch accepts
+ * any decimal string, truncating fractions for integer types ("1.5" -> 1). Range is not checked.
+ */
 const isNumeric = (value: unknown): boolean => {
   if (typeof value === 'number') {
     return Number.isFinite(value);
   }
-  // Number('') is 0, but empty strings are filtered out before this point.
-  return typeof value === 'string' && Number.isFinite(Number(value.trim()));
-};
-
-const isIntegerLike = (value: unknown): boolean => {
-  if (typeof value === 'number') {
-    return Number.isInteger(value);
-  }
-  return typeof value === 'string' && INTEGER_PATTERN.test(value.trim());
+  return typeof value === 'string' && DECIMAL_NUMBER_PATTERN.test(value);
 };
 
 const isBooleanLike = (value: unknown): boolean =>
@@ -82,10 +85,7 @@ export const isValueCompatibleWithType = (
   if (STRING_FIELD_TYPES.has(existingType)) {
     return true;
   }
-  if (INTEGER_TYPES.has(existingType)) {
-    return isIntegerLike(value);
-  }
-  if (FLOAT_TYPES.has(existingType)) {
+  if (INTEGER_TYPES.has(existingType) || FLOAT_TYPES.has(existingType)) {
     return isNumeric(value);
   }
   if (existingType === 'boolean') {
