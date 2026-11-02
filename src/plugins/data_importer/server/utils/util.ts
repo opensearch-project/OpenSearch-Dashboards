@@ -99,14 +99,6 @@ export const isNumericType = (value: any) => {
   return !isNaN(Number(value));
 };
 
-export const mergeCustomizerForPreview = (objValue: any, srcValue: any) => {
-  if (!isBooleanType(objValue) && !isNumericType(objValue)) {
-    return objValue;
-  } else {
-    return srcValue;
-  }
-};
-
 const flattenObject = (obj: Record<string, any>) => {
   const result: Record<string, any> = {};
   for (const key of Object.keys(obj)) {
