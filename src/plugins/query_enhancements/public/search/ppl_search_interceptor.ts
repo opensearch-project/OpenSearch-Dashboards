@@ -10,6 +10,7 @@ import { first, switchMap } from 'rxjs/operators';
 import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
+  getPPLSourceTimeFieldChecker,
   Query,
   TimeBounds,
   UI_SETTINGS,
@@ -182,15 +183,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     // Check if skipTimeFilter is set in the search request fields
     const skipTimeFilter = request.params?.body?.skipTimeFilter;
 
+    // Resolved even when skipTimeFilter is set: appendDefaultSort reads the cached answer, and a
+    // time sort on a source without the field fails just like the filter would.
+    const sourceLacksTimeField = await this.sourceLacksTimeField(query);
+
     let timeBounds: TimeBounds | undefined;
 
     if (
       dataset &&
       dataset.timeFieldName &&
       !skipTimeFilter && // Skip time filters if skipTimeFilter is true
-      // Skip time filter when source= names a different index than the dataset — its time field
-      // won't exist there. Removing this reverts to the always-inject behavior.
-      !PPLFilterUtils.sourceDiffersFromDataset(query.query ?? '', dataset.title) &&
+      // Skip the time filter only when source= names an index that lacks the dataset's time field
+      // (e.g. a lookup); filtering on it would fail with `field not found`. Another index that has
+      // the field (logs-b on dataset logs-a, an alias, a remote cluster) keeps the date picker.
+      !sourceLacksTimeField &&
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
@@ -234,6 +240,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   /**
+   * Whether the query's `source=` names an index that lacks the dataset's time field. Shared with
+   * Explore's non-time-series detection via the data plugin, so both reach the same verdict for a
+   * query. Resolves false (apply the time filter) when it cannot tell, including when the index
+   * patterns service is not available yet.
+   */
+  private async sourceLacksTimeField(query: Query): Promise<boolean> {
+    if (!this.indexPatterns || !query.dataset?.timeFieldName) return false;
+    return getPPLSourceTimeFieldChecker(this.indexPatterns).sourceLacksTimeField(
+      typeof query.query === 'string' ? query.query : '',
+      query.dataset
+    );
+  }
+
+  /**
    * Appends a default descending sort on the time field to match legacy Discover behavior,
    * unless the query already sorts, aggregates, projects specific fields, or limits results.
    * Applied only to the results query, not to the histogram aggregation query.
@@ -242,8 +262,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     if (
       !isPPLSearchQuery(query) ||
       !query.dataset?.timeFieldName ||
-      // Don't sort on the dataset time field when querying a different source.
-      PPLFilterUtils.sourceDiffersFromDataset(query.query ?? '', query.dataset?.title) ||
+      // Don't sort on the dataset time field when the source lacks it. buildQuery has already
+      // resolved this for the same source, so the synchronous cached answer is available; an
+      // unknown answer (failed lookup) keeps the sort, matching the filter's apply-on-error.
+      (this.indexPatterns &&
+        getPPLSourceTimeFieldChecker(this.indexPatterns).peek(
+          typeof query.query === 'string' ? query.query : '',
+          query.dataset
+        ) === true) ||
       !canAppendDefaultSort(query.query)
     ) {
       return query;

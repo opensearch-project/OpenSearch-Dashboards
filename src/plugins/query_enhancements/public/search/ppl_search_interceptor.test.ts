@@ -31,9 +31,6 @@ jest.mock('./filters', () => ({
     convertFiltersToWhereClause: jest.fn(),
     getTimeFilter: jest.fn(),
     insertWhereCommand: jest.requireActual('./filters').PPLFilterUtils.insertWhereCommand,
-    extractSourceIndex: jest.requireActual('./filters').PPLFilterUtils.extractSourceIndex,
-    sourceDiffersFromDataset:
-      jest.requireActual('./filters').PPLFilterUtils.sourceDiffersFromDataset,
   },
 }));
 
@@ -1371,6 +1368,100 @@ describe('PPLSearchInterceptor', () => {
       expect(aggConfig.qs['1']).toBe(
         'source=test_index | fields * | stats count() by span(@timestamp, 1h)'
       );
+    });
+  });
+
+  // The date picker is skipped only when the queried source genuinely lacks the dataset's time
+  // field, decided by asking the cluster for the source's fields (shared with Explore).
+  describe('time filter for a source other than the dataset', () => {
+    const dataset = { type: 'DEFAULT', title: 'logs-a', timeFieldName: '@timestamp' };
+    let getFieldsForWildcard: jest.Mock;
+
+    const build = async (queryString: string) => {
+      const query = { language: 'PPL', query: queryString, dataset };
+      const request: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [query] } } },
+      };
+      const built = await (pplSearchInterceptor as any).buildQuery(request);
+      return { built, sorted: (pplSearchInterceptor as any).appendDefaultSort(built) };
+    };
+
+    beforeEach(() => {
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
+      mockPPLFilterUtils.getTimeFilter.mockImplementation(mockTimeFilter as any);
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest
+          .fn()
+          .mockReturnValue({ languageOverrides: { PPL: { hideDatePicker: true } } }),
+      });
+      getFieldsForWildcard = jest.fn(async ({ pattern }: { pattern: string }) => {
+        if (pattern === 'logs-b') return [{ name: '@timestamp' }, { name: 'host' }];
+        if (pattern === 'lookup') return [{ name: 'key' }, { name: 'value' }];
+        throw new Error(`no such index [${pattern}]`);
+      });
+      (mockDataService.indexPatterns as any).getFieldsForWildcard = getFieldsForWildcard;
+    });
+
+    it('applies the time filter and sort when the other source has the time field', async () => {
+      const { built, sorted } = await build('source=logs-b');
+
+      expect(getFieldsForWildcard).toHaveBeenCalledWith({
+        pattern: 'logs-b',
+        dataSourceId: undefined,
+      });
+      expect(built.query).toBe('source=logs-b | WHERE @timestamp >= "2023-01-01"');
+      expect(built.time_field).toBe('@timestamp');
+      expect(sorted.query).toBe(
+        'source=logs-b | WHERE @timestamp >= "2023-01-01" | sort - `@timestamp`'
+      );
+    });
+
+    it('skips the time filter and sort when the source lacks the time field', async () => {
+      const { built, sorted } = await build('source=lookup | head 5');
+
+      expect(built.query).toBe('source=lookup | head 5');
+      expect(built.time_field).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
+      expect(sorted.query).toBe('source=lookup | head 5');
+    });
+
+    it('applies the time filter without a lookup when the source matches the dataset', async () => {
+      const { built, sorted } = await build('source=logs-a | fields host');
+
+      expect(getFieldsForWildcard).not.toHaveBeenCalled();
+      expect(built.query).toBe('source=logs-a | WHERE @timestamp >= "2023-01-01" | fields host');
+      // The sort is withheld here by the fields projection, not by the source check.
+      expect(sorted.query).toBe(built.query);
+    });
+
+    it('applies the time filter and sort when the field lookup fails', async () => {
+      const { built, sorted } = await build('source=remote:logs');
+
+      expect(getFieldsForWildcard).toHaveBeenCalled();
+      expect(built.query).toBe('source=remote:logs | WHERE @timestamp >= "2023-01-01"');
+      expect(sorted.query).toBe(
+        'source=remote:logs | WHERE @timestamp >= "2023-01-01" | sort - `@timestamp`'
+      );
+    });
+
+    it('looks each source up once', async () => {
+      await build('source=lookup');
+      await build('source=lookup | stats count() by key');
+      expect(getFieldsForWildcard).toHaveBeenCalledTimes(1);
+    });
+
+    it('still withholds the sort for a lookup source when the time filter is skipped by request', async () => {
+      const query = { language: 'PPL', query: 'source=lookup', dataset };
+      const built = await (pplSearchInterceptor as any).buildQuery({
+        params: { body: { query: { queries: [query] }, skipTimeFilter: true } },
+      });
+      expect((pplSearchInterceptor as any).appendDefaultSort(built).query).toBe('source=lookup');
     });
   });
 

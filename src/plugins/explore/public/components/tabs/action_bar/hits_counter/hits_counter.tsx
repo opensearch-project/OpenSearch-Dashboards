@@ -89,10 +89,10 @@ export interface HitsCounterProps {
    */
   streaming?: StreamingQueryStatus;
   /**
-   * when true, the results are non-time-series: the dataset has no time field, or the rows came
-   * from a different source than the active dataset (e.g. a `source=<lookup>` query over a
-   * time-based dataset); renders an informational badge so the user understands why
-   * time-dependent features (histogram, time column) are quiet
+   * when true, the results are non-time-series: the dataset has no time field, or the query's
+   * source lacks the dataset's time field (e.g. a `source=<lookup>` query over a time-based
+   * dataset); renders an informational badge so the user understands why time-dependent
+   * features (histogram, time column, time filter) are quiet
    */
   isNonTimeSeries?: boolean;
 }
@@ -187,14 +187,11 @@ export function HitsCounter({
             )}
           </EuiText>
         </EuiFlexItem>
-        {/* Sits in the same sentence as the counts so the table's column set is disclosed where
-            the result summary already is, and offers the way back out of the filter. The gap is a
-            margin rather than a leading space, since the row's gutterSize="none" collapses one. */}
         {isNonTimeSeries && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('explore.discover.outsideDatasetBadgeTooltip', {
+              content={i18n.translate('explore.discover.nonTimeSeriesBadgeTooltip', {
                 defaultMessage:
                   'This query returns non-time-series data. Time-based features (histogram, time column, time filter) are unavailable for these results.',
               })}
@@ -202,17 +199,20 @@ export function HitsCounter({
               <EuiBadge
                 color="primary"
                 iconType="iInCircle"
-                className="dscResultCount__outsideDataset"
+                className="dscResultCount__nonTimeSeries"
                 data-test-subj="exploreNonTimeSeriesBadge"
               >
                 <FormattedMessage
-                  id="explore.discover.outsideDatasetBadge"
+                  id="explore.discover.nonTimeSeriesBadge"
                   defaultMessage="Querying non-time-series data"
                 />
               </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
         )}
+        {/* Sits in the same sentence as the counts so the table's column set is disclosed where
+            the result summary already is, and offers the way back out of the filter. The gap is a
+            margin rather than a leading space, since the row's gutterSize="none" collapses one. */}
         {hiddenColumnCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued" className="dscResultCount__hiddenColumns">

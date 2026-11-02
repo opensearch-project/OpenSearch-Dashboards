@@ -92,7 +92,10 @@ describe('hits counter', () => {
 
   it('renders the non-time-series badge when isNonTimeSeries is true', () => {
     component = mountWithIntl(<HitsCounter {...props} isNonTimeSeries={true} />);
-    expect(findTestSubject(component, 'exploreNonTimeSeriesBadge').length).toBeGreaterThan(0);
+    const badge = findTestSubject(component, 'exploreNonTimeSeriesBadge').hostNodes();
+    expect(badge.length).toBeGreaterThan(0);
+    expect(badge.first().hasClass('dscResultCount__nonTimeSeries')).toBe(true);
+    expect(badge.text()).toBe('Querying non-time-series data');
   });
 
   it('does not render the non-time-series badge by default', () => {
