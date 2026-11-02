@@ -22,6 +22,7 @@ import { RootState } from '../../application/utils/state_management/store';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { ErrorGuard } from './error_guard/error_guard';
 import {
+  EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
@@ -53,8 +54,8 @@ export const ExploreTabs = () => {
   const activeTabId = useSelector(selectActiveTab);
   const { dataset } = useDatasetContext();
   const metricsPageMode = useMetricsPageMode();
-  // Non-time-series mode: the dataset has no time field, or the result set came from a source
-  // without the dataset's time field (e.g. a lookup). Drives the tab-set mode swap below.
+  // Non-time-series mode: the dataset has no time field, or the query's source lacks the
+  // dataset's time field (e.g. a lookup). Drives the tab-set mode swap below.
   const isNonTimeSeries = useIsNonTimeSeries();
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
@@ -94,29 +95,7 @@ export const ExploreTabs = () => {
 
   const filteredTabs = useMemo(() => {
     if (flavorId == null) return [];
-    // Non-time-series mode: when the results have no usable time field (a dataset without one, or
-    // a source such as a lookup lacking the dataset's time field), collapse the tab bar to a
-    // single "Query Results" tab. Logs/Visualization/Patterns/Fields all assume a timestamp, so
-    // hiding them avoids a partially broken experience. Query Results reuses the Statistics
-    // surface (a schema-driven table), relabeled only in this mode.
-    if (isNonTimeSeries) {
-      const statisticsTab = registryTabs.find(
-        (t) => t.id === EXPLORE_STATISTICS_TAB_ID && t.flavor.includes(flavorId)
-      );
-      if (statisticsTab) {
-        return [
-          {
-            ...statisticsTab,
-            label: i18n.translate('explore.queryResultsTab.label', {
-              defaultMessage: 'Query Results',
-            }),
-          },
-        ];
-      }
-      // No Statistics tab for this flavor (shouldn't happen in Logs); fall through to the normal
-      // list rather than render an empty tab bar.
-    }
-    return registryTabs.filter((registryTab) => {
+    const tabs = registryTabs.filter((registryTab) => {
       const registeredFlavor = registryTab.flavor.includes(flavorId);
       const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
       const isFieldStatsTab = registryTab.id === EXPLORE_FIELD_STATS_TAB_ID;
@@ -145,6 +124,29 @@ export const ExploreTabs = () => {
       }
       return registeredFlavor;
     });
+
+    if (!isNonTimeSeries) return tabs;
+
+    // Non-time-series mode: when the results have no usable time field (a dataset without one, or
+    // a source such as a lookup lacking the dataset's time field), drop the tabs built around a
+    // timestamp: Logs (time column, histogram, time-sorted documents) and Patterns. Visualization
+    // and the rest render from the result schema, so they stay. The Statistics surface (a
+    // schema-driven table) takes over as the results table and is relabeled "Query Results" only
+    // in this mode.
+    const nonTimeSeriesTabs = tabs
+      .filter((tab) => tab.id !== EXPLORE_LOGS_TAB_ID && tab.id !== EXPLORE_PATTERNS_TAB_ID)
+      .map((tab) =>
+        tab.id === EXPLORE_STATISTICS_TAB_ID
+          ? {
+              ...tab,
+              label: i18n.translate('explore.queryResultsTab.label', {
+                defaultMessage: 'Query Results',
+              }),
+            }
+          : tab
+      );
+    // Never leave the tab bar empty: fall back to the normal list.
+    return nonTimeSeriesTabs.length > 0 ? nonTimeSeriesTabs : tabs;
   }, [flavorId, registryTabs, query, metricsPageMode, isNonTimeSeries]);
 
   const activeRegistryTab = useMemo(() => {

@@ -428,6 +428,13 @@ describe('ExploreTabsComponent', () => {
             component: () => <div>Logs Content</div>,
             flavor: [ExploreFlavor.Logs],
           },
+          // Registry order: getAllTabs sorts by `order` (Statistics 17 before Visualization 20).
+          {
+            id: 'explore_statistics',
+            label: 'Statistics',
+            component: () => <div>Statistics Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
           {
             id: 'explore_visualization_tab',
             label: 'Visualization',
@@ -435,9 +442,9 @@ describe('ExploreTabsComponent', () => {
             flavor: [ExploreFlavor.Logs],
           },
           {
-            id: 'explore_statistics',
-            label: 'Statistics',
-            component: () => <div>Statistics Content</div>,
+            id: 'explore_patterns_tab',
+            label: 'Patterns',
+            component: () => <div>Patterns Content</div>,
             flavor: [ExploreFlavor.Logs],
           },
         ]),
@@ -471,17 +478,24 @@ describe('ExploreTabsComponent', () => {
       expect(screen.getByText('Logs')).toBeInTheDocument();
       expect(screen.getByText('Visualization')).toBeInTheDocument();
       expect(screen.getByText('Statistics')).toBeInTheDocument();
+      expect(screen.getByText('Patterns')).toBeInTheDocument();
       expect(screen.queryByText('Query Results')).not.toBeInTheDocument();
     });
 
-    it('collapses to a single relabeled Query Results tab for non-time-series results', () => {
+    it('drops only Logs and Patterns for non-time-series results', () => {
       mockUseIsNonTimeSeries.mockReturnValue(true);
       renderSwap();
-      // Logs and Visualization are hidden; only the (relabeled) Statistics surface remains.
       expect(screen.queryByText('Logs')).not.toBeInTheDocument();
-      expect(screen.queryByText('Visualization')).not.toBeInTheDocument();
+      expect(screen.queryByText('Patterns')).not.toBeInTheDocument();
+      // Visualization works off the result schema, so it stays available.
+      expect(screen.getByText('Visualization')).toBeInTheDocument();
+      // The Statistics surface is relabeled as the primary results table.
       expect(screen.queryByText('Statistics')).not.toBeInTheDocument();
       expect(screen.getByText('Query Results')).toBeInTheDocument();
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        'Query Results',
+        'Visualization',
+      ]);
     });
 
     it('falls back to the first available tab when Logs is hidden mid-session', () => {
@@ -507,14 +521,14 @@ describe('ExploreTabsComponent', () => {
         mockUseDatasetContext.mockReturnValue({ dataset: undefined } as any);
       });
 
-      it('collapses to Query Results immediately, before any results arrive', () => {
+      it('switches to the non-time-series tab set immediately, before any results arrive', () => {
         mockUseDatasetContext.mockReturnValue({
           dataset: { id: 'lookup', title: 'lookup', timeFieldName: undefined },
         } as any);
         // The store has no results: the swap must not wait for them, or Logs would flash first.
         renderSwap();
         expect(screen.queryByText('Logs')).not.toBeInTheDocument();
-        expect(screen.queryByText('Visualization')).not.toBeInTheDocument();
+        expect(screen.getByText('Visualization')).toBeInTheDocument();
         expect(screen.getByText('Query Results')).toBeInTheDocument();
       });
 

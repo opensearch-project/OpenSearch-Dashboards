@@ -28,7 +28,7 @@ jest.mock('../../../data/public', () => ({
   },
 }));
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import {
   useDisplayedColumns,
@@ -36,7 +36,7 @@ import {
   useHiddenColumnCount,
   useIsNonTimeSeries,
   isNonTimeSeriesResult,
-  isQueryingOutsideDatasetResult,
+  hitCarriesField,
   processDisplayedColumns,
 } from './use_displayed_columns';
 import { filterColumns } from './view_component_utils/filter_columns';
@@ -446,99 +446,191 @@ describe('useHiddenColumnCount', () => {
   });
 });
 
-describe('isQueryingOutsideDatasetResult', () => {
-  const timeDataset = { timeFieldName: '@timestamp' };
-  const withTime = { hits: { hits: [{}, {}] }, fieldCounts: { '@timestamp': 2, app: 2 } };
-  const withoutTime = { hits: { hits: [{}, {}] }, fieldCounts: { key: 2, value: 2 } };
-
-  it('is true when a time-based dataset returns rows lacking its time field', () => {
-    expect(isQueryingOutsideDatasetResult(timeDataset, withoutTime)).toBe(true);
+describe('hitCarriesField', () => {
+  it('finds a field present in _source, even when its value is null', () => {
+    expect(hitCarriesField({ _source: { '@timestamp': '2026-01-01' } }, '@timestamp')).toBe(true);
+    // Schema-driven (PPL) rows carry every schema column; null still means the source has it.
+    expect(hitCarriesField({ _source: { '@timestamp': null } }, '@timestamp')).toBe(true);
   });
 
-  it('is false when the rows carry the time field', () => {
-    expect(isQueryingOutsideDatasetResult(timeDataset, withTime)).toBe(false);
+  it('finds flat dotted keys, nested paths and fields', () => {
+    expect(hitCarriesField({ _source: { 'event.time': 1 } }, 'event.time')).toBe(true);
+    expect(hitCarriesField({ _source: { event: { time: 1 } } }, 'event.time')).toBe(true);
+    expect(hitCarriesField({ _source: {}, fields: { ts: [1] } }, 'ts')).toBe(true);
   });
 
-  it('is false with no rows to judge from', () => {
-    expect(
-      isQueryingOutsideDatasetResult(timeDataset, { hits: { hits: [] }, fieldCounts: {} })
-    ).toBe(false);
-    expect(isQueryingOutsideDatasetResult(timeDataset, null)).toBe(false);
-  });
-
-  it('is false for a dataset without a time field (nothing to be outside of)', () => {
-    expect(isQueryingOutsideDatasetResult({}, withoutTime)).toBe(false);
+  it('is false when the field is absent', () => {
+    expect(hitCarriesField({ _source: { key: 'a' } }, '@timestamp')).toBe(false);
+    expect(hitCarriesField({}, '@timestamp')).toBe(false);
   });
 });
 
 describe('isNonTimeSeriesResult', () => {
-  const withTime = { hits: { hits: [{}] }, fieldCounts: { '@timestamp': 1 } };
-  const withoutTime = { hits: { hits: [{}] }, fieldCounts: { key: 1 } };
+  const timeDataset = { title: 'logs-a', timeFieldName: '@timestamp' };
 
   it('is false with no dataset selected', () => {
-    expect(isNonTimeSeriesResult(undefined, withoutTime)).toBe(false);
+    expect(isNonTimeSeriesResult({ dataset: undefined, queryString: 'source=x' })).toBe(false);
   });
 
   it('is true for a dataset without a time field, even before any results arrive', () => {
     // Applies on dataset selection so the tab bar never flashes the time-series set first.
-    expect(isNonTimeSeriesResult({ timeFieldName: undefined }, null)).toBe(true);
-    expect(isNonTimeSeriesResult({}, withTime)).toBe(true);
-    expect(isNonTimeSeriesResult({ timeFieldName: '' }, null)).toBe(true);
+    expect(isNonTimeSeriesResult({ dataset: { title: 'lookup' } })).toBe(true);
+    expect(isNonTimeSeriesResult({ dataset: { title: 'lookup', timeFieldName: '' } })).toBe(true);
   });
 
-  it('is true when a time-based dataset is queried outside itself (e.g. source=<lookup>)', () => {
-    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, withoutTime)).toBe(true);
+  it.each([
+    'source=logs-a | fields host',
+    'source = logs-a | table host',
+    'source=logs-a | fields - @timestamp',
+    'source=logs-a | stats count() by host',
+  ])('is false when the query reads the dataset itself: %s', (queryString) => {
+    // Rows without the time field are expected here (a projection or aggregation dropped it);
+    // that is not the same as querying outside the dataset.
+    expect(
+      isNonTimeSeriesResult({
+        dataset: timeDataset,
+        queryString,
+        sourceLacksTimeField: true,
+        hitsLackTimeField: true,
+      })
+    ).toBe(false);
   });
 
-  it('is false for a time-based dataset whose rows carry the time field', () => {
-    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, withTime)).toBe(false);
+  it('follows the shared source check when it has answered', () => {
+    const args = { dataset: timeDataset, queryString: 'source=other', hitsLackTimeField: true };
+    expect(isNonTimeSeriesResult({ ...args, sourceLacksTimeField: true })).toBe(true);
+    expect(isNonTimeSeriesResult({ ...args, sourceLacksTimeField: false })).toBe(false);
   });
 
-  it('is false for a time-based dataset before results arrive', () => {
-    expect(isNonTimeSeriesResult({ timeFieldName: '@timestamp' }, null)).toBe(false);
+  it('falls back to the returned rows while the source check is pending', () => {
+    const args = { dataset: timeDataset, queryString: 'source=other' };
+    expect(isNonTimeSeriesResult({ ...args, hitsLackTimeField: true })).toBe(true);
+    expect(isNonTimeSeriesResult({ ...args, hitsLackTimeField: false })).toBe(false);
+    expect(isNonTimeSeriesResult(args)).toBe(false);
+  });
+
+  it('is false for a time-based dataset when the query is not PPL', () => {
+    expect(isNonTimeSeriesResult({ dataset: timeDataset, hitsLackTimeField: true })).toBe(false);
   });
 });
 
 describe('useIsNonTimeSeries', () => {
-  const CACHE_KEY = 'cache-key';
+  const lookupHits = [{ _source: { key: 'a' } }, { _source: { key: 'b' } }];
+  const hostOnlyHits = [{ _source: { host: 'h1' } }];
+  const logHits = [{ _source: { '@timestamp': '2026-01-01', host: 'h1' } }];
 
-  const setup = ({ dataset, processedResults }: { dataset: any; processedResults: any | null }) => {
+  let getFieldsForWildcard: jest.Mock;
+
+  // Lets the async field check settle, including the hook's resulting state update.
+  const flushCheck = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+
+  const setup = ({
+    dataset = mockDataset as any,
+    queryString,
+    language = 'PPL',
+    hits,
+  }: {
+    dataset?: any;
+    queryString: string;
+    language?: string;
+    hits?: any[];
+  }) => {
+    // A fresh index patterns service per test, so the shared checker cache starts empty.
+    const indexPatterns = { getFieldsForWildcard };
+    mockUseOpenSearchDashboards.mockReturnValue({
+      services: { ...mockServices, data: { indexPatterns } },
+    } as any);
     mockUseDatasetContext.mockReturnValue({ dataset } as any);
-    (defaultPrepareQueryString as jest.Mock).mockReturnValue(CACHE_KEY);
-    (defaultResultsProcessor as jest.Mock).mockReturnValue(processedResults);
+    (defaultPrepareQueryString as jest.Mock).mockImplementation((query: any) => query.query);
     resultsCache.clear();
-    if (processedResults) resultsCache.set(CACHE_KEY, {} as any);
+    if (hits) resultsCache.set(queryString, { hits: { hits } } as any);
     const state = {
-      query: { query: 'source=logs', language: 'PPL' },
-      results: processedResults ? { [CACHE_KEY]: { status: 'READY' } } : {},
+      query: {
+        query: queryString,
+        language,
+        dataset: dataset && { title: dataset.title, timeFieldName: dataset.timeFieldName },
+      },
+      results: hits ? { [queryString]: { status: 'READY' } } : {},
     };
     mockUseSelector.mockImplementation((selector: any) => selector(state));
   };
 
-  const lookupRows = { hits: { hits: [{}, {}] }, fieldCounts: { key: 2 } };
-  const logRows = { hits: { hits: [{}, {}] }, fieldCounts: { '@timestamp': 2 } };
-
   beforeEach(() => {
     jest.clearAllMocks();
+    getFieldsForWildcard = jest.fn(async ({ pattern }: { pattern: string }) => {
+      if (pattern === 'logs-b') return [{ name: '@timestamp' }, { name: 'host' }];
+      if (pattern === 'lookup') return [{ name: 'key' }];
+      throw new Error(`no such index [${pattern}]`);
+    });
   });
 
   it('flags a no-time-field dataset as non-time-series with no results yet', () => {
-    setup({ dataset: { ...mockDataset, timeFieldName: undefined }, processedResults: null });
+    setup({ dataset: { ...mockDataset, timeFieldName: undefined }, queryString: 'source=lookup' });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
   });
 
-  it('flags a lookup queried over a time-based dataset', () => {
-    setup({ dataset: mockDataset, processedResults: lookupRows });
-    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(true);
+  it.each([
+    'source=test-index | fields host',
+    'source=test-index | table host',
+    'source=test-index | fields - @timestamp',
+  ])('keeps a projection over the dataset itself time-series: %s', (queryString) => {
+    setup({ queryString, hits: hostOnlyHits });
+    expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
+    expect(getFieldsForWildcard).not.toHaveBeenCalled();
+  });
+
+  it('flags a lookup source queried over a time-based dataset', async () => {
+    setup({ queryString: 'source=lookup', hits: lookupHits });
+    const { result } = renderHook(() => useIsNonTimeSeries());
+    // Rows already show no time field, so the provisional answer matches the final one.
+    expect(result.current).toBe(true);
+    await flushCheck();
+    expect(getFieldsForWildcard).toHaveBeenCalled();
+    expect(result.current).toBe(true);
+  });
+
+  it('flags a lookup source once the field check answers, before any rows', async () => {
+    setup({ queryString: 'source=lookup' });
+    const { result } = renderHook(() => useIsNonTimeSeries());
+    await flushCheck();
+    expect(result.current).toBe(true);
+  });
+
+  it('keeps another index that has the time field time-series, even if rows lack it', async () => {
+    setup({ queryString: 'source=logs-b | fields host', hits: hostOnlyHits });
+    const { result } = renderHook(() => useIsNonTimeSeries());
+    await flushCheck();
+    expect(result.current).toBe(false);
+    expect(getFieldsForWildcard).toHaveBeenCalledWith({
+      pattern: 'logs-b',
+      dataSourceId: undefined,
+    });
+  });
+
+  it('treats a failed field check as time-series, as the interceptor applies the filter', async () => {
+    setup({ queryString: 'source=remote:logs', hits: logHits });
+    const { result } = renderHook(() => useIsNonTimeSeries());
+    await flushCheck();
+    expect(getFieldsForWildcard).toHaveBeenCalled();
+    expect(result.current).toBe(false);
   });
 
   it('leaves a time-based dataset with time-stamped rows as time-series', () => {
-    setup({ dataset: mockDataset, processedResults: logRows });
+    setup({ queryString: 'source=test-index', hits: logHits });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
   });
 
+  it('does not run the results processor', async () => {
+    setup({ queryString: 'source=lookup', hits: lookupHits });
+    renderHook(() => useIsNonTimeSeries());
+    await flushCheck();
+    expect(defaultResultsProcessor).not.toHaveBeenCalled();
+  });
+
   it('is false with no dataset selected', () => {
-    setup({ dataset: undefined, processedResults: null });
+    // null, not undefined: undefined would fall back to setup's default dataset.
+    setup({ dataset: null, queryString: 'source=lookup' });
     expect(renderHook(() => useIsNonTimeSeries()).result.current).toBe(false);
+    expect(getFieldsForWildcard).not.toHaveBeenCalled();
   });
 });
