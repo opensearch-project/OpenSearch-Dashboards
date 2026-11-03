@@ -5,11 +5,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DataStructure, DEFAULT_DATA } from '../../../../../../data/common';
-// Type-only: `dataSource` is an optional plugin, so its enum can't be value-imported into this bundle.
-import type { DataSourceEngineType } from '../../../../../../data_source/common/data_sources';
 import { ExploreServices } from '../../../../types';
 import { BrowsableItem } from '../types';
 import { getErrorStatus, maybeNotifyPermissionDenied } from '../permission_toast';
+import { isServerlessDataSource } from '../serverless';
 
 interface UseIndexListArgs {
   services: ExploreServices;
@@ -131,31 +130,6 @@ export const useIndexList = ({
   return { items: filtered, loading, error };
 };
 
-// String value of `DataSourceEngineType.OpenSearchServerless` (kept in sync with the enum).
-const OPENSEARCH_SERVERLESS = 'OpenSearch Serverless' as DataSourceEngineType.OpenSearchServerless;
-
-/**
- * Whether the data source is OpenSearch Serverless, read from its saved object's engine type (set
- * when the data source connection is validated). Serverless `_cat/indices` has no `creation.date`
- * (sorting by it is rejected) and returns empty `health`/`pri`/`rep`, so the enrichment call asks
- * only for the columns it supports. Any lookup failure is treated as "not serverless" so other
- * engines keep their existing behavior.
- */
-async function isServerlessDataSource(
-  services: ExploreServices,
-  dataSourceId: string
-): Promise<boolean> {
-  try {
-    const dataSource = await services.savedObjects.client.get<{ dataSourceEngineType?: string }>(
-      'data-source',
-      dataSourceId
-    );
-    return dataSource?.attributes?.dataSourceEngineType === OPENSEARCH_SERVERLESS;
-  } catch (e) {
-    return false;
-  }
-}
-
 /** Parses a numeric `_cat` cell; empty or non-numeric cells are unknown (never 0). */
 const parseCount = (value?: string): number | undefined => {
   if (value == null || value.trim() === '') return undefined;
@@ -208,7 +182,7 @@ async function sortByCreationDate(
 
   const catIndices = (query: Record<string, string>) =>
     services.http.get<CatIndicesRow[]>(
-      `/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId}`,
+      `/api/directquery/dsl/cat.indices/dataSourceMDSId=${encodeURIComponent(dataSourceId)}`,
       { query }
     );
 

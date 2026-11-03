@@ -53,7 +53,11 @@ import {
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
-import { IndexPatternMissingIndices } from '../lib';
+import {
+  IndexPatternMissingIndices,
+  isPayloadTooLargeError,
+  getPayloadTooLargeToast,
+} from '../lib';
 import { findByTitle, getDataSourceIdFromIndexPattern, getIndexPatternTitle } from '../utils';
 import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
@@ -695,13 +699,26 @@ export class IndexPatternsService {
     const body = indexPattern.getAsSavedObjectBody();
     const references = indexPattern.getSaveObjectReference();
 
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: indexPattern.id,
-      references,
-    });
+    const response = await this.savedObjectsClient
+      .create(savedObjectType, body, {
+        id: indexPattern.id,
+        references,
+      })
+      .catch((err) => {
+        this.notifyIfPayloadTooLarge(err, indexPattern);
+        throw err;
+      });
     indexPattern.id = response.id;
     indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
+  }
+
+  private notifyIfPayloadTooLarge(err: any, indexPattern: IndexPattern) {
+    if (isPayloadTooLargeError(err)) {
+      this.onNotification(
+        getPayloadTooLargeToast(indexPattern.title, indexPattern.fields?.length ?? 0)
+      );
+    }
   }
 
   /**
@@ -787,6 +804,9 @@ export class IndexPatternsService {
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
+        }
+        if (!ignoreErrors) {
+          this.notifyIfPayloadTooLarge(err, indexPattern);
         }
         throw err;
       });

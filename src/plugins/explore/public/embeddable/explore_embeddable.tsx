@@ -446,25 +446,28 @@ export class ExploreEmbeddable
   };
 
   private async handleInputChange(force = false) {
-    // Pause fetching while not visible (e.g. a collapsed section); record the
-    // owed fetch and flush it once on resume. All fetch paths funnel through here.
+    const { filters, query, timeRange } = this.input;
+    const fetchRequested =
+      force ||
+      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      !isEqual(query, this.prevState.query) ||
+      !isEqual(timeRange, this.prevState.timeRange);
+
+    // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
+    // only when one was actually requested, so a visibility-only change (the
+    // collapse itself) does not trigger a refetch on expand. See
+    // EmbeddableInput.isVisible.
     if (this.input.isVisible === false) {
-      this.pendingFetchOnResume = true;
+      if (fetchRequested) {
+        this.pendingFetchOnResume = true;
+      }
       return;
     }
     const resumeFetch = this.pendingFetchOnResume;
     this.pendingFetchOnResume = false;
 
-    const { filters, query, timeRange } = this.input;
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
-    const needFetch = Boolean(
-      this.node &&
-      (force ||
-        resumeFetch ||
-        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-        !isEqual(query, this.prevState.query) ||
-        !isEqual(timeRange, this.prevState.timeRange))
-    );
+    const needFetch = Boolean(this.node && (fetchRequested || resumeFetch));
 
     if (needFetch) {
       this.prevState = { filters, query, timeRange };

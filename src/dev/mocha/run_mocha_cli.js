@@ -100,9 +100,8 @@ export function runMochaCli() {
       });
   }
 
-  if (runInBand) {
-    require('mocha/bin/_mocha');
-  } else {
-    require('mocha/bin/mocha');
-  }
+  // mocha 12 removed bin/_mocha. bin/mocha now runs mocha in this process unless
+  // Node flags are passed to mocha itself, so `node --inspect scripts/mocha` still
+  // debugs the test run.
+  require('mocha/bin/mocha');
 }

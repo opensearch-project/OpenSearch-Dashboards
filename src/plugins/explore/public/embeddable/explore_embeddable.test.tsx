@@ -701,6 +701,110 @@ describe('ExploreEmbeddable', () => {
     expect((embeddable as any).pendingFetchOnResume).toBe(false);
   });
 
+  test('does not refetch a mounted panel after a visibility-only collapse and expansion', () => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    embeddable.render(mockNode);
+    embeddable.reload();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    container.updateInput({ isVisible: false });
+    container.updateInput({ isVisible: true });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('fetches once on expansion after repeated forced refreshes while hidden', () => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    embeddable.render(mockNode);
+    embeddable.reload();
+    container.updateInput({ isVisible: false });
+
+    embeddable.reload();
+    embeddable.reload();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    container.updateInput({ isVisible: true });
+    embeddable.updateInput({ columns: ['column3'] });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test.each([
+    { name: 'time range', input: { timeRange: { from: 'now-1h', to: 'now' } } },
+    { name: 'query', input: { query: { query: 'source=updated-logs', language: 'PPL' } } },
+    {
+      name: 'enabled filters',
+      input: {
+        filters: [
+          {
+            meta: { alias: null, negate: false, disabled: false },
+            query: { match_phrase: { 'machine.os': 'win 8' } },
+          },
+        ],
+      },
+    },
+  ])('fetches once on expansion after $name changes while hidden', ({ input }) => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    embeddable.render(mockNode);
+    embeddable.reload();
+    container.updateInput({ isVisible: false });
+
+    container.updateInput(input);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    container.updateInput({ isVisible: true });
+    embeddable.updateInput({ columns: ['column3'] });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('does not refetch on expansion when only disabled filters changed while hidden', () => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    container.updateInput({ filters: [] });
+    embeddable.render(mockNode);
+    embeddable.reload();
+    container.updateInput({ isVisible: false });
+
+    container.updateInput({
+      filters: [
+        {
+          meta: { alias: null, negate: false, disabled: true },
+          query: { match_phrase: { 'machine.os': 'win 8' } },
+        },
+      ],
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    container.updateInput({ isVisible: true });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('applies columns and sort changes on expansion without refetching the result set', async () => {
+    embeddable.render(mockNode);
+    await (embeddable as any).handleInputChange(true);
+    const currentContent = (embeddable as any).state.content;
+    mockSavedExplore.searchSource.fetch.mockClear();
+    mockRender.mockClear();
+    container.updateInput({ isVisible: false });
+
+    embeddable.updateInput({ columns: ['machine.os'], sort: [['machine.os', 'asc']] });
+
+    expect(mockSavedExplore.searchSource.fetch).not.toHaveBeenCalled();
+    expect(mockRender).not.toHaveBeenCalled();
+
+    container.updateInput({ isVisible: true });
+
+    expect(mockSavedExplore.searchSource.fetch).not.toHaveBeenCalled();
+    expect(embeddable.getInput().sort).toEqual([['machine.os', 'asc']]);
+    expect(mockRender.mock.calls.at(-1)?.[0].props).toEqual(
+      expect.objectContaining({
+        selectedColumns: ['machine.os'],
+        state: { status: 'ready', content: currentContent },
+      })
+    );
+  });
+
   test('defers mounted panel refreshes while hidden and fetches once on expansion', () => {
     const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
     container.updateInput({ isVisible: false });

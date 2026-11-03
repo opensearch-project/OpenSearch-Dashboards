@@ -51,13 +51,19 @@ interface Props {
   /** Primitive that changes when the global time range changes; drives re-fetch of all cards. */
   refreshKey: string;
   /** Lazily classify an index (time-based? severity fields?) — from useIndexClassification. */
-  classify: (name: string) => Promise<{
+  classify: (
+    name: string,
+    kind?: 'index' | 'dataset'
+  ) => Promise<{
     classification: IndexClassification;
     timeFieldName?: string;
     dateFields?: string[];
     severityField?: string;
   }>;
-  getCached: (name: string) =>
+  getCached: (
+    name: string,
+    kind?: 'index' | 'dataset'
+  ) =>
     | {
         classification: IndexClassification;
         timeFieldName?: string;
@@ -182,7 +188,7 @@ export const RowsView: React.FC<Props> = ({
       // dataset carries its own timeFieldName, but the severity field must still be detected from its
       // fields. For indexes, classification supplies the time field too.
       let timeFieldName = item.timeFieldName;
-      const classification = getCached(name) ?? (await classify(name));
+      const classification = getCached(name, item.kind) ?? (await classify(name, item.kind));
       const severityField = classification.severityField;
       if (item.kind === 'index') {
         timeFieldName = classification.timeFieldName;
@@ -496,7 +502,7 @@ export const RowsView: React.FC<Props> = ({
     // Classification is cached for BOTH kinds (datasets classify too, for severity detection). A
     // dataset's own timeFieldName still wins for time-based detection; the cached result supplies the
     // detected severity field (and, for indexes, the time/date fields).
-    const cached = getCached(item.name);
+    const cached = getCached(item.name, item.kind);
     const isTimeBased =
       item.kind === 'dataset'
         ? Boolean(item.timeFieldName)

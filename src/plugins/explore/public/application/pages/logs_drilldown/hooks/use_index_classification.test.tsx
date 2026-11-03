@@ -7,14 +7,26 @@ import React from 'react';
 import { render, act, cleanup } from '@testing-library/react';
 import { useIndexClassification } from './use_index_classification';
 import { ClassificationResult, IndexClassification } from '../types';
+import { resetServerlessCaches } from '../serverless';
 
 const getFieldsForWildcard = jest.fn();
-const makeServices = () => ({ indexPatterns: { getFieldsForWildcard } }) as unknown as any;
+const savedObjectsGet = jest.fn();
+const httpGet = jest.fn();
+const makeServices = () =>
+  ({
+    indexPatterns: { getFieldsForWildcard },
+    savedObjects: { client: { get: savedObjectsGet } },
+    http: { get: httpGet },
+  }) as unknown as any;
+const serverless = () =>
+  savedObjectsGet.mockResolvedValue({
+    attributes: { dataSourceEngineType: 'OpenSearch Serverless' },
+  });
 
 // Expose the hook's API to the test via a ref-carrying harness (no react-hooks testing lib here).
 interface Api {
-  classify: (name: string) => Promise<ClassificationResult>;
-  getCached: (name: string) => ClassificationResult | undefined;
+  classify: (name: string, kind?: 'index' | 'dataset') => Promise<ClassificationResult>;
+  getCached: (name: string, kind?: 'index' | 'dataset') => ClassificationResult | undefined;
   getStatus: (name: string) => IndexClassification;
 }
 let api: Api;
@@ -28,6 +40,9 @@ const Harness: React.FC<{ dataSourceId?: string }> = ({ dataSourceId }) => {
 describe('useIndexClassification', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetServerlessCaches();
+    // Default: a non-serverless engine, so no settings lookup.
+    savedObjectsGet.mockResolvedValue({ attributes: { dataSourceEngineType: 'OpenSearch' } });
     render(<Harness dataSourceId="ds-1" />);
   });
 
@@ -131,6 +146,180 @@ describe('useIndexClassification', () => {
       res = await api.classify('broken-index');
     });
     expect(res!.classification).toBe(IndexClassification.NO_TIME_FIELD);
+  });
+
+  it('prefers the serverless index.timestamp_field over the canonical candidates', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([
+      { name: 'time', type: 'date' },
+      { name: 'event_time', type: 'date' },
+    ]);
+    httpGet.mockResolvedValue({
+      'custom-ts': { settings: { index: { timestamp_field: 'event_time' } } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('custom-ts');
+    });
+    expect(httpGet).toHaveBeenCalledWith(
+      '/api/directquery/dsl/indices.getFieldSettings/dataSourceMDSId=ds-1',
+      { query: { index: 'custom-ts' } }
+    );
+    expect(res!.timeFieldName).toBe('event_time');
+    expect(res!.dateFields).toEqual(['time', 'event_time']);
+  });
+
+  it('falls back to the candidate order when matched indexes disagree on timestamp_field', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([
+      { name: '@timestamp', type: 'date' },
+      { name: 'event_time', type: 'date' },
+    ]);
+    httpGet.mockResolvedValue({
+      'logs-a': { settings: { index: { timestamp_field: '@timestamp' } } },
+      'logs-b': { settings: { index: { timestamp_field: 'event_time' } } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('logs-*');
+    });
+    expect(res!.timeFieldName).toBe('@timestamp');
+  });
+
+  it('stays time-based on serverless when the field fetch fails but timestamp_field is known', async () => {
+    serverless();
+    getFieldsForWildcard.mockRejectedValue(new Error('field_caps timed out'));
+    httpGet.mockResolvedValue({
+      'logs-a': { settings: { index: { timestamp_field: '@timestamp' } } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('logs-a');
+    });
+    expect(res!.classification).toBe(IndexClassification.TIME_BASED);
+    expect(res!.timeFieldName).toBe('@timestamp');
+  });
+
+  it('does not read index settings for non-serverless data sources', async () => {
+    savedObjectsGet.mockResolvedValue({ attributes: { dataSourceEngineType: 'OpenSearch' } });
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    await act(async () => {
+      await api.classify('logs-a');
+    });
+    expect(httpGet).not.toHaveBeenCalled();
+  });
+
+  it('treats an index without timestamp_field as disagreement for a pattern', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([
+      { name: '@timestamp', type: 'date' },
+      { name: 'event_time', type: 'date' },
+    ]);
+    httpGet.mockResolvedValue({
+      'logs-a': { settings: { index: { timestamp_field: 'event_time' } } },
+      'logs-b': { settings: { index: {} } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('logs-*');
+    });
+    expect(res!.timeFieldName).toBe('@timestamp');
+  });
+
+  it('stays time-based when field caps returns no date field but timestamp_field is known', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([{ name: 'level', type: 'string' }]);
+    httpGet.mockResolvedValue({
+      'fresh-index': { settings: { index: { timestamp_field: '@timestamp' } } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('fresh-index');
+    });
+    expect(res!.classification).toBe(IndexClassification.TIME_BASED);
+    expect(res!.timeFieldName).toBe('@timestamp');
+    expect(res!.severityField).toBe('level');
+  });
+
+  it('tries the timestamp_field lookup when no engine type is saved', async () => {
+    savedObjectsGet.mockResolvedValue({ attributes: {} });
+    getFieldsForWildcard.mockResolvedValue([
+      { name: 'time', type: 'date' },
+      { name: 'event_time', type: 'date' },
+    ]);
+    httpGet.mockResolvedValue({
+      'custom-ts': { settings: { index: { timestamp_field: 'event_time' } } },
+    });
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('custom-ts');
+    });
+    expect(res!.timeFieldName).toBe('event_time');
+  });
+
+  it('retries the engine-type lookup after a transient failure', async () => {
+    savedObjectsGet
+      .mockRejectedValueOnce(new Error('network'))
+      .mockResolvedValue({ attributes: { dataSourceEngineType: 'OpenSearch Serverless' } });
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    httpGet.mockResolvedValue({ a: { settings: { index: { timestamp_field: '@timestamp' } } } });
+    await act(async () => {
+      await api.classify('a');
+      await api.classify('b');
+    });
+    expect(savedObjectsGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('skips the settings lookup for dataset rows', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    await act(async () => {
+      await api.classify('logs-*', 'dataset');
+    });
+    expect(httpGet).not.toHaveBeenCalled();
+    expect(api.getCached('logs-*', 'dataset')?.classification).toBe(IndexClassification.TIME_BASED);
+    expect(api.getCached('logs-*')).toBeUndefined();
+  });
+
+  it('stops calling the settings route for a data source once the route is missing', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    httpGet.mockRejectedValue({ body: { statusCode: 404, message: 'Not Found' } });
+    await act(async () => {
+      await api.classify('a');
+      await api.classify('b');
+    });
+    expect(httpGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps calling the settings route after an index_not_found 404', async () => {
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    httpGet.mockRejectedValue({
+      body: {
+        statusCode: 404,
+        message: 'Data Source Error: [index_not_found_exception] no such index',
+      },
+    });
+    await act(async () => {
+      await api.classify('a');
+      await api.classify('b');
+    });
+    expect(httpGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('URL-encodes the data source id in the settings path', async () => {
+    cleanup();
+    render(<Harness dataSourceId="ds/odd?id" />);
+    serverless();
+    getFieldsForWildcard.mockResolvedValue([{ name: '@timestamp', type: 'date' }]);
+    httpGet.mockResolvedValue({});
+    await act(async () => {
+      await api.classify('a');
+    });
+    expect(httpGet.mock.calls[0][0]).toBe(
+      '/api/directquery/dsl/indices.getFieldSettings/dataSourceMDSId=ds%2Fodd%3Fid'
+    );
   });
 
   it('caches the result: a second classify does not re-fetch', async () => {
