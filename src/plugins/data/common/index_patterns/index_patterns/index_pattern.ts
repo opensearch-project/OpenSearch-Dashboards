@@ -416,6 +416,15 @@ export class IndexPattern implements IIndexPattern {
     return (this.fieldsLoading = status);
   };
 
+  /**
+   * Replaces the meta fields (`_id`, `_index`, ...) that flattened hits carry, e.g. with none for
+   * data that doesn't come from OpenSearch documents.
+   */
+  setMetaFields = (metaFields: string[]) => {
+    this.metaFields = metaFields;
+    this.flattenHit = flattenHitWrapper(this, metaFields);
+  };
+
   // DQL and Lucene already calling this formatter, we should add ppl formatter in the language config
   /**
    * Provide a field, get its formatter

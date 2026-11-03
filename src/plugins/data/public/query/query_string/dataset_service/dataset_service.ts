@@ -176,8 +176,14 @@ export class DatasetService {
           dataSourceMeta: dataset.dataSource ? dataset.dataSource.meta : undefined,
         } as IndexPatternSpec;
 
+        // The type's own meta fields, when it names them (none for data outside OpenSearch).
+        const typeMetaFields = type?.meta.metaFields;
+
         if (defaultCache) {
           const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+          if (temporaryIndexPattern && typeMetaFields) {
+            temporaryIndexPattern.setMetaFields(typeMetaFields);
+          }
 
           // Load schema asynchronously if it's an async index pattern
           if (asyncType && temporaryIndexPattern) {
@@ -200,6 +206,9 @@ export class DatasetService {
           }
         } else {
           const temporaryDataView = await services.data?.dataViews.create(spec, true);
+          if (temporaryDataView && typeMetaFields) {
+            temporaryDataView.setMetaFields(typeMetaFields);
+          }
 
           if (asyncType && temporaryDataView) {
             type!

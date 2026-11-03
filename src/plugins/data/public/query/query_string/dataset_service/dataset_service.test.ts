@@ -176,6 +176,30 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(1);
   });
 
+  test("cacheDataset gives the type's data view the meta fields the type names", async () => {
+    const view = { setMetaFields: jest.fn() };
+    (indexPatterns.create as jest.Mock).mockResolvedValue(view);
+    // A type whose data isn't OpenSearch documents names none.
+    service.registerType({ ...mockType, id: 'external-type', meta: { ...mockType.meta, metaFields: [] } });
+    await service.cacheDataset(
+      { id: 'external::1', title: 'External', type: 'external-type' } as Dataset,
+      mockDataPluginServices
+    );
+    expect(view.setMetaFields).toHaveBeenCalledWith([]);
+    expect(indexPatterns.saveToCache).toHaveBeenCalledWith('external::1', view);
+  });
+
+  test('cacheDataset leaves the meta fields of a type that names none as they are', async () => {
+    const view = { setMetaFields: jest.fn() };
+    (indexPatterns.create as jest.Mock).mockResolvedValue(view);
+    service.registerType(mockType);
+    await service.cacheDataset(
+      { id: 'test-dataset', title: 'Test Dataset', type: mockType.id } as Dataset,
+      mockDataPluginServices
+    );
+    expect(view.setMetaFields).not.toHaveBeenCalled();
+  });
+
   test('calling cacheDataset on index pattern does not cache it', async () => {
     service.registerType(indexPatternTypeConfig);
     const mockDataset = {
