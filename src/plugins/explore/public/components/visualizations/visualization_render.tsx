@@ -86,18 +86,19 @@ export const CommonVisualizationRender = ({
     }
   }, [supportsCustomLegend, legend$]);
 
-  const timeRange = useMemo(() => {
+  // Relative ranges such as 'now-15m' to 'now' keep the same strings across refreshes.
+  // Re-resolve their bounds with new results; absolute ranges retain fixed timestamps.
+  const { rows, timeRange } = useMemo(() => {
     return {
-      from: from ? (dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '') : '',
-      to: to
-        ? (dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '')
-        : '',
+      rows: visualizationData?.transformedData ?? [],
+      timeRange: {
+        from: from ? (dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '') : '',
+        to: to
+          ? (dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '')
+          : '',
+      },
     };
-  }, [from, to]);
-
-  const rows = useMemo(() => {
-    return visualizationData?.transformedData ?? [];
-  }, [visualizationData?.transformedData]);
+  }, [from, to, visualizationData?.transformedData]);
 
   const columns = useMemo(() => {
     return [
