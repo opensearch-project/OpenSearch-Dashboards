@@ -8,6 +8,7 @@ import { ExploreServices } from '../../../../types';
 import { saveAs } from 'file-saver';
 import { AppDispatch, RootState } from '../store';
 import { resultsCache, clearResultsCache } from '../slices';
+import { defaultPrepareQueryString } from './query_actions';
 
 jest.mock('file-saver', () => ({
   saveAs: jest.fn(),
@@ -29,13 +30,26 @@ describe('export_actions', () => {
   let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockGetState: jest.MockedFunction<() => RootState>;
   let mockState: RootState;
+  let mockDataView: any;
 
   beforeEach(() => {
+    mockDataView = {
+      id: 'ds-1',
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      fields: { field1: {}, field2: {} },
+      flattenHit: jest.fn((hit) => hit._source),
+    };
+
     mockServices = {
       data: {
         indexPatterns: {
           fields: { field1: {}, field2: {} },
           flattenHit: jest.fn((hit) => hit._source),
+        },
+        dataViews: {
+          get: jest.fn().mockResolvedValue(mockDataView),
+          getDefault: jest.fn().mockResolvedValue(mockDataView),
         },
         search: {
           searchSource: {
@@ -117,6 +131,7 @@ describe('export_actions', () => {
 
   afterEach(() => {
     clearResultsCache();
+    (defaultPrepareQueryString as jest.Mock).mockImplementation((query) => query.query);
   });
 
   // Full ISearchResult fixture for cache population
@@ -311,10 +326,7 @@ describe('export_actions', () => {
       await action(mockDispatch, mockGetState);
 
       expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
-      expect(mockSearchSource.setField).toHaveBeenCalledWith(
-        'index',
-        mockServices.data.indexPatterns
-      );
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('index', mockDataView);
       expect(mockSearchSource.setField).toHaveBeenCalledWith('size', 1000);
       expect(mockSearchSource.fetch).toHaveBeenCalled();
       expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), 'test.csv');
@@ -337,11 +349,7 @@ describe('export_actions', () => {
     });
 
     it('should use tab prepareQuery when available', async () => {
-      const mockPrepareQuery = jest.fn().mockReturnValue({
-        query: 'PREPARED QUERY',
-        language: 'PPL',
-        dataset: undefined,
-      });
+      const mockPrepareQuery = jest.fn().mockReturnValue('PREPARED QUERY');
 
       (mockServices.tabRegistry.getTab as any as jest.MockedFunction<any>).mockReturnValue({
         prepareQuery: mockPrepareQuery,
@@ -354,7 +362,7 @@ describe('export_actions', () => {
       expect(mockSearchSource.setField).toHaveBeenCalledWith('query', {
         query: 'PREPARED QUERY',
         language: 'PPL',
-        dataset: undefined,
+        dataset: mockState.query.dataset,
       });
     });
 
@@ -372,7 +380,7 @@ describe('export_actions', () => {
       await action(mockDispatch, mockGetState);
 
       expect(mockServices.data.query.timefilter.timefilter.createFilter).toHaveBeenCalledWith(
-        mockServices.data.indexPatterns
+        mockDataView
       );
       expect(mockSearchSource.setField).toHaveBeenCalledWith('filter', [
         { range: { '@timestamp': { gte: 'now-1d', lte: 'now' } } },
@@ -389,6 +397,84 @@ describe('export_actions', () => {
       await action(mockDispatch, mockGetState);
 
       expect(mockSearchSource.setField).toHaveBeenCalledWith('filter', []);
+    });
+
+    describe('dataset resolution', () => {
+      const plainDataset = {
+        id: 'ds-1',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+      };
+
+      it('resolves a plain Redux dataset to a DataView', async () => {
+        mockState.query.dataset = plainDataset as any;
+
+        await exportMaxSizeCsv({ services: mockServices, fileName: 'a.csv' })(
+          mockDispatch,
+          mockGetState
+        );
+
+        expect(mockServices.data.dataViews.get).toHaveBeenCalledWith('ds-1', false);
+        expect(mockSearchSource.setField).toHaveBeenCalledWith('index', mockDataView);
+        expect(mockServices.data.query.timefilter.timefilter.createFilter).toHaveBeenCalledWith(
+          mockDataView
+        );
+        expect(mockDataView.flattenHit).toHaveBeenCalled();
+        expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), 'a.csv');
+      });
+
+      it('asks for a non index-pattern dataset type with the second argument true', async () => {
+        mockState.query.dataset = { ...plainDataset, type: 'INDEXES' } as any;
+
+        await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+        expect(mockServices.data.dataViews.get).toHaveBeenCalledWith('ds-1', true);
+      });
+
+      it('falls back to the default DataView when there is no dataset', async () => {
+        await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+        expect(mockServices.data.dataViews.getDefault).toHaveBeenCalled();
+        expect(mockServices.data.dataViews.get).not.toHaveBeenCalled();
+        expect(mockSearchSource.setField).toHaveBeenCalledWith('index', mockDataView);
+      });
+
+      it('rejects without fetching when no DataView can be resolved', async () => {
+        (mockServices.data.dataViews.getDefault as jest.Mock).mockResolvedValue(null);
+
+        await expect(
+          exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState)
+        ).rejects.toThrow('Dataset not found for CSV export');
+        expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+      });
+    });
+
+    it('prepares an empty query with the default query preparation', async () => {
+      mockState.query.query = '';
+      mockState.query.dataset = { id: 'ds-1', title: 'logs-*', type: 'INDEX_PATTERN' } as any;
+      (defaultPrepareQueryString as jest.Mock).mockImplementation(() => 'source = logs-*');
+
+      await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('query', {
+        query: 'source = logs-*',
+        language: 'PPL',
+        dataset: mockState.query.dataset,
+      });
+    });
+
+    it('requests the row limit through fetchSize when maxSize is given', async () => {
+      await exportMaxSizeCsv({ services: mockServices, maxSize: 1000 })(mockDispatch, mockGetState);
+
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('fetchSize', 1000);
+    });
+
+    it('does not set fetchSize when maxSize is not given', async () => {
+      await exportMaxSizeCsv({ services: mockServices })(mockDispatch, mockGetState);
+
+      expect(mockSearchSource.setField).not.toHaveBeenCalledWith('fetchSize', expect.anything());
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('size', 500);
     });
   });
 });
