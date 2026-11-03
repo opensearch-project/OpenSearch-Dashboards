@@ -30,6 +30,7 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import stringify from 'json-stable-stringify';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import {
@@ -190,6 +191,7 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
+  private inFlightReads = new Map<string, Promise<any>>();
   /**
    * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
@@ -282,6 +284,9 @@ export class SavedObjectsClient {
   }
 
   public setCurrentWorkspace(workspaceId: string) {
+    if (this.currentWorkspaceId !== workspaceId) {
+      this.inFlightReads.clear();
+    }
     this.currentWorkspaceId = workspaceId;
   }
 
@@ -571,12 +576,42 @@ export class SavedObjectsClient {
     path: string,
     { method, query, body, prependOptions }: HttpFetchOptions
   ) {
-    return this.http.fetch(path, {
+    const fetch = () =>
+      this.http.fetch(path, {
+        method,
+        query,
+        body,
+        ...(prependOptions && { prependOptions }),
+      });
+
+    const isRead = method === 'GET' || (method === 'POST' && path === this.getPath(['_bulk_get']));
+    if (!isRead) {
+      // A read started before or during a mutation must not serve a later reader.
+      this.inFlightReads.clear();
+      return fetch().finally(() => this.inFlightReads.clear());
+    }
+
+    const key = stringify({
+      path: this.http.basePath.prepend(path, prependOptions),
       method,
       query,
       body,
-      ...(prependOptions && { prependOptions }),
+      prependOptions,
+      workspace: this.currentWorkspaceId,
     });
+    let request = this.inFlightReads.get(key);
+    if (!request) {
+      request = fetch().finally(() => {
+        // An older request may finish after a mutation has replaced its entry.
+        if (this.inFlightReads.get(key) === request) {
+          this.inFlightReads.delete(key);
+        }
+      });
+      this.inFlightReads.set(key, request);
+    }
+
+    // Each caller owns mutable saved-object attributes and response wrappers.
+    return request.then((response) => cloneDeep(response));
   }
 }
 

@@ -31,6 +31,7 @@
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
+import { BasePath } from '../http/base_path';
 
 describe('SavedObjectsClient', () => {
   const updatedAt = new Date().toISOString();
@@ -465,6 +466,244 @@ describe('SavedObjectsClient', () => {
           ],
         ]
       `);
+    });
+  });
+
+  describe('in-flight reads', () => {
+    const response = { saved_objects: [doc], page: 1, per_page: 10, total: 1 };
+
+    const deferred = <T>() => {
+      let resolve: (value: T) => void;
+      let reject: (reason: Error) => void;
+      const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise;
+        reject = rejectPromise;
+      });
+      return { promise, resolve: resolve!, reject: reject! };
+    };
+
+    beforeEach(() => {
+      http.fetch.mockReset();
+    });
+
+    test.each(['index-pattern', 'dashboard', 'visualization', 'data-source'])(
+      'shares identical pending find requests for %s',
+      async (type) => {
+        const pending = deferred<typeof response>();
+        http.fetch.mockReturnValue(pending.promise);
+        const requests = Array.from({ length: 17 }, () =>
+          savedObjectsClient.find({ type, search: 'logs', fields: ['title'] })
+        );
+
+        expect(http.fetch).toHaveBeenCalledTimes(1);
+        pending.resolve(response);
+        const results = await Promise.all(requests);
+        expect(results).toHaveLength(17);
+        expect(results.every((result) => result.savedObjects[0].id === doc.id)).toBe(true);
+      }
+    );
+
+    test('starts a fresh find after the previous request succeeds', async () => {
+      http.fetch.mockResolvedValueOnce(response).mockResolvedValueOnce({
+        ...response,
+        saved_objects: [{ ...doc, attributes: { title: 'Updated title' } }],
+      });
+
+      await savedObjectsClient.find({ type: doc.type });
+      const result = await savedObjectsClient.find({ type: doc.type });
+
+      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(result.savedObjects[0].get('title')).toBe('Updated title');
+    });
+
+    test('rejects all shared callers and starts a fresh request after failure', async () => {
+      const pending = deferred<typeof response>();
+      const error = new Error('Request failed');
+      http.fetch.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(response);
+      const requests = [
+        savedObjectsClient.find({ type: doc.type }),
+        savedObjectsClient.find({ type: doc.type }),
+      ];
+      const settled = Promise.allSettled(requests);
+
+      pending.reject(error);
+      expect(await settled).toEqual([
+        { status: 'rejected', reason: error },
+        { status: 'rejected', reason: error },
+      ]);
+      const result = await savedObjectsClient.find({ type: doc.type });
+      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(result.savedObjects[0].id).toBe(doc.id);
+    });
+
+    test.each([
+      { type: 'dashboard' },
+      { search: 'another search' },
+      { fields: ['description'] },
+      { searchFields: ['description'] },
+      { page: 2 },
+      { perPage: 20 },
+      { filter: 'data-source.id:another-source' },
+      { workspaces: ['another-workspace'] },
+      { namespaces: ['another-namespace'] },
+      { hasReference: { type: 'data-source', id: 'another-source' } },
+    ])('keeps different find criteria separate: %j', async (differentOptions) => {
+      http.fetch.mockResolvedValue(response);
+      await Promise.all([
+        savedObjectsClient.find({ type: doc.type }),
+        savedObjectsClient.find({ type: doc.type, ...differentOptions }),
+      ]);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    test('keeps requests with different base paths or prepend options separate', async () => {
+      const scopedHttp = httpServiceMock.createStartContract({
+        basePath: '/base',
+        clientBasePath: '/w/one',
+      });
+      const client = new SavedObjectsClient(scopedHttp);
+      scopedHttp.fetch.mockResolvedValue(response);
+
+      const first = client.find({ type: doc.type });
+      const global = client.find({ type: doc.type }, { withoutClientBasePath: true });
+      scopedHttp.basePath = new BasePath('/base', undefined, '/w/two');
+      const second = client.find({ type: doc.type });
+
+      await Promise.all([first, global, second]);
+      expect(scopedHttp.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    test('keeps pending reads separate when the active workspace changes', async () => {
+      http.fetch.mockResolvedValue(response);
+      savedObjectsClient.setCurrentWorkspace('one');
+      const first = savedObjectsClient.bulkGet([{ type: doc.type, id: doc.id }]);
+      savedObjectsClient.setCurrentWorkspace('two');
+      const second = savedObjectsClient.bulkGet([{ type: doc.type, id: doc.id }]);
+
+      await Promise.all([first, second]);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    test.each(['find', 'bulkGet'] as const)(
+      'gives callers independent mutable results for shared %s requests',
+      async (operation) => {
+        http.fetch.mockResolvedValue({
+          ...response,
+          saved_objects: [
+            { ...doc, references: [{ name: 'source', type: 'data-source', id: 'source-id' }] },
+          ],
+        });
+        const read = () =>
+          operation === 'find'
+            ? savedObjectsClient.find({ type: doc.type })
+            : savedObjectsClient.bulkGet([{ type: doc.type, id: doc.id }]);
+        const [first, second] = await Promise.all([read(), read()]);
+
+        expect(http.fetch).toHaveBeenCalledTimes(1);
+        first.savedObjects[0].set('title', 'Edited title');
+        first.savedObjects[0].references[0].id = 'edited-source';
+        expect(second.savedObjects[0].get('title')).toBe('Example title');
+        expect(second.savedObjects[0].references[0].id).toBe('source-id');
+        expect(second.savedObjects[0]).not.toBe(first.savedObjects[0]);
+      }
+    );
+
+    test('shares get and bulkGet across batching windows only while the request is pending', async () => {
+      jest.useFakeTimers();
+      try {
+        const pending = deferred<typeof response>();
+        http.fetch.mockReturnValueOnce(pending.promise).mockResolvedValue(response);
+        const first = savedObjectsClient.get(doc.type, doc.id);
+        jest.advanceTimersByTime(100);
+        expect(http.fetch).toHaveBeenCalledTimes(1);
+
+        const bulk = savedObjectsClient.bulkGet([{ type: doc.type, id: doc.id }]);
+        const second = savedObjectsClient.get(doc.type, doc.id);
+        jest.advanceTimersByTime(100);
+        expect(http.fetch).toHaveBeenCalledTimes(1);
+
+        pending.resolve(response);
+        const [firstResult, secondResult, bulkResult] = await Promise.all([first, second, bulk]);
+        firstResult.set('title', 'Edited title');
+        expect(secondResult.get('title')).toBe('Example title');
+        expect(bulkResult.savedObjects[0].get('title')).toBe('Example title');
+
+        const fresh = savedObjectsClient.get(doc.type, doc.id);
+        jest.advanceTimersByTime(100);
+        await fresh;
+        expect(http.fetch).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    test('keeps different bulk payloads separate', async () => {
+      http.fetch.mockResolvedValue(response);
+      await Promise.all([
+        savedObjectsClient.bulkGet([{ type: doc.type, id: doc.id }]),
+        savedObjectsClient.bulkGet([{ type: 'dashboard', id: doc.id }]),
+        savedObjectsClient.bulkGet([{ type: doc.type, id: 'another-id' }]),
+      ]);
+      expect(http.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    test.each([
+      {
+        operation: 'create',
+        call: () => savedObjectsClient.create(doc.type, doc.attributes),
+      },
+      {
+        operation: 'bulkCreate',
+        call: () => savedObjectsClient.bulkCreate([{ type: doc.type, attributes: doc.attributes }]),
+      },
+      {
+        operation: 'update',
+        call: () => savedObjectsClient.update(doc.type, doc.id, doc.attributes),
+      },
+      {
+        operation: 'bulkUpdate',
+        call: () =>
+          savedObjectsClient.bulkUpdate([
+            { type: doc.type, id: doc.id, attributes: doc.attributes },
+          ]),
+      },
+      { operation: 'delete', call: () => savedObjectsClient.delete(doc.type, doc.id) },
+    ])('executes every $operation request', async ({ call }) => {
+      http.fetch.mockImplementation(async () => ({ ...doc, saved_objects: [{ ...doc }] }));
+      await Promise.all([call(), call()]);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    test('reads after a mutation do not join reads started before or during it', async () => {
+      const before = deferred<typeof response>();
+      const write = deferred<typeof doc>();
+      const during = deferred<typeof response>();
+      const after = deferred<typeof response>();
+      http.fetch
+        .mockReturnValueOnce(before.promise)
+        .mockReturnValueOnce(write.promise)
+        .mockReturnValueOnce(during.promise)
+        .mockReturnValueOnce(after.promise);
+
+      const firstRead = savedObjectsClient.find({ type: doc.type });
+      const update = savedObjectsClient.update(doc.type, doc.id, doc.attributes);
+      const duringRead = savedObjectsClient.find({ type: doc.type });
+      expect(http.fetch).toHaveBeenCalledTimes(3);
+
+      write.resolve(doc);
+      await update;
+      const afterRead = savedObjectsClient.find({ type: doc.type });
+      expect(http.fetch).toHaveBeenCalledTimes(4);
+
+      before.resolve(response);
+      await firstRead;
+      const sharedAfterRead = savedObjectsClient.find({ type: doc.type });
+      expect(http.fetch).toHaveBeenCalledTimes(4);
+
+      during.resolve(response);
+      await duringRead;
+      after.resolve(response);
+      await Promise.all([afterRead, sharedAfterRead]);
     });
   });
 
