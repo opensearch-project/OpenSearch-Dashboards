@@ -11,6 +11,7 @@ import { AppDispatch, RootState } from '../store';
 import { processDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
 import { defaultResultsProcessor, defaultPrepareQueryString } from './query_actions';
 import { resultsCache } from '../slices';
+import { buildCsv } from '../../../../components/tabs/action_bar/download_csv/csv_utils';
 
 /**
  * Utility function to get filtered displayed column names for use in Redux thunks.
@@ -156,6 +157,8 @@ export const exportMaxSizeCsv = (
       if (!dataView) {
         throw new Error('Dataset not found for CSV export');
       }
+      // get dataset built from the DataView for timeFieldName
+      const dataset = await services.data.dataViews.convertToDataset(dataView);
 
       // Configure SearchSource
       const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(dataView);
@@ -165,7 +168,7 @@ export const exportMaxSizeCsv = (
         .setField('query', {
           query: queryString,
           language: query.language,
-          dataset: query.dataset,
+          dataset,
         })
         .setField('filter', timeRangeFilter ? [timeRangeFilter] : [])
         .setField('size', options.maxSize || 500);
@@ -185,7 +188,12 @@ export const exportMaxSizeCsv = (
       const columns = getFilteredDisplayedColumnNames(state, dataView, services);
 
       // Generate CSV
-      const csv = generateCsv(rows, dataView, columns);
+      const csv = buildCsv({
+        rows,
+        displayedColumnNames: columns,
+        indexPattern: dataView,
+        uiSettings: services.uiSettings,
+      });
 
       // Download CSV
       const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
