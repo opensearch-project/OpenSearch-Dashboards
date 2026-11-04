@@ -11,6 +11,7 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { VisTabular } from '../../../visualizations/utils/vis_data_to_tabular';
+import { isSourceColumn } from '../../../../helpers/is_source_column';
 
 export const formatRowsForCsv =
   ({
@@ -28,7 +29,7 @@ export const formatRowsForCsv =
         return '';
       }
 
-      if (fieldInfo?.type === '_source') {
+      if (isSourceColumn(colName, fieldInfo)) {
         const formattedRow = indexPattern.formatHit(row, 'text');
         return JSON.stringify(formattedRow);
       }
