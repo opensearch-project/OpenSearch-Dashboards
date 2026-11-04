@@ -169,9 +169,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.savedObjects.client,
       // Data sources are only read, picked and sent when multiple data sources are enabled.
       !!deps.dataSource,
-      // Only an AG-UI agent can run without a data source id: an ML Commons agent without one
-      // would run against the local cluster, so it always uses the picker.
-      chatConfig.agUiUrl ? (chatConfig.unresolvedDataSource ?? 'picker') : 'picker'
+      chatConfig.unresolvedDataSource ?? 'picker'
     );
 
     if (!isEnabled) {

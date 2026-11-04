@@ -15,8 +15,8 @@ export const configSchema = schema.object({
   // there is no page, conversation or default data source):
   // - picker: the chat shows the data source picker before sending.
   // - agent: the message is sent without a data source, and the agent asks the user for one
-  //   (ask_user) only when the request needs data. It applies only with agUiUrl: an ML Commons
-  //   agent (mlCommonsAgentId) always needs a data source id, so the chat keeps the picker.
+  //   (ask_user) only when the request needs data. Use it only with an agent that can run
+  //   without a data source id.
   unresolvedDataSource: schema.oneOf([schema.literal('picker'), schema.literal('agent')], {
     defaultValue: 'picker',
   }),
