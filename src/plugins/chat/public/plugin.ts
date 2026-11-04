@@ -164,7 +164,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.uiSettings,
       core.chat,
       core.workspaces,
-      core.savedObjects.client
+      core.savedObjects.client,
+      // Data sources are only read, picked and sent when multiple data sources are enabled.
+      !!deps.dataSource
     );
 
     if (!isEnabled) {
@@ -179,9 +181,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        setSessionDataSourceList: (dataSourceId: string | undefined) => {
-          this.chatService?.setSessionDataSourceList(dataSourceId);
-        },
       });
     }
 
@@ -190,7 +189,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       try {
         const agenticMemoryProvider = new AgenticMemoryProvider(
           core.http,
-          () => this.chatService?.peekCurrentDataSourceId() ?? Promise.resolve(undefined)
+          () => this.chatService?.getDataSourceIdForRead() ?? Promise.resolve(undefined)
         );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {

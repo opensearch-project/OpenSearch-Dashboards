@@ -32,17 +32,21 @@ describe('useSwitchDataSourceAction', () => {
     });
 
     mockChatService = {
-      setDataSourceId: jest.fn(),
-      getConfirmedDataSourceId: jest.fn().mockReturnValue(undefined),
-      getSessionDataSourceList: jest.fn().mockReturnValue(['ds-a', 'ds-b']),
-      validateDataSourceId: jest.fn().mockResolvedValue({
-        valid: true,
+      getThreadId: jest.fn().mockReturnValue('thread-1'),
+      setConversationDataSource: jest.fn(),
+      // ds-b is the conversation's data source, so switching to ds-a is a real switch.
+      getConversationDataSourceId: jest.fn().mockReturnValue('ds-b'),
+      getPendingDataSourceId: jest.fn().mockReturnValue(undefined),
+      // No page dataset pins a data source unless a test says so.
+      getPageDataSource: jest.fn().mockResolvedValue(undefined),
+      verifyDataSourceId: jest.fn().mockResolvedValue({
         dataSource: { id: 'ds-a', title: 'Cluster A' },
-        availableDataSources: [
+        available: [
           { id: 'ds-a', title: 'Cluster A' },
           { id: 'ds-b', title: 'Cluster B' },
           { id: 'ds-c', title: 'Cluster C' },
         ],
+        unverifiable: false,
       }),
     } as unknown as jest.Mocked<ChatService>;
   });
@@ -66,13 +70,13 @@ describe('useSwitchDataSourceAction', () => {
   });
 
   describe('handler', () => {
-    it('should set the confirmed data source and resolve its authoritative title', async () => {
+    it('should record a verified data source that is not the conversation one', async () => {
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
-      expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('ds-a');
-      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(mockChatService.verifyDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(mockChatService.setConversationDataSource).toHaveBeenCalledWith('ds-a');
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
@@ -83,31 +87,39 @@ describe('useSwitchDataSourceAction', () => {
       );
     });
 
-    it('should no-op without validating or mutating when only one data source is in the session', async () => {
-      mockChatService.getSessionDataSourceList.mockReturnValue(['ds-a']);
+    it('should skip, still carrying the id, when the id is already the recorded data source', async () => {
+      (mockChatService.getConversationDataSourceId as jest.Mock).mockReturnValue('ds-a');
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
-      expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
-      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
+      // The id stays in the result so the conversation history still records it.
       expect(result).toEqual(
-        expect.objectContaining({
-          success: true,
-          skipped: true,
-        })
+        expect.objectContaining({ success: true, skipped: true, dataSourceId: 'ds-a' })
       );
-      expect(result.message).toContain('Skipped switch_data_source');
-      expect(result.message).toContain('1 data source');
+      expect(result.message).toContain('already the active data source');
+    });
+
+    it('should record a pending choice even when it is already the conversation one', async () => {
+      (mockChatService.getConversationDataSourceId as jest.Mock).mockReturnValue('ds-a');
+      (mockChatService.getPendingDataSourceId as jest.Mock).mockReturnValue('ds-a');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setConversationDataSource).toHaveBeenCalledWith('ds-a');
+      expect(result).toEqual(expect.objectContaining({ success: true, dataSourceId: 'ds-a' }));
+      expect(result.skipped).toBeUndefined();
     });
 
     it('should reject an id that is not a known data source without mutating state', async () => {
-      (mockChatService.validateDataSourceId as jest.Mock).mockResolvedValue({
-        valid: false,
-        availableDataSources: [
+      (mockChatService.verifyDataSourceId as jest.Mock).mockResolvedValue({
+        available: [
           { id: 'ds-a', title: 'Cluster A' },
           { id: 'ds-b', title: 'Cluster B' },
         ],
+        unverifiable: false,
       });
       renderHook();
 
@@ -117,10 +129,10 @@ describe('useSwitchDataSourceAction', () => {
       // The error names the valid ids so the LLM can correct itself in the same turn.
       expect(result.message).toContain('ds-a');
       expect(result.message).toContain('ds-b');
-      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
     });
 
-    it('should reject a missing / empty id without validating or mutating state', async () => {
+    it('should reject a missing / empty id without verifying or mutating state', async () => {
       renderHook();
 
       const missing = await registeredAction.handler({});
@@ -129,18 +141,98 @@ describe('useSwitchDataSourceAction', () => {
       expect(missing.success).toBe(false);
       expect(missing.message).toBe('A dataSourceId is required to switch the data source.');
       expect(empty.success).toBe(false);
-      expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
-      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.verifyDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
     });
 
-    it('should report a failure when validation throws', async () => {
-      (mockChatService.validateDataSourceId as jest.Mock).mockRejectedValue(new Error('boom'));
+    it('should not switch, and ask to retry, when the data source cannot be verified', async () => {
+      (mockChatService.verifyDataSourceId as jest.Mock).mockResolvedValue({
+        available: [{ id: 'ds-b', title: 'Cluster B' }],
+        unverifiable: true,
+      });
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Could not verify data source "ds-a" right now');
+      expect(result.message).not.toContain('Valid data source ids are');
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
+    });
+
+    it('should not switch, and say why, when the page dataset pins another data source', async () => {
+      (mockChatService.getPageDataSource as jest.Mock).mockResolvedValue({
+        id: 'ds-b',
+        title: 'Cluster B',
+      });
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('not switched to "Cluster A"');
+      expect(result.message).toContain('belongs to "Cluster B"');
+      expect(result.message).toContain('select a dataset from "Cluster A"');
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
+    });
+
+    it('should record the page data source when the user names it on that page', async () => {
+      (mockChatService.getPageDataSource as jest.Mock).mockResolvedValue({
+        id: 'ds-a',
+        title: 'Cluster A',
+      });
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(result.success).toBe(true);
+      expect(mockChatService.setConversationDataSource).toHaveBeenCalledWith('ds-a');
+    });
+
+    it('should report an unknown id rather than the page pin when the id is not a data source', async () => {
+      (mockChatService.getPageDataSource as jest.Mock).mockResolvedValue({
+        id: 'ds-b',
+        title: 'Cluster B',
+      });
+      (mockChatService.verifyDataSourceId as jest.Mock).mockResolvedValue({
+        available: [
+          { id: 'ds-a', title: 'Cluster A' },
+          { id: 'ds-b', title: 'Cluster B' },
+        ],
+        unverifiable: false,
+      });
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'not-a-data-source' });
+
+      // Changing the page dataset would not help, so the agent is told the id is wrong.
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Unknown dataSourceId "not-a-data-source"');
+      expect(mockChatService.getPageDataSource).not.toHaveBeenCalled();
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
+    });
+
+    it('should not record the switch when the conversation changed while it was checked', async () => {
+      (mockChatService.getThreadId as jest.Mock)
+        .mockReturnValueOnce('thread-1')
+        .mockReturnValue('thread-2');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('conversation changed');
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
+    });
+
+    it('should report a failure when verification throws', async () => {
+      (mockChatService.verifyDataSourceId as jest.Mock).mockRejectedValue(new Error('boom'));
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
       expect(result).toEqual({ success: false, message: 'boom' });
-      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setConversationDataSource).not.toHaveBeenCalled();
     });
   });
 

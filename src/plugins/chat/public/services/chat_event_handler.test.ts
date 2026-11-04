@@ -35,12 +35,7 @@ const mockAssistantActionService = {
 
 const mockChatService = {
   sendToolResult: jest.fn(),
-  setDataSourceId: jest.fn(),
-  setSessionDataSourceList: jest.fn(),
-  clearSessionDataSourceList: jest.fn(),
-  validateDataSourceId: jest.fn(),
-  getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
-  getCurrentDataSourceInfo: jest.fn().mockResolvedValue(undefined),
+  getRunDataSource: jest.fn().mockResolvedValue(undefined),
   getCurrentTimeRange: jest.fn().mockReturnValue(undefined),
   resetConnection: jest.fn(),
 } as unknown as jest.Mocked<ChatService>;
@@ -247,6 +242,42 @@ describe('ChatEventHandler', () => {
           arguments: '{"param": "value"}',
         },
       });
+    });
+
+    it('should run a tool with the data source of the run that requested it', async () => {
+      const toolCallId = 'tool-ds';
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue({ success: true });
+      (mockChatService.getRunDataSource as jest.Mock).mockImplementationOnce(
+        async (runId?: string) =>
+          runId === 'run-a' ? { id: 'ds-a', title: 'Cluster A' } : { id: 'ds-other', title: 'X' }
+      );
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: { subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) },
+        toolMessage: { id: 't', role: 'tool', content: '{}', toolCallId },
+      });
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED, runId: 'run-a' } as any);
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'registered_action',
+      } as ToolCallStartEvent);
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(mockChatService.getRunDataSource).toHaveBeenCalledWith('run-a');
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'registered_action',
+        { datasourceId: 'ds-a', datasourceTitle: 'Cluster A' },
+        toolCallId
+      );
     });
 
     it('should execute registered action successfully', async () => {

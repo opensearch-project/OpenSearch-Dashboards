@@ -173,8 +173,6 @@ export interface ChatServiceInterface {
     messages: Message[],
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
-
-  setSessionDataSourceList(dataSourceId: string | undefined): void;
 }
 
 /**
@@ -193,8 +191,6 @@ export interface ChatImplementationFunctions {
     messages: Message[],
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
-
-  setSessionDataSourceList: (dataSourceId: string | undefined) => void;
 }
 
 /**

@@ -101,9 +101,15 @@ describe('ChatWindow - Conversation Name', () => {
         content,
         rawMessage: rawMessage || content,
       })),
-      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
-      getAvailableDataSources: jest.fn().mockResolvedValue([]),
-      setDataSourceId: jest.fn(),
+      isDataSourceEnabled: jest.fn().mockReturnValue(true),
+      resolveDataSourceForRun: jest.fn().mockResolvedValue({
+        kind: 'resolved',
+        active: { id: 'mock-ds-id', title: 'Mock DS' },
+        source: 'workspaceDefault',
+        available: [{ id: 'mock-ds-id', title: 'Mock DS' }],
+        listComplete: true,
+      }),
+      setConversationDataSource: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,

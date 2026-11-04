@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
+import { DataSourceUnresolvedError } from '../services/data_source_unresolved_error';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
 import { HumanInputService } from '../services/human_input_service';
@@ -68,6 +69,23 @@ describe('ChatWindow', () => {
   let mockConfirmationService: jest.Mocked<ConfirmationService>;
   let mockHumanInputService: jest.Mocked<HumanInputService>;
 
+  // Data source resolutions returned by the mocked chatService.resolveDataSourceForRun.
+  const resolved = (id = 'mock-ds-id', title = 'Mock DS') => ({
+    kind: 'resolved' as const,
+    active: { id, title },
+    source: 'workspaceDefault' as const,
+    available: [{ id, title }],
+    listComplete: true,
+  });
+  const mockResolved = (id?: string, title?: string) =>
+    mockChatService.resolveDataSourceForRun.mockResolvedValue(resolved(id, title));
+  const mockNeedsSelection = (available: Array<{ id: string; title: string }>) =>
+    mockChatService.resolveDataSourceForRun.mockResolvedValue({
+      kind: 'needs_selection',
+      available,
+      listComplete: true,
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockCore = coreMock.createStart();
@@ -85,7 +103,8 @@ describe('ChatWindow', () => {
       abort: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
-      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
+      isDataSourceEnabled: jest.fn().mockReturnValue(true),
+      resolveDataSourceForRun: jest.fn().mockResolvedValue(resolved()),
       getUserMessage: jest.fn((content: string, rawMessage?: string) => ({
         id: `msg-${Date.now()}`,
         role: 'user',
@@ -95,13 +114,7 @@ describe('ChatWindow', () => {
       generateMessageId: jest.fn(
         () => `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
       ),
-      getAvailableDataSources: jest
-        .fn()
-        .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
-      setDataSourceId: jest.fn(),
-      clearConfirmedDataSourceId: jest.fn(),
-      clearSessionDataSourceList: jest.fn(),
-      clearSessionDataSourceAndContext: jest.fn(),
+      setPendingDataSource: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,
@@ -197,7 +210,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'test message from ref',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
   });
@@ -536,7 +550,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'Second message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
       expect(resendObservable.subscribe).toHaveBeenCalled();
     });
@@ -561,7 +576,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'Assistant message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
 
@@ -705,7 +721,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '   \n\t  ',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
 
@@ -721,7 +738,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '  test message  ',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
   });
@@ -752,7 +770,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '안녕하세요',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
 
@@ -772,7 +791,8 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '안녕하세요',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
   });
@@ -867,10 +887,7 @@ describe('ChatWindow', () => {
 
     it('should clear pending data source selection on new chat', async () => {
       // Mock no data source to trigger the prompt
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-1', title: 'Source One' },
-      ]);
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
@@ -890,7 +907,7 @@ describe('ChatWindow', () => {
       });
 
       // Restore data source mock so next send goes through normally
-      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-1');
+      mockResolved('ds-1', 'Source One');
 
       // Send another message — should not re-trigger the data source prompt
       fireEvent.change(input, { target: { value: 'second message' } });
@@ -904,21 +921,21 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'second message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
   });
 
   describe('data source validation on send', () => {
-    it('should show unsupported message when data source is AnalyticEngine', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
-      mockChatService.getAvailableDataSources.mockResolvedValue([]);
-      mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
-        attributes: { dataSourceEngineType: 'AnalyticEngine' },
-      });
+    it('should send without an unsupported message for an AnalyticEngine data source', async () => {
+      // AnalyticEngine data sources are supported now: an active, available data source sends.
+      mockResolved('ds-analytic', 'AnalyticEngine Source');
 
       const ref = React.createRef<ChatWindowInstance>();
-      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+      const { getByRole, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
 
       const input = getByRole('textbox');
       fireEvent.change(input, { target: { value: 'hello' } });
@@ -928,16 +945,19 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      // Should not send to agent
-      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      // No "unsupported" system message, and the message is sent.
+      expect(queryByText('The current data source does not support AI features.')).toBeNull();
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'hello',
+        expect.any(Array),
+        expect.any(Object),
+        expect.anything()
+      );
     });
 
     it('should show selector when current data source is invalid but alternatives exist', async () => {
-      // Current data source is unsupported, but compatible alternatives exist
-      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-good', title: 'Good Source' },
-      ]);
+      // No candidate verified (e.g. a deleted data source); alternatives exist.
+      mockNeedsSelection([{ id: 'ds-good', title: 'Good Source' }]);
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole, getByText } = renderWithContext(
@@ -952,14 +972,70 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      // Should show selector, not unsupported message
+      // Should show selector
       expect(mockChatService.sendMessage).not.toHaveBeenCalled();
       expect(getByText('Good Source')).toBeTruthy();
     });
 
     it('should show no data source message when no data sources exist at all', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([]);
+      mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'none_exist' });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should not send to agent
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(getByText(/There are no data sources associated with this workspace/)).toBeTruthy();
+    });
+
+    it('should say the list could not be loaded, not that none exist, when the read fails', async () => {
+      mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'list_failed' });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      // A toast says why; nothing is added to the conversation, and the text goes back to the
+      // input so a retry does not send the message twice.
+      expect(mockCore.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Could not load the data sources right now')
+      );
+      expect(queryByText(/There are no data sources associated/)).toBeNull();
+      // Only the input holds the text now, not a message row.
+      expect(queryByText('hello', { selector: ':not(textarea)' })).toBeNull();
+      expect((input as HTMLTextAreaElement).value).toBe('hello');
+      // The next send resolves again and goes through once the list can be read.
+      mockResolved();
+      fireEvent.change(input, { target: { value: 'again' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('should send without data source checks when multiple data sources are disabled', async () => {
+      mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'disabled' });
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
@@ -972,13 +1048,16 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      // Should not send to agent
-      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'hello',
+        expect.any(Array),
+        expect.any(Object),
+        { resolution: { kind: 'disabled' } }
+      );
     });
 
     it('should show data source selector when compatible data sources exist', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
+      mockNeedsSelection([
         { id: 'ds-1', title: 'Source One' },
         { id: 'ds-2', title: 'Source Two' },
       ]);
@@ -1004,11 +1083,393 @@ describe('ChatWindow', () => {
       expect(getByText('Source Two')).toBeTruthy();
     });
 
-    it('should send message after user selects a data source', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-1', title: 'Source One' },
-      ]);
+    it('should resolve a caller data source as a candidate for its message only', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // An empty message is not sent, so nothing is resolved.
+      await act(async () => {
+        await ref.current?.sendMessage({ content: '', dataSourceId: 'ds-panel' });
+      });
+      expect(mockChatService.resolveDataSourceForRun).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'summarize', dataSourceId: 'ds-panel' });
+      });
+      expect(mockChatService.resolveDataSourceForRun).toHaveBeenCalledWith({
+        callerDataSourceId: 'ds-panel',
+      });
+      // Nothing is chosen before the message is sent: sendMessage does that once it runs.
+      expect(mockChatService.setPendingDataSource).not.toHaveBeenCalled();
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not send another message while one waits on the data source picker', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(getByText('Source One')).toBeTruthy();
+
+      // A programmatic send (e.g. from another page) while the picker is open is ignored.
+      mockResolved();
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'second' });
+      });
+
+      expect(mockChatService.resolveDataSourceForRun).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should drop a pending pick when the user resends an earlier message instead', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getAllByLabelText, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+      const input = getByRole('textbox');
+
+      // An earlier message that went through.
+      fireEvent.change(input, { target: { value: 'earlier' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // A later message waits on the picker.
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      fireEvent.change(input, { target: { value: 'later' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(queryByText('Source One')).toBeTruthy();
+
+      // Resending the earlier message replaces the pending one and closes the picker.
+      mockResolved();
+      await act(async () => {
+        fireEvent.click(getAllByLabelText('Resend message')[0]);
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(queryByText('Source One')).toBeNull();
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(2);
+      expect(mockChatService.sendMessage).toHaveBeenLastCalledWith(
+        'earlier',
+        expect.any(Array),
+        expect.any(Object),
+        expect.anything()
+      );
+    });
+
+    it('should send history from before the pending message after a pick', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'needs a pick' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      mockResolved('ds-1', 'Source One');
+      fireEvent.click(getByText('Source One'));
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // The pending message is sent once, without itself in its history.
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      const [content, history] = mockChatService.sendMessage.mock.calls[0];
+      expect(content).toBe('needs a pick');
+      expect(history.some((msg: any) => msg.content === 'needs a pick')).toBe(false);
+    });
+
+    it('should put back the text of a message with an image when the list cannot be read', async () => {
+      mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'list_failed' });
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      await act(async () => {
+        await ref.current?.sendMessage({
+          content: [
+            { type: 'binary', mimeType: 'image/png', data: 'abc' },
+            { type: 'text', text: 'what is in this image' },
+          ] as any,
+        });
+      });
+
+      expect((getByRole('textbox') as HTMLTextAreaElement).value).toBe('what is in this image');
+    });
+
+    it('should keep the conversation intact when a resend cannot load the data sources', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getAllByLabelText, getAllByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'list_failed' });
+      await act(async () => {
+        fireEvent.click(getAllByLabelText('Resend message')[0]);
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // The message the resend would have cut off is still in the conversation.
+      expect(
+        getAllByText('first question', { selector: ':not(textarea)' }).length
+      ).toBeGreaterThanOrEqual(1);
+      expect((input as HTMLTextAreaElement).value).toBe('');
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not resolve a caller data source while a message waits on the picker', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'summarize', dataSourceId: 'ds-panel' });
+      });
+
+      expect(mockChatService.resolveDataSourceForRun).not.toHaveBeenCalledWith({
+        callerDataSourceId: 'ds-panel',
+      });
+      expect(mockChatService.setPendingDataSource).not.toHaveBeenCalled();
+    });
+
+    it('should not apply a pick whose pending message was replaced', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'waits' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      const option = getByText('Source One');
+
+      // The pending message leaves the timeline (e.g. a new chat) before the user picks.
+      act(() => {
+        ref.current?.startNewChat();
+      });
+      fireEvent.click(option);
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.setPendingDataSource).not.toHaveBeenCalled();
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should clear the loading state when a new chat aborts a history load', async () => {
+      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            id: 'conv-1',
+            threadId: 'thread-1',
+            name: 'Old conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
+      // The history load never finishes on its own.
+      mockChatService.loadConversation.mockImplementation(() => new Promise(() => {}));
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByLabelText, getByText, queryByText, getByRole } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      await act(async () => {
+        getByLabelText('Show conversation history').click();
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      await act(async () => {
+        getByText('Old conversation').click();
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(queryByText('Loading conversation...')).toBeTruthy();
+
+      await act(async () => {
+        getByLabelText('New chat').click();
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(queryByText('Loading conversation...')).toBeNull();
+      expect(getByRole('textbox')).toBeTruthy();
+    });
+
+    it('should drop a slash command whose conversation changed while it ran', async () => {
+      const { slashCommandRegistry } = jest.requireActual('../services/slash_commands');
+      slashCommandRegistry.register({
+        command: 'slow-cmd',
+        description: 'Slow command',
+        handler: jest.fn(async () => {
+          // The user opens another conversation while the command runs.
+          mockChatService.getThreadId.mockReturnValue('another-thread');
+          return 'resolved command message';
+        }),
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      await act(async () => {
+        await ref.current?.sendMessage({ content: '/slow-cmd args' });
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      slashCommandRegistry.unregister('slow-cmd');
+    });
+
+    it('should not send when the conversation changes while the data source resolves', async () => {
+      // The user opens another conversation while this send is resolving.
+      mockChatService.resolveDataSourceForRun.mockImplementation(async () => {
+        mockChatService.getThreadId.mockReturnValue('another-thread');
+        return resolved();
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should tell the user when a send after picking a data source finds none', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+      mockChatService.sendMessage.mockRejectedValue(
+        new DataSourceUnresolvedError({ kind: 'list_failed' })
+      );
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      fireEvent.click(getByText('Source One'));
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockCore.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Could not load the data sources right now')
+      );
+    });
+
+    it('should not start a second run while a resend is still resolving its data source', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getAllByLabelText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // A first message, sent normally, gives the timeline a user message to resend.
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+
+      // The resend's resolution stays pending while the user clicks resend again.
+      let finish: (value: ReturnType<typeof resolved>) => void = () => {};
+      mockChatService.resolveDataSourceForRun.mockImplementation(
+        () => new Promise((resolve) => (finish = resolve))
+      );
+      await act(async () => {
+        fireEvent.click(getAllByLabelText('Resend message')[0]);
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'second' });
+      });
+      await act(async () => {
+        finish(resolved());
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Only the resend went out.
+      expect(mockChatService.resolveDataSourceForRun).toHaveBeenCalledTimes(2);
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(2);
+      expect(mockChatService.sendMessage).toHaveBeenLastCalledWith(
+        'first',
+        expect.any(Array),
+        expect.any(Object),
+        expect.anything()
+      );
+    });
+
+    it('should resolve once per send and pass that resolution on to sendMessage', async () => {
+      mockResolved('ds-1', 'Source One');
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.resolveDataSourceForRun).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'hello',
+        expect.any(Array),
+        expect.any(Object),
+        { resolution: resolved('ds-1', 'Source One') }
+      );
+    });
+
+    it('should show the picker when the confirmed data source is no longer available', async () => {
+      // An unavailable conversation data source counts as "nothing selected".
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole, getByText } = renderWithContext(
@@ -1023,8 +1484,54 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      // After selecting, restore getCurrentDataSourceId so subscribeToMessageStream proceeds
-      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-1');
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(getByText('Please select a data source to continue:')).toBeTruthy();
+      expect(getByText('Source One')).toBeTruthy();
+
+      // After the user picks, the next send goes through without the picker.
+      mockResolved('ds-1', 'Source One');
+      fireEvent.click(getByText('Source One'));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+
+      fireEvent.change(input, { target: { value: 'second message' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenLastCalledWith(
+        'second message',
+        expect.any(Array),
+        expect.any(Object),
+        expect.anything()
+      );
+    });
+
+    it('should send message after user selects a data source', async () => {
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // After selecting, resolution succeeds so the pending message is sent
+      mockResolved('ds-1', 'Source One');
 
       // Click the data source option
       fireEvent.click(getByText('Source One'));
@@ -1033,11 +1540,12 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'hello',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
 
@@ -1051,10 +1559,7 @@ describe('ChatWindow', () => {
         handler: mockHandler,
       });
 
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-1', title: 'Source One' },
-      ]);
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole, getByText } = renderWithContext(
@@ -1083,13 +1588,14 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed
-      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
       expect(mockHandler).toHaveBeenCalledWith('some args');
       // The command returns a message to send to the agent
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'resolved command message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
 
       // Clean up registered command
@@ -1109,10 +1615,7 @@ describe('ChatWindow', () => {
         handler: mockHandler,
       });
 
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-1', title: 'Source One' },
-      ]);
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole, getByText } = renderWithContext(
@@ -1139,7 +1642,7 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed locally
-      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
       expect(mockHandler).toHaveBeenCalled();
       // Should NOT send to the agent since it's a local command
       expect(mockChatService.sendMessage).not.toHaveBeenCalled();
@@ -1151,9 +1654,9 @@ describe('ChatWindow', () => {
 
   describe('optimistic user message rendering', () => {
     it('should show user message immediately before data source validation completes', async () => {
-      // Make getCurrentDataSourceId take time to resolve
-      let resolveDataSource: (value: string) => void;
-      mockChatService.getCurrentDataSourceId.mockImplementation(
+      // Make the data source resolution take time
+      let resolveDataSource: (value: ReturnType<typeof resolved>) => void;
+      mockChatService.resolveDataSourceForRun.mockImplementation(
         () => new Promise((resolve) => (resolveDataSource = resolve))
       );
 
@@ -1175,14 +1678,14 @@ describe('ChatWindow', () => {
 
       // Now resolve validation
       await act(async () => {
-        resolveDataSource!('mock-ds-id');
+        resolveDataSource!(resolved());
         await new Promise((r) => setTimeout(r, 0));
       });
     });
 
     it('should show Connecting indicator while validating data source', async () => {
-      let resolveDataSource: (value: string | undefined) => void;
-      mockChatService.getCurrentDataSourceId.mockImplementation(
+      let resolveDataSource: (value: ReturnType<typeof resolved>) => void;
+      mockChatService.resolveDataSourceForRun.mockImplementation(
         () => new Promise((resolve) => (resolveDataSource = resolve))
       );
 
@@ -1203,7 +1706,7 @@ describe('ChatWindow', () => {
 
       // Resolve validation
       await act(async () => {
-        resolveDataSource!('mock-ds-id');
+        resolveDataSource!(resolved());
         await new Promise((r) => setTimeout(r, 0));
       });
 
@@ -1212,8 +1715,8 @@ describe('ChatWindow', () => {
     });
 
     it('should disable input while validating', async () => {
-      let resolveDataSource: (value: string | undefined) => void;
-      mockChatService.getCurrentDataSourceId.mockImplementation(
+      let resolveDataSource: (value: ReturnType<typeof resolved>) => void;
+      mockChatService.resolveDataSourceForRun.mockImplementation(
         () => new Promise((resolve) => (resolveDataSource = resolve))
       );
 
@@ -1234,7 +1737,7 @@ describe('ChatWindow', () => {
 
       // Resolve validation
       await act(async () => {
-        resolveDataSource!('mock-ds-id');
+        resolveDataSource!(resolved());
         await new Promise((r) => setTimeout(r, 0));
       });
 
@@ -1243,8 +1746,8 @@ describe('ChatWindow', () => {
     });
 
     it('should prevent double-send while validating', async () => {
-      let resolveDataSource: (value: string | undefined) => void;
-      mockChatService.getCurrentDataSourceId.mockImplementation(
+      let resolveDataSource: (value: ReturnType<typeof resolved>) => void;
+      mockChatService.resolveDataSourceForRun.mockImplementation(
         () => new Promise((resolve) => (resolveDataSource = resolve))
       );
 
@@ -1274,43 +1777,13 @@ describe('ChatWindow', () => {
 
       // Resolve validation
       await act(async () => {
-        resolveDataSource!('mock-ds-id');
+        resolveDataSource!(resolved());
         await new Promise((r) => setTimeout(r, 0));
       });
-    });
-
-    it('should show user message then error when data source is unsupported', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
-      mockChatService.getAvailableDataSources.mockResolvedValue([]);
-      mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
-        attributes: { dataSourceEngineType: 'AnalyticEngine' },
-      });
-
-      const { getByRole, getAllByText, getByText } = renderWithContext(
-        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
-      );
-
-      const input = getByRole('textbox');
-      fireEvent.change(input, { target: { value: 'hello' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 0));
-      });
-
-      // User message should be visible (appears in message + header title)
-      expect(getAllByText('hello').length).toBeGreaterThanOrEqual(1);
-      // Error message should appear below
-      expect(getByText('The current data source does not support AI features.')).toBeTruthy();
-      // Should not send to agent
-      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
     });
 
     it('should show user message then data source selector when DS is invalid', async () => {
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      mockChatService.getAvailableDataSources.mockResolvedValue([
-        { id: 'ds-1', title: 'Source One' },
-      ]);
+      mockNeedsSelection([{ id: 'ds-1', title: 'Source One' }]);
 
       const { getByRole, getAllByText, getByText } = renderWithContext(
         <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
@@ -2219,13 +2692,15 @@ describe('ChatWindow', () => {
         1,
         'first message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
       expect(mockChatService.sendMessage).toHaveBeenNthCalledWith(
         2,
         'second message',
         expect.any(Array),
-        expect.any(Object)
+        expect.any(Object),
+        expect.anything()
       );
     });
 
