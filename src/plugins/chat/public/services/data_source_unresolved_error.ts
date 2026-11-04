@@ -5,7 +5,7 @@
 
 import type { DataSourceResolution } from './chat_service';
 
-/** Error thrown by ChatService.sendMessage when the run has no usable data source. */
+/** Error thrown by ChatService.sendMessage when the resolution cannot run (see canRunWith). */
 export class DataSourceUnresolvedError extends Error {
   constructor(public readonly resolution: DataSourceResolution) {
     super(`No data source to run with (${resolution.kind})`);

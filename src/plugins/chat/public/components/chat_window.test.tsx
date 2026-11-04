@@ -977,6 +977,83 @@ describe('ChatWindow', () => {
       expect(getByText('Good Source')).toBeTruthy();
     });
 
+    it('sends without the picker when the agent selects the data source', async () => {
+      const resolution = {
+        kind: 'unselected' as const,
+        available: [{ id: 'ds-good', title: 'Good Source' }],
+        listComplete: true,
+      };
+      mockChatService.resolveDataSourceForRun.mockResolvedValue(resolution);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'hello',
+        expect.any(Array),
+        expect.anything(),
+        { resolution }
+      );
+      expect(queryByText('Good Source')).toBeNull();
+    });
+
+    it('resends and runs slash commands without the picker when the agent selects', async () => {
+      const resolution = {
+        kind: 'unselected' as const,
+        available: [{ id: 'ds-good', title: 'Good Source' }],
+        listComplete: true,
+      };
+      mockChatService.resolveDataSourceForRun.mockResolvedValue(resolution);
+      const { slashCommandRegistry } = jest.requireActual('../services/slash_commands');
+      slashCommandRegistry.register({
+        command: 'agent-cmd',
+        description: 'Test command',
+        handler: jest.fn().mockReturnValue('resolved agent command'),
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getAllByLabelText, queryByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      await act(async () => {
+        fireEvent.click(getAllByLabelText('Resend message')[0]);
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      fireEvent.change(input, { target: { value: '/agent-cmd args' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      slashCommandRegistry.unregister('agent-cmd');
+
+      // The send, the resend and the command all run with the resolution, and no picker shows.
+      expect(
+        mockChatService.sendMessage.mock.calls.map((call: any[]) => [call[0], call[3]])
+      ).toEqual([
+        ['first', { resolution }],
+        ['first', { resolution }],
+        ['resolved agent command', { resolution }],
+      ]);
+      expect(queryByText('Good Source')).toBeNull();
+    });
+
     it('should show no data source message when no data sources exist at all', async () => {
       mockChatService.resolveDataSourceForRun.mockResolvedValue({ kind: 'none_exist' });
 
@@ -1496,7 +1573,7 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1');
       expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
 
       fireEvent.change(input, { target: { value: 'second message' } });
@@ -1540,7 +1617,7 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1');
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'hello',
         expect.any(Array),
@@ -1588,7 +1665,7 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed
-      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1');
       expect(mockHandler).toHaveBeenCalledWith('some args');
       // The command returns a message to send to the agent
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
@@ -1642,7 +1719,7 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed locally
-      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1', 'picker');
+      expect(mockChatService.setPendingDataSource).toHaveBeenCalledWith('ds-1');
       expect(mockHandler).toHaveBeenCalled();
       // Should NOT send to the agent since it's a local command
       expect(mockChatService.sendMessage).not.toHaveBeenCalled();

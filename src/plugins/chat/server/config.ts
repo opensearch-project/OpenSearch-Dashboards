@@ -11,6 +11,15 @@ export const configSchema = schema.object({
   forwardCredentials: schema.boolean({ defaultValue: false }),
   mlCommonsAgentId: schema.maybe(schema.string()),
   observabilityAgentId: schema.maybe(schema.string()),
+  // How the chat gets a data source when none resolves for a message (data sources exist, but
+  // there is no page, conversation or default data source):
+  // - picker: the chat shows the data source picker before sending.
+  // - agent: the message is sent without a data source, and the agent asks the user for one
+  //   (ask_user) only when the request needs data. It applies only with agUiUrl: an ML Commons
+  //   agent (mlCommonsAgentId) always needs a data source id, so the chat keeps the picker.
+  unresolvedDataSource: schema.oneOf([schema.literal('picker'), schema.literal('agent')], {
+    defaultValue: 'picker',
+  }),
 });
 
 export type ChatConfigType = TypeOf<typeof configSchema>;

@@ -6,6 +6,7 @@
 import type { AssistantAction } from '../../../context_provider/public';
 import { HumanInputService, AskUserOption } from './human_input_service';
 import { InlineAskUser } from '../components/ask_user_card';
+import { ASK_USER_TOOL_NAME } from '../../common';
 
 interface AskUserArgs {
   prompt: string;
@@ -27,7 +28,7 @@ interface AskUserArgs {
 export const createAskUserAction = (
   humanInputService: HumanInputService
 ): AssistantAction<AskUserArgs> => ({
-  name: 'ask_user',
+  name: ASK_USER_TOOL_NAME,
   description:
     'Ask the user a structured question and wait for their answer before continuing. ' +
     'Use this to resolve ambiguity, let the user choose between options, or confirm an ' +

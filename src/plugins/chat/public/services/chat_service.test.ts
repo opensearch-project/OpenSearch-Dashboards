@@ -2017,6 +2017,7 @@ describe('ChatService', () => {
     workspaceId?: string;
     defaultId?: string;
     dataSourceEnabled?: boolean;
+    unresolvedDataSource?: 'picker' | 'agent';
   }
 
   /**
@@ -2039,7 +2040,8 @@ describe('ChatService', () => {
       mockCoreChatService,
       { currentWorkspaceId$ } as any,
       { find, get } as any,
-      options.dataSourceEnabled ?? true
+      options.dataSourceEnabled ?? true,
+      options.unresolvedDataSource
     );
     mockThreadId$.next(DS_THREAD_ID);
     // The continuation delay is covered by the sendToolResult tests; skip it here.
@@ -2062,6 +2064,9 @@ describe('ChatService', () => {
   const dataSourceContextValue = (runInput: any): string | undefined =>
     runInput.context.find((ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES)
       ?.value;
+
+  const NOT_RECORDED =
+    'The active data source is not recorded in the conversation yet. Before calling any other tool, call switch_data_source with dataSourceId ';
 
   const lastRunAgentCall = () =>
     mockAgent.runAgent.mock.calls[mockAgent.runAgent.mock.calls.length - 1];
@@ -2095,15 +2100,13 @@ describe('ChatService', () => {
         });
 
         const value = dataSourceContextValue(lastRunAgentCall()[0]);
-        expect(value).toContain(
-          `The user's request is about data in "Gamma" (id: ds-c) (for example a visualization they asked about). Before calling any other tool, call switch_data_source with dataSourceId "ds-c"`
-        );
-        expect(value).not.toContain('The user selected');
+        expect(value).toContain(`Active data source: "Gamma" (id: ds-c)\n`);
+        expect(value).toContain(`${NOT_RECORDED}"ds-c"`);
         expect(service.getPendingDataSourceId()).toBe('ds-c');
         expect(service.getConversationDataSourceId()).toBe('ds-b');
       });
 
-      it('uses a neutral line in later runs while the agent has not recorded it', async () => {
+      it('asks the agent to record it in later runs too, until it does', async () => {
         const { service } = setupDataSources();
         service.setConversationDataSource('ds-b');
         await service.sendMessage('hi', [], undefined, {
@@ -2113,22 +2116,18 @@ describe('ChatService', () => {
         expect(await service.resolveDataSourceForRun()).toMatchObject({
           active: { id: 'ds-c' },
           source: 'pending',
-          pendingOrigin: 'caller',
         });
         await service.sendMessage('and now?', []);
 
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-c');
         const value = dataSourceContextValue(runInput);
-        expect(value).toContain(
-          `"Gamma" (id: ds-c) was chosen for this conversation by an earlier request but is not recorded yet. Before calling any other tool, call switch_data_source with dataSourceId "ds-c"`
-        );
-        expect(value).not.toContain("The user's request is about");
+        expect(value).toContain(`${NOT_RECORDED}"ds-c"`);
       });
 
       it('becomes the conversation data source once the agent switches to it', async () => {
         const { service } = setupDataSources();
-        service.setPendingDataSource('ds-c', 'caller');
+        service.setPendingDataSource('ds-c');
         service.setConversationDataSource('ds-c');
 
         expect(service.getPendingDataSourceId()).toBeUndefined();
@@ -2140,7 +2139,7 @@ describe('ChatService', () => {
 
       it('is replaced when the agent switches to another data source the user named', async () => {
         const { service } = setupDataSources();
-        service.setPendingDataSource('ds-c', 'caller');
+        service.setPendingDataSource('ds-c');
         service.setConversationDataSource('ds-a');
 
         expect(service.getPendingDataSourceId()).toBeUndefined();
@@ -2176,13 +2175,12 @@ describe('ChatService', () => {
         const debug = jest.spyOn(console, 'debug').mockImplementation(() => {});
         const { service } = setupDataSources();
         service.setConversationDataSource('ds-a');
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
 
         const resolution = await service.resolveDataSourceForRun(caller('ds-gone'));
         expect(resolution).toMatchObject({
           active: { id: 'ds-b' },
           source: 'pending',
-          pendingOrigin: 'picker',
         });
         await service.sendMessage('hi', [], undefined, { resolution });
 
@@ -2193,7 +2191,7 @@ describe('ChatService', () => {
 
       it('is cleared with the conversation', async () => {
         const { service } = setupDataSources({ defaultId: 'ds-a' });
-        service.setPendingDataSource('ds-c', 'caller');
+        service.setPendingDataSource('ds-c');
         service.newThread();
 
         expect(await service.resolveDataSourceForRun()).toMatchObject({ active: { id: 'ds-a' } });
@@ -2726,7 +2724,7 @@ describe('ChatService', () => {
       it('clears the previous conversation data source and picker flag first', async () => {
         const { service } = setupDataSources();
         service.setConversationDataSource('ds-old');
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
         expect(service.getPendingDataSourceId()).toBe('ds-b');
 
         await load(service, [
@@ -2741,7 +2739,7 @@ describe('ChatService', () => {
       it('keeps the current conversation data source when the conversation fails to load', async () => {
         const { service } = setupDataSources();
         service.setConversationDataSource('ds-a');
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
         service.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
 
         await service.loadConversation('thread-missing');
@@ -2793,41 +2791,37 @@ describe('ChatService', () => {
     describe('picker choice', () => {
       it('runs with the picked data source and asks the agent to record it', async () => {
         const { service } = setupDataSources();
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
 
         expect(service.getPendingDataSourceId()).toBe('ds-b');
         expect(service.getConversationDataSourceId()).toBeUndefined();
         expect(await service.resolveDataSourceForRun()).toMatchObject({
           active: { id: 'ds-b' },
           source: 'pending',
-          pendingOrigin: 'picker',
         });
 
         await service.sendMessage('hi', []);
 
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-b');
-        expect(dataSourceContextValue(runInput)).toContain(
-          'The user selected "Beta" (id: ds-b) in the data source picker. Before calling any other tool, call switch_data_source with dataSourceId "ds-b"'
-        );
+        expect(dataSourceContextValue(runInput)).toContain(`${NOT_RECORDED}"ds-b"`);
       });
 
       it('is used ahead of the conversation data source until the agent records it', async () => {
         const { service } = setupDataSources();
         service.setConversationDataSource('ds-a');
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
 
         expect(await service.resolveDataSourceForRun()).toMatchObject({
           active: { id: 'ds-b' },
           source: 'pending',
-          pendingOrigin: 'picker',
         });
         expect(service.getConversationDataSourceId()).toBe('ds-a');
       });
 
-      it('drops the picker line once the agent switched', async () => {
+      it('drops the record line once the agent switched', async () => {
         const { service } = setupDataSources();
-        service.setPendingDataSource('ds-b', 'picker');
+        service.setPendingDataSource('ds-b');
         service.setConversationDataSource('ds-b');
 
         expect(service.getPendingDataSourceId()).toBeUndefined();
@@ -2835,7 +2829,7 @@ describe('ChatService', () => {
 
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-b');
-        expect(dataSourceContextValue(runInput)).not.toContain('The user selected');
+        expect(dataSourceContextValue(runInput)).not.toContain(NOT_RECORDED);
       });
     });
 
@@ -2855,13 +2849,15 @@ describe('ChatService', () => {
         );
         const value = dataSourceContextValue(lastRunAgentCall()[0])!;
         expect(value).toContain(
-          'Available data sources (the ONLY data sources the user can use): "Alpha" (id: ds-a), "He said \\"hi\\"" (id: ds-q)'
+          'Available data sources: "Alpha" (id: ds-a), "He said \\"hi\\"" (id: ds-q)\n'
         );
-        expect(value).toContain('Currently active data source: "Alpha" (id: ds-a)');
+        expect(value).toContain('Active data source: "Alpha" (id: ds-a)');
         expect(value).toContain(
-          '- If it matches none, tell the user it is not available and list the available names.'
+          '- If the user names a data source that is not listed, say you could not find it and list the available names.'
         );
-        expect(value).not.toContain('cannot be switched while the user is on this page');
+        expect(value).toContain('- If the user names no data source, use the active one.');
+        expect(value).not.toContain('cannot be switched here');
+        expect(value).not.toContain(NOT_RECORDED);
       });
 
       it('says the list may be partial when it is incomplete', async () => {
@@ -2871,12 +2867,9 @@ describe('ChatService', () => {
         await service.sendMessage('hi', []);
 
         const value = dataSourceContextValue(lastRunAgentCall()[0])!;
+        expect(value).toContain('(id: ds-c) (this list may be incomplete)\n');
         expect(value).toContain(
-          'Available data sources (this list may not include every data source): '
-        );
-        expect(value).not.toContain('the ONLY data sources');
-        expect(value).toContain(
-          '- If it matches none, tell the user you could not find it among the listed data sources'
+          'say you could not find it among the listed ones, list their names, and ask the user for its id.'
         );
       });
 
@@ -2889,7 +2882,7 @@ describe('ChatService', () => {
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-c');
         expect(dataSourceContextValue(runInput)).toContain(
-          'cannot be switched while the user is on this page'
+          'The dataset on the current page pins the active data source, so it cannot be switched here.'
         );
       });
 
@@ -2938,9 +2931,7 @@ describe('ChatService', () => {
 
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-b');
-        expect(dataSourceContextValue(runInput)).toContain(
-          'Currently active data source: "Beta" (id: ds-b)'
-        );
+        expect(dataSourceContextValue(runInput)).toContain('Active data source: "Beta" (id: ds-b)');
       });
 
       it('dispatches a tool result batch with the data source the agent switched to', async () => {
@@ -2994,8 +2985,8 @@ describe('ChatService', () => {
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-a');
         const value = dataSourceContextValue(runInput)!;
-        expect(value).toContain('Currently active data source: "Alpha" (id: ds-a)');
-        expect(value).toContain('this list may not include every data source');
+        expect(value).toContain('Active data source: "Alpha" (id: ds-a)');
+        expect(value).toContain('(this list may be incomplete)');
       });
 
       it('does not ask to record a picker choice for the fallback data source', async () => {
@@ -3004,7 +2995,7 @@ describe('ChatService', () => {
         (await service.sendMessage('hi', [])).observable.subscribe();
 
         // A picker choice that does not verify, and the user left the page.
-        service.setPendingDataSource('ds-gone', 'picker');
+        service.setPendingDataSource('ds-gone');
         setPageDataSource(store, undefined);
 
         await service.sendToolResult('tc-1', { success: true }, []);
@@ -3012,7 +3003,7 @@ describe('ChatService', () => {
         const [runInput, dataSourceId] = lastRunAgentCall();
         expect(dataSourceId).toBe('ds-a');
         // The picker line would name the fallback data source as the user's choice.
-        expect(dataSourceContextValue(runInput)).not.toContain('The user selected');
+        expect(dataSourceContextValue(runInput)).not.toContain(NOT_RECORDED);
       });
 
       it('marks the fallback to the previous run so no page or picker line applies to it', async () => {
@@ -3067,6 +3058,150 @@ describe('ChatService', () => {
         expect(error).toBeInstanceOf(DataSourceUnresolvedError);
         expect(error.resolution).toMatchObject({ kind: 'needs_selection' });
         expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      });
+
+      describe('when the agent selects the data source', () => {
+        it('sends without a data source id and asks the agent to ask the user when data is needed', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          expect(await service.resolveDataSourceForRun()).toEqual({
+            kind: 'unselected',
+            available: [
+              { id: 'ds-a', title: 'Alpha' },
+              { id: 'ds-b', title: 'Beta' },
+              { id: 'ds-c', title: 'Gamma' },
+            ],
+            listComplete: true,
+          });
+
+          await service.sendMessage('hi', []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBeUndefined();
+          const value = dataSourceContextValue(runInput)!;
+          expect(value).toContain(
+            'Available data sources: "Alpha" (id: ds-a), "Beta" (id: ds-b), "Gamma" (id: ds-c)\n'
+          );
+          expect(value).toContain('Active data source: none.');
+          expect(value).toContain(
+            'call ask_user with inputType "select" and these options: "Alpha", "Beta", "Gamma".'
+          );
+          expect(value).toContain('Answer a request that needs no data');
+          expect(value).toContain(
+            '- Once the user has chosen a data source (for example in an ask_user answer), call switch_data_source with its id.'
+          );
+          expect(value).toContain(
+            '- If the user declines to choose, say that no data source is selected, and do not call switch_data_source or tools that read data.'
+          );
+          expect(value).not.toContain('If the user names no data source, use the active one');
+        });
+
+        it('switches to the only data source without asking', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent', list: [DS_A] });
+
+          await service.sendMessage('hi', []);
+
+          const value = dataSourceContextValue(lastRunAgentCall()[0])!;
+          expect(value).toContain(
+            'call switch_data_source with the id of the only data source first'
+          );
+          expect(value).not.toContain('ask_user');
+        });
+
+        it('gives the tools of a run that went without a data source none, even after a switch', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          await service.sendMessage('hi', []);
+
+          // A switch in the same step applies from the next run on; a server that echoes its
+          // own runId must not make the run's tools resolve afresh.
+          service.setConversationDataSource('ds-b');
+
+          expect(await service.getRunDataSource('unknown-run')).toBeUndefined();
+        });
+
+        it('runs on the data source the agent recorded once it is switched', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          (await service.sendMessage('hi', [])).observable.subscribe();
+          expect(lastRunAgentCall()[1]).toBeUndefined();
+
+          service.setConversationDataSource('ds-b');
+          await service.sendToolResult('tc-1', { success: true, dataSourceId: 'ds-b' }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-b');
+          expect(dataSourceContextValue(runInput)).toContain(
+            'Active data source: "Beta" (id: ds-b)'
+          );
+        });
+
+        it('answers an ask_user result without a data source until the agent switches', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          (await service.sendMessage('hi', [])).observable.subscribe();
+
+          await service.sendToolResult('tc-1', { answered: true, answer: 'Beta' }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBeUndefined();
+          expect(dataSourceContextValue(runInput)).toContain('Active data source: none.');
+        });
+
+        it('adds the id to ask_user options whose titles repeat', async () => {
+          const twin = { id: 'ds-a2', attributes: { title: 'Alpha' } };
+          const { service } = setupDataSources({
+            unresolvedDataSource: 'agent',
+            list: [DS_A, twin, DS_B],
+          });
+
+          await service.sendMessage('hi', []);
+
+          expect(dataSourceContextValue(lastRunAgentCall()[0])).toContain(
+            'these options: "Alpha (id: ds-a)", "Alpha (id: ds-a2)", "Beta".'
+          );
+        });
+
+        it('lists every data source for a continuation that falls back to the previous run', async () => {
+          const { service, store } = setupDataSources({ unresolvedDataSource: 'agent' });
+          setPageDataSource(store, 'ds-a');
+          (await service.sendMessage('hi', [])).observable.subscribe();
+          // The user left the page; nothing else resolves.
+          setPageDataSource(store, undefined);
+
+          await service.sendToolResult('tc-1', { success: true }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-a');
+          expect(dataSourceContextValue(runInput)).toContain(
+            'Available data sources: "Alpha" (id: ds-a), "Beta" (id: ds-b), "Gamma" (id: ds-c) (this list may be incomplete)\n'
+          );
+        });
+
+        it('keeps the picker for the picker setting', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'picker' });
+
+          expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        });
+
+        it('still throws when no data source exists or the list cannot be read', async () => {
+          const none = setupDataSources({ unresolvedDataSource: 'agent', list: [] });
+          const noneError = await none.service.sendMessage('hi', []).catch((e) => e);
+          expect(noneError.resolution).toMatchObject({ kind: 'none_exist' });
+
+          const failed = setupDataSources({ unresolvedDataSource: 'agent' });
+          failed.find.mockRejectedValue(new Error('boom'));
+          const failedError = await failed.service.sendMessage('hi', []).catch((e) => e);
+          expect(failedError.resolution).toMatchObject({ kind: 'list_failed' });
+          expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        });
+
+        it('uses a resolved data source as before', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          service.setConversationDataSource('ds-a');
+
+          await service.sendMessage('hi', []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-a');
+          expect(dataSourceContextValue(runInput)).not.toContain('Active data source: none');
+        });
       });
 
       it('runs without a data source id and removes the context when disabled', async () => {

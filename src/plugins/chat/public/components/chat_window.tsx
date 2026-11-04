@@ -42,7 +42,7 @@ import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
 import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
-import type { DataSourceResolution } from '../services/chat_service';
+import { canRunWith, DataSourceResolution } from '../services/chat_service';
 import { DataSourceUnresolvedError } from '../services/data_source_unresolved_error';
 import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
@@ -432,7 +432,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         // The user's choice is used for the message being sent; the agent is asked to record it
         // with switch_data_source in that run.
-        chatService.setPendingDataSource(id, 'picker');
+        chatService.setPendingDataSource(id);
 
         // Pending user message is already in the timeline — replace it if a slash command
         const handled = await executeSlashCommand(messageContent, historyMessages, pending);
@@ -469,7 +469,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           return { valid: false, reason: 'thread_changed' };
         }
 
-        if (resolution.kind === 'resolved' || resolution.kind === 'disabled') {
+        // An `unselected` message is sent too: the agent asks the user for a data source if the
+        // request needs one.
+        if (canRunWith(resolution)) {
           return { valid: true, resolution };
         }
 

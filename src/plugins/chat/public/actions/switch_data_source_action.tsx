@@ -139,8 +139,9 @@ const SwitchDataSourceCard = ({
 
 /**
  * This tool is a pure apply action: it records the conversation's data source. It does NOT ask the
- * user anything; when no data source resolves, the chat window shows the data source picker, and
- * the agent is then asked to call this tool to record the user's choice in the conversation.
+ * user anything. When no data source resolves, either the chat window shows the data source picker
+ * and the agent is then asked to call this tool to record the choice, or (with
+ * chat.unresolvedDataSource 'agent') the agent asks the user with ask_user and then calls it.
  */
 export function useSwitchDataSourceAction(chatService: ChatService, enabled: boolean = true) {
   useAssistantAction<SwitchDataSourceArgs>({
@@ -150,9 +151,8 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
       '(for example, tools that inspect fields, query data, or create visualizations). ' +
       'WHEN TO CALL IT: call this tool when the user names an available data source (from ' +
       'available-data-sources-context) that is not the currently active one, passing that data ' +
-      "source's id, or when that context asks you to record a data source chosen for the " +
-      'conversation (a picker choice, or the data source of what the user asked about). ' +
-      'Otherwise do not call it for the data source that is already active. ' +
+      "source's id, when the user chooses one through ask_user, or when that context asks you " +
+      'to record one. Otherwise do not call it for the data source that is already active. ' +
       'NOTES: (1) A data source id/title in page, panel, visualization, or message context is metadata, not a request to switch. ' +
       '(2) A dataset or index-pattern id is not a data source id. ' +
       '(3) The switch applies from the next step on: do not call other data-source-aware tools in ' +

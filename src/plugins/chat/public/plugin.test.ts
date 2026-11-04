@@ -133,7 +133,8 @@ describe('ChatPlugin', () => {
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.savedObjects.client,
-        false
+        false,
+        'picker'
       );
     });
 
@@ -145,7 +146,48 @@ describe('ChatPlugin', () => {
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.savedObjects.client,
-        true
+        true,
+        'picker'
+      );
+    });
+
+    it('keeps the picker for an agent setting without an AG-UI agent', () => {
+      mockInitializerContext.config.get.mockReturnValue({
+        enabled: true,
+        mlCommonsAgentId: 'agent-1',
+        unresolvedDataSource: 'agent',
+      });
+      plugin = new ChatPlugin(mockInitializerContext);
+
+      plugin.start(mockCoreStart, { ...mockDeps, dataSource: {} } as any);
+
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client,
+        true,
+        'picker'
+      );
+    });
+
+    it('should pass the data source selection mode from the config', () => {
+      mockInitializerContext.config.get.mockReturnValue({
+        enabled: true,
+        agUiUrl: 'http://test-ag-ui:3000',
+        unresolvedDataSource: 'agent',
+      });
+      plugin = new ChatPlugin(mockInitializerContext);
+
+      plugin.start(mockCoreStart, { ...mockDeps, dataSource: {} } as any);
+
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client,
+        true,
+        'agent'
       );
     });
 
@@ -178,7 +220,8 @@ describe('ChatPlugin', () => {
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.savedObjects.client,
-        false
+        false,
+        'picker'
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -192,7 +235,8 @@ describe('ChatPlugin', () => {
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.savedObjects.client,
-        false
+        false,
+        'picker'
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -258,7 +302,8 @@ describe('ChatPlugin', () => {
           mockCoreStart.chat,
           mockCoreStart.workspaces,
           mockCoreStart.savedObjects.client,
-          false
+          false,
+          'picker'
         );
       });
     });

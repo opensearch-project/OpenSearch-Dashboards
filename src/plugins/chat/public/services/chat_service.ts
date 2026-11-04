@@ -24,7 +24,7 @@ import {
   ToolCallEndEvent,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
-import { SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
+import { ASK_USER_TOOL_NAME, SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 import { ConversationHistoryService } from './conversation_history_service';
 import { DataSourceUnresolvedError } from './data_source_unresolved_error';
 
@@ -51,8 +51,8 @@ export type DataSourceSource =
   // The data source passed with this message (sendMessageWithWindow's dataSourceId). Sending
   // the message makes it the pending choice.
   | 'caller'
-  // A data source chosen for the conversation but not recorded yet (see `pendingOrigin`). Used
-  // ahead of the conversation's own, and the agent is asked to record it with switch_data_source.
+  // A data source chosen for the conversation but not recorded yet. Used ahead of the
+  // conversation's own, and the agent is asked to record it with switch_data_source.
   | 'pending'
   | 'conversation'
   | 'workspaceDefault'
@@ -71,20 +71,29 @@ export type DataSourceResolution =
   | { kind: 'list_failed' }
   // No data source is available to this workspace.
   | { kind: 'none_exist' }
-  // Data sources exist but none resolved: the user has to pick one.
+  // Data sources exist but none resolved: the user has to pick one in the picker.
   | { kind: 'needs_selection'; available: DataSourceInfo[]; listComplete: boolean }
+  // Data sources exist but none resolved, and chat.unresolvedDataSource is 'agent': the run is
+  // sent without a data source, and the agent asks the user for one when the request needs data.
+  | { kind: 'unselected'; available: DataSourceInfo[]; listComplete: boolean }
   | {
       kind: 'resolved';
       active: DataSourceInfo;
       source: DataSourceSource;
-      // Where a pending choice came from; set only when `source` is 'pending'.
-      pendingOrigin?: 'picker' | 'caller';
       available: DataSourceInfo[];
       // false when `available` may not hold every data source: the workspace has more than the
       // list shows, the active one was found only by a direct lookup, or a continuation fell
       // back to the previous run's data source.
       listComplete: boolean;
     };
+
+/** Whether a message can be sent with this resolution (the others block the send). */
+export const canRunWith = (
+  resolution: DataSourceResolution
+): resolution is Extract<DataSourceResolution, { kind: 'resolved' | 'disabled' | 'unselected' }> =>
+  resolution.kind === 'resolved' ||
+  resolution.kind === 'disabled' ||
+  resolution.kind === 'unselected';
 
 type DataSourceListResult = { ok: true; list: DataSourceInfo[]; complete: boolean } | { ok: false };
 
@@ -145,6 +154,9 @@ export class ChatService {
   private toolSubscription?: Subscription;
   // Whether multiple data sources are enabled. When false, runs carry no data source id.
   private dataSourceEnabled: boolean;
+  // What happens when no data source resolves (see chat.unresolvedDataSource): 'picker' asks the
+  // user before sending, 'agent' sends without one and lets the agent ask when it needs data.
+  private unresolvedDataSource: 'picker' | 'agent';
   // The available data sources of the current conversation, read once per thread. A failed read
   // is dropped so the next caller reads again.
   private dataSources?: { threadId: string; promise: Promise<DataSourceListResult> };
@@ -160,7 +172,7 @@ export class ChatService {
   private conversationDataSourceId?: string;
   // A data source chosen for the conversation that the agent has not recorded with
   // switch_data_source yet: a picker choice, or one a caller passed. Cleared once recorded.
-  private pendingDataSource?: { id: string; origin: 'picker' | 'caller' };
+  private pendingDataSourceId?: string;
   // The default data source setting, read once per thread and scope.
   private defaultDataSourceRead?: {
     threadId: string;
@@ -169,7 +181,9 @@ export class ChatService {
   };
   // The data source each run was dispatched with, for the tools that run executes.
   private runDataSources = new Map<string, DataSourceInfo | undefined>();
-  private lastRunDataSource?: DataSourceInfo;
+  // The last dispatched run. Its data source is undefined when it went without one (an
+  // `unselected` or `disabled` run), which is not the same as no run yet.
+  private lastRun?: { dataSource?: DataSourceInfo };
   // Incremented per loadConversation, so only the latest load applies its thread.
   private conversationLoadToken = 0;
 
@@ -182,8 +196,10 @@ export class ChatService {
     workspaces?: WorkspacesStart,
     savedObjectsClient?: SavedObjectsClientContract,
     // Without a saved objects client there is no way to read data sources.
-    dataSourceEnabled: boolean = !!savedObjectsClient
+    dataSourceEnabled: boolean = !!savedObjectsClient,
+    unresolvedDataSource: 'picker' | 'agent' = 'picker'
   ) {
+    this.unresolvedDataSource = unresolvedDataSource;
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
@@ -632,8 +648,7 @@ export class ChatService {
     active: DataSourceInfo,
     source: DataSourceSource,
     list: DataSourceInfo[] | undefined,
-    listComplete: boolean,
-    pendingOrigin?: 'picker' | 'caller'
+    listComplete: boolean
   ): DataSourceResolution {
     const known = list ?? [];
     const inList = known.some((ds) => ds.id === active.id);
@@ -641,7 +656,6 @@ export class ChatService {
       kind: 'resolved',
       active,
       source,
-      ...(pendingOrigin ? { pendingOrigin } : {}),
       available: inList ? known : [...known, active],
       listComplete: listComplete && inList,
     };
@@ -654,7 +668,8 @@ export class ChatService {
    * passed with this message (`callerDataSourceId`), a choice not recorded yet, the
    * conversation's data source, then the default (workspace-level in a workspace, global
    * otherwise). Each one is used only if it is verified; otherwise the next one is tried. When
-   * none is, the user has to pick one (`needs_selection`).
+   * none is, the user has to pick one (`needs_selection`), or, when chat.unresolvedDataSource is
+   * 'agent', the run goes without one and the agent asks when it needs data (`unselected`).
    */
   public async resolveDataSourceForRun(options?: {
     callerDataSourceId?: string;
@@ -664,15 +679,11 @@ export class ChatService {
     // Read the conversation's state before awaiting, so one resolution never mixes two
     // conversations if the user switches while it runs.
     const conversationDataSourceId = this.conversationDataSourceId;
-    const pendingDataSource = this.pendingDataSource;
+    const pendingDataSourceId = this.pendingDataSourceId;
     const listResult = await this.ensureDataSources();
     const list = listResult.ok ? listResult.list : undefined;
-    const resolved = (
-      active: DataSourceInfo,
-      source: DataSourceSource,
-      pendingOrigin?: 'picker' | 'caller'
-    ) =>
-      this.toResolution(active, source, list, listResult.ok && listResult.complete, pendingOrigin);
+    const resolved = (active: DataSourceInfo, source: DataSourceSource) =>
+      this.toResolution(active, source, list, listResult.ok && listResult.complete);
 
     const page = await this.verifyDataSource(this.getDataSourceFromPageContext(), list);
     if (page) return resolved(page, 'page');
@@ -690,12 +701,12 @@ export class ChatService {
     }
 
     // A choice not recorded yet comes before the conversation's own: it is the newer intent.
-    if (pendingDataSource) {
-      const pending = await this.verifyDataSource(pendingDataSource.id, list);
-      if (pending) return resolved(pending, 'pending', pendingDataSource.origin);
+    if (pendingDataSourceId) {
+      const pending = await this.verifyDataSource(pendingDataSourceId, list);
+      if (pending) return resolved(pending, 'pending');
       // eslint-disable-next-line no-console
       console.debug(
-        `Chat: the chosen data source "${pendingDataSource.id}" is not available; ignoring it.`
+        `Chat: the chosen data source "${pendingDataSourceId}" is not available; ignoring it.`
       );
     }
 
@@ -712,7 +723,7 @@ export class ChatService {
     if (!listResult.ok) return { kind: 'list_failed' };
     if (listResult.list.length === 0) return { kind: 'none_exist' };
     return {
-      kind: 'needs_selection',
+      kind: this.unresolvedDataSource === 'agent' ? 'unselected' : 'needs_selection',
       available: listResult.list,
       listComplete: listResult.complete,
     };
@@ -755,7 +766,7 @@ export class ChatService {
 
   /** The chosen data source the agent has not recorded yet, if any. */
   public getPendingDataSourceId(): string | undefined {
-    return this.pendingDataSource?.id;
+    return this.pendingDataSourceId;
   }
 
   /**
@@ -765,9 +776,9 @@ export class ChatService {
    * available), and the agent is asked to record it with switch_data_source so it can be read
    * back from the history.
    */
-  public setPendingDataSource(id: string, origin: 'picker' | 'caller'): void {
+  public setPendingDataSource(id: string): void {
     // Already the recorded data source: there is nothing for the agent to record.
-    this.pendingDataSource = id === this.conversationDataSourceId ? undefined : { id, origin };
+    this.pendingDataSourceId = id === this.conversationDataSourceId ? undefined : id;
   }
 
   /**
@@ -776,7 +787,7 @@ export class ChatService {
    */
   public setConversationDataSource(id: string): void {
     this.conversationDataSourceId = id;
-    this.pendingDataSource = undefined;
+    this.pendingDataSourceId = undefined;
   }
 
   /**
@@ -788,7 +799,7 @@ export class ChatService {
    */
   public async getRunDataSource(runId?: string): Promise<DataSourceInfo | undefined> {
     if (runId && this.runDataSources.has(runId)) return this.runDataSources.get(runId);
-    if (this.lastRunDataSource) return this.lastRunDataSource;
+    if (this.lastRun) return this.lastRun.dataSource;
     const resolution = await this.resolveDataSourceForRun();
     return resolution.kind === 'resolved' ? resolution.active : undefined;
   }
@@ -799,15 +810,15 @@ export class ChatService {
     if (this.runDataSources.size > 20) {
       this.runDataSources.delete(this.runDataSources.keys().next().value as string);
     }
-    this.lastRunDataSource = dataSource;
+    this.lastRun = { dataSource };
   }
 
   private clearConversationDataSourceState(): void {
     this.conversationDataSourceId = undefined;
-    this.pendingDataSource = undefined;
+    this.pendingDataSourceId = undefined;
     this.defaultDataSourceRead = undefined;
     this.runDataSources.clear();
-    this.lastRunDataSource = undefined;
+    this.lastRun = undefined;
     this.dataSources = undefined;
     this.dataSourceLookups = undefined;
   }
@@ -820,12 +831,15 @@ export class ChatService {
   private async resolveForContinuation(): Promise<DataSourceResolution> {
     const resolution = await this.resolveDataSourceForRun();
     if (resolution.kind === 'resolved' || resolution.kind === 'disabled') return resolution;
-    const last = this.lastRunDataSource;
+    const last = this.lastRun?.dataSource;
     // No earlier run to fall back to (a tool replayed from history whose data source no longer
     // verifies): the result is still delivered, without a data source id, so the run can finish.
     if (!last) return resolution;
     // Not the conversation's data source: no picker or page line applies to it.
-    const list = resolution.kind === 'needs_selection' ? resolution.available : undefined;
+    const list =
+      resolution.kind === 'needs_selection' || resolution.kind === 'unselected'
+        ? resolution.available
+        : undefined;
     return this.toResolution(last, 'previousRun', list, false);
   }
 
@@ -865,56 +879,19 @@ export class ChatService {
   }
 
   /**
-   * Publish the data source context for a run and return every context the agent may see. A
-   * resolved run lists the available data sources and names the active one; otherwise the
-   * data source context is removed.
+   * Publish the data source context for a run and return every context the agent may see. It
+   * lists the available data sources and names the active one, or says none is active (an
+   * `unselected` run). Other runs remove it.
    */
   private buildDataSourceContext(resolution: DataSourceResolution) {
     const contextStore = (window as any).assistantContextStore;
 
     if (contextStore) {
-      if (resolution.kind === 'resolved') {
-        const { active, available, source, listComplete } = resolution;
-        // JSON.stringify quotes and escapes the title so a title containing a quote or newline
-        // cannot break the list format.
-        const label = (ds: DataSourceInfo) => `${JSON.stringify(ds.title)} (id: ${ds.id})`;
-        const availableLabel = available.map(label).join(', ');
-
+      if (resolution.kind === 'resolved' || resolution.kind === 'unselected') {
         contextStore.addContext({
           id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
           description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
-          value: [
-            listComplete
-              ? `Available data sources (the ONLY data sources the user can use): ${availableLabel}`
-              : `Available data sources (this list may not include every data source): ${availableLabel}`,
-            `Currently active data source: ${label(active)}`,
-            `Server-side tools only reach the active data source; its cluster name is its title.`,
-            ...(source === 'page'
-              ? [
-                  `The dataset on the current page belongs to the active data source, so the data source cannot be switched while the user is on this page. If the user asks for another data source, tell them to select a dataset from it on the page, or to leave the page.`,
-                ]
-              : []),
-            ...(source === 'caller'
-              ? [
-                  `The user's request is about data in ${label(active)} (for example a visualization they asked about). Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to make it the conversation's data source.`,
-                ]
-              : []),
-            ...(source === 'pending'
-              ? [
-                  resolution.pendingOrigin === 'picker'
-                    ? `The user selected ${label(active)} in the data source picker. Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to record the choice in the conversation.`
-                    : `${label(active)} was chosen for this conversation by an earlier request but is not recorded yet. Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to make it the conversation's data source.`,
-                ]
-              : []),
-            `When the user explicitly names a data source by its title, match the name against the available list:`,
-            `- If it is the active data source, proceed.`,
-            `- If it is another available data source, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with its id first.`,
-            listComplete
-              ? `- If it matches none, tell the user it is not available and list the available names.`
-              : `- If it matches none, tell the user you could not find it among the listed data sources and list their names.`,
-            `If the user does not name a data source, use the active one: it is the selected data source. Do not switch based on what the question is about.`,
-            `Never pass any name other than the active data source's title as a cluster name.`,
-          ].join('\n'),
+          value: this.dataSourceContextLines(resolution).join('\n'),
         });
       } else {
         contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
@@ -926,11 +903,83 @@ export class ChatService {
     return this.getAgentContexts();
   }
 
+  private dataSourceContextLines(
+    resolution: Extract<DataSourceResolution, { kind: 'resolved' | 'unselected' }>
+  ): string[] {
+    const switchTool = SWITCH_DATA_SOURCE_TOOL_NAME;
+    // JSON.stringify quotes and escapes the title so a title containing a quote or newline
+    // cannot break the list format.
+    const label = (ds: DataSourceInfo) => `${JSON.stringify(ds.title)} (id: ${ds.id})`;
+    const { available, listComplete } = resolution;
+    const lines = [
+      `Available data sources: ${available.map(label).join(', ')}` +
+        (listComplete ? '' : ' (this list may be incomplete)'),
+    ];
+
+    if (resolution.kind === 'unselected') {
+      lines.push(`Active data source: none. Do not call tools that read data until one is active.`);
+    } else {
+      const { active, source } = resolution;
+      lines.push(
+        `Active data source: ${label(active)}`,
+        `Tools that read data only reach the active data source; pass its title, and no other name, as the cluster name.`
+      );
+      if (source === 'page') {
+        lines.push(
+          `The dataset on the current page pins the active data source, so it cannot be switched here. If the user asks for another data source, tell them to select a dataset from it on the page, or to leave the page.`
+        );
+      }
+      // A picker choice, or the data source of what the user asked about: the agent records it
+      // so the conversation keeps it after this run.
+      if (source === 'caller' || source === 'pending') {
+        lines.push(
+          `The active data source is not recorded in the conversation yet. Before calling any other tool, call ${switchTool} with dataSourceId "${active.id}".`
+        );
+      }
+    }
+
+    lines.push(
+      `- If the user names an available data source that is not active, call ${switchTool} with its id first.`,
+      listComplete
+        ? `- If the user names a data source that is not listed, say you could not find it and list the available names.`
+        : `- If the user names a data source that is not listed, say you could not find it among the listed ones, list their names, and ask the user for its id.`
+    );
+    if (resolution.kind === 'unselected') {
+      const needsData = `If the request needs data (for example querying or listing indices, fields or logs)`;
+      const noData = `Answer a request that needs no data (for example a general or syntax question) directly.`;
+      // A title shared by two data sources gets its id, so an answer always names one of them.
+      const titleCounts = new Map<string, number>();
+      available.forEach((ds) => titleCounts.set(ds.title, (titleCounts.get(ds.title) ?? 0) + 1));
+      const options = available
+        .map((ds) =>
+          JSON.stringify(titleCounts.get(ds.title)! > 1 ? `${ds.title} (id: ${ds.id})` : ds.title)
+        )
+        .join(', ');
+      lines.push(
+        ...(available.length === 1
+          ? [
+              `- ${needsData}, call ${switchTool} with the id of the only data source first. ${noData}`,
+            ]
+          : [
+              `- ${needsData} and the user names no data source, call ${ASK_USER_TOOL_NAME} with inputType "select" and these options: ${options}. ${noData}`,
+              `- Once the user has chosen a data source (for example in an ${ASK_USER_TOOL_NAME} answer), call ${switchTool} with its id.`,
+              `- If the user declines to choose, say that no data source is selected, and do not call ${switchTool} or tools that read data.`,
+            ]),
+        `- Do not choose a data source based on what the question is about.`
+      );
+    } else {
+      lines.push(
+        `- If the user names no data source, use the active one. Do not choose a data source based on what the question is about.`
+      );
+    }
+    return lines;
+  }
+
   /**
    * Send a user message. `options.resolution` is the data source resolution the caller already
    * made for this send (the chat window does, to decide whether to show the picker); without it,
-   * the data source is resolved here. Throws DataSourceUnresolvedError when there is no data
-   * source to run with.
+   * the data source is resolved here. Throws DataSourceUnresolvedError when the resolution cannot
+   * run (see canRunWith).
    */
   public async sendMessage(
     content: string,
@@ -943,7 +992,7 @@ export class ChatService {
   }> {
     // Resolve once for this run: the run, its context and its tools all use this result.
     const resolution = options?.resolution ?? (await this.resolveDataSourceForRun());
-    if (resolution.kind !== 'resolved' && resolution.kind !== 'disabled') {
+    if (!canRunWith(resolution)) {
       throw new DataSourceUnresolvedError(resolution);
     }
     const runDataSource = resolution.kind === 'resolved' ? resolution.active : undefined;
@@ -982,7 +1031,7 @@ export class ChatService {
     // A data source passed with this message stays chosen for the conversation once it is sent,
     // until the agent records it.
     if (resolution.kind === 'resolved' && resolution.source === 'caller') {
-      this.setPendingDataSource(resolution.active.id, 'caller');
+      this.setPendingDataSource(resolution.active.id);
     }
 
     const context = this.buildDataSourceContext(resolution);

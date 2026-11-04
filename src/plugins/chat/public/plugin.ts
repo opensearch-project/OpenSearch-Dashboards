@@ -32,6 +32,7 @@ import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
 import { HumanInputService } from './services/human_input_service';
 import { createAskUserAction } from './services/ask_user_action';
+import { ASK_USER_TOOL_NAME } from '../common';
 import { AssistantActionService } from '../../context_provider/public';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 import { ChatMountService } from './services/chat_mount_service';
@@ -149,6 +150,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      unresolvedDataSource?: 'picker' | 'agent';
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -166,7 +168,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.workspaces,
       core.savedObjects.client,
       // Data sources are only read, picked and sent when multiple data sources are enabled.
-      !!deps.dataSource
+      !!deps.dataSource,
+      // Only an AG-UI agent can run without a data source id: an ML Commons agent without one
+      // would run against the local cluster, so it always uses the picker.
+      chatConfig.agUiUrl ? (chatConfig.unresolvedDataSource ?? 'picker') : 'picker'
     );
 
     if (!isEnabled) {
@@ -300,6 +305,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.chatService?.destroy();
     this.confirmationService.cleanAll();
     this.humanInputService.cleanAll();
-    AssistantActionService.getInstance().unregisterAction('ask_user');
+    AssistantActionService.getInstance().unregisterAction(ASK_USER_TOOL_NAME);
   }
 }
