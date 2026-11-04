@@ -23,6 +23,7 @@ import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from './auth_registry';
 import { IDirectQueryConnectionFlowRegistry } from './direct_query_connection_flow_registry';
+import type { DataConnectionsExperience } from './components/data_connections_experience';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -41,6 +42,8 @@ export interface DataSourceManagementContext {
   authenticationMethodRegistry: AuthenticationMethodRegistry;
   workspaces: WorkspacesStart;
   directQueryConnectionFlowRegistry?: IDirectQueryConnectionFlowRegistry;
+  /** The registered data connections experience, only while it is on for the session. */
+  dataConnectionsExperience?: DataConnectionsExperience;
 }
 
 export enum DataSourceConnectionType {
