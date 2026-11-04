@@ -5,6 +5,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import moment from 'moment';
+import { isEqual } from 'lodash';
 import {
   EuiPanel,
   EuiListGroup,
@@ -126,9 +127,10 @@ export const RecentItems = ({
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
   const [recentsRadioIdSelected, setRecentsRadioIdSelected] = useState(recentsRadios[0].id);
   const workspaceList = useObservable(workspaceList$, []);
-  const [savedObjectDetails, setSavedObjectDetails] = useState<SavedObjectWithMetadata[] | null>(
-    null
-  );
+  const [savedObjectDetails, setSavedObjectDetails] = useState<{
+    ids: Array<Pick<SavedObject, 'type' | 'id'>>;
+    objects: SavedObjectWithMetadata[] | null;
+  } | null>(null);
   const navLinks = useObservable(navLinks$, []);
   const loadingCount = useObservable(loadingCount$, 0);
 
@@ -229,8 +231,8 @@ export const RecentItems = ({
   const recentSavedObjects = useMemo(
     () =>
       recentlyAccessedItems.filter(
-        (item) =>
-          item.meta?.type &&
+        (item): item is ChromeRecentlyAccessedHistoryItem & { meta: { type: string } } =>
+          !!item.meta?.type &&
           (!item.workspaceId ||
             // If the workspace id is existing but the workspace is deleted, filter the item
             workspaceList.some((workspace) => workspace.id === item.workspaceId))
@@ -239,43 +241,53 @@ export const RecentItems = ({
   );
   // Only changes to the requested objects require loading details again.
   // History order, access times, and workspace names are presentation data.
-  const savedObjectIds = JSON.stringify(
-    recentSavedObjects
-      .map((item) => ({
-        type: item.meta?.type || '',
-        id: item.id,
-      }))
-      .sort((a, b) => a.type.localeCompare(b.type) || a.id.localeCompare(b.id))
+  const savedObjectIds = useMemo(
+    () =>
+      recentSavedObjects
+        .map((item) => ({
+          type: item.meta.type,
+          id: item.id,
+        }))
+        .sort((a, b) => a.type.localeCompare(b.type) || a.id.localeCompare(b.id)),
+    [recentSavedObjects]
   );
 
   useEffect(() => {
-    // Details belong to this opening of the popover, never to a later opening.
-    setSavedObjectDetails(null);
-    if (!isPopoverOpen) {
+    if (isPopoverOpen && !isEqual(savedObjectDetails?.ids, savedObjectIds)) {
+      setSavedObjectDetails({ ids: savedObjectIds, objects: null });
+    }
+  }, [isPopoverOpen, savedObjectIds, savedObjectDetails?.ids]);
+
+  useEffect(() => {
+    if (!savedObjectDetails || savedObjectDetails.objects !== null) {
       return;
     }
 
+    // Closing the popover preserves both pending requests and loaded details.
     let cancelled = false;
-    const savedObjects: Array<Pick<SavedObject, 'type' | 'id'>> = JSON.parse(savedObjectIds);
+    const savedObjects = savedObjectDetails.ids;
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
         if (!cancelled) {
-          setSavedObjectDetails(res.filter((obj) => !obj.error));
+          setSavedObjectDetails({
+            ids: savedObjectDetails.ids,
+            objects: res.filter((obj) => !obj.error),
+          });
         }
       });
     } else {
-      setSavedObjectDetails([]);
+      setSavedObjectDetails({ ids: savedObjectDetails.ids, objects: [] });
     }
 
     return () => {
       cancelled = true;
     };
-  }, [isPopoverOpen, http, savedObjectIds]);
+  }, [http, savedObjectDetails]);
 
   const detailedSavedObjects = useMemo<DetailedRecentlyAccessedItem[]>(
     () =>
       recentSavedObjects.flatMap((item) => {
-        const obj = savedObjectDetails?.find(
+        const obj = savedObjectDetails?.objects?.find(
           (detail) => detail.id === item.id && detail.type === item.meta?.type
         );
         if (!obj) {
@@ -329,7 +341,7 @@ export const RecentItems = ({
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {savedObjectDetails === null && recentSavedObjects.length > 0 ? (
+        {!savedObjectDetails?.objects && recentSavedObjects.length > 0 ? (
           <EuiLoadingSpinner
             size="m"
             aria-label={i18n.translate('core.header.recent.loading', {

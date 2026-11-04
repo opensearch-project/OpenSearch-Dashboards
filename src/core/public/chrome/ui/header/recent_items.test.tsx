@@ -243,74 +243,134 @@ describe('Recent items', () => {
     expect(defaultMockProps.http.get).not.toHaveBeenCalled();
   });
 
-  it('loads fresh details on each opening and hides items that have since been deleted', async () => {
+  it.each([true, false])(
+    'reuses loaded details on reopening (accessible items: %s)',
+    async (hasItems) => {
+      if (!hasItems) {
+        jest.mocked(defaultMockProps.http.get).mockResolvedValue(savedObjectsFromServer[1]);
+      }
+      render(
+        <RecentItems
+          {...defaultMockProps}
+          recentlyAccessed$={mockRecentlyAccessed$}
+          workspaceList$={mockWorkspaceList$}
+        />
+      );
+      const button = screen.getByTestId('recentItemsSectionButton');
+      fireEvent.click(button);
+      const expectedText = hasItems ? 'visualizeMock' : 'No recently viewed items';
+      await screen.findByText(expectedText);
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+      expect(defaultMockProps.http.get).toHaveBeenCalledWith(
+        expect.stringContaining('/management/saved_objects/visualization/'),
+        { prependOptions: { withoutClientBasePath: true } }
+      );
+
+      await act(async () => {
+        fireEvent.mouseDown(document.body);
+      });
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      expect(screen.getByText(expectedText)).toBeInTheDocument();
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it.each([true, false])(
+    'updates history order, labels, and workspace names without reloading (menu open: %s)',
+    async (menuOpen) => {
+      const first = mockRecentlyAccessed$.getValue()[0];
+      const second = {
+        ...first,
+        id: 'another-visualization',
+        label: 'Second visualization',
+        link: '/app/visualize/another-visualization',
+      };
+      const recentlyAccessed$ = new BehaviorSubject([first, second]);
+      const workspaceList$ = new BehaviorSubject(mockWorkspaceList$.getValue());
+      jest
+        .mocked(defaultMockProps.http.get)
+        .mockImplementation(async (url: string | HttpFetchOptionsWithPath) => ({
+          ...savedObjectsFromServer[0],
+          id: typeof url === 'string' && url.endsWith(second.id) ? second.id : first.id,
+        }));
+      render(<RecentItems {...defaultMockProps} {...{ recentlyAccessed$, workspaceList$ }} />);
+      fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+      await screen.findByText('visualizeMock');
+      expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        'visualizeMock (WorkspaceMock_1)',
+        'Second visualization (WorkspaceMock_1)',
+      ]);
+
+      if (!menuOpen) {
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+        });
+      }
+
+      act(() => {
+        recentlyAccessed$.next([
+          {
+            ...second,
+            label: 'Updated visualization',
+            meta: { ...second.meta, lastAccessedTime: 10 },
+          },
+          first,
+        ]);
+        workspaceList$.next([{ id: 'workspace_1', name: 'Renamed workspace' }]);
+      });
+
+      if (!menuOpen) {
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+        });
+      }
+
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+      expect(screen.queryByText('Second visualization')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        'Updated visualization (Renamed workspace)',
+        'visualizeMock (Renamed workspace)',
+      ]);
+    }
+  );
+
+  it('loads changed object identities on the next opening after a change while closed', async () => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const recentlyAccessed$ = new BehaviorSubject([first]);
     render(
       <RecentItems
         {...defaultMockProps}
-        recentlyAccessed$={mockRecentlyAccessed$}
+        recentlyAccessed$={recentlyAccessed$}
         workspaceList$={mockWorkspaceList$}
       />
     );
     const button = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(button);
     await screen.findByText('visualizeMock');
-    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
-    expect(defaultMockProps.http.get).toHaveBeenCalledWith(
-      expect.stringContaining('/management/saved_objects/visualization/'),
-      { prependOptions: { withoutClientBasePath: true } }
-    );
-
-    fireEvent.click(button);
-    jest.mocked(defaultMockProps.http.get).mockResolvedValue(savedObjectsFromServer[1]);
-    fireEvent.click(button);
-
-    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
-    expect(await screen.findByText('No recently viewed items')).toBeInTheDocument();
-    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(4);
-  });
-
-  it('updates history order, labels, and workspace names without reloading the same objects', async () => {
-    const first = mockRecentlyAccessed$.getValue()[0];
-    const second = {
-      ...first,
-      id: 'another-visualization',
-      label: 'Second visualization',
-      link: '/app/visualize/another-visualization',
-    };
-    const recentlyAccessed$ = new BehaviorSubject([first, second]);
-    const workspaceList$ = new BehaviorSubject(mockWorkspaceList$.getValue());
-    jest
-      .mocked(defaultMockProps.http.get)
-      .mockImplementation(async (url: string | HttpFetchOptionsWithPath) => ({
-        ...savedObjectsFromServer[0],
-        id: typeof url === 'string' && url.endsWith(second.id) ? second.id : first.id,
-      }));
-    render(<RecentItems {...defaultMockProps} {...{ recentlyAccessed$, workspaceList$ }} />);
-    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
-    await screen.findByText('visualizeMock');
-    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'visualizeMock (WorkspaceMock_1)',
-      'Second visualization (WorkspaceMock_1)',
-    ]);
-
-    act(() => {
-      recentlyAccessed$.next([
-        {
-          ...second,
-          label: 'Updated visualization',
-          meta: { ...second.meta, lastAccessedTime: 10 },
-        },
-        first,
-      ]);
-      workspaceList$.next([{ id: 'workspace_1', name: 'Renamed workspace' }]);
+    await act(async () => {
+      fireEvent.click(button);
     });
 
+    const second = { ...first, id: 'new-visualization', label: 'New asset' };
+    jest.mocked(defaultMockProps.http.get).mockResolvedValueOnce({
+      ...savedObjectsFromServer[0],
+      id: second.id,
+    });
+    act(() => {
+      recentlyAccessed$.next([second]);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(button);
+    expect(await screen.findByText('New asset')).toBeInTheDocument();
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
     expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
-    expect(screen.queryByText('Second visualization')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'Updated visualization (Renamed workspace)',
-      'visualizeMock (Renamed workspace)',
-    ]);
   });
 
   it.each([
@@ -365,21 +425,65 @@ describe('Recent items', () => {
     expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('ignores a previous opening that completes after a newer opening', async () => {
-    let resolveFirst!: (value: SavedObjectWithMetadata) => void;
-    let resolveSecond!: (value: SavedObjectWithMetadata) => void;
-    const firstRequest = new Promise<SavedObjectWithMetadata>((resolve) => {
-      resolveFirst = resolve;
-    });
-    const secondRequest = new Promise<SavedObjectWithMetadata>((resolve) => {
-      resolveSecond = resolve;
-    });
-    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(firstRequest);
-    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(secondRequest);
+  it.each([true, false])(
+    'retains pending details after an outside click (reopen before completion: %s)',
+    async (reopenBeforeCompletion) => {
+      const pendingDetails = Promise.withResolvers<SavedObjectWithMetadata>();
+      jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(pendingDetails.promise);
+      render(
+        <RecentItems
+          {...defaultMockProps}
+          recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+          workspaceList$={mockWorkspaceList$}
+        />
+      );
+      const button = screen.getByTestId('recentItemsSectionButton');
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.mouseDown(document.body);
+      });
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+
+      if (reopenBeforeCompletion) {
+        await act(async () => {
+          fireEvent.click(button);
+        });
+        expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+      }
+
+      await act(async () => {
+        pendingDetails.resolve(savedObjectsFromServer[0]);
+      });
+
+      if (!reopenBeforeCompletion) {
+        await act(async () => {
+          fireEvent.click(button);
+        });
+      }
+
+      expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('ignores previous object details that complete after the requested objects change', async () => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const second = { ...first, id: 'new-visualization', label: 'New asset' };
+    const recentlyAccessed$ = new BehaviorSubject([first]);
+    const firstRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+    const secondRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(firstRequest.promise);
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(secondRequest.promise);
     render(
       <RecentItems
         {...defaultMockProps}
-        recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+        recentlyAccessed$={recentlyAccessed$}
         workspaceList$={mockWorkspaceList$}
       />
     );
@@ -387,19 +491,20 @@ describe('Recent items', () => {
     fireEvent.click(button);
     expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
     expect(screen.queryByText('No recently viewed items')).not.toBeInTheDocument();
-    fireEvent.click(button);
-    fireEvent.click(button);
-
-    await act(async () => {
-      resolveSecond({ ...savedObjectsFromServer[0], error: savedObjectsFromServer[1].error });
+    act(() => {
+      recentlyAccessed$.next([second]);
     });
-    expect(screen.getByText('No recently viewed items')).toBeInTheDocument();
 
     await act(async () => {
-      resolveFirst(savedObjectsFromServer[0]);
+      secondRequest.resolve({ ...savedObjectsFromServer[0], id: second.id });
+    });
+    expect(screen.getByText('New asset')).toBeInTheDocument();
+
+    await act(async () => {
+      firstRequest.resolve(savedObjectsFromServer[0]);
     });
     expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
-    expect(screen.getByText('No recently viewed items')).toBeInTheDocument();
+    expect(screen.getByText('New asset')).toBeInTheDocument();
     expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
   });
 

@@ -472,16 +472,6 @@ describe('SavedObjectsClient', () => {
   describe('in-flight reads', () => {
     const response = { saved_objects: [doc], page: 1, per_page: 10, total: 1 };
 
-    const deferred = <T>() => {
-      let resolve: (value: T) => void;
-      let reject: (reason: Error) => void;
-      const promise = new Promise<T>((resolvePromise, rejectPromise) => {
-        resolve = resolvePromise;
-        reject = rejectPromise;
-      });
-      return { promise, resolve: resolve!, reject: reject! };
-    };
-
     beforeEach(() => {
       http.fetch.mockReset();
     });
@@ -489,7 +479,7 @@ describe('SavedObjectsClient', () => {
     test.each(['index-pattern', 'dashboard', 'visualization', 'data-source'])(
       'shares identical pending find requests for %s',
       async (type) => {
-        const pending = deferred<typeof response>();
+        const pending = Promise.withResolvers<typeof response>();
         http.fetch.mockReturnValue(pending.promise);
         const requests = Array.from({ length: 17 }, () =>
           savedObjectsClient.find({ type, search: 'logs', fields: ['title'] })
@@ -517,7 +507,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('rejects all shared callers and starts a fresh request after failure', async () => {
-      const pending = deferred<typeof response>();
+      const pending = Promise.withResolvers<typeof response>();
       const error = new Error('Request failed');
       http.fetch.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(response);
       const requests = [
@@ -556,7 +546,7 @@ describe('SavedObjectsClient', () => {
       expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
-    test('keeps requests with different base paths or prepend options separate', async () => {
+    test('shares requests with the same resolved path and keeps different paths separate', async () => {
       const scopedHttp = httpServiceMock.createStartContract({
         basePath: '/base',
         clientBasePath: '/w/one',
@@ -565,11 +555,12 @@ describe('SavedObjectsClient', () => {
       scopedHttp.fetch.mockResolvedValue(response);
 
       const first = client.find({ type: doc.type });
+      const equivalent = client.find({ type: doc.type }, { withoutClientBasePath: false });
       const global = client.find({ type: doc.type }, { withoutClientBasePath: true });
       scopedHttp.basePath = new BasePath('/base', undefined, '/w/two');
       const second = client.find({ type: doc.type });
 
-      await Promise.all([first, global, second]);
+      await Promise.all([first, equivalent, global, second]);
       expect(scopedHttp.fetch).toHaveBeenCalledTimes(3);
     });
 
@@ -611,7 +602,7 @@ describe('SavedObjectsClient', () => {
     test('shares get and bulkGet across batching windows only while the request is pending', async () => {
       jest.useFakeTimers();
       try {
-        const pending = deferred<typeof response>();
+        const pending = Promise.withResolvers<typeof response>();
         http.fetch.mockReturnValueOnce(pending.promise).mockResolvedValue(response);
         const first = savedObjectsClient.get(doc.type, doc.id);
         jest.advanceTimersByTime(100);
@@ -675,10 +666,10 @@ describe('SavedObjectsClient', () => {
     });
 
     test('reads after a mutation do not join reads started before or during it', async () => {
-      const before = deferred<typeof response>();
-      const write = deferred<typeof doc>();
-      const during = deferred<typeof response>();
-      const after = deferred<typeof response>();
+      const before = Promise.withResolvers<typeof response>();
+      const write = Promise.withResolvers<typeof doc>();
+      const during = Promise.withResolvers<typeof response>();
+      const after = Promise.withResolvers<typeof response>();
       http.fetch
         .mockReturnValueOnce(before.promise)
         .mockReturnValueOnce(write.promise)

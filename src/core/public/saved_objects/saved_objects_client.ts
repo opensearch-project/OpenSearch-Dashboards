@@ -30,7 +30,6 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
-import stringify from 'json-stable-stringify';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import {
@@ -40,6 +39,7 @@ import {
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
+  SavedObjectsBulkResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -191,7 +191,7 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
-  private inFlightReads = new Map<string, Promise<any>>();
+  private inFlightReads = new Map<string, Promise<unknown>>();
   /**
    * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
@@ -284,9 +284,6 @@ export class SavedObjectsClient {
   }
 
   public setCurrentWorkspace(workspaceId: string) {
-    if (this.currentWorkspaceId !== workspaceId) {
-      this.inFlightReads.clear();
-    }
     this.currentWorkspaceId = workspaceId;
   }
 
@@ -532,10 +529,10 @@ export class SavedObjectsClient {
       version,
     };
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => this.createSavedObject(resp));
+    }).then((resp) => this.createSavedObject(resp));
   }
 
   /**
@@ -547,7 +544,7 @@ export class SavedObjectsClient {
   public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObjectsBulkResponse<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
@@ -572,12 +569,12 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(
+  private savedObjectsFetch<T = unknown>(
     path: string,
     { method, query, body, prependOptions }: HttpFetchOptions
-  ) {
+  ): Promise<T> {
     const fetch = () =>
-      this.http.fetch(path, {
+      this.http.fetch<T>(path, {
         method,
         query,
         body,
@@ -591,12 +588,11 @@ export class SavedObjectsClient {
       return fetch().finally(() => this.inFlightReads.clear());
     }
 
-    const key = stringify({
+    const key = JSON.stringify({
       path: this.http.basePath.prepend(path, prependOptions),
       method,
       query,
       body,
-      prependOptions,
       workspace: this.currentWorkspaceId,
     });
     let request = this.inFlightReads.get(key);
@@ -611,7 +607,7 @@ export class SavedObjectsClient {
     }
 
     // Each caller owns mutable saved-object attributes and response wrappers.
-    return request.then((response) => cloneDeep(response));
+    return request.then((response) => cloneDeep(response as T));
   }
 }
 
