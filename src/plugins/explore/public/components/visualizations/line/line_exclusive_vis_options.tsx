@@ -8,8 +8,15 @@ import { i18n } from '@osd/i18n';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
-import { LineSharePanel } from '../style_panel/share/line_shared_options';
-import { LineMode, LineDashStyle, LineStyle } from '../types';
+import { LineSharePanel, ConnectionGroup } from '../style_panel/share';
+import {
+  LineMode,
+  LineDashStyle,
+  LineStyle,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
+} from '../types';
 
 interface BasicVisOptionsProps {
   addTimeMarker: boolean;
@@ -19,7 +26,8 @@ interface BasicVisOptionsProps {
   lineWidth: number;
   pointSize?: number;
   showValues?: boolean;
-
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onLineModeChange: (lineMode: LineMode) => void;
   onLineWidthChange: (lineWidth: number) => void;
@@ -27,6 +35,8 @@ interface BasicVisOptionsProps {
   onLineDashStyleChange: (lineDashStyle: LineDashStyle) => void;
   onPointSizeChange: (pointSize: number) => void;
   onShowValuesChange: (showValues: boolean) => void;
+  onConnectNullValuesChange: (connectNullValues: ConnectNullValuesOption) => void;
+  onDisconnectValuesChange: (disconnectValues: DisconnectValuesOption) => void;
   shouldShowTimeMarker?: boolean;
 }
 
@@ -38,6 +48,8 @@ export const LineExclusiveVisOptions = ({
   pointSize,
   lineDashStyle,
   showValues = false,
+  connectNullValues,
+  disconnectValues,
   onAddTimeMarkerChange,
   onLineModeChange,
   onLineWidthChange,
@@ -45,8 +57,12 @@ export const LineExclusiveVisOptions = ({
   onPointSizeChange,
   onLineDashStyleChange,
   onShowValuesChange,
+  onConnectNullValuesChange,
+  onDisconnectValuesChange,
   shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
+  const connectMode = connectNullValues?.connectMode ?? DisableMode.Always;
+  const disconnectMode = disconnectValues?.disableMode ?? DisableMode.Never;
   return (
     <StyleAccordion
       id="lineSection"
@@ -72,16 +88,28 @@ export const LineExclusiveVisOptions = ({
         onShowValuesChange={onShowValuesChange}
         testSubj="lineChartSharePanel"
       />
-      <EuiSpacer size="s" />
       {shouldShowTimeMarker && (
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
-            defaultMessage: 'Show current time marker',
-          })}
-          checked={addTimeMarker}
-          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-        />
+        <>
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
+              defaultMessage: 'Show current time marker',
+            })}
+            checked={addTimeMarker}
+            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+          />
+          <EuiSpacer size="s" />
+          <ConnectionGroup
+            connectMode={connectMode}
+            disconnectMode={disconnectMode}
+            connectNullValues={connectNullValues}
+            disconnectValues={disconnectValues}
+            onConnectNullValuesChange={onConnectNullValuesChange}
+            onDisconnectValuesChange={onDisconnectValuesChange}
+            testsubj="line"
+          />
+        </>
       )}
       <EuiSpacer size="s" />
     </StyleAccordion>
