@@ -1,0 +1,2 @@
+feat:
+- [Data] Let a dataset type name the meta fields of its data views ([#13135](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13135))
