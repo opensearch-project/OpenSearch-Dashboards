@@ -62,7 +62,7 @@ export const useDatasetSelector = ({
                       'datasetManagement.dataset.titleExistsLabel',
                       {
                         values: { title: query.dataset.title },
-                        defaultMessage: "An index pattern with the title '{title}' already exists.",
+                        defaultMessage: "An dataset with the title '{title}' already exists.",
                       }
                     );
 
