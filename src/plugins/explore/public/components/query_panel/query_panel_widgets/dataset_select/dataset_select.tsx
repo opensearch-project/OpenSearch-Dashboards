@@ -16,8 +16,9 @@ import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectDataset } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
-import { useClearEditors } from '../../../../application/hooks';
+import { useClearEditors, useEditorText } from '../../../../application/hooks';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import { isExplicitRunRefinement } from '../../../../application/utils/requires_explicit_run';
 import './dataset_select_terminology.scss';
 import { ExploreFlavor } from '../../../../../common';
 
@@ -26,6 +27,7 @@ export const DatasetSelectWidget = () => {
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
   const clearEditors = useClearEditors();
+  const getEditorText = useEditorText();
   const { isDatasetManagementEnabled } = services;
 
   const {
@@ -52,6 +54,21 @@ export const DatasetSelectWidget = () => {
             })
           );
           clearEditors();
+          return;
+        }
+
+        // Other log groups (or the like) of the same explicit-Run source: keep the user's query and
+        // language for them to run on the new selection. That's the editor's text, which may not
+        // have been run yet: the query panel remounts per dataset and would otherwise reload the
+        // last query that ran.
+        const currentQuery = queryString.getQuery();
+        if (isExplicitRunRefinement(queryString, currentQuery.dataset, dataset)) {
+          queryString.setQuery({
+            ...currentQuery,
+            query: getEditorText() || currentQuery.query,
+            dataset,
+          });
+          dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
           return;
         }
 
@@ -92,7 +109,7 @@ export const DatasetSelectWidget = () => {
         });
       }
     },
-    [queryString, dispatch, clearEditors, services.notifications?.toasts]
+    [queryString, dispatch, clearEditors, getEditorText, services.notifications?.toasts]
   );
 
   // The active source type decides the picker: its own datasetSelector if it has one, else the

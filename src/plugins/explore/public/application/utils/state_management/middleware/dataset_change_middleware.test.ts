@@ -15,7 +15,10 @@ import {
   setUsingRegexPatterns,
   setHideEmptyFields,
 } from '../slices';
-import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
+import {
+  clearQueryStatusMap,
+  setIsQueryEditorDirty,
+} from '../slices/query_editor/query_editor_slice';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
@@ -139,6 +142,63 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockedExecuteQueries).not.toHaveBeenCalled();
+  });
+
+  describe('changing the selection within a dataset type that requires an explicit run', () => {
+    const stateWith = (dataset: object) => ({
+      query: { dataset },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+
+    beforeEach(() => {
+      mockServices.data.query.queryString.getDatasetService = jest.fn().mockReturnValue({
+        cacheDataset: mockCacheDataset,
+        getType: jest.fn((type: string) =>
+          type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined
+        ),
+      });
+      middleware = createDatasetChangeMiddleware(mockServices)(mockStore)(mockNext);
+    });
+
+    it('keeps the results and marks the query to run', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+      (mockStore.dispatch as jest.Mock).mockClear();
+
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearQueryStatusMap());
+      expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledTimes(1); // the first dataset only
+      expect(mockedExecuteQueries).not.toHaveBeenCalled();
+      expect(mockCacheDataset).toHaveBeenLastCalledWith(
+        { id: 'b', type: 'EXPLICIT_RUN_TYPE' },
+        expect.anything(),
+        false
+      );
+    });
+
+    it('still clears when switching to it from another type', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'logs', type: 'index_pattern' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+      (mockStore.dispatch as jest.Mock).mockClear();
+
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(setIsQueryEditorDirty(true));
+    });
   });
 
   it('still runs a query for a dataset type that does not opt out', async () => {

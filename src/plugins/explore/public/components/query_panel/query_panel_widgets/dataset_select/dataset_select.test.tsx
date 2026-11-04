@@ -150,6 +150,9 @@ jest.doMock('../../../../../../data/common', () => ({
     METRICS: 'metrics',
     TRACES: 'traces',
   },
+  // As in the data plugin, so the explicit-Run cases read the mocked dataset types' meta.
+  datasetTypeRequiresExplicitRun: (typeConfig?: { meta?: { requiresExplicitRun?: boolean } }) =>
+    typeConfig?.meta?.requiresExplicitRun === true,
 }));
 
 jest.doMock('../../../../helpers/use_flavor_id', () => ({
@@ -165,8 +168,10 @@ jest.doMock('../../../../../common', () => ({
   EXPLORE_DEFAULT_LANGUAGE: 'PPL',
 }));
 
+const mockGetEditorText = jest.fn(() => '');
 jest.doMock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
+  useEditorText: () => mockGetEditorText,
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -225,6 +230,7 @@ const renderWithStore = () => {
 describe('DatasetSelectWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetEditorText.mockReturnValue('');
     mockGetQuery.mockReturnValue({ query: 'test query', language: 'PPL' });
     mockGetInitialQueryByDataset.mockReturnValue({ query: 'initial query', language: 'PPL' });
     mockGetType = jest.fn((_type?: string) => undefined);
@@ -512,6 +518,64 @@ describe('DatasetSelectWidget', () => {
           dataset: { id: 'fake-2', type: 'FAKE' },
         });
         expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryWithHistory());
+      });
+      expect(mockClearEditors).toHaveBeenCalled();
+    });
+
+    it("keeps the editor's text when refining the selection of an explicit-Run source", async () => {
+      registerFakeSource(FakeSelector);
+      const current = {
+        query: 'fields @message | limit 7',
+        language: 'FakeQL',
+        dataset: { id: 'fake-1', type: 'FAKE' },
+      };
+      mockGetQuery.mockReturnValue(current);
+      // Typed but not run yet.
+      mockGetEditorText.mockReturnValue('fields @message | limit 9');
+      mockGetType = jest.fn(() => ({
+        meta: { requiresExplicitRun: true },
+        supportedLanguages: () => ['FakeQL'],
+      }));
+
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('fake-selector'));
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalledWith({
+          ...current,
+          query: 'fields @message | limit 9',
+          dataset: { id: 'fake-2', type: 'FAKE' },
+        });
+        expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryWithHistory());
+      });
+      expect(mockGetInitialQueryByDataset).not.toHaveBeenCalled();
+      expect(mockClearEditors).not.toHaveBeenCalled();
+    });
+
+    it('starts over when switching to an explicit-Run source from another type', async () => {
+      registerFakeSource(FakeSelector);
+      mockGetQuery.mockReturnValue({
+        query: 'source = logs',
+        language: 'PPL',
+        dataset: { id: 'logs', type: 'index_pattern' },
+      });
+      mockGetInitialQueryByDataset.mockReturnValue({ query: 'fake default', language: 'FakeQL' });
+      mockGetType = jest.fn((type?: string) =>
+        type === 'FAKE'
+          ? { meta: { requiresExplicitRun: true }, supportedLanguages: () => ['FakeQL'] }
+          : undefined
+      );
+      mockPickedDataset = { id: 'fake-1', type: 'FAKE' };
+
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('dataset-select-button'));
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalledWith({
+          query: '',
+          language: 'FakeQL',
+          dataset: { id: 'fake-1', type: 'FAKE' },
+        });
       });
       expect(mockClearEditors).toHaveBeenCalled();
     });

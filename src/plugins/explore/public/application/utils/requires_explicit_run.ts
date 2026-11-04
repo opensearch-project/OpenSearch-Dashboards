@@ -49,6 +49,19 @@ export const datasetRequiresExplicitRun = (
   datasetTypeRequiresExplicitRun(getDatasetTypeConfig(queryString, dataset?.type), dataset);
 
 /**
+ * Whether a dataset change only refines the selection for a dataset type that requires an explicit
+ * Run: the same type before and after (e.g. other log groups of the same source). The user's query
+ * and the last results still apply, so they are kept, and the change waits for Run like an edited
+ * query. A change to another type starts over (its language and columns differ).
+ */
+export const isExplicitRunRefinement = (
+  queryString: Pick<QueryStringContract, 'getDatasetService'> | undefined,
+  previous: { type?: Dataset['type'] } | undefined,
+  next: { type?: Dataset['type'] } | undefined
+): boolean =>
+  !!previous?.type && previous.type === next?.type && datasetRequiresExplicitRun(queryString, next);
+
+/**
  * What a skipped automatic run leaves behind for a dataset type that requires an explicit Run:
  * the previous results and statuses are cleared (they belong to another query or language) and
  * the editor is marked dirty, so TopNav shows "Update" for the staged query.
