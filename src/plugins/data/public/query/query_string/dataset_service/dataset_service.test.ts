@@ -392,6 +392,32 @@ describe('DatasetService', () => {
       expect(savedView).toHaveProperty('signalType', 'traces');
     });
 
+    test("gives the saved view the meta fields the dataset's type names", async () => {
+      const savedView = buildSavedView(undefined, { setMetaFields: jest.fn() });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+      service.registerType({ ...mockType, meta: { ...mockType.meta, metaFields: [] } });
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(savedView.setMetaFields).toHaveBeenCalledWith([]);
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('leaves the saved view meta fields alone when the type names none', async () => {
+      const savedView = buildSavedView(undefined, { setMetaFields: jest.fn() });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(savedView.setMetaFields).not.toHaveBeenCalled();
+    });
+
     test('remembers datasets without a saved object and skips the lookup next time', async () => {
       const dataViews = buildAdHocDataViews(
         new SavedObjectNotFound('index-pattern', 'saved-dataset')

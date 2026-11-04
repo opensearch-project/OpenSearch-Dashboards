@@ -238,6 +238,7 @@ export class DatasetService {
   /**
    * Ensures the cache holds the saved-object-backed data view when the dataset has been saved.
    * Returns false for ad-hoc datasets that have no saved object.
+   * Applies the dataset type's meta fields to the saved view when the type sets them.
    */
   private async loadPersistedDataView(
     dataset: Dataset,
@@ -289,6 +290,12 @@ export class DatasetService {
     // Older saved objects may predate persisted signalType; keep the caller's value in that case.
     if (!persisted.signalType && (signalType ?? dataset.signalType)) {
       persisted.signalType = signalType ?? dataset.signalType;
+    }
+
+    // The type's own meta fields apply to its saved views too; saved objects don't store them.
+    const metaFields = this.getType(dataset.type)?.meta.metaFields;
+    if (metaFields) {
+      persisted.setMetaFields(metaFields);
     }
     return true;
   }
