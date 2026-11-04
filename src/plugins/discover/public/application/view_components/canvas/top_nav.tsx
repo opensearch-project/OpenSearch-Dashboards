@@ -27,6 +27,7 @@ import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_manag
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 import { ResultStatus } from '../utils';
+import { hasUsableTimeField } from '../../helpers/has_usable_time_field';
 
 export interface TopNavProps {
   opts: {
@@ -146,10 +147,9 @@ export const TopNav = ({
     );
   }, [savedSearch?.title]);
 
-  const showDatePicker = useMemo(
-    () => (indexPattern ? indexPattern.isTimeBased() : false),
-    [indexPattern]
-  );
+  // Showing a range we cannot filter on is worse than hiding it: getTime()
+  // drops the filter silently when the field does not resolve.
+  const showDatePicker = useMemo(() => hasUsableTimeField(indexPattern), [indexPattern]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));

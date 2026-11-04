@@ -7,3 +7,4 @@ export { Facet, FacetProps } from './facet';
 export { OpenSearchEnhancements } from './plugins';
 export { shimStats } from './shim_stats';
 export { shimSchemaRow } from './shim_schema_row';
+export { resolvePPLFetchSize } from './resolve_ppl_fetch_size';

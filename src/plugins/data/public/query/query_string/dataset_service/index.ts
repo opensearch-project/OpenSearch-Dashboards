@@ -5,3 +5,4 @@
 
 export * from './types';
 export { DatasetServiceContract, DatasetService, DatasetFilter } from './dataset_service';
+export { datasetTypeRequiresExplicitRun } from '../../../../common';

@@ -51,6 +51,17 @@ export interface EmbeddableInput {
   hidePanelActions?: boolean;
 
   /**
+   * Whether the embeddable is currently visible to the user. The container sets
+   * this to `false` when the panel is not visible (for example it is in a
+   * collapsed dashboard section). Data embeddables SHOULD skip fetching while it
+   * is `false` and perform a single refresh when it returns to `true`. The
+   * embeddable is not destroyed while not visible. `undefined` means visibility
+   * is unknown and is treated as visible. Honoring this flag is optional, so
+   * embeddables can adopt it incrementally.
+   */
+  isVisible?: boolean;
+
+  /**
    * Reserved key for enhancements added by other plugins.
    */
   enhancements?: SerializableState;

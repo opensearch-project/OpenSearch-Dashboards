@@ -216,6 +216,34 @@ export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
 export type PPLQueryRequest = Requests;
+export interface PromQLHttpResponse {
+  body: {
+    fields: Array<{
+      name: string;
+      values: unknown[];
+    }>;
+    meta?: {
+      truncation?: {
+        tableTruncated: boolean;
+        totalSeriesCount: number;
+        displayedSeriesCount: number;
+      };
+      multiQuery?: {
+        queryCount: number;
+        successCount: number;
+        errors: Array<{ query: string; error: string }>;
+      };
+    };
+  };
+}
+
+export interface PromQLQueryRequest {
+  dataObject: Data;
+  url: UrlObject;
+  datasource: string;
+  maxDataPoints?: number;
+  step?: number;
+}
 
 export interface ContextVarsObject {
   [index: string]: any;

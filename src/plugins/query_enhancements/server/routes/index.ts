@@ -19,6 +19,7 @@ import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
 import { registerPPLCancelRoute } from './ppl_cancel';
+import { registerPPLStreamRoutes } from './ppl_stream';
 import { registerPPLAnalyzeRoute } from './ppl_analyze';
 import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
 import { definePPLExplainRoute } from './ppl_explain';
@@ -43,7 +44,13 @@ export const DATASOURCE_UNAVAILABLE_MESSAGE =
  */
 export async function resolveOpenSearchClient(
   context: RequestHandlerContext,
-  dataSourceId?: string
+  dataSourceId?: string,
+  /**
+   * Parses JSON preserving integers too large for a JS number, matching what the synchronous search
+   * strategy does when `data:withLongNumerals` is on. Ignored for a remote data source, whose client
+   * is configured elsewhere — the same limitation the synchronous path has.
+   */
+  withLongNumeralsSupport = false
 ): Promise<OpenSearchClient | null> {
   if (dataSourceId) {
     if (!context.dataSource?.opensearch?.getClient) {
@@ -51,7 +58,9 @@ export async function resolveOpenSearchClient(
     }
     return context.dataSource.opensearch.getClient(dataSourceId);
   }
-  return context.core.opensearch.client.asCurrentUser;
+  return withLongNumeralsSupport
+    ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
+    : context.core.opensearch.client.asCurrentUser;
 }
 
 /**
@@ -128,6 +137,14 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             queryId: schema.maybe(schema.string()),
+            // Caller-requested row limit, honored by the ppl strategy.
+            fetchSize: schema.maybe(
+              schema.number({
+                min: 1,
+                validate: (value) =>
+                  Number.isInteger(value) ? undefined : 'fetchSize must be an integer',
+              })
+            ),
           }),
         },
       },
@@ -226,6 +243,7 @@ export function defineRoutes(
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
   registerPPLCancelRoute(router, logger);
+  registerPPLStreamRoutes(router, logger);
   registerPPLAnalyzeRoute(router, logger);
 
   definePPLBundleRoute(logger, router);

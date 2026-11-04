@@ -18,6 +18,7 @@ import { useSetEditorText } from '../use_set_editor_text';
 import { useEditorFocus } from '../use_editor_focus';
 import { onEditorRunActionCreator } from '../../../utils/state_management/actions/query_editor';
 import { setIsQueryEditorDirty } from '../../../utils/state_management/slices/query_editor';
+import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 
 export const useChangeQueryEditor = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -71,11 +72,24 @@ export const useChangeQueryEditor = () => {
       // `| WHERE` command per filter, which the logs builder round-trips to chips.
       const newText = languageConfig.addFiltersToQuery?.(baseText, newFilters) || baseText;
 
-      // Commit to the draft, mirror into the code editor (no-op when unmounted),
-      // then run so results refresh and the builder re-seeds from the new query.
+      // Nothing was added (e.g. the language can't express the filter): don't
+      // re-run the same query.
+      if (newText === baseText) {
+        focusOnEditor();
+        return;
+      }
+
+      // Commit to the draft and mirror into the code editor (no-op when unmounted).
       queryString.setQuery({ ...currentQuery, query: newText });
       setEditorText(newText);
-      dispatch(onEditorRunActionCreator(services, newText));
+      if (datasetRequiresExplicitRun(queryString, dataset)) {
+        // The dataset type runs queries only when the user asks
+        // (meta.requiresExplicitRun): stage the edit and keep TopNav on "Update".
+        dispatch(setIsQueryEditorDirty(true));
+      } else {
+        // Run so results refresh and the builder re-seeds from the new query.
+        dispatch(onEditorRunActionCreator(services, newText));
+      }
 
       focusOnEditor();
     },

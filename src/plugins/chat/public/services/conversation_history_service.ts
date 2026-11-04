@@ -65,7 +65,11 @@ export class ConversationHistoryService {
   /**
    * Save or update a conversation
    */
-  public async saveConversation(threadId: string, messages: Message[]): Promise<void> {
+  public async saveConversation(
+    threadId: string,
+    messages: Message[],
+    generatedTitle?: string
+  ): Promise<void> {
     if (messages.length === 0) {
       // Don't save empty conversations
       return;
@@ -87,7 +91,7 @@ export class ConversationHistoryService {
     const conversation: SavedConversation = {
       id: threadId,
       threadId,
-      name: this.getConversationName(messages),
+      name: generatedTitle || this.getConversationName(messages),
       messages,
       createdAt: existingCreatedAt ?? Date.now(),
       updatedAt: Date.now(),

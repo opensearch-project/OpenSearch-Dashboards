@@ -511,6 +511,12 @@ export interface DocLinksStart {
                 readonly geo_bound: string;
                 readonly top_hits: string;
                 readonly scripted_metric: string;
+                readonly avg: string;
+                readonly min: string;
+                readonly max: string;
+                readonly extended_stats: string;
+                readonly geo_centroid: string;
+                readonly percentile_ranks: string;
                 };
                 readonly bucket: {
                 readonly base: string;
@@ -525,6 +531,12 @@ export interface DocLinksStart {
                 readonly geo: string;
                 readonly adjacency_matrix: string;
                 readonly nested: string;
+                readonly date_histogram: string;
+                readonly date_range: string;
+                readonly ip_range: string;
+                readonly filters: string;
+                readonly geohash_grid: string;
+                readonly geotile_grid: string;
                 };
                 readonly pipeline: {
                 readonly base: string;
@@ -538,6 +550,10 @@ export interface DocLinksStart {
                 readonly derivative: string;
                 readonly moving_avg: string;
                 readonly serial_diff: string;
+                readonly max_bucket: string;
+                readonly min_bucket: string;
+                readonly sum_bucket: string;
+                readonly moving_fn: string;
                 };
             };
             readonly indexTemplates: {

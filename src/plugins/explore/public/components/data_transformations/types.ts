@@ -7,13 +7,17 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
-import { VisFieldType } from '../visualizations/types';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
 
 export interface FieldSchema {
   name: string;
-  visFieldType: VisFieldType;
+  type: string;
 }
+
+export interface FieldReference {
+  name: string;
+}
+
+export type NormalizedRow = Record<string, unknown>;
 
 export interface UrlTransformationState {
   definitionId: string;
@@ -32,7 +36,7 @@ export interface TransformationIssue {
 export type TransformationExecutionStatus = 'applied' | 'partially_applied' | 'skipped';
 
 export interface TransformationExecutionResult {
-  rows: OpenSearchSearchHit[];
+  rows: NormalizedRow[];
   status: TransformationExecutionStatus;
   issues: TransformationIssue[];
   // Explicit semantic type changes made during execution.
@@ -55,10 +59,7 @@ export interface TransformationInstance<TConfig = Record<string, unknown>> {
   // set true to skip transformation during pipeline execution
   hide: boolean;
   // Execute against the current rows and report the outcome without changing config.
-  transformationMethod: (
-    data: OpenSearchSearchHit[],
-    config: TConfig
-  ) => TransformationExecutionResult;
+  transformationMethod: (data: NormalizedRow[], config: TConfig) => TransformationExecutionResult;
   // config editor
   Editor: React.ComponentType<{
     config: TConfig;
@@ -98,14 +99,15 @@ export interface ITransformationService {
   toggleInstanceHide(id: string): void;
   setPipeline(instances: TransformationPipeline): void;
   clearPipeline(): void;
+  serializePipeline(pipeline?: TransformationPipeline): UrlTransformationState[];
 
   // execution
   applyPipeline(
-    rawRows: OpenSearchSearchHit[],
+    rows: NormalizedRow[],
     originalSchema?: Array<{ name?: string; type?: string }>
   ): {
-    rows: OpenSearchSearchHit[];
-    finalSchema: Array<{ name?: string; type?: string }>;
+    rows: NormalizedRow[];
+    finalSchema: FieldSchema[];
     steps: TransformationStepResult[];
   };
 

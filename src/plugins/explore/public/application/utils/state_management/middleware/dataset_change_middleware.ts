@@ -25,6 +25,7 @@ import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 import { EXPLORE_NO_TAB_ID } from '../../../../../common';
+import { datasetRequiresExplicitRun } from '../../requires_explicit_run';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -98,7 +99,11 @@ export const createDatasetChangeMiddleware = (
             );
           }
 
-          await store.dispatch(executeQueries({ services }) as any);
+          // A dataset type can require an explicit Run (meta.requiresExplicitRun): selecting or
+          // switching to it then only clears the old results.
+          if (!datasetRequiresExplicitRun(queryString, currentDataset)) {
+            await store.dispatch(executeQueries({ services }) as any);
+          }
         } catch (error) {
           services.notifications?.toasts.addError(error, {
             title: 'Error loading dataset',

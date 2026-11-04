@@ -4,12 +4,19 @@
  */
 
 import { DataPublicPluginStart, IndexPattern } from '../../../../../../data/public';
+import { hasUsableTimeField } from '../../../helpers/has_usable_time_field';
 
 export function createHistogramConfigs(
   indexPattern: IndexPattern,
   histogramInterval: string,
   data: DataPublicPluginStart
 ) {
+  // createAggConfigs throws if the field does not resolve; the missing field is
+  // already reported by IndexPatternsService.
+  if (!hasUsableTimeField(indexPattern)) {
+    return;
+  }
+
   const visStateAggs = [
     {
       type: 'count',

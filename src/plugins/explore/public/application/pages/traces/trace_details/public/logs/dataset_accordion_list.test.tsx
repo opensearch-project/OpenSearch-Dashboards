@@ -11,7 +11,15 @@ import { Dataset } from '../../../../../../../../data/common';
 // Mock external components and modules
 jest.mock('@osd/i18n', () => ({
   i18n: {
-    translate: (id: string, options: { defaultMessage: string }) => options.defaultMessage,
+    // Fills in `{count, plural, one {# x} other {# xs}}` messages; others pass through.
+    translate: (id: string, options: { defaultMessage: string; values?: { count?: number } }) => {
+      const count = options.values?.count;
+      if (count === undefined) return options.defaultMessage;
+      return options.defaultMessage.replace(
+        /\{count, plural, one \{# ([^}]*)\} other \{# ([^}]*)\}\}/,
+        (_match: string, one: string, other: string) => `${count} ${count === 1 ? one : other}`
+      );
+    },
   },
 }));
 
@@ -113,11 +121,12 @@ describe('DatasetAccordionList', () => {
       expect(datasetLabels).toHaveLength(3);
     });
 
-    it('renders recent results text', () => {
+    it('renders how many recent results each dataset has', () => {
       render(<DatasetAccordionList {...defaultProps} />);
 
-      const recentResultsTexts = screen.getAllByText('10 recent results');
-      expect(recentResultsTexts).toHaveLength(3);
+      expect(screen.getByText('2 recent results')).toBeInTheDocument();
+      expect(screen.getByText('1 recent result')).toBeInTheDocument();
+      expect(screen.getByText('0 recent results')).toBeInTheDocument();
     });
 
     it('renders view in explore buttons only for datasets with logs', () => {

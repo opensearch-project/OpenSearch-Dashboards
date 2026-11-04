@@ -26,6 +26,8 @@ jest.mock('../../../components/visualizations/visualization_registry', () => ({
 
 const mockNormalizeResultRows = jest.fn();
 jest.mock('../../../components/visualizations/utils/normalize_result_rows', () => ({
+  normalizeSearchHits: (hits: Array<{ _source?: Record<string, unknown> }>) =>
+    hits.map((hit) => ({ ...(hit._source ?? {}) })),
   normalizeResultRows: (...args: any[]) => mockNormalizeResultRows(...args),
 }));
 

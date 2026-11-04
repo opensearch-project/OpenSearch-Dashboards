@@ -29,7 +29,25 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Storage } from './index';
+import { isQuotaExceededError } from '@osd/std';
+import { Storage, storedByteLength } from './index';
+
+/**
+ * Largest request body persisted per entry, in characters (~50KB of the ASCII
+ * JSON request bodies are). Bodies past this are pasted from a file the user
+ * still has, so persisting them verbatim only exhausts the origin's quota.
+ */
+export const MAX_ENTRY_DATA_CHARS = 50 * 1024;
+
+/**
+ * Total stored bytes all history entries may occupy. localStorage is one ~5MB
+ * store shared by the whole origin, so Console must not consume it all. A
+ * per-entry cap alone bounds nothing: enough mid-sized entries still exhaust it.
+ */
+export const MAX_HISTORY_STORED_BYTES = 1024 * 1024;
+
+/** Most recent entries retained, regardless of size. */
+export const MAX_HISTORY_ENTRIES = 500;
 
 export class History {
   constructor(private readonly storage: Storage) {}
@@ -58,21 +76,68 @@ export class History {
     return () => subscription.unsubscribe();
   }
 
-  addToHistory(endpoint: string, method: string, data: any) {
-    const keys = this.getHistoryKeys();
-    keys.splice(0, 500); // only maintain most recent X;
-    keys.forEach((key) => {
-      this.storage.delete(key);
-    });
+  /**
+   * Drops an oversized body but keeps the entry, so the user still sees the
+   * request ran. restoreRequestFromHistory already guards on absent req.data.
+   */
+  private buildEntry(timestamp: number, endpoint: string, method: string, data: any) {
+    const base = { time: timestamp, endpoint, method };
+    if (data === undefined || data === null || data === '') {
+      return base;
+    }
 
+    const serialized = typeof data === 'string' ? data : JSON.stringify(data);
+    if (serialized.length > MAX_ENTRY_DATA_CHARS) {
+      // Drives the "body not saved" label in the history list.
+      return { ...base, dataOmitted: true };
+    }
+
+    return { ...base, data };
+  }
+
+  /** Evicts oldest entries until the retained set plus `incomingBytes` fits. */
+  private evictToBudget(incomingBytes: number) {
+    const keys = this.getHistoryKeys(); // newest first
+    keys.splice(MAX_HISTORY_ENTRIES).forEach((key) => this.storage.delete(key));
+
+    let total = incomingBytes + keys.reduce((sum, key) => sum + this.storage.rawByteLength(key), 0);
+
+    while (keys.length > 0 && total > MAX_HISTORY_STORED_BYTES) {
+      const oldest = keys.pop() as string;
+      total -= this.storage.rawByteLength(oldest);
+      this.storage.delete(oldest);
+    }
+  }
+
+  addToHistory(endpoint: string, method: string, data: any) {
     const timestamp = new Date().getTime();
-    const k = 'hist_elem_' + timestamp;
-    this.storage.set(k, {
-      time: timestamp,
-      endpoint,
-      method,
-      data,
-    });
+    const key = 'hist_elem_' + timestamp;
+    const entry = this.buildEntry(timestamp, endpoint, method, data);
+    const incomingBytes = storedByteLength(this.storage.encodeKey(key), this.storage.encode(entry));
+
+    this.evictToBudget(incomingBytes);
+
+    // Our own budget does not guarantee the write fits: the quota is shared with
+    // every other key on the origin. Shed oldest and retry so a store filled
+    // elsewhere degrades history rather than failing the write. Shedding from a
+    // snapshot (not a re-query) terminates even if a delete does not take hold.
+    let sheddable: string[] | undefined;
+    for (;;) {
+      try {
+        this.storage.set(key, entry);
+        break;
+      } catch (e) {
+        if (!isQuotaExceededError(e)) throw e;
+        if (!sheddable) {
+          sheddable = this.getHistoryKeys().filter((k) => k !== key);
+        }
+        if (sheddable.length === 0) {
+          // Nothing left to give back; the caller notifies the user.
+          throw e;
+        }
+        this.storage.delete(sheddable.pop() as string);
+      }
+    }
 
     this.changeEmitter.next(this.getHistory());
   }

@@ -18,6 +18,7 @@ import {
   EuiButtonGroup,
   EuiLoadingChart,
   EuiIcon,
+  EuiCallOut,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -90,6 +91,8 @@ const BreakdownPanel: React.FC<{
   metricType: MetricType;
   /** The metric is a native histogram (see isNativeHistogram). */
   nativeHistogram?: boolean;
+  /** The breakdown query waits for the user (see "Load charts"). */
+  deferred?: boolean;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
@@ -102,6 +105,7 @@ const BreakdownPanel: React.FC<{
   layout,
   metricType,
   nativeHistogram,
+  deferred,
   onVisibilityChange,
   onTimeRangeChange,
   timeBounds,
@@ -151,7 +155,15 @@ const BreakdownPanel: React.FC<{
               height: 160,
             }}
           >
-            <EuiLoadingChart size="m" />
+            {deferred ? (
+              <EuiText size="xs" color="subdued" data-test-subj="metricsExploreBreakdownDeferred">
+                {i18n.translate('explore.metricsExplore.notLoaded', {
+                  defaultMessage: 'Not loaded',
+                })}
+              </EuiText>
+            ) : (
+              <EuiLoadingChart size="m" />
+            )}
           </div>
         </EuiPanel>
       </div>
@@ -266,6 +278,8 @@ export const MetricDetail: React.FC = () => {
     refreshCounter,
     onTimeRangeChange,
     timeBounds,
+    previewsEnabled = true,
+    requestPreviews,
   } = useExploration();
   const [chartData, setChartData] = useState<Array<[number, string]>>([]);
   const [labels, setLabels] = useState<LabelInfo[]>([]);
@@ -291,9 +305,15 @@ export const MetricDetail: React.FC = () => {
         const meta = metaMap[state.metric];
         if (meta && !cancelled) setMetadata({ type: meta.type, help: meta.help, unit: meta.unit });
         const type = inferMetricType(state.metric, meta?.type || MetricType.UNKNOWN);
-        const query = queryGen.forMetric(state.metric, type, stepSec, state.filters);
-        const result = await client.queryRange(query);
-        if (!cancelled) setChartData(result?.[0]?.values || []);
+        // The range query waits for the user on a dataset type that requires an explicit Run
+        // (also on a cold load of a detail URL); the metadata and label lookups still load.
+        if (previewsEnabled) {
+          const query = queryGen.forMetric(state.metric, type, stepSec, state.filters);
+          const result = await client.queryRange(query);
+          if (!cancelled) setChartData(result?.[0]?.values || []);
+        } else if (!cancelled) {
+          setChartData([]);
+        }
         const labelNames = await client.getLabelsForMetric(state.metric);
         if (!cancelled) {
           setLabels(labelNames.map((name) => ({ name, cardinality: 0 })));
@@ -308,7 +328,7 @@ export const MetricDetail: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [state.metric, state.filters, client, queryGen, stepSec, refreshCounter]);
+  }, [state.metric, state.filters, client, queryGen, stepSec, refreshCounter, previewsEnabled]);
 
   // Clear selection when data source changes
   const filterKey = `${state.metric}|${JSON.stringify(state.filters)}|${refreshCounter}`;
@@ -346,13 +366,12 @@ export const MetricDetail: React.FC = () => {
     results: breakdowns,
     errors: breakdownErrors,
     onVisibilityChange,
-  } = useConcurrentQueries<LabelBreakdownData>(breakdownFetch, [
-    client,
-    state.filters,
-    refreshCounter,
-    selectedLabelName,
-    loading,
-  ]);
+  } = useConcurrentQueries<LabelBreakdownData>(
+    breakdownFetch,
+    [client, state.filters, refreshCounter, selectedLabelName, loading, previewsEnabled],
+    undefined,
+    previewsEnabled
+  );
 
   const labelOptions = useMemo(() => labels.map((l) => ({ label: l.name })), [labels]);
 
@@ -389,6 +408,31 @@ export const MetricDetail: React.FC = () => {
 
   if (loading) return <LoadingIndicator />;
   if (error) return <ErrorCallout error={error} />;
+
+  const deferredCallout = !previewsEnabled && (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        iconType="iInCircle"
+        title={i18n.translate('explore.metricsExplore.detailDeferredTitle', {
+          defaultMessage: 'Charts load only when you ask for them for this data source.',
+        })}
+        data-test-subj="metricsExploreDetailDeferred"
+      >
+        <EuiButton
+          size="s"
+          iconType="play"
+          onClick={() => requestPreviews?.()}
+          data-test-subj="metricsExploreDetailLoadButton"
+        >
+          {i18n.translate('explore.metricsExplore.loadCharts', {
+            defaultMessage: 'Load charts',
+          })}
+        </EuiButton>
+      </EuiCallOut>
+    </>
+  );
 
   return (
     <>
@@ -448,6 +492,7 @@ export const MetricDetail: React.FC = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {deferredCallout}
 
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -485,6 +530,12 @@ export const MetricDetail: React.FC = () => {
             timeFrom={timeBounds?.min}
             timeTo={timeBounds?.max}
           />
+        ) : !previewsEnabled ? (
+          <EuiText size="s" color="subdued" data-test-subj="metricsExploreDetailChartDeferred">
+            {i18n.translate('explore.metricsExplore.detailChartDeferred', {
+              defaultMessage: 'Not loaded. Select Load charts to run the query.',
+            })}
+          </EuiText>
         ) : (
           <EuiText size="s" color="subdued">
             {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
@@ -563,6 +614,7 @@ export const MetricDetail: React.FC = () => {
                 layout={state.layout}
                 metricType={metricType}
                 nativeHistogram={isNativeHistogram(state.metric, metricType)}
+                deferred={!previewsEnabled}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
                 timeBounds={timeBounds}

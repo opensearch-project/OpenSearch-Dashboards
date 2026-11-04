@@ -19,6 +19,10 @@ import {
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { useEditorFocus, useSwitchSourceType } from '../../../../application/hooks';
+import {
+  datasetRequiresExplicitRun,
+  stageQueryForExplicitRun,
+} from '../../../../application/utils/requires_explicit_run';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { getServices } from '../../../../services/services';
@@ -135,7 +139,12 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
       languageSvc.setUserQueryLanguage(newLanguage);
       dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
       scheduleTimeout(focusOnEditor);
-      // Auto-execute query after language switch
+      // Auto-execute query after language switch, unless the dataset waits for an explicit Run.
+      // The same dataset keeps its previous results otherwise: clear them and stage the query.
+      if (datasetRequiresExplicitRun(queryString, dataset)) {
+        stageQueryForExplicitRun(dispatch);
+        return;
+      }
       scheduleTimeout(() => dispatch(onEditorRunActionCreator(services, newQueryString)));
     },
     [closePopover, focusOnEditor, dispatch, scheduleTimeout]

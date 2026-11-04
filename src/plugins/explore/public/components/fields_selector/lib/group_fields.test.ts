@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { groupFields } from './group_fields';
+import { groupFields, mergeSortedFields, partitionFields, sortFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
 
 describe('group_fields', function () {
@@ -241,6 +241,54 @@ describe('group_fields', function () {
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
   });
 
+  it('should exclude multi-fields (e.g. .keyword sub-fields) from all groups', function () {
+    const fields = [
+      {
+        name: 'message',
+        type: 'string',
+        esTypes: ['text'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: false,
+        readFromDocValues: false,
+        displayName: 'message',
+      },
+      {
+        name: 'message.keyword',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 0,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'message.keyword',
+        subType: { multi: { parent: 'message' } },
+      },
+    ];
+
+    const columns: string[] = [];
+    const fieldCounts = {
+      message: 1,
+    };
+
+    const fieldFilterState = getDefaultFieldFilter();
+    fieldFilterState.missing = false;
+
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+
+    const allFieldNames = [
+      ...actual.facetedFields,
+      ...actual.selectedFields,
+      ...actual.queryFields,
+      ...actual.discoveredFields,
+    ].map((f) => f.name);
+
+    expect(allFieldNames).toContain('message');
+    expect(allFieldNames).not.toContain('message.keyword');
+  });
+
   it('should handle empty or null fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
 
@@ -256,6 +304,68 @@ describe('group_fields', function () {
       selectedFields: [],
       queryFields: [],
       discoveredFields: [],
+    });
+  });
+
+  describe('sortFields / partitionFields / mergeSortedFields', () => {
+    const mk = (name: string, extra: Partial<any> = {}) =>
+      ({
+        name,
+        displayName: name,
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 0,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        ...extra,
+      }) as any;
+
+    it('sortFields orders by display name and tolerates array-like field lists', () => {
+      const fields = new Set([mk('zeta'), mk('alpha'), mk('Mid')]);
+      expect(sortFields(fields).map((f) => f.name)).toEqual(['alpha', 'Mid', 'zeta']);
+      expect(sortFields(null)).toEqual([]);
+      expect(sortFields(undefined)).toEqual([]);
+    });
+
+    it('sortFields matches the order groupFields produces', () => {
+      const fields = [mk('c'), mk('a'), mk('b'), mk('B2')];
+      const grouped = groupFields(fields, [], {}, getDefaultFieldFilter());
+      expect(sortFields(fields).map((f) => f.name)).toEqual(
+        grouped.discoveredFields.map((f) => f.name)
+      );
+    });
+
+    it('mergeSortedFields interleaves two sorted lists', () => {
+      const a = sortFields([mk('a'), mk('c'), mk('e')]);
+      const b = sortFields([mk('b'), mk('d'), mk('f')]);
+      expect(mergeSortedFields(a, b).map((f) => f.name)).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
+      expect(mergeSortedFields(a, [])).toBe(a);
+      expect(mergeSortedFields([], b)).toBe(b);
+    });
+
+    it('partitionFields groups without re-sorting and matches groupFields', () => {
+      const fields = [mk('c'), mk('a'), mk('b'), mk('_source', { type: '_source' })];
+      const columns = ['b'];
+      const fieldCounts = { a: 3 };
+      const filter = getDefaultFieldFilter();
+
+      const viaGroup = groupFields(fields, columns, fieldCounts, filter);
+      const viaPartition = partitionFields(sortFields(fields), columns, fieldCounts, filter);
+      expect(viaPartition).toEqual(viaGroup);
+      expect(viaPartition.selectedFields.map((f) => f.name)).toEqual(['b']);
+      expect(viaPartition.queryFields.map((f) => f.name)).toEqual(['a']);
+      expect(viaPartition.discoveredFields.map((f) => f.name)).toEqual(['c']);
+    });
+
+    it('partitionFields returns empty groups for null input', () => {
+      expect(partitionFields(null, [], {}, getDefaultFieldFilter())).toEqual({
+        facetedFields: [],
+        selectedFields: [],
+        queryFields: [],
+        discoveredFields: [],
+      });
     });
   });
 });

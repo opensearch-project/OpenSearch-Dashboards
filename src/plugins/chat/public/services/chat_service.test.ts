@@ -332,7 +332,7 @@ describe('ChatService', () => {
           tools: [],
           context: [],
           state: {},
-          forwardedProps: {},
+          forwardedProps: { allowConversationTitle: true },
         },
         undefined
       ); // dataSourceId is undefined when no uiSettings provided
@@ -416,7 +416,7 @@ describe('ChatService', () => {
           tools: [],
           context: [],
           state: {},
-          forwardedProps: {},
+          forwardedProps: { allowConversationTitle: true },
         },
         undefined
       ); // dataSourceId is undefined when no uiSettings provided
@@ -721,7 +721,7 @@ describe('ChatService', () => {
           tools: [],
           context: [],
           state: {},
-          forwardedProps: {},
+          forwardedProps: { allowConversationTitle: true },
         },
         undefined
       ); // dataSourceId is undefined when no uiSettings provided
@@ -813,7 +813,7 @@ describe('ChatService', () => {
           tools: [],
           context: [],
           state: {},
-          forwardedProps: {},
+          forwardedProps: { allowConversationTitle: true },
         },
         undefined
       );
@@ -1157,7 +1157,7 @@ describe('ChatService', () => {
           tools: [],
           context: [],
           state: {},
-          forwardedProps: {},
+          forwardedProps: { allowConversationTitle: true },
         },
         undefined
       );
@@ -1412,7 +1412,8 @@ describe('ChatService', () => {
 
       expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
         expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        messages
+        messages,
+        undefined
       );
     });
   });

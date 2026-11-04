@@ -13,6 +13,7 @@ interface PanelConfig {
   version: string;
   type: string;
   panelIndex: string;
+  embeddableConfig?: Record<string, unknown>;
   gridData: {
     x: number;
     y: number;
@@ -72,6 +73,9 @@ export const addToDashboard = async (
     id: obj.id,
     type: obj.type,
     panelIndex,
+    // As the dashboard saves panels itself. Without it the dashboard reads the panel as changed
+    // when it loads, and marks the just-saved dashboard as having unsaved changes.
+    embeddableConfig: {},
     gridData: {
       i: panelIndex,
       x,

@@ -23,6 +23,7 @@ import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../
 import { WorkspaceAssociateResult } from '../common/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 import { MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
+import { DataSourceAssociationFilters } from './services/data_source_association_filters';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -42,10 +43,24 @@ export class WorkspaceClient implements IWorkspaceClient {
   private http: HttpSetup;
   private workspaces: WorkspacesSetup;
   private isPermissionEnabled: boolean = false;
+  private readonly dataSourceAssociationFilters: DataSourceAssociationFilters;
 
-  constructor(http: HttpSetup, workspaces: WorkspacesSetup) {
+  constructor(
+    http: HttpSetup,
+    workspaces: WorkspacesSetup,
+    dataSourceAssociationFilters: DataSourceAssociationFilters = new DataSourceAssociationFilters()
+  ) {
     this.http = http;
     this.workspaces = workspaces;
+    this.dataSourceAssociationFilters = dataSourceAssociationFilters;
+  }
+
+  /**
+   * The data source association filters registered with the workspace plugin, read by the
+   * "Associate data sources" modal wherever it is rendered.
+   */
+  public getDataSourceAssociationFilters() {
+    return this.dataSourceAssociationFilters;
   }
 
   public setPermissionEnabled(enabled: boolean) {

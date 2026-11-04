@@ -36,10 +36,13 @@ export const selectExecutionStatus = createSelector(
   (overallStatus) => overallStatus.status
 );
 
-export const selectIsLoading = createSelector([selectOverallQueryStatus], (overallStatus) => {
-  const isLoading = overallStatus.status === QueryExecutionStatus.LOADING;
-  return isLoading;
-});
+/**
+ * Some query is still in flight. Read from the status map rather than the overall status, which
+ * turns ERROR when one query fails while others run on.
+ */
+export const selectIsLoading = createSelector([selectQueryStatusMap], (statusMap) =>
+  Object.values(statusMap).some((status) => status?.status === QueryExecutionStatus.LOADING)
+);
 
 export const selectPromptModeIsAvailable = createSelector(
   [selectState],

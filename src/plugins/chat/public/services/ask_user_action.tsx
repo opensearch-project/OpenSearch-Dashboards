@@ -11,7 +11,6 @@ interface AskUserArgs {
   prompt: string;
   inputType?: 'select' | 'confirm' | 'text';
   options?: Array<string | AskUserOption>;
-  allowFreeText?: boolean;
 }
 
 /**
@@ -34,9 +33,8 @@ export const createAskUserAction = (
     'Use this to resolve ambiguity, let the user choose between options, or confirm an ' +
     'action before proceeding — instead of guessing or asking in free-form text. ' +
     "Set inputType to 'select' with options for a multiple-choice question, 'confirm' for " +
-    "a yes/no decision, or 'text' for free-form input. For a 'select' question, set " +
-    'allowFreeText: true to also offer a text field so the user can answer with something ' +
-    'not in the options. ' +
+    "a yes/no decision, or 'text' for free-form input. A 'select' question always also offers " +
+    'a free-text field, so the user can answer with something not in the options. ' +
     'If a result comes back with declined: true, the user chose not to answer that ' +
     'question (identified by the echoed question field) — do NOT ask it again, in a card ' +
     'or in free-form text. Acknowledge briefly and proceed with a sensible default or ' +
@@ -57,12 +55,6 @@ export const createAskUserAction = (
         type: 'array',
         items: { type: 'string' },
         description: "Choices for a 'select' question.",
-      },
-      allowFreeText: {
-        type: 'boolean',
-        description:
-          "For a 'select' question, also show a free-text field so the user can answer with " +
-          'something not listed in options. Ignored for other input types.',
       },
     },
     required: ['prompt'],
@@ -108,7 +100,6 @@ export const createAskUserAction = (
       prompt: args.prompt,
       inputType: args.inputType,
       options,
-      allowFreeText: args.allowFreeText,
     });
 
     // Torn down (conversation reset) — cancel so the executor skips dispatch.

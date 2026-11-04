@@ -12,6 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 import { DataSourceConnectionType } from '../../../common/types';
 
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
+import { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 
 const dataSources = [
   {
@@ -214,6 +215,124 @@ describe('SelectDataSourcePanel', () => {
     fireEvent.click(getByText('Remove selected'));
 
     expect(onChangeMock).toHaveBeenCalledWith([assignedDataSourcesConnections[0]]);
+  });
+
+  it("offers only the connections the workspace client's association filters allow", async () => {
+    const associationFilters = new DataSourceAssociationFilters();
+    const isAssociable = jest.fn(
+      (candidate: { id: string }, context: { useCaseId?: string }) =>
+        candidate.id !== 'ds2' || context.useCaseId === 'observability'
+    );
+    associationFilters.register({ isAssociable });
+    const { getByTestId, getByText, queryByText } = render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider
+          services={{
+            ...mockCoreStart,
+            workspaceClient: { getDataSourceAssociationFilters: () => associationFilters },
+          }}
+        >
+          <SelectDataSourcePanel
+            onChange={jest.fn()}
+            savedObjects={mockCoreStart.savedObjects}
+            assignedDataSourceConnections={[]}
+            showDataSourceManagement={true}
+            workspaceFeatures={['use-case-search']}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    await waitFor(() => {
+      expect(getByText('Data Source 1')).toBeInTheDocument();
+    });
+    expect(queryByText('Data Source 2')).not.toBeInTheDocument();
+    expect(isAssociable).toHaveBeenCalledWith(expect.objectContaining({ id: 'ds2' }), {
+      useCaseId: 'search',
+      features: ['use-case-search'],
+    });
+  });
+
+  it('drops selected connections the filters no longer allow when the use case changes', () => {
+    const associationFilters = new DataSourceAssociationFilters();
+    associationFilters.register({
+      isAssociable: (candidate, context) =>
+        candidate.id !== 'ds2' || context.useCaseId === 'observability',
+    });
+    const onChange = jest.fn();
+    const selected = [
+      {
+        id: 'ds1',
+        name: 'Data Source 1',
+        type: 'OpenSearch',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
+      {
+        id: 'ds2',
+        name: 'Data Source 2',
+        type: 'OpenSearch',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
+    ];
+    const renderPanel = (workspaceFeatures: string[]) => (
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider
+          services={{
+            ...mockCoreStart,
+            workspaceClient: { getDataSourceAssociationFilters: () => associationFilters },
+          }}
+        >
+          <SelectDataSourcePanel
+            onChange={onChange}
+            savedObjects={mockCoreStart.savedObjects}
+            assignedDataSourceConnections={selected}
+            showDataSourceManagement={true}
+            workspaceFeatures={workspaceFeatures}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+    const { rerender } = render(renderPanel(['use-case-observability', 'discover']));
+    expect(onChange).not.toHaveBeenCalled();
+
+    // The same features in another order are the same workspace.
+    rerender(renderPanel(['discover', 'use-case-observability']));
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(renderPanel(['use-case-search', 'discover']));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith([selected[0]]);
+  });
+
+  it('keeps the selection without association filters', () => {
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={{ ...mockCoreStart }}>
+          <SelectDataSourcePanel
+            onChange={onChange}
+            savedObjects={mockCoreStart.savedObjects}
+            assignedDataSourceConnections={assignedDataSourcesConnections}
+            showDataSourceManagement={true}
+            workspaceFeatures={['use-case-observability']}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+    rerender(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={{ ...mockCoreStart }}>
+          <SelectDataSourcePanel
+            onChange={onChange}
+            savedObjects={mockCoreStart.savedObjects}
+            assignedDataSourceConnections={assignedDataSourcesConnections}
+            showDataSourceManagement={true}
+            workspaceFeatures={['use-case-search']}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('should close associate data sources modal', async () => {

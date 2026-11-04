@@ -85,6 +85,9 @@ interface ExplorationContextValue {
   refreshCounter: number;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
+  /** False while the dataset type requires an explicit Run and the user hasn't asked for previews. */
+  previewsEnabled?: boolean;
+  requestPreviews?: () => void;
 }
 
 export const ExplorationContext = createContext<ExplorationContextValue | null>(null);

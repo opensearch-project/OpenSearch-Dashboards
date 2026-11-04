@@ -9,6 +9,7 @@ import { ChartsPluginStart } from '../../charts/public';
 import { ChatService } from './services/chat_service';
 import { SuggestedActionsServiceSetupContract } from './services/suggested_action';
 import { CommandRegistrySetup } from './services/command_registry_service';
+import { StarterSuggestionsPluginStart } from '../../starter_suggestions/public';
 
 export interface ChatPluginSetup {
   suggestedActionsService: SuggestedActionsServiceSetupContract;
@@ -23,6 +24,7 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   contextProvider: ContextProviderStart;
   charts: ChartsPluginStart;
+  starterSuggestions: StarterSuggestionsPluginStart;
 }
 
 export enum ChatLayoutMode {

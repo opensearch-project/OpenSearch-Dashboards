@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useState, useCallback, useRef } from 'react';
+import { Fragment, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
 import {
   EuiText,
@@ -26,13 +26,19 @@ import {
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
 
-import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
+import {
+  getDataSourcesList,
+  fetchDataSourceConnections,
+  getDataSourceAssociationContext,
+  getWorkspaceFeaturesKey,
+} from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import type { DataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
@@ -226,6 +232,17 @@ export interface AssociationDataSourceModalProps {
   closeModal: () => void;
   handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void> | void;
   logos: Logos;
+  /**
+   * Feature configs of the workspace the connections would be associated with (undefined when
+   * unknown); the association filters get the context built from them.
+   */
+  workspaceFeatures?: string[];
+  /**
+   * The data source association filters registered with the workspace plugin. Without them (no
+   * workspace plugin client) every fetched connection is offered. Filters only hide options here;
+   * the server does not apply them.
+   */
+  associationFilters?: DataSourceAssociationFilters;
 }
 
 export const AssociationDataSourceModal = (props: AssociationDataSourceModalProps) => {
@@ -245,13 +262,28 @@ export const AssociationDataSourceModalContent = ({
   excludedConnectionIds,
   handleAssignDataSourceConnections,
   logos,
+  workspaceFeatures,
+  associationFilters,
 }: AssociationDataSourceModalProps) => {
-  const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
+  const [fetchedConnections, setFetchedConnections] = useState<DataSourceConnection[]>([]);
   const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
   const [options, setOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const mountedRef = useRef(false);
+  // A stable key, so a new array with the same features does not recompute the options.
+  const workspaceFeaturesKey = getWorkspaceFeaturesKey(workspaceFeatures);
+  // Connections that plugins report cannot be associated with this workspace are not offered.
+  const allConnections = useMemo(() => {
+    if (!associationFilters) {
+      return fetchedConnections;
+    }
+    const context = getDataSourceAssociationContext(workspaceFeatures);
+    return fetchedConnections.filter((connection) =>
+      associationFilters.isAssociable(connection, context)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchedConnections, workspaceFeaturesKey, associationFilters]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -279,17 +311,17 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
-    getDataSourcesList(savedObjects.client)
+    getDataSourcesList(savedObjects.client, undefined, associationFilters?.getRequestedFields())
       .then((dataSourcesList) =>
         fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
       )
       .then((connections) => {
-        setAllConnections(connections);
+        setFetchedConnections(connections);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [savedObjects.client, http, notifications, mode]);
+  }, [savedObjects.client, http, notifications, mode, associationFilters]);
 
   useEffect(() => {
     setOptions(

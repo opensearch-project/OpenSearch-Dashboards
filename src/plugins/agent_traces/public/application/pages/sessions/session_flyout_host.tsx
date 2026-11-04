@@ -26,15 +26,16 @@ interface SessionFlyoutHostProps {
   sessionId: string;
   /** The session row when it is already loaded (sessions list); fetched by id otherwise. */
   session?: SessionRow;
-  /** Trace to focus first (the one the user came back from). */
+  /** Trace, and agent run of it, to focus first (the one the user came back from). */
   focusTraceId?: string;
+  focusSpanId?: string;
   /** View and tab to restore (where the user left the session). */
   sessionView?: SessionViewState;
   /** Called with the session once fetched by id, so the flyout history can keep it. */
   onLoaded?: (session: SessionRow) => void;
   formatTs: (ts: string) => string;
   onClose: () => void;
-  /** Back and Forward through the flyouts the user moved between. */
+  /** Back to the flyout the user came from. */
   navigation?: FlyoutNavigation;
 }
 
@@ -43,6 +44,7 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
   sessionId,
   session,
   focusTraceId,
+  focusSpanId,
   sessionView,
   onLoaded,
   formatTs,
@@ -93,6 +95,7 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
       <SessionDetailsFlyout
         session={row}
         focusTraceId={focusTraceId}
+        focusSpanId={focusSpanId}
         sessionView={sessionView}
         formatTs={formatTs}
         onClose={onClose}

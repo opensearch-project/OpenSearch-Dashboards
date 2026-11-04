@@ -90,6 +90,8 @@ import {
   SourceTypeRegistryService,
   setSourceTypeRegistry,
 } from './services/source_type_registry';
+import { abortAllStreamingQueries } from './application/utils/streaming/streaming_abort_registry';
+import { releaseInFlightJobs } from './application/utils/streaming/release_jobs_on_unload';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
@@ -485,8 +487,23 @@ export class ExplorePlugin implements Plugin<
           // Call renderApp with params, services, and store
           const unmount = renderApp(params, services, store, flavor);
 
+          // Closing the tab destroys the only holder of the streaming job ids, so release them while
+          // the store still exists. `pagehide` rather than `beforeunload`: it fires for cases
+          // `beforeunload` misses, and does not risk blocking navigation.
+          const releaseStreamingJobs = () =>
+            releaseInFlightJobs({
+              state: store.getState(),
+              prependBasePath: (jobPath) => core.http.basePath.prepend(jobPath),
+            });
+          window.addEventListener('pagehide', releaseStreamingJobs);
+
           return () => {
+            window.removeEventListener('pagehide', releaseStreamingJobs);
             abortAllActiveQueries();
+            // Streaming runs are not tied to component lifetime, so leaving the app would otherwise
+            // leave them polling into a store that has been reset. Aborting also releases the
+            // server-side job, which holds its whole result until `keep_alive` lapses.
+            abortAllStreamingQueries();
             services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
             appUnMounted();
             unmount();
@@ -1062,6 +1079,12 @@ export class ExplorePlugin implements Plugin<
   private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
     const sqlSupportEnabled =
       this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    const visualizationEditorDescription = i18n.translate(
+      'explore.visualization.editor.description',
+      {
+        defaultMessage: 'Create and refine visualizations in one editor.',
+      }
+    );
     const appExtensions: VisTypeAlias['appExtensions'] = {
       visualizations: {
         docTypes: [SAVED_OBJECT_TYPE],
@@ -1157,11 +1180,15 @@ export class ExplorePlugin implements Plugin<
       aliasPath: '#/edit/',
       aliasApp: VISUALIZATION_EDITOR_APP_ID,
       title: i18n.translate('explore.visualization.editor.title', {
-        defaultMessage: 'Add visualization',
+        defaultMessage: 'Visualization editor',
       }),
-      description: i18n.translate('explore.visualization.editor.description', {
-        defaultMessage: 'Create visualization with visualization editor',
-      }),
+      description: visualizationEditorDescription,
+      promotion: {
+        description: visualizationEditorDescription,
+        buttonText: i18n.translate('explore.visualization.editor.promotionButton', {
+          defaultMessage: 'Create visualization',
+        }),
+      },
       icon: 'visualizeApp',
       stage: 'production',
       appExtensions,
@@ -1172,23 +1199,23 @@ export class ExplorePlugin implements Plugin<
     core: CoreStart,
     plugins: ExploreStartDependencies
   ) {
+    const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
+    const visTypes = plugins.visualizations.all();
+    const aliasTypes = plugins.visualizations.getAliases();
+    const allVisTypes = [...visTypes, ...aliasTypes];
+    dashboardVisActions.forEach((action) => {
+      const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
+      if (visOfAction && visOfAction.isClassic) {
+        action.grouping?.push({
+          id: 'others',
+          getDisplayName: () => 'More',
+          getIconType: () => 'boxesHorizontal',
+        });
+      }
+    });
+
     const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(core);
-    if (isExploreEnabledWorkspace) {
-      const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
-      const visTypes = plugins.visualizations.all();
-      const aliasTypes = plugins.visualizations.getAliases();
-      const allVisTypes = [...visTypes, ...aliasTypes];
-      dashboardVisActions.forEach((action) => {
-        const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
-        if (visOfAction && visOfAction.isClassic) {
-          action.grouping?.push({
-            id: 'others',
-            getDisplayName: () => 'More',
-            getIconType: () => 'boxesHorizontal',
-          });
-        }
-      });
-    } else {
+    if (!isExploreEnabledWorkspace) {
       plugins.visualizations
         .getAliases()
         .filter(

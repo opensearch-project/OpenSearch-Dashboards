@@ -59,6 +59,21 @@ $hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
   }
 }
 
+.exploreSideBar_fieldGroupCount {
+  margin-left: $euiSizeXS;
+  color: $euiTextSubduedColor;
+  font-weight: $euiFontWeightRegular;
+}
+
+// Zero-height elements are not reliably reported as intersecting, so give the sentinel a height.
+.exploreSideBar__sentinel {
+  height: 1px;
+}
+
+.exploreSideBar_showMore {
+  width: 100%;
+}
+
 .exploreSideBar__facetField {
   width: 100%;
 

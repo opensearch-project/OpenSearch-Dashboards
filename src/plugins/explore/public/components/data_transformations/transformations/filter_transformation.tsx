@@ -17,14 +17,14 @@ import {
   allOperatorOptions,
   TransformationConfigSchema,
 } from '../types';
-import { VisFieldType } from '../../visualizations/types';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 import {
   createAppliedResult,
   createInvalidConfigResult,
   getRowFieldValue,
+  isDateField,
+  isNumericalField,
 } from '../transformation_utils';
 
 const isConfigComplete = (config: FilterConfig): boolean => {
@@ -41,7 +41,6 @@ const FilterEditor = ({
   availableFields: FieldSchema[];
 }) => {
   const selectedField = availableFields.find((field) => field.name === config.field);
-  const fieldType = selectedField?.visFieldType;
 
   const updateConfig = useCallback(
     (newConfig: FilterConfig) => {
@@ -50,16 +49,15 @@ const FilterEditor = ({
     [onChange]
   );
 
-  const getOperatorsForType = (type: VisFieldType | undefined) => {
-    if (type === VisFieldType.Numerical)
-      return [...allOperatorOptions, ...numericalOperatorOptions];
-    if (type === VisFieldType.Date) return [...allOperatorOptions, ...dateOperatorOptions];
+  const getOperatorsForField = (field: FieldSchema | undefined) => {
+    if (isNumericalField(field)) return [...allOperatorOptions, ...numericalOperatorOptions];
+    if (isDateField(field)) return [...allOperatorOptions, ...dateOperatorOptions];
     return allOperatorOptions;
   };
 
   const handleFieldChange = (fieldSchema: FieldSchema | undefined) => {
     const newConfig = { ...config, field: fieldSchema?.name || undefined, value: '' };
-    const validOperators = getOperatorsForType(fieldSchema?.visFieldType);
+    const validOperators = getOperatorsForField(fieldSchema);
     // reset operator if FieldSchema type is changed
     if (!validOperators.some((op) => op.value === newConfig.operator)) {
       newConfig.operator = 'equals';
@@ -67,7 +65,7 @@ const FilterEditor = ({
     updateConfig(newConfig);
   };
 
-  const operatorOptions = getOperatorsForType(fieldType);
+  const operatorOptions = getOperatorsForField(selectedField);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -130,7 +128,7 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
       value: '',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: FilterConfig) => {
+    transformationMethod: (data, config: FilterConfig) => {
       const { field, operator, value } = config;
 
       if (!isConfigComplete({ field, operator, value })) {

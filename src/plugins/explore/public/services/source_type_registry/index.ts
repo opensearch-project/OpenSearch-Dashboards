@@ -4,10 +4,13 @@
  */
 
 export {
+  HISTOGRAM_RESULT_COLUMNS,
   OPENSEARCH_SOURCE_TYPE_ID,
   SourceTypeDatasetSelectorProps,
   SourceTypeDefinition,
   SourceTypeDependencies,
+  SourceTypeHistogramColumns,
+  SourceTypeHistogramConfig,
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
   SourceTypeMetricsResourceClient,

@@ -121,6 +121,42 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/executeQueries' });
   });
 
+  it('clears results but does not run a query for a dataset type that requires an explicit run', async () => {
+    mockServices.data.query.queryString.getDatasetService = jest.fn().mockReturnValue({
+      cacheDataset: mockCacheDataset,
+      getType: jest.fn((type: string) =>
+        type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined
+      ),
+    });
+    middleware = createDatasetChangeMiddleware(mockServices)(mockStore)(mockNext);
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'explicit-dataset', type: 'EXPLICIT_RUN_TYPE' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+
+    await middleware(setQueryState({ query: 'q', language: 'L' }));
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
+    expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
+    expect(mockedExecuteQueries).not.toHaveBeenCalled();
+  });
+
+  it('still runs a query for a dataset type that does not opt out', async () => {
+    mockServices.data.query.queryString.getDatasetService = jest.fn().mockReturnValue({
+      cacheDataset: mockCacheDataset,
+      getType: jest.fn(() => ({ meta: { requiresExplicitRun: false } })),
+    });
+    middleware = createDatasetChangeMiddleware(mockServices)(mockStore)(mockNext);
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'regular-dataset', type: 'REGULAR_TYPE' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+
+    await middleware(setQueryState({ query: 'q', language: 'L' }));
+
+    expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+  });
+
   it('should trigger side effects when dataset changes with setQueryWithHistory', async () => {
     // Setup a new dataset that's different from the current one
     const newDataset = { id: 'new-dataset', type: 'index_pattern' };

@@ -33,6 +33,7 @@ import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
+import { DATA_FRAME_TYPES } from '../../data_frames';
 
 jest.mock('./legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -233,6 +234,92 @@ describe('SearchSource', () => {
       const request = searchSource.history[0];
       expect(mockSearchMethod).toHaveBeenCalledTimes(1);
       expect(request.dataSourceId).toEqual(dataSourceId);
+    });
+  });
+
+  describe('#fetchExternalSearch() polling', () => {
+    const request = { index: { id: 'ds', title: 'ds' }, body: {} } as any;
+
+    test('surfaces the strategy error when the query fails at start', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'failed',
+        body: { error: 'The data source rejected the query' },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        'The data source rejected the query'
+      );
+    });
+
+    test('surfaces the strategy error for an upper-case FAILED status at start', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'FAILED',
+        body: { error: 'The data source rejected the query' },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        'The data source rejected the query'
+      );
+    });
+
+    test('uses the message of an Error-shaped failure body', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'failed',
+        body: { error: { message: 'Access denied' } },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        'Access denied'
+      );
+    });
+
+    test('serializes a failure body without a message', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'failed',
+        body: { error: { code: 'THROTTLED', retryAfterSeconds: 5 } },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        '{"code":"THROTTLED","retryAfterSeconds":5}'
+      );
+    });
+
+    test('truncates a long serialized failure body', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'failed',
+        body: { error: { detail: 'x'.repeat(5000) } },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      const error = await (searchSource as any)
+        .fetchExternalSearch(request, {})
+        .catch((e: Error) => e);
+      expect(error.message.length).toBe(1001);
+      expect(error.message.endsWith('…')).toBe(true);
+    });
+
+    test('falls back to a generic message for an empty failure body', async () => {
+      mockSearchMethod.mockResolvedValue({
+        type: DATA_FRAME_TYPES.POLLING,
+        status: 'failed',
+        body: { error: {} },
+      });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        'Query failed'
+      );
+    });
+
+    test('still rejects unknown polling states', async () => {
+      mockSearchMethod.mockResolvedValue({ type: DATA_FRAME_TYPES.POLLING, status: 'weird' });
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      await expect((searchSource as any).fetchExternalSearch(request, {})).rejects.toThrow(
+        'Invalid query state'
+      );
     });
   });
 

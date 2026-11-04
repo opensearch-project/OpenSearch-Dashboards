@@ -165,6 +165,10 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
 
   &__sourceType {
     border-radius: 5px;
+
+    // A <button>, which centers its label; a name that wraps onto two lines should read from
+    // the left edge like the rest of the column.
+    text-align: left;
     font-size: $ouiFontSizeS;
     padding: $ouiSizeS 10px;
 

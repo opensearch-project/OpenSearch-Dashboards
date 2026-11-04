@@ -367,8 +367,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       }
 
       // If datasets array is empty during a refetch, don't update selection
-      // This prevents clearing the dataset when fetchDatasets temporarily clears the array
-      if (datasets.length === 0 && hasCompletedInitialLoad.current) {
+      // This prevents clearing the dataset when fetchDatasets temporarily clears the array.
+      // Once the refetch has finished an empty list is final, so fall through to the fallback
+      // (otherwise a dataset that is not in the list, e.g. from the URL, shows "Select dataset").
+      if (datasets.length === 0 && hasCompletedInitialLoad.current && isLoading) {
         return;
       }
 
@@ -423,6 +425,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     currentDataset,
     dataViews,
     datasets,
+    isLoading,
     signalType,
     queryString,
     currentQuery.language,
@@ -484,14 +487,24 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           const typeConfig = datasetService.getType(type);
           if (!typeConfig?.fetch) return;
           const datasetRoot: DataStructure = { id: typeConfig.id, title: typeConfig.title, type };
-          const result = await typeConfig.fetch(services, [datasetRoot]);
-          result.children?.forEach((child) => {
-            const dataset = typeConfig.toDataset([datasetRoot, child]);
-            fetchedDatasets.push({
-              ...dataset,
-              displayName: child.title,
+          try {
+            const result = await typeConfig.fetch(services, [datasetRoot]);
+            // Children that need further navigation (e.g. containers whose datasets are one
+            // level down) are not datasets themselves; those types are only selectable through
+            // the advanced selector.
+            if (result.hasNext) return;
+            result.children?.forEach((child) => {
+              const dataset = typeConfig.toDataset([datasetRoot, child]);
+              fetchedDatasets.push({
+                ...dataset,
+                displayName: child.title,
+              });
             });
-          });
+          } catch (error) {
+            // Like the index patterns above: one failing type must not hide the others.
+            // eslint-disable-next-line no-console
+            console.error(`[DatasetSelect] Error fetching datasets of type ${type}:`, error);
+          }
         }) || []
       );
 

@@ -4,14 +4,8 @@
  */
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import {
-  DataStorage,
-  getDataSourceEngineCapabilities,
-  OSD_FIELD_TYPES,
-  UI_SETTINGS,
-} from '../../data/common';
+import { DataStorage, getDataSourceEngineCapabilities, UI_SETTINGS } from '../../data/common';
 // Type-only: DataSourceEngineType is an enum (runtime value); we use its string value directly to
 // avoid a cross-plugin runtime value-import. Keep in sync with the enum.
 import type { DataSourceEngineType } from '../../data_source/common/data_sources';
@@ -26,6 +20,7 @@ import {
   SingleLineInput,
 } from '../../data/public';
 import { ConfigSchema } from '../common/config';
+import { formatFieldValue } from '../common/utils';
 import { s3TypeConfig } from './datasets';
 import { prometheusTypeConfig } from './datasets/prometheus_type';
 import { createQueryAssistExtension } from './query_assist';
@@ -115,15 +110,7 @@ export class QueryEnhancementsPlugin implements Plugin<
           return false;
         },
         visualizable: false,
-        formatter: (value: string, type: OSD_FIELD_TYPES) => {
-          switch (type) {
-            case OSD_FIELD_TYPES.DATE:
-              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
-
-            default:
-              return value;
-          }
-        },
+        formatter: formatFieldValue,
       },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
@@ -298,15 +285,7 @@ export class QueryEnhancementsPlugin implements Plugin<
         sortable: false,
         filterable: false,
         visualizable: false,
-        formatter: (value: string, type: OSD_FIELD_TYPES) => {
-          switch (type) {
-            case OSD_FIELD_TYPES.DATE:
-              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // Date fields need special formatting in order for discover table formatter to render in the correct time zone
-
-            default:
-              return value;
-          }
-        },
+        formatter: formatFieldValue,
       },
       docLink: {
         title: i18n.translate('queryEnhancements.promqlLanguage.docLink', {

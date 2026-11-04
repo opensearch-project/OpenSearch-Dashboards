@@ -15,6 +15,7 @@ import {
   TransformationIssue,
   TransformationStepResult,
   FieldSchema,
+  NormalizedRow,
 } from './types';
 import {
   addTransformation,
@@ -23,38 +24,32 @@ import {
   toggleTransformationHide,
   inferSchemaFromRows,
 } from './transformation_utils';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
-import { FIELD_TYPE_MAP } from '../visualizations/constants';
-import { VisFieldType } from '../visualizations/types';
 
 export const TRANSFORMATION_STATE_KEY = '_t';
 
 // Non-empty rows determine which fields exist. Empty results preserve the last known schema
 // because they provide no evidence that fields were removed.
 const reconcileSchemaWithRows = (
-  rows: OpenSearchSearchHit[],
-  currentSchema: Array<{ name?: string; type?: string }>,
+  rows: NormalizedRow[],
+  currentSchema: FieldSchema[],
   typeOverrides: Record<string, string> = {}
-): Array<{ name?: string; type?: string }> => {
+): FieldSchema[] => {
   if (rows.length === 0) {
     return currentSchema;
   }
 
   const inferredSchema = inferSchemaFromRows(rows);
   const inferredByName = new Map(inferredSchema.map((field) => [field.name, field]));
-  const reconciledSchema: Array<{ name?: string; type?: string }> = [];
+  const reconciledSchema: FieldSchema[] = [];
 
   for (const field of currentSchema) {
-    if (!field.name) {
-      continue;
-    }
     const inferredField = inferredByName.get(field.name);
     if (!inferredField) {
       continue;
     }
     reconciledSchema.push({
       ...field,
-      type: typeOverrides[field.name] ?? field.type ?? inferredField.type,
+      type: typeOverrides[field.name] ?? field.type,
     });
     inferredByName.delete(field.name);
   }
@@ -69,20 +64,8 @@ const reconcileSchemaWithRows = (
   return reconciledSchema;
 };
 
-// TODO: Preserve raw schema types in stageFields$ instead of reducing them to VisFieldType.
-// Transformation editors need distinctions such as boolean versus string; VisFieldType is
-// a visualization-level classification. Keep this projection until the editor contract is updated.
-const getFieldSchemas = (schema: Array<{ name?: string; type?: string }>): FieldSchema[] =>
-  schema.flatMap((field) =>
-    field.name
-      ? [
-          {
-            name: field.name,
-            visFieldType: FIELD_TYPE_MAP[field.type ?? ''] ?? VisFieldType.Unknown,
-          },
-        ]
-      : []
-  );
+const isCompleteFieldSchema = (field: { name?: string; type?: string }): field is FieldSchema =>
+  Boolean(field.name && field.type);
 
 export class TransformationService implements ITransformationService {
   // Catalog of available transformations.
@@ -179,33 +162,47 @@ export class TransformationService implements ITransformationService {
     }
   }
 
+  serializePipeline(
+    pipeline: TransformationPipeline = this.pipeline$.getValue()
+  ): UrlTransformationState[] {
+    return pipeline.map((instance) => ({
+      definitionId: instance.definition_id,
+      config: instance.config,
+      hide: instance.hide,
+    }));
+  }
+
   /**
    * Apply the full pipeline without changing its stored configuration.
    * Returns the final rows, their inferred schema, and execution diagnostics for each step.
    * stageFields$ projects each step's input rows into fields for its editor.
    */
   applyPipeline(
-    rawRows: OpenSearchSearchHit[],
+    inputRows: NormalizedRow[],
     originalSchema: Array<{ name?: string; type?: string }> = []
   ): {
-    rows: OpenSearchSearchHit[];
-    finalSchema: Array<{ name?: string; type?: string }>;
+    rows: NormalizedRow[];
+    finalSchema: FieldSchema[];
     steps: TransformationStepResult[];
   } {
     const instances = this.pipeline$.getValue();
+    const inputSchema = reconcileSchemaWithRows(
+      inputRows,
+      originalSchema.filter(isCompleteFieldSchema)
+    );
 
     if (instances.length === 0) {
       this.stageFields$.next(new Map());
-      return { rows: rawRows, finalSchema: originalSchema, steps: [] };
+      return { rows: inputRows, finalSchema: inputSchema, steps: [] };
     }
 
     const stageFields = new Map<string, FieldSchema[]>();
     const steps: TransformationStepResult[] = [];
-    let rows = [...rawRows];
-    let currentSchema = reconcileSchemaWithRows(rows, originalSchema);
+    let rows = [...inputRows];
+    let currentSchema = inputSchema;
 
     for (const instance of instances) {
-      stageFields.set(instance.instance_id, getFieldSchemas(currentSchema));
+      stageFields.set(instance.instance_id, currentSchema);
 
       if (instance.hide) {
         steps.push({
@@ -250,7 +247,7 @@ export class TransformationService implements ITransformationService {
     this.stageFields$.next(stageFields);
 
     const hasActiveTransformations = instances.some((instance) => !instance.hide);
-    const finalSchema = hasActiveTransformations ? currentSchema : originalSchema;
+    const finalSchema = hasActiveTransformations ? currentSchema : inputSchema;
 
     return { rows, finalSchema, steps };
   }
@@ -301,13 +298,9 @@ export class TransformationService implements ITransformationService {
     if (!this.urlStateStorage) return;
 
     try {
-      const states: UrlTransformationState[] = pipeline.map((instance) => ({
-        definitionId: instance.definition_id,
-        config: instance.config,
-        hide: instance.hide,
-      }));
-
-      this.urlStateStorage.set(TRANSFORMATION_STATE_KEY, states, { replace: true });
+      this.urlStateStorage.set(TRANSFORMATION_STATE_KEY, this.serializePipeline(pipeline), {
+        replace: true,
+      });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('TransformationService: failed to persist to URL', err);
@@ -323,32 +316,3 @@ export class TransformationService implements ITransformationService {
     this.definitions.clear();
   }
 }
-
-export const createNoOpTransformationService = (): ITransformationService => {
-  const pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
-  const stageFields$ = new BehaviorSubject<Map<string, FieldSchema[]>>(new Map());
-
-  return {
-    registerDefinition: () => {},
-    getDefinitions: () => [],
-    getDefinitionsByType: () => [],
-    getDefinition: () => undefined,
-    pipeline$,
-    stageFields$,
-    getPipeline$: () => pipeline$,
-    addInstance: () => {},
-    removeInstance: () => {},
-    updateInstanceConfig: () => {},
-    toggleInstanceHide: () => {},
-    setPipeline: () => {},
-    clearPipeline: () => {},
-    applyPipeline: (rawRows: OpenSearchSearchHit[], originalSchema = []) => ({
-      rows: rawRows,
-      finalSchema: originalSchema,
-      steps: [],
-    }),
-    initUrlSync: () => {},
-    destroy: () => {},
-    restoreFromState: (states: UrlTransformationState[]) => {},
-  };
-};

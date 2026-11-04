@@ -43,5 +43,7 @@ export { getFlattenedObject } from './get_flattened_object';
 export { validateObject } from './validate_object';
 export * from './rxjs_7';
 export { parse, stringify } from './json';
+export { isQuotaExceededError, safeSetItem } from './web_storage';
+export type { WritableWebStorage } from './web_storage';
 export * from './clean';
 export { autoBom } from './auto_bom';

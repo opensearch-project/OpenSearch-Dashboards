@@ -5,7 +5,7 @@
 
 import './data_table.scss';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
@@ -18,6 +18,7 @@ import {
 import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
+import { useIncrementalRender } from '../../helpers/use_incremental_render';
 
 export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
@@ -65,100 +66,30 @@ const DataTableUI = ({
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
    *   * The lazy-loading is mindful of the performance by monitoring the fps of the browser.
-   *   *`renderedRowCount` and `desiredRowCount` are only used in this method.
+   *   * A sentinel element attached to the bottom of the table loads the next batch when scrolled into view.
    *
    * PAGINATED_PAGE_SIZE
    * Paginated, the view is broken into pages of 50 rows.
-   *   * `displayedRows` and `currentRowCounts` are only used in this method.
+   *   * The displayed rows are derived from `rows` and the active page.
    */
-  const [renderedRowCount, setRenderedRowCount] = useState(INFINITE_SCROLLED_PAGE_SIZE);
-  const [desiredRowCount, setDesiredRowCount] = useState(
-    Math.min(rows.length, DESIRED_ROWS_LOOKAHEAD)
-  );
-  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, PAGINATED_PAGE_SIZE));
-  const [currentRowCounts, setCurrentRowCounts] = useState({
-    startRow: 0,
-    endRow: rows.length < PAGINATED_PAGE_SIZE ? rows.length : PAGINATED_PAGE_SIZE,
+  const { count: renderedRowCount, sentinelRef } = useIncrementalRender({
+    total: rows.length,
+    pageSize: INFINITE_SCROLLED_PAGE_SIZE,
+    lookahead: DESIRED_ROWS_LOOKAHEAD,
+    enabled: !showPagination,
   });
 
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  // `sentinelElement` is attached to the bottom of the table to observe when the table is scrolled all the way.
-  const [sentinelElement, setSentinelElement] = useState<HTMLDivElement>();
-  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
-    if (node !== null) {
-      setSentinelElement(node);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (sentinelElement && !showPagination) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            // Load another batch of rows, some immediately and some lazily
-            setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
-            setDesiredRowCount((prevRowCount) => prevRowCount + DESIRED_ROWS_LOOKAHEAD);
-          }
-        },
-        {
-          // Important that 0 < threshold < 1, since there OSD application div has a transparent
-          // fade at the bottom which causes the sentinel element to sometimes not be 100% visible
-          threshold: 0.1,
-        }
-      );
-
-      observerRef.current.observe(sentinelElement);
-    }
-
-    return () => {
-      if (observerRef.current && sentinelElement) {
-        observerRef.current.unobserve(sentinelElement);
-      }
-    };
-  }, [sentinelElement, showPagination]);
-
-  // Page management when using a paginated table
-  const [activePage, setActivePage] = useState(0);
+  // Page management when using a paginated table. The page is remembered together with the rows
+  // it was chosen for, so new results start again from the first page.
+  const [pageSelection, setPageSelection] = useState({ rows, page: 0 });
+  const activePage = pageSelection.rows === rows ? pageSelection.page : 0;
   const pageCount = Math.ceil(rows.length / PAGINATED_PAGE_SIZE);
+  const startRow = activePage * PAGINATED_PAGE_SIZE;
+  const endRow = Math.min(rows.length, startRow + PAGINATED_PAGE_SIZE);
+  const displayedRows = rows.slice(startRow, endRow);
   const goToPage = (pageNumber: number) => {
-    const startRow = pageNumber * PAGINATED_PAGE_SIZE;
-    const endRow =
-      rows.length < pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE
-        ? rows.length
-        : pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE;
-    setCurrentRowCounts({
-      startRow,
-      endRow,
-    });
-    setDisplayedRows(rows.slice(startRow, endRow));
-    setActivePage(pageNumber);
+    setPageSelection({ rows, page: pageNumber });
   };
-
-  // Lazy-loader of rows
-  const lazyLoadRequestFrameRef = useRef<number>(0);
-  const lazyLoadLastTimeRef = useRef<number>(0);
-
-  // When doing infinite scrolling, the `rows` prop gets regularly updated from the outside: we only
-  // render the additional rows when we know the load isn't too high. To prevent overloading the
-  // renderer, we throttle by current framerate and only render if the frames are fast enough, then
-  // we increase the rendered row count and trigger a re-render.
-  React.useEffect(() => {
-    if (!showPagination) {
-      const loadMoreRows = (time: number) => {
-        if (renderedRowCount < desiredRowCount) {
-          // Load more rows only if fps > 30, when calls are less than 33ms apart
-          if (time - lazyLoadLastTimeRef.current < 33) {
-            setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
-          }
-          lazyLoadLastTimeRef.current = time;
-          lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
-        }
-      };
-      lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
-    }
-
-    return () => cancelAnimationFrame(lazyLoadRequestFrameRef.current);
-  }, [showPagination, renderedRowCount, desiredRowCount]);
 
   return (
     <div className="explore-table-container">
@@ -167,8 +98,8 @@ const DataTableUI = ({
           pageCount={pageCount}
           activePage={activePage}
           goToPage={goToPage}
-          startItem={currentRowCounts.startRow + 1}
-          endItem={currentRowCounts.endRow}
+          startItem={startRow + 1}
+          endItem={endRow}
           totalItems={hits}
           sampleSize={sampleSize}
         />
@@ -237,8 +168,8 @@ const DataTableUI = ({
           pageCount={pageCount}
           activePage={activePage}
           goToPage={goToPage}
-          startItem={currentRowCounts.startRow + 1}
-          endItem={currentRowCounts.endRow}
+          startItem={startRow + 1}
+          endItem={endRow}
           totalItems={hits}
           sampleSize={sampleSize}
         />

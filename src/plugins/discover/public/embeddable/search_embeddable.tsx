@@ -115,6 +115,8 @@ export class SearchEmbeddable
   private services: DiscoverServices;
   private filterManager: FilterManager;
   private abortController?: AbortController;
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -314,6 +316,15 @@ export class SearchEmbeddable
   private fetch = async () => {
     if (!this.searchProps) return;
 
+    // Pause fetching while not visible (e.g. a collapsed section); record the
+    // owed fetch and flush it once on resume (via isFetchRequired). See
+    // EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      this.pendingFetchOnResume = true;
+      return;
+    }
+    this.pendingFetchOnResume = false;
+
     const { searchSource } = this.savedSearch;
 
     // Abort any in-progress requests
@@ -382,6 +393,7 @@ export class SearchEmbeddable
     const isFetchRequired =
       this.node &&
       (force ||
+        (this.pendingFetchOnResume && this.input.isVisible !== false) ||
         !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
         !isEqual(this.prevQuery, this.input.query) ||
         !isEqual(this.prevTimeRange, this.input.timeRange) ||

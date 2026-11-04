@@ -23,6 +23,12 @@ import { defaultPreparePplQuery } from '../../languages';
 // Module-level storage for abort controllers keyed by cacheKey
 const activeTraceQueryAbortControllers = new Map<string, AbortController>();
 
+/** Aborts every RED metrics query in flight. Called by `abortAllActiveQueries`, so Stop reaches them. */
+export const abortAllTraceQueries = () => {
+  activeTraceQueryAbortControllers.forEach((controller) => controller.abort());
+  activeTraceQueryAbortControllers.clear();
+};
+
 /**
  * Query preparation for trace queries
  */
@@ -232,7 +238,7 @@ const executeTraceQueryBase = async (
       parsedError = {
         error: {
           reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          details: error.body?.error || error.message || 'An error occurred',
           type: error.name,
         },
       };

@@ -198,10 +198,15 @@ describe('ppl_request_helpers', () => {
   });
 
   describe('escapePPLValue', () => {
+    it('escapes backslashes before quotes, so a value cannot close the literal', () => {
+      expect(escapePPLValue('abc\\')).toBe('"abc\\\\"');
+      expect(escapePPLValue('a\\"b')).toBe('"a\\\\\\"b"');
+    });
+
     it('escapes string values', () => {
       expect(escapePPLValue('test')).toBe('"test"');
       expect(escapePPLValue('test"quote')).toBe('"test\\"quote"');
-      expect(escapePPLValue('test\\backslash')).toBe('"test\\backslash"');
+      expect(escapePPLValue('test\\backslash')).toBe('"test\\\\backslash"');
     });
 
     it('handles number values', () => {

@@ -442,6 +442,32 @@ export const LogStreamCard: React.FC<Props> = ({
       </EuiFlexItem>
     ) : null;
 
+  // Docs count / store size as plain header metadata when there is no health pill to carry them in
+  // its tooltip (e.g. OpenSearch Serverless reports size and docs but no cluster health). Engines
+  // that report health keep showing these inside the pill tooltip, unchanged.
+  const indexMetaText =
+    kind === 'index' && !health
+      ? [
+          docsCount != null &&
+            i18n.translate('explore.logsDrilldown.rows.docsCount', {
+              defaultMessage: '{count} docs',
+              values: { count: docsCount.toLocaleString() },
+            }),
+          storeSize,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : '';
+  const indexMeta = indexMetaText ? (
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs">
+        <EuiTextColor color="subdued" data-test-subj={`logsExploreCardIndexMeta-${name}`}>
+          {indexMetaText}
+        </EuiTextColor>
+      </EuiText>
+    </EuiFlexItem>
+  ) : null;
+
   const histogramCol = (
     <EuiFlexItem
       grow={false}
@@ -533,6 +559,7 @@ export const LogStreamCard: React.FC<Props> = ({
             </EuiFlexItem>
           )}
           {healthPill}
+          {indexMeta}
           {datasetActions}
         </EuiFlexGroup>
 

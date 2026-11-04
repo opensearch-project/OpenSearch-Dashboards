@@ -14,8 +14,8 @@ import { DiscoverFieldSearch } from './discover_field_search';
 import './discover_sidebar.scss';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getDetails } from './lib/get_details';
-import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
-import { groupFields } from './lib/group_fields';
+import { getUnknownFieldList } from './lib/get_index_pattern_field_list';
+import { mergeSortedFields, partitionFields, sortFields } from './lib/group_fields';
 import { DiscoverFieldHeader } from './discover_field_header';
 import { FieldList } from './field_list';
 import { FacetList } from './facet_list';
@@ -73,9 +73,26 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     return services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
   }, []);
 
+  // Sorting the pattern's fields depends only on the dataset, so it is done once per dataset
+  // rather than on every query result. The field list can be filled in asynchronously after
+  // the dataset object is created, hence the length and loading flag in the dependencies.
+  const patternFieldCount = selectedDataSet?.fields?.length ?? 0;
+  const patternFieldsLoading = selectedDataSet?.fieldsLoading;
+  const sortedPatternFields = useMemo(
+    () => sortFields(selectedDataSet?.fields?.getAll() as DataViewField[] | undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedDataSet, patternFieldCount, patternFieldsLoading]
+  );
+
+  // Fields present in the hits but not in the pattern are few and change per query; sort just
+  // those and merge, instead of re-sorting the whole pattern.
   const fields = useMemo(() => {
-    return getIndexPatternFieldList(selectedDataSet, fieldCounts);
-  }, [selectedDataSet, fieldCounts]);
+    if (!selectedDataSet) {
+      return null;
+    }
+    const unknownFields = getUnknownFieldList(selectedDataSet, fieldCounts);
+    return mergeSortedFields(sortedPatternFields, sortFields(unknownFields));
+  }, [selectedDataSet, sortedPatternFields, fieldCounts]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -92,13 +109,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
 
   const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(() => {
     const showFacetedFields = flavorId === ExploreFlavor.Traces;
-    return groupFields(
-      fields as DataViewField[],
-      columns,
-      fieldCounts,
-      fieldFilterState,
-      showFacetedFields
-    );
+    return partitionFields(fields, columns, fieldCounts, fieldFilterState, showFacetedFields);
   }, [flavorId, fields, columns, fieldCounts, fieldFilterState]);
 
   const fieldTypes = useMemo(() => {

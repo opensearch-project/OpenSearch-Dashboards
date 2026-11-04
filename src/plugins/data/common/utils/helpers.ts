@@ -44,6 +44,33 @@ export interface QueryStatusOptions {
 
 export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+/** Upper bound for a serialized error shown as a failed query's message. */
+const MAX_FAILED_QUERY_MESSAGE_LENGTH = 1000;
+
+/**
+ * The message of a query a search strategy reported as failed (at start or while polling): the
+ * error itself when it is a string, else its `message`, else the serialized error (truncated), so
+ * an unknown error shape still reaches the user.
+ */
+export const getFailedQueryMessage = (error: unknown): string => {
+  if (typeof error === 'string' && error) return error;
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string' && message) return message;
+    try {
+      const serialized = JSON.stringify(error);
+      if (serialized && serialized !== '{}') {
+        return serialized.length > MAX_FAILED_QUERY_MESSAGE_LENGTH
+          ? `${serialized.slice(0, MAX_FAILED_QUERY_MESSAGE_LENGTH)}…`
+          : serialized;
+      }
+    } catch {
+      // Not serializable (e.g. circular): fall through to the generic message.
+    }
+  }
+  return 'Query failed';
+};
+
 export const handleQueryResults = async <T>(
   options: QueryStatusOptions
 ): Promise<FetchStatusResponse> => {
@@ -61,8 +88,9 @@ export const handleQueryResults = async <T>(
   } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
   if (queryStatus === 'FAILED') {
-    // @ts-expect-error TS2339 TODO(ts-error): fixme
-    throw new Error(queryResultsRes?.body.error);
+    throw new Error(
+      getFailedQueryMessage((queryResultsRes as { body?: { error?: unknown } })?.body?.error)
+    );
   }
 
   return queryResultsRes;

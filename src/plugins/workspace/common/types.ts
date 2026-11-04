@@ -13,6 +13,8 @@ export type DataSource = Pick<
 > & {
   // Id defined in SavedObjectAttribute could be single or array, here only should be single string.
   id: string;
+  /** Saved object attributes requested by data source association filters. */
+  attributes?: Record<string, unknown>;
 };
 
 export type DataConnection = Pick<DataConnectionSavedObjectAttributes, 'title'> & {
@@ -21,6 +23,8 @@ export type DataConnection = Pick<DataConnectionSavedObjectAttributes, 'title'> 
   connectionType: DataConnectionType;
   description?: string;
   title: string;
+  /** Saved object attributes requested by data source association filters. */
+  attributes?: Record<string, unknown>;
 };
 
 export enum DataSourceConnectionType {
@@ -37,6 +41,8 @@ export interface DataSourceConnection {
   name: string;
   description?: string;
   relatedConnections?: DataSourceConnection[];
+  /** Saved object attributes requested by data source association filters. */
+  attributes?: Record<string, unknown>;
 }
 
 export interface WorkspaceAssociateResult {

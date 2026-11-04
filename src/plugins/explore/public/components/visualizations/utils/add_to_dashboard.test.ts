@@ -6,6 +6,7 @@
 import { addToDashboard } from './add_to_dashboard'; // Adjust path as needed
 import { setStateToOsdUrl } from '../../../../../opensearch_dashboards_utils/public';
 import { v4 as uuidv4 } from 'uuid';
+import type { DashboardStart } from '../../../../../dashboard/public';
 
 // Mock dependencies
 jest.mock('uuid', () => ({
@@ -64,6 +65,23 @@ describe('addToDashboard', () => {
 
     expect(mockGet).toHaveBeenCalledWith('123');
     expect(mockSave).toHaveBeenCalled();
+  });
+
+  it('saves the new panel with the embeddableConfig the dashboard writes for its own panels', async () => {
+    // Typed as the fields addToDashboard writes, which the assertion reads back.
+    const dashboard: typeof mockDashboardBase = { ...mockDashboardBase, panelsJSON: '[]' };
+    mockGet.mockResolvedValue(dashboard);
+    await addToDashboard(
+      dashboardService as unknown as DashboardStart,
+      { id: 'new-viz', type: 'explore' },
+      'existing',
+      { existingDashboardId: '123' }
+    );
+    // Without it the dashboard reads the panel as changed when it opens and asks to discard.
+    expect(JSON.parse(dashboard.panelsJSON)[0]).toMatchObject({
+      id: 'new-viz',
+      embeddableConfig: {},
+    });
   });
 
   it('creates a new dashboard with correct panel and URL', async () => {

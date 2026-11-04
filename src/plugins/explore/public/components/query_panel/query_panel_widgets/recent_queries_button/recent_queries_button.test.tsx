@@ -230,12 +230,15 @@ describe('RecentQueriesButton', () => {
     const queryItem = screen.getByTestId('mock-query-item');
     fireEvent.click(queryItem);
 
-    expect(mockHandleTimeChange).toHaveBeenCalledWith({
-      start: 'now-1d',
-      end: 'now',
-      isInvalid: false,
-      isQuickSelection: true,
-    });
+    expect(mockHandleTimeChange).toHaveBeenCalledWith(
+      {
+        start: 'now-1d',
+        end: 'now',
+        isInvalid: false,
+        isQuickSelection: true,
+      },
+      { fromRecentQuery: true }
+    );
   });
 
   it('does not call handleTimeChange when no time range is provided', () => {

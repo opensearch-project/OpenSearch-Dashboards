@@ -22,6 +22,8 @@ import { getResponseInspectorStats } from '../../../../application/legacy/discov
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
 import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../interfaces';
 import { defaultPreparePplQuery } from '../../languages';
+import { ensureAiRootFieldChecked } from '../../ai_root';
+import { PPLService } from '../../../pages/traces/trace_details/data_fetching/ppl_request_helpers';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -193,6 +195,15 @@ export const executeQueries = createAsyncThunk<
   // Early exit if query should be skipped
   if (shouldSkipQueryExecution(query)) {
     return;
+  }
+
+  // The AI-root query only names the marker field once it is known to be mapped.
+  if (services.data && query.dataset) {
+    await ensureAiRootFieldChecked(
+      new PPLService(services.data),
+      query.dataset,
+      defaultPrepareQueryString({ ...query, query: '' })
+    );
   }
 
   // Collect all tab cache keys that need execution

@@ -18,6 +18,7 @@ import {
   computeUnclaimedPanels,
   computeUngroupedLayout,
   flattenSectionsToPanels,
+  getCollapsedMemberIds,
   getNextSectionName,
   migrateAllPanelsToSection,
   moveMemberToSection,
@@ -364,6 +365,47 @@ describe('section_layout_utils', () => {
     it('never wraps a row-leading panel wider than the grid', () => {
       const panels = [panel('wide', 0, 0, 60, 10)];
       expect(computeUngroupedLayout(panels)[0].gridData).toEqual({ x: 0, y: 0, w: 60, h: 10 });
+    });
+  });
+
+  describe('getCollapsedMemberIds', () => {
+    const withCollapsed = (s: DashboardSection, collapsed: boolean): DashboardSection => ({
+      ...s,
+      collapsed,
+    });
+
+    it('returns only member ids that belong to collapsed sections', () => {
+      const items = [
+        withCollapsed(
+          section('s1', 'S1', [
+            { idRef: 'a', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 10 } },
+            { idRef: 'b', type: 'panel', gridData: { x: 24, y: 0, w: 24, h: 10 } },
+          ]),
+          true
+        ),
+        withCollapsed(
+          section('s2', 'S2', [
+            { idRef: 'c', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 10 } },
+          ]),
+          false
+        ),
+      ];
+      const result = getCollapsedMemberIds(items);
+      expect([...result].sort()).toEqual(['a', 'b']);
+      expect(result.has('c')).toBe(false);
+    });
+
+    it('returns an empty set when no section is collapsed', () => {
+      const items = [
+        section('s1', 'S1', [
+          { idRef: 'a', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 10 } },
+        ]),
+      ];
+      expect(getCollapsedMemberIds(items).size).toBe(0);
+    });
+
+    it('returns an empty set for no sections', () => {
+      expect(getCollapsedMemberIds([]).size).toBe(0);
     });
   });
 });

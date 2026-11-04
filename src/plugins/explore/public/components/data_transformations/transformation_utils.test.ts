@@ -27,12 +27,7 @@ const createMockInstance = (
   Editor: (() => null) as any,
 });
 
-const createHit = (source: Record<string, unknown>) => ({
-  _index: 'test',
-  _id: '1',
-  _score: 1,
-  _source: source,
-});
+const createRow = (source: Record<string, unknown>) => source;
 
 describe('transformation_utils', () => {
   describe('addTransformation', () => {
@@ -87,7 +82,7 @@ describe('transformation_utils', () => {
 
   describe('inferSchemaFromRows', () => {
     it('uses the union of fields present across rows', () => {
-      const rows = [createHit({ name: 'Alice' }), createHit({ age: 30 })];
+      const rows = [createRow({ name: 'Alice' }), createRow({ age: 30 })];
       expect(inferSchemaFromRows(rows)).toEqual([
         { name: 'name', type: 'string' },
         { name: 'age', type: 'integer' },
@@ -96,7 +91,7 @@ describe('transformation_utils', () => {
 
     it('infers field types from row values', () => {
       const rows = [
-        createHit({
+        createRow({
           count: 5,
           ratio: 1.5,
           timestamp: '2024-01-15T00:00:00Z',
@@ -117,7 +112,7 @@ describe('transformation_utils', () => {
     });
 
     it('uses a later non-null value to infer a field type', () => {
-      const rows = [createHit({ value: null }), createHit({ value: 42 })];
+      const rows = [createRow({ value: null }), createRow({ value: 42 })];
       expect(inferSchemaFromRows(rows)).toEqual([{ name: 'value', type: 'integer' }]);
     });
 
@@ -128,11 +123,11 @@ describe('transformation_utils', () => {
 
   describe('row field access', () => {
     it('prefers a literal dotted field and falls back to a nested path', () => {
-      const literalRow = createHit({
+      const literalRow = createRow({
         'service.name': 'literal',
         service: { name: 'nested' },
       });
-      const nestedRow = createHit({ service: { name: 'nested' } });
+      const nestedRow = createRow({ service: { name: 'nested' } });
 
       expect(rowHasField(literalRow, 'service.name')).toBe(true);
       expect(getRowFieldValue(literalRow, 'service.name')).toBe('literal');

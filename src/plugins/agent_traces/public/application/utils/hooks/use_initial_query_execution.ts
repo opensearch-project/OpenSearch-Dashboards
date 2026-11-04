@@ -22,6 +22,7 @@ import { AGENT_TRACES_VISUALIZATION_TAB_ID } from '../../../../common';
 import { selectActiveTabId, selectSort } from '../state_management/selectors';
 import { useCurrentAgentTracesId } from './use_current_agent_traces_id';
 import { useDatasetContext } from '../../context';
+import { datasetTypeRequiresExplicitRun } from '../../../../../data/public';
 
 /**
  * Hook to handle initial query execution on page load
@@ -40,6 +41,10 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
     if (queryState.dataset && services?.data?.query?.queryString) {
       const datasetService = services.data.query.queryString.getDatasetService();
       const typeConfig = datasetService.getType(queryState.dataset.type);
+      // A dataset type that requires an explicit Run never searches on page load.
+      if (datasetTypeRequiresExplicitRun(typeConfig, queryState.dataset)) {
+        return false;
+      }
       const datasetSearchOnLoad = typeConfig?.meta?.searchOnLoad;
       if (datasetSearchOnLoad !== undefined) {
         return datasetSearchOnLoad;

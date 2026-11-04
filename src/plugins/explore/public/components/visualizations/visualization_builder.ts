@@ -15,7 +15,7 @@ import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/pub
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
-import { normalizeResultRows } from './utils/normalize_result_rows';
+import { normalizeResultRows, normalizeSearchHits } from './utils/normalize_result_rows';
 import { ChartConfig, SplitConfig, SplitLayout, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
@@ -24,7 +24,8 @@ import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
 import { ITransformationService } from '../data_transformations/types';
-import { createNoOpTransformationService } from '../data_transformations/transformation_service';
+import { TransformationService } from '../data_transformations/transformation_service';
+import type { VariableValue } from '../../../../dashboard/public';
 
 interface VisState {
   title?: string;
@@ -45,7 +46,7 @@ export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
-  private transformationService: ITransformationService = createNoOpTransformationService();
+  private transformationService: ITransformationService = new TransformationService();
   private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
   private lastSchema: Array<{ type?: string; name?: string }> = [];
   private seriesDisplayNames?: Record<string, string> = {};
@@ -54,10 +55,18 @@ export class VisualizationBuilder {
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
+  /** The dashboard's current variable values, when editing a dashboard panel. */
+  variables$ = new BehaviorSubject<VariableValue[]>([]);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
+    }
+  }
+
+  setVariables(variables: VariableValue[]) {
+    if (!isEqual(variables, this.variables$.value)) {
+      this.variables$.next(variables);
     }
   }
 
@@ -418,12 +427,9 @@ export class VisualizationBuilder {
     this.lastSchema = schema;
     this.seriesDisplayNames = seriesDisplayNames;
 
-    // TODO: Normalize results(OpenSearchSearchHit) into plain rows before running the
-    // transformation pipeline. The pipeline currently operates on OpenSearchSearchHit._source,
-    // coupling every transformation to the OpenSearch response shape. Split row normalization
-    // from visualization column inference, then run normalization before applyPipeline.
+    const normalizedRows = normalizeSearchHits(rows);
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      rows,
+      normalizedRows,
       schema
     );
     const { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
@@ -556,6 +562,7 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
+    this.variables$.complete();
   }
 
   reset(): void {
@@ -565,7 +572,8 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
-    this.transformationService = createNoOpTransformationService();
+    this.variables$ = new BehaviorSubject<VariableValue[]>([]);
+    this.transformationService = new TransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
     this.seriesDisplayNames = {};
@@ -638,6 +646,7 @@ export class VisualizationBuilder {
       data$: this.data$,
       config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
+      variables$: this.variables$,
       timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),

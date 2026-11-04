@@ -8,6 +8,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiStat,
   EuiText,
@@ -163,6 +164,25 @@ export const TraceMetricsBar: React.FC<TraceMetricsBarProps> = ({ metrics, onErr
                       {i18n.translate('agentTraces.metricsBar.totalTokens', {
                         defaultMessage: 'Total Tokens',
                       })}
+                      {metrics?.countsMayIncludeDuplicates && (
+                        <>
+                          {' '}
+                          <EuiIconTip
+                            type="alert"
+                            color="warning"
+                            size="s"
+                            aria-label={i18n.translate(
+                              'agentTraces.metricsBar.mayIncludeDuplicatesLabel',
+                              { defaultMessage: 'Tokens may count a few agent runs twice' }
+                            )}
+                            content={i18n.translate('agentTraces.metricsBar.mayIncludeDuplicates', {
+                              defaultMessage:
+                                'Too many agent runs to check them all for duplicates, so agent runs, tokens and latency may count a few runs twice. Trace counts are exact.',
+                            })}
+                            iconProps={{ 'data-test-subj': 'agentTracesMetricsDuplicatesNotice' }}
+                          />
+                        </>
+                      )}
                     </EuiTextColor>
                   }
                   titleSize="s"

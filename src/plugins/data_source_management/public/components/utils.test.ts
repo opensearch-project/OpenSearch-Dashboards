@@ -24,6 +24,7 @@ import {
   setDataSourceSelection,
   getDefaultDataSourceId,
   getDefaultDataSourceId$,
+  mergeDataSourcesWithConnections,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import { UiSettingScope } from '../../../../core/public';
@@ -68,6 +69,17 @@ describe('DataSourceManagement: Utils.ts', () => {
       const fetchDataSources = await getDataSources(savedObjects.client);
       expect(fetchDataSources.length).toBe(getDataSourcesResponse.savedObjects.length);
     });
+    test('Success: keeps the workspaces of data sources that have them', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', {
+        savedObjects: [
+          { id: 'ds-1', title: 'One', workspaces: ['ws1'], get: () => undefined },
+          { id: 'ds-2', title: 'Two', get: () => undefined },
+        ],
+      });
+      const fetchDataSources = await getDataSources(savedObjects.client);
+      expect(fetchDataSources[0].workspaces).toEqual(['ws1']);
+      expect(fetchDataSources[1]).not.toHaveProperty('workspaces');
+    });
     test('Success but no data sources found: getting data sources', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', {});
       const fetchDataSources = await getDataSources(savedObjects.client);
@@ -80,6 +92,23 @@ describe('DataSourceManagement: Utils.ts', () => {
       } catch (e) {
         expect(e).toBeTruthy();
       }
+    });
+  });
+
+  describe('mergeDataSourcesWithConnections', () => {
+    test('passes data source workspaces through, and not to related connections', () => {
+      const merged = mergeDataSourcesWithConnections(
+        [
+          { id: 'ds-1', title: 'One', type: 'OpenSearch', workspaces: ['ws1'] },
+          { id: 'ds-2', title: 'Two', type: 'OpenSearch' },
+        ] as any,
+        [{ id: 'dq-1', title: 'Nested', type: 'Amazon S3', parentId: 'ds-1' }] as any,
+        []
+      );
+      const one = merged.find((item) => item.id === 'ds-1');
+      expect(one?.workspaces).toEqual(['ws1']);
+      expect(one?.relatedConnections?.[0]).not.toHaveProperty('workspaces');
+      expect(merged.find((item) => item.id === 'ds-2')).not.toHaveProperty('workspaces');
     });
   });
 

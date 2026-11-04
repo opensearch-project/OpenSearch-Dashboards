@@ -114,7 +114,9 @@ const buildVisualizationBuilder = (
   visualizationBuilderForEditor: {
     visConfig$: new BehaviorSubject(visConfig),
     isVisDirty$: new BehaviorSubject(false),
-    getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
+    getTransformationService: jest.fn().mockReturnValue({
+      serializePipeline: jest.fn().mockReturnValue([]),
+    }),
   },
 });
 

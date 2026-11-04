@@ -236,7 +236,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                   <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
-                        <h1>{screenTitle}</h1>
+                        <h1 title={screenTitle}>{screenTitle}</h1>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
@@ -257,7 +257,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                     <EuiTitle size="xs">
-                      <h1>{screenTitle}</h1>
+                      <h1 title={screenTitle}>{screenTitle}</h1>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem className="osdTopNavMenu">
@@ -293,7 +293,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                   <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
-                        <h1>{screenTitle}</h1>
+                        <h1 title={screenTitle}>{screenTitle}</h1>
                       </EuiTitle>
                     </EuiFlexItem>
                     {groupedActionsBeforeDatePicker ? (

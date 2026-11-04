@@ -72,7 +72,7 @@ export const AskUserCard: React.FC<AskUserCardProps> = ({ request, onAnswer, onD
       );
     }
 
-    // Text field + Send, reused for `text` and appended to `select` when allowFreeText.
+    // Text field + Send, used for `text` and appended to every `select`.
     const textField = (
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         <EuiFlexItem>
@@ -120,18 +120,14 @@ export const AskUserCard: React.FC<AskUserCardProps> = ({ request, onAnswer, onD
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-          {request.allowFreeText && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('chat.askUser.orTypeOwn', {
-                  defaultMessage: 'Or type your own answer:',
-                })}
-              </EuiText>
-              <EuiSpacer size="xs" />
-              {textField}
-            </>
-          )}
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('chat.askUser.orTypeOwn', {
+              defaultMessage: 'Or type your own answer:',
+            })}
+          </EuiText>
+          <EuiSpacer size="xs" />
+          {textField}
         </>
       );
     }
