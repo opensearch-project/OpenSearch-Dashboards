@@ -117,7 +117,13 @@ export const createAreaSeries =
     addTimeMarker?: boolean;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], axisColumnMappings, xAxisConfig, seriesDisplayNames } = state;
+    const {
+      transformedData = [],
+      axisColumnMappings,
+      xAxisConfig,
+      dataRange,
+      seriesDisplayNames,
+    } = state;
     const palette = getColors().categories;
     const newState = { ...state };
     const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
@@ -142,7 +148,7 @@ export const createAreaSeries =
     });
 
     const legendItems: LegendItem[] = [];
-    const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker);
+    const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker, dataRange);
     const stackConfig = buildStackConfig(styles);
     const borderLineStyle = buildBorderLineStyle(styles);
     const interpolation = buildBorderInterpolation(styles);

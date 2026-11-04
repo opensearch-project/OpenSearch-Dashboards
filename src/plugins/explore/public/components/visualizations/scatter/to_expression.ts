@@ -12,6 +12,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  buildDataRange,
 } from '../utils/echarts_spec';
 import {
   createScatterSeries,
@@ -37,6 +38,7 @@ export const createTwoMetricScatter = (
     transform(convertTo2DArray(allColumns)),
     createBaseConfig({}),
     buildAxisConfigs,
+    buildDataRange({ seriesFields: (headers) => (headers ?? []).filter((h) => h === yCol.column) }),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h === yCol.column),
     }),
@@ -82,6 +84,9 @@ export const createTwoMetricOneCateScatter = (
     ),
     createBaseConfig({}),
     buildAxisConfigs,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== xCol.column),
+    }),
     createCategoryScatterSeries({
       styles,
       xField: xCol.column,
@@ -123,6 +128,7 @@ export const createThreeMetricOneCateScatter = (
     transform(convertTo2DArray(allColumns)),
     createBaseConfig({}),
     buildAxisConfigs,
+    buildDataRange({ seriesFields: [yCol.column] }),
     createSizeScatterSeries({
       styles,
       xField: xCol.column,
