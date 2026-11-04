@@ -7,6 +7,8 @@ import { fireEvent, render, screen, act } from '@testing-library/react';
 
 import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock, httpServiceMock } from '../../../mocks';
+import { HttpFetchOptionsWithPath } from '../../../http';
+import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { SavedObjectWithMetadata } from './recent_items';
 import { RecentItems } from './recent_items';
 import { createRecentNavLink } from './nav_link';
@@ -19,7 +21,7 @@ jest.mock('./nav_link', () => ({
   }),
 }));
 
-const mockRecentlyAccessed$ = new BehaviorSubject([
+const mockRecentlyAccessed$ = new BehaviorSubject<ChromeRecentlyAccessedHistoryItem[]>([
   {
     id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
     label: 'visualizeMock',
@@ -83,20 +85,26 @@ const defaultMockProps = {
   loadingCount$: new BehaviorSubject(0),
 };
 
-jest
-  .spyOn(defaultMockProps.http, 'get')
-  .mockImplementation((url): Promise<SavedObjectWithMetadata> => {
-    if (typeof url === 'string') {
-      if ((url as string).includes('6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b')) {
-        return Promise.resolve(savedObjectsFromServer[0]);
-      } else {
-        return Promise.resolve(savedObjectsFromServer[1]);
-      }
-    }
-    return Promise.reject(new Error('Invalid URL'));
+describe('Recent items', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(defaultMockProps.http.get).mockReset();
+    jest
+      .mocked(defaultMockProps.http.get)
+      .mockImplementation(
+        (url: string | HttpFetchOptionsWithPath): Promise<SavedObjectWithMetadata> => {
+          if (typeof url === 'string') {
+            if (url.includes('6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b')) {
+              return Promise.resolve(savedObjectsFromServer[0]);
+            } else {
+              return Promise.resolve(savedObjectsFromServer[1]);
+            }
+          }
+          return Promise.reject(new Error('Invalid URL'));
+        }
+      );
   });
 
-describe('Recent items', () => {
   it('should render base element normally', () => {
     const { baseElement } = render(<RecentItems {...defaultMockProps} />);
     expect(baseElement).toMatchSnapshot();
@@ -122,7 +130,7 @@ describe('Recent items', () => {
 
     const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(mockRecentButton);
-    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+    expect(await screen.findByText('visualizeMock')).toBeInTheDocument();
     expect(screen.queryByText('Fake Dashboards')).not.toBeInTheDocument();
   });
 
@@ -139,7 +147,7 @@ describe('Recent items', () => {
 
     const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(mockRecentButton);
-    expect(screen.getByText('(WorkspaceMock_1)')).toBeInTheDocument();
+    expect(await screen.findByText('(WorkspaceMock_1)')).toBeInTheDocument();
   });
 
   it('should call navigateToUrl with link generated from createRecentNavLink when clicking a recent item', async () => {
@@ -157,7 +165,7 @@ describe('Recent items', () => {
 
     const button = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(button);
-    const item = screen.getByText('visualizeMock');
+    const item = await screen.findByText('visualizeMock');
     expect(navigateToUrl).not.toHaveBeenCalled();
     fireEvent.click(item);
     expect(navigateToUrl).toHaveBeenCalledWith('/recent_nav_link');
@@ -190,7 +198,9 @@ describe('Recent items', () => {
 
   it('should show not display item if it is in a workspace which is not available', () => {
     render(<RecentItems {...defaultMockProps} recentlyAccessed$={mockRecentlyAccessed$} />);
+    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
     expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(defaultMockProps.http.get).not.toHaveBeenCalled();
   });
 
   it('workspace feature flag should be passed to createRecentNavLink correctly', async () => {
@@ -204,7 +214,7 @@ describe('Recent items', () => {
       />
     );
     fireEvent.click(getByTestId('recentItemsSectionButton'));
-    await findByText('Recent assets');
+    await findByText('visualizeMock');
     fireEvent.click(getByText('visualizeMock'));
     expect(createRecentNavLink).toHaveBeenCalledWith(
       expect.anything(),
@@ -213,5 +223,204 @@ describe('Recent items', () => {
       expect.anything(),
       true
     );
+  });
+
+  it('does not load details while closed, including history and workspace updates', () => {
+    const recentlyAccessed$ = new BehaviorSubject(mockRecentlyAccessed$.getValue());
+    const workspaceList$ = new BehaviorSubject(mockWorkspaceList$.getValue());
+    render(<RecentItems {...defaultMockProps} {...{ recentlyAccessed$, workspaceList$ }} />);
+
+    act(() => {
+      workspaceList$.next([{ id: 'workspace_1', name: 'Renamed workspace' }]);
+      recentlyAccessed$.next(
+        recentlyAccessed$.getValue().map((item) => ({
+          ...item,
+          meta: { ...item.meta, lastAccessedTime: Date.now() },
+        }))
+      );
+    });
+
+    expect(defaultMockProps.http.get).not.toHaveBeenCalled();
+  });
+
+  it('loads fresh details on each opening and hides items that have since been deleted', async () => {
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={mockRecentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+    await screen.findByText('visualizeMock');
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    expect(defaultMockProps.http.get).toHaveBeenCalledWith(
+      expect.stringContaining('/management/saved_objects/visualization/'),
+      { prependOptions: { withoutClientBasePath: true } }
+    );
+
+    fireEvent.click(button);
+    jest.mocked(defaultMockProps.http.get).mockResolvedValue(savedObjectsFromServer[1]);
+    fireEvent.click(button);
+
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(await screen.findByText('No recently viewed items')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(4);
+  });
+
+  it('updates history order, labels, and workspace names without reloading the same objects', async () => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const second = {
+      ...first,
+      id: 'another-visualization',
+      label: 'Second visualization',
+      link: '/app/visualize/another-visualization',
+    };
+    const recentlyAccessed$ = new BehaviorSubject([first, second]);
+    const workspaceList$ = new BehaviorSubject(mockWorkspaceList$.getValue());
+    jest
+      .mocked(defaultMockProps.http.get)
+      .mockImplementation(async (url: string | HttpFetchOptionsWithPath) => ({
+        ...savedObjectsFromServer[0],
+        id: typeof url === 'string' && url.endsWith(second.id) ? second.id : first.id,
+      }));
+    render(<RecentItems {...defaultMockProps} {...{ recentlyAccessed$, workspaceList$ }} />);
+    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+    await screen.findByText('visualizeMock');
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'visualizeMock (WorkspaceMock_1)',
+      'Second visualization (WorkspaceMock_1)',
+    ]);
+
+    act(() => {
+      recentlyAccessed$.next([
+        {
+          ...second,
+          label: 'Updated visualization',
+          meta: { ...second.meta, lastAccessedTime: 10 },
+        },
+        first,
+      ]);
+      workspaceList$.next([{ id: 'workspace_1', name: 'Renamed workspace' }]);
+    });
+
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Second visualization')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'Updated visualization (Renamed workspace)',
+      'visualizeMock (Renamed workspace)',
+    ]);
+  });
+
+  it.each([
+    { id: 'new-visualization', type: 'visualization' },
+    { id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b', type: 'dashboard' },
+  ])('loads changed object identities while open: %j', async ({ id, type }) => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const recentlyAccessed$ = new BehaviorSubject([first]);
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={recentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+    await screen.findByText('visualizeMock');
+
+    const second = { ...first, id, meta: { type }, label: 'New asset' };
+    jest.mocked(defaultMockProps.http.get).mockResolvedValueOnce({
+      ...savedObjectsFromServer[0],
+      id: second.id,
+      type,
+    });
+    act(() => {
+      recentlyAccessed$.next([second]);
+    });
+
+    expect(await screen.findByText('New asset')).toBeInTheDocument();
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('removes entries immediately when their workspace is no longer available', async () => {
+    const workspaceList$ = new BehaviorSubject(mockWorkspaceList$.getValue());
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={mockRecentlyAccessed$}
+        workspaceList$={workspaceList$}
+      />
+    );
+    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+    await screen.findByText('visualizeMock');
+
+    act(() => {
+      workspaceList$.next([]);
+    });
+
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(screen.getByText('No recently viewed items')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores a previous opening that completes after a newer opening', async () => {
+    let resolveFirst!: (value: SavedObjectWithMetadata) => void;
+    let resolveSecond!: (value: SavedObjectWithMetadata) => void;
+    const firstRequest = new Promise<SavedObjectWithMetadata>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const secondRequest = new Promise<SavedObjectWithMetadata>((resolve) => {
+      resolveSecond = resolve;
+    });
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(firstRequest);
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(secondRequest);
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+    expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+    expect(screen.queryByText('No recently viewed items')).not.toBeInTheDocument();
+    fireEvent.click(button);
+    fireEvent.click(button);
+
+    await act(async () => {
+      resolveSecond({ ...savedObjectsFromServer[0], error: savedObjectsFromServer[1].error });
+    });
+    expect(screen.getByText('No recently viewed items')).toBeInTheDocument();
+
+    await act(async () => {
+      resolveFirst(savedObjectsFromServer[0]);
+    });
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(screen.getByText('No recently viewed items')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('omits failed requests and keeps accessible items', async () => {
+    jest
+      .mocked(defaultMockProps.http.get)
+      .mockImplementation(async (url: string | HttpFetchOptionsWithPath) => {
+        if (typeof url === 'string' && url.includes('/dashboards/')) {
+          throw new Error('Forbidden');
+        }
+        return savedObjectsFromServer[0];
+      });
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={mockRecentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+    expect(await screen.findByText('visualizeMock')).toBeInTheDocument();
+    expect(screen.queryByText('Fake Dashboards')).not.toBeInTheDocument();
   });
 });

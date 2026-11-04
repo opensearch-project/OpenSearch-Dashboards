@@ -9,6 +9,7 @@ import {
   EuiPanel,
   EuiListGroup,
   EuiListGroupItem,
+  EuiLoadingSpinner,
   EuiTitle,
   EuiPopoverTitle,
   EuiIcon,
@@ -125,8 +126,8 @@ export const RecentItems = ({
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
   const [recentsRadioIdSelected, setRecentsRadioIdSelected] = useState(recentsRadios[0].id);
   const workspaceList = useObservable(workspaceList$, []);
-  const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
-    []
+  const [savedObjectDetails, setSavedObjectDetails] = useState<SavedObjectWithMetadata[] | null>(
+    null
   );
   const navLinks = useObservable(navLinks$, []);
   const loadingCount = useObservable(loadingCount$, 0);
@@ -225,45 +226,75 @@ export const RecentItems = ({
     </EuiToolTip>
   );
 
-  useEffect(() => {
-    const savedObjects = recentlyAccessedItems
-      .filter(
+  const recentSavedObjects = useMemo(
+    () =>
+      recentlyAccessedItems.filter(
         (item) =>
           item.meta?.type &&
           (!item.workspaceId ||
             // If the workspace id is existing but the workspace is deleted, filter the item
-            (item.workspaceId &&
-              !!workspaceList.find((workspace) => workspace.id === item.workspaceId)))
-      )
+            workspaceList.some((workspace) => workspace.id === item.workspaceId))
+      ),
+    [recentlyAccessedItems, workspaceList]
+  );
+  // Only changes to the requested objects require loading details again.
+  // History order, access times, and workspace names are presentation data.
+  const savedObjectIds = JSON.stringify(
+    recentSavedObjects
       .map((item) => ({
         type: item.meta?.type || '',
         id: item.id,
-      }));
+      }))
+      .sort((a, b) => a.type.localeCompare(b.type) || a.id.localeCompare(b.id))
+  );
+
+  useEffect(() => {
+    // Details belong to this opening of the popover, never to a later opening.
+    setSavedObjectDetails(null);
+    if (!isPopoverOpen) {
+      return;
+    }
+
+    let cancelled = false;
+    const savedObjects: Array<Pick<SavedObject, 'type' | 'id'>> = JSON.parse(savedObjectIds);
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
-        const formatDetailedSavedObjects = res
-          .filter((obj) => !obj.error) // filter out saved objects has errors
-          .map((obj) => {
-            const recentAccessItem = recentlyAccessedItems.find(
-              (item) => item.id === obj.id
-            ) as ChromeRecentlyAccessedHistoryItem;
-
-            const findWorkspace = workspaceList.find(
-              (workspace) => workspace.id === recentAccessItem.workspaceId
-            );
-
-            return {
-              ...recentAccessItem,
-              ...obj,
-              ...recentAccessItem.meta,
-              updatedAt: moment(obj?.updated_at).valueOf(),
-              workspaceName: findWorkspace?.name,
-            };
-          });
-        setDetailedSavedObjects(formatDetailedSavedObjects);
+        if (!cancelled) {
+          setSavedObjectDetails(res.filter((obj) => !obj.error));
+        }
       });
+    } else {
+      setSavedObjectDetails([]);
     }
-  }, [recentlyAccessedItems, http, workspaceList]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPopoverOpen, http, savedObjectIds]);
+
+  const detailedSavedObjects = useMemo<DetailedRecentlyAccessedItem[]>(
+    () =>
+      recentSavedObjects.flatMap((item) => {
+        const obj = savedObjectDetails?.find(
+          (detail) => detail.id === item.id && detail.type === item.meta?.type
+        );
+        if (!obj) {
+          return [];
+        }
+
+        return [
+          {
+            ...item,
+            ...obj,
+            ...item.meta,
+            updatedAt: moment(obj.updated_at).valueOf(),
+            workspaceName: workspaceList.find((workspace) => workspace.id === item.workspaceId)
+              ?.name,
+          },
+        ];
+      }),
+    [recentSavedObjects, savedObjectDetails, workspaceList]
+  );
 
   const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
@@ -298,7 +329,14 @@ export const RecentItems = ({
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {selectedRecentItems.length > 0 ? (
+        {savedObjectDetails === null && recentSavedObjects.length > 0 ? (
+          <EuiLoadingSpinner
+            size="m"
+            aria-label={i18n.translate('core.header.recent.loading', {
+              defaultMessage: 'Loading recent items',
+            })}
+          />
+        ) : selectedRecentItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
             {selectedRecentItems.map((item) => (
               <EuiListGroupItem
