@@ -70,7 +70,7 @@ const DataTableUI = ({
    *
    * PAGINATED_PAGE_SIZE
    * Paginated, the view is broken into pages of 50 rows.
-   *   * `displayedRows` and `currentRowCounts` are only used in this method.
+   *   * The displayed rows are derived from `rows` and the active page.
    */
   const { count: renderedRowCount, sentinelRef } = useIncrementalRender({
     total: rows.length,
@@ -78,27 +78,17 @@ const DataTableUI = ({
     lookahead: DESIRED_ROWS_LOOKAHEAD,
     enabled: !showPagination,
   });
-  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, PAGINATED_PAGE_SIZE));
-  const [currentRowCounts, setCurrentRowCounts] = useState({
-    startRow: 0,
-    endRow: rows.length < PAGINATED_PAGE_SIZE ? rows.length : PAGINATED_PAGE_SIZE,
-  });
 
-  // Page management when using a paginated table
-  const [activePage, setActivePage] = useState(0);
+  // Page management when using a paginated table. The page is remembered together with the rows
+  // it was chosen for, so new results start again from the first page.
+  const [pageSelection, setPageSelection] = useState({ rows, page: 0 });
+  const activePage = pageSelection.rows === rows ? pageSelection.page : 0;
   const pageCount = Math.ceil(rows.length / PAGINATED_PAGE_SIZE);
+  const startRow = activePage * PAGINATED_PAGE_SIZE;
+  const endRow = Math.min(rows.length, startRow + PAGINATED_PAGE_SIZE);
+  const displayedRows = rows.slice(startRow, endRow);
   const goToPage = (pageNumber: number) => {
-    const startRow = pageNumber * PAGINATED_PAGE_SIZE;
-    const endRow =
-      rows.length < pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE
-        ? rows.length
-        : pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE;
-    setCurrentRowCounts({
-      startRow,
-      endRow,
-    });
-    setDisplayedRows(rows.slice(startRow, endRow));
-    setActivePage(pageNumber);
+    setPageSelection({ rows, page: pageNumber });
   };
 
   return (
@@ -108,8 +98,8 @@ const DataTableUI = ({
           pageCount={pageCount}
           activePage={activePage}
           goToPage={goToPage}
-          startItem={currentRowCounts.startRow + 1}
-          endItem={currentRowCounts.endRow}
+          startItem={startRow + 1}
+          endItem={endRow}
           totalItems={hits}
           sampleSize={sampleSize}
         />
@@ -178,8 +168,8 @@ const DataTableUI = ({
           pageCount={pageCount}
           activePage={activePage}
           goToPage={goToPage}
-          startItem={currentRowCounts.startRow + 1}
-          endItem={currentRowCounts.endRow}
+          startItem={startRow + 1}
+          endItem={endRow}
           totalItems={hits}
           sampleSize={sampleSize}
         />

@@ -6,9 +6,12 @@
 import React from 'react';
 import { EuiContextMenu, EuiDataGridCellValueElementProps, EuiPopover } from '@elastic/eui';
 import { useEffect } from 'react';
-import { getTextColor } from './table_vis_utils';
+import { i18n } from '@osd/i18n';
+import { cellValueText, getTextColor } from './table_vis_utils';
 import { ColorMode } from '../types';
 import { DataLink } from './data_link_options';
+import { isNavigableDataLinkUrl, resolveDataLink } from './data_link_utils';
+import type { VariableValue } from '../../../../../dashboard/public';
 
 import './cell_value.scss';
 
@@ -21,6 +24,8 @@ type Props = Pick<EuiDataGridCellValueElementProps, 'setCellProps'> & {
   isPopoverOpen?: boolean;
   setPopoverOpen?: (open: boolean) => void;
   columnId?: string;
+  row?: Record<string, unknown>;
+  variables?: VariableValue[];
 };
 
 export const CellValue = (props: Props) => {
@@ -34,10 +39,11 @@ export const CellValue = (props: Props) => {
     isPopoverOpen,
     setPopoverOpen,
     columnId,
+    row,
+    variables,
   } = props;
 
-  const valueDisplay =
-    value !== null && typeof value === 'object' ? JSON.stringify(value) : `${value ?? ''}`;
+  const valueDisplay = cellValueText(value);
 
   useEffect(() => {
     const cellStyle: React.CSSProperties = { textAlign };
@@ -58,23 +64,38 @@ export const CellValue = (props: Props) => {
     });
   }, [setCellProps, value, textAlign, color, colorMode]);
 
-  const resolveUrl = (url: string) => {
-    return url.replace('${__value.text}', encodeURIComponent(value ?? ''));
-  };
+  const resolvedLinks = (dataLinks ?? [])
+    .filter((link) => columnId && link.fields.includes(columnId))
+    .map((link) => ({ link, ...resolveDataLink(link.url, value, row, variables) }));
 
-  const applicableLinks =
-    dataLinks?.filter((link) => columnId && link.fields.includes(columnId)) || [];
-
-  if (!applicableLinks || applicableLinks.length === 0) {
+  if (resolvedLinks.length === 0) {
     return <span>{valueDisplay}</span>;
   }
 
+  // A URL with an unresolved placeholder would not open anything useful, and
+  // one with a script scheme, or a relative link a value moved to another host,
+  // must not open at all.
+  const applicableLinks = resolvedLinks.filter(
+    ({ link, url, unresolved }) => unresolved.length === 0 && isNavigableDataLinkUrl(url, link.url)
+  );
+
+  if (applicableLinks.length === 0) {
+    const placeholders = Array.from(new Set(resolvedLinks.flatMap((l) => l.unresolved)));
+    const title =
+      placeholders.length > 0
+        ? i18n.translate('explore.stylePanel.table.dataLinks.unresolvedTitle', {
+            defaultMessage: 'No link: {placeholders} could not be resolved for this row',
+            values: { placeholders: placeholders.join(', ') },
+          })
+        : undefined;
+    return <span title={title}>{valueDisplay}</span>;
+  }
+
   if (applicableLinks.length === 1) {
-    const link = applicableLinks[0];
-    const resolvedUrl = resolveUrl(link.url);
+    const { link, url } = applicableLinks[0];
     return (
       <a
-        href={resolvedUrl}
+        href={url}
         target={link.openInNewTab ? '_blank' : '_self'}
         rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
       >
@@ -83,9 +104,9 @@ export const CellValue = (props: Props) => {
     );
   }
 
-  const contextMenuItems = applicableLinks.map((link) => ({
+  const contextMenuItems = applicableLinks.map(({ link, url }) => ({
     name: link.title,
-    href: resolveUrl(link.url),
+    href: url,
     target: link.openInNewTab ? '_blank' : '_self',
     rel: link.openInNewTab ? 'noopener noreferrer' : undefined,
     icon: 'link',
