@@ -7,11 +7,14 @@ import './ppl_builder.scss';
 
 import React, { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import { isValidTimeField } from '../../../../../../data/common';
 import type { DataView } from '../../../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
-import { builderReducer, buildPPL, sortableColumns } from './build_ppl';
+import type { SourceTypeVisualBuilder } from '../../../../services/source_type_registry';
+import { createBuilderReducer, sortableColumns } from './build_ppl';
+import { VisualBuilderContext, pplVisualBuilder } from './visual_builder_language';
 import { PPLBuilderState, emptyState } from './types';
 import { SearchBox } from './search_box';
 import { AggregationRow } from './aggregation_row';
@@ -26,7 +29,11 @@ import { isImeComposing } from '../../../../../../../core/public/utils';
 
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
+  /** The language the builder writes and reads. Defaults to PPL. */
+  language?: SourceTypeVisualBuilder;
   datasetOverride?: DataView;
+  /** Changes each time a query finishes, so the language's `getFields` is asked again. */
+  fieldsRefreshKey?: string | null;
   onQueryChange: (query: string, state: PPLBuilderState) => void;
   onRun?: () => void;
 }
@@ -35,15 +42,18 @@ const CHART_BAR_TARGET = 15;
 
 export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   initialState,
+  language = pplVisualBuilder,
   datasetOverride,
+  fieldsRefreshKey,
   onQueryChange,
   onRun,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset: contextDataset } = useDatasetContext();
   const dataset = datasetOverride ?? contextDataset;
+  const reducer = useMemo(() => createBuilderReducer(language.aggregationColumn), [language]);
   const [state, dispatch] = useReducer(
-    builderReducer,
+    reducer,
     initialState ?? null,
     (seed) => seed ?? emptyState()
   );
@@ -55,10 +65,15 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     timeFieldName,
     getFieldType,
     getValues,
-  } = useFieldData(dataset);
+  } = useFieldData(dataset, { getFields: language.getFields, refreshKey: fieldsRefreshKey });
 
   const deriveAutoInterval = useCallback((): string => {
     if (!dataset?.timeFieldName) return '1m';
+    // The interval comes from a date histogram config, which rejects (with an error toast) a time
+    // field it can't aggregate on, e.g. one a source lists without `aggregatable`.
+    const timeField = dataset.fields?.getByName?.(dataset.timeFieldName);
+    // The data view's field, not its spec: it reads a missing `aggregatable` as false, as aggs do.
+    if (!timeField || !isValidTimeField(timeField)) return '1m';
     try {
       const configs = createHistogramConfigs(
         dataset,
@@ -77,7 +92,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const autoInterval = useMemo(() => deriveAutoInterval(), [deriveAutoInterval]);
 
-  const query = useMemo(() => buildPPL(state, getFieldType), [state, getFieldType]);
+  const query = useMemo(() => language.build(state, getFieldType), [language, state, getFieldType]);
 
   const onQueryChangeRef = useRef(onQueryChange);
   onQueryChangeRef.current = onQueryChange;
@@ -118,9 +133,9 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   }, [hasAggregation]);
 
   const sortColumns = useMemo(
-    () => (hasAggregation ? sortableColumns(state) : fieldNames),
+    () => (hasAggregation ? sortableColumns(state, language.aggregationColumn) : fieldNames),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hasAggregation, state.aggregations, state.groupBy.fields, fieldNames]
+    [hasAggregation, state.aggregations, state.groupBy.fields, fieldNames, language]
   );
 
   const addSpan = () => {
@@ -140,7 +155,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     [onRun]
   );
 
-  return (
+  const builder = (
     <div className="plqBuilder" data-test-subj="pplBuilder" onKeyDown={onKeyDown}>
       <div className="plqRow">
         <span className="plqRow__label">
@@ -153,6 +168,8 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
             onRequestValues={getValues}
             onChange={onSearchChange}
             onRun={onRun}
+            // The search box's autocomplete parses PPL's search syntax.
+            autocomplete={language === pplVisualBuilder}
           />
         </div>
       </div>
@@ -221,4 +238,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
       </div>
     </div>
   );
+
+  // The rows' menus read the language's options from this context.
+  return <VisualBuilderContext.Provider value={language}>{builder}</VisualBuilderContext.Provider>;
 };

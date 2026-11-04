@@ -6,13 +6,17 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { WhereRow } from './where_row';
 import { WhereFilter } from './types';
+import { VisualBuilderContext, pplVisualBuilder } from './visual_builder_language';
 
 const fieldNames = ['response', 'service', 'bytes'];
 
 const fieldTypes: Record<string, string> = { response: 'number', bytes: 'number' };
 const getFieldType = (field: string): string | undefined => fieldTypes[field] ?? 'string';
 
-const renderRow = (filters: WhereFilter[] = [], typeOverride?: (field: string) => string) => {
+const renderRow = (
+  filters: WhereFilter[] = [],
+  typeOverride?: (field: string) => string | undefined
+) => {
   const dispatch = jest.fn();
   const getValues = jest.fn().mockResolvedValue(['200', '404', '500']);
   const utils = render(
@@ -121,6 +125,13 @@ describe('WhereRow', () => {
     expect(
       screen.queryByTestId('pplBuilderFilterOperatorOption-is_between-0')
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_one_of-0')).toBeInTheDocument();
+  });
+
+  it('offers every operator, the between ones too, for a field of unknown type', () => {
+    renderRow([{ id: 'f1', field: 'duration', operator: 'is', values: ['900'] }], () => undefined);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterOperator-0'));
+    expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_between-0')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_one_of-0')).toBeInTheDocument();
   });
 
@@ -312,5 +323,62 @@ describe('WhereRow', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  describe("for a source that can't suggest values", () => {
+    const renderTyped = (filters: WhereFilter[]) => {
+      const dispatch = jest.fn();
+      const getValues = jest.fn().mockResolvedValue(['200']);
+      const utils = render(
+        <VisualBuilderContext.Provider value={{ ...pplVisualBuilder, valueSuggestions: false }}>
+          <WhereRow
+            filters={filters}
+            fieldNames={fieldNames}
+            getFieldType={stringType}
+            getValues={getValues}
+            dispatch={dispatch}
+          />
+        </VisualBuilderContext.Provider>
+      );
+      return { ...utils, dispatch, getValues };
+    };
+
+    it('takes a single value in a text box, without a suggestion dropdown', () => {
+      const { dispatch, getValues } = renderTyped([
+        { id: 'f1', field: 'service', operator: 'is', values: [] },
+      ]);
+      const input = screen.getByTestId('pplBuilderFilterValue-0');
+      expect(input.tagName).toBe('INPUT');
+      fireEvent.change(input, { target: { value: 'auth' } });
+      expect(dispatch).toHaveBeenLastCalledWith({
+        type: 'SET_FILTER',
+        index: 0,
+        filter: { values: ['auth'] },
+      });
+      expect(getValues).not.toHaveBeenCalled();
+    });
+
+    it('takes several values as comma-separated text and keeps the text as typed', () => {
+      const { dispatch } = renderTyped([
+        { id: 'f1', field: 'service', operator: 'is_one_of', values: [] },
+      ]);
+      const input = screen.getByTestId('pplBuilderFilterValues-0') as HTMLInputElement;
+      expect(input.tagName).toBe('INPUT');
+      fireEvent.change(input, { target: { value: 'auth, web,' } });
+      expect(dispatch).toHaveBeenLastCalledWith({
+        type: 'SET_FILTER',
+        index: 0,
+        filter: { values: ['auth', 'web'] },
+      });
+      // The trailing comma stays while typing, though no value follows it yet.
+      expect(input.value).toBe('auth, web,');
+    });
+
+    it('shows the values a filter already has', () => {
+      renderTyped([{ id: 'f1', field: 'service', operator: 'is_one_of', values: ['a', 'b'] }]);
+      expect((screen.getByTestId('pplBuilderFilterValues-0') as HTMLInputElement).value).toBe(
+        'a, b'
+      );
+    });
   });
 });

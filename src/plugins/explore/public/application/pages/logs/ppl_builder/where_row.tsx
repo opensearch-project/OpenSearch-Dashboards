@@ -7,10 +7,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { BuilderAction, compileWhereFilter } from './build_ppl';
+import { BuilderAction } from './build_ppl';
 import { WhereFilter, WhereOperator } from './types';
 import { OPERATOR_DEF_MAP, operatorArity, operatorsForFieldType } from './where_operators';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
+import { filterOperatorsFor, useVisualBuilder } from './visual_builder_language';
 import {
   ControlGroup,
   GhostAddButton,
@@ -102,8 +103,13 @@ const OperatorPopover: React.FC<{
   fieldType?: string;
   onChange: (operator: WhereOperator) => void;
 }> = ({ filter, index, fieldType, onChange }) => {
+  const language = useVisualBuilder();
   const current = OPERATOR_DEF_MAP[filter.operator];
-  const options: SearchMenuOption[] = operatorsForFieldType(fieldType).map((def) => ({
+  // No field picked yet: the string operators, as before a field narrows them.
+  const options: SearchMenuOption[] = operatorsForFieldType(
+    filter.field ? fieldType : 'string',
+    filterOperatorsFor(language)
+  ).map((def) => ({
     key: def.value,
     label: def.label,
     filterText: `${def.label} ${def.shortLabel}`,
@@ -280,6 +286,47 @@ const ChipTextInput: React.FC<{
   />
 );
 
+// `a, b` as values, and back. A value can't contain a comma here.
+const parseValueList = (text: string): string[] =>
+  text
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value !== '');
+
+/**
+ * Several typed values, comma-separated, for a source that can't suggest values. Keeps the text as
+ * typed (a trailing comma or space would be lost going through the values), and takes the values
+ * again when they change from outside, e.g. a reset on a field change.
+ */
+const ChipListInput: React.FC<{
+  values: string[];
+  ariaLabel: string;
+  onChange: (values: string[]) => void;
+  dataTestSubj: string;
+}> = ({ values, ariaLabel, onChange, dataTestSubj }) => {
+  const [text, setText] = useState(() => values.join(', '));
+  const joined = values.join('\u0000');
+  useEffect(() => {
+    if (parseValueList(text).join('\u0000') !== joined) setText(values.join(', '));
+    // Only an outside change to the values should reset the text.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [joined]);
+  return (
+    <ChipTextInput
+      value={text}
+      placeholder={i18n.translate('explore.pplBuilder.filterValuesListPlaceholder', {
+        defaultMessage: 'value, value',
+      })}
+      ariaLabel={ariaLabel}
+      onChange={(next) => {
+        setText(next);
+        onChange(parseValueList(next));
+      }}
+      dataTestSubj={dataTestSubj}
+    />
+  );
+};
+
 const ChipValues: React.FC<{
   filter: WhereFilter;
   index: number;
@@ -288,6 +335,8 @@ const ChipValues: React.FC<{
   onChange: (values: string[]) => void;
 }> = ({ filter, index, fieldType, getValues, onChange }) => {
   const arity = operatorArity(filter.operator);
+  // A source that can't suggest values gets text boxes, not a dropdown that only says "Type a value".
+  const typedOnly = useVisualBuilder().valueSuggestions === false;
 
   if (arity === 'none') return null;
 
@@ -325,7 +374,18 @@ const ChipValues: React.FC<{
     );
   }
 
-  if (arity === 'one' && !fieldSuggestsValues(fieldType)) {
+  if (arity === 'many' && typedOnly) {
+    return (
+      <ChipListInput
+        values={filter.values}
+        ariaLabel={valueForLabel(filter.field)}
+        onChange={onChange}
+        dataTestSubj={`pplBuilderFilterValues-${index}`}
+      />
+    );
+  }
+
+  if (arity === 'one' && (typedOnly || !fieldSuggestsValues(fieldType))) {
     return (
       <ChipTextInput
         value={filter.values[0] ?? ''}
@@ -364,16 +424,13 @@ const WhereChip: React.FC<{
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
-  // Use this chip's field type so the tooltip quotes values as buildPPL does.
-  const predicate = compileWhereFilter(filter, () => fieldType);
-  const tooltip = predicate
-    ? i18n.translate('explore.pplBuilder.filterChipTooltip', {
-        defaultMessage: 'where {predicate}',
-        values: { predicate },
-      })
-    : i18n.translate('explore.pplBuilder.filterChipIncomplete', {
-        defaultMessage: 'Finish this condition',
-      });
+  const language = useVisualBuilder();
+  // Use this chip's field type so the tooltip quotes values as the query does.
+  const tooltip =
+    language.filterText(filter, () => fieldType) ??
+    i18n.translate('explore.pplBuilder.filterChipIncomplete', {
+      defaultMessage: 'Finish this condition',
+    });
 
   const setField = (field: string) => {
     if (field === filter.field) return;
