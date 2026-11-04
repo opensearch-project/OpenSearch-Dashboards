@@ -10,6 +10,7 @@ import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
+import { VisFieldType } from '../components/visualizations/types';
 import { Container, ContainerInput, EmbeddableInput } from '../../../embeddable/public';
 import { IVariableInterpolationService } from '../../../dashboard/public';
 
@@ -887,7 +888,7 @@ describe('ExploreEmbeddable', () => {
   test('formats row values using field formatter when available', async () => {
     const mockConverter = jest.fn().mockReturnValue('formatted');
     const mockGetFormatterForField = jest.fn().mockReturnValue({ convert: mockConverter });
-    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price', type: 'number' });
 
     mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
       if (field === 'index') {
@@ -903,7 +904,7 @@ describe('ExploreEmbeddable', () => {
       await import('../components/visualizations/utils/normalize_result_rows');
     jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
       transformedData: [{ price: 42 }],
-      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      numericalColumns: [{ id: 0, name: 'price', column: 'price', schema: VisFieldType.Numerical }],
       categoricalColumns: [],
       dateColumns: [],
       unknownColumns: [],
