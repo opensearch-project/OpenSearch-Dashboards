@@ -129,13 +129,10 @@ describe('DiscoverDownloadCsv', () => {
       );
     });
 
-    it('hides the max option when disableMaxOption is set', () => {
-      render(<TestHarness disableMaxOption />);
+    it('counts Visible from visibleRowsCount when given, not from rows', () => {
+      render(<TestHarness visibleRowsCount={3} />);
       fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
-      expect(
-        screen.getByLabelText(`Visible (${mockRows.length.toLocaleString()})`)
-      ).toBeInTheDocument();
-      expect(screen.queryByTestId('dscDownloadCsvOptionMax')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Visible (3)')).toBeInTheDocument();
     });
 
     it('Clicking on visible option calls downloadCsvForOption correctly', () => {

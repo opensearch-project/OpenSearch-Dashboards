@@ -44,11 +44,11 @@ export const pplSearchStrategyProvider = (
 
         const fetchSize = await resolvePPLFetchSize(
           context.core.uiSettings.client,
-          typeof query.query === 'string' ? query.query : ''
+          typeof query.query === 'string' ? query.query : '',
+          request.body.fetchSize
         );
-        if (fetchSize !== undefined) {
-          request.body = { ...request.body, fetchSize };
-        }
+        // Assigned even when undefined so a client-sent fetchSize cannot override a trailing head.
+        request.body = { ...request.body, fetchSize };
 
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 

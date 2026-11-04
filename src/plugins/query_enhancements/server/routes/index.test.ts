@@ -214,7 +214,7 @@ describe('definePPLBundleRoute', () => {
 });
 
 describe('defineSearchStrategyRouteProvider', () => {
-  const validateBody = (query: Record<string, unknown>) => {
+  const validateRequestBody = (body: Record<string, unknown>, queryOverrides = {}) => {
     const router = { post: jest.fn() };
     defineSearchStrategyRouteProvider(loggingSystemMock.create().get(), router as any)(
       'ppl',
@@ -222,10 +222,18 @@ describe('defineSearchStrategyRouteProvider', () => {
     );
     const { validate } = router.post.mock.calls[0][0];
     return validate.body.validate({
-      query: { query: 'source = logs', language: 'PPL', dataset: null, format: 'jdbc', ...query },
+      query: {
+        query: 'source = logs',
+        language: 'PPL',
+        dataset: null,
+        format: 'jdbc',
+        ...queryOverrides,
+      },
       aggConfig: null,
+      ...body,
     });
   };
+  const validateBody = (query: Record<string, unknown>) => validateRequestBody({}, query);
 
   it('accepts partial_result from older clients', () => {
     expect(() => validateBody({ partial_result: false })).not.toThrow();
@@ -233,6 +241,18 @@ describe('defineSearchStrategyRouteProvider', () => {
 
   it('rejects other unknown query keys', () => {
     expect(() => validateBody({ unknown_key: true })).toThrow(/unknown_key/);
+  });
+
+  it('accepts a top-level fetchSize', () => {
+    expect(() => validateRequestBody({ fetchSize: 1000 })).not.toThrow();
+  });
+
+  it.each([0, -5])('rejects a non-positive fetchSize (%s)', (fetchSize) => {
+    expect(() => validateRequestBody({ fetchSize })).toThrow();
+  });
+
+  it('rejects a non-integer fetchSize', () => {
+    expect(() => validateRequestBody({ fetchSize: 2.5 })).toThrow(/must be an integer/);
   });
 });
 

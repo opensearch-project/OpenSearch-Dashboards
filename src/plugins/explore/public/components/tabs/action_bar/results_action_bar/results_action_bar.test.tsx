@@ -28,12 +28,14 @@ jest.mock('../../../../helpers/use_displayed_columns', () => ({
   useHiddenColumnCount: () => mockUseHiddenColumnCount(),
 }));
 
-const mockDiscoverDownloadCsv = jest.fn();
+// jest.mock('../download_csv', () => ({
+//   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+// }));
+const mockDiscoverDownloadCsv = jest.fn((_props: any) => (
+  <div data-test-subj="discoverDownloadCsvButton" />
+));
 jest.mock('../download_csv', () => ({
-  DiscoverDownloadCsv: (downloadProps: unknown) => {
-    mockDiscoverDownloadCsv(downloadProps);
-    return <div data-test-subj="discoverDownloadCsvButton" />;
-  },
+  DiscoverDownloadCsv: (props: any) => mockDiscoverDownloadCsv(props),
 }));
 jest.mock('../../../visualizations/add_to_dashboard_button', () => ({
   SaveAndAddButtonWithModal: () => <div data-test-subj="saveAndAddButtonWithModal" />,
@@ -87,6 +89,103 @@ describe('ResultsActionBar', () => {
       </Provider>
     );
     expect(screen.getByTestId('dscResultCount')).toBeInTheDocument();
+  });
+
+  test('offers the Max export on the Logs tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} hits={459} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ hits: 459, shouldShowMaxExport: true })
+    );
+  });
+
+  test('does not offer the Max export on the Visualization tab', () => {
+    const visStore = mockStore({
+      ui: { ...initialState.ui, activeTabId: 'explore_visualization_tab' },
+    });
+    render(
+      <Provider store={visStore}>
+        <DiscoverResultsActionBar {...props} hits={459} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ shouldShowMaxExport: false })
+    );
+  });
+
+  test('exports the response schema columns without the Max export on the Statistics tab', () => {
+    const statisticsStore = mockStore({
+      ui: { ...initialState.ui, activeTabId: 'explore_statistics' },
+    });
+    render(
+      <Provider store={statisticsStore}>
+        <DiscoverResultsActionBar
+          {...props}
+          fieldSchema={[{ name: 'count()' }, { name: 'category' }, { name: '' }]}
+        />
+      </Provider>
+    );
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnNamesOverride: ['count()', 'category'],
+        shouldShowMaxExport: false,
+      })
+    );
+  });
+
+  test('keeps the Logs columns outside of the Statistics tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} fieldSchema={[{ name: 'count()' }]} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ columnNamesOverride: undefined })
+    );
+  });
+
+  describe('Visible row count', () => {
+    const mockBuilderWithVisData = (rowCount: number) =>
+      jest.spyOn(visualizationBuilder, 'getVisualizationBuilder').mockReturnValue({
+        visConfig$: new BehaviorSubject<ChartConfig | undefined>(undefined),
+        showRawTable$: new BehaviorSubject<boolean>(false),
+        data$: new BehaviorSubject({
+          transformedData: Array.from({ length: rowCount }, () => ({})),
+        }),
+      } as unknown as visualizationBuilder.VisualizationBuilder);
+
+    test('counts the visualization table rows on the Visualization tab', () => {
+      const spy = mockBuilderWithVisData(3);
+      const visStore = mockStore({
+        ui: { ...initialState.ui, activeTabId: 'explore_visualization_tab' },
+      });
+      render(
+        <Provider store={visStore}>
+          <DiscoverResultsActionBar {...props} />
+        </Provider>
+      );
+      expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ visibleRowsCount: 3 })
+      );
+      spy.mockRestore();
+    });
+
+    test('leaves the count to the rows on the Logs tab', () => {
+      const spy = mockBuilderWithVisData(3);
+      render(
+        <Provider store={store}>
+          <DiscoverResultsActionBar {...props} />
+        </Provider>
+      );
+      expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ visibleRowsCount: undefined })
+      );
+      spy.mockRestore();
+    });
   });
 
   test('should render the download CSV button when dataset and rows are available', () => {
@@ -153,37 +252,6 @@ describe('ResultsActionBar', () => {
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
-  });
-
-  test('should export the response schema columns without the max option on statistics tab', () => {
-    const statisticsStore = mockStore({ ui: { activeTabId: 'explore_statistics' } });
-    render(
-      <Provider store={statisticsStore}>
-        <DiscoverResultsActionBar
-          {...props}
-          fieldSchema={[{ name: 'count()' }, { name: 'category' }, { name: '' }]}
-        />
-      </Provider>
-    );
-    expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
-    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
-      expect.objectContaining({
-        columnNamesOverride: ['count()', 'category'],
-        disableMaxOption: true,
-      })
-    );
-  });
-
-  test('should keep the logs export behavior outside of the statistics tab', () => {
-    render(
-      <Provider store={store}>
-        <DiscoverResultsActionBar {...props} fieldSchema={[{ name: 'count()' }]} />
-      </Provider>
-    );
-    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
-      expect.objectContaining({ columnNamesOverride: undefined, disableMaxOption: false })
-    );
   });
 
   test('should render the table actions menu on logs tab', () => {
@@ -284,6 +352,7 @@ describe('ResultsActionBar', () => {
           axesMapping: undefined,
         }),
         showRawTable$: new BehaviorSubject<boolean>(false),
+        data$: new BehaviorSubject(undefined),
         setShowRawTable: mockSetShowRawTable,
       } as unknown as visualizationBuilder.VisualizationBuilder);
 

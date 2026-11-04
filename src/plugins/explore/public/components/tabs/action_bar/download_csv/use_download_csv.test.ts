@@ -15,13 +15,9 @@ import { AbortError, IndexPattern } from '../../../../../../data/common';
 import { setServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { discoverPluginMock } from '../../../../application/legacy/discover/mocks';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import {
-  formatRowsForCsv,
-  saveDataAsCsv,
-  useDiscoverDownloadCsv,
-  UseDiscoverDownloadCsvProps,
-} from './use_download_csv';
+import { useDiscoverDownloadCsv, UseDiscoverDownloadCsvProps } from './use_download_csv';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
+import { saveDataAsCsv, formatRowsForCsv } from './csv_utils';
 
 jest.mock('file-saver', () => ({
   saveAs: jest.fn(),
@@ -34,6 +30,12 @@ jest.mock('papaparse', () => ({
 jest.mock('../../../../application/legacy/discover/application/utils/state_management', () => ({
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
+}));
+
+// The Visualization tab exports the visualization's own table from data$
+let mockVisData: any;
+jest.mock('../../../visualizations/visualization_builder', () => ({
+  getVisualizationBuilder: () => ({ data$: { getValue: () => mockVisData } }),
 }));
 
 // Mock the useDisplayedColumnNames hook to avoid Redux context requirement
@@ -145,48 +147,6 @@ describe('useDiscoverDownloadCsv', () => {
         indexPattern: mockIndexPattern,
       })(mockRow1);
       expect(result).toEqual([mockRow1._source.bytes_transferred, '']);
-    });
-  });
-
-  describe('forematRowsForCsv with useRawValues', () => {
-    const aggregatedRow = {
-      _source: {
-        'count()': 42,
-        bytes: 1444079,
-        zero: 0,
-        empty: null,
-        'values(a)': ['x', 'y'],
-      },
-    } as unknown as OpenSearchSearchHit;
-    const format = (colName: string) =>
-      formatRowsForCsv({
-        displayedColumnNames: [colName],
-        indexPattern: {
-          fields: { getByName: () => undefined },
-          formatField: () => '1,444,079',
-        } as unknown as IndexPattern,
-        useRawValues: true,
-      })(aggregatedRow)[0];
-
-    it('reads columns that are not in the mapping from the row', () => {
-      expect(format('count()')).toBe('42');
-    });
-
-    it('does not apply the field formatter of a column sharing a field name', () => {
-      expect(format('bytes')).toBe('1444079');
-    });
-
-    it('keeps a zero value', () => {
-      expect(format('zero')).toBe('0');
-    });
-
-    it('returns an empty string for null and missing values', () => {
-      expect(format('empty')).toBe('');
-      expect(format('missing')).toBe('');
-    });
-
-    it('serializes array and object values as JSON', () => {
-      expect(format('values(a)')).toBe('["x","y"]');
     });
   });
 
@@ -383,6 +343,49 @@ describe('useDiscoverDownloadCsv', () => {
       });
       expect(mockOnError).not.toHaveBeenCalled();
       expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    describe('on the Visualization tab', () => {
+      beforeEach(() => {
+        (useSelector as jest.MockedFunction<any>).mockImplementation(
+          () => 'explore_visualization_tab'
+        );
+        mockVisData = {
+          transformedData: [{ host: 'a', 'count()': 3 }],
+          categoricalColumns: [{ id: 0, name: 'host', column: 'host' }],
+          numericalColumns: [{ id: 1, name: 'count()', column: 'count()' }],
+          dateColumns: [],
+          unknownColumns: [],
+        };
+      });
+
+      afterEach(() => {
+        mockVisData = undefined;
+      });
+
+      it("exports the visualization's columns instead of the Logs table's", async () => {
+        const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
+        await act(async () => {
+          await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+        });
+        expect(unparse).toHaveBeenCalledWith(
+          { fields: ['host', 'count()'], data: [['a', '3']] },
+          expect.anything()
+        );
+        expect(saveAs).toHaveBeenCalled();
+      });
+
+      it('falls back to the Logs table columns while there is no visualization data', async () => {
+        mockVisData = undefined;
+        const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
+        await act(async () => {
+          await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+        });
+        expect(unparse).toHaveBeenCalledWith(
+          expect.objectContaining({ fields: mockDisplayedColumnNames }),
+          expect.anything()
+        );
+      });
     });
   });
 });
