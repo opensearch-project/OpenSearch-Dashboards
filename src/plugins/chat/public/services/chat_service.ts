@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { AssistantContextOptions, ToolDefinition } from '../../../context_provider/public';
@@ -30,6 +30,24 @@ import { ConversationDataSourceStore } from './conversation_data_source_store';
 export interface DataSourceInfo {
   id: string;
   title: string;
+}
+
+export type SendDataSourceResolution =
+  | { status: 'ok'; dataSourceId: string }
+  | { status: 'unsupported' }
+  | { status: 'needs_selection'; options: DataSourceInfo[] }
+  | { status: 'none' }
+  | { status: 'stale' };
+
+/** A conversation the chat entered: see ChatService.openConversation. */
+export interface ConversationSession {
+  /** Aborted once the chat enters another conversation. */
+  signal: AbortSignal;
+  /**
+   * The AG-UI events to replay, or null when there is nothing to replay (including a load the
+   * user abandoned).
+   */
+  events: Promise<Event[] | null>;
 }
 
 export interface ChatState {
@@ -92,6 +110,11 @@ export class ChatService {
   private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
+  // Cached AnalyticEngine check for the last data source a send was resolved against
+  private unsupportedDataSourceCache?: { dataSourceId: string; unsupported: boolean };
+  // The conversation currently shown. Replaced (and the old one aborted) whenever the chat
+  // enters another conversation, so async work started for the old one can tell it is stale.
+  private conversationScope = new AbortController();
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -271,6 +294,13 @@ export class ChatService {
     await this.coreChatService.closeWindow();
   }
 
+  /**
+   * Open the chat window and send a message through it. The returned observable completes
+   * immediately; the window streams the response into its own timeline. Without
+   * `clearConversation`, a message that arrives while the window is busy (streaming,
+   * resolving a data source, or loading a history conversation) is dropped, as a send from
+   * the input would be.
+   */
   public async sendMessageWithWindow(
     content: string | InputContent[],
     messages: Message[],
@@ -382,7 +412,10 @@ export class ChatService {
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
-  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
+  private async getWorkspaceAwareDataSourceId(
+    readOnly = false,
+    signal: AbortSignal = this.conversationScope.signal
+  ): Promise<string | undefined> {
     try {
       // Try to get data source from page context first
       const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
@@ -418,7 +451,10 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
+      // Only commit it to the conversation this lookup started in. If the user left that
+      // conversation while the lookup was in flight, skip the write; still return the value
+      // and let the caller decide what to do.
+      if (!readOnly && !signal.aborted) {
         this.setDataSourceId(dataSourceId || undefined);
       }
       return dataSourceId || undefined;
@@ -438,12 +474,17 @@ export class ChatService {
    *   3. getWorkspaceAwareDataSourceId() — workspace default
    *
    * @param readOnly when true, resolve without committing anything: no setDataSourceId
+   * @param signal the conversation the caller acts for (see getConversationSignal). Defaults
+   *   to the current one; pass the caller's own when calling after an await.
    */
-  public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
+  public async getCurrentDataSourceId(
+    readOnly = false,
+    signal: AbortSignal = this.conversationScope.signal
+  ): Promise<string | undefined> {
     const ds =
       this.getDataSourceFromPageContext(readOnly) ||
       this.confirmedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId(readOnly));
+      (await this.getWorkspaceAwareDataSourceId(readOnly, signal));
 
     return ds;
   }
@@ -482,6 +523,7 @@ export class ChatService {
     this.confirmedDataSourceId = undefined;
     this.sessionDataSourceList = [];
     this.cachedAvailableDataSources = undefined;
+    this.unsupportedDataSourceCache = undefined;
   }
 
   private persistDataSourceState(): void {
@@ -496,7 +538,10 @@ export class ChatService {
   /**
    * Restore a conversation's data source state from the store
    */
-  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
+  private async restoreDataSourceStateFromStore(
+    threadId: string,
+    signal: AbortSignal
+  ): Promise<void> {
     const stored = this.conversationDataSourceStore.get(threadId);
     if (!stored) return;
 
@@ -515,7 +560,9 @@ export class ChatService {
         : Promise.resolve(false),
     ]);
 
-    if (this.getThreadId() !== threadId) return;
+    // The user left this conversation while the stored data sources were being validated:
+    // do not hand its data source state to the conversation the user switched to.
+    if (signal.aborted) return;
 
     this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
     this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
@@ -555,13 +602,63 @@ export class ChatService {
     return { id, title };
   }
 
-  private async buildAvailableDsContext(dataSourceId?: string) {
-    const contextStore = (window as any).assistantContextStore;
+  /**
+   * Decide which data source a new send uses, before the user message is sent.
+   *
+   * - `ok`: the current data source is compatible; send with it.
+   * - `unsupported`: the current data source does not support AI features (AnalyticEngine).
+   * - `needs_selection`: there is no usable current data source; ask the user to pick one.
+   * - `none`: the workspace has no compatible data source.
+   * - `stale`: the user left the conversation (`signal` aborted) while this was resolving.
+   */
+  public async resolveSendDataSource(signal: AbortSignal): Promise<SendDataSourceResolution> {
+    const dataSourceId = await this.getCurrentDataSourceId(false, signal);
+    if (signal.aborted) return { status: 'stale' };
+
+    const unsupported = dataSourceId ? await this.isUnsupportedDataSource(dataSourceId) : false;
+    if (signal.aborted) return { status: 'stale' };
+    if (unsupported) return { status: 'unsupported' };
+
+    const options = await this.getAvailableDataSources();
+    if (signal.aborted) return { status: 'stale' };
+
+    if (dataSourceId && options.some((ds) => ds.id === dataSourceId)) {
+      return { status: 'ok', dataSourceId };
+    }
+    return options.length > 0 ? { status: 'needs_selection', options } : { status: 'none' };
+  }
+
+  private async isUnsupportedDataSource(dataSourceId: string): Promise<boolean> {
+    if (this.unsupportedDataSourceCache?.dataSourceId === dataSourceId) {
+      return this.unsupportedDataSourceCache.unsupported;
+    }
+    if (!this.savedObjectsClient) return false;
+    try {
+      const ds = await this.savedObjectsClient.get<{ dataSourceEngineType?: string }>(
+        'data-source',
+        dataSourceId
+      );
+      const unsupported = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
+      this.unsupportedDataSourceCache = { dataSourceId, unsupported };
+      return unsupported;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * @param signal when given and aborted (the user left the conversation the caller acts for),
+   *   the shared context store is left untouched, so a stale send cannot write its
+   *   conversation's data source context into the conversation the user switched to.
+   */
+  private async buildAvailableDsContext(dataSourceId?: string, signal?: AbortSignal) {
+    const contextStore = signal?.aborted ? undefined : (window as any).assistantContextStore;
 
     const sessionDataSourceList = this.getSessionDataSourceList();
 
     if (contextStore && sessionDataSourceList.length > 1) {
       const availableDataSources = await this.getAvailableDataSources();
+      if (signal?.aborted) return this.getAgentContexts();
       const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
 
       const activeDsLabel = activeDatasource
@@ -608,13 +705,21 @@ export class ChatService {
     return this.getAgentContexts();
   }
 
+  /**
+   * @param signal the conversation this send belongs to (see getConversationSignal). Defaults
+   *   to the current one. It is checked after the data source and context are resolved, right
+   *   before the request is built; a send whose conversation the user has left is not started
+   *   and comes back with `dropped: true` and an empty observable.
+   */
   public async sendMessage(
     content: string,
     messages: Message[],
-    userMessage?: UserMessage
+    userMessage?: UserMessage,
+    signal: AbortSignal = this.conversationScope.signal
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
+    dropped?: boolean;
   }> {
     const requestId = this.generateRequestId();
 
@@ -641,8 +746,15 @@ export class ChatService {
     }
 
     // Get workspace-aware data source ID
-    const dataSourceId = await this.getCurrentDataSourceId();
-    const context = await this.buildAvailableDsContext(dataSourceId);
+    const dataSourceId = await this.getCurrentDataSourceId(false, signal);
+    const context = signal.aborted ? [] : await this.buildAvailableDsContext(dataSourceId, signal);
+
+    // The user left this conversation while the data source or context was resolving: do not
+    // send this message with the thread id of the conversation the user switched to.
+    if (signal.aborted) {
+      this.removeActiveRequest(requestId);
+      return { observable: EMPTY, userMessage, dropped: true };
+    }
 
     const threadId = this.getThreadId();
 
@@ -989,11 +1101,29 @@ export class ChatService {
     });
   }
 
+  /**
+   * The conversation currently shown. Take it once at the start of an operation that acts
+   * for this conversation (a send, a resend) and pass it down; once it is aborted, the user
+   * has left the conversation and the operation should stop without touching shared state.
+   */
+  public getConversationSignal(): AbortSignal {
+    return this.conversationScope.signal;
+  }
+
+  /** Abandon the current conversation's async work and start a new scope. */
+  private enterConversation(): AbortSignal {
+    this.conversationScope.abort();
+    this.conversationScope = new AbortController();
+    return this.conversationScope.signal;
+  }
+
+  /** Enter a new, empty conversation. */
   public newThread(): void {
     // Delegate to core service
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
     }
+    this.enterConversation();
     this.coreChatService.newThread();
 
     // Clear data source selection and cache for new session
@@ -1103,61 +1233,27 @@ export class ChatService {
   }
 
   /**
-   * Restore the latest conversation from agentic memory.
-   * Returns the AG-UI event array (with unfinished tool calls injected) for replay,
-   * or null if no conversation exists or a thread is already active.
+   * Enter a conversation from history: abandon the current conversation's async work, then
+   * load the conversation's events and its data source state.
+   *
+   * The returned session's signal is aborted once the chat enters another conversation (a new
+   * chat, another history conversation, or the window closing). An abandoned load neither
+   * switches the active thread to `threadId` nor restores its data source state, and its
+   * events resolve to null. The signal is returned synchronously, so the caller can tell an
+   * abandoned load apart even when loading throws.
    */
-  public async restoreLatestConversation(): Promise<Event[] | null> {
-    // Check if thread ID is already set - if so, skip restore and use existing thread
-    const currentThreadId = this.coreChatService?.getThreadId();
-    if (currentThreadId) {
-      // Thread already set, don't restore from latest conversation
-      return null;
-    }
-
-    // Get the latest conversation summary from conversation history service
-    const result = await this.conversationHistoryService.getConversations({
-      page: 0,
-      pageSize: 1,
-    });
-
-    if (result.conversations.length > 0) {
-      // Found a latest conversation - get full details
-      const latestConversationSummary = result.conversations[0];
-      // Get the full conversation with all events
-      const events = await this.conversationHistoryService.getConversation(
-        latestConversationSummary.threadId
-      );
-
-      if (!events) {
-        // No events found, generate a new thread
-        this.newThread();
-        return null;
-      }
-
-      // Set the thread ID in core service
-      if (this.coreChatService) {
-        this.coreChatService.setThreadId(latestConversationSummary.threadId);
-      }
-
-      // Restore the per-conversation data source state
-      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
-
-      return this.injectUnfinishedToolCallEvents(events);
-    }
-
-    // No conversation found, generate a new thread
-    this.newThread();
-    return null;
+  public openConversation(threadId: string): ConversationSession {
+    const signal = this.enterConversation();
+    this.clearSessionDataSourceAndContext();
+    return { signal, events: this.loadConversationEvents(threadId, signal) };
   }
 
-  /**
-   * Load a specific conversation from history by thread ID.
-   * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
-   */
-  public async loadConversation(threadId: string): Promise<Event[] | null> {
+  private async loadConversationEvents(
+    threadId: string,
+    signal: AbortSignal
+  ): Promise<Event[] | null> {
     const events = await this.conversationHistoryService.getConversation(threadId);
-    if (!events) {
+    if (!events || signal.aborted) {
       return null;
     }
 
@@ -1166,9 +1262,18 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
-    await this.restoreDataSourceStateFromStore(threadId);
+    await this.restoreDataSourceStateFromStore(threadId, signal);
+    if (signal.aborted) {
+      return null;
+    }
 
     return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /** Leave the current conversation without entering another one (the chat window closed). */
+  public closeConversation(): void {
+    this.enterConversation();
+    this.coreChatService?.resetThreadId();
   }
 
   /**
