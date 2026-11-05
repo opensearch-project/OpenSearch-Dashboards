@@ -117,4 +117,17 @@ describe('SourceFieldTableCell', () => {
     const cell = screen.getByTestId('docTableField');
     expect(cell).toBeInTheDocument();
   });
+
+  it('excludes the __lookup metadata field from the inline _source display', () => {
+    mockDataset.formatHit.mockReturnValue({
+      host_name: 'web-01',
+      __lookup: 'c0ffee-uuid',
+    });
+
+    renderInTable(defaultProps);
+
+    expect(screen.getByText('host_name:')).toBeInTheDocument();
+    expect(screen.queryByText('__lookup:')).not.toBeInTheDocument();
+    expect(screen.queryByText('c0ffee-uuid')).not.toBeInTheDocument();
+  });
 });

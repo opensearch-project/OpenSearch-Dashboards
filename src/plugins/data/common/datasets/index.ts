@@ -11,3 +11,14 @@ export {
   TRACE_TIME_FIELD_CANDIDATES,
 } from './time_field_utils';
 export { datasetTypeRequiresExplicitRun } from './requires_explicit_run';
+export {
+  extractPPLSourceIndex,
+  pplSourceDiffersFromDataset,
+  PPLSourceTimeFieldChecker,
+  getPPLSourceTimeFieldChecker,
+} from './ppl_source_utils';
+export type {
+  PPLSourceCheckDataset,
+  PPLSourceFieldsResolver,
+  PPLSourceFieldsProvider,
+} from './ppl_source_utils';
