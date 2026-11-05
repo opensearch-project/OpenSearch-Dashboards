@@ -51,9 +51,13 @@ export const datasetRequiresExplicitRun = (
 /**
  * Whether a dataset change only refines the selection for a dataset type that requires an explicit
  * Run: the same type before and after (e.g. other log groups of the same source). The user's query
- * and the last results still apply, so they are kept, and the change waits for Run like an edited
- * query. A change to another type starts over (its language and columns differ).
+ * and the last results are kept for the user to re-run on the new selection, and the change waits
+ * for Run like an edited query. A change to another type starts over (its language and columns
+ * differ). Only the dataset picker marks a change as a refinement (`REFINE_SELECTION_META`).
  */
+/** Action meta with which the dataset picker marks a refinement (see `isExplicitRunRefinement`). */
+export const REFINE_SELECTION_META = { refineSelection: true } as const;
+
 export const isExplicitRunRefinement = (
   queryString: Pick<QueryStringContract, 'getDatasetService'> | undefined,
   previous: { type?: Dataset['type'] } | undefined,

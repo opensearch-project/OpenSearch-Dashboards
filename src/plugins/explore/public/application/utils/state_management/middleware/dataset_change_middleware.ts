@@ -23,6 +23,7 @@ import {
   clearQueryStatusMap,
   setBreakdownField,
   setIsQueryEditorDirty,
+  setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
@@ -60,11 +61,17 @@ export const createDatasetChangeMiddleware = (
       const previousDataset = currentDataset;
       currentDataset = dataset;
 
-      if (isExplicitRunRefinement(queryString, previousDataset, dataset)) {
-        // Only the selection changed (same type, explicit Run): keep the results and tab state
-        // until the user runs the query on the new selection, as for an edited query.
+      if (
+        action.meta?.refineSelection &&
+        isExplicitRunRefinement(queryString, previousDataset, dataset)
+      ) {
+        // The picker refined the selection (same type, explicit Run): keep the results and the
+        // view (columns, sort, breakdown, patterns) they're shown with until the user runs the
+        // query on the new selection, as for an edited query, and mark them as stale meanwhile.
         store.dispatch(setIsQueryEditorDirty(true));
+        store.dispatch(setIsSelectionStale(true));
       } else {
+        store.dispatch(setIsSelectionStale(false));
         store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
         store.dispatch(clearResults());
         store.dispatch(clearQueryStatusMap());

@@ -17,8 +17,11 @@ import {
 } from '../slices';
 import {
   clearQueryStatusMap,
+  setBreakdownField,
   setIsQueryEditorDirty,
+  setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
+import { setActiveTab } from '../slices';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
@@ -160,7 +163,44 @@ describe('createDatasetChangeMiddleware', () => {
       middleware = createDatasetChangeMiddleware(mockServices)(mockStore)(mockNext);
     });
 
-    it('keeps the results and marks the query to run', async () => {
+    const refine = (action: any) => ({ ...action, meta: { refineSelection: true } });
+
+    it('keeps the results and view when the picker refines the selection, marking them stale', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+      (mockStore.dispatch as jest.Mock).mockClear();
+      mockedResetLegacyStateActionCreator.mockClear();
+
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsSelectionStale(true));
+      [
+        clearResults(),
+        clearQueryStatusMap(),
+        clearLastExecutedData(),
+        setPatternsField(''),
+        setHideEmptyFields(false),
+        setBreakdownField(undefined),
+      ].forEach((reset) => expect(mockStore.dispatch).not.toHaveBeenCalledWith(reset));
+      expect(
+        (mockStore.dispatch as jest.Mock).mock.calls.some(([a]) => a?.type === setActiveTab.type)
+      ).toBe(false);
+      expect(mockedResetLegacyStateActionCreator).not.toHaveBeenCalled();
+      expect(mockedExecuteQueries).not.toHaveBeenCalled();
+      expect(mockCacheDataset).toHaveBeenLastCalledWith(
+        { id: 'b', type: 'EXPLICIT_RUN_TYPE' },
+        expect.anything(),
+        false
+      );
+    });
+
+    it('still resets for a same-type change that the picker did not make (e.g. a saved query)', async () => {
       mockStore.getState = jest
         .fn()
         .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
@@ -172,16 +212,9 @@ describe('createDatasetChangeMiddleware', () => {
         .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
       await middleware(setQueryState({ query: 'q', language: 'L' }));
 
-      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
-      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
-      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearQueryStatusMap());
-      expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledTimes(1); // the first dataset only
-      expect(mockedExecuteQueries).not.toHaveBeenCalled();
-      expect(mockCacheDataset).toHaveBeenLastCalledWith(
-        { id: 'b', type: 'EXPLICIT_RUN_TYPE' },
-        expect.anything(),
-        false
-      );
+      expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsSelectionStale(false));
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(setIsQueryEditorDirty(true));
     });
 
     it('still clears when switching to it from another type', async () => {
@@ -199,6 +232,30 @@ describe('createDatasetChangeMiddleware', () => {
       expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
       expect(mockStore.dispatch).not.toHaveBeenCalledWith(setIsQueryEditorDirty(true));
     });
+  });
+
+  it('fully resets and runs when switching between two index patterns', async () => {
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'logs-a', type: 'INDEX_PATTERN' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+    await middleware(setQueryState({ query: 'q', language: 'PPL' }));
+    (mockStore.dispatch as jest.Mock).mockClear();
+    mockedExecuteQueries.mockClear();
+
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'logs-b', type: 'INDEX_PATTERN' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+    // Even a picker-marked change: index patterns don't require an explicit Run.
+    await middleware({
+      ...setQueryState({ query: 'q', language: 'PPL' }),
+      meta: { refineSelection: true },
+    });
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setPatternsField(''));
+    expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
   });
 
   it('still runs a query for a dataset type that does not opt out', async () => {

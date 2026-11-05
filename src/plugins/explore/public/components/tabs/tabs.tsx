@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import './tabs.scss';
 import { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
@@ -57,6 +57,8 @@ export const ExploreTabs = () => {
   // Non-time-series mode: the dataset has no time field, or the query's source lacks the
   // dataset's time field (e.g. a lookup). Drives the tab-set mode swap below.
   const isNonTimeSeries = useIsNonTimeSeries();
+  // Results kept from the previous selection (see the dataset change middleware).
+  const isSelectionStale = useSelector((state: RootState) => !!state.queryEditor.isSelectionStale);
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
@@ -211,9 +213,23 @@ export const ExploreTabs = () => {
     }
 
     return (
-      <ErrorGuard registryTab={activeRegistryTab}>
-        <activeRegistryTab.component />
-      </ErrorGuard>
+      <>
+        {isSelectionStale && (
+          <EuiCallOut
+            size="s"
+            iconType="clock"
+            className="exploreTabs__staleSelectionCallout"
+            data-test-subj="exploreStaleSelectionCallout"
+            title={i18n.translate('explore.tabs.staleSelectionCallout', {
+              defaultMessage:
+                'Results are from the previous selection. Run the query to update them.',
+            })}
+          />
+        )}
+        <ErrorGuard registryTab={activeRegistryTab}>
+          <activeRegistryTab.component />
+        </ErrorGuard>
+      </>
     );
   };
 
