@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildPPL, builderReducer, compileWhereFilter, sortableColumns } from './build_ppl';
+import {
+  buildPPL,
+  builderReducer,
+  compileWhereFilter,
+  createBuilderReducer,
+  sortableColumns,
+} from './build_ppl';
 import { Aggregation, PPLBuilderState, WhereFilter, emptyState } from './types';
 
 const state = (over: Partial<PPLBuilderState>): PPLBuilderState => ({ ...emptyState(), ...over });
@@ -504,6 +510,22 @@ describe('builderReducer', () => {
     next = builderReducer(next, { type: 'SET_SORT', sort: { column: 'service', desc: true } });
     next = builderReducer(next, { type: 'REMOVE_AGGREGATION', index: 0 });
     expect(next.sort).toEqual({ column: 'service', desc: true });
+  });
+
+  it('clears a sort on a removed metric whose column the language names without parens', () => {
+    // A language naming its metric columns `<fn>_<n>`, e.g. `count_1`.
+    const reducer = createBuilderReducer((metric) => `${metric.fn}_1`);
+    let next = reducer(emptyState(), { type: 'ADD_AGGREGATION' });
+    next = reducer(next, { type: 'SET_GROUPBY_FIELDS', fields: ['service'] });
+    next = reducer(next, { type: 'SET_SORT', sort: { column: 'count_1', desc: true } });
+    next = reducer(next, { type: 'REMOVE_AGGREGATION', index: 0 });
+    expect(next.sort).toBeUndefined();
+
+    // A sort on a group-by field stays.
+    next = reducer(next, { type: 'ADD_AGGREGATION' });
+    next = reducer(next, { type: 'SET_SORT', sort: { column: 'service', desc: false } });
+    next = reducer(next, { type: 'REMOVE_AGGREGATION', index: 0 });
+    expect(next.sort).toEqual({ column: 'service', desc: false });
   });
 
   it('adds a filter defaulting to an empty `is`', () => {

@@ -11,7 +11,11 @@ import { BuilderAction } from './build_ppl';
 import { WhereFilter, WhereOperator } from './types';
 import { OPERATOR_DEF_MAP, operatorArity, operatorsForFieldType } from './where_operators';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
-import { filterOperatorsFor, useVisualBuilder } from './visual_builder_language';
+import {
+  defaultFilterOperatorFor,
+  filterOperatorsFor,
+  useVisualBuilder,
+} from './visual_builder_language';
 import {
   ControlGroup,
   GhostAddButton,
@@ -23,9 +27,23 @@ interface WhereRowProps {
   filters: WhereFilter[];
   fieldNames: string[];
   getFieldType: (field: string) => string | undefined;
+  /** True for a field only the source's `getFields` lists, with no type: any operator applies. */
+  isUntypedSourceField?: (field: string) => boolean;
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }
+
+const NOT_FROM_SOURCE = () => false;
+
+/**
+ * The type operators are offered for: the field's own, any for an untyped source field, and
+ * string's otherwise (as for a field not picked yet).
+ */
+const operatorFieldType = (
+  field: string,
+  fieldType: string | undefined,
+  isUntypedSourceField: (field: string) => boolean
+): string | undefined => fieldType || (field && isUntypedSourceField(field) ? undefined : 'string');
 
 const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || fieldType === 'string';
 
@@ -100,14 +118,14 @@ const AddFilterMenu: React.FC<{
 const OperatorPopover: React.FC<{
   filter: WhereFilter;
   index: number;
-  fieldType?: string;
+  /** The type to offer operators for (see operatorFieldType); undefined offers them all. */
+  operatorType?: string;
   onChange: (operator: WhereOperator) => void;
-}> = ({ filter, index, fieldType, onChange }) => {
+}> = ({ filter, index, operatorType, onChange }) => {
   const language = useVisualBuilder();
   const current = OPERATOR_DEF_MAP[filter.operator];
-  // No field picked yet: the string operators, as before a field narrows them.
   const options: SearchMenuOption[] = operatorsForFieldType(
-    filter.field ? fieldType : 'string',
+    operatorType,
     filterOperatorsFor(language)
   ).map((def) => ({
     key: def.value,
@@ -421,9 +439,20 @@ const WhereChip: React.FC<{
   index: number;
   fieldType?: string;
   fieldNames: string[];
+  getFieldType: (field: string) => string | undefined;
+  isUntypedSourceField: (field: string) => boolean;
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
-}> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
+}> = ({
+  filter,
+  index,
+  fieldType,
+  fieldNames,
+  getFieldType,
+  isUntypedSourceField,
+  getValues,
+  dispatch,
+}) => {
   const language = useVisualBuilder();
   // Use this chip's field type so the tooltip quotes values as the query does.
   const tooltip =
@@ -434,7 +463,11 @@ const WhereChip: React.FC<{
 
   const setField = (field: string) => {
     if (field === filter.field) return;
-    dispatch({ type: 'SET_FILTER', index, filter: { field, operator: 'is', values: [] } });
+    const operator = defaultFilterOperatorFor(
+      language,
+      operatorFieldType(field, getFieldType(field), isUntypedSourceField)
+    );
+    dispatch({ type: 'SET_FILTER', index, filter: { field, operator, values: [] } });
   };
   const setOperator = (operator: WhereOperator) => {
     const values = operatorArity(operator) === operatorArity(filter.operator) ? filter.values : [];
@@ -463,7 +496,12 @@ const WhereChip: React.FC<{
           </EuiToolTip>
         )}
       />
-      <OperatorPopover filter={filter} index={index} fieldType={fieldType} onChange={setOperator} />
+      <OperatorPopover
+        filter={filter}
+        index={index}
+        operatorType={operatorFieldType(filter.field, fieldType, isUntypedSourceField)}
+        onChange={setOperator}
+      />
       <ChipValues
         filter={filter}
         index={index}
@@ -488,11 +526,18 @@ export const WhereRow: React.FC<WhereRowProps> = ({
   filters,
   fieldNames,
   getFieldType,
+  isUntypedSourceField = NOT_FROM_SOURCE,
   getValues,
   dispatch,
 }) => {
-  const addFilter = (field: string) =>
-    dispatch({ type: 'ADD_FILTER', filter: { field, operator: 'is', values: [] } });
+  const language = useVisualBuilder();
+  const addFilter = (field: string) => {
+    const operator = defaultFilterOperatorFor(
+      language,
+      operatorFieldType(field, getFieldType(field), isUntypedSourceField)
+    );
+    dispatch({ type: 'ADD_FILTER', filter: { field, operator, values: [] } });
+  };
 
   if (filters.length === 0) {
     return (
@@ -525,6 +570,8 @@ export const WhereRow: React.FC<WhereRowProps> = ({
           index={index}
           fieldType={getFieldType(filter.field)}
           fieldNames={fieldNames}
+          getFieldType={getFieldType}
+          isUntypedSourceField={isUntypedSourceField}
           getValues={getValues}
           dispatch={dispatch}
         />

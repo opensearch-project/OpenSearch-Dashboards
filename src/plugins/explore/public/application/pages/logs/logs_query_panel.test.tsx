@@ -77,7 +77,7 @@ jest.mock('./ppl_builder', () => ({
     onQueryChange,
   }: {
     initialState?: any;
-    language?: { build: (state: any) => string; reportsBuiltQuery?: boolean };
+    language?: Pick<SourceTypeVisualBuilder, 'build'> & { reportsBuiltQuery?: boolean };
     onQueryChange?: (query: string, state: any) => void;
   }) => {
     // Like the real builder, a language flagged `reportsBuiltQuery` reports the query its rows
@@ -94,10 +94,10 @@ jest.mock('./ppl_builder', () => ({
       if (language?.reportsBuiltQuery && built !== undefined) onQueryChange?.(built, initialState);
     }, [built]);
     return (
-      <div data-test-subj="ppl-builder-stub">
+      <div data-test-subj="pplBuilderStub">
         Builder
-        <span data-test-subj="stub-initial-state">{JSON.stringify(initialState)}</span>
-        <span data-test-subj="stub-built-query">
+        <span data-test-subj="stubInitialState">{JSON.stringify(initialState)}</span>
+        <span data-test-subj="stubBuiltQuery">
           {/* Some tests seed a partial state; fill the rest so PPL's build can read it. */}
           {language?.build({
             searchExpression: '',
@@ -109,7 +109,7 @@ jest.mock('./ppl_builder', () => ({
         </span>
         <button
           type="button"
-          data-test-subj="stub-add-partial-metric"
+          data-test-subj="stubAddPartialMetric"
           onClick={() =>
             // A fieldless metric compiles to nothing, so the emitted query is just
             // the search expression; the partial work lives only in state.
@@ -245,19 +245,19 @@ describe('LogsQueryPanel', () => {
   it('defaults a fresh query to code mode', () => {
     renderPanel('');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('opens a parseable query in code mode', () => {
     renderPanel('source = logs service="web-store"');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('opens an unparseable query in code mode', () => {
     renderPanel('source = logs | sort field');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('can switch to Builder from Code for a representable query and back', () => {
@@ -265,12 +265,12 @@ describe('LogsQueryPanel', () => {
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
     expect(screen.queryByTestId('code-editor-stub')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   // Renders the panel while a query is loading, optionally with the progress a source reported.
@@ -402,12 +402,12 @@ describe('LogsQueryPanel', () => {
       renderFakeQL('find error');
       fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
-      expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
-      expect(JSON.parse(screen.getByTestId('stub-initial-state').textContent ?? '')).toEqual(
+      expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
+      expect(JSON.parse(screen.getByTestId('stubInitialState').textContent ?? '')).toEqual(
         expect.objectContaining({ searchExpression: 'error' })
       );
       // The builder is handed the translation, so it writes FakeQL rather than PPL.
-      expect(screen.getByTestId('stub-built-query')).toHaveTextContent('find error');
+      expect(screen.getByTestId('stubBuiltQuery')).toHaveTextContent('find error');
     });
 
     it('re-reads the query in a new language instead of rewriting it, when only the language changes', () => {
@@ -453,7 +453,7 @@ describe('LogsQueryPanel', () => {
         store.dispatch(setQueryState({ ...store.getState().query, language: 'OtherQL' }));
       });
 
-      expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
       expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
       expect(mockSetQuery).not.toHaveBeenCalled();
     });
@@ -475,23 +475,23 @@ describe('LogsQueryPanel', () => {
   it('preserves partial builder work across a Code round-trip when the code is unedited', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
 
     // Toggle to Code and back WITHOUT editing the code.
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
     // The preserved state is restored verbatim; a re-parse would drop the metric.
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
 
   it('preserves partial work when Monaco returns the same query with a trailing newline / CRLF', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // A trailing newline / CRLF from Monaco must NOT count as an edit: the
@@ -499,14 +499,14 @@ describe('LogsQueryPanel', () => {
     mockEditorText.current = 'service="web-store"\r\n';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
 
   it('re-parses (dropping partial work) when the code was edited before switching back', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // Edited code no longer matches the builder's output, so it is authoritative:
@@ -514,7 +514,7 @@ describe('LogsQueryPanel', () => {
     mockEditorText.current = 'service="web-store" | stats count()';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: expect.any(String), fn: 'count' }]);
   });
 

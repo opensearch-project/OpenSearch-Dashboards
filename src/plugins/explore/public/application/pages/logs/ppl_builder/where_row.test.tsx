@@ -128,11 +128,52 @@ describe('WhereRow', () => {
     expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_one_of-0')).toBeInTheDocument();
   });
 
-  it('offers every operator, the between ones too, for a field of unknown type', () => {
-    renderRow([{ id: 'f1', field: 'duration', operator: 'is', values: ['900'] }], () => undefined);
+  it('offers every operator, the between ones too, for an untyped field from getFields', () => {
+    render(
+      <WhereRow
+        filters={[{ id: 'f1', field: 'duration', operator: 'is', values: ['900'] }]}
+        fieldNames={['duration']}
+        getFieldType={() => undefined}
+        isUntypedSourceField={(field) => field === 'duration'}
+        getValues={jest.fn().mockResolvedValue([])}
+        dispatch={jest.fn()}
+      />
+    );
     fireEvent.click(screen.getByTestId('pplBuilderFilterOperator-0'));
     expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_between-0')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_one_of-0')).toBeInTheDocument();
+  });
+
+  it('keeps a dataset field without a type on the string operators, as before', () => {
+    renderRow([{ id: 'f1', field: 'duration', operator: 'is', values: ['900'] }], () => undefined);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterOperator-0'));
+    expect(
+      screen.queryByTestId('pplBuilderFilterOperatorOption-is_between-0')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_one_of-0')).toBeInTheDocument();
+  });
+
+  it("starts a new filter with the language's first operator when it doesn't offer `is`", () => {
+    const dispatch = jest.fn();
+    render(
+      <VisualBuilderContext.Provider
+        value={{ ...pplVisualBuilder, filterOperators: ['is_one_of', 'exists'] }}
+      >
+        <WhereRow
+          filters={[]}
+          fieldNames={fieldNames}
+          getFieldType={getFieldType}
+          getValues={jest.fn().mockResolvedValue([])}
+          dispatch={dispatch}
+        />
+      </VisualBuilderContext.Provider>
+    );
+    fireEvent.click(screen.getByTestId('pplBuilderAddFilter'));
+    fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-service'));
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'ADD_FILTER',
+      filter: { field: 'service', operator: 'is_one_of', values: [] },
+    });
   });
 
   it('changes the operator from the popover and preserves the value within the same arity', () => {

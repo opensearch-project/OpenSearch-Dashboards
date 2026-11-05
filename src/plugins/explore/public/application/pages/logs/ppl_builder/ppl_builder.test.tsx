@@ -11,7 +11,17 @@ import { PPLBuilderState, emptyState } from './types';
 
 // Render CodeEditor as a plain textbox so onChange is drivable; stub services the builder reads.
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
-  CodeEditor: ({ value, onChange, languageId, suggestionProvider }: any) => (
+  CodeEditor: ({
+    value,
+    onChange,
+    languageId,
+    suggestionProvider,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    languageId?: string;
+    suggestionProvider?: unknown;
+  }) => (
     <input
       data-test-subj="pplBuilderSearchBoxInput"
       data-language-id={languageId}
@@ -286,6 +296,20 @@ describe('PPLBuilder', () => {
         target: { value: 'error' },
       });
       expect(onQueryChange).toHaveBeenLastCalledWith('find error', expect.anything());
+    });
+
+    it("starts the metric group-by needs as the language's first aggregation without `count`", () => {
+      const onQueryChange = jest.fn();
+      render(
+        <PPLBuilder
+          initialState={emptyState()}
+          language={{ ...fakeLanguage, aggregations: ['sum', 'avg'] }}
+          onQueryChange={onQueryChange}
+        />
+      );
+      fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
+      const [, state] = onQueryChange.mock.calls[onQueryChange.mock.calls.length - 1];
+      expect(state.aggregations).toEqual([expect.objectContaining({ fn: 'sum' })]);
     });
 
     it('offers only the aggregations the language supports', () => {

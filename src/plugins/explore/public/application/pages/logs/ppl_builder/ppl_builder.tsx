@@ -14,7 +14,11 @@ import { ExploreServices } from '../../../../types';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import type { SourceTypeVisualBuilder } from '../../../../services/source_type_registry';
 import { createBuilderReducer, sortableColumns } from './build_ppl';
-import { VisualBuilderContext, pplVisualBuilder } from './visual_builder_language';
+import {
+  VisualBuilderContext,
+  defaultAggregationFor,
+  pplVisualBuilder,
+} from './visual_builder_language';
 import { PPLBuilderState, emptyState } from './types';
 import { SearchBox } from './search_box';
 import { AggregationRow } from './aggregation_row';
@@ -64,6 +68,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     groupByFieldNames,
     timeFieldName,
     getFieldType,
+    isUntypedSourceField,
     getValues,
   } = useFieldData(dataset, { getFields: language.getFields, refreshKey: fieldsRefreshKey });
 
@@ -117,11 +122,11 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const expandGroupBy = useCallback(() => {
     if (state.aggregations.length === 0) {
-      dispatch({ type: 'ADD_AGGREGATION' });
+      dispatch({ type: 'ADD_AGGREGATION', agg: { fn: defaultAggregationFor(language) } });
     }
     setShowGroupBy(true);
     setAutoOpenGroupBy(true);
-  }, [state.aggregations.length]);
+  }, [state.aggregations.length, language]);
 
   // Group-by requires an aggregation; collapse and reset it once the last one is removed.
   useEffect(() => {
@@ -179,6 +184,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
           filters={state.filters}
           fieldNames={fieldNames}
           getFieldType={getFieldType}
+          isUntypedSourceField={isUntypedSourceField}
           getValues={getValues}
           dispatch={dispatch}
         />

@@ -9,7 +9,8 @@ import { getSourceTypeRegistry } from '../../../../services/source_type_registry
 import { buildPPL, compileAggregation, compileWhereFilter } from './build_ppl';
 import { parsePPL } from './parse_ppl';
 import { AGG_FUNCTIONS, AggDef, SCALAR_FN_CATEGORIES } from './operations';
-import { OPERATOR_DEFS, OperatorDef } from './where_operators';
+import { OPERATOR_DEFS, OperatorDef, operatorsForFieldType } from './where_operators';
+import { AggFn, WhereOperator } from './types';
 
 /** The builder's PPL translation: what the builder uses unless a source brings its own. */
 export const pplVisualBuilder: SourceTypeVisualBuilder = {
@@ -21,6 +22,7 @@ export const pplVisualBuilder: SourceTypeVisualBuilder = {
     return predicate ? `where ${predicate}` : null;
   },
   functions: SCALAR_FN_CATEGORIES,
+  timeBucketText: (field, interval) => `span(${field}, ${interval})`,
 };
 
 /**
@@ -52,3 +54,21 @@ export const filterOperatorsFor = (language: SourceTypeVisualBuilder): OperatorD
   language.filterOperators
     ? OPERATOR_DEFS.filter((def) => language.filterOperators?.includes(def.value))
     : OPERATOR_DEFS;
+
+/** The aggregation a new metric starts as: `count` when the translation offers it, else its first. */
+export const defaultAggregationFor = (language: SourceTypeVisualBuilder): AggFn => {
+  const offered = aggregationsFor(language);
+  return offered.some((def) => def.id === 'count') ? 'count' : (offered[0]?.id ?? 'count');
+};
+
+/**
+ * The operator a new filter (or one whose field changed) starts with: `is` when the translation
+ * offers it for the field's type, else the first it offers.
+ */
+export const defaultFilterOperatorFor = (
+  language: SourceTypeVisualBuilder,
+  fieldType?: string
+): WhereOperator => {
+  const offered = operatorsForFieldType(fieldType, filterOperatorsFor(language));
+  return offered.some((def) => def.value === 'is') ? 'is' : (offered[0]?.value ?? 'is');
+};

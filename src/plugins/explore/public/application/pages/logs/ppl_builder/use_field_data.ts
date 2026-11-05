@@ -15,6 +15,8 @@ interface FieldInfo {
   name: string;
   type?: string;
   aggregatable?: boolean;
+  /** Only the source's `getFields` lists it, so an unset type means unknown, not a gap. */
+  fromSource?: boolean;
 }
 
 const NO_FIELDS: FieldInfo[] = [];
@@ -35,8 +37,9 @@ const mergeFields = (datasetFields: FieldInfo[], sourceFields: FieldInfo[]): Fie
   for (const field of sourceFields) {
     const existing = byName.get(field.name);
     if (!existing) {
-      byName.set(field.name, field);
-      merged.push(field);
+      const added = { ...field, fromSource: true };
+      byName.set(field.name, added);
+      merged.push(added);
     } else if (existing.type === undefined || existing.aggregatable === undefined) {
       const filled = {
         ...existing,
@@ -77,12 +80,17 @@ export const useFieldData = (
   }, [getFields, dataset]);
   useEffect(() => {
     if (!getFields || refreshKey === null) return;
-    const queryDataset = servicesRef.current.data?.query?.queryString?.getQuery?.()?.dataset;
-    if (!queryDataset) return;
+    // The query's dataset, as `getFields` takes it. During a switch it can run ahead of the data
+    // view these fields merge into (or lag behind it): ask only when both are the same dataset,
+    // and keep the answer only if the query is still on it.
+    const currentQueryDataset = () =>
+      servicesRef.current.data?.query?.queryString?.getQuery?.()?.dataset;
+    const queryDataset = currentQueryDataset();
+    if (!queryDataset || (dataset?.id !== undefined && queryDataset.id !== dataset.id)) return;
     let cancelled = false;
     getFields(queryDataset)
       .then((next) => {
-        if (cancelled) return;
+        if (cancelled || currentQueryDataset()?.id !== queryDataset.id) return;
         setSourceFields(
           (next ?? [])
             .filter((f) => !!f?.name)
@@ -104,9 +112,10 @@ export const useFieldData = (
 
   const fieldNames = useMemo<string[]>(() => fields.map((f) => f.name), [fields]);
 
-  // A field of unknown type (only a source's `getFields` can give one: a dataset's fields are
-  // typed) may hold numbers, so it's offered for numeric aggregations too.
-  const mayBeNumber = (f: FieldInfo) => f.type === 'number' || f.type === undefined;
+  // A field of unknown type from the source's `getFields` may hold numbers, so it's offered for
+  // numeric aggregations too. A dataset's own fields keep their type as given.
+  const mayBeNumber = (f: FieldInfo) =>
+    f.type === 'number' || (f.type === undefined && !!f.fromSource);
 
   const numericAndAggregatableNames = useMemo<string[]>(
     () => fields.filter((f) => mayBeNumber(f) || f.aggregatable).map((f) => f.name),
@@ -132,6 +141,16 @@ export const useFieldData = (
     (fieldName: string): string | undefined =>
       fieldTypeByName[fieldName] ?? fieldTypeByName[`${fieldName}.keyword`],
     [fieldTypeByName]
+  );
+
+  // Fields only `getFields` lists, with no type: they take any filter operator.
+  const untypedSourceFields = useMemo(
+    () => new Set(fields.filter((f) => f.fromSource && f.type === undefined).map((f) => f.name)),
+    [fields]
+  );
+  const isUntypedSourceField = useCallback(
+    (name: string) => untypedSourceFields.has(name),
+    [untypedSourceFields]
   );
 
   const groupByFieldNames = useMemo<string[]>(
@@ -179,6 +198,7 @@ export const useFieldData = (
     groupByFieldNames,
     timeFieldName,
     getFieldType,
+    isUntypedSourceField,
     getValues,
   };
 };

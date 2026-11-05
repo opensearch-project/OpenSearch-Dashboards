@@ -42,7 +42,7 @@ export interface VisualBuilderField {
   name: string;
   /**
    * OSD field type: `string`, `number`, `date`, `boolean`, ... Leave it unset when unknown: the
-   * builder then offers the field for numeric aggregations too, and filters on it take any value.
+   * builder then offers the field for numeric aggregations and every filter operator.
    */
   type?: string;
   /** Offered for aggregations that take any field (e.g. distinct count). Numbers always are. */
@@ -62,7 +62,15 @@ export interface VisualBuilderParseResult {
  * Explore's; this translates between them and the language's query text.
  */
 export interface SourceTypeVisualBuilder {
-  /** The rows as query text. Skips rows the user hasn't finished, such as a filter with no value. */
+  /**
+   * The rows as query text. Skips rows the user hasn't finished, such as a filter with no value.
+   * - Values are text as typed. Quote them unless `getFieldType` says the field is numeric: an
+   *   unknown type means unknown, not "number", and writing `02134` bare changes what
+   *   `zip = "02134"` compares.
+   * - A time bucket's `interval` can be one the user typed (`1.5h`, `5 minutes`). Write the
+   *   language's form of it, or skip the bucket when the language can't express it, so the query
+   *   still runs; don't write it through unchecked.
+   */
   build: (state: VisualBuilderState, getFieldType?: VisualBuilderFieldTypeResolver) => string;
   /**
    * Query text as rows, for Code to Builder. Return `canBuild: false` for anything the rows can't
@@ -72,7 +80,8 @@ export interface SourceTypeVisualBuilder {
   parse: (query: string) => VisualBuilderParseResult;
   /**
    * The result column an aggregation produces, as the language names it (PPL's `count()`), or
-   * null while it is unfinished. The sort row offers these, and `state.sort.column` holds one.
+   * null while it is unfinished. The sort row offers these, and `state.sort.column` holds one; a
+   * sort on a metric that is removed is dropped. Any name works, with or without parentheses.
    */
   aggregationColumn: (agg: VisualBuilderAggregation) => string | null;
   /** One filter as it appears in the query, for its tooltip; null while it is unfinished. */
@@ -81,13 +90,19 @@ export interface SourceTypeVisualBuilder {
     getFieldType?: VisualBuilderFieldTypeResolver
   ) => string | null;
   /**
-   * Aggregations the language supports, in Explore's menu order. Defaults to all of them. Include
-   * `count`: a new aggregation starts as one.
+   * A time bucket as it appears in the query (PPL's `span(@timestamp, 1h)`), for its tooltip. Null,
+   * or leaving it out, describes the bucket in words instead (`@timestamp in 1h buckets`).
+   */
+  timeBucketText?: (field: string, interval: string) => string | null;
+  /**
+   * Aggregations the language supports, in Explore's menu order. Defaults to all of them. A new
+   * aggregation starts as `count` when it's listed, else as the first listed.
    */
   aggregations?: VisualBuilderAggregationFunction[];
   /**
-   * Filter operators the language supports. Defaults to all of them. Include `is`: a new filter,
-   * and a filter whose field changes, starts with it.
+   * Filter operators the language supports. Defaults to all of them. A new filter, and a filter
+   * whose field changes, starts with `is` when it's listed (and fits the field's type), else with
+   * the first that fits.
    */
   filterOperators?: VisualBuilderFilterOperator[];
   /**

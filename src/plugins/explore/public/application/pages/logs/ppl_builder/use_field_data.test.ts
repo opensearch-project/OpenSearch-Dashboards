@@ -6,9 +6,12 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFieldData } from './use_field_data';
 import { fetchColumnValues } from '../../../../../../data/public';
+import type { DataView } from '../../../../../../data/common';
 
 const mockUseDatasetContext = jest.fn();
-const mockGetQuery = jest.fn(() => ({ dataset: { type: 'INDEX_PATTERN' } }));
+const mockGetQuery = jest.fn((): { dataset?: { id?: string; type: string } } => ({
+  dataset: { type: 'INDEX_PATTERN' },
+}));
 
 jest.mock('../../../../../../data/public', () => ({
   fetchColumnValues: jest.fn().mockResolvedValue([]),
@@ -137,7 +140,7 @@ describe('useFieldData', () => {
     const cloudDataset = { id: 'cloud::us-east-1::app', type: 'CLOUD' };
 
     beforeEach(() => {
-      mockGetQuery.mockReturnValue({ dataset: cloudDataset } as any);
+      mockGetQuery.mockReturnValue({ dataset: cloudDataset });
       mockUseDatasetContext.mockReturnValue({
         dataset: datasetWithFields([{ name: '@message' }, { name: 'latency', type: 'number' }]),
       });
@@ -172,9 +175,11 @@ describe('useFieldData', () => {
       const { result } = renderHook(() => useFieldData(undefined, { getFields, refreshKey: 'a' }));
 
       await waitFor(() => expect(result.current.fieldNames).toContain('duration'));
-      // `@message` has no type in this dataset either, so it may hold numbers too.
-      expect(result.current.numericFieldNames).toEqual(['@message', 'latency', 'duration']);
+      // `@message` has no type in the dataset, but it's the dataset's field: not offered.
+      expect(result.current.numericFieldNames).toEqual(['latency', 'duration']);
       expect(result.current.getFieldType('duration')).toBeUndefined();
+      expect(result.current.isUntypedSourceField('duration')).toBe(true);
+      expect(result.current.isUntypedSourceField('@message')).toBe(false);
     });
 
     it('asks again when a query finishes, not while one runs', async () => {
@@ -197,10 +202,10 @@ describe('useFieldData', () => {
         .fn()
         .mockResolvedValueOnce([{ name: 'service', type: 'string' }])
         .mockRejectedValueOnce(new Error('offline'));
-      const datasetA = datasetWithFields([{ name: '@message' }]);
-      const datasetB = datasetWithFields([{ name: '@message' }]);
+      const datasetA = datasetWithFields([{ name: '@message' }]) as unknown as DataView;
+      const datasetB = datasetWithFields([{ name: '@message' }]) as unknown as DataView;
       const { result, rerender } = renderHook(
-        ({ dataset, refreshKey }: { dataset: any; refreshKey: string | null }) =>
+        ({ dataset, refreshKey }: { dataset: DataView; refreshKey: string | null }) =>
           useFieldData(dataset, { getFields, refreshKey }),
         { initialProps: { dataset: datasetA, refreshKey: 'ready:1' as string | null } }
       );
@@ -213,6 +218,35 @@ describe('useFieldData', () => {
       // B's query finished, but asking for its fields failed: still not A's.
       rerender({ dataset: datasetB, refreshKey: 'ready:2' });
       await waitFor(() => expect(getFields).toHaveBeenCalledTimes(2));
+      expect(result.current.fieldNames).toEqual(['@message']);
+    });
+
+    it("doesn't ask while the query's dataset and the data view differ", async () => {
+      const getFields = jest.fn().mockResolvedValue([{ name: 'service', type: 'string' }]);
+      const view = {
+        ...datasetWithFields([{ name: '@message' }]),
+        id: 'other-dataset',
+      } as unknown as DataView;
+      renderHook(() => useFieldData(view, { getFields, refreshKey: 'ready:1' }));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(getFields).not.toHaveBeenCalled();
+    });
+
+    it('drops an answer that arrives after the query moved to another dataset', async () => {
+      let answer: (fields: Array<{ name: string }>) => void = () => {};
+      const getFields = jest.fn(
+        () => new Promise<Array<{ name: string }>>((resolve) => (answer = resolve))
+      );
+      const view = {
+        ...datasetWithFields([{ name: '@message' }]),
+        id: cloudDataset.id,
+      } as unknown as DataView;
+      const { result } = renderHook(() => useFieldData(view, { getFields, refreshKey: 'ready:1' }));
+      await waitFor(() => expect(getFields).toHaveBeenCalledTimes(1));
+
+      mockGetQuery.mockReturnValue({ dataset: { id: 'next-dataset', type: 'CLOUD' } });
+      answer([{ name: 'service' }]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(result.current.fieldNames).toEqual(['@message']);
     });
 

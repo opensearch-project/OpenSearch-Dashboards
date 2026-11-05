@@ -107,7 +107,7 @@ function reduceBuilder(
         aggregations: state.aggregations.filter((_, i) => i !== action.index),
       };
       // Drop a sort chip left pointing at a removed metric; raw-field sorts stay valid.
-      if (isOrphanedAggregateSort(next, aggregationColumn)) {
+      if (isOrphanedAggregateSort(next, aggregationColumn, state)) {
         const { sort: _sort, ...rest } = next;
         return rest;
       }
@@ -226,17 +226,20 @@ function isAggregateColumn(column: string): boolean {
 }
 
 // True when the sort points at an aggregate metric the query no longer produces;
-// emitting it would make the backend reject an unknown field.
+// emitting it would make the backend reject an unknown field. A metric column is one that looks
+// like PPL's (parens), or, given the state before an edit, one of that state's metric columns, so
+// a language whose columns are plain names (`count_1`) is covered too.
 function isOrphanedAggregateSort(
   state: PPLBuilderState,
-  aggregationColumn: AggregationColumnNamer = compileAggregation
+  aggregationColumn: AggregationColumnNamer = compileAggregation,
+  previous?: PPLBuilderState
 ): boolean {
   const { sort } = state;
-  return (
-    !!sort &&
-    isAggregateColumn(sort.column) &&
-    !sortableColumns(state, aggregationColumn).includes(sort.column)
-  );
+  if (!sort) return false;
+  const wasMetric =
+    isAggregateColumn(sort.column) ||
+    (!!previous && previous.aggregations.map(aggregationColumn).includes(sort.column));
+  return wasMetric && !sortableColumns(state, aggregationColumn).includes(sort.column);
 }
 
 function quoteSortColumn(column: string): string {
