@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright OpenSearch Contributors
+# SPDX-License-Identifier: Apache-2.0
 
 { # this ensures the entire script is downloaded #
 
