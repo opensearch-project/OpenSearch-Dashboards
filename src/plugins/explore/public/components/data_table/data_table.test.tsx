@@ -93,6 +93,21 @@ describe('DefaultDiscoverTable', () => {
     });
   });
 
+  // A screen tall enough to fit every rendered row: the sentinel is visible whenever observed.
+  it('keeps loading rows while the sentinel stays visible, with nothing to scroll', async () => {
+    mockIntersectionObserver.mockImplementation((callback) => ({
+      observe: (target: Element) =>
+        callback([{ isIntersecting: target.isConnected, target }] as IntersectionObserverEntry[]),
+      unobserve: () => null,
+      disconnect: () => null,
+    }));
+    const { container } = render(getDataTable());
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('tbody tr').length).toBe(mockRows.length);
+    });
+  });
+
   it('should display the sample size callout when all rows are rendered', async () => {
     const { container } = render(getDataTable());
 
