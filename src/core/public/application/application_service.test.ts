@@ -395,6 +395,76 @@ describe('#setup()', () => {
     });
   });
 
+  describe('createAsyncUpdater', () => {
+    it('initially hides the app and reveals it if the promise resolves to true', async () => {
+      const setup = service.setup(setupDeps);
+
+      let resolveCheck: (result: boolean) => void = () => {};
+      const asyncCheck = () =>
+        new Promise<boolean>((resolve) => {
+          resolveCheck = resolve;
+        });
+
+      const updater$ = setup.createAsyncUpdater(asyncCheck);
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1', updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+      let applications = await applications$.pipe(take(1)).toPromise();
+
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        })
+      );
+
+      // Resolve the async check
+      resolveCheck(true);
+      // Wait a tick for promise to resolve and RxJS to emit
+      await new Promise((resolve) => setImmediate(resolve));
+
+      applications = await applications$.pipe(take(1)).toPromise();
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          status: AppStatus.accessible,
+          navLinkStatus: AppNavLinkStatus.visible,
+        })
+      );
+    });
+
+    it('keeps the app hidden if the promise resolves to false', async () => {
+      const setup = service.setup(setupDeps);
+
+      let resolveCheck: (result: boolean) => void = () => {};
+      const asyncCheck = () =>
+        new Promise<boolean>((resolve) => {
+          resolveCheck = resolve;
+        });
+
+      const updater$ = setup.createAsyncUpdater(asyncCheck);
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1', updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+
+      // Resolve the async check to false
+      resolveCheck(false);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      const applications = await applications$.pipe(take(1)).toPromise();
+      expect(applications.get('app1')).toEqual(
+        expect.objectContaining({
+          id: 'app1',
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        })
+      );
+    });
+  });
+
   it("`registerMountContext` calls context container's registerContext", () => {
     const { registerMountContext } = service.setup(setupDeps);
     const container = setupDeps.context.createContextContainer.mock.results[0].value;
