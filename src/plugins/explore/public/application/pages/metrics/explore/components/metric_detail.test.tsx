@@ -108,7 +108,7 @@ describe('MetricDetail explicit-Run gate', () => {
 });
 
 describe('MetricDetail error state', () => {
-  it("shows the server's message and names the source when the metric fails to load", async () => {
+  it("shows only the server's message when the metric fails to load", async () => {
     const client = makeClient();
     client.getMetadata.mockRejectedValue(
       Object.assign(new Error(''), {
@@ -132,11 +132,12 @@ describe('MetricDetail error state', () => {
       </ExplorationContext.Provider>
     );
 
+    // Without the resources route's prefix, and without the generic sentence.
     expect(await screen.findByTestId('metricsExploreErrorMessage')).toHaveTextContent(
-      'Unable to get resources: access denied'
+      /^access denied$/
     );
-    expect(screen.getByTestId('metricsExploreErrorCallout')).toHaveTextContent(
-      'We encountered a problem fetching data from the My Metrics data source.'
-    );
+    const callout = screen.getByTestId('metricsExploreErrorCallout');
+    expect(callout).not.toHaveTextContent('Unable to get resources');
+    expect(callout).not.toHaveTextContent('Check your connection');
   });
 });

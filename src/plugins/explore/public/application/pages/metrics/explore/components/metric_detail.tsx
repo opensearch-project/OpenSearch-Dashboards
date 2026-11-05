@@ -30,7 +30,7 @@ import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
-import { getErrorMessage } from '../utils/get_error_message';
+import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
 
 interface BreakdownSeries {
   labelValue: string;
@@ -291,7 +291,7 @@ export const MetricDetail: React.FC = () => {
     unit: '',
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MetricsLoadError | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<Array<{ label: string }>>([]);
 
   const promql = queryGen.forMetric(state.metric, metadata.type, stepSec, state.filters);
@@ -321,7 +321,7 @@ export const MetricDetail: React.FC = () => {
           setLabels(labelNames.map((name) => ({ name, cardinality: 0 })));
         }
       } catch (e) {
-        if (!cancelled) setError(getErrorMessage(e));
+        if (!cancelled) setError(toMetricsLoadError(e));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -409,7 +409,14 @@ export const MetricDetail: React.FC = () => {
   );
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorCallout error={error} sourceLabel={source?.label} />;
+  if (error)
+    return (
+      <ErrorCallout
+        error={error.message}
+        fromServer={error.fromServer}
+        sourceLabel={source?.label}
+      />
+    );
 
   const deferredCallout = !previewsEnabled && (
     <>

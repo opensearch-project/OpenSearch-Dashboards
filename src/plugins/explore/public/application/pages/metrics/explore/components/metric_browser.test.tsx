@@ -152,20 +152,21 @@ describe('MetricBrowser error and empty states', () => {
       </ExplorationContext.Provider>
     );
 
-  it("shows the server's message and names the source when the metric list fails", async () => {
+  it("shows only the server's message when the metric list fails", async () => {
     const client = makeClient();
     client.getMetricNames.mockRejectedValue(
       httpError({ statusCode: 403, message: 'Unable to get resources: access denied' })
     );
     renderWithSource(client, { label: 'My Metrics' });
 
+    // Without the resources route's prefix, and without the generic sentence: the server's
+    // message says what went wrong.
     expect(await screen.findByTestId('metricsExploreErrorMessage')).toHaveTextContent(
-      'Unable to get resources: access denied'
+      /^access denied$/
     );
     const callout = screen.getByTestId('metricsExploreErrorCallout');
-    expect(callout).toHaveTextContent(
-      'We encountered a problem fetching data from the My Metrics data source.'
-    );
+    expect(callout).not.toHaveTextContent('Unable to get resources');
+    expect(callout).not.toHaveTextContent('Check your connection');
     expect(callout).not.toHaveTextContent('Prometheus');
   });
 

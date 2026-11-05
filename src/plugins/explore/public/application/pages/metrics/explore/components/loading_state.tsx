@@ -20,13 +20,17 @@ export function LoadingIndicator(): JSX.Element {
  * @param error The failure, as text.
  * @param sourceLabel The name of the selected source type (what the source picker shows), if
  *   known; without one the text says "the data source".
+ * @param fromServer Whether the server wrote the text: it then says what went wrong and what to
+ *   do, so the generic "Check your connection" sentence is left out.
  */
 export function ErrorCallout({
   error,
   sourceLabel,
+  fromServer = false,
 }: {
   error: string;
   sourceLabel?: string;
+  fromServer?: boolean;
 }): JSX.Element {
   const message = error.replace(/^Error:\s*/, '');
   const source = sourceLabel?.trim();
@@ -44,18 +48,20 @@ export function ErrorCallout({
       }
       body={
         <EuiText size="s" color="subdued">
-          <p>
-            {source
-              ? i18n.translate('explore.metricsExplore.errorBodyWithSource', {
-                  defaultMessage:
-                    'We encountered a problem fetching data from the {sourceLabel} data source. Check your connection and try again.',
-                  values: { sourceLabel: source },
-                })
-              : i18n.translate('explore.metricsExplore.errorBodyGeneric', {
-                  defaultMessage:
-                    'We encountered a problem fetching data from the data source. Check your connection and try again.',
-                })}
-          </p>
+          {!fromServer && (
+            <p>
+              {source
+                ? i18n.translate('explore.metricsExplore.errorBodyWithSource', {
+                    defaultMessage:
+                      'We encountered a problem fetching data from the {sourceLabel} data source. Check your connection and try again.',
+                    values: { sourceLabel: source },
+                  })
+                : i18n.translate('explore.metricsExplore.errorBodyGeneric', {
+                    defaultMessage:
+                      'We encountered a problem fetching data from the data source. Check your connection and try again.',
+                  })}
+            </p>
+          )}
           <p
             data-test-subj="metricsExploreErrorMessage"
             style={{ fontFamily: 'monospace', wordBreak: 'break-word' }}

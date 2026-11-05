@@ -31,7 +31,7 @@ import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { MetricsEmptyState } from './metrics_empty_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
-import { getErrorMessage } from '../utils/get_error_message';
+import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
 import { getNoMetricsBody } from '../utils/exploration_source';
 
 const PAGE_SIZE = 20;
@@ -85,7 +85,7 @@ export const MetricBrowser: React.FC = () => {
   const [allMetrics, setAllMetrics] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, MetricMetadata>>({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MetricsLoadError | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [debouncedSearch, setDebouncedSearch] = useState(state.search);
   const [searchResults, setSearchResults] = useState<string[] | null>(null);
@@ -125,7 +125,7 @@ export const MetricBrowser: React.FC = () => {
         if (cancelled) return;
         setAllMetrics(names);
       })
-      .catch((e) => !cancelled && setError(getErrorMessage(e)))
+      .catch((e) => !cancelled && setError(toMetricsLoadError(e)))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -240,7 +240,13 @@ export const MetricBrowser: React.FC = () => {
   }
 
   if (error) {
-    return <ErrorCallout error={error} sourceLabel={source?.label} />;
+    return (
+      <ErrorCallout
+        error={error.message}
+        fromServer={error.fromServer}
+        sourceLabel={source?.label}
+      />
+    );
   }
 
   if (!allMetrics.length) {

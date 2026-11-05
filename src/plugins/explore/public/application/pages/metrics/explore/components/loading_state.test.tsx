@@ -34,6 +34,23 @@ describe('ErrorCallout', () => {
     expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent('access denied');
   });
 
+  it('leaves out the generic sentence when the server wrote the message', () => {
+    render(
+      <ErrorCallout
+        error="You can't list these metrics. Ask for access."
+        sourceLabel="My Metrics"
+        fromServer
+      />
+    );
+    expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent(
+      'Check your connection'
+    );
+    expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent(
+      "You can't list these metrics. Ask for access."
+    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Unable to load metrics');
+  });
+
   it('reads as before for Prometheus', () => {
     render(<ErrorCallout error="Bad Request" sourceLabel="Prometheus" />);
     expect(
