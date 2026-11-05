@@ -256,7 +256,7 @@ export const DatasetSelectWidget = () => {
         appName="explore"
         supportedTypes={supportedTypes}
         signalType={flavorId}
-        showNonTimeFieldDatasets={false}
+        showNonTimeFieldDatasets={true}
       />
     </div>
   );

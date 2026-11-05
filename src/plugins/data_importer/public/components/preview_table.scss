@@ -32,3 +32,13 @@
     max-width: 50px;
   }
 }
+
+// Type-mismatch indicators: header icon for the column, danger text only on incompatible cells
+.previewTable__headerIcon,
+.previewTable__cellIcon {
+  margin-left: $euiSizeXS;
+}
+
+.previewTable__cell--invalid {
+  color: $euiColorDanger;
+}

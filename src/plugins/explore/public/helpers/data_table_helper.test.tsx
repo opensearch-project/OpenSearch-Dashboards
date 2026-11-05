@@ -155,6 +155,27 @@ describe('data_table_helper', () => {
       ).toBeUndefined();
     });
 
+    it('should drop the time column when timeFieldPresent is false (lookup / arbitrary source=)', () => {
+      const columns = ['field1'];
+
+      // hideTimeField=false, but the time field is absent from the result set.
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, false, false);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('field1');
+      expect(result.find((col) => col.displayName === 'Time')).toBeUndefined();
+    });
+
+    it('should include the time column when timeFieldPresent defaults to true', () => {
+      const columns = ['field1'];
+
+      // Omitting the arg preserves legacy behavior: the time column is prepended.
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, false);
+
+      expect(result[0].name).toBe('@timestamp');
+      expect(result[0].displayName).toBe('Time');
+    });
+
     it('should use shortenDottedString when isShortDots is true', () => {
       const columns = ['field.with.dots'];
       mockShortenDottedString.mockReturnValue('field...dots');

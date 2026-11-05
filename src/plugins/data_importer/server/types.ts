@@ -4,6 +4,7 @@
  */
 
 import { Readable } from 'stream';
+import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import { OpenSearchClient } from '../../../core/server';
 
 export interface DataImporterPluginSetup {
@@ -48,6 +49,37 @@ export interface IngestOptions {
    * Field name to use for the lookup identifier (typically '__lookup')
    */
   lookupField?: string;
+
+  /**
+   * Resolved mapping of the target index, if known. Used to coerce numbers/booleans to strings for
+   * fields declared as text/keyword; undeclared fields are passed through unchanged.
+   */
+  mapping?: MappingTypeMapping;
+}
+
+/**
+ * One bucket of failures that share a cause, e.g. 25,900 rows failing with
+ * `mapper_parsing_exception: failed to parse field [age] of type [integer]`.
+ */
+export interface IngestErrorSummary {
+  /**
+   * OpenSearch error type (e.g. `mapper_parsing_exception`), or an importer-local type such as
+   * `invalid_row` for rows rejected before being sent to OpenSearch
+   */
+  type: string;
+  /**
+   * Error reason with per-document detail (doc ids, value previews) stripped so that rows failing
+   * for the same cause are grouped together
+   */
+  reason: string;
+  /**
+   * Number of rows that failed with this type + reason
+   */
+  count: number;
+  /**
+   * A few example row numbers (ascending) for this bucket
+   */
+  sampleRows: number[];
 }
 
 export interface IngestResponse {
@@ -57,9 +89,15 @@ export interface IngestResponse {
   total: number;
   message: string;
   /**
-   * List of row numbers that failed to be parsed/ingested
+   * Full list of row numbers that failed to be parsed/ingested
    */
   failedRows: number[];
+  /**
+   * Top failure causes, most frequent first (capped to a handful of buckets). Prefer this over
+   * `failedRows` for user-facing messages. Built-in processors always populate it; optional so
+   * that externally registered processors remain compatible.
+   */
+  errorSummary?: IngestErrorSummary[];
 }
 
 export interface ValidationOptions {
