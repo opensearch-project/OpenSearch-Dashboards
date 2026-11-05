@@ -10,6 +10,7 @@ import { ChatService } from './services/chat_service';
 import { SuggestedActionsServiceSetupContract } from './services/suggested_action';
 import { CommandRegistrySetup } from './services/command_registry_service';
 import { StarterSuggestionsPluginStart } from '../../starter_suggestions/public';
+import type { DataSourcePluginStart } from '../../data_source/public';
 
 export interface ChatPluginSetup {
   suggestedActionsService: SuggestedActionsServiceSetupContract;
@@ -25,6 +26,8 @@ export interface AppPluginStartDependencies {
   contextProvider: ContextProviderStart;
   charts: ChartsPluginStart;
   starterSuggestions: StarterSuggestionsPluginStart;
+  // Optional: present when multiple data sources are enabled.
+  dataSource?: DataSourcePluginStart;
 }
 
 export enum ChatLayoutMode {

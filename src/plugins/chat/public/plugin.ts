@@ -32,6 +32,7 @@ import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
 import { HumanInputService } from './services/human_input_service';
 import { createAskUserAction } from './services/ask_user_action';
+import { ASK_USER_TOOL_NAME } from '../common';
 import { AssistantActionService } from '../../context_provider/public';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 import { ChatMountService } from './services/chat_mount_service';
@@ -149,6 +150,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      unresolvedDataSource?: 'picker' | 'agent';
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -164,7 +166,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.uiSettings,
       core.chat,
       core.workspaces,
-      core.savedObjects.client
+      core.savedObjects.client,
+      // Data sources are only read, picked and sent when multiple data sources are enabled.
+      !!deps.dataSource,
+      chatConfig.unresolvedDataSource ?? 'picker'
     );
 
     if (!isEnabled) {
@@ -179,9 +184,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        setSessionDataSourceList: (dataSourceId: string | undefined) => {
-          this.chatService?.setSessionDataSourceList(dataSourceId);
-        },
       });
     }
 
@@ -190,7 +192,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       try {
         const agenticMemoryProvider = new AgenticMemoryProvider(
           core.http,
-          () => this.chatService?.peekCurrentDataSourceId() ?? Promise.resolve(undefined)
+          () => this.chatService?.getDataSourceIdForRead() ?? Promise.resolve(undefined)
         );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {
@@ -301,6 +303,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.chatService?.destroy();
     this.confirmationService.cleanAll();
     this.humanInputService.cleanAll();
-    AssistantActionService.getInstance().unregisterAction('ask_user');
+    AssistantActionService.getInstance().unregisterAction(ASK_USER_TOOL_NAME);
   }
 }

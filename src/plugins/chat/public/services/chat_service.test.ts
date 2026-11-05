@@ -7,12 +7,13 @@ import {
   AVAILABLE_DATA_SOURCES_CONTEXT_ID,
   ChatService,
   AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+  DataSourceUnresolvedError,
 } from './chat_service';
 import { AgUiAgent, BaseEvent } from './ag_ui_agent';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Message } from '../../common/types';
 import { ToolDefinition } from '../../../context_provider/public';
-import { ChatServiceStart } from '../../../../core/public';
+import { ChatServiceStart, UiSettingScope } from '../../../../core/public';
 import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AgUiAgent
@@ -276,21 +277,6 @@ describe('ChatService', () => {
   });
 
   describe('sendMessage', () => {
-    const createStatefulContextStore = () => {
-      const storedContexts: Array<{ id: string; description: string; value: string }> = [];
-      return {
-        addContext: jest.fn((ctx: any) => {
-          storedContexts.push(ctx);
-        }),
-        removeContextById: jest.fn((id: string) => {
-          const index = storedContexts.findIndex((ctx) => ctx.id === id);
-          if (index !== -1) storedContexts.splice(index, 1);
-        }),
-        getAllContexts: jest.fn(() => storedContexts),
-        getBackendFormattedContexts: jest.fn().mockReturnValue([]),
-      };
-    };
-
     beforeEach(() => {
       // Initialize a thread first - required for sendMessage
       chatService.newThread();
@@ -551,90 +537,6 @@ describe('ChatService', () => {
 
       await expect(newService.sendMessage('test', [])).rejects.toThrow(
         'Thread ID is required to send a message'
-      );
-    });
-
-    it('should include session data source history in available-data-sources-context context', async () => {
-      const mockObservable = new Observable<BaseEvent>();
-      mockAgent.runAgent.mockReturnValue(mockObservable);
-
-      const mockSavedObjectsClient = {
-        find: jest.fn().mockResolvedValue({
-          savedObjects: [
-            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
-            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
-          ],
-        }),
-      };
-      const service = new ChatService(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient as any
-      );
-
-      (window as any).assistantContextStore = createStatefulContextStore();
-
-      service.newThread();
-      service.setSessionDataSourceList('ds-1');
-      service.setSessionDataSourceList('ds-2');
-      mockUiSettings.get.mockReturnValue(undefined);
-
-      await service.sendMessage('test', []);
-
-      const runInput = mockAgent.runAgent.mock.calls[0][0];
-      const availableDataSourcesContext = runInput.context.find(
-        (ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
-      );
-
-      expect(availableDataSourcesContext.value).toContain(
-        'Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): "Source One" (id: ds-1), "Source Two" (id: ds-2)'
-      );
-      expect(availableDataSourcesContext.value).toContain(
-        'IMPORTANT — this conversation involves MORE THAN ONE data source.'
-      );
-      expect(availableDataSourcesContext.value).toContain(
-        'A data source being currently active or previously confirmed does NOT satisfy this'
-      );
-    });
-
-    it('should not include available-data-sources-context context when only one data source has appeared in the session', async () => {
-      const mockObservable = new Observable<BaseEvent>();
-      mockAgent.runAgent.mockReturnValue(mockObservable);
-
-      const mockSavedObjectsClient = {
-        find: jest.fn().mockResolvedValue({
-          savedObjects: [
-            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
-            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
-          ],
-        }),
-      };
-      const service = new ChatService(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient as any
-      );
-
-      const contextStore = createStatefulContextStore();
-      (window as any).assistantContextStore = contextStore;
-
-      service.newThread();
-      service.setSessionDataSourceList('ds-1');
-      mockUiSettings.get.mockReturnValue(undefined);
-
-      await service.sendMessage('test', []);
-
-      const runInput = mockAgent.runAgent.mock.calls[0][0];
-      const availableDataSourcesContext = runInput.context.find(
-        (ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
-      );
-
-      expect(availableDataSourcesContext).toBeUndefined();
-      expect(contextStore.addContext).not.toHaveBeenCalled();
-      expect(contextStore.removeContextById).toHaveBeenCalledWith(
-        AVAILABLE_DATA_SOURCES_CONTEXT_ID
       );
     });
   });
@@ -1419,18 +1321,16 @@ describe('ChatService', () => {
   });
 
   describe('deleteConversation', () => {
-    it('should delete the conversation and clear its persisted data source state', async () => {
+    it('should delete the conversation', async () => {
       chatService.conversationHistoryService.deleteConversation = jest
         .fn()
         .mockResolvedValue(undefined);
-      const storeDeleteSpy = jest.spyOn((chatService as any).conversationDataSourceStore, 'delete');
 
       await chatService.deleteConversation('thread-x');
 
       expect(chatService.conversationHistoryService.deleteConversation).toHaveBeenCalledWith(
         'thread-x'
       );
-      expect(storeDeleteSpy).toHaveBeenCalledWith('thread-x');
     });
   });
 
@@ -1551,6 +1451,22 @@ describe('ChatService', () => {
 
       expect(mockCoreChatService.openWindow).toHaveBeenCalled();
       expect(mockInstance.sendMessage).toHaveBeenCalledWith({ content: 'test', messages: [] });
+    });
+
+    it('hands a caller data source to the window instead of applying it before the send', async () => {
+      const mockInstance = { sendMessage: jest.fn(), startNewChat: jest.fn() };
+      mockCoreChatService.isWindowOpen.mockReturnValue(true);
+      chatService.setChatWindowInstance(mockInstance);
+
+      await chatService.sendMessageWithWindow('test', [], { dataSourceId: 'ds-panel' });
+
+      expect(mockInstance.sendMessage).toHaveBeenCalledWith({
+        content: 'test',
+        messages: [],
+        dataSourceId: 'ds-panel',
+      });
+      // The window applies it only if it sends the message.
+      expect(chatService.getConversationDataSourceId()).toBeUndefined();
     });
 
     it('should delegate to ChatWindow when instance is available and window is open', async () => {
@@ -1839,193 +1755,6 @@ describe('ChatService', () => {
     });
   });
 
-  describe('restoreLatestConversation', () => {
-    const mockMessages = [
-      { id: 'msg-1', role: 'user', content: 'Hello' },
-      { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
-    ];
-    const mockThreadId = 'thread-12345';
-    const mockSnapshotEvent = {
-      type: 'MESSAGES_SNAPSHOT',
-      messages: mockMessages,
-      timestamp: Date.now(),
-    };
-
-    it('should return events array including MESSAGES_SNAPSHOT for the latest conversation', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest
-        .fn()
-        .mockResolvedValue([mockSnapshotEvent]);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).not.toBeNull();
-      expect(Array.isArray(result)).toBe(true);
-      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT');
-      expect(snapshot).toBeDefined();
-      expect((snapshot as any).messages).toEqual(mockMessages);
-      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
-    });
-
-    it('should return null and generate new thread when no conversations exist', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [],
-        total: 0,
-      });
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(mockCoreChatService.newThread).toHaveBeenCalled();
-    });
-
-    it('should return null and generate new thread when getConversation returns null', async () => {
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(mockCoreChatService.newThread).toHaveBeenCalled();
-    });
-
-    it('should return null and skip restore when thread ID is already set', async () => {
-      mockCoreChatService.getThreadId.mockReturnValue('existing-thread-id');
-      chatService.conversationHistoryService.getConversations = jest.fn();
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      expect(chatService.conversationHistoryService.getConversations).not.toHaveBeenCalled();
-      expect(mockCoreChatService.newThread).not.toHaveBeenCalled();
-    });
-
-    it('should inject synthetic tool call events for unfinished tool calls', async () => {
-      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
-      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
-        mockHasAction
-      );
-
-      const messagesWithUnfinished = [
-        { id: 'user-1', role: 'user', content: 'Run it' },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: '',
-          toolCalls: [
-            {
-              id: 'tc-1',
-              type: 'function',
-              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
-            },
-          ],
-        },
-      ];
-
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest
-        .fn()
-        .mockResolvedValue([
-          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
-        ]);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).not.toBeNull();
-      const types = result!.map((e: any) => e.type);
-      expect(types).toContain('TOOL_CALL_START');
-      expect(types).toContain('TOOL_CALL_ARGS');
-      expect(types).toContain('TOOL_CALL_END');
-
-      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT') as any;
-      const lastMsg = snapshot.messages[snapshot.messages.length - 1];
-      expect(lastMsg.toolCalls).toHaveLength(0);
-    });
-
-    it('injects synthetic tool call events before RUN_FINISHED', async () => {
-      // RUN_FINISHED clears the event handler's active-message map, so a tool call replayed after it
-      // cannot resolve its parent and spawns a second assistant message (losing the restored one's
-      // text). Synthetic events must sit where they do in a live stream: before the run ends.
-      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
-        (name: string) => name === 'ask_user'
-      );
-
-      const messages = [
-        { id: '0', role: 'user', content: 'ask me some question' },
-        {
-          id: '1',
-          role: 'assistant',
-          content: "I'd love to chat!",
-          toolCalls: [
-            { id: 'tc-ask', type: 'function', function: { name: 'ask_user', arguments: '{}' } },
-          ],
-        },
-      ];
-
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
-        { type: 'RUN_STARTED', timestamp: Date.now() },
-        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
-        { type: 'RUN_FINISHED', timestamp: Date.now() },
-      ]);
-
-      const result = await chatService.loadConversation(mockThreadId);
-
-      const types = result!.map((e: any) => e.type);
-      expect(types).toEqual([
-        'RUN_STARTED',
-        'MESSAGES_SNAPSHOT',
-        'TOOL_CALL_START',
-        'TOOL_CALL_ARGS',
-        'TOOL_CALL_END',
-        'RUN_FINISHED',
-      ]);
-    });
-
-    it('should not inject synthetic events for non-frontend tool calls', async () => {
-      const mockHasAction = jest.fn().mockReturnValue(false);
-      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
-        mockHasAction
-      );
-
-      const messagesWithServerTool = [
-        { id: 'user-1', role: 'user', content: 'Run it' },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: '',
-          toolCalls: [
-            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
-          ],
-        },
-      ];
-
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
-        total: 1,
-      });
-      chatService.conversationHistoryService.getConversation = jest
-        .fn()
-        .mockResolvedValue([
-          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
-        ]);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).not.toBeNull();
-      const types = result!.map((e: any) => e.type);
-      expect(types).not.toContain('TOOL_CALL_START');
-    });
-  });
-
   describe('loadConversation', () => {
     const mockThreadId = 'thread-load-123';
     const mockMessages = [
@@ -2090,6 +1819,45 @@ describe('ChatService', () => {
       expect(types).toContain('TOOL_CALL_START');
       expect(types).toContain('TOOL_CALL_ARGS');
       expect(types).toContain('TOOL_CALL_END');
+    });
+
+    it('injects synthetic tool call events before RUN_FINISHED', async () => {
+      // RUN_FINISHED clears the event handler's active-message map, so a tool call replayed after it
+      // cannot resolve its parent and spawns a second assistant message (losing the restored one's
+      // text). Synthetic events must sit where they do in a live stream: before the run ends.
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        (name: string) => name === 'ask_user'
+      );
+
+      const messages = [
+        { id: '0', role: 'user', content: 'ask me some question' },
+        {
+          id: '1',
+          role: 'assistant',
+          content: "I'd love to chat!",
+          toolCalls: [
+            { id: 'tc-ask', type: 'function', function: { name: 'ask_user', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        { type: 'RUN_STARTED', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      const types = result!.map((e: any) => e.type);
+      expect(types).toEqual([
+        'RUN_STARTED',
+        'MESSAGES_SNAPSHOT',
+        'TOOL_CALL_START',
+        'TOOL_CALL_ARGS',
+        'TOOL_CALL_END',
+        'RUN_FINISHED',
+      ]);
     });
 
     it('should inject synthetic events for each of multiple unfinished tool calls', async () => {
@@ -2199,501 +1967,1251 @@ describe('ChatService', () => {
     });
   });
 
-  describe('getWorkspaceAwareDataSourceId with page context priority', () => {
-    let mockWorkspaces: any;
+  // ---------------------------------------------------------------------------------------------
+  // Data source resolution
+  // ---------------------------------------------------------------------------------------------
 
-    beforeEach(() => {
-      mockUiSettings = {
-        get: jest.fn(),
-      };
-      mockWorkspaces = {
-        currentWorkspaceId$: {
-          getValue: jest.fn().mockReturnValue(null),
-        },
-      };
+  const getDefaultDataSourceIdMock = jest.requireMock('../../../data_source_management/public')
+    .getDefaultDataSourceId as jest.Mock;
 
-      // Set default return value for getDefaultDataSourceId mock
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('workspace-data-source-id');
-    });
+  const DS_THREAD_ID = 'thread-ds-1';
+  const DS_A = { id: 'ds-a', attributes: { title: 'Alpha' } };
+  const DS_B = { id: 'ds-b', attributes: { title: 'Beta' } };
+  const DS_C = { id: 'ds-c', attributes: { title: 'Gamma' } };
 
-    it('should prioritize page context data source over workspace data source', async () => {
-      // Set up page context with data source
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
-          {
-            categories: ['page', 'static'],
-            description: 'Explore page context',
-            value: {
-              appId: 'explore',
-              dataset: { dataSource: { id: 'page-data-source-id' } },
-            },
-          },
-        ]),
-      };
-
-      // Create service with uiSettings and workspaces
-      const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces
-      );
-
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
-
-      expect(result).toBe('page-data-source-id');
-    });
-
-    it('should fallback to workspace data source when no page context', async () => {
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
-
-      // Set up context store without page context
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
-          {
-            id: 'text-selection',
-            categories: ['dynamic'],
-            description: 'Selected text',
-            value: 'some text',
-          },
-        ]),
-      };
-
-      const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces
-      );
-
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
-
-      expect(result).toBe('workspace-fallback-id');
-    });
-
-    it('should fallback to workspace data source when page context has invalid data', async () => {
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
-
-      // Set up page context without data source
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
-          {
-            categories: ['page', 'static'],
-            description: 'Invalid page context',
-            value: { appId: 'explore' }, // Missing dataset
-          },
-        ]),
-      };
-
-      const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces
-      );
-
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
-
-      expect(result).toBe('workspace-fallback-id');
-    });
-
-    it('should return undefined when no context store available', async () => {
-      // Remove context store
-      delete (global as any).window.assistantContextStore;
-
-      const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces
-      );
-
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
-
-      // Should still fallback to workspace data source even without context store
-      expect(result).toBe('workspace-data-source-id');
-    });
-
-    it('should handle context store errors gracefully', async () => {
-      // Set up context store that throws error
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockImplementation(() => {
-          throw new Error('Context store error');
-        }),
-      };
-
-      const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces
-      );
-
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
-
-      expect(result).toBeUndefined();
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      delete (global as any).window.assistantContextStore;
-    });
-  });
-
-  describe('getAvailableDataSources', () => {
-    let mockSavedObjectsClient: any;
-
-    beforeEach(() => {
-      mockSavedObjectsClient = {
-        find: jest.fn().mockResolvedValue({
-          savedObjects: [
-            {
-              id: 'ds-1',
-              attributes: { title: 'Beta Source', dataSourceEngineType: 'OpenSearch' },
-            },
-            {
-              id: 'ds-2',
-              attributes: { title: 'Alpha Source', dataSourceEngineType: 'OpenSearch' },
-            },
-            {
-              id: 'ds-3',
-              attributes: { title: 'Gamma AE', dataSourceEngineType: 'AnalyticEngine' },
-            },
-          ],
-        }),
-      };
-    });
-
-    it('should return sorted data sources excluding AnalyticEngine', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient
-      );
-
-      const result = await service.getAvailableDataSources();
-
-      expect(result).toEqual([
-        { id: 'ds-2', title: 'Alpha Source' },
-        { id: 'ds-1', title: 'Beta Source' },
-      ]);
-    });
-
-    it('should cache the result and not query again', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient
-      );
-
-      await service.getAvailableDataSources();
-      await service.getAvailableDataSources();
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return empty array when savedObjectsClient is not set', async () => {
-      const service = new (ChatService as any)(mockUiSettings, mockCoreChatService);
-
-      const result = await service.getAvailableDataSources();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array when find throws', async () => {
-      mockSavedObjectsClient.find.mockRejectedValue(new Error('Network error'));
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient
-      );
-
-      const result = await service.getAvailableDataSources();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should bypass the cache when forceRefresh is true', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient
-      );
-
-      await service.getAvailableDataSources();
-      await service.getAvailableDataSources(true);
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('validateDataSourceId', () => {
-    let mockSavedObjectsClient: any;
-
-    const buildClient = (ids: string[]) => ({
-      find: jest.fn().mockResolvedValue({
-        savedObjects: ids.map((id) => ({
-          id,
-          attributes: { title: `title-${id}`, dataSourceEngineType: 'OpenSearch' },
-        })),
+  const createStatefulContextStore = () => {
+    const stored: any[] = [];
+    return {
+      addContext: jest.fn((ctx: any) => {
+        const index = stored.findIndex((c) => c.id === ctx.id);
+        if (index !== -1) stored.splice(index, 1);
+        stored.push(ctx);
       }),
+      removeContextById: jest.fn((id: string) => {
+        const index = stored.findIndex((c) => c.id === id);
+        if (index !== -1) stored.splice(index, 1);
+      }),
+      getAllContexts: jest.fn(() => stored),
+      getBackendFormattedContexts: jest.fn().mockReturnValue([]),
+    };
+  };
+
+  /** A saved object as savedObjectsClient.get returns it. */
+  const savedDataSource = (id: string, title: string, workspaces?: string[]) => ({
+    id,
+    type: 'data-source',
+    attributes: { title },
+    workspaces,
+  });
+
+  const notFound = (id: string) => ({
+    id,
+    type: 'data-source',
+    attributes: {},
+    error: { statusCode: 404 },
+  });
+
+  interface DataSourceHarnessOptions {
+    list?: Array<{ id: string; attributes: { title: string } }>;
+    total?: number;
+    workspaceId?: string;
+    defaultId?: string;
+    dataSourceEnabled?: boolean;
+    unresolvedDataSource?: 'picker' | 'agent';
+  }
+
+  /**
+   * A ChatService with a saved objects client. The thread is set directly (not via newThread) so
+   * the list is not prefetched and find counts start at zero.
+   */
+  const setupDataSources = (options: DataSourceHarnessOptions = {}) => {
+    const { list = [DS_A, DS_B, DS_C], total, workspaceId, defaultId } = options;
+    const find = jest.fn().mockResolvedValue({ savedObjects: list, total });
+    const get = jest.fn(async (_type: string, id: string): Promise<any> => notFound(id));
+    const currentWorkspaceId$ = new BehaviorSubject<string | undefined>(workspaceId);
+    const store = createStatefulContextStore();
+    (window as any).assistantContextStore = store;
+    getDefaultDataSourceIdMock.mockReset();
+    getDefaultDataSourceIdMock.mockResolvedValue(defaultId);
+    // Runs complete on subscribe, so a finished run does not hold up the next continuation.
+    mockAgent.runAgent.mockReturnValue(new Observable<BaseEvent>((s) => s.complete()));
+    const service = new ChatService(
+      mockUiSettings,
+      mockCoreChatService,
+      { currentWorkspaceId$ } as any,
+      { find, get } as any,
+      options.dataSourceEnabled ?? true,
+      options.unresolvedDataSource
+    );
+    mockThreadId$.next(DS_THREAD_ID);
+    // The continuation delay is covered by the sendToolResult tests; skip it here.
+    jest.spyOn(service as any, 'waitBeforeContinuation').mockResolvedValue(true);
+    return { service, find, get, store, currentWorkspaceId$ };
+  };
+
+  const setPageDataSource = (store: ReturnType<typeof createStatefulContextStore>, id?: string) => {
+    store.removeContextById('page-context');
+    if (id) {
+      store.addContext({
+        id: 'page-context',
+        categories: ['page'],
+        description: 'Page context',
+        value: { appId: 'explore', dataset: { dataSource: { id } } },
+      });
+    }
+  };
+
+  const dataSourceContextValue = (runInput: any): string | undefined =>
+    runInput.context.find((ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES)
+      ?.value;
+
+  const NOT_RECORDED =
+    'The active data source is not recorded in the conversation yet. Before calling any other tool, call switch_data_source with dataSourceId ';
+
+  const lastRunAgentCall = () =>
+    mockAgent.runAgent.mock.calls[mockAgent.runAgent.mock.calls.length - 1];
+
+  describe('data sources', () => {
+    afterEach(() => {
+      delete (window as any).assistantContextStore;
     });
 
-    beforeEach(() => {
-      mockSavedObjectsClient = buildClient(['ds-1', 'ds-2']);
-    });
+    describe('a data source a caller passes', () => {
+      const caller = (id: string) => ({ callerDataSourceId: id });
 
-    const buildService = (client: any = mockSavedObjectsClient) =>
-      new (ChatService as any)(mockUiSettings, mockCoreChatService, undefined, client);
+      it('is used for its message ahead of the conversation data source, without being recorded', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-b');
 
-    it('should accept a known data source id and return its info', async () => {
-      const result = await buildService().validateDataSourceId('ds-1');
+        const resolution = await service.resolveDataSourceForRun(caller('ds-c'));
 
-      expect(result.valid).toBe(true);
-      expect(result.dataSource).toEqual({ id: 'ds-1', title: 'title-ds-1' });
-    });
-
-    it('should reject an unknown id and report the valid ids', async () => {
-      const result = await buildService().validateDataSourceId('not-a-data-source');
-
-      expect(result.valid).toBe(false);
-      expect(result.dataSource).toBeUndefined();
-      expect(result.availableDataSources.map((ds: any) => ds.id)).toEqual(['ds-1', 'ds-2']);
-    });
-
-    it('should refresh the cached list once before rejecting an id', async () => {
-      const service = buildService();
-      // Warm the cache, then have the client report a newly created data source.
-      await service.getAvailableDataSources();
-      mockSavedObjectsClient.find.mockResolvedValue({
-        savedObjects: [
-          { id: 'ds-1', attributes: { title: 'title-ds-1' } },
-          { id: 'ds-2', attributes: { title: 'title-ds-2' } },
-          { id: 'ds-new', attributes: { title: 'Freshly created' } },
-        ],
+        expect(resolution).toMatchObject({ active: { id: 'ds-c' }, source: 'caller' });
+        // Resolution is a pure read; only the agent's switch_data_source records it.
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+        expect(service.getConversationDataSourceId()).toBe('ds-b');
       });
 
-      const result = await service.validateDataSourceId('ds-new');
+      it('asks the agent to switch to it, and stays chosen once its message is sent', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-b');
 
-      expect(result.valid).toBe(true);
-      expect(result.dataSource).toEqual({ id: 'ds-new', title: 'Freshly created' });
+        await service.sendMessage('hi', [], undefined, {
+          resolution: await service.resolveDataSourceForRun(caller('ds-c')),
+        });
+
+        const value = dataSourceContextValue(lastRunAgentCall()[0]);
+        expect(value).toContain(`Active data source: "Gamma" (id: ds-c)\n`);
+        expect(value).toContain(`${NOT_RECORDED}"ds-c"`);
+        expect(service.getPendingDataSourceId()).toBe('ds-c');
+        expect(service.getConversationDataSourceId()).toBe('ds-b');
+      });
+
+      it('asks the agent to record it in later runs too, until it does', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-b');
+        await service.sendMessage('hi', [], undefined, {
+          resolution: await service.resolveDataSourceForRun(caller('ds-c')),
+        });
+
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-c' },
+          source: 'pending',
+        });
+        await service.sendMessage('and now?', []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-c');
+        const value = dataSourceContextValue(runInput);
+        expect(value).toContain(`${NOT_RECORDED}"ds-c"`);
+      });
+
+      it('becomes the conversation data source once the agent switches to it', async () => {
+        const { service } = setupDataSources();
+        service.setPendingDataSource('ds-c');
+        service.setConversationDataSource('ds-c');
+
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-c' },
+          source: 'conversation',
+        });
+      });
+
+      it('is replaced when the agent switches to another data source the user named', async () => {
+        const { service } = setupDataSources();
+        service.setPendingDataSource('ds-c');
+        service.setConversationDataSource('ds-a');
+
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+        expect(await service.resolveDataSourceForRun()).toMatchObject({ active: { id: 'ds-a' } });
+      });
+
+      it('asks nothing of the agent when it already is the conversation data source', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-c');
+
+        const resolution = await service.resolveDataSourceForRun(caller('ds-c'));
+        expect(resolution).toMatchObject({ active: { id: 'ds-c' }, source: 'conversation' });
+        await service.sendMessage('hi', [], undefined, { resolution });
+
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+        expect(dataSourceContextValue(lastRunAgentCall()[0])).not.toContain(
+          'Before calling any other tool'
+        );
+      });
+
+      it('stays behind the page data source', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+
+        const resolution = await service.resolveDataSourceForRun(caller('ds-c'));
+        expect(resolution).toMatchObject({ active: { id: 'ds-a' }, source: 'page' });
+        await service.sendMessage('hi', [], undefined, { resolution });
+
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+      });
+
+      it('is ignored, with a debug note, when it does not verify, keeping an earlier picker choice', async () => {
+        const debug = jest.spyOn(console, 'debug').mockImplementation(() => {});
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-a');
+        service.setPendingDataSource('ds-b');
+
+        const resolution = await service.resolveDataSourceForRun(caller('ds-gone'));
+        expect(resolution).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'pending',
+        });
+        await service.sendMessage('hi', [], undefined, { resolution });
+
+        expect(service.getPendingDataSourceId()).toBe('ds-b');
+        expect(debug).toHaveBeenCalledWith(expect.stringContaining('"ds-gone"'));
+        debug.mockRestore();
+      });
+
+      it('is cleared with the conversation', async () => {
+        const { service } = setupDataSources({ defaultId: 'ds-a' });
+        service.setPendingDataSource('ds-c');
+        service.newThread();
+
+        expect(await service.resolveDataSourceForRun()).toMatchObject({ active: { id: 'ds-a' } });
+      });
     });
 
-    it('should fail open when the data source list cannot be resolved', async () => {
-      // An empty list also means "no savedObjectsClient" or "find() threw" — validation
-      // must not make switching impossible in that case.
-      const serviceWithoutClient = new (ChatService as any)(mockUiSettings, mockCoreChatService);
-      const result = await serviceWithoutClient.validateDataSourceId('anything');
+    describe('the default data source setting', () => {
+      it('is read once per conversation', async () => {
+        const { service } = setupDataSources({ defaultId: 'ds-a' });
 
-      expect(result.valid).toBe(true);
-      expect(result.availableDataSources).toEqual([]);
+        await service.resolveDataSourceForRun();
+        await service.getDataSourceIdForRead();
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledTimes(1);
+
+        service.newThread();
+        await service.resolveDataSourceForRun();
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledTimes(2);
+      });
+
+      it('is read again after a failed read', async () => {
+        const { service } = setupDataSources();
+        getDefaultDataSourceIdMock.mockRejectedValueOnce(new Error('down'));
+
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        getDefaultDataSourceIdMock.mockResolvedValue('ds-a');
+        expect(await service.resolveDataSourceForRun()).toMatchObject({ active: { id: 'ds-a' } });
+      });
     });
-  });
 
-  describe('getCurrentDataSourceId', () => {
-    let mockSavedObjectsClient: any;
-    let mockWorkspaces: any;
+    describe('resolveDataSourceForRun', () => {
+      it('prefers the page data source, then the conversation one, then the default', async () => {
+        const { service, store } = setupDataSources({ defaultId: 'ds-c' });
+        setPageDataSource(store, 'ds-a');
+        service.setConversationDataSource('ds-b');
 
-    beforeEach(() => {
-      mockWorkspaces = {
-        currentWorkspaceId$: { getValue: jest.fn().mockReturnValue('workspace-1') },
-      };
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          kind: 'resolved',
+          active: { id: 'ds-a', title: 'Alpha' },
+          source: 'page',
+        });
 
-      mockSavedObjectsClient = {
-        find: jest.fn().mockResolvedValue({
-          savedObjects: [
-            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
-            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+        setPageDataSource(store, undefined);
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'conversation',
+        });
+
+        service.newThread();
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-c' },
+          source: 'globalDefault',
+        });
+      });
+
+      it('moves to the next candidate when an id is neither listed nor found by lookup', async () => {
+        const { service, store, get } = setupDataSources();
+        setPageDataSource(store, 'ds-gone');
+        service.setConversationDataSource('ds-b');
+
+        const resolution = await service.resolveDataSourceForRun();
+
+        expect(get).toHaveBeenCalledWith('data-source', 'ds-gone');
+        expect(resolution).toMatchObject({ active: { id: 'ds-b' }, source: 'conversation' });
+      });
+
+      it('uses an id found by lookup in the current workspace, appends it and marks the list incomplete', async () => {
+        const { service, get } = setupDataSources({ list: [DS_A], workspaceId: 'ws-1' });
+        get.mockImplementation(async (_type: string, id: string) =>
+          savedDataSource(id, 'Far Away', ['ws-1'])
+        );
+        service.setConversationDataSource('ds-far');
+
+        expect(await service.resolveDataSourceForRun()).toEqual({
+          kind: 'resolved',
+          active: { id: 'ds-far', title: 'Far Away' },
+          source: 'conversation',
+          available: [
+            { id: 'ds-a', title: 'Alpha' },
+            { id: 'ds-far', title: 'Far Away' },
           ],
-        }),
+          listComplete: false,
+        });
+      });
+
+      it('does not use an id the lookup finds in another workspace', async () => {
+        const { service, get } = setupDataSources({ list: [DS_A], workspaceId: 'ws-1' });
+        get.mockImplementation(async (_type: string, id: string) =>
+          savedDataSource(id, 'Elsewhere', ['ws-2'])
+        );
+        service.setConversationDataSource('ds-other');
+
+        expect(await service.resolveDataSourceForRun()).toEqual({
+          kind: 'needs_selection',
+          available: [{ id: 'ds-a', title: 'Alpha' }],
+          listComplete: true,
+        });
+      });
+
+      it('does not use an id whose lookup throws, and looks it up again on the next call', async () => {
+        const { service, get } = setupDataSources({ list: [DS_A] });
+        get.mockRejectedValue(new Error('network down'));
+        service.setConversationDataSource('ds-x');
+
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        expect(get).toHaveBeenCalledTimes(2);
+      });
+
+      it('caches a 404 lookup for the thread', async () => {
+        const { service, get } = setupDataSources({ list: [DS_A] });
+        service.setConversationDataSource('ds-x');
+
+        await service.resolveDataSourceForRun();
+        await service.resolveDataSourceForRun();
+
+        expect(get).toHaveBeenCalledTimes(1);
+      });
+
+      it('reads the workspace default in a workspace and the global default outside one', async () => {
+        const inWorkspace = setupDataSources({ workspaceId: 'ws-1', defaultId: 'ds-b' });
+        inWorkspace.get.mockImplementation(async (_type: string, id: string) =>
+          savedDataSource(id, 'unused', ['ws-1'])
+        );
+        expect(await inWorkspace.service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'workspaceDefault',
+        });
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(
+          mockUiSettings,
+          UiSettingScope.WORKSPACE
+        );
+
+        const outside = setupDataSources({ defaultId: 'ds-b' });
+        expect(await outside.service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'globalDefault',
+        });
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(
+          mockUiSettings,
+          UiSettingScope.GLOBAL
+        );
+      });
+
+      it('needs a selection when reading the default throws', async () => {
+        const { service } = setupDataSources();
+        getDefaultDataSourceIdMock.mockRejectedValue(new Error('settings unavailable'));
+
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+      });
+
+      it('is disabled without reading the list when multiple data sources are not enabled', async () => {
+        const { service, find } = setupDataSources({ dataSourceEnabled: false });
+
+        expect(service.isDataSourceEnabled()).toBe(false);
+        expect(await service.resolveDataSourceForRun()).toEqual({ kind: 'disabled' });
+        expect(find).not.toHaveBeenCalled();
+      });
+
+      it('is disabled without a saved objects client', async () => {
+        expect(chatService.isDataSourceEnabled()).toBe(false);
+        expect(await chatService.resolveDataSourceForRun()).toEqual({ kind: 'disabled' });
+      });
+
+      it('reports list_failed when the list read fails and no candidate verifies', async () => {
+        const { service, find } = setupDataSources({ defaultId: 'ds-a' });
+        find.mockRejectedValue(new Error('boom'));
+
+        expect(await service.resolveDataSourceForRun()).toEqual({ kind: 'list_failed' });
+      });
+
+      it('resolves a candidate found by lookup even when the list read fails', async () => {
+        const { service, find, get } = setupDataSources();
+        find.mockRejectedValue(new Error('boom'));
+        get.mockImplementation(async (_type: string, id: string) => savedDataSource(id, 'Alpha'));
+        service.setConversationDataSource('ds-a');
+
+        expect(await service.resolveDataSourceForRun()).toEqual({
+          kind: 'resolved',
+          active: { id: 'ds-a', title: 'Alpha' },
+          source: 'conversation',
+          available: [{ id: 'ds-a', title: 'Alpha' }],
+          listComplete: false,
+        });
+      });
+
+      it('reports none_exist when the list is empty', async () => {
+        const { service } = setupDataSources({ list: [], defaultId: 'ds-a' });
+
+        expect(await service.resolveDataSourceForRun()).toEqual({ kind: 'none_exist' });
+      });
+
+      it('carries the list, sorted by title, when a selection is needed', async () => {
+        const { service } = setupDataSources({ list: [DS_C, DS_A, DS_B] });
+
+        expect(await service.resolveDataSourceForRun()).toEqual({
+          kind: 'needs_selection',
+          available: [
+            { id: 'ds-a', title: 'Alpha' },
+            { id: 'ds-b', title: 'Beta' },
+            { id: 'ds-c', title: 'Gamma' },
+          ],
+          listComplete: true,
+        });
+      });
+
+      it('marks the list incomplete when the total exceeds the listed data sources', async () => {
+        const { service } = setupDataSources({ list: [DS_A, DS_B], total: 150 });
+
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          kind: 'needs_selection',
+          listComplete: false,
+        });
+
+        service.setConversationDataSource('ds-a');
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          kind: 'resolved',
+          listComplete: false,
+        });
+      });
+    });
+
+    describe('direct lookup of ids missing from the list', () => {
+      const resolveWithDefault = async (getResult: () => Promise<any>) => {
+        const { service, get } = setupDataSources({ defaultId: 'ds-x' });
+        get.mockImplementation(getResult);
+        return { service, get, resolution: await service.resolveDataSourceForRun() };
       };
+
+      it('treats a 403 result as not available and caches it', async () => {
+        const { service, get, resolution } = await resolveWithDefault(async () => ({
+          id: 'ds-x',
+          type: 'data-source',
+          attributes: {},
+          error: { statusCode: 403 },
+        }));
+
+        expect(resolution.kind).toBe('needs_selection');
+        await service.resolveDataSourceForRun();
+        expect(get).toHaveBeenCalledTimes(1);
+      });
+
+      it('treats a request rejected with 403 as not available and caches it', async () => {
+        const { service, get, resolution } = await resolveWithDefault(async () => {
+          throw Object.assign(new Error('Forbidden'), { res: { status: 403 } });
+        });
+
+        expect(resolution.kind).toBe('needs_selection');
+        await service.resolveDataSourceForRun();
+        expect(get).toHaveBeenCalledTimes(1);
+      });
+
+      it('treats an object of another type as not available', async () => {
+        const { resolution } = await resolveWithDefault(async () => ({
+          id: 'ds-x',
+          type: 'index-pattern',
+          attributes: { title: 'Not a data source' },
+        }));
+
+        expect(resolution.kind).toBe('needs_selection');
+      });
+
+      it('treats an object with empty attributes as not available', async () => {
+        const { resolution } = await resolveWithDefault(async () => ({
+          id: 'ds-x',
+          type: 'data-source',
+          attributes: {},
+        }));
+
+        expect(resolution.kind).toBe('needs_selection');
+      });
+
+      it('shares one request between concurrent lookups of the same id', async () => {
+        const { service, get } = setupDataSources({ defaultId: 'ds-x' });
+        let finish: (value: any) => void = () => {};
+        get.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
+
+        const first = service.resolveDataSourceForRun();
+        const second = service.getDataSourceIdForRead();
+        // Both resolutions reach the lookup before it answers.
+        await new Promise((r) => setTimeout(r, 0));
+        finish(savedDataSource('ds-x', 'Extra'));
+
+        expect((await first).kind).toBe('resolved');
+        expect(await second).toBe('ds-x');
+        expect(get).toHaveBeenCalledTimes(1);
+      });
+
+      it('looks an id up again in another conversation', async () => {
+        const { service, get } = setupDataSources({ defaultId: 'ds-x' });
+        await service.resolveDataSourceForRun();
+        mockThreadId$.next('another-thread');
+        await service.resolveDataSourceForRun();
+
+        expect(get).toHaveBeenCalledTimes(2);
+      });
     });
 
-    it('should return data source ID when it exists in available data sources', async () => {
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('ds-1');
+    describe('verifyDataSourceId', () => {
+      it('finds an id in the list without a lookup', async () => {
+        const { service, get } = setupDataSources();
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+        const result = await service.verifyDataSourceId('ds-b');
 
-      const result = await service.getCurrentDataSourceId();
+        expect(result).toMatchObject({ dataSource: { id: 'ds-b' }, unverifiable: false });
+        expect(get).not.toHaveBeenCalled();
+      });
 
-      expect(result).toBe('ds-1');
+      it('reports a failed lookup as unverifiable, not as an unknown id', async () => {
+        const { service, get } = setupDataSources();
+        get.mockRejectedValue(new Error('network down'));
+
+        const result = await service.verifyDataSourceId('ds-new');
+
+        expect(result.dataSource).toBeUndefined();
+        expect(result.unverifiable).toBe(true);
+        expect(result.available.map((ds) => ds.id)).toEqual(['ds-a', 'ds-b', 'ds-c']);
+      });
+
+      it('reports an object-level error other than 403/404 as unverifiable, without caching', async () => {
+        const { service, get } = setupDataSources();
+        get.mockResolvedValue({ id: 'ds-x', type: 'data-source', error: { statusCode: 500 } });
+
+        expect((await service.verifyDataSourceId('ds-x')).unverifiable).toBe(true);
+        await service.verifyDataSourceId('ds-x');
+        expect(get).toHaveBeenCalledTimes(2);
+      });
+
+      it('reports a definite miss as not unverifiable', async () => {
+        const { service } = setupDataSources();
+
+        const result = await service.verifyDataSourceId('ds-missing');
+
+        expect(result).toMatchObject({ unverifiable: false });
+        expect(result.dataSource).toBeUndefined();
+      });
+
+      it('reports unverifiable when the list cannot be read and the lookup misses', async () => {
+        const { service, find } = setupDataSources();
+        find.mockRejectedValue(new Error('down'));
+
+        expect((await service.verifyDataSourceId('ds-missing')).unverifiable).toBe(true);
+      });
     });
 
-    it('should not confirm workspace-resolved data source when called in read-only mode', async () => {
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('ds-1');
+    describe('data source list lifecycle', () => {
+      it('shares one list read between concurrent resolutions', async () => {
+        const { service, find } = setupDataSources();
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+        await Promise.all([service.resolveDataSourceForRun(), service.resolveDataSourceForRun()]);
 
-      const result = await service.peekCurrentDataSourceId();
+        expect(find).toHaveBeenCalledTimes(1);
+        expect(find).toHaveBeenCalledWith({
+          type: 'data-source',
+          fields: ['title'],
+          perPage: 100,
+        });
+      });
 
-      expect(result).toBe('ds-1');
-      expect(service.getConfirmedDataSourceId()).toBeUndefined();
-      expect(service.getSessionDataSourceList()).toEqual([]);
+      it('reads the list again after a failed read', async () => {
+        const { service, find } = setupDataSources();
+        find.mockRejectedValueOnce(new Error('boom'));
+
+        expect((await service.resolveDataSourceForRun()).kind).toBe('list_failed');
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        expect(find).toHaveBeenCalledTimes(2);
+      });
+
+      it('keeps a successful read for the thread and reads again for another thread', async () => {
+        const { service, find } = setupDataSources();
+
+        await service.resolveDataSourceForRun();
+        await service.resolveDataSourceForRun();
+        expect(find).toHaveBeenCalledTimes(1);
+
+        mockThreadId$.next('thread-ds-2');
+        await service.resolveDataSourceForRun();
+        expect(find).toHaveBeenCalledTimes(2);
+
+        service.newThread();
+        await service.resolveDataSourceForRun();
+        expect(find).toHaveBeenCalledTimes(3);
+      });
+
+      it('prefetches the list on newThread', () => {
+        const { service, find } = setupDataSources();
+
+        service.newThread();
+
+        expect(find).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not prefetch on newThread when data sources are disabled', () => {
+        const { service, find } = setupDataSources({ dataSourceEnabled: false });
+
+        service.newThread();
+
+        expect(find).not.toHaveBeenCalled();
+      });
     });
 
-    it('should return data source ID even if not in available data sources', async () => {
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('ds-invalid');
+    describe('overlapping conversation loads', () => {
+      const historyWithSwitch = (dataSourceId: string) => [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          timestamp: Date.now(),
+          messages: [
+            {
+              id: 'a1',
+              role: 'assistant',
+              content: '',
+              toolCalls: [
+                {
+                  id: 'c1',
+                  type: 'function',
+                  function: { name: 'switch_data_source', arguments: '{}' },
+                },
+              ],
+            },
+            {
+              id: 't1',
+              role: 'tool',
+              toolCallId: 'c1',
+              content: JSON.stringify({ success: true, dataSourceId }),
+            },
+          ],
+        },
+      ];
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+      it('applies only the latest load, even when an earlier one finishes last', async () => {
+        const { service } = setupDataSources();
+        let finishA: (events: any) => void = () => {};
+        const getConversation = jest.spyOn(service.conversationHistoryService, 'getConversation');
+        getConversation
+          .mockImplementationOnce(() => new Promise((resolve) => (finishA = resolve)))
+          .mockResolvedValueOnce(historyWithSwitch('ds-b'));
 
-      const result = await service.getCurrentDataSourceId();
+        const loadA = service.loadConversation('thread-a');
+        const loadB = service.loadConversation('thread-b');
+        await loadB;
+        finishA(historyWithSwitch('ds-c'));
 
-      expect(result).toBe('ds-invalid');
+        expect(await loadA).toBeNull();
+        expect(mockCoreChatService.setThreadId).toHaveBeenLastCalledWith('thread-b');
+        expect(service.getConversationDataSourceId()).toBe('ds-b');
+      });
+
+      it('does not take the thread back when a new chat starts during a load', async () => {
+        const { service } = setupDataSources();
+        let finish: (events: any) => void = () => {};
+        jest
+          .spyOn(service.conversationHistoryService, 'getConversation')
+          .mockImplementationOnce(() => new Promise((resolve) => (finish = resolve)));
+
+        const load = service.loadConversation('thread-old');
+        service.newThread();
+        finish(historyWithSwitch('ds-b'));
+
+        expect(await load).toBeNull();
+        expect(mockCoreChatService.setThreadId).not.toHaveBeenCalledWith('thread-old');
+        expect(service.getConversationDataSourceId()).toBeUndefined();
+      });
     });
 
-    it('should return data source ID even when no compatible data sources are available', async () => {
-      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
-      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
-      getDefaultDataSourceId.mockResolvedValue('ds-1');
+    describe('conversation data source from history', () => {
+      const switchCall = (id: string, name = 'switch_data_source') => ({
+        id,
+        type: 'function',
+        function: { name, arguments: '{}' },
+      });
+      const toolResult = (toolCallId: string, content: any) => ({
+        id: `tool-${toolCallId}`,
+        role: 'tool',
+        toolCallId,
+        content: typeof content === 'string' ? content : JSON.stringify(content),
+      });
+      const load = async (service: ChatService, messages: any[]) => {
+        service.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue([{ type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() }]);
+        return service.loadConversation('thread-history');
+      };
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+      it('uses the last successful switch', async () => {
+        const { service } = setupDataSources();
 
-      const result = await service.getCurrentDataSourceId();
+        await load(service, [
+          { id: 'u1', role: 'user', content: 'switch' },
+          { id: 'a1', role: 'assistant', content: '', toolCalls: [switchCall('c1')] },
+          toolResult('c1', { success: true, dataSourceId: 'ds-a' }),
+          { id: 'a2', role: 'assistant', content: '', toolCalls: [switchCall('c2')] },
+          toolResult('c2', { success: true, dataSourceId: 'ds-b' }),
+          { id: 'a3', role: 'assistant', content: 'done' },
+        ]);
 
-      expect(result).toBe('ds-1');
-    });
+        expect(service.getConversationDataSourceId()).toBe('ds-b');
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'conversation',
+        });
+      });
 
-    it('should return cachedDataSourceId when it is valid', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+      it('ignores failed switches, unparseable results, calls without a result and other tools', async () => {
+        const { service } = setupDataSources();
 
-      service.setDataSourceId('ds-2');
-      const result = await service.getCurrentDataSourceId();
-
-      expect(result).toBe('ds-2');
-    });
-
-    it('should return cachedDataSourceId even if not in available data sources', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
-
-      service.setDataSourceId('ds-removed');
-      const result = await service.getCurrentDataSourceId();
-
-      expect(result).toBe('ds-removed');
-    });
-
-    it('should prioritize page context data source when valid', async () => {
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
+        await load(service, [
+          { id: 'u1', role: 'user', content: 'switch' },
+          { id: 'a1', role: 'assistant', content: '', toolCalls: [switchCall('c1')] },
+          toolResult('c1', { success: true, dataSourceId: 'ds-a' }),
           {
-            categories: ['page', 'static'],
-            description: 'Page context',
-            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+            id: 'a2',
+            role: 'assistant',
+            content: '',
+            toolCalls: [
+              switchCall('c2'),
+              switchCall('c3'),
+              switchCall('c4'),
+              switchCall('c5', 'other_tool'),
+            ],
           },
-        ]),
-      };
+          toolResult('c2', { success: false, dataSourceId: 'ds-b' }),
+          toolResult('c3', 'not json'),
+          // c4 has no result.
+          toolResult('c5', { success: true, dataSourceId: 'ds-c' }),
+          { id: 'a3', role: 'assistant', content: 'done' },
+        ]);
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
+        expect(service.getConversationDataSourceId()).toBe('ds-a');
+      });
+
+      it('clears the previous conversation data source and picker flag first', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-old');
+        service.setPendingDataSource('ds-b');
+        expect(service.getPendingDataSourceId()).toBe('ds-b');
+
+        await load(service, [
+          { id: 'u1', role: 'user', content: 'hi' },
+          { id: 'a1', role: 'assistant', content: 'hello' },
+        ]);
+
+        expect(service.getConversationDataSourceId()).toBeUndefined();
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+      });
+
+      it('keeps the current conversation data source when the conversation fails to load', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-a');
+        service.setPendingDataSource('ds-b');
+        service.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+        await service.loadConversation('thread-missing');
+
+        // The user stays in the current conversation, so nothing about it changes.
+        expect(service.getConversationDataSourceId()).toBe('ds-a');
+        expect(service.getPendingDataSourceId()).toBe('ds-b');
+      });
+
+      it('fetches the history with the current data source and reads the list once more only for the new thread', async () => {
+        const { service, find } = setupDataSources();
+        service.setConversationDataSource('ds-b');
+        let historyDataSourceId: string | undefined;
+        service.conversationHistoryService.getConversation = jest.fn(async () => {
+          // What the memory provider sees while it fetches the history.
+          historyDataSourceId = await service.getDataSourceIdForRead();
+          return [{ type: 'MESSAGES_SNAPSHOT', messages: [], timestamp: Date.now() }] as any;
+        });
+        await service.resolveDataSourceForRun();
+        expect(find).toHaveBeenCalledTimes(1);
+
+        await service.loadConversation('thread-history');
+
+        expect(historyDataSourceId).toBe('ds-b');
+        // The fetch reused the cached list; only the opened conversation reads it again.
+        expect(find).toHaveBeenCalledTimes(2);
+      });
+
+      it('reads switches from every snapshot, in order', async () => {
+        const { service } = setupDataSources();
+        const snapshot = (callId: string, dataSourceId: string) => ({
+          type: 'MESSAGES_SNAPSHOT',
+          timestamp: Date.now(),
+          messages: [
+            { id: `a-${callId}`, role: 'assistant', content: '', toolCalls: [switchCall(callId)] },
+            toolResult(callId, { success: true, dataSourceId }),
+          ],
+        });
+        service.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue([snapshot('c1', 'ds-a'), snapshot('c2', 'ds-c')]);
+
+        await service.loadConversation('thread-history');
+
+        expect(service.getConversationDataSourceId()).toBe('ds-c');
+      });
+    });
+
+    describe('picker choice', () => {
+      it('runs with the picked data source and asks the agent to record it', async () => {
+        const { service } = setupDataSources();
+        service.setPendingDataSource('ds-b');
+
+        expect(service.getPendingDataSourceId()).toBe('ds-b');
+        expect(service.getConversationDataSourceId()).toBeUndefined();
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'pending',
+        });
+
+        await service.sendMessage('hi', []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-b');
+        expect(dataSourceContextValue(runInput)).toContain(`${NOT_RECORDED}"ds-b"`);
+      });
+
+      it('is used ahead of the conversation data source until the agent records it', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-a');
+        service.setPendingDataSource('ds-b');
+
+        expect(await service.resolveDataSourceForRun()).toMatchObject({
+          active: { id: 'ds-b' },
+          source: 'pending',
+        });
+        expect(service.getConversationDataSourceId()).toBe('ds-a');
+      });
+
+      it('drops the record line once the agent switched', async () => {
+        const { service } = setupDataSources();
+        service.setPendingDataSource('ds-b');
+        service.setConversationDataSource('ds-b');
+
+        expect(service.getPendingDataSourceId()).toBeUndefined();
+        await service.sendMessage('hi', []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-b');
+        expect(dataSourceContextValue(runInput)).not.toContain(NOT_RECORDED);
+      });
+    });
+
+    describe('data source context', () => {
+      it('lists every available data source with escaped titles and names the active one', async () => {
+        const quoted = { id: 'ds-q', attributes: { title: 'He said "hi"' } };
+        const { service, store } = setupDataSources({ list: [quoted, DS_A] });
+        service.setConversationDataSource('ds-a');
+
+        await service.sendMessage('hi', []);
+
+        expect(store.addContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
+            description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+          })
+        );
+        const value = dataSourceContextValue(lastRunAgentCall()[0])!;
+        expect(value).toContain(
+          'Available data sources: "Alpha" (id: ds-a), "He said \\"hi\\"" (id: ds-q)\n'
+        );
+        expect(value).toContain('Active data source: "Alpha" (id: ds-a)');
+        expect(value).toContain(
+          '- If the user names a data source that is not listed, say you could not find it and list the available names.'
+        );
+        expect(value).toContain('- If the user names no data source, use the active one.');
+        expect(value).not.toContain('cannot be switched here');
+        expect(value).not.toContain(NOT_RECORDED);
+      });
+
+      it('says the list may be partial when it is incomplete', async () => {
+        const { service } = setupDataSources({ total: 150 });
+        service.setConversationDataSource('ds-a');
+
+        await service.sendMessage('hi', []);
+
+        const value = dataSourceContextValue(lastRunAgentCall()[0])!;
+        expect(value).toContain('(id: ds-c) (this list may be incomplete)\n');
+        expect(value).toContain(
+          'say you could not find it among the listed ones, list their names, and ask the user for its id.'
+        );
+      });
+
+      it('says the data source cannot be switched when the page pins it', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-c');
+
+        await service.sendMessage('hi', []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-c');
+        expect(dataSourceContextValue(runInput)).toContain(
+          'The dataset on the current page pins the active data source, so it cannot be switched here.'
+        );
+      });
+
+      it('removes the context when the continuation has no data source to run with', async () => {
+        const { service, store } = setupDataSources({ list: [] });
+
+        await service.sendToolResult('tc-1', { ok: true }, []);
+
+        expect(store.removeContextById).toHaveBeenCalledWith(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBeUndefined();
+        expect(dataSourceContextValue(runInput)).toBeUndefined();
+      });
+    });
+
+    describe('per-run data source', () => {
+      it('keeps the data source a run was dispatched with after the page changes', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+        await service.sendMessage('hi', []);
+        const runId = lastRunAgentCall()[0].runId;
+
+        setPageDataSource(store, 'ds-b');
+
+        expect(await service.getRunDataSource(runId)).toEqual({ id: 'ds-a', title: 'Alpha' });
+        expect(await service.getRunDataSource('unknown-run')).toEqual({
+          id: 'ds-a',
+          title: 'Alpha',
+        });
+      });
+
+      it('resolves afresh for getRunDataSource before any run', async () => {
+        const { service } = setupDataSources({ defaultId: 'ds-c' });
+
+        expect(await service.getRunDataSource()).toEqual({ id: 'ds-c', title: 'Gamma' });
+      });
+
+      it('dispatches a tool result with the data source the agent switched to', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-a');
+        (await service.sendMessage('hi', [])).observable.subscribe();
+        expect(lastRunAgentCall()[1]).toBe('ds-a');
+
+        service.setConversationDataSource('ds-b');
+        await service.sendToolResult('tc-1', { success: true }, []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-b');
+        expect(dataSourceContextValue(runInput)).toContain('Active data source: "Beta" (id: ds-b)');
+      });
+
+      it('dispatches a tool result batch with the data source the agent switched to', async () => {
+        const { service } = setupDataSources();
+        service.setConversationDataSource('ds-a');
+        await service.sendMessage('hi', []);
+
+        service.setConversationDataSource('ds-b');
+        await service.sendToolResults([{ toolCallId: 'tc-1', result: { success: true } }], []);
+
+        expect(lastRunAgentCall()[1]).toBe('ds-b');
+      });
+
+      it.each([
+        ['sendToolResult', (s: ChatService) => s.sendToolResult('tc-1', { success: true }, [])],
+        [
+          'sendToolResults',
+          (s: ChatService) => s.sendToolResults([{ toolCallId: 'tc-1', result: {} }], []),
+        ],
+      ])(
+        'skips a %s continuation when the conversation changes during the wait',
+        async (_name, send) => {
+          const { service, store } = setupDataSources();
+          setPageDataSource(store, 'ds-a');
+          (await service.sendMessage('hi', [])).observable.subscribe();
+          const runsBefore = mockAgent.runAgent.mock.calls.length;
+          // The user starts another conversation while the continuation waits.
+          (service as any).waitBeforeContinuation.mockImplementation(async () => {
+            mockThreadId$.next('another-thread');
+            return true;
+          });
+
+          const result: any = await send(service);
+
+          expect(result.skipped).toEqual({ reason: 'aborted' });
+          expect(mockAgent.runAgent.mock.calls.length).toBe(runsBefore);
+        }
       );
 
-      const result = await service.getCurrentDataSourceId();
+      it('reuses the last run data source when nothing resolves for a continuation', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+        (await service.sendMessage('hi', [])).observable.subscribe();
 
-      expect(result).toBe('ds-1');
-    });
+        // The user left the page; nothing else resolves.
+        setPageDataSource(store, undefined);
+        expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
 
-    it('should not confirm page-context data source when called in read-only mode', async () => {
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
-          {
-            categories: ['page', 'static'],
-            description: 'Page context',
-            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+        await service.sendToolResult('tc-1', { success: true }, []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-a');
+        const value = dataSourceContextValue(runInput)!;
+        expect(value).toContain('Active data source: "Alpha" (id: ds-a)');
+        expect(value).toContain('(this list may be incomplete)');
+      });
+
+      it('does not ask to record a picker choice for the fallback data source', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+        (await service.sendMessage('hi', [])).observable.subscribe();
+
+        // A picker choice that does not verify, and the user left the page.
+        service.setPendingDataSource('ds-gone');
+        setPageDataSource(store, undefined);
+
+        await service.sendToolResult('tc-1', { success: true }, []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-a');
+        // The picker line would name the fallback data source as the user's choice.
+        expect(dataSourceContextValue(runInput)).not.toContain(NOT_RECORDED);
+      });
+
+      it('marks the fallback to the previous run so no page or picker line applies to it', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+        (await service.sendMessage('hi', [])).observable.subscribe();
+        setPageDataSource(store, undefined);
+
+        await service.sendToolResult('tc-1', { success: true }, []);
+
+        const [runInput, dataSourceId] = lastRunAgentCall();
+        expect(dataSourceId).toBe('ds-a');
+        expect(dataSourceContextValue(runInput)).not.toContain('cannot be switched');
+      });
+
+      it('forgets earlier runs in a new conversation', async () => {
+        const { service, store } = setupDataSources();
+        setPageDataSource(store, 'ds-a');
+        (await service.sendMessage('hi', [])).observable.subscribe();
+        service.newThread();
+        setPageDataSource(store, undefined);
+
+        await service.sendToolResult('tc-1', { success: true }, []);
+
+        // Nothing resolves and there is no earlier run to fall back to.
+        expect(lastRunAgentCall()[1]).toBeUndefined();
+      });
+
+      it('does not read data sources when sendMessage gets a resolution', async () => {
+        const { service, find, get } = setupDataSources();
+
+        await service.sendMessage('hi', [], undefined, {
+          resolution: {
+            kind: 'resolved',
+            active: { id: 'ds-z', title: 'Zed' },
+            source: 'conversation',
+            available: [{ id: 'ds-z', title: 'Zed' }],
+            listComplete: true,
           },
-        ]),
-      };
+        });
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+        expect(find).not.toHaveBeenCalled();
+        expect(get).not.toHaveBeenCalled();
+        expect(lastRunAgentCall()[1]).toBe('ds-z');
+      });
 
-      const result = await service.peekCurrentDataSourceId();
+      it('throws DataSourceUnresolvedError when a selection is needed', async () => {
+        const { service } = setupDataSources();
 
-      expect(result).toBe('ds-1');
-      expect(service.getConfirmedDataSourceId()).toBeUndefined();
-      expect(service.getSessionDataSourceList()).toEqual([]);
-    });
+        const error = await service.sendMessage('hi', []).catch((e) => e);
 
-    it('should return page context data source even if not in available list', async () => {
-      (global as any).window.assistantContextStore = {
-        getAllContexts: jest.fn().mockReturnValue([
-          {
-            categories: ['page', 'static'],
-            description: 'Page context',
-            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-not-in-workspace' } } },
-          },
-        ]),
-      };
+        expect(error).toBeInstanceOf(DataSourceUnresolvedError);
+        expect(error.resolution).toMatchObject({ kind: 'needs_selection' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      });
 
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        mockWorkspaces,
-        mockSavedObjectsClient
-      );
+      describe('when the agent selects the data source', () => {
+        it('sends without a data source id and asks the agent to ask the user when data is needed', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          expect(await service.resolveDataSourceForRun()).toEqual({
+            kind: 'unselected',
+            available: [
+              { id: 'ds-a', title: 'Alpha' },
+              { id: 'ds-b', title: 'Beta' },
+              { id: 'ds-c', title: 'Gamma' },
+            ],
+            listComplete: true,
+          });
 
-      const result = await service.getCurrentDataSourceId();
+          await service.sendMessage('hi', []);
 
-      expect(result).toBe('ds-not-in-workspace');
-    });
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBeUndefined();
+          const value = dataSourceContextValue(runInput)!;
+          expect(value).toContain(
+            'Available data sources: "Alpha" (id: ds-a), "Beta" (id: ds-b), "Gamma" (id: ds-c)\n'
+          );
+          expect(value).toContain('Active data source: none.');
+          expect(value).toContain(
+            'call ask_user with inputType "select" and these options: "Alpha", "Beta", "Gamma".'
+          );
+          expect(value).toContain('Answer a request that needs no data');
+          expect(value).toContain(
+            '- Once the user has chosen a data source (for example in an ask_user answer), call switch_data_source with its id.'
+          );
+          expect(value).toContain(
+            '- If the user declines to choose, say that no data source is selected, and do not call switch_data_source or tools that read data.'
+          );
+          expect(value).not.toContain('If the user names no data source, use the active one');
+        });
 
-    afterEach(() => {
-      delete (global as any).window.assistantContextStore;
-      jest.clearAllMocks();
-    });
-  });
+        it('switches to the only data source without asking', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent', list: [DS_A] });
 
-  describe('session data source list', () => {
-    it('should dedupe data source ids and clear them on newThread', () => {
-      chatService.setSessionDataSourceList('ds-1');
-      chatService.setSessionDataSourceList('ds-1');
-      chatService.setSessionDataSourceList('ds-2');
+          await service.sendMessage('hi', []);
 
-      expect(chatService.getSessionDataSourceList()).toEqual(['ds-1', 'ds-2']);
+          const value = dataSourceContextValue(lastRunAgentCall()[0])!;
+          expect(value).toContain(
+            'call switch_data_source with the id of the only data source first'
+          );
+          expect(value).not.toContain('ask_user');
+        });
 
-      chatService.newThread();
+        it('gives the tools of a run that went without a data source none, even after a switch', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          await service.sendMessage('hi', []);
 
-      expect(chatService.getSessionDataSourceList()).toEqual([]);
+          // A switch in the same step applies from the next run on; a server that echoes its
+          // own runId must not make the run's tools resolve afresh.
+          service.setConversationDataSource('ds-b');
+
+          expect(await service.getRunDataSource('unknown-run')).toBeUndefined();
+        });
+
+        it('runs on the data source the agent recorded once it is switched', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          (await service.sendMessage('hi', [])).observable.subscribe();
+          expect(lastRunAgentCall()[1]).toBeUndefined();
+
+          service.setConversationDataSource('ds-b');
+          await service.sendToolResult('tc-1', { success: true, dataSourceId: 'ds-b' }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-b');
+          expect(dataSourceContextValue(runInput)).toContain(
+            'Active data source: "Beta" (id: ds-b)'
+          );
+        });
+
+        it('answers an ask_user result without a data source until the agent switches', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          (await service.sendMessage('hi', [])).observable.subscribe();
+
+          await service.sendToolResult('tc-1', { answered: true, answer: 'Beta' }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBeUndefined();
+          expect(dataSourceContextValue(runInput)).toContain('Active data source: none.');
+        });
+
+        it('adds the id to ask_user options whose titles repeat', async () => {
+          const twin = { id: 'ds-a2', attributes: { title: 'Alpha' } };
+          const { service } = setupDataSources({
+            unresolvedDataSource: 'agent',
+            list: [DS_A, twin, DS_B],
+          });
+
+          await service.sendMessage('hi', []);
+
+          expect(dataSourceContextValue(lastRunAgentCall()[0])).toContain(
+            'these options: "Alpha (id: ds-a)", "Alpha (id: ds-a2)", "Beta".'
+          );
+        });
+
+        it('lists every data source for a continuation that falls back to the previous run', async () => {
+          const { service, store } = setupDataSources({ unresolvedDataSource: 'agent' });
+          setPageDataSource(store, 'ds-a');
+          (await service.sendMessage('hi', [])).observable.subscribe();
+          // The user left the page; nothing else resolves.
+          setPageDataSource(store, undefined);
+
+          await service.sendToolResult('tc-1', { success: true }, []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-a');
+          expect(dataSourceContextValue(runInput)).toContain(
+            'Available data sources: "Alpha" (id: ds-a), "Beta" (id: ds-b), "Gamma" (id: ds-c) (this list may be incomplete)\n'
+          );
+        });
+
+        it('keeps the picker for the picker setting', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'picker' });
+
+          expect((await service.resolveDataSourceForRun()).kind).toBe('needs_selection');
+        });
+
+        it('still throws when no data source exists or the list cannot be read', async () => {
+          const none = setupDataSources({ unresolvedDataSource: 'agent', list: [] });
+          const noneError = await none.service.sendMessage('hi', []).catch((e) => e);
+          expect(noneError.resolution).toMatchObject({ kind: 'none_exist' });
+
+          const failed = setupDataSources({ unresolvedDataSource: 'agent' });
+          failed.find.mockRejectedValue(new Error('boom'));
+          const failedError = await failed.service.sendMessage('hi', []).catch((e) => e);
+          expect(failedError.resolution).toMatchObject({ kind: 'list_failed' });
+          expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        });
+
+        it('uses a resolved data source as before', async () => {
+          const { service } = setupDataSources({ unresolvedDataSource: 'agent' });
+          service.setConversationDataSource('ds-a');
+
+          await service.sendMessage('hi', []);
+
+          const [runInput, dataSourceId] = lastRunAgentCall();
+          expect(dataSourceId).toBe('ds-a');
+          expect(dataSourceContextValue(runInput)).not.toContain('Active data source: none');
+        });
+      });
+
+      it('runs without a data source id and removes the context when disabled', async () => {
+        const { service, store } = setupDataSources({ dataSourceEnabled: false });
+
+        await service.sendMessage('hi', []);
+
+        expect(lastRunAgentCall()[1]).toBeUndefined();
+        expect(store.removeContextById).toHaveBeenCalledWith(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+      });
     });
   });
 

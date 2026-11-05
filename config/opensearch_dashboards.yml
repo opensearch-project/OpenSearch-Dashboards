@@ -447,6 +447,10 @@
   # enabled: true
   # agUiUrl: "http://your-ai-agent-url:port"
   # mlCommonsAgentId: "olly-chat-agent-id"
+  # When no data source is chosen for a message: "picker" (default) asks the user before sending;
+  # "agent" sends it without one and the agent asks when it needs data. Use "agent" only with an
+  # agent that can run without a data source id.
+  # unresolvedDataSource: "picker"
 
 # @experimental Set the value to true to enable context provider
 # contextProvider:

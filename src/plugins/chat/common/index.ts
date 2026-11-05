@@ -29,3 +29,5 @@ export const HALT_MARKER = '\n\nThe response was stopped.';
 export const TOOL_EXECUTION_ERROR_PREFIX = 'Tool execution failed: ';
 
 export const SWITCH_DATA_SOURCE_TOOL_NAME = 'switch_data_source';
+
+export const ASK_USER_TOOL_NAME = 'ask_user';

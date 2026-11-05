@@ -42,6 +42,8 @@ import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
 import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
+import { canRunWith, DataSourceResolution } from '../services/chat_service';
+import { DataSourceUnresolvedError } from '../services/data_source_unresolved_error';
 import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
 
@@ -50,6 +52,9 @@ export interface ChatWindowInstance {
   sendMessage: (options: {
     content: string | InputContent[];
     messages?: Message[];
+    // A data source the caller chose for this message (e.g. the panel it asks about). It becomes
+    // the conversation's data source only if the message is actually sent.
+    dataSourceId?: string;
   }) => Promise<unknown>;
 }
 
@@ -73,7 +78,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const toasts = services.core?.notifications?.toasts;
 
     // Register the switch_data_source tool so the LLM can request a data source switch mid-conversation
-    useSwitchDataSourceAction(chatService);
+    useSwitchDataSourceAction(chatService, chatService.isDataSourceEnabled());
     const [timeline, setTimeline] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
@@ -245,34 +250,50 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
     });
 
-    // Cache data source compatibility check to avoid network call on every message
-    const unsupportedDataSourceRef = useRef<{ dataSourceId: string; result: boolean } | null>(null);
-
-    const isUnsupportedDataSource = useCallback(
-      async (dataSourceId: string): Promise<boolean> => {
-        try {
-          if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
-            return unsupportedDataSourceRef.current.result;
-          }
-          const savedObjectsClient = services.core?.savedObjects?.client;
-          if (!savedObjectsClient) return false;
-          const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
-            'data-source',
-            dataSourceId
-          );
-          const result = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
-          unsupportedDataSourceRef.current = { dataSourceId, result };
-          return result;
-        } catch {
-          return false;
+    /**
+     * Show the user why a message cannot be sent yet: the data source picker when data sources
+     * exist but none resolved, otherwise a message saying none exist or the list failed to load.
+     * The user message is already in the timeline; handleDataSourceSelect continues it.
+     */
+    const presentUnresolvedDataSource = useCallback(
+      (userMsg: UserMessage, resolution: DataSourceResolution) => {
+        if (resolution.kind === 'needs_selection') {
+          setPendingMessage(userMsg);
+          setAvailableDataSources(resolution.available);
+          return;
         }
+        if (resolution.kind === 'list_failed') {
+          // A transient failure: take the unsent message back out of the conversation (so it is
+          // neither saved nor sent twice on retry), put its text back in the input, and say why.
+          setTimelineSynced((prev) => prev.filter((msg) => msg.id !== userMsg.id));
+          // A message with a screenshot is an array; its text goes back, the screenshot stays.
+          setInput(flattenContentText(userMsg.content));
+          toasts?.addWarning(
+            i18n.translate('chat.dataSourceListFailedMessage', {
+              defaultMessage:
+                'Could not load the data sources right now. Please try sending your message again.',
+            })
+          );
+          return;
+        }
+        if (resolution.kind !== 'none_exist') return;
+
+        const infoMsg: Message = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          role: 'assistant',
+          content: i18n.translate('chat.noDataSourceMessage', {
+            defaultMessage:
+              'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
+          }),
+        };
+        setTimelineSynced((prev) => [...prev, infoMsg]);
       },
-      [services.core?.savedObjects?.client]
+      [setTimelineSynced, toasts]
     );
 
     // Helper function to handle message streaming with observable subscription
     const subscribeToMessageStream = useCallback(
-      async (messages: Message[], userMessage: UserMessage) => {
+      async (messages: Message[], userMessage: UserMessage, resolution?: DataSourceResolution) => {
         isStreamingRef.current = true;
         setIsStreaming(true);
         setStartResponse(false);
@@ -280,7 +301,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         const content = flattenContentText(userMessage.content);
 
         try {
-          const { observable } = await chatService.sendMessage(content, messages, userMessage);
+          const { observable } = await chatService.sendMessage(content, messages, userMessage, {
+            resolution,
+          });
 
           setScreenshotData(undefined);
 
@@ -317,13 +340,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
           return () => subscription.unsubscribe();
         } catch (error) {
-          console.error('Failed to send message:', error);
           isStreamingRef.current = false;
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
+          // sendMessage resolved the data source itself (e.g. after a picker choice) and found
+          // none: tell the user instead of leaving the message unanswered.
+          if (error instanceof DataSourceUnresolvedError) {
+            presentUnresolvedDataSource(userMessage, error.resolution);
+            return;
+          }
+          console.error('Failed to send message:', error);
         }
       },
-      [chatService, currentRunId, eventHandler]
+      [chatService, currentRunId, eventHandler, presentUnresolvedDataSource]
     );
 
     /**
@@ -339,10 +368,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       async (
         messageContent: string,
         messagesToSend: Message[],
-        pendingUserMessage?: UserMessage
+        pendingUserMessage?: UserMessage,
+        resolution?: DataSourceResolution
       ): Promise<boolean> => {
+        const threadId = chatService.getThreadId();
         const commandResult = await slashCommandRegistry.execute(messageContent);
         if (!commandResult.handled) return false;
+        // The user started a new chat or opened another conversation while the command ran: the
+        // command belongs to the conversation that is gone, so drop it.
+        if (chatService.getThreadId() !== threadId) return true;
 
         if (commandResult.localMessage) {
           const role = commandResult.role ?? 'system';
@@ -372,7 +406,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           } else {
             setTimelineSynced((prev) => [...prev, userMsg]);
           }
-          subscribeToMessageStream(messagesToSend, userMsg);
+          subscribeToMessageStream(messagesToSend, userMsg, resolution);
           return true;
         }
         return true;
@@ -383,14 +417,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Handler for when user selects a data source from the prompt
     const handleDataSourceSelect = useCallback(
       async (id: string) => {
-        chatService.setDataSourceId(id);
         setAvailableDataSources([]);
         const pending = pendingMessage;
         setPendingMessage(null);
         if (!pending) return;
 
         const messageContent = typeof pending.content === 'string' ? pending.content : '';
-        const historyMessages = timeline.slice(0, -1);
+        // History is everything before the pending message, wherever it sits in the timeline. A
+        // pending message no longer in the timeline was replaced, so there is nothing to send and
+        // the pick is not applied.
+        const pendingIndex = timeline.findIndex((msg) => msg.id === pending.id);
+        if (pendingIndex === -1) return;
+        const historyMessages = timeline.slice(0, pendingIndex);
+
+        // The user's choice is used for the message being sent; the agent is asked to record it
+        // with switch_data_source in that run.
+        chatService.setPendingDataSource(id);
 
         // Pending user message is already in the timeline — replace it if a slash command
         const handled = await executeSlashCommand(messageContent, historyMessages, pending);
@@ -408,67 +450,64 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
      */
     const validateDataSource = useCallback(
       async (
-        userMsg: UserMessage
+        userMsg: UserMessage,
+        callerDataSourceId?: string
       ): Promise<
-        | { valid: true }
-        | { valid: false; reason: 'unsupported' | 'needs_selection' | 'no_data_sources' }
-      > => {
-        const currentDataSourceId = await chatService.getCurrentDataSourceId();
-
-        // 1. Check if current data source is unsupported (e.g. AnalyticEngine)
-        if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
-          const systemMsg: SystemMessage = {
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            role: 'system',
-            content: i18n.translate('chat.dataSourceUnsupported', {
-              defaultMessage: 'The current data source does not support AI features.',
-            }),
-          };
-          setTimelineSynced((prev) => [...prev, systemMsg]);
-          return { valid: false, reason: 'unsupported' };
-        }
-
-        // 2. Check if current data source is valid (exists in available list)
-        const compatibleDataSources = await chatService.getAvailableDataSources();
-        const isValid =
-          currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
-
-        if (!isValid) {
-          if (compatibleDataSources.length >= 1) {
-            // Compatible data sources exist — prompt user to pick one.
-            // User message is already in timeline; handleDataSourceSelect will continue.
-            setPendingMessage(userMsg);
-            setAvailableDataSources(compatibleDataSources);
-            return { valid: false, reason: 'needs_selection' };
+        | { valid: true; resolution: DataSourceResolution }
+        | {
+            valid: false;
+            reason: 'needs_selection' | 'no_data_sources' | 'list_failed' | 'thread_changed';
           }
+      > => {
+        // Resolve once for this send; the same resolution is passed on to the run.
+        const threadId = chatService.getThreadId();
+        const resolution = await chatService.resolveDataSourceForRun({ callerDataSourceId });
 
-          // 3. No data sources associated with this workspace
-          const infoMsg: Message = {
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            role: 'assistant',
-            content: i18n.translate('chat.noDataSourceMessage', {
-              defaultMessage:
-                'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
-            }),
-          };
-          setTimelineSynced((prev) => [...prev, infoMsg]);
-          return { valid: false, reason: 'no_data_sources' };
+        // The user started a new chat or opened another conversation while this resolved: the
+        // message belongs to the conversation that is gone, so it is not sent.
+        if (chatService.getThreadId() !== threadId) {
+          return { valid: false, reason: 'thread_changed' };
         }
 
-        return { valid: true };
+        // An `unselected` message is sent too: the agent asks the user for a data source if the
+        // request needs one.
+        if (canRunWith(resolution)) {
+          return { valid: true, resolution };
+        }
+
+        presentUnresolvedDataSource(userMsg, resolution);
+        return {
+          valid: false,
+          reason:
+            resolution.kind === 'needs_selection'
+              ? 'needs_selection'
+              : resolution.kind === 'list_failed'
+                ? 'list_failed'
+                : 'no_data_sources',
+        };
       },
-      [chatService, setTimelineSynced, isUnsupportedDataSource]
+      [chatService, presentUnresolvedDataSource]
     );
 
     const handleSend = async (options?: {
       input?: string | InputContent[];
       messages?: Message[];
+      dataSourceId?: string;
     }) => {
       let messageContent: string | InputContent[] = options?.input ?? input.trim();
 
       const isEmpty = Array.isArray(messageContent) ? messageContent.length === 0 : !messageContent;
-      // Use ref for immediate check since React 18 batches state updates
-      if (isEmpty || isStreamingRef.current || isValidatingRef.current || hasPendingResend) return;
+      // Use ref for immediate check since React 18 batches state updates. A message waiting on
+      // the data source picker blocks new sends until the user picks (or starts a new chat).
+      if (
+        isEmpty ||
+        isStreamingRef.current ||
+        isValidatingRef.current ||
+        hasPendingResend ||
+        pendingMessage
+      ) {
+        return;
+      }
 
       // Prepare additional messages for sending (but don't add to timeline yet)
       const additionalMessages = options?.messages ?? [];
@@ -502,19 +541,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsValidating(true);
 
       try {
-        const result = await validateDataSource(userMsg);
+        // A caller's data source (e.g. of the visualization asked about) is used for this
+        // message when it verifies, and the agent is asked to switch the conversation to it.
+        const result = await validateDataSource(userMsg, options?.dataSourceId);
         if (!result.valid) return;
 
         // Check if this is a slash command — pass userMsg so executeSlashCommand
         // can replace it (by id) with the resolved command message. Only plain-text
         // input can be a command (a multimodal message carries an image block).
         if (typeof messageContent === 'string') {
-          const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
+          const handled = await executeSlashCommand(
+            messageContent,
+            messagesToSend,
+            userMsg,
+            result.resolution
+          );
           if (handled) return;
         }
 
         // Normal message flow — the content can be multimodal
-        return subscribeToMessageStream(messagesToSend, userMsg);
+        return subscribeToMessageStream(messagesToSend, userMsg, result.resolution);
       } finally {
         isValidatingRef.current = false;
         setIsValidating(false);
@@ -532,8 +578,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     const handleResendMessage = useCallback(
       async (message: Message) => {
-        // Use ref for immediate check since React 18 batches state updates
-        if (isStreamingRef.current) return;
+        // Use refs for immediate checks since React 18 batches state updates. A send or resend
+        // still resolving its data source blocks another one, like handleSend does.
+        if (isStreamingRef.current || isValidatingRef.current) return;
 
         // Only user messages can be resent
         if (message.role !== 'user') return;
@@ -555,12 +602,41 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         // Clear any streaming state and input
         setInput('');
 
-        // Add user message back and stream
+        // The resend replaces a message still waiting on the data source picker: that message is
+        // cut off with the rest of the timeline, so the pending pick is dropped too.
+        setPendingMessage(null);
+        setAvailableDataSources([]);
+
+        // Add user message back and stream, resolving its data source like a new send
         const userMsg = chatService.getUserMessage(content);
         setTimelineSynced([...truncatedTimeline, userMsg]);
-        subscribeToMessageStream(truncatedTimeline, userMsg);
+        isValidatingRef.current = true;
+        setIsValidating(true);
+        try {
+          const result = await validateDataSource(userMsg);
+          if (!result.valid) {
+            // A transient list failure must not cost the user the messages the resend cut off:
+            // put the conversation back as it was (the original message is still in it).
+            if (result.reason === 'list_failed') {
+              setTimelineSynced(timeline);
+              setInput('');
+            }
+            return;
+          }
+          subscribeToMessageStream(truncatedTimeline, userMsg, result.resolution);
+        } finally {
+          isValidatingRef.current = false;
+          setIsValidating(false);
+        }
       },
-      [timeline, subscribeToMessageStream, setInput, setTimelineSynced, chatService]
+      [
+        timeline,
+        subscribeToMessageStream,
+        setInput,
+        setTimelineSynced,
+        chatService,
+        validateDataSource,
+      ]
     );
 
     const handleResendToolResult = useCallback(
@@ -618,6 +694,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       // and toolCallStates) so stale pending/executing entries from the previous
       // run do not keep the input disabled in the new conversation.
       eventHandler.clearState();
+
+      // A history load still in flight must not replay into the new chat. The aborted load
+      // leaves its loading state to whoever aborted it, so clear it here.
+      conversationLoadAbortControllerRef.current?.abort();
+      setIsLoading(false);
 
       chatService.newThread();
       setTimelineSynced([]);
@@ -733,8 +814,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setPendingMessage(null);
         setAvailableDataSources([]);
 
-        // Clear the confirmed conversation-level data source and its context
-        chatService.clearSessionDataSourceAndContext();
+        // loadConversation replaces the data source state only once the conversation has loaded,
+        // so a failed load leaves the current conversation as it was.
 
         // Abort any ongoing conversation loading
         if (conversationLoadAbortControllerRef.current) {
@@ -827,8 +908,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const windowInstance = useMemo<ChatWindowInstance>(
       () => ({
         startNewChat: () => handleNewChat(),
-        sendMessage: async ({ content, messages }) =>
-          await handleSendRef.current?.({ input: content, messages }),
+        sendMessage: async ({ content, messages, dataSourceId }) =>
+          await handleSendRef.current?.({ input: content, messages, dataSourceId }),
       }),
       [handleNewChat]
     );

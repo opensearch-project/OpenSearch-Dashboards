@@ -62,7 +62,7 @@ const SwitchDataSourceCard = ({
         alignItems="center"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="s" />
@@ -92,7 +92,7 @@ const SwitchDataSourceCard = ({
         alignItems="flexStart"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="s" color="danger" />
@@ -114,7 +114,7 @@ const SwitchDataSourceCard = ({
       gutterSize="xs"
       responsive={false}
       wrap={false}
-      style={{ padding: '2px 0', flexGrow: 0 }}
+      style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="database" size="s" color="primary" />
@@ -138,30 +138,26 @@ const SwitchDataSourceCard = ({
 };
 
 /**
- * This tool is a pure apply action — it does a single thing: set the confirmed data source.
- * It does NOT ask the user anything, choosing a data source is delegated to the generic `ask_user` tool.
+ * This tool is a pure apply action: it records the conversation's data source. It does NOT ask the
+ * user anything. When no data source resolves, either the chat window shows the data source picker
+ * and the agent is then asked to call this tool to record the choice, or (with
+ * chat.unresolvedDataSource 'agent') the agent asks the user with ask_user and then calls it.
  */
 export function useSwitchDataSourceAction(chatService: ChatService, enabled: boolean = true) {
   useAssistantAction<SwitchDataSourceArgs>({
     name: SWITCH_DATA_SOURCE_TOOL_NAME,
     description:
       'WHAT THIS TOOL DOES: sets the active data source for subsequent data-source-aware tools ' +
-      '(for example, tools that inspect fields, query data, or create visualizations) only in conversations involving multiple data sources. ' +
-      'PRECONDITION: call this tool only when available-data-sources-context is present and its sessionDataSourceList has ' +
-      'MORE THAN ONE distinct data source. If zero or exactly one data source has appeared, do NOT call it at all: ' +
-      'with one, that data source is already active and calling this tool is redundant; ' +
-      'with none, there is nothing to select. ' +
-      'WHEN THE PRECONDITION IS MET: determine the data source for the CURRENT request. ' +
-      '(1) If the user explicitly named one in the current request by name or by position, e.g. ' +
-      '"the first one", call this tool with that id. ' +
-      "(2) Otherwise, you MUST FIRST call the ask_user tool (inputType 'select'; one option per data " +
-      "source in this conversation, label = the data source's title/name, value = its id) to let " +
-      'the user choose, then call this tool with the id they chose. ' +
+      '(for example, tools that inspect fields, query data, or create visualizations). ' +
+      'WHEN TO CALL IT: call this tool when the user names an available data source (from ' +
+      'available-data-sources-context) that is not the currently active one, passing that data ' +
+      "source's id, when the user chooses one through ask_user, or when that context asks you " +
+      'to record one. Otherwise do not call it for the data source that is already active. ' +
       'NOTES: (1) A data source id/title in page, panel, visualization, or message context is metadata, not a request to switch. ' +
-      '(2) A data source chosen earlier in the conversation does NOT carry over to a new request; ' +
-      'do not reuse it silently, guess, or decide on your own that the choice is obvious. ' +
-      '(3) A dataset or index-pattern id is not a data source id. ' +
-      '(4) Once set, subsequent data-source-aware tools use it automatically; do not pass a data source id to them.',
+      '(2) A dataset or index-pattern id is not a data source id. ' +
+      '(3) The switch applies from the next step on: do not call other data-source-aware tools in ' +
+      'the same step as this tool. After it, they use the new data source automatically; do not ' +
+      'pass a data source id to them.',
     parameters: {
       type: 'object',
       properties: {
@@ -183,39 +179,82 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
-        const sessionDataSourceList = chatService.getSessionDataSourceList();
-        if (sessionDataSourceList.length <= 1) {
-          return {
-            success: true,
-            skipped: true,
-            message:
-              `Skipped switch_data_source because this conversation has ` +
-              `${sessionDataSourceList.length} data source. No data source switch is needed.`,
-          };
-        }
+        // The switch belongs to the conversation that asked for it.
+        const threadId = chatService.getThreadId();
 
-        // Validate  first
-        const { valid, dataSource, availableDataSources } = await chatService.validateDataSourceId(
+        // The target must be in the available list, or be found by a direct lookup.
+        const { dataSource, available, unverifiable } = await chatService.verifyDataSourceId(
           args.dataSourceId
         );
 
-        if (!valid) {
+        if (unverifiable) {
+          return {
+            success: false,
+            message:
+              `Could not verify data source "${args.dataSourceId}" right now, so the data ` +
+              'source was not switched. Tell the user and ask them to try again.',
+          };
+        }
+
+        if (!dataSource) {
           return {
             success: false,
             message:
               `Unknown dataSourceId "${args.dataSourceId}". Valid data source ids are: ` +
-              `${availableDataSources.map((ds) => ds.id).join(', ')}. ` +
+              `${available.map((ds) => ds.id).join(', ')}. ` +
               'Note that a dataset or index pattern id is not a data source id.',
           };
         }
 
-        chatService.setDataSourceId(args.dataSourceId);
+        const resolvedTitle = dataSource.title;
 
-        const resolvedTitle = dataSource?.title ?? args.dataSourceId;
+        // A page whose dataset belongs to a data source (for example Discover or Explore) pins
+        // the active data source to it, so a switch to another one would not take effect.
+        const pageDataSource = await chatService.getPageDataSource();
+
+        // The user started a new chat or opened another conversation while this was checked:
+        // do not write this conversation's switch into that one.
+        if (chatService.getThreadId() !== threadId) {
+          return {
+            success: false,
+            message:
+              'The conversation changed while switching, so the data source was not switched.',
+          };
+        }
+
+        if (pageDataSource && pageDataSource.id !== dataSource.id) {
+          return {
+            success: false,
+            message:
+              `The data source was not switched to "${resolvedTitle}": the dataset on the ` +
+              `current page belongs to "${pageDataSource.title}", and the chat uses the page's ` +
+              'data source while the user is on this page. Tell the user to select a dataset ' +
+              `from "${resolvedTitle}" on the page, or leave this page, and ask again.`,
+          };
+        }
+
+        // Already the conversation's recorded data source, with no other choice pending: nothing
+        // changes. The result still carries the id, so the history keeps recording it.
+        if (
+          chatService.getConversationDataSourceId() === dataSource.id &&
+          !chatService.getPendingDataSourceId()
+        ) {
+          return {
+            success: true,
+            skipped: true,
+            dataSourceId: dataSource.id,
+            datasourceTitle: resolvedTitle,
+            message: `"${resolvedTitle}" is already the active data source. No switch is needed.`,
+          };
+        }
+
+        // Record it. This also records (or, for another id, replaces) a pending choice: a picker
+        // pick, or a data source a caller passed with the message.
+        chatService.setConversationDataSource(dataSource.id);
 
         return {
           success: true,
-          dataSourceId: args.dataSourceId,
+          dataSourceId: dataSource.id,
           datasourceTitle: resolvedTitle,
           message: `Confirmed "${resolvedTitle}" as the active data source for this conversation.`,
         };
