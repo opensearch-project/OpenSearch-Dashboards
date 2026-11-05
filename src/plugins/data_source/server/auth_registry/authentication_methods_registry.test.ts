@@ -103,4 +103,32 @@ describe('AuthenticationMethodRegistry', () => {
       expect(registry.getAllAuthenticationMethods().length).toEqual(3);
     });
   });
+
+  test('removeAuthenticationMethod allows a name to be registered again', () => {
+    const localRegistry = new AuthenticationMethodRegistry();
+    const builtIn: AuthenticationMethod = {
+      name: 'oauth2',
+      credentialProvider: jest.fn(),
+    };
+    const replacement: AuthenticationMethod = {
+      name: 'oauth2',
+      credentialProvider: jest.fn(),
+    };
+
+    localRegistry.registerAuthenticationMethod(builtIn);
+    // Registering the same name twice is rejected, which is why the data source plugin has to
+    // remove its built-in provider before another plugin's registration can take effect -
+    // otherwise that plugin's setup() throws and startup fails.
+    expect(() => localRegistry.registerAuthenticationMethod(replacement)).toThrow(
+      `Authentication method 'oauth2' is already registered`
+    );
+
+    localRegistry.removeAuthenticationMethod('oauth2');
+    expect(localRegistry.getAuthenticationMethod('oauth2')).toBeUndefined();
+
+    localRegistry.registerAuthenticationMethod(replacement);
+    expect(localRegistry.getAuthenticationMethod('oauth2')?.credentialProvider).toBe(
+      replacement.credentialProvider
+    );
+  });
 });

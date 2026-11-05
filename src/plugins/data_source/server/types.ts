@@ -17,6 +17,7 @@ import {
   AuthType,
   UsernamePasswordTypedContent,
   SigV4Content,
+  OAuth2Content,
 } from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
@@ -55,6 +56,14 @@ export interface DataSourceCredentialsProviderOptions {
   dataSourceAttr: DataSourceAttributes;
   request?: OpenSearchDashboardsRequest;
   cryptography?: CryptographyServiceSetup;
+  endpointDeniedIPs?: string[];
+  endpointAllowlistedSuffixes?: string[];
+  /**
+   * False when the credentials in dataSourceAttr are already plain text, which is the case for
+   * "Test connection" against a data source that has not been saved yet. Providers must not
+   * attempt to decrypt in that case.
+   */
+  requireDecryption?: boolean;
 }
 
 export type DataSourceCredentialsProvider = (
@@ -65,7 +74,7 @@ export interface ClientParameters {
   authType: AuthType;
   endpoint: string;
   cacheKeySuffix: string;
-  credentials: UsernamePasswordTypedContent | SigV4Content;
+  credentials: UsernamePasswordTypedContent | SigV4Content | OAuth2Content;
 }
 
 export interface AuthenticationMethod {
@@ -98,6 +107,14 @@ export interface DataSourcePluginSetup {
   registerCredentialProvider: (method: AuthenticationMethod) => void;
   registerCustomApiSchema: (schema: any) => void;
   dataSourceEnabled: () => boolean;
+  /**
+   * Mirrors data_source.authTypes.OAuth2.enabled, so other plugins can refuse to create OAuth2
+   * connections when it is turned off rather than relying on the browser to hide the option.
+   *
+   * Optional so that adding it does not break every existing mock of this contract - callers
+   * should read it as `oauth2AuthEnabled?.() ?? true`, matching the config schema default.
+   */
+  oauth2AuthEnabled?: () => boolean;
 }
 
 export interface DataSourcePluginStart {

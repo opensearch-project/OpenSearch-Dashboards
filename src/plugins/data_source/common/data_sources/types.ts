@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/types';
+import { OAuth2Content } from './oauth2_types';
 
 export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
@@ -14,7 +15,8 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   installedPlugins?: string[];
   auth: {
     type: AuthType | string;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined | AuthTypeContent;
+    credentials:
+      UsernamePasswordTypedContent | SigV4Content | OAuth2Content | undefined | AuthTypeContent;
   };
   lastUpdatedTime?: string;
 }
@@ -41,10 +43,15 @@ export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
   password: string;
 }
 
+// OAuth2Content lives in oauth2_types.ts alongside the rest of the OAuth2 types; re-exported
+// here so existing imports from this module keep working.
+export { OAuth2Content } from './oauth2_types';
+
 export enum AuthType {
   NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
   SigV4 = 'sigv4',
+  OAuth2 = 'oauth2',
 }
 
 // src/plugins/workspace/public/utils.ts Workspace plugin depends on this to do use case limitation.
