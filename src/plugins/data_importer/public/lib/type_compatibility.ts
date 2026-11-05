@@ -29,7 +29,8 @@ const STRING_FIELD_TYPES = new Set([
  * A plain decimal number string, optionally signed, with an optional fraction and exponent.
  * Based on DECIMAL_STRING_REGEX in server/utils/determine_mapping.ts, widened to what OpenSearch
  * actually accepts at index time (a leading `+`, leading zeros, `.5`, `1e3`). Unlike `Number()`,
- * it rejects hex/binary/octal literals, `Infinity`/`NaN` and whitespace padding.
+ * it rejects hex/binary/octal literals and `Infinity`/`NaN`. Matched against the trimmed value,
+ * since OpenSearch trims numeric strings before parsing.
  */
 const DECIMAL_NUMBER_PATTERN = /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
 const DIGITS_PATTERN = /^\d+$/;
@@ -49,7 +50,9 @@ const isNumeric = (value: unknown): boolean => {
   if (typeof value === 'number') {
     return Number.isFinite(value);
   }
-  return typeof value === 'string' && DECIMAL_NUMBER_PATTERN.test(value);
+  // Whitespace-only trims to '', which the pattern rejects, matching OpenSearch's
+  // number_format_exception for it
+  return typeof value === 'string' && DECIMAL_NUMBER_PATTERN.test(value.trim());
 };
 
 const isBooleanLike = (value: unknown): boolean =>

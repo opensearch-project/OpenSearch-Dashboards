@@ -14,8 +14,12 @@ describe('isValueCompatibleWithType', () => {
     expect(isValueCompatibleWithType(value, 'date')).toBe(true);
   });
 
-  // Not-a-decimal strings that Number() would happily turn into a number.
-  const NON_DECIMAL_STRINGS = ['0x1F', '0b11', '0o7', '   ', ' 4', '4 ', 'Infinity', 'NaN'];
+  // Not-a-decimal strings that Number() would happily turn into a number. Whitespace-only is
+  // rejected by OpenSearch (number_format_exception), unlike the truly empty string.
+  const NON_DECIMAL_STRINGS = ['0x1F', '0b11', '0o7', '   ', ' ', 'Infinity', 'NaN'];
+
+  // OpenSearch trims numeric strings before parsing, so surrounding whitespace is accepted.
+  const PADDED_DECIMAL_STRINGS = [' 4', '4 ', ' 1.5 ', '\t-3\t'];
 
   describe.each(['integer', 'long', 'short', 'byte', 'unsigned_long'])('%s', (type) => {
     it('accepts integer-looking values', () => {
@@ -38,6 +42,10 @@ describe('isValueCompatibleWithType', () => {
     it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
       expect(isValueCompatibleWithType(value, type)).toBe(false);
     });
+
+    it.each(PADDED_DECIMAL_STRINGS)('accepts whitespace-padded decimal %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(true);
+    });
   });
 
   describe.each(['float', 'double', 'half_float', 'scaled_float'])('%s', (type) => {
@@ -57,6 +65,10 @@ describe('isValueCompatibleWithType', () => {
 
     it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
       expect(isValueCompatibleWithType(value, type)).toBe(false);
+    });
+
+    it.each(PADDED_DECIMAL_STRINGS)('accepts whitespace-padded decimal %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(true);
     });
   });
 
