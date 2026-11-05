@@ -18,6 +18,7 @@ import { useCelestialMapActions } from './shared/hooks/use_celestial_map_actions
 import { useFitViewWithDelay } from './shared/hooks/use_fit_view_with_delay.hook';
 import { useFocusOnNodes } from './shared/hooks/use_focus_on_nodes.hook';
 import type { CelestialMapProps } from './types';
+import { layoutSignature, reuseLayout } from './shared/utils/layout_reuse.utils';
 
 /**
  * Detect whether the host page is in dark mode by reading the computed
@@ -81,15 +82,6 @@ export const Celestial = (props: CelestialMapProps) => {
     props.topN
   );
 
-  useEffect(() => {
-    const layoutResult = getLaidOutElements(map.nodes, map.edges);
-
-    // Update the ReactFlow states
-    setNodes(layoutResult.nodes);
-    setEdges(layoutResult.edges);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map.nodes, map.edges, getLaidOutElements]);
-
   // focus on selected nodeid
   useEffect(() => {
     setSelectedNodeId(props.selectedNodeId);
@@ -102,19 +94,49 @@ export const Celestial = (props: CelestialMapProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedNodeId, nodes, focusOnNodes]);
 
+  // Lay out once per change of the layout inputs. Node data changes (e.g. metrics arriving)
+  // reuse the previous positions instead of re-running dagre, which takes seconds on large
+  // maps, and leave the viewport where it is.
+  const lastLayout = useRef<{
+    signature: string;
+    getLaidOutElements: typeof getLaidOutElements;
+    result: ReturnType<typeof getLaidOutElements>;
+  } | null>(null);
+  const lastNodesInFocus = useRef(props.nodesInFocus);
   useEffect(() => {
-    if (map.nodes) {
-      const layoutResult = getLaidOutElements(map.nodes, map.edges ?? []);
-      setNodes(layoutResult.nodes);
-      setEdges(layoutResult.edges);
-      if (props.nodesInFocus?.length) {
-        focusOnNodes(props.nodesInFocus, layoutResult.nodes);
-      } else if (!viewLock.isLocked()) {
-        fitViewWithDelay();
-      }
+    if (!map.nodes) return;
+    const edgesIn = map.edges ?? [];
+    const signature = layoutSignature(map.nodes, edgesIn);
+    const prev = lastLayout.current;
+    const reusable =
+      prev && prev.signature === signature && prev.getLaidOutElements === getLaidOutElements
+        ? prev
+        : null;
+    const reuse = !!reusable;
+    const layoutResult = reusable
+      ? reuseLayout(reusable.result, map.nodes, edgesIn)
+      : getLaidOutElements(map.nodes, edgesIn);
+    lastLayout.current = { signature, getLaidOutElements, result: layoutResult };
+    setNodes(layoutResult.nodes);
+    setEdges(layoutResult.edges);
+
+    const focusChanged = lastNodesInFocus.current !== props.nodesInFocus;
+    lastNodesInFocus.current = props.nodesInFocus;
+    if (reuse && !focusChanged) return;
+    if (props.nodesInFocus?.length) {
+      focusOnNodes(props.nodesInFocus, layoutResult.nodes);
+    } else if (!viewLock.isLocked()) {
+      fitViewWithDelay();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map.nodes, map.edges, focusOnNodes, fitViewWithDelay, props.nodesInFocus]);
+  }, [
+    map.nodes,
+    map.edges,
+    getLaidOutElements,
+    focusOnNodes,
+    fitViewWithDelay,
+    props.nodesInFocus,
+  ]);
 
   // Re-fit when the container is resized (e.g. an embedded map in a resizable panel).
   useEffect(() => {
