@@ -31,6 +31,8 @@ import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { MetricsEmptyState } from './metrics_empty_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { getErrorMessage } from '../utils/get_error_message';
+import { getNoMetricsBody } from '../utils/exploration_source';
 
 const PAGE_SIZE = 20;
 
@@ -78,6 +80,7 @@ export const MetricBrowser: React.FC = () => {
     refreshCounter,
     previewsEnabled = true,
     requestPreviews,
+    source,
   } = useExploration();
   const [allMetrics, setAllMetrics] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, MetricMetadata>>({});
@@ -122,7 +125,7 @@ export const MetricBrowser: React.FC = () => {
         if (cancelled) return;
         setAllMetrics(names);
       })
-      .catch((e) => !cancelled && setError(String(e)))
+      .catch((e) => !cancelled && setError(getErrorMessage(e)))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -237,7 +240,7 @@ export const MetricBrowser: React.FC = () => {
   }
 
   if (error) {
-    return <ErrorCallout error={error} />;
+    return <ErrorCallout error={error} sourceLabel={source?.label} />;
   }
 
   if (!allMetrics.length) {
@@ -246,10 +249,9 @@ export const MetricBrowser: React.FC = () => {
         title={i18n.translate('explore.metricsExplore.emptyTitle', {
           defaultMessage: 'No metrics found',
         })}
-        body={i18n.translate('explore.metricsExplore.emptyBody', {
-          defaultMessage:
-            'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
-        })}
+        body={getNoMetricsBody(source)}
+        sampleQueries={source?.sampleQueries}
+        codeLanguage={source?.codeLanguage}
       />
     );
   }

@@ -106,3 +106,37 @@ describe('MetricDetail explicit-Run gate', () => {
     expect(requestPreviews).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('MetricDetail error state', () => {
+  it("shows the server's message and names the source when the metric fails to load", async () => {
+    const client = makeClient();
+    client.getMetadata.mockRejectedValue(
+      Object.assign(new Error(''), {
+        body: { statusCode: 403, message: 'Unable to get resources: access denied' },
+      })
+    );
+    render(
+      <ExplorationContext.Provider
+        value={{
+          state: { ...defaultState, level: ExplorationLevel.DETAIL, metric: 'metric_one' },
+          dispatch: jest.fn(),
+          client: client as any,
+          queryGen: new MetricQueryGenerator(),
+          stepSec: 60,
+          executePromQL: jest.fn(),
+          refreshCounter: 0,
+          source: { label: 'My Metrics' },
+        }}
+      >
+        <MetricDetail />
+      </ExplorationContext.Provider>
+    );
+
+    expect(await screen.findByTestId('metricsExploreErrorMessage')).toHaveTextContent(
+      'Unable to get resources: access denied'
+    );
+    expect(screen.getByTestId('metricsExploreErrorCallout')).toHaveTextContent(
+      'We encountered a problem fetching data from the My Metrics data source.'
+    );
+  });
+});

@@ -131,6 +131,18 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getMetricsResourceClientId({ type: 'QUERY_ONLY' })).toBeUndefined();
   });
 
+  it("keeps Prometheus's advice for an empty metric list on the built-in source only", () => {
+    registry.register(
+      fakeSource({ id: 'own', datasetTypes: ['OWN'], metricsEmptyHint: 'Own advice.' })
+    );
+    expect(registry.getForDataset({ type: 'PROMETHEUS' }).metricsEmptyHint).toBe(
+      'Try adjusting the time range or verify the data source is scraping targets.'
+    );
+    expect(registry.getForDataset({ type: 'OWN' }).metricsEmptyHint).toBe('Own advice.');
+    registry.register(fakeSource());
+    expect(registry.getForDataset({ type: 'FAKE' }).metricsEmptyHint).toBeUndefined();
+  });
+
   it('treats PromQL and the languages Metrics sources list as metrics languages', () => {
     registry.register(
       fakeSource({ flavors: [ExploreFlavor.Metrics], languageSettings: { MY_SQL: {} } })

@@ -30,6 +30,7 @@ import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { getErrorMessage } from '../utils/get_error_message';
 
 interface BreakdownSeries {
   labelValue: string;
@@ -280,6 +281,7 @@ export const MetricDetail: React.FC = () => {
     timeBounds,
     previewsEnabled = true,
     requestPreviews,
+    source,
   } = useExploration();
   const [chartData, setChartData] = useState<Array<[number, string]>>([]);
   const [labels, setLabels] = useState<LabelInfo[]>([]);
@@ -319,7 +321,7 @@ export const MetricDetail: React.FC = () => {
           setLabels(labelNames.map((name) => ({ name, cardinality: 0 })));
         }
       } catch (e) {
-        if (!cancelled) setError(String(e));
+        if (!cancelled) setError(getErrorMessage(e));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -407,7 +409,7 @@ export const MetricDetail: React.FC = () => {
   );
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorCallout error={error} />;
+  if (error) return <ErrorCallout error={error} sourceLabel={source?.label} />;
 
   const deferredCallout = !previewsEnabled && (
     <>

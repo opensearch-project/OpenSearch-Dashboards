@@ -211,6 +211,13 @@ export interface SourceTypeDefinition {
    * PromQL autocomplete in the code editors lists metrics and labels through this client too.
    */
   metricsResourceClientId?: string;
+  /**
+   * Metrics page: the advice Explore gives when this source has no metrics to show for the time
+   * range (the Explore tab's metric list, or a PromQL query that returns nothing), after a
+   * sentence that names the source. For example, which of the source's metrics PromQL reaches.
+   * Defaults to "Try adjusting the time range."
+   */
+  metricsEmptyHint?: string;
 }
 
 /** A time range as the metric browser passes it (date math, e.g. `now-15m`). */
