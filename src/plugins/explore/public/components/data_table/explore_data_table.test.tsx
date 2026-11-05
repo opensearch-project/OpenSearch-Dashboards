@@ -32,7 +32,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
             case 'discover:modifyColumnsOnSwitch':
               return true;
             case 'discover:sampleSize':
-              return mockSampleSize;
+              return 500;
             case 'shortDots:enable':
               return false;
             default:
@@ -73,19 +73,10 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
 }));
 
 jest.mock('./data_table', () => ({
-  DataTable: ({ rows, sampleSize }: { rows: any[]; sampleSize: number }) => (
-    <div data-test-subj="data-table" data-sample-size={sampleSize}>
-      Data Table with {rows.length} rows
-    </div>
+  DataTable: ({ rows }: { rows: any[] }) => (
+    <div data-test-subj="data-table">Data Table with {rows.length} rows</div>
   ),
 }));
-
-let mockStreaming: Record<string, unknown> | undefined;
-jest.mock('../streaming/use_streaming_status', () => ({
-  useStreamingStatus: () => ({ streaming: mockStreaming, isPolling: !!mockStreaming?.isPolling }),
-}));
-
-let mockSampleSize = 500;
 
 jest.mock('../../helpers/view_component_utils/filter_columns', () => ({
   filterColumns: jest.fn((columns) => columns || ['_source']),
@@ -188,32 +179,6 @@ describe('ExploreDataTable', () => {
 
   afterEach(() => {
     clearResultsCache();
-    mockStreaming = undefined;
-    mockSampleSize = 500;
-  });
-
-  // The table explains a truncated result only when its row count equals the limit it is given.
-  describe('row limit', () => {
-    const limit = () => Number(screen.getByTestId('data-table').getAttribute('data-sample-size'));
-
-    it('is the sample size for a result that did not stream', () => {
-      mockSampleSize = 300000;
-      renderComponent();
-      expect(limit()).toBe(300000);
-    });
-
-    it('is the streaming cap when a streamed result holds fewer rows than the sample size', () => {
-      mockSampleSize = 300000;
-      mockStreaming = { isPolling: false };
-      renderComponent();
-      expect(limit()).toBe(100000);
-    });
-
-    it('is the sample size when that is below the streaming cap', () => {
-      mockStreaming = { isPolling: false };
-      renderComponent();
-      expect(limit()).toBe(500);
-    });
   });
 
   it('renders the explore data table container', () => {

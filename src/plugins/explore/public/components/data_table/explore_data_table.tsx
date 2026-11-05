@@ -29,8 +29,6 @@ import { useDatasetContext } from '../../application/context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { useDisplayedColumns } from '../../helpers/use_displayed_columns';
-import { useStreamingStatus } from '../streaming/use_streaming_status';
-import { STREAMING_MAX_HELD_ROWS } from '../../application/utils/state_management/actions/streaming_query_actions';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -50,11 +48,6 @@ const ExploreDataTableComponent = () => {
   const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const rows = rawResults?.hits?.hits || [];
   const warnings = metadata?.warnings ?? [];
-  // A streamed result holds at most STREAMING_MAX_HELD_ROWS, so that is its row limit when lower;
-  // the table only explains a truncated result when the row count equals the limit.
-  const { streaming } = useStreamingStatus(cacheKey);
-  const sampleSize: number = uiSettings.get(SAMPLE_SIZE_SETTING);
-  const rowLimit = streaming ? Math.min(sampleSize, STREAMING_MAX_HELD_ROWS) : sampleSize;
 
   const flavorId = useFlavorId();
   const expandedTableHeader = useMemo(() => {
@@ -119,7 +112,7 @@ const ExploreDataTableComponent = () => {
             dataset={dataset!}
             rows={rows}
             docViewsRegistry={docViewsRegistry}
-            sampleSize={rowLimit}
+            sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
             isShortDots={uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)}
             onFilter={onAddFilter as DocViewFilterFn}
             scrollToTop={scrollToTop}
