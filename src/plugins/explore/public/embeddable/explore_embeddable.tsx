@@ -72,6 +72,23 @@ import {
 } from '../components/data_transformations';
 import { PanelDataService } from './panel_data_service';
 import { visDataToTabular } from '../components/visualizations/utils/vis_data_to_tabular';
+import { parseErrorEnvelope } from '../application/utils/parse_error_envelope';
+
+/**
+ * The text a failed fetch shows on the panel. A search strategy's error arrives as a serialised
+ * envelope in the message: show its details, else its reason, as Explore's error panel does, and
+ * never the raw JSON or the envelope's type (an internal code). A plain message is shown as it is.
+ */
+const getFetchErrorMessage = (error: any): string => {
+  for (const message of [error?.body?.message, error?.message]) {
+    if (typeof message !== 'string' || message === '') continue;
+    const envelope = parseErrorEnvelope(message);
+    if (!envelope) return message;
+    const text = envelope.details || envelope.reason;
+    if (text) return text;
+  }
+  return 'An error occurred';
+};
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -558,7 +575,7 @@ export class ExploreEmbeddable
         this.searchProps.isLoading = false;
         this.searchProps.error = {
           name: error?.body?.error || error?.name || 'Error',
-          message: error?.body?.message || error?.message || 'An error occurred',
+          message: getFetchErrorMessage(error),
         };
         this.updateOutput({
           loading: false,
