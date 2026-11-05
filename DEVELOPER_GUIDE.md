@@ -304,6 +304,10 @@ savedObjects.storage.backend: "sqlite"
 savedObjects.storage.sqlite.path: "data/osd-metadata.db"
 ```
 
+The SQLite backend does not support saved object permission control. OpenSearch Dashboards rejects
+configurations that combine `savedObjects.storage.backend: "sqlite"` with
+`savedObjects.permission.enabled: true`.
+
 #### Resource savings
 
 |  | With OpenSearch | With SQLite |
@@ -317,7 +321,7 @@ savedObjects.storage.sqlite.path: "data/osd-metadata.db"
 
 **Works with SQLite (no OpenSearch needed):**
 - UI and frontend development — React components, pages, layouts, styling
-- Workspace features — create, edit, delete, navigate workspaces
+- Workspace features without saved object permission control — create, edit, delete, navigate workspaces
 - Saved object CRUD — import/export, management page, copy to workspace
 - Plugin scaffolding — registering saved object types, routes, and UI
 - Application chrome — header, sidebar, breadcrumbs, home page
