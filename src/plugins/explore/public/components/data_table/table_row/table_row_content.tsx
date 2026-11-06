@@ -12,13 +12,15 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableCell } from '../table_cell/table_cell';
 import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { tryParseJson } from '../table_cell/json_tree/json_utils';
+import { useFormatJson } from '../table_cell/json_tree/format_json_setting';
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -73,6 +75,22 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   const [isRowSelected, setIsRowSelected] = useState(false);
 
   const flattened = dataset.flattenHit(row);
+  // A row showing a JSON tree is several lines tall, so its time cell can put the date and the
+  // time on separate lines at no cost in height. This is the same test `TableCell` applies to
+  // decide whether a cell is rendered as a tree.
+  const formatJson = useFormatJson();
+  const timeFieldName = dataset.timeFieldName;
+  const hasJsonTree = useMemo(
+    () =>
+      formatJson &&
+      columns.some(
+        (colName) =>
+          colName !== timeFieldName &&
+          typeof flattened[colName] === 'string' &&
+          tryParseJson(flattened[colName]) !== undefined
+      ),
+    [formatJson, columns, timeFieldName, flattened]
+  );
   return (
     <tr
       key={row._id}
@@ -169,6 +187,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             isOnTracesPage={isOnTracesPage}
             setIsRowSelected={setIsRowSelected}
             wrapCellText={wrapCellText}
+            splitDateTime={isTimeField && hasJsonTree}
           />
         );
       })}

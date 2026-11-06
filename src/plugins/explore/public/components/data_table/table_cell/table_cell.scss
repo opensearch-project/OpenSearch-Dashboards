@@ -29,6 +29,21 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
     padding-left: $euiSizeXS;
   }
 
+  // Date and time on separate lines, in rows that show a JSON tree. The extra space on the right
+  // keeps the two-line time visually apart from the multi-line tree beside it.
+  &__dateTime {
+    padding-right: $euiSize;
+
+    > span {
+      display: block;
+    }
+  }
+
+  // Multi-line cells (JSON tree): keep the cell actions on the first line
+  &__filter--top {
+    align-self: flex-start;
+  }
+
   &__filterButton,
   &__filter {
     opacity: 0;

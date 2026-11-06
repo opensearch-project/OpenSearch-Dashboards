@@ -4,8 +4,18 @@
  */
 
 import classNames from 'classnames';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { JsonTree, GetLeafFilter } from '../../../data_table/table_cell/json_tree/json_tree';
+import {
+  tryParseJson,
+  extractHighlightTerms,
+} from '../../../data_table/table_cell/json_tree/json_utils';
+import { useFormatJson } from '../../../data_table/table_cell/json_tree/format_json_setting';
+import {
+  mergeHighlightTerms,
+  useQueryHighlightTerms,
+} from '../../../data_table/table_cell/json_tree/query_highlight_terms';
 import { FieldMapping, DocViewFilterFn } from '../../../../types/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
@@ -32,6 +42,10 @@ export interface Props {
   onToggleColumn?: () => void;
   value: string | ReactNode;
   valueRaw: unknown;
+  // Enables filter buttons on the leaves of a JSON string value.
+  getLeafFilter?: GetLeafFilter;
+  // Identifies the document + field so the tree's expanded nodes are remembered.
+  jsonStateKey?: string;
 }
 
 export function DocViewTableRow({
@@ -49,10 +63,27 @@ export function DocViewTableRow({
   onToggleColumn,
   value,
   valueRaw,
+  getLeafFilter,
+  jsonStateKey,
 }: Props) {
+  // A string value holding JSON is shown as a collapsible tree instead of one long string,
+  // unless turned off in the table settings.
+  const formatJson = useFormatJson();
+  const parsedJson = useMemo(
+    () => (formatJson && typeof valueRaw === 'string' ? tryParseJson(valueRaw) : undefined),
+    [formatJson, valueRaw]
+  );
+  // Highlight what was searched for in the tree: the matches marked in the formatted value
+  // (DSL results) plus the string literals of the query (PPL/SQL results carry no highlights).
+  const queryTerms = useQueryHighlightTerms();
+  const highlightTerms = useMemo(
+    () => (parsedJson ? mergeHighlightTerms(extractHighlightTerms(value), queryTerms) : undefined),
+    [parsedJson, value, queryTerms]
+  );
+
   const valueClassName = classNames({
     exploreDocViewer__value: true,
-    'truncate-by-height': isCollapsible && isCollapsed,
+    'truncate-by-height': !parsedJson && isCollapsible && isCollapsed,
   });
 
   // No value filters on date/time fields: PPL exact-equality on a timestamp is broken
@@ -94,23 +125,35 @@ export function DocViewTableRow({
         />
       </td>
       <td>
-        {isCollapsible && (
+        {isCollapsible && !parsedJson && (
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          /*
-           * Justification for dangerouslySetInnerHTML:
-           * We just use values encoded by our field formatters. The output is
-           * additionally passed through DOMPurify to defend against any unsafe
-           * HTML that may slip through the formatters.
-           */
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value as string) }}
-        />
+        {parsedJson ? (
+          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+            <JsonTree
+              value={parsedJson}
+              rawText={valueRaw as string}
+              getLeafFilter={getLeafFilter}
+              stateKey={jsonStateKey}
+              highlightTerms={highlightTerms}
+            />
+          </div>
+        ) : (
+          <div
+            className={valueClassName}
+            data-test-subj={`tableDocViewRow-${field}-value`}
+            /*
+             * Justification for dangerouslySetInnerHTML:
+             * We just use values encoded by our field formatters. The output is
+             * additionally passed through DOMPurify to defend against any unsafe
+             * HTML that may slip through the formatters.
+             */
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value as string) }}
+          />
+        )}
       </td>
     </tr>
   );
