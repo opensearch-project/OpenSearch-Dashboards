@@ -35,6 +35,7 @@ describe('useSwitchDataSourceAction', () => {
       setDataSourceId: jest.fn(),
       getConfirmedDataSourceId: jest.fn().mockReturnValue(undefined),
       getSessionDataSourceList: jest.fn().mockReturnValue(['ds-a', 'ds-b']),
+      getPinnedPageDataSourceId: jest.fn().mockResolvedValue(undefined),
       validateDataSourceId: jest.fn().mockResolvedValue({
         valid: true,
         dataSource: { id: 'ds-a', title: 'Cluster A' },
@@ -81,6 +82,28 @@ describe('useSwitchDataSourceAction', () => {
           message: 'Confirmed "Cluster A" as the active data source for this conversation.',
         })
       );
+    });
+
+    it('should refuse to switch when the page pins a different data source', async () => {
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-page');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('"ds-page"');
+      expect(result.message).toContain('Switching is not possible');
+    });
+
+    it('should allow switching to the data source the page already pins', async () => {
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-a');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(result.success).toBe(true);
     });
 
     it('should switch even when the session has seen only one data source', async () => {

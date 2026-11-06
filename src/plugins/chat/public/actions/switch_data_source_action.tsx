@@ -189,6 +189,20 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
+        // The page context data source has the highest resolution priority. While the page pins
+        // a usable data source, a switch would report success but the next run would return to
+        // the page's data source. Refuse it instead of pretending to switch.
+        const pinnedId = await chatService.getPinnedPageDataSourceId();
+        if (pinnedId && pinnedId !== args.dataSourceId) {
+          return {
+            success: false,
+            message:
+              `The current page pins data source "${pinnedId}". Switching is not possible on this ` +
+              'page; tell the user to leave this page (or change the page dataset) to use another ' +
+              'data source.',
+          };
+        }
+
         chatService.setDataSourceId(args.dataSourceId);
 
         const resolvedTitle = dataSource?.title ?? args.dataSourceId;

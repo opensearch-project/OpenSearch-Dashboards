@@ -595,6 +595,52 @@ describe('ChatService', () => {
       expect(availableDataSourcesContext.value).toContain('call switch_data_source');
     });
 
+    it('should tell the agent the active data source cannot be changed when the page pins it', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+      const service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient as any
+      );
+
+      const contextStore = createStatefulContextStore();
+      (window as any).assistantContextStore = contextStore;
+      // A page that pins ds-2 via its dataset.
+      contextStore.addContext({
+        id: 'page',
+        description: 'page',
+        categories: ['page'],
+        value: { appId: 'explore', dataset: { dataSource: { id: 'ds-2' } } },
+      } as any);
+      mockUiSettings.get.mockReturnValue(undefined);
+
+      service.newThread();
+
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const availableDataSourcesContext = runInput.context.find(
+        (ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+
+      expect(availableDataSourcesContext.value).toContain(
+        'Currently active data source: "Source Two" (id: ds-2).'
+      );
+      expect(availableDataSourcesContext.value).toContain('cannot be changed here');
+      expect(availableDataSourcesContext.value).toContain('do NOT call switch_data_source');
+    });
+
     it('should not include available-data-sources-context context when only one data source is available', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -2701,6 +2747,61 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
       expect(service.getConfirmedDataSourceId()).toBeUndefined();
       expect(service.getSessionDataSourceList()).toEqual([]);
+    });
+
+    it('getPinnedPageDataSourceId returns the page data source when it is usable', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      expect(await service.getPinnedPageDataSourceId()).toBe('ds-1');
+    });
+
+    it('getPinnedPageDataSourceId returns undefined when the page data source is not usable', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-not-in-workspace' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      expect(await service.getPinnedPageDataSourceId()).toBeUndefined();
+    });
+
+    it('getPinnedPageDataSourceId returns undefined when the page names no data source', async () => {
+      delete (global as any).window.assistantContextStore;
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      expect(await service.getPinnedPageDataSourceId()).toBeUndefined();
     });
 
     it('should skip a page context data source that is not in the available list', async () => {

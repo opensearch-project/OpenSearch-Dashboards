@@ -486,6 +486,18 @@ export class ChatService {
     return [...this.rejectedDataSources];
   }
 
+  /**
+   * The usable data source the current page pins, if any. The page context has the highest
+   * resolution priority, so while it names a usable data source a switch cannot take effect:
+   * the next resolve returns to the page's data source. Returns undefined when the page names
+   * no data source, or names one that does not validate (then it is skipped and a switch is
+   * allowed).
+   */
+  public async getPinnedPageDataSourceId(): Promise<string | undefined> {
+    const id = this.getDataSourceFromPageContext();
+    return id && (await this.isUsableDataSourceId(id)) ? id : undefined;
+  }
+
   private async isUsableDataSourceId(id: string): Promise<boolean> {
     if (this.invalidDataSourceIds.has(id)) return false;
     try {
@@ -620,15 +632,22 @@ export class ChatService {
           ? `id: ${dataSourceId}`
           : 'none';
 
+      const pinnedId = await this.getPinnedPageDataSourceId();
+      const switchLine = pinnedId
+        ? `The current page pins the active data source, so it cannot be changed here. If the ` +
+          `user asks for a different data source, do NOT call switch_data_source; tell them to ` +
+          `leave this page or change the page dataset to use another one.`
+        : `If the user's current request explicitly names a different data source from this list ` +
+          `(by name or id), call switch_data_source with that data source's id before using any ` +
+          `data-source-aware tool.`;
+
       contextStore.addContext({
         id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
         description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
         value: [
           `Currently active data source: ${activeDsLabel}. Data-source-aware tools use it automatically.`,
           `Data sources available to the user: ${availableDataSources.map(label).join(', ')}.`,
-          `If the user's current request explicitly names a different data source from this list ` +
-            `(by name or id), call switch_data_source with that data source's id before using any ` +
-            `data-source-aware tool.`,
+          switchLine,
           `If the user refers to a data source that is ambiguous or not in this list, call ask_user ` +
             `with inputType 'select' (label = data source name, value = its id) instead of guessing, ` +
             `then call switch_data_source with the chosen id.`,
