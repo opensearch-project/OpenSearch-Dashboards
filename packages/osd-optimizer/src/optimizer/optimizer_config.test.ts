@@ -58,7 +58,7 @@ import { REPO_ROOT } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
-import { parseThemeTags } from '../common';
+import { BundleRefs, parseThemeTags } from '../common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -674,6 +674,11 @@ describe('OptimizerConfig::parseOptions()', () => {
  * and just making sure that the arguments are coming from where we expect
  */
 describe('OptimizerConfig::create()', () => {
+  const allBundles = [Symbol('bundle1'), Symbol('bundle2')];
+  const filteredBundles = [allBundles[0]];
+  const effectiveBundleRefs = Symbol('effective bundle refs');
+  const addRefs = jest.fn();
+  const getRefs = jest.fn();
   const assignBundlesToWorkers: jest.Mock = jest.requireMock(
     './assign_bundles_to_workers.ts'
   ).assignBundlesToWorkers;
@@ -694,9 +699,12 @@ describe('OptimizerConfig::create()', () => {
       { config: Symbol('worker config 2') },
     ]);
     findOpenSearchDashboardsPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
-    getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
-    filterById.mockReturnValue(Symbol('filtered bundles'));
+    getPluginBundles.mockReturnValue(allBundles);
+    filterById.mockReturnValue(filteredBundles);
     readLimits.mockReturnValue(Symbol('limits'));
+    addRefs.mockReturnThis();
+    getRefs.mockReturnValue(effectiveBundleRefs);
+    jest.spyOn(BundleRefs, 'fromBundles').mockReturnValue({ addRefs, getRefs } as any);
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation(
       (): {
@@ -727,8 +735,10 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundleRefs": Symbol(bundle refs),
-        "bundles": Symbol(filtered bundles),
+        "bundleRefs": Symbol(effective bundle refs),
+        "bundles": Array [
+          Symbol(bundle1),
+        ],
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
@@ -774,5 +784,9 @@ describe('OptimizerConfig::create()', () => {
       type: 'return',
       value: config.bundles,
     });
+
+    expect(BundleRefs.fromBundles).toHaveBeenCalledWith([allBundles[1]]);
+    expect(addRefs).toHaveBeenCalledWith(parsedOptions.bundleRefs);
+    expect(getRefs).toHaveBeenCalledTimes(1);
   });
 });
