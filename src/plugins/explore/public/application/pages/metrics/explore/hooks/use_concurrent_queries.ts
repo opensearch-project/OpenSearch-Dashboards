@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getErrorMessage } from '../utils/get_error_message';
 
 const DEFAULT_CONCURRENCY = 6;
 const DEBOUNCE_MS = 200;
@@ -98,7 +99,7 @@ export function useConcurrentQueries<T>(
           .catch((err) => {
             if (controller.signal.aborted) return;
             s.fetched.add(key);
-            s.bufferedErrors.set(key, err?.message ? String(err.message) : String(err));
+            s.bufferedErrors.set(key, getErrorMessage(err));
             scheduleFlush();
           })
           .finally(() => {
