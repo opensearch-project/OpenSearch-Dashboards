@@ -60,6 +60,7 @@ export class TracePPLService extends PPLService {
         title: dataset.title,
         type: dataset.type,
         ...(dataset.dataSource && { dataSource: dataset.dataSource }),
+        ...(dataset.schemaMappings && { schemaMappings: dataset.schemaMappings }),
         // Omit timeFieldName to prevent automatic time filtering
       };
 

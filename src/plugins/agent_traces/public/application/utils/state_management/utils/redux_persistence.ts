@@ -76,6 +76,9 @@ export const loadReduxState = async (services: AgentTracesServices): Promise<Roo
         timeFieldName: queryState.dataset.timeFieldName,
         dataSource: queryState.dataset.dataSource,
         signalType: queryState.dataset.signalType,
+        ...(queryState.dataset.schemaMappings && {
+          schemaMappings: queryState.dataset.schemaMappings,
+        }),
       };
     }
 
@@ -237,7 +240,21 @@ const resolveDataset = async (
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = undefined;
   // @ts-expect-error TS2339 TODO(ts-error): fixme
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+  let existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+
+  // URL state contains a compact Dataset. Reload saved metadata before the first query so
+  // capabilities and schema mappings are available without reselecting the dataset.
+  if (existingDataset?.id && existingDataset.type === 'INDEX_PATTERN') {
+    try {
+      const dataView = await services.data.dataViews?.get(existingDataset.id);
+      existingDataset = {
+        ...existingDataset,
+        schemaMappings: dataView?.schemaMappings ?? existingDataset.schemaMappings,
+      };
+    } catch {
+      // Retain URL metadata when the saved data view is unavailable.
+    }
+  }
 
   // If we have an existing dataset, validate SignalType compatibility.
   // signalType is persisted in URL/query state, so read it directly from the Dataset.
@@ -279,6 +296,7 @@ const getPreloadedQueryState = async (
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
         signalType: selectedDataset.signalType,
+        ...(selectedDataset.schemaMappings && { schemaMappings: selectedDataset.schemaMappings }),
       };
     }
   }

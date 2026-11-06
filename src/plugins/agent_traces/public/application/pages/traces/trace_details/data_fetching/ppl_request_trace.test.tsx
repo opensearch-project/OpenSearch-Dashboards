@@ -85,6 +85,22 @@ describe('ppl_request_trace', () => {
       );
     });
 
+    it('preserves schema mappings when omitting the time field', async () => {
+      const schemaMappings = {
+        otelTraces: { traceId: 'traceId' },
+      };
+
+      await tracePPLService.fetchTraceSpans({
+        ...defaultParams,
+        dataset: { ...defaultParams.dataset, schemaMappings },
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ schemaMappings }),
+        expect.any(String)
+      );
+    });
+
     it('constructs query with single filter', async () => {
       await tracePPLService.fetchTraceSpans({
         ...defaultParams,

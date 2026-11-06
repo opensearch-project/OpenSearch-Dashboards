@@ -11,7 +11,7 @@ import { useDatasetContext } from '../../../context/dataset_context/dataset_cont
 import { defaultPrepareQueryString } from '../../../utils/state_management/actions/query_actions';
 import { RootState } from '../../../utils/state_management/store';
 import { TracePPLService } from '../trace_details/data_fetching/ppl_request_trace';
-import { Dataset } from '../../../../../../data/common';
+import { DataView, Dataset } from '../../../../../../data/common';
 
 export interface PPLQueryDeps {
   services: AgentTracesServices;
@@ -20,6 +20,26 @@ export interface PPLQueryDeps {
   baseQueryString: string | null;
   sourceOnlyQueryString: string | null;
 }
+
+export const buildPPLDatasetParam = (dataset: DataView | undefined): Dataset | null => {
+  if (!dataset) return null;
+
+  return {
+    id: dataset.id || '',
+    title: dataset.title,
+    type: dataset.type || 'INDEX_PATTERN',
+    timeFieldName: dataset.timeFieldName,
+    ...(dataset.schemaMappings && { schemaMappings: dataset.schemaMappings }),
+    ...(dataset.dataSourceRef && {
+      dataSource: {
+        id: dataset.dataSourceRef.id,
+        title: dataset.dataSourceRef.name || dataset.dataSourceRef.id,
+        type: dataset.dataSourceRef.type || 'OpenSearch',
+        version: '',
+      },
+    }),
+  };
+};
 
 /**
  * Shared hook that provides the common PPL query dependencies
@@ -35,23 +55,7 @@ export const usePPLQueryDeps = (): PPLQueryDeps => {
     [services.data]
   );
 
-  const datasetParam = useMemo(() => {
-    if (!dataset) return null;
-    return {
-      id: dataset.id || '',
-      title: dataset.title,
-      type: dataset.type || 'INDEX_PATTERN',
-      timeFieldName: dataset.timeFieldName,
-      ...(dataset.dataSourceRef && {
-        dataSource: {
-          id: dataset.dataSourceRef.id,
-          title: dataset.dataSourceRef.name || dataset.dataSourceRef.id,
-          type: dataset.dataSourceRef.type || 'OpenSearch',
-          version: '',
-        },
-      }),
-    };
-  }, [dataset]);
+  const datasetParam = useMemo(() => buildPPLDatasetParam(dataset), [dataset]);
 
   const baseQueryString = useMemo(() => {
     try {
