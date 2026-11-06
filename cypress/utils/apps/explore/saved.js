@@ -16,6 +16,7 @@ import {
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 import { verifyMonacoEditorContent } from './autocomplete';
 import { openShareMenuWithRetry } from './shared_links';
+import { selectFieldFromSidebar } from './sidebar';
 
 /**
  * The fields to select for saved search. Also takes shape of the API for saved search
@@ -208,7 +209,7 @@ export const setSearchConfigurations = ({
 
   if (selectFields) {
     for (const field of SELECTED_FIELD_COLUMNS) {
-      cy.getElementByTestId(`fieldToggle-${field}`).click();
+      selectFieldFromSidebar(field);
     }
 
     cy.getElementByTestId('exploreQueryExecutionButton').should('be.visible');

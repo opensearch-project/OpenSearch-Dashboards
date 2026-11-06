@@ -16,6 +16,7 @@ import {
   createWorkspaceAndDatasetUsingEndpoint,
 } from '../../../../../../utils/helpers';
 import { DatasetTypes } from '../../../../../../utils/apps/explore/constants';
+import { ensureSidebarOpen } from '../../../../../../utils/apps/explore/sidebar';
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
@@ -113,6 +114,7 @@ const runAiEditorTests = () => {
           cy.getElementByTestId('exploreTabs').should('exist');
 
           cy.explore.setQueryEditor(' ');
+          ensureSidebarOpen();
           cy.getElementByTestId('field-category-showDetails').click({ force: true });
           cy.get('[data-test-subj^="plus-category-"]')
             .first()
