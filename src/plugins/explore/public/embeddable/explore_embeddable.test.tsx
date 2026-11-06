@@ -383,6 +383,85 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.getOutput().error).toBeUndefined();
   });
 
+  describe('fetch error message', () => {
+    // A failed request as the http service rejects it: `body.message` holds the server's message,
+    // which a search strategy sets to a serialised `{ error: { type, reason, details }, status }`.
+    const httpError = (message: string, statusText = 'Forbidden') =>
+      Object.assign(new Error(statusText), {
+        body: { statusCode: 403, error: statusText, message },
+      });
+    const envelope = (error: Record<string, string>) => JSON.stringify({ error, status: 403 });
+
+    const failWith = async (error: unknown) => {
+      mockSavedExplore.searchSource.fetch.mockRejectedValueOnce(error);
+      // @ts-ignore
+      embeddable.node = mockNode;
+      // @ts-ignore
+      await embeddable.updateHandler(embeddable.searchProps, true);
+      const output = embeddable.getOutput();
+      expect(output.loading).toBe(false);
+      // @ts-ignore
+      expect(embeddable.searchProps.error).toEqual(output.error);
+      return output.error!;
+    };
+
+    test('shows the details of a serialised error', async () => {
+      const error = await failWith(
+        httpError(
+          envelope({
+            type: 'FakeQueryException',
+            reason: 'Fake query failed',
+            details: 'The fake source refused the query.',
+          })
+        )
+      );
+      expect(error.message).toBe('The fake source refused the query.');
+      expect(error.name).toBe('Forbidden');
+    });
+
+    test('shows the reason of a serialised error without details', async () => {
+      const error = await failWith(httpError(envelope({ reason: 'Fake query failed' })));
+      expect(error.message).toBe('Fake query failed');
+    });
+
+    test("never shows a serialised error's type", async () => {
+      const withText = await failWith(
+        httpError(envelope({ type: 'FAKE_INTERNAL_CODE', details: 'The fake source is down.' }))
+      );
+      expect(withText.message).toBe('The fake source is down.');
+      expect(withText.name).not.toBe('FAKE_INTERNAL_CODE');
+
+      // No text to show: neither the raw JSON nor the type, but the error's own message.
+      const typeOnly = await failWith(httpError(envelope({ type: 'FAKE_INTERNAL_CODE' })));
+      expect(typeOnly.message).toBe('Forbidden');
+      expect(typeOnly.name).not.toBe('FAKE_INTERNAL_CODE');
+    });
+
+    test('falls back to the default text when a serialised error has no text at all', async () => {
+      const error = await failWith(httpError(envelope({ type: 'FAKE_INTERNAL_CODE' }), ''));
+      expect(error.message).toBe('An error occurred');
+    });
+
+    test('shows the details of a serialised error thrown without a response body', async () => {
+      const error = await failWith(
+        new Error(envelope({ reason: 'Fake query failed', details: 'Fake details.' }))
+      );
+      expect(error.message).toBe('Fake details.');
+    });
+
+    test('shows a plain message as it is', async () => {
+      const error = await failWith(httpError('Fake source is not reachable', 'Bad Request'));
+      expect(error.message).toBe('Fake source is not reachable');
+      expect(error.name).toBe('Bad Request');
+    });
+
+    test('shows a malformed serialised error as it is', async () => {
+      const malformed = '{"error":{"reason":"Fake query failed","details":"cut';
+      const error = await failWith(httpError(malformed));
+      expect(error.message).toBe(malformed);
+    });
+  });
+
   test('reload calls updateHandler with force=true', () => {
     // @ts-ignore
     const spy = jest.spyOn(embeddable as any, 'updateHandler').mockResolvedValue(undefined);
