@@ -1251,6 +1251,28 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(flag.payload).toBe(true);
     });
 
+    it('clears the stale-selection flag, since the results that load are for the current selection', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {}, isSelectionStale: true },
+      });
+
+      await executeQueries({
+        services: { tabRegistry: { getTab: jest.fn() } } as unknown as ExploreServices,
+      })(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'queryEditor/setIsSelectionStale', payload: false })
+      );
+    });
+
     // Tab queries are dispatched only once the data table settles. Unless the run itself counts as
     // running until then, the overall status settles in between and Stop turns back into Run while
     // the tab query is still to come.

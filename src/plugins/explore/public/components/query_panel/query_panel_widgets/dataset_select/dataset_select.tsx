@@ -13,11 +13,24 @@ import {
 } from '../../../../services/source_type_registry';
 import { convertIndexPatternTerminology } from '../../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../../types';
-import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
-import { selectDataset } from '../../../../application/utils/state_management/selectors';
+import {
+  setIsSelectionStale,
+  setQueryState,
+  setQueryWithHistory,
+} from '../../../../application/utils/state_management/slices';
+import {
+  selectDataset,
+  selectIsPromptEditorMode,
+  selectQuery,
+} from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
-import { useClearEditors } from '../../../../application/hooks';
+import { useClearEditors, useEditorRef } from '../../../../application/hooks';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import {
+  isExplicitRunRefinement,
+  REFINE_SELECTION_META,
+  stageQueryForExplicitRun,
+} from '../../../../application/utils/requires_explicit_run';
 import './dataset_select_terminology.scss';
 import { ExploreFlavor } from '../../../../../common';
 
@@ -26,6 +39,10 @@ export const DatasetSelectWidget = () => {
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
   const clearEditors = useClearEditors();
+  const editorRef = useEditorRef();
+  // The query that last ran (redux), which the results are keyed by, and the editor's mode.
+  const lastQuery = useSelector(selectQuery);
+  const isPromptMode = useSelector(selectIsPromptEditorMode);
   const { isDatasetManagementEnabled } = services;
 
   const {
@@ -52,6 +69,36 @@ export const DatasetSelectWidget = () => {
             })
           );
           clearEditors();
+          return;
+        }
+
+        // Other log groups (or the like) of the same explicit-Run source that can run the current
+        // language: keep the user's query for them to run on the new selection. The query is the
+        // editor's text (the query panel remounts per dataset and would otherwise reload the last
+        // query that ran), but only in Query mode: in prompt mode the editor holds a prompt.
+        const refineLanguages = queryString
+          .getDatasetService()
+          .getType(dataset.type)
+          ?.supportedLanguages(dataset);
+        if (
+          isExplicitRunRefinement(queryString, lastQuery.dataset, dataset) &&
+          (!refineLanguages || refineLanguages.includes(lastQuery.language))
+        ) {
+          const editor = editorRef.current;
+          const draft = editor && !isPromptMode ? editor.getValue() : undefined;
+          const text = draft ?? lastQuery.query;
+          queryString.setQuery({ ...queryString.getQuery(), query: text, dataset });
+          // Not setQueryWithHistory: the query hasn't run, so it doesn't belong in the history.
+          dispatch({
+            ...setQueryState({ ...lastQuery, query: text, dataset }),
+            meta: REFINE_SELECTION_META,
+          });
+          // The results are keyed by the query that ran, so they can only be kept for that query.
+          // An edited draft is staged instead: no results, and the Run prompt.
+          if (text !== lastQuery.query) {
+            stageQueryForExplicitRun(dispatch);
+            dispatch(setIsSelectionStale(false));
+          }
           return;
         }
 
@@ -92,7 +139,15 @@ export const DatasetSelectWidget = () => {
         });
       }
     },
-    [queryString, dispatch, clearEditors, services.notifications?.toasts]
+    [
+      queryString,
+      dispatch,
+      clearEditors,
+      editorRef,
+      lastQuery,
+      isPromptMode,
+      services.notifications?.toasts,
+    ]
   );
 
   // The active source type decides the picker: its own datasetSelector if it has one, else the
