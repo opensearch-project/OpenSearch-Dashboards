@@ -8,10 +8,12 @@ import { takeUntil } from 'rxjs/operators';
 import { firstValueFrom } from '@osd/std';
 import { ExploreServices } from '../../../types';
 import { QueryEditorExtensionDependencies } from '../../../../../data/public';
+import { Query } from '../../../../../data/common';
 
 export const getPromptModeIsAvailable = async (
   services: ExploreServices,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
+  userProvidedQuery?: Query
 ): Promise<boolean> => {
   try {
     const signal = options?.signal;
@@ -29,7 +31,9 @@ export const getPromptModeIsAvailable = async (
       return false;
     }
 
-    const enabled$ = queryAssistExtension.isEnabled$({} as QueryEditorExtensionDependencies);
+    const enabled$ = queryAssistExtension.isEnabled$({
+      userProvidedQuery,
+    } as QueryEditorExtensionDependencies);
     // Aborting completes the stream without a value, so firstValueFrom throws and we return false.
     return await firstValueFrom(
       signal ? enabled$.pipe(takeUntil(fromEvent(signal, 'abort'))) : enabled$
