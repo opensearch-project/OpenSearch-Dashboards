@@ -67,6 +67,64 @@ describe('getErrorMessage', () => {
     expect(getServerErrorMessage(undefined)).toBeUndefined();
   });
 
+  // PromQL's search strategy throws its error serialised: `{ error: { type, reason, details }, status }`.
+  const promqlEnvelope = (error: Record<string, unknown>) =>
+    JSON.stringify({ error: { type: 'PromQLQueryError', ...error }, status: 403 });
+
+  it('reads a serialised search error: its details, else its reason, never its type or the JSON', () => {
+    const details = "You don't have permission to read these metrics.";
+    const withDetails = httpError('Forbidden', {
+      message: promqlEnvelope({ reason: 'PromQL query failed', details }),
+    });
+    expect(getErrorMessage(withDetails)).toBe(details);
+    expect(toMetricsLoadError(withDetails)).toEqual({ message: details, fromServer: true });
+    expect(
+      getErrorMessage(
+        httpError('Bad Request', { message: promqlEnvelope({ reason: 'bad query' }) })
+      )
+    ).toBe('bad query');
+    // Behind the resources route's prefix too.
+    expect(
+      getErrorMessage(
+        httpError('x', { message: `Unable to get resources: ${promqlEnvelope({ details: 'd' })}` })
+      )
+    ).toBe('d');
+    for (const message of [
+      promqlEnvelope({ reason: 'r', details: 'd' }),
+      promqlEnvelope({ reason: 'r' }),
+    ]) {
+      const shown = getErrorMessage(httpError('Forbidden', { message }));
+      expect(shown).not.toMatch(/PromQLQueryError|[{}]/);
+    }
+  });
+
+  it('shows the status text for a serialised error with nothing readable (no raw JSON)', () => {
+    // A serialised client SDK error (as a data source can return it), and envelopes without text.
+    const sdkError = JSON.stringify({
+      name: 'AccessDenied',
+      $fault: 'client',
+      $metadata: { httpStatusCode: 403, requestId: 'r-1' },
+      message: 'not authorized',
+    });
+    for (const message of [
+      sdkError,
+      promqlEnvelope({}),
+      promqlEnvelope({ reason: '  ', details: 7 }),
+      JSON.stringify({ error: 'x' }),
+      '{}',
+    ]) {
+      const error = httpError('Forbidden', { message });
+      expect(getErrorMessage(error)).toBe('Forbidden');
+      expect(toMetricsLoadError(error)).toEqual({ message: 'Forbidden', fromServer: false });
+    }
+  });
+
+  it('keeps a message that is not a JSON object as it is', () => {
+    for (const message of ['[1,2]', '"quoted"', '42', 'null', '{not json']) {
+      expect(getErrorMessage(httpError('x', { message }))).toBe(message);
+    }
+  });
+
   it('falls back to the error as a string', () => {
     expect(getErrorMessage(httpError(''))).toBe('Error');
     expect(getErrorMessage('stringly')).toBe('stringly');

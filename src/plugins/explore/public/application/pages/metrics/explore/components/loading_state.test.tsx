@@ -34,7 +34,7 @@ describe('ErrorCallout', () => {
     expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent('access denied');
   });
 
-  it('leaves out the generic sentence when the server wrote the message', () => {
+  it('leads with the source, without the generic sentence, when the server wrote the message', () => {
     render(
       <ErrorCallout
         error="You can't list these metrics. Ask for access."
@@ -45,11 +45,24 @@ describe('ErrorCallout', () => {
     expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent(
       'Check your connection'
     );
+    expect(screen.getByText('The My Metrics data source returned an error:')).toBeInTheDocument();
     expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent(
       "You can't list these metrics. Ask for access."
     );
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Unable to load metrics');
   });
+
+  it.each([undefined, '', '   '])(
+    'leads with "the data source" for a server message without a label (%p)',
+    (sourceLabel?: string) => {
+      render(<ErrorCallout error="Response Error" sourceLabel={sourceLabel} fromServer />);
+      expect(screen.getByText('The data source returned an error:')).toBeInTheDocument();
+      expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent('Response Error');
+      expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent(
+        'Check your connection'
+      );
+    }
+  );
 
   it('reads as before for Prometheus', () => {
     render(<ErrorCallout error="Bad Request" sourceLabel="Prometheus" />);

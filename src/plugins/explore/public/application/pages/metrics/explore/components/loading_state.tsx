@@ -21,7 +21,7 @@ export function LoadingIndicator(): JSX.Element {
  * @param sourceLabel The name of the selected source type (what the source picker shows), if
  *   known; without one the text says "the data source".
  * @param fromServer Whether the server wrote the text: it then says what went wrong and what to
- *   do, so the generic "Check your connection" sentence is left out.
+ *   do, so a short lead naming the source replaces the generic "Check your connection" sentence.
  */
 export function ErrorCallout({
   error,
@@ -48,7 +48,18 @@ export function ErrorCallout({
       }
       body={
         <EuiText size="s" color="subdued">
-          {!fromServer && (
+          {fromServer ? (
+            <p>
+              {source
+                ? i18n.translate('explore.metricsExplore.serverErrorLeadWithSource', {
+                    defaultMessage: 'The {sourceLabel} data source returned an error:',
+                    values: { sourceLabel: source },
+                  })
+                : i18n.translate('explore.metricsExplore.serverErrorLeadGeneric', {
+                    defaultMessage: 'The data source returned an error:',
+                  })}
+            </p>
+          ) : (
             <p>
               {source
                 ? i18n.translate('explore.metricsExplore.errorBodyWithSource', {
