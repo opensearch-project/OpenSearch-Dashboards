@@ -79,11 +79,15 @@ import { parseErrorEnvelope } from '../application/utils/parse_error_envelope';
  * envelope in the message: show its details, else its reason, as Explore's error panel does, and
  * never the raw JSON or the envelope's type (an internal code). A plain message is shown as it is.
  */
-const getFetchErrorMessage = (error: any): string => {
-  for (const message of [error?.body?.message, error?.message]) {
-    if (typeof message !== 'string' || message === '') continue;
-    const envelope = parseErrorEnvelope(message);
-    if (!envelope) return message;
+const getFetchErrorMessage = (error: unknown): string => {
+  const { body, message } = (error ?? {}) as {
+    body?: { message?: unknown };
+    message?: unknown;
+  };
+  for (const candidate of [body?.message, message]) {
+    if (typeof candidate !== 'string' || candidate === '') continue;
+    const envelope = parseErrorEnvelope(candidate);
+    if (!envelope) return candidate;
     const text = envelope.details || envelope.reason;
     if (text) return text;
   }
