@@ -4,7 +4,7 @@
  */
 
 import { History } from 'history';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
@@ -48,6 +48,17 @@ export const getTableColumns = (
       }),
       dataType: 'string',
       sortable: true,
+      // One line per row, so a long description doesn't make the row taller;
+      // the tooltip shows the full text.
+      truncateText: true,
+      render: (description?: string) =>
+        description ? (
+          <EuiToolTip content={description} anchorClassName="eui-textTruncate">
+            <span data-test-subj="dashboardListingDescription" tabIndex={0}>
+              {description}
+            </span>
+          </EuiToolTip>
+        ) : null,
     },
     {
       field: `updated_at`,

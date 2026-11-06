@@ -11470,7 +11470,8 @@ exports[`Header renders application header without title 1`] = `
                           ]
                         }
                         data-test-subj="breadcrumbs"
-                        hideLastBreadCrumb={true}
+                        disableTrailingLink={true}
+                        hideTrailingSeparator={true}
                         max={5}
                         responsive={
                           Object {
@@ -11514,6 +11515,16 @@ exports[`Header renders application header without title 1`] = `
                               />
                             </svg>
                           </EuiBreadcrumbSeparator>
+                          <EuiInnerText>
+                            <span
+                              aria-current="page"
+                              className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
+                              data-test-subj="breadcrumb last"
+                              title="testTitle"
+                            >
+                              testTitle
+                            </span>
+                          </EuiInnerText>
                         </nav>
                       </EuiSimplifiedBreadcrumbs>
                     </HeaderBreadcrumbs>
@@ -21578,7 +21589,8 @@ exports[`Header renders page header with application title 1`] = `
                   ]
                 }
                 data-test-subj="breadcrumbs"
-                hideLastBreadCrumb={true}
+                disableTrailingLink={true}
+                hideTrailingSeparator={true}
                 max={5}
                 responsive={
                   Object {
@@ -21622,6 +21634,16 @@ exports[`Header renders page header with application title 1`] = `
                       />
                     </svg>
                   </EuiBreadcrumbSeparator>
+                  <EuiInnerText>
+                    <span
+                      aria-current="page"
+                      className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
+                      data-test-subj="breadcrumb last"
+                      title="testTitle"
+                    >
+                      testTitle
+                    </span>
+                  </EuiInnerText>
                 </nav>
               </EuiSimplifiedBreadcrumbs>
             </HeaderBreadcrumbs>

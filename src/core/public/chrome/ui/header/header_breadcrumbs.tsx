@@ -109,11 +109,14 @@ export function HeaderBreadcrumbs({
   }
 
   if (useUpdatedHeader) {
-    // Case 2: Updated header, simplified breadcrumbs
+    // Case 2: Updated header, simplified breadcrumbs. The current page is the
+    // last crumb, as plain text, and separators only sit between crumbs (no
+    // trailing "/" after the last one).
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
-        hideLastBreadCrumb={!renderFullLength}
+        hideTrailingSeparator
+        disableTrailingLink
         max={5}
         data-test-subj="breadcrumbs"
         truncate={true}
