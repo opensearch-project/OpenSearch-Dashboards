@@ -84,6 +84,14 @@ export interface DatasetTypeConfig {
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;
+    /**
+     * Optional. The meta fields (`_id`, `_index`, `_score`, ...) of the data views the dataset
+     * service caches for datasets of this type, both the temporary views it builds and saved
+     * data views it loads; defaults to the `metaFields` advanced setting. A type whose data
+     * doesn't come from OpenSearch documents sets `[]`, so its results show no OpenSearch meta
+     * fields (in the field list, the document views and their field counts).
+     */
+    metaFields?: string[];
     /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
     cacheOptions?: boolean;
     /** Optional list of supported apps. If undefined, it will show up in all apps */
