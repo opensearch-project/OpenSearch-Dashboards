@@ -171,4 +171,10 @@ describe('ServiceCardNode', () => {
     // Verify the custom color is NOT applied (breach wins)
     expect(shell.style.borderColor).not.toBe('#6366f1');
   });
+
+  it('shows requests as missing when the node has no metrics', () => {
+    render(<ServiceCardNode {...createNodeProps({ metrics: undefined })} />);
+    expect(screen.getByText('Req: -')).toBeInTheDocument();
+    expect(screen.queryByText('Req: 0')).toBeNull();
+  });
 });
