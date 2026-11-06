@@ -4,7 +4,7 @@
  */
 
 import { History } from 'history';
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
@@ -49,15 +49,17 @@ export const getTableColumns = (
       dataType: 'string',
       sortable: true,
       // One line per row, so a long description doesn't make the row taller;
-      // the tooltip shows the full text.
+      // the native title shows the full text without adding a tab stop per row.
       truncateText: true,
       render: (description?: string) =>
         description ? (
-          <EuiToolTip content={description} anchorClassName="eui-textTruncate">
-            <span data-test-subj="dashboardListingDescription" tabIndex={0}>
-              {description}
-            </span>
-          </EuiToolTip>
+          <span
+            className="eui-textTruncate"
+            title={description}
+            data-test-subj="dashboardListingDescription"
+          >
+            {description}
+          </span>
         ) : null,
     },
     {

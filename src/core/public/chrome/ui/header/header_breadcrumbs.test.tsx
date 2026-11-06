@@ -95,7 +95,7 @@ describe('HeaderBreadcrumbs', () => {
   });
 
   it('renders updates to the breadcrumbs$ observable with updated header', () => {
-    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'First' }]);
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
       <HeaderBreadcrumbs
         appTitle$={new BehaviorSubject('')}
@@ -105,17 +105,12 @@ describe('HeaderBreadcrumbs', () => {
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-    // The current page is the last crumb, as plain text, with no trailing separator.
-    expect(wrapper.find('span[data-test-subj="breadcrumb first last"]').text()).toBe('First');
-    expect(wrapper.find('.euiSimplifiedBreadcrumbs .euiBreadcrumbSeparator')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
 
-    act(() => breadcrumbs$.next([{ text: 'First', href: '#/first' }, { text: 'Second' }]));
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
     expect(wrapper.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    expect(wrapper.find('span[data-test-subj="breadcrumb last"]').text()).toBe('Second');
-    // Exactly one separator, between the two crumbs.
-    expect(wrapper.find('.euiSimplifiedBreadcrumbs .euiBreadcrumbSeparator')).toHaveLength(1);
 
     act(() => breadcrumbs$.next([]));
     wrapper.update();
