@@ -707,8 +707,9 @@ export function Header({
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
           {/* This layout has no page title, so show the current page as the last
-              crumb (plain text) with no separator after it. */}
-          <EuiFlexItem grow={false}>{renderBreadcrumbs(true, true)}</EuiFlexItem>
+              crumb (plain text) with no separator after it, keeping the
+              updated header's crumb limits. */}
+          <EuiFlexItem grow={false}>{renderBreadcrumbs(true, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>
         <EuiHeaderSection side="right">

@@ -278,6 +278,28 @@ describe('Header', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('keeps every crumb of a three-level trail visible in the application header', () => {
+    const props = {
+      ...mockProps(),
+      breadcrumbs$: new BehaviorSubject([
+        { text: 'Workspace', href: '#/workspace' },
+        { text: 'Section', href: '#/section' },
+        { text: 'Page' },
+      ]),
+      branding: { useExpandedHeader: false },
+      useUpdatedHeader: true,
+      headerVariant$: new BehaviorSubject(HeaderVariant.APPLICATION),
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+    // Nothing collapses into an ellipsis at this width: every crumb stays in view.
+    expect(bar.find('.euiSimplifiedBreadcrumb--collapsed').exists()).toBeFalsy();
+    expect(bar.find('[data-test-subj="breadcrumb first"]').first().text()).toBe('Workspace');
+    expect(bar.find('a[title="Section"]').exists()).toBeTruthy();
+    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('Page');
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(2);
+  });
+
   it('should remember the collapse state when new nav is enabled', () => {
     const branding = {
       useExpandedHeader: false,

@@ -11452,7 +11452,7 @@ exports[`Header renders application header without title 1`] = `
                           "thrownError": null,
                         }
                       }
-                      hideTrailingSeparator={true}
+                      hideTrailingSeparator={false}
                       renderFullLength={true}
                       useUpdatedHeader={true}
                     >
@@ -11473,10 +11473,10 @@ exports[`Header renders application header without title 1`] = `
                         disableTrailingLink={true}
                         hideLastBreadCrumb={false}
                         hideTrailingSeparator={true}
-                        max={10}
+                        max={5}
                         responsive={
                           Object {
-                            "l": 2,
+                            "l": 4,
                             "m": 1,
                             "s": 1,
                             "xs": 1,
@@ -21590,7 +21590,9 @@ exports[`Header renders page header with application title 1`] = `
                   ]
                 }
                 data-test-subj="breadcrumbs"
+                disableTrailingLink={false}
                 hideLastBreadCrumb={true}
+                hideTrailingSeparator={false}
                 max={5}
                 responsive={
                   Object {
