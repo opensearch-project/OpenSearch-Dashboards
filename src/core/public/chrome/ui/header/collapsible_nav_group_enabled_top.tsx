@@ -52,7 +52,7 @@ export const CollapsibleNavTop = ({
 }: CollapsibleNavTopProps) => {
   const homeIcon = logos.Mark.url;
   // The home button renders only the logo, so it needs an accessible name.
-  const homeAriaLabel = i18n.translate('core.ui.primaryNav.homeButtonAriaLabel', {
+  const homeAriaLabel = i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
     defaultMessage: 'Go to home page',
   });
 
