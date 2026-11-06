@@ -87,6 +87,18 @@ const SETTING_KEY_TO_PATH_MAP = {
 export const POLL_INTERVAL = 60000;
 let pollTimeoutId: NodeJS.Timeout | null;
 
+interface AutoCompleteRefresh {
+  http: HttpSetup;
+  settings: Settings;
+  settingsToRetrieve: any;
+  dataSourceId: string;
+  subscriptionGeneration: number;
+}
+
+let activeRefresh: Promise<void> | null = null;
+let pendingRefresh: AutoCompleteRefresh | null = null;
+let subscriptionGeneration = 0;
+
 let perIndexTypes: { [index: string]: { [type: string]: Field[] } } = {};
 let perAliasIndices: { [alias: string]: string[] } = {};
 let templates: string[] = [];
@@ -346,10 +358,17 @@ function retrieveSettings(
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-export function clearSubscriptions() {
+function clearPollTimeout() {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
+    pollTimeoutId = null;
   }
+}
+
+export function clearSubscriptions() {
+  clearPollTimeout();
+  pendingRefresh = null;
+  subscriptionGeneration++;
 }
 
 // Type guard function
@@ -406,25 +425,64 @@ const retrieveTemplates = async (
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
+function startAutoCompleteRefresh(refresh: AutoCompleteRefresh) {
+  activeRefresh = Promise.allSettled([
+    retrieveMappings(refresh.http, refresh.settingsToRetrieve, refresh.dataSourceId),
+    retrieveAliases(refresh.http, refresh.settingsToRetrieve, refresh.dataSourceId),
+    retrieveTemplates(refresh.http, refresh.settingsToRetrieve, refresh.dataSourceId),
+  ]).then(() => {
+    activeRefresh = null;
+
+    if (pendingRefresh) {
+      const nextRefresh = pendingRefresh;
+      pendingRefresh = null;
+      startAutoCompleteRefresh(nextRefresh);
+      return;
+    }
+
+    // Do not restart polling after the editor has unsubscribed while this request was in flight.
+    if (refresh.subscriptionGeneration !== subscriptionGeneration) {
+      return;
+    }
+
+    pollTimeoutId = setTimeout(() => {
+      pollTimeoutId = null;
+      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+      // a scheduled request if the user turns off polling.
+      if (refresh.settings.getPolling()) {
+        retrieveAutoCompleteInfo(
+          refresh.http,
+          refresh.settings,
+          refresh.settings.getAutocomplete(),
+          refresh.dataSourceId
+        );
+      }
+    }, POLL_INTERVAL);
+  });
+}
+
 export function retrieveAutoCompleteInfo(
   http: HttpSetup,
   settings: Settings,
   settingsToRetrieve: any,
   dataSourceId: string
 ) {
-  clearSubscriptions();
-  Promise.allSettled([
-    retrieveMappings(http, settingsToRetrieve, dataSourceId),
-    retrieveAliases(http, settingsToRetrieve, dataSourceId),
-    retrieveTemplates(http, settingsToRetrieve, dataSourceId),
-  ]).then(() => {
-    // Schedule next request.
-    pollTimeoutId = setTimeout(() => {
-      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
-      // a scheduled request if the user turns off polling.
-      if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
-      }
-    }, POLL_INTERVAL);
-  });
+  clearPollTimeout();
+
+  const refresh = {
+    http,
+    settings,
+    settingsToRetrieve,
+    dataSourceId,
+    subscriptionGeneration,
+  };
+
+  if (activeRefresh) {
+    // Keep only the latest refresh requested while one is active. This avoids overlapping expensive
+    // mapping requests while ensuring changes made during the active request are picked up afterward.
+    pendingRefresh = refresh;
+    return;
+  }
+
+  startAutoCompleteRefresh(refresh);
 }
