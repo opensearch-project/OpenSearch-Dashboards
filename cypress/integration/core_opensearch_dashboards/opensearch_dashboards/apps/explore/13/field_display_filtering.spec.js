@@ -18,6 +18,7 @@ import {
   createWorkspaceAndDatasetUsingEndpoint,
 } from '../../../../../../utils/helpers';
 import { QueryLanguages } from '../../../../../../utils/apps/explore/constants';
+import { showSidebarFieldDetails } from '../../../../../../utils/apps/explore/sidebar';
 
 const workspace = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
@@ -70,7 +71,7 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-        cy.getElementByTestId('field-category-showDetails').click();
+        showSidebarFieldDetails('category');
         cy.get('[data-test-subj^="plus-category-"]')
           .first()
           .then(($plusButton) => {
@@ -87,7 +88,7 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-        cy.getElementByTestId('field-category-showDetails').click();
+        showSidebarFieldDetails('category');
         cy.get('[data-test-subj^="minus-category-"]')
           .first()
           .then(($minusButton) => {
