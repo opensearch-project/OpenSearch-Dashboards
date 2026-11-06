@@ -23,3 +23,19 @@ export {
   getSourceTypeRegistry,
   setSourceTypeRegistry,
 } from './source_type_registry_service';
+export type {
+  SourceTypeVisualBuilder,
+  VisualBuilderAggregation,
+  VisualBuilderAggregationFunction,
+  VisualBuilderField,
+  VisualBuilderFieldTypeResolver,
+  VisualBuilderFilter,
+  VisualBuilderFilterOperator,
+  VisualBuilderFunctionCall,
+  VisualBuilderFunctionCategory,
+  VisualBuilderGroupBy,
+  VisualBuilderParseResult,
+  VisualBuilderSort,
+  VisualBuilderState,
+  VisualBuilderTimeBucket,
+} from './visual_builder';

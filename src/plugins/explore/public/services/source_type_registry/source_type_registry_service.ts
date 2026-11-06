@@ -15,6 +15,7 @@ import {
 import { getServices } from '../services';
 import { openSearchSourceType, OPENSEARCH_SOURCE_TYPE_ID } from './opensearch_source_type';
 import { BUILT_IN_LANGUAGE_GUIDES } from './built_in_language_guides';
+import type { SourceTypeVisualBuilder } from './visual_builder';
 
 export { OPENSEARCH_SOURCE_TYPE_ID };
 export { HISTOGRAM_RESULT_COLUMNS, SourceTypeHistogramColumns } from './histogram_columns';
@@ -103,6 +104,11 @@ export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
   buildHistogramQuery?: (query: string, config: SourceTypeHistogramConfig) => string | undefined;
   /** Offer the Logs page's visual query builder. Off by default: the builder emits PPL. */
   supportsVisualBuilder?: boolean;
+  /**
+   * Translates the Logs page's visual query builder to and from this language. Setting it enables
+   * the builder for this language on this source's datasets, in place of the PPL translation.
+   */
+  visualBuilder?: SourceTypeVisualBuilder;
   /**
    * Replaces the Metrics page's query rows while this language is active on one of this source's
    * datasets, for example a builder of the source's own. Without it, PromQL keeps the PromQL rows
@@ -480,7 +486,15 @@ export class SourceTypeRegistryService {
   /** Whether the Logs page may show its visual builder. Built-in languages keep their behavior. */
   public supportsVisualBuilder(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);
-    return settings ? !!settings.supportsVisualBuilder : true;
+    return settings ? !!(settings.supportsVisualBuilder || settings.visualBuilder) : true;
+  }
+
+  /** The source's own visual builder translation for a language; undefined means PPL's. */
+  public getVisualBuilder(
+    languageId?: string,
+    dataset?: { type?: string }
+  ): SourceTypeVisualBuilder | undefined {
+    return this.settingsFor(languageId, dataset)?.visualBuilder;
   }
 
   /** Whether Explore can run a language: a built-in one, or one a registered source lists. */
@@ -494,7 +508,9 @@ export class SourceTypeRegistryService {
   /** Whether any of a source's languages can use the visual builder (OpenSearch's can). */
   public hasVisualBuilder(sourceType: SourceTypeDefinition): boolean {
     const settings = Object.values(sourceType.languageSettings ?? {});
-    return settings.length === 0 || settings.some((s) => s.supportsVisualBuilder);
+    return (
+      settings.length === 0 || settings.some((s) => s.supportsVisualBuilder || s.visualBuilder)
+    );
   }
 
   // The active source's settings. For a non-built-in language seen briefly on another source's
