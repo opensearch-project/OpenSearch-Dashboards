@@ -233,7 +233,7 @@ export interface SourceTypeDefinition {
 }
 
 /**
- * Where the Explore logs page lists a source's items, e.g. a region. JSON-safe: the page keeps it
+ * Where the Explore logs page lists a source's items, such as a zone or an account. JSON-safe: the page keeps it
  * in its URL (`_a`) and the tab's session, so it survives a reload and can be shared. That also
  * makes it user input: validate it before use, as any value from a URL.
  */
@@ -247,7 +247,7 @@ export interface SourceTypeLogsDrilldownScopeSelectorProps {
    * Call with the scope to list. When `scope` is undefined on mount, call it once with a default
    * (as the data source picker auto-selects one), or the page waits for the user to pick one. Keep
    * a valid `scope` the page passed in as is: it may come from a shared link. A scope that's no
-   * longer valid (e.g. it names a connection that was removed) may be replaced with a valid one.
+   * longer valid (e.g. it names something that was removed) may be replaced with a valid one.
    */
   onChange: (scope: SourceTypeLogsDrilldownScope) => void;
   data: DataPublicPluginStart;
@@ -269,7 +269,7 @@ export interface SourceTypeLogsDrilldownEmptyStateProps {
   children: ReactNode;
 }
 
-/** One item the Explore logs page shows as a card, e.g. a log group. */
+/** One item the Explore logs page shows as a card, such as a stream. */
 export interface SourceTypeLogsDrilldownItem {
   /** Unique within the scope; the page keys cards and selection on it. */
   id: string;
@@ -312,7 +312,7 @@ export interface SourceTypeLogsDrilldown {
   /** The page-level picker that sets the scope (replaces the data source picker). */
   ScopeSelector: ComponentType<SourceTypeLogsDrilldownScopeSelectorProps>;
   /**
-   * Placeholder (and accessible name) for the page's search box, e.g. "Search log groups…". Pass a
+   * Placeholder (and accessible name) for the page's search box, e.g. "Search streams…". Pass a
    * translated string.
    */
   searchPlaceholder?: string;
@@ -346,7 +346,7 @@ export interface SourceTypeLogsDrilldown {
     args: SourceTypeLogsDrilldownQueryArgs & { interval: string; timeFieldName: string }
   ): string | undefined;
   /**
-   * The most items one dataset can hold (e.g. how many log groups one query scans). The page stops
+   * The most items one dataset can hold (e.g. how many items one query can read). The page stops
    * further ticks at this many. Omit for no limit.
    */
   maxSelection?: number;
@@ -359,12 +359,12 @@ export interface SourceTypeLogsDrilldown {
     items: SourceTypeLogsDrilldownItem[];
   }): Promise<Dataset>;
   /**
-   * The group an item belongs to for the page's Prefix grouping, e.g. `/aws/lambda/`. Omit to
+   * The group an item belongs to for the page's Prefix grouping, e.g. `app/web/`. Omit to
    * offer A–Z only.
    */
   groupOf?(item: SourceTypeLogsDrilldownItem): string;
   /**
-   * Replaces the page's empty and listing-failed states with the source's own, e.g. why a region
+   * Replaces the page's empty and listing-failed states with the source's own, e.g. why a scope
    * lists nothing and what to do. It gets the page's own state as `children`.
    */
   EmptyState?: ComponentType<SourceTypeLogsDrilldownEmptyStateProps>;

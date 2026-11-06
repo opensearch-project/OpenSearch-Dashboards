@@ -33,10 +33,10 @@ describe('useSourceItems', () => {
     drilldown.listItems
       .mockResolvedValueOnce(page(['a', 'b'], 't2'))
       .mockResolvedValueOnce(page(['b', 'c']));
-    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, 'x'));
+    const { result } = renderHook(() => useSourceItems(drilldown, { zone: 'z' }, 'x'));
     await waitFor(() => expect(result.current.items).toHaveLength(2));
     expect(drilldown.listItems).toHaveBeenCalledWith(
-      expect.objectContaining({ scope: { region: 'r' }, search: 'x' })
+      expect.objectContaining({ scope: { zone: 'z' }, search: 'x' })
     );
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.items.map((i) => i.id)).toEqual(['a', 'b', 'c']));
@@ -53,9 +53,9 @@ describe('useSourceItems', () => {
       .mockReturnValueOnce(new Promise((resolve) => (answerOld = resolve)))
       .mockResolvedValueOnce(page(['new']));
     const { result, rerender } = renderHook(({ scope }) => useSourceItems(drilldown, scope, ''), {
-      initialProps: { scope: { region: 'old' } as Record<string, unknown> },
+      initialProps: { scope: { zone: 'old' } as Record<string, unknown> },
     });
-    rerender({ scope: { region: 'new' } });
+    rerender({ scope: { zone: 'new' } });
     await waitFor(() => expect(result.current.items.map((i) => i.id)).toEqual(['new']));
     await act(async () => answerOld(page(['stale'])));
     expect(result.current.items.map((i) => i.id)).toEqual(['new']);
@@ -65,10 +65,10 @@ describe('useSourceItems', () => {
     const drilldown = makeDrilldown();
     drilldown.listItems.mockResolvedValue(page(['a']));
     const { rerender } = renderHook(({ scope }) => useSourceItems(drilldown, scope, ''), {
-      initialProps: { scope: { region: 'r' } as Record<string, unknown> },
+      initialProps: { scope: { zone: 'z' } as Record<string, unknown> },
     });
     await waitFor(() => expect(drilldown.listItems).toHaveBeenCalledTimes(1));
-    rerender({ scope: { region: 'r' } });
+    rerender({ scope: { zone: 'z' } });
     expect(drilldown.listItems).toHaveBeenCalledTimes(1);
   });
 
@@ -76,7 +76,7 @@ describe('useSourceItems', () => {
     const drilldown = makeDrilldown();
     const rejection = Object.assign(new Error('Forbidden'), { statusCode: 403 });
     drilldown.listItems.mockRejectedValueOnce(rejection).mockResolvedValueOnce(page(['a']));
-    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    const { result } = renderHook(() => useSourceItems(drilldown, { zone: 'z' }, ''));
     await waitFor(() => expect(result.current.error).toBe('Forbidden'));
     expect(result.current.errorCause).toBe(rejection);
     expect(result.current.errorFrom).toBe('list');
@@ -89,7 +89,7 @@ describe('useSourceItems', () => {
     const drilldown = makeDrilldown();
     const many = (from: number, n: number) => Array.from({ length: n }, (_, i) => `i${from + i}`);
     drilldown.listItems.mockResolvedValueOnce(page(many(0, 80), 't2'));
-    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    const { result } = renderHook(() => useSourceItems(drilldown, { zone: 'z' }, ''));
     await waitFor(() => expect(result.current.items).toHaveLength(50));
     expect(drilldown.listItems).toHaveBeenCalledWith(expect.objectContaining({ pageSize: 50 }));
     // 19 more pages of 50 reach the 1000 cap; "Load more" then stops.
@@ -111,7 +111,7 @@ describe('useSourceItems', () => {
       .mockReturnValueOnce(new Promise((resolve) => (answerMore = resolve)))
       .mockReturnValueOnce(new Promise((resolve) => (answerRefresh = resolve)));
     const { result, rerender } = renderHook(
-      ({ refresh }) => useSourceItems(drilldown, { region: 'r' }, '', refresh),
+      ({ refresh }) => useSourceItems(drilldown, { zone: 'z' }, '', refresh),
       { initialProps: { refresh: 0 } }
     );
     await waitFor(() => expect(result.current.items).toHaveLength(1));
@@ -130,7 +130,7 @@ describe('useSourceItems', () => {
     drilldown.listItems.mockImplementation(() => {
       throw new Error('bad scope');
     });
-    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    const { result } = renderHook(() => useSourceItems(drilldown, { zone: 'z' }, ''));
     await waitFor(() => expect(result.current.error).toBe('bad scope'));
   });
 
@@ -138,10 +138,10 @@ describe('useSourceItems', () => {
     const drilldown = makeDrilldown();
     drilldown.listItems.mockResolvedValue(page(['a']));
     const { rerender } = renderHook(({ scope }) => useSourceItems(drilldown, scope, ''), {
-      initialProps: { scope: { region: 'r', accountId: 'x' } as Record<string, unknown> },
+      initialProps: { scope: { zone: 'z', tenant: 'x' } as Record<string, unknown> },
     });
     await waitFor(() => expect(drilldown.listItems).toHaveBeenCalledTimes(1));
-    rerender({ scope: { accountId: 'x', region: 'r' } });
+    rerender({ scope: { tenant: 'x', zone: 'z' } });
     expect(drilldown.listItems).toHaveBeenCalledTimes(1);
   });
 
@@ -150,7 +150,7 @@ describe('useSourceItems', () => {
     drilldown.listItems
       .mockResolvedValueOnce(page(['a'], 't2'))
       .mockRejectedValueOnce(new Error('throttled'));
-    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    const { result } = renderHook(() => useSourceItems(drilldown, { zone: 'z' }, ''));
     await waitFor(() => expect(result.current.items).toHaveLength(1));
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.errorFrom).toBe('more'));

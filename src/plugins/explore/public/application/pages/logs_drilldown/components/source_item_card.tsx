@@ -13,8 +13,10 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import type { SourceTypeLogsDrilldownItem } from '../../../../services/source_type_registry';
@@ -47,6 +49,8 @@ interface Props {
   /** Stable callbacks taking the item, so the card can be memoized. */
   onToggleCheck: (item: SourceTypeLogsDrilldownItem) => void;
   onRun: (itemId: string) => void;
+  /** Stops the card's run (a source that requires an explicit run). */
+  onStop?: (itemId: string) => void;
   onVisibilityChange: (itemId: string, visible: boolean) => void;
   onBrushTime: (from: number, to: number) => void;
 }
@@ -70,6 +74,7 @@ const SourceItemCardComponent: React.FC<Props> = ({
   checkDisabledReason,
   onToggleCheck,
   onRun,
+  onStop,
   onVisibilityChange,
   onBrushTime,
 }) => {
@@ -93,6 +98,8 @@ const SourceItemCardComponent: React.FC<Props> = ({
     };
   }, [itemId]);
   const run = () => onRun(itemId);
+  const checkDisabled = !checked && !!checkDisabledReason;
+  const reasonId = `logsDrilldownSourceCardFull-${itemId}`;
 
   const details = (item.details ?? [])
     .filter((detail) => detail.value)
@@ -103,48 +110,78 @@ const SourceItemCardComponent: React.FC<Props> = ({
     ? i18n.translate('explore.logsDrilldown.source.runAgain', { defaultMessage: 'Run again' })
     : i18n.translate('explore.logsDrilldown.source.run', { defaultMessage: 'Run' });
 
-  const runButton = explicitRun && (
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        size="s"
-        iconType="play"
-        onClick={run}
-        isLoading={loading}
-        isDisabled={loading}
-        fill={!result || stale}
-        aria-label={
-          result
-            ? i18n.translate('explore.logsDrilldown.source.runAgainAria', {
-                defaultMessage: 'Run {name} again',
-                values: { name: item.name },
-              })
-            : i18n.translate('explore.logsDrilldown.source.runAria', {
-                defaultMessage: 'Run {name}',
-                values: { name: item.name },
-              })
-        }
-        data-test-subj={`logsDrilldownSourceCardRun-${item.id}`}
-      >
-        {runLabel}
-      </EuiButton>
-    </EuiFlexItem>
-  );
+  // While a card runs (or waits its turn), its button stops it: on a source with billed queries,
+  // that's the way to cancel a long run without leaving the scope.
+  const runButton =
+    explicitRun && loading && onStop ? (
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          iconType="stop"
+          color="danger"
+          onClick={() => onStop(itemId)}
+          aria-label={i18n.translate('explore.logsDrilldown.source.stopAria', {
+            defaultMessage: 'Stop {name}',
+            values: { name: item.name },
+          })}
+          data-test-subj={`logsDrilldownSourceCardStop-${item.id}`}
+        >
+          {i18n.translate('explore.logsDrilldown.source.stop', { defaultMessage: 'Stop' })}
+        </EuiButton>
+      </EuiFlexItem>
+    ) : (
+      explicitRun && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={run}
+            isLoading={loading}
+            isDisabled={loading}
+            fill={!result || stale}
+            aria-label={
+              result
+                ? i18n.translate('explore.logsDrilldown.source.runAgainAria', {
+                    defaultMessage: 'Run {name} again',
+                    values: { name: item.name },
+                  })
+                : i18n.translate('explore.logsDrilldown.source.runAria', {
+                    defaultMessage: 'Run {name}',
+                    values: { name: item.name },
+                  })
+            }
+            data-test-subj={`logsDrilldownSourceCardRun-${item.id}`}
+          >
+            {runLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      )
+    );
 
   const header = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
       <EuiFlexItem grow={false}>
-        <EuiCheckbox
-          id={`logsDrilldownSourceCardCheckbox-${item.id}`}
-          checked={checked}
-          disabled={!checked && !!checkDisabledReason}
-          title={!checked ? checkDisabledReason : undefined}
-          onChange={() => onToggleCheck(item)}
-          aria-label={i18n.translate('explore.logsDrilldown.source.select', {
-            defaultMessage: 'Select {name}',
-            values: { name: item.name },
-          })}
-          data-test-subj={`logsDrilldownSourceCardCheckbox-${item.id}`}
-        />
+        {/* A full selection disables the unticked boxes; the reason is in a tooltip, and read
+            out with the box (aria-describedby), not only in a title. */}
+        <EuiToolTip content={checkDisabled ? checkDisabledReason : undefined}>
+          <EuiCheckbox
+            id={`logsDrilldownSourceCardCheckbox-${item.id}`}
+            checked={checked}
+            disabled={checkDisabled}
+            onChange={() => onToggleCheck(item)}
+            aria-label={i18n.translate('explore.logsDrilldown.source.select', {
+              defaultMessage: 'Select {name}',
+              values: { name: item.name },
+            })}
+            aria-describedby={checkDisabled ? reasonId : undefined}
+            data-test-subj={`logsDrilldownSourceCardCheckbox-${item.id}`}
+          />
+        </EuiToolTip>
+        {checkDisabled && (
+          <EuiScreenReaderOnly>
+            <span id={reasonId}>{checkDisabledReason}</span>
+          </EuiScreenReaderOnly>
+        )}
       </EuiFlexItem>
       {icon && (
         <EuiFlexItem grow={false}>

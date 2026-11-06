@@ -72,7 +72,7 @@ jest.mock('../../../../../data/public', () => ({
 // A registered source with a scope picker that reports its default scope on mount.
 const MockScopeSelector = ({ scope, onChange }: any) => {
   React.useEffect(() => {
-    if (!scope) onChange({ region: 'us-east-1' });
+    if (!scope) onChange({ zone: 'zone-a' });
   }, [scope, onChange]);
   return <div data-test-subj="mock-scope-selector" data-scope={JSON.stringify(scope ?? null)} />;
 };
@@ -196,24 +196,24 @@ describe('LogsDrilldownPage source types', () => {
     expect(screen.getByPlaceholderText('Search fake groups…')).toBeInTheDocument();
     expect(screen.getByTestId('mock-source-rows-view')).toBeInTheDocument();
     expect(lastSourceRowsProps.sourceType.id).toBe('fake-logs');
-    expect(lastSourceRowsProps.scope).toEqual({ region: 'us-east-1' });
-    expect(url.store._a).toEqual({ sourceType: 'fake-logs', scope: { region: 'us-east-1' } });
+    expect(lastSourceRowsProps.scope).toEqual({ zone: 'zone-a' });
+    expect(url.store._a).toEqual({ sourceType: 'fake-logs', scope: { zone: 'zone-a' } });
   });
 
   it('restores the source type and scope from the URL', () => {
     const url = makeUrlStateStorage({
-      _a: { sourceType: 'fake-logs', scope: { region: 'eu-west-1' } },
+      _a: { sourceType: 'fake-logs', scope: { zone: 'zone-c' } },
     });
     render(<LogsDrilldownPage services={makeServices(url)} />);
     expect(screen.getByTestId('mock-source-type-control')).toHaveAttribute(
       'data-selected',
       'fake-logs'
     );
-    expect(lastSourceRowsProps.scope).toEqual({ region: 'eu-west-1' });
+    expect(lastSourceRowsProps.scope).toEqual({ zone: 'zone-c' });
   });
 
   it('falls back to OpenSearch for a source type that is no longer mockRegistered', () => {
-    const url = makeUrlStateStorage({ _a: { sourceType: 'gone', scope: { region: 'x' } } });
+    const url = makeUrlStateStorage({ _a: { sourceType: 'gone', scope: { zone: 'x' } } });
     render(<LogsDrilldownPage services={makeServices(url)} />);
     expect(screen.getByTestId('mock-source-type-control')).toHaveAttribute(
       'data-selected',
@@ -225,7 +225,7 @@ describe('LogsDrilldownPage source types', () => {
   it('a URL `_a` without a source type opens OpenSearch, over the tab session', () => {
     window.sessionStorage.setItem(
       'logsDrilldown.source',
-      JSON.stringify({ sourceType: 'fake-logs', scope: { region: 'x' } })
+      JSON.stringify({ sourceType: 'fake-logs', scope: { zone: 'x' } })
     );
     const url = makeUrlStateStorage({ _a: { dataSource: { id: 'ds-1', title: 'one' } } });
     render(<LogsDrilldownPage services={makeServices(url)} />);
@@ -245,11 +245,11 @@ describe('LogsDrilldownPage source types', () => {
   });
 
   it('follows a URL change it did not make', () => {
-    const url = makeUrlStateStorage({ _a: { sourceType: 'fake-logs', scope: { region: 'a-1' } } });
+    const url = makeUrlStateStorage({ _a: { sourceType: 'fake-logs', scope: { zone: 'zone-1' } } });
     render(<LogsDrilldownPage services={makeServices(url)} />);
-    expect(lastSourceRowsProps.scope).toEqual({ region: 'a-1' });
-    act(() => url.external({ sourceType: 'fake-logs', scope: { region: 'b-2' } }));
-    expect(lastSourceRowsProps.scope).toEqual({ region: 'b-2' });
+    expect(lastSourceRowsProps.scope).toEqual({ zone: 'zone-1' });
+    act(() => url.external({ sourceType: 'fake-logs', scope: { zone: 'zone-2' } }));
+    expect(lastSourceRowsProps.scope).toEqual({ zone: 'zone-2' });
     act(() => url.external({ dataSource: { id: 'ds-9', title: 'nine' } }));
     expect(screen.getByTestId('mock-source-type-control')).toHaveAttribute(
       'data-selected',
@@ -280,12 +280,12 @@ describe('LogsDrilldownPage source types', () => {
     fireEvent.click(screen.getByTestId('pick-fake-logs'));
     expect(JSON.parse(window.sessionStorage.getItem('logsDrilldown.source') || 'null')).toEqual({
       sourceType: 'fake-logs',
-      scope: { region: 'us-east-1' },
+      scope: { zone: 'zone-a' },
     });
     unmount();
     // Re-entry from a bare `#/` (no `_a`): the source and its scope come back together.
     render(<LogsDrilldownPage services={makeServices(makeUrlStateStorage())} />);
-    expect(lastSourceRowsProps.scope).toEqual({ region: 'us-east-1' });
+    expect(lastSourceRowsProps.scope).toEqual({ zone: 'zone-a' });
   });
 
   it('clears the search when the URL switches the source', () => {
@@ -294,14 +294,14 @@ describe('LogsDrilldownPage source types', () => {
     fireEvent.change(screen.getByPlaceholderText('Search datasets and indexes…'), {
       target: { value: 'abc' },
     });
-    act(() => url.external({ sourceType: 'fake-logs', scope: { region: 'b-2' } }));
+    act(() => url.external({ sourceType: 'fake-logs', scope: { zone: 'zone-2' } }));
     expect(screen.getByPlaceholderText('Search fake groups…')).toHaveValue('');
   });
 
   it('reads its own write of a two-key scope back as the same scope (rison sorts keys)', async () => {
     const TwoKeyScope = ({ scope, onChange }: any) => {
       React.useEffect(() => {
-        if (!scope) onChange({ region: 'us-east-1', accountId: '123' });
+        if (!scope) onChange({ zone: 'zone-a', tenant: '123' });
       }, [scope, onChange]);
       return null;
     };
@@ -319,8 +319,8 @@ describe('LogsDrilldownPage source types', () => {
     await act(async () => {
       await Promise.resolve();
     });
-    // The URL now holds `{ accountId, region }`; the page keeps its own scope object.
-    expect(url.store._a.scope).toEqual({ accountId: '123', region: 'us-east-1' });
+    // The URL now holds `{ tenant, zone }`; the page keeps its own scope object.
+    expect(url.store._a.scope).toEqual({ tenant: '123', zone: 'zone-a' });
     expect(lastSourceRowsProps.scope).toBe(scopeBefore);
   });
 

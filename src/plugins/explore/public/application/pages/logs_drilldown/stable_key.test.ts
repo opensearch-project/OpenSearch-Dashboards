@@ -8,7 +8,7 @@ import { stableKey } from './stable_key';
 
 describe('stableKey', () => {
   it('equals for values that differ only in key order, at any depth', () => {
-    const written = { sourceType: 'x', scope: { region: 'r', accountId: 'a' } };
+    const written = { sourceType: 'x', scope: { zone: 'z', tenant: 'a' } };
     const readBack = rison.decode(rison.encode(written));
     expect(JSON.stringify(readBack)).not.toBe(JSON.stringify(written));
     expect(stableKey(readBack)).toBe(stableKey(written));

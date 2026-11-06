@@ -56,8 +56,8 @@ const makeDrilldown = (overrides: Record<string, any> = {}) => {
     ScopeSelector: () => null,
     listItems: jest.fn().mockResolvedValue({
       items: [
-        { id: '/aws/lambda/a', name: '/aws/lambda/a', details: [{ label: 'Size', value: '1 MB' }] },
-        { id: '/aws/ecs/b', name: '/aws/ecs/b' },
+        { id: 'app/web/a', name: 'app/web/a', details: [{ label: 'Size', value: '1 MB' }] },
+        { id: 'app/api/b', name: 'app/api/b' },
       ],
       nextToken: 'page-2',
     }),
@@ -74,7 +74,7 @@ const makeDrilldown = (overrides: Record<string, any> = {}) => {
       language: 'FAKE_QL',
       timeFieldName: '@timestamp',
     }),
-    groupOf: (item: { name: string }) => item.name.split('/').slice(0, 3).join('/') + '/',
+    groupOf: (item: { name: string }) => item.name.split('/').slice(0, 2).join('/') + '/',
     ...overrides,
   };
   mockRunners = { fetchPreview: drilldown.fetchPreview, fetchHistogram: drilldown.fetchHistogram };
@@ -144,7 +144,7 @@ const renderView = (drilldown: any, props: Record<string, unknown> = {}) => {
         resolveDefaultDataset: jest.fn(),
         logsDrilldown: drilldown,
       }}
-      scope={{ region: 'us-east-1' }}
+      scope={{ zone: 'zone-a' }}
       search=""
       refreshKey="a"
       onBrushTime={jest.fn()}
@@ -164,14 +164,14 @@ describe('SourceRowsView', () => {
   it("lists the source's items and shows their free details without running anything", async () => {
     const drilldown = makeDrilldown();
     renderView(drilldown);
-    expect(await screen.findByTestId('logsDrilldownSourceCard-/aws/lambda/a')).toBeInTheDocument();
+    expect(await screen.findByTestId('logsDrilldownSourceCard-app/web/a')).toBeInTheDocument();
     expect(drilldown.listItems).toHaveBeenCalledWith(
-      expect.objectContaining({ scope: { region: 'us-east-1' }, search: '' })
+      expect.objectContaining({ scope: { zone: 'zone-a' }, search: '' })
     );
-    expect(screen.getByTestId('logsDrilldownSourceCardDetails-/aws/lambda/a')).toHaveTextContent(
+    expect(screen.getByTestId('logsDrilldownSourceCardDetails-app/web/a')).toHaveTextContent(
       'Size: 1 MB'
     );
-    expect(screen.getByTestId('logsDrilldownSourceCardIdle-/aws/ecs/b')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCardIdle-app/api/b')).toBeInTheDocument();
     await flush();
     expect(drilldown.fetchPreview).not.toHaveBeenCalled();
     expect(drilldown.fetchHistogram).not.toHaveBeenCalled();
@@ -180,22 +180,22 @@ describe('SourceRowsView', () => {
   it('runs only the card whose Run button is pressed, preview and histogram', async () => {
     const drilldown = makeDrilldown();
     renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/lambda/a'));
-    expect(
-      await screen.findByTestId('logsDrilldownSourceCardLogs-/aws/lambda/a')
-    ).toHaveTextContent('hi');
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/web/a'));
+    expect(await screen.findByTestId('logsDrilldownSourceCardLogs-app/web/a')).toHaveTextContent(
+      'hi'
+    );
     expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
     // The source builds the query for the item's own dataset; the page runs it through search.
     expect(drilldown.buildPreviewQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        item: expect.objectContaining({ id: '/aws/lambda/a' }),
+        item: expect.objectContaining({ id: 'app/web/a' }),
         dataset: expect.objectContaining({ type: 'FAKE_LOGS' }),
         size: 10,
       })
     );
     expect(drilldown.toDataset).toHaveBeenCalledWith({
-      scope: { region: 'us-east-1' },
-      items: [expect.objectContaining({ id: '/aws/lambda/a' })],
+      scope: { zone: 'zone-a' },
+      items: [expect.objectContaining({ id: 'app/web/a' })],
     });
     expect(drilldown.fetchPreview).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -205,14 +205,14 @@ describe('SourceRowsView', () => {
     );
     expect(drilldown.fetchHistogram).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('mock-histogram')).toBeInTheDocument();
-    expect(screen.getByTestId('logsDrilldownSourceCardIdle-/aws/ecs/b')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCardIdle-app/api/b')).toBeInTheDocument();
   });
 
   it('marks a run card stale on a time range change instead of running it again', async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/lambda/a'));
-    await screen.findByTestId('logsDrilldownSourceCardLogs-/aws/lambda/a');
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/web/a'));
+    await screen.findByTestId('logsDrilldownSourceCardLogs-app/web/a');
 
     rerender(
       <SourceRowsView
@@ -224,7 +224,7 @@ describe('SourceRowsView', () => {
           resolveDefaultDataset: jest.fn(),
           logsDrilldown: drilldown,
         }}
-        scope={{ region: 'us-east-1' }}
+        scope={{ zone: 'zone-a' }}
         search=""
         refreshKey="b"
         onBrushTime={jest.fn()}
@@ -232,9 +232,9 @@ describe('SourceRowsView', () => {
       />
     );
     await flush();
-    expect(screen.getByTestId('logsDrilldownSourceCardStale-/aws/lambda/a')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCardStale-app/web/a')).toBeInTheDocument();
     expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('logsDrilldownSourceCardRun-/aws/lambda/a')).toHaveTextContent(
+    expect(screen.getByTestId('logsDrilldownSourceCardRun-app/web/a')).toHaveTextContent(
       'Run again'
     );
   });
@@ -244,8 +244,8 @@ describe('SourceRowsView', () => {
       fetchPreview: jest.fn().mockRejectedValue(new Error('AccessDenied')),
     });
     renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/ecs/b'));
-    expect(await screen.findByTestId('logsDrilldownSourceCardError-/aws/ecs/b')).toHaveTextContent(
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+    expect(await screen.findByTestId('logsDrilldownSourceCardError-app/api/b')).toHaveTextContent(
       'AccessDenied'
     );
   });
@@ -255,9 +255,9 @@ describe('SourceRowsView', () => {
       fetchHistogram: jest.fn().mockRejectedValue(new Error('too big')),
     });
     renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/ecs/b'));
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
     expect(await screen.findByText('Histogram unavailable')).toBeInTheDocument();
-    expect(screen.getByTestId('logsDrilldownSourceCardLogs-/aws/ecs/b')).toHaveTextContent('hi');
+    expect(screen.getByTestId('logsDrilldownSourceCardLogs-app/api/b')).toHaveTextContent('hi');
   });
 
   it('groups items by the source prefix', async () => {
@@ -265,8 +265,8 @@ describe('SourceRowsView', () => {
     await screen.findByTestId('logsDrilldownSourceRows');
     // The button group's radios share one generated id in tests, so click the radio itself.
     fireEvent.click(screen.getByTestId('prefix'));
-    expect(screen.getByText('/aws/ecs/ (1)')).toBeInTheDocument();
-    expect(screen.getByText('/aws/lambda/ (1)')).toBeInTheDocument();
+    expect(screen.getByText('app/api/ (1)')).toBeInTheDocument();
+    expect(screen.getByText('app/web/ (1)')).toBeInTheDocument();
   });
 
   it('loads the next page with the token the source returned', async () => {
@@ -286,18 +286,18 @@ describe('SourceRowsView', () => {
   it('opens the selected items as one dataset in Logs', async () => {
     const drilldown = makeDrilldown();
     const { services, onBatchActionChange } = renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/lambda/a'));
-    fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/web/a'));
+    fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
 
     const action = onBatchActionChange.mock.calls[onBatchActionChange.mock.calls.length - 1][0];
     expect(action.label).toContain('in Logs');
     await act(async () => action.onClick());
 
     expect(drilldown.toDataset).toHaveBeenCalledWith({
-      scope: { region: 'us-east-1' },
+      scope: { zone: 'zone-a' },
       items: [
-        expect.objectContaining({ id: '/aws/lambda/a' }),
-        expect.objectContaining({ id: '/aws/ecs/b' }),
+        expect.objectContaining({ id: 'app/web/a' }),
+        expect.objectContaining({ id: 'app/api/b' }),
       ],
     });
     expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(
@@ -313,7 +313,7 @@ describe('SourceRowsView', () => {
 
   const tickAndOpen = async (drilldown: any) => {
     const view = renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
     const action =
       view.onBatchActionChange.mock.calls[view.onBatchActionChange.mock.calls.length - 1][0];
     return { ...view, action };
@@ -361,15 +361,15 @@ describe('SourceRowsView', () => {
   it("keeps an item whose group can't be computed, in no group", async () => {
     const drilldown = makeDrilldown({
       groupOf: (item: { name: string }) => {
-        if (item.name.includes('ecs')) throw new Error('bad');
-        return '/aws/lambda/';
+        if (item.name.includes('api')) throw new Error('bad');
+        return 'app/web/';
       },
     });
     renderView(drilldown);
     await screen.findByTestId('logsDrilldownSourceRows');
     fireEvent.click(screen.getByTestId('prefix'));
-    expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
-    expect(screen.getByText('/aws/lambda/ (1)')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCard-app/api/b')).toBeInTheDocument();
+    expect(screen.getByText('app/web/ (1)')).toBeInTheDocument();
   });
 
   it('shows a listing failure with a Retry', async () => {
@@ -397,7 +397,7 @@ describe('SourceRowsView', () => {
     expect(await screen.findByTestId('sourceEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('logsDrilldownSourceEmpty')).toBeInTheDocument();
     expect(EmptyState.mock.calls[0][0]).toMatchObject({
-      scope: { region: 'us-east-1' },
+      scope: { zone: 'zone-a' },
       search: '',
       error: undefined,
     });
@@ -427,7 +427,7 @@ describe('SourceRowsView', () => {
     mockTypeRegistered = false;
     const drilldown = makeDrilldown();
     renderView(drilldown);
-    expect(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/ecs/b')).toBeInTheDocument();
+    expect(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b')).toBeInTheDocument();
     await flush();
     expect(drilldown.fetchPreview).not.toHaveBeenCalled();
   });
@@ -435,8 +435,8 @@ describe('SourceRowsView', () => {
   it('keeps a run card through a search that hides it and shows it again', async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/ecs/b'));
-    await screen.findByTestId('logsDrilldownSourceCardLogs-/aws/ecs/b');
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+    await screen.findByTestId('logsDrilldownSourceCardLogs-app/api/b');
     const view = (search: string) => (
       <SourceRowsView
         services={services}
@@ -447,7 +447,7 @@ describe('SourceRowsView', () => {
           resolveDefaultDataset: jest.fn(),
           logsDrilldown: drilldown,
         }}
-        scope={{ region: 'us-east-1' }}
+        scope={{ zone: 'zone-a' }}
         search={search}
         refreshKey="a"
         onBrushTime={jest.fn()}
@@ -455,12 +455,12 @@ describe('SourceRowsView', () => {
       />
     );
     drilldown.listItems.mockResolvedValueOnce({
-      items: [{ id: '/aws/lambda/a', name: '/aws/lambda/a' }],
+      items: [{ id: 'app/web/a', name: 'app/web/a' }],
     });
-    rerender(view('lambda'));
-    await screen.findByTestId('logsDrilldownSourceCard-/aws/lambda/a');
+    rerender(view('web'));
+    await screen.findByTestId('logsDrilldownSourceCard-app/web/a');
     rerender(view(''));
-    expect(await screen.findByTestId('logsDrilldownSourceCardLogs-/aws/ecs/b')).toHaveTextContent(
+    expect(await screen.findByTestId('logsDrilldownSourceCardLogs-app/api/b')).toHaveTextContent(
       'hi'
     );
     expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
@@ -469,9 +469,9 @@ describe('SourceRowsView', () => {
   it('still opens a ticked item that a search hides', async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
     drilldown.listItems.mockResolvedValueOnce({
-      items: [{ id: '/aws/lambda/a', name: '/aws/lambda/a' }],
+      items: [{ id: 'app/web/a', name: 'app/web/a' }],
     });
     rerender(
       <SourceRowsView
@@ -483,21 +483,21 @@ describe('SourceRowsView', () => {
           resolveDefaultDataset: jest.fn(),
           logsDrilldown: drilldown,
         }}
-        scope={{ region: 'us-east-1' }}
-        search="lambda"
+        scope={{ zone: 'zone-a' }}
+        search="web"
         refreshKey="a"
         onBrushTime={jest.fn()}
         onBatchActionChange={onBatchActionChange}
       />
     );
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/lambda/a'));
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/web/a'));
     const action = onBatchActionChange.mock.calls[onBatchActionChange.mock.calls.length - 1][0];
     await act(async () => action.onClick());
     expect(drilldown.toDataset).toHaveBeenCalledWith({
-      scope: { region: 'us-east-1' },
+      scope: { zone: 'zone-a' },
       items: [
-        expect.objectContaining({ id: '/aws/ecs/b' }),
-        expect.objectContaining({ id: '/aws/lambda/a' }),
+        expect.objectContaining({ id: 'app/api/b' }),
+        expect.objectContaining({ id: 'app/web/a' }),
       ],
     });
   });
@@ -512,7 +512,7 @@ describe('SourceRowsView', () => {
         resolveDefaultDataset: jest.fn(),
         logsDrilldown: drilldown,
       }}
-      scope={{ region: 'us-east-1' }}
+      scope={{ zone: 'zone-a' }}
       search=""
       refreshKey="a"
       onBrushTime={jest.fn()}
@@ -538,13 +538,13 @@ describe('SourceRowsView', () => {
   it("lists again on the page's Refresh, keeping the cards meanwhile", async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
-    await screen.findByTestId('logsDrilldownSourceCard-/aws/ecs/b');
+    await screen.findByTestId('logsDrilldownSourceCard-app/api/b');
     let resolveList: (page: unknown) => void = () => {};
     drilldown.listItems.mockReturnValueOnce(new Promise((resolve) => (resolveList = resolve)));
     rerender(viewWith(drilldown, services, onBatchActionChange, { listRefreshKey: 1 }));
     await flush();
     expect(drilldown.listItems).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCard-app/api/b')).toBeInTheDocument();
     await act(async () => resolveList({ items: [{ id: 'new', name: 'new' }] }));
     expect(await screen.findByTestId('logsDrilldownSourceCard-new')).toBeInTheDocument();
   });
@@ -552,13 +552,13 @@ describe('SourceRowsView', () => {
   it('keeps the list when a refresh fails, and Retry lists again', async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
-    await screen.findByTestId('logsDrilldownSourceCard-/aws/ecs/b');
+    await screen.findByTestId('logsDrilldownSourceCard-app/api/b');
     drilldown.listItems
       .mockRejectedValueOnce(new Error('throttled'))
       .mockResolvedValueOnce({ items: [{ id: 'again', name: 'again' }] });
     rerender(viewWith(drilldown, services, onBatchActionChange, { listRefreshKey: 1 }));
     expect(await screen.findByText('throttled')).toBeInTheDocument();
-    expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCard-app/api/b')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Retry'));
     expect(await screen.findByTestId('logsDrilldownSourceCard-again')).toBeInTheDocument();
   });
@@ -578,7 +578,7 @@ describe('SourceRowsView', () => {
         jest.advanceTimersByTime(1000);
       });
       rerender(
-        viewWith(drilldown, services, onBatchActionChange, { refreshKey: 'b', search: 'aws' })
+        viewWith(drilldown, services, onBatchActionChange, { refreshKey: 'b', search: 'app' })
       );
       act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
       await act(async () => {
@@ -594,17 +594,17 @@ describe('SourceRowsView', () => {
 
   it("stops ticks at the source's maxSelection", async () => {
     renderView(makeDrilldown({ maxSelection: 1 }));
-    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
-    expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-/aws/lambda/a')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
-    expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-/aws/lambda/a')).not.toBeDisabled();
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
+    expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
+    expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a')).not.toBeDisabled();
   });
 
   it("names the item in each Run button's accessible label", async () => {
     renderView(makeDrilldown());
-    expect(await screen.findByTestId('logsDrilldownSourceCardRun-/aws/ecs/b')).toHaveAttribute(
+    expect(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b')).toHaveAttribute(
       'aria-label',
-      'Run /aws/ecs/b'
+      'Run app/api/b'
     );
   });
 
@@ -618,7 +618,7 @@ describe('SourceRowsView', () => {
       await act(async () => {
         await Promise.resolve();
       });
-      expect(screen.queryByTestId('logsDrilldownSourceCardRun-/aws/ecs/b')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownSourceCardRun-app/api/b')).not.toBeInTheDocument();
       act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
       await act(async () => {
         jest.advanceTimersByTime(500);

@@ -23,8 +23,8 @@ const messageOf = (error: unknown) =>
  * user. Unlike the viewport scheduler, nothing ever runs on its own: not on scroll, not on a reset.
  * At most `concurrency` run at once; more Run presses wait their turn (a run can start several
  * billed queries, and async backends cap concurrent queries). A new run of a card replaces its
- * previous one (aborting it) and keeps the old result on screen until it answers. Everything is
- * aborted and forgotten when `resetKey` changes or on unmount.
+ * previous one (aborting it) and keeps the old result on screen until it answers; `stop(key)`
+ * cancels one. Everything is aborted and forgotten when `resetKey` changes or on unmount.
  */
 export const useExplicitRuns = <T>(
   fetchFn: (key: string, signal: AbortSignal) => Promise<T>,
@@ -93,5 +93,23 @@ export const useExplicitRuns = <T>(
     [update, startNext]
   );
 
-  return { runs, run };
+  /**
+   * Stops a card's run (running or waiting): aborts it, which for an async source stops the query
+   * through its search interceptor. The card keeps the result it had before, if any.
+   */
+  const stop = useCallback(
+    (key: string) => {
+      const controller = controllers.current.get(key);
+      const queued = queue.current.includes(key);
+      if (!controller && !queued) return;
+      controller?.abort();
+      controllers.current.delete(key);
+      queue.current = queue.current.filter((queuedKey) => queuedKey !== key);
+      update(key, (prev) => ({ result: prev?.result, running: false }));
+      startNext();
+    },
+    [update, startNext]
+  );
+
+  return { runs, run, stop };
 };

@@ -31,7 +31,12 @@ const item = {
 };
 
 const renderCard = (props: Record<string, unknown> = {}) => {
-  const handlers = { onRun: jest.fn(), onToggleCheck: jest.fn(), onVisibilityChange: jest.fn() };
+  const handlers = {
+    onRun: jest.fn(),
+    onStop: jest.fn(),
+    onToggleCheck: jest.fn(),
+    onVisibilityChange: jest.fn(),
+  };
   render(
     <SourceItemCard
       services={{} as any}
@@ -97,9 +102,18 @@ describe('SourceItemCard', () => {
     expect(screen.queryByTestId('logsDrilldownSourceCardRun-g')).not.toBeInTheDocument();
   });
 
-  it("can't be ticked once the selection is full, unless already ticked", () => {
-    renderCard({ checkDisabledReason: 'full' });
-    expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-g')).toBeDisabled();
+  it("can't be ticked once the selection is full, and says why to screen readers", () => {
+    renderCard({ checkDisabledReason: 'You can open at most 2 at once.' });
+    const box = screen.getByTestId('logsDrilldownSourceCardCheckbox-g');
+    expect(box).toBeDisabled();
+    expect(box).toHaveAccessibleDescription('You can open at most 2 at once.');
+  });
+
+  it('offers Stop while a run is in flight, and Run once it is not', () => {
+    const { onStop } = renderCard({ loading: true });
+    expect(screen.queryByTestId('logsDrilldownSourceCardRun-g')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('logsDrilldownSourceCardStop-g'));
+    expect(onStop).toHaveBeenCalledWith('g');
   });
 
   it('stays enabled when already ticked, so it can be unticked', () => {

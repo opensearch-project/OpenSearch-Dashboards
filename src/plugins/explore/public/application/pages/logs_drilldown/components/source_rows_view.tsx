@@ -179,6 +179,7 @@ export const SourceRowsView: React.FC<Props> = ({
     if (explicitRunRef.current) explicitRef.current.run(itemId);
     else autoRef.current.invalidate(itemId);
   }, []);
+  const onStop = useCallback((itemId: string) => explicitRef.current.stop(itemId), []);
   const onVisibilityChange = useCallback((itemId: string, visible: boolean) => {
     if (!explicitRunRef.current) autoRef.current.onVisibilityChange(itemId, visible);
   }, []);
@@ -277,8 +278,8 @@ export const SourceRowsView: React.FC<Props> = ({
     [drilldown, scopeKey, services, sourceType.datasetTypes, maxSelection, toasts]
   );
 
-  // The source's limit on one dataset: past it, unticked cards can't be ticked (as the Logs page's
-  // log group selector stops at its limit).
+  // The source's `maxSelection` caps how many items one dataset can hold: at the limit, unticked
+  // cards can't be ticked.
   const selectionFull =
     maxSelection !== undefined && checked.size >= maxSelection
       ? i18n.translate('explore.logsDrilldown.source.selectionFull', {
@@ -466,6 +467,7 @@ export const SourceRowsView: React.FC<Props> = ({
                   checkDisabledReason={selectionFull}
                   onToggleCheck={toggleChecked}
                   onRun={onRun}
+                  onStop={onStop}
                   onVisibilityChange={onVisibilityChange}
                   onBrushTime={onBrushTime}
                 />

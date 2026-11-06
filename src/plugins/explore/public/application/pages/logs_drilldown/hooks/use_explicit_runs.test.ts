@@ -75,6 +75,36 @@ describe('useExplicitRuns', () => {
     expect(fetchFn.mock.calls.map(([key]) => key)).toEqual(['a', 'b', 'c']);
   });
 
+  it('stops a running card, keeping its last result, and frees its slot', async () => {
+    const signals: Record<string, AbortSignal[]> = {};
+    const answers: Record<string, Array<(value: string) => void>> = {};
+    const fetchFn = jest.fn(
+      (key: string, signal: AbortSignal) =>
+        new Promise<string>((resolve) => {
+          (signals[key] = signals[key] ?? []).push(signal);
+          (answers[key] = answers[key] ?? []).push(resolve);
+        })
+    );
+    const { result } = renderHook(() => useExplicitRuns(fetchFn, 'scope', 1));
+    act(() => result.current.run('a'));
+    await act(async () => answers.a[0]('first'));
+    act(() => {
+      result.current.run('a');
+      result.current.run('b');
+    });
+    act(() => result.current.stop('a'));
+    expect(signals.a[1].aborted).toBe(true);
+    expect(result.current.runs.get('a')).toEqual({ result: 'first', running: false });
+    // The slot it held goes to the waiting card.
+    expect(fetchFn.mock.calls.map(([key]) => key)).toEqual(['a', 'a', 'b']);
+    // Stopping a waiting card takes it off the queue.
+    act(() => result.current.run('c'));
+    act(() => result.current.stop('c'));
+    await act(async () => answers.b[0]('b done'));
+    expect(fetchFn.mock.calls.map(([key]) => key)).toEqual(['a', 'a', 'b']);
+    expect(result.current.runs.get('c')?.running).toBe(false);
+  });
+
   it("keeps the failed run's error as is", async () => {
     const rejection = Object.assign(new Error('denied'), { statusCode: 403 });
     const fetchFn = jest.fn().mockRejectedValue(rejection);

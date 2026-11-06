@@ -69,7 +69,7 @@ const run = (services: any, drilldown: any, datasetTypes = ['FAKE']) =>
     services,
     drilldown,
     datasetTypes,
-    scope: { region: 'r' },
+    scope: { zone: 'z' },
     item,
     from: 0,
     to: 60 * 60 * 1000,
@@ -87,10 +87,10 @@ describe('runSourceCard', () => {
     const drilldown = makeDrilldown();
     const result = await run(services, drilldown);
 
-    expect(drilldown.toDataset).toHaveBeenCalledWith({ scope: { region: 'r' }, items: [item] });
+    expect(drilldown.toDataset).toHaveBeenCalledWith({ scope: { zone: 'z' }, items: [item] });
     expect(cacheDataset).toHaveBeenCalled();
     expect(drilldown.buildPreviewQuery).toHaveBeenCalledWith({
-      scope: { region: 'r' },
+      scope: { zone: 'z' },
       item,
       dataset,
       size: 10,

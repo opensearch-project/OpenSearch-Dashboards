@@ -19,7 +19,7 @@ const base: DrilldownPageState = {
 describe('drilldownPageReducer', () => {
   it('a source switch drops the scope, search and batch action, and keeps the data source', () => {
     const next = drilldownPageReducer(
-      { ...base, sourceTypeId: 'cw', scope: { region: 'r' } },
+      { ...base, sourceTypeId: 'stream-source', scope: { zone: 'z' } },
       { type: 'selectSource', sourceTypeId: 'other' }
     );
     expect(next).toMatchObject({
@@ -33,9 +33,9 @@ describe('drilldownPageReducer', () => {
   });
 
   it('keeps the same state for the same scope in another key order', () => {
-    const state = { ...base, sourceTypeId: 'cw', scope: { region: 'r', accountId: 'a' } };
+    const state = { ...base, sourceTypeId: 'stream-source', scope: { zone: 'z', tenant: 'a' } };
     expect(
-      drilldownPageReducer(state, { type: 'setScope', scope: { accountId: 'a', region: 'r' } })
+      drilldownPageReducer(state, { type: 'setScope', scope: { tenant: 'a', zone: 'z' } })
     ).toBe(state);
   });
 
@@ -46,7 +46,7 @@ describe('drilldownPageReducer', () => {
   });
 
   describe('applyExternalAppState', () => {
-    const known = ['opensearch', 'cw'];
+    const known = ['opensearch', 'stream-source'];
 
     it("doesn't trust a URL data source until the picker confirms it", () => {
       const next = drilldownPageReducer(base, {
@@ -71,10 +71,10 @@ describe('drilldownPageReducer', () => {
       expect(
         drilldownPageReducer(base, {
           type: 'applyExternalAppState',
-          appState: { sourceType: 'cw', scope: { region: 'r' } },
+          appState: { sourceType: 'stream-source', scope: { zone: 'z' } },
           knownSourceTypeIds: known,
         })
-      ).toMatchObject({ sourceTypeId: 'cw', scope: { region: 'r' }, search: '' });
+      ).toMatchObject({ sourceTypeId: 'stream-source', scope: { zone: 'z' }, search: '' });
       expect(
         drilldownPageReducer(base, {
           type: 'applyExternalAppState',
@@ -87,16 +87,16 @@ describe('drilldownPageReducer', () => {
     it('changes nothing for its own state read back in another key order', () => {
       const state = {
         ...base,
-        sourceTypeId: 'cw',
-        scope: { region: 'r', accountId: 'a' },
+        sourceTypeId: 'stream-source',
+        scope: { zone: 'z', tenant: 'a' },
       };
       expect(
         drilldownPageReducer(state, {
           type: 'applyExternalAppState',
           appState: {
             dataSource: base.dataSource,
-            scope: { accountId: 'a', region: 'r' },
-            sourceType: 'cw',
+            scope: { tenant: 'a', zone: 'z' },
+            sourceType: 'stream-source',
           },
           knownSourceTypeIds: known,
         })
@@ -108,7 +108,7 @@ describe('drilldownPageReducer', () => {
 describe('appStateFor', () => {
   it('keeps other keys, and writes no source type or scope for OpenSearch', () => {
     expect(
-      appStateFor(base, { other: 1, sourceType: 'cw', scope: { region: 'r' } } as any)
+      appStateFor(base, { other: 1, sourceType: 'stream-source', scope: { zone: 'z' } } as any)
     ).toEqual({
       other: 1,
       dataSource: base.dataSource,
@@ -117,7 +117,10 @@ describe('appStateFor', () => {
 
   it('writes the source type and scope of a registered source', () => {
     expect(
-      appStateFor({ sourceTypeId: 'cw', scope: { region: 'r' }, dataSource: undefined }, null)
-    ).toEqual({ sourceType: 'cw', scope: { region: 'r' } });
+      appStateFor(
+        { sourceTypeId: 'stream-source', scope: { zone: 'z' }, dataSource: undefined },
+        null
+      )
+    ).toEqual({ sourceType: 'stream-source', scope: { zone: 'z' } });
   });
 });
