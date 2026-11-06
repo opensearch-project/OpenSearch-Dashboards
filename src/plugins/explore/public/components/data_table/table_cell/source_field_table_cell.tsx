@@ -17,6 +17,11 @@ import { getDisplayValue } from '../../../../../data/common';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
+// Internal metadata field injected by the data importer on lookup rows (the per-import UUID the
+// filtered alias matches on). Kept in sync with the data_importer plugin's LOOKUP_FIELD by
+// convention — a stable data contract — to avoid an explore -> data_importer plugin dependency.
+const LOOKUP_METADATA_FIELD = '__lookup';
+
 export interface SourceFieldTableCellProps {
   colName: string;
   dataset: IndexPattern | Dataset;
@@ -34,7 +39,12 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
 }) => {
   const formattedRow = dataset.formatHit(row, 'text');
   const metaFields = dataset.metaFields || [];
-  const rawKeys = Object.keys(formattedRow).filter((key) => !metaFields.includes(key));
+  // The data importer injects `__lookup` (a per-import UUID) on lookup rows. It's internal
+  // metadata — like _id/_index/_score it adds no value inline and just eats horizontal space in
+  // the _source summary — so exclude it here. It stays visible in the expanded document view,
+  // which renders the full hit (including other metadata) through a separate path.
+  const hiddenSourceFields = [...metaFields, LOOKUP_METADATA_FIELD];
+  const rawKeys = Object.keys(formattedRow).filter((key) => !hiddenSourceFields.includes(key));
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
 
   return (
