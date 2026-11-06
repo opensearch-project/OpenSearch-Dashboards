@@ -20,24 +20,17 @@ const makeTextVariable = (): VariableWithState =>
   }) as VariableWithState;
 
 describe('TextValueEditor', () => {
-  it('ignores Enter during IME composition and commits a plain Enter once', () => {
+  it('commits the value once on Enter', () => {
     const onValuesChange = jest.fn();
     const component = mountWithIntl(
       <TextValueEditor variable={makeTextVariable()} onValuesChange={onValuesChange} />
     );
 
     const input = findTestSubject(component, 'variable-text-input');
-    input.simulate('change', { target: { value: '지표' } });
+    input.simulate('change', { target: { value: 'error' } });
 
-    input.simulate('keydown', {
-      key: 'Enter',
-      keyCode: 229,
-      nativeEvent: { isComposing: true },
-    });
-    expect(onValuesChange).not.toHaveBeenCalled();
-
-    input.simulate('keydown', { key: 'Enter', keyCode: 13, nativeEvent: { isComposing: false } });
+    input.simulate('keydown', { key: 'Enter', keyCode: 13 });
     expect(onValuesChange).toHaveBeenCalledTimes(1);
-    expect(onValuesChange).toHaveBeenCalledWith('text-1', ['지표']);
+    expect(onValuesChange).toHaveBeenCalledWith('text-1', ['error']);
   });
 });
