@@ -65,7 +65,7 @@ const SwitchDataSourceCard = ({
         alignItems="center"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="s" />
@@ -96,7 +96,7 @@ const SwitchDataSourceCard = ({
         alignItems="flexStart"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="s" color="danger" />
@@ -118,7 +118,7 @@ const SwitchDataSourceCard = ({
       gutterSize="xs"
       responsive={false}
       wrap={false}
-      style={{ padding: '2px 0', flexGrow: 0 }}
+      style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="database" size="s" color="primary" />
