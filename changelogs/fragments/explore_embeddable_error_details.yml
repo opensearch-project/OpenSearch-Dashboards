@@ -1,2 +1,0 @@
-fix:
-- [Explore] Show the error details on a failed dashboard panel, not the raw error ([#XXXXX](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/XXXXX))
