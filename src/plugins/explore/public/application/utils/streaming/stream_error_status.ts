@@ -16,6 +16,7 @@
 import { i18n } from '@osd/i18n';
 import type { PPLStreamError } from '../../../../../query_enhancements/common';
 import { QueryResultStatus } from '../state_management/types';
+import { parseErrorEnvelope } from '../parse_error_envelope';
 
 type QueryError = NonNullable<QueryResultStatus['error']>;
 
@@ -54,15 +55,6 @@ interface HttpErrorBody {
   message?: string;
 }
 
-const parseErrorBody = (message?: string): { type?: string; reason?: string; details?: string } => {
-  if (!message) return {};
-  try {
-    return JSON.parse(message)?.error ?? {};
-  } catch {
-    return {};
-  }
-};
-
 /**
  * A rejected request from the stream routes.
  *
@@ -74,7 +66,7 @@ export const streamRequestError = (error: unknown): QueryError => {
   const body = (error as { body?: HttpErrorBody })?.body;
   const fallbackMessage =
     body?.message || (error instanceof Error ? error.message : undefined) || UNKNOWN_ERROR;
-  const parsed = parseErrorBody(body?.message);
+  const parsed = parseErrorEnvelope(body?.message) ?? {};
   const reason = parsed.reason || fallbackMessage;
 
   return {
