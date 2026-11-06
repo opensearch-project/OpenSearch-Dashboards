@@ -14,7 +14,7 @@ describe('useExplicitRuns', () => {
     act(() => result.current.run('a'));
     expect(result.current.runs.get('a')?.running).toBe(true);
     await waitFor(() =>
-      expect(result.current.runs.get('a')).toEqual({ result: 'result', running: false })
+      expect(result.current.runs.get('a')).toMatchObject({ result: 'result', running: false })
     );
     expect(fetchFn).toHaveBeenCalledTimes(1);
     expect(fetchFn).toHaveBeenCalledWith('a', expect.any(AbortSignal));
@@ -42,7 +42,7 @@ describe('useExplicitRuns', () => {
     await act(async () => answers[0]('stale'));
     expect(result.current.runs.get('a')?.result).toBe('first');
     await act(async () => answers[1]('second'));
-    expect(result.current.runs.get('a')).toEqual({ result: 'second', running: false });
+    expect(result.current.runs.get('a')).toMatchObject({ result: 'second', running: false });
   });
 
   it('keeps the last result with the error of a failed run', async () => {
@@ -56,6 +56,31 @@ describe('useExplicitRuns', () => {
     act(() => result.current.run('a'));
     await waitFor(() => expect(result.current.runs.get('a')?.error).toBe('denied'));
     expect(result.current.runs.get('a')).toMatchObject({ result: 'ok', running: false });
+  });
+
+  it('runs at most `concurrency` at once; more Run presses wait their turn', async () => {
+    const answers: Record<string, (value: string) => void> = {};
+    const fetchFn = jest.fn(
+      (key: string) => new Promise<string>((resolve) => (answers[key] = resolve))
+    );
+    const { result } = renderHook(() => useExplicitRuns(fetchFn, 'scope', 2));
+    act(() => {
+      result.current.run('a');
+      result.current.run('b');
+      result.current.run('c');
+    });
+    expect(fetchFn.mock.calls.map(([key]) => key)).toEqual(['a', 'b']);
+    expect(result.current.runs.get('c')?.running).toBe(true);
+    await act(async () => answers.a('done'));
+    expect(fetchFn.mock.calls.map(([key]) => key)).toEqual(['a', 'b', 'c']);
+  });
+
+  it("keeps the failed run's error as is", async () => {
+    const rejection = Object.assign(new Error('denied'), { statusCode: 403 });
+    const fetchFn = jest.fn().mockRejectedValue(rejection);
+    const { result } = renderHook(() => useExplicitRuns(fetchFn, 'scope'));
+    act(() => result.current.run('a'));
+    await waitFor(() => expect(result.current.runs.get('a')?.errorCause).toBe(rejection));
   });
 
   it('aborts and forgets every run when the reset key changes, and on unmount', async () => {

@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getErrorMessage } from '../utils/get_error_message';
+import { getErrorMessage } from '../../pages/metrics/explore/utils/get_error_message';
 
 const DEFAULT_CONCURRENCY = 6;
 const DEBOUNCE_MS = 200;
@@ -201,6 +201,15 @@ export function useConcurrentQueries<T>(
   const invalidate = useCallback((key: string) => {
     const s = stateRef.current;
     s.fetched.delete(key);
+    // A retry starts from scratch: drop the key's last error, so the caller sees it loading again
+    // (and not the old error once the retry succeeds, which only writes a result).
+    s.bufferedErrors.delete(key);
+    setErrors((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Map(prev);
+      next.delete(key);
+      return next;
+    });
     const ctrl = s.inflight.get(key);
     if (ctrl) {
       ctrl.abort();

@@ -44,9 +44,10 @@ interface Props {
   checked: boolean;
   /** Set when the selection is full: why this card can't be ticked. */
   checkDisabledReason?: string;
-  onToggleCheck: () => void;
-  onRun: () => void;
-  onVisibilityChange: (visible: boolean) => void;
+  /** Stable callbacks taking the item, so the card can be memoized. */
+  onToggleCheck: (item: SourceTypeLogsDrilldownItem) => void;
+  onRun: (itemId: string) => void;
+  onVisibilityChange: (itemId: string, visible: boolean) => void;
   onBrushTime: (from: number, to: number) => void;
 }
 
@@ -55,7 +56,7 @@ interface Props {
  * a histogram and the latest events, like an OpenSearch index card. On a source that requires an
  * explicit run, nothing is queried until the user presses Run.
  */
-export const SourceItemCard: React.FC<Props> = ({
+const SourceItemCardComponent: React.FC<Props> = ({
   services,
   item,
   icon,
@@ -77,19 +78,21 @@ export const SourceItemCard: React.FC<Props> = ({
   // Visibility drives automatic runs on sources that don't require an explicit one.
   const visibilityRef = useRef(onVisibilityChange);
   visibilityRef.current = onVisibilityChange;
+  const itemId = item.id;
   useEffect(() => {
     const el = cardRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => visibilityRef.current(entry.isIntersecting)),
+      (entries) => entries.forEach((entry) => visibilityRef.current(itemId, entry.isIntersecting)),
       { rootMargin: '100px' }
     );
     observer.observe(el);
     return () => {
       observer.disconnect();
-      visibilityRef.current(false);
+      visibilityRef.current(itemId, false);
     };
-  }, []);
+  }, [itemId]);
+  const run = () => onRun(itemId);
 
   const details = (item.details ?? [])
     .filter((detail) => detail.value)
@@ -105,7 +108,7 @@ export const SourceItemCard: React.FC<Props> = ({
       <EuiButton
         size="s"
         iconType="play"
-        onClick={onRun}
+        onClick={run}
         isLoading={loading}
         isDisabled={loading}
         fill={!result || stale}
@@ -135,7 +138,7 @@ export const SourceItemCard: React.FC<Props> = ({
           checked={checked}
           disabled={!checked && !!checkDisabledReason}
           title={!checked ? checkDisabledReason : undefined}
-          onChange={onToggleCheck}
+          onChange={() => onToggleCheck(item)}
           aria-label={i18n.translate('explore.logsDrilldown.source.select', {
             defaultMessage: 'Select {name}',
             values: { name: item.name },
@@ -180,7 +183,7 @@ export const SourceItemCard: React.FC<Props> = ({
         data-test-subj={`logsDrilldownSourceCardError-${item.id}`}
       >
         {!explicitRun && (
-          <EuiButtonEmpty size="xs" onClick={onRun}>
+          <EuiButtonEmpty size="xs" onClick={run}>
             {i18n.translate('explore.logsDrilldown.source.retry', { defaultMessage: 'Retry' })}
           </EuiButtonEmpty>
         )}
@@ -296,3 +299,6 @@ export const SourceItemCard: React.FC<Props> = ({
     </div>
   );
 };
+
+/** Memoized: the page re-renders on every result batch, a card only when its own props change. */
+export const SourceItemCard = React.memo(SourceItemCardComponent);

@@ -5,10 +5,11 @@
 
 import './index.scss';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
@@ -29,37 +30,25 @@ import {
   getSourceTypeRegistry,
   OPENSEARCH_SOURCE_TYPE_ID,
   SourceTypeDefinition,
-  SourceTypeLogsDrilldown,
   SourceTypeLogsDrilldownScope,
 } from '../../../services/source_type_registry';
 import { ExploreServices } from '../../../types';
 import { DataSourceControl } from './components/data_source_control';
 import { RowsView } from './components/rows_view';
-import { SourceBatchAction, SourceRowsView } from './components/source_rows_view';
+import { SourceRowsView } from './components/source_rows_view';
 import { SourceTypeControl } from './components/source_type_control';
+import { DATA_SOURCE_STORAGE_KEY, SOURCE_STORAGE_KEY } from './constants';
 import { useIndexClassification } from './hooks/use_index_classification';
+import { appStateFor, drilldownPageReducer, DrilldownPageState } from './page_state';
 import { resetPermissionToast } from './permission_toast';
+import { stableKey } from './stable_key';
+import { DrilldownAppState, DrilldownSourceType } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-// Per-tab remembered data source. The nav-popover / query-bar entry points open the drilldown at a
-// bare `#/` (no `_a`), so the URL alone can't survive re-entry — this sessionStorage fallback keeps
-// the last selection for the tab session. URL `_a` still wins when present (shareable/bookmarkable).
-const DATA_SOURCE_STORAGE_KEY = 'logsDrilldown.dataSource';
-// The same per-tab fallback for the source type and its scope, kept together (`{ sourceType, scope }`)
-// so a scope is never restored for another source.
-const SOURCE_STORAGE_KEY = 'logsDrilldown.source';
-
-/** The page's `_a` URL state. */
-interface DrilldownAppState {
-  dataSource?: Dataset['dataSource'];
-  /** The source type id; absent means OpenSearch. */
-  sourceType?: string;
-  /** A registered source's scope (see `SourceTypeLogsDrilldownScope`). */
-  scope?: SourceTypeLogsDrilldownScope;
-}
-
-type DrilldownSourceType = SourceTypeDefinition & { logsDrilldown: SourceTypeLogsDrilldown };
+const isDrilldownSourceType = (
+  sourceType: SourceTypeDefinition | undefined
+): sourceType is DrilldownSourceType => !!sourceType?.logsDrilldown;
 
 /** Sources offered on the page: OpenSearch, then registered Logs sources that support it. */
 const getDrilldownSourceTypes = (): SourceTypeDefinition[] => {
@@ -84,96 +73,99 @@ type Props = {
  *
  * Rows-only: a full-width vertical stack of per-item cards (histogram + raw log lines), teaching the
  * `data source → index → dataset` hierarchy and turning raw indexes into a durable dataset. Fully
- * self-contained: no explore Redux store; the data source is local React state, the global time
- * range drives the previews, and activating/creating a dataset hands off to the logs Query app.
+ * self-contained: no explore Redux store; the page's state is local (`page_state.ts`), the global
+ * time range drives the previews, and activating/creating a dataset hands off to the logs Query app.
  */
 export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMenu }) => {
   const timefilter = services.data.query.timefilter.timefilter;
   const urlStateStorage = services.osdUrlStateStorage;
 
-  // Per-tab session store for the last selected data source (survives re-entry from a bare `#/`).
+  // Per-tab session store: re-entry from a bare `#/` (the nav-popover and query-bar entry points
+  // open the page with no `_a`) restores the last selection. A URL `_a` always wins (shareable).
   const sessionStore = useMemo(() => new Storage(window.sessionStorage), []);
-
-  // Restore the selected data source on first mount. The URL `_a` wins (bookmarkable/shareable);
-  // when it's absent — as when the nav-popover / query-bar action opens the drilldown at a bare
-  // `#/` — fall back to the per-tab session store so the last selection isn't lost on re-entry.
-  const initialDataSource = useMemo<Dataset['dataSource'] | undefined>(() => {
-    const fromUrl = urlStateStorage?.get<DrilldownAppState>('_a')?.dataSource;
-    return fromUrl ?? sessionStore.get(DATA_SOURCE_STORAGE_KEY) ?? undefined;
-    // Read once on mount; later changes are written out, not read back in.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Merges a change into `_a`, so the data source, source type and scope don't overwrite each other.
-  // The last `_a` the page wrote, so the URL listener below can tell its own writes from others'.
-  const lastWrittenAppState = useRef<string>();
-  const writeAppState = useCallback(
-    (patch: Partial<DrilldownAppState>) => {
-      const current = urlStateStorage?.get<DrilldownAppState>('_a') ?? {};
-      const next = { ...current, ...patch };
-      lastWrittenAppState.current = JSON.stringify(next);
-      urlStateStorage?.set('_a', next, { replace: true });
-    },
-    [urlStateStorage]
-  );
 
   // The sources offered here. Read once: sources register by the time an app mounts.
   const drilldownSourceTypes = useMemo(getDrilldownSourceTypes, []);
+  const knownSourceTypeIds = useMemo(
+    () => drilldownSourceTypes.map((sourceType) => sourceType.id),
+    [drilldownSourceTypes]
+  );
 
-  // The selected source type and, for a registered one, its scope. A URL with `_a` wins (no
-  // `sourceType` there means OpenSearch, e.g. a shared OpenSearch link); without `_a`, the per-tab
-  // store; then OpenSearch. An unknown id (a source no longer registered) falls back to OpenSearch.
-  const initialSource = useMemo(() => {
-    const appState = urlStateStorage?.get<DrilldownAppState>('_a');
+  // The page's state on mount: the URL's `_a` when there is one (no `sourceType` there means
+  // OpenSearch, e.g. a shared OpenSearch link); else the tab's session; then OpenSearch. An unknown
+  // source (no longer registered) falls back to OpenSearch.
+  const initialState = useMemo((): DrilldownPageState => {
+    const appState = urlStateStorage?.get<DrilldownAppState>('_a') ?? undefined;
     const stored: Pick<DrilldownAppState, 'sourceType' | 'scope'> | undefined = appState
       ? undefined
       : (sessionStore.get(SOURCE_STORAGE_KEY) ?? undefined);
-    const id: string | undefined = appState ? appState.sourceType : stored?.sourceType;
-    const known = drilldownSourceTypes.some((sourceType) => sourceType.id === id);
-    if (!id || !known || id === OPENSEARCH_SOURCE_TYPE_ID) {
-      return { id: OPENSEARCH_SOURCE_TYPE_ID, scope: undefined };
-    }
-    const scope: SourceTypeLogsDrilldownScope | undefined = appState
-      ? appState.scope
-      : stored?.scope;
-    return { id, scope };
+    const wanted = appState ? appState.sourceType : stored?.sourceType;
+    const known =
+      !!wanted && wanted !== OPENSEARCH_SOURCE_TYPE_ID && knownSourceTypeIds.includes(wanted);
+    const dataSource: Dataset['dataSource'] | undefined =
+      appState?.dataSource ?? sessionStore.get(DATA_SOURCE_STORAGE_KEY) ?? undefined;
+    return {
+      sourceTypeId: known ? wanted! : OPENSEARCH_SOURCE_TYPE_ID,
+      scope: known ? (appState ? appState.scope : stored?.scope) : undefined,
+      dataSource,
+      // A restored data source shows its list right away on reload; the picker confirms it.
+      dataSourceResolved: !!dataSource?.id,
+      dataSourcePickerKey: 0,
+      searchInput: '',
+      search: '',
+      batchAction: null,
+    };
     // Read once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [sourceTypeId, setSourceTypeId] = useState(initialSource.id);
-  const [sourceScope, setSourceScope] = useState<SourceTypeLogsDrilldownScope | undefined>(
-    initialSource.scope
-  );
-  const registeredSource = useMemo(
-    () =>
-      sourceTypeId === OPENSEARCH_SOURCE_TYPE_ID
-        ? undefined
-        : (drilldownSourceTypes.find((sourceType) => sourceType.id === sourceTypeId) as
-            DrilldownSourceType | undefined),
-    [sourceTypeId, drilldownSourceTypes]
-  );
-
-  // Data source scoping the list (MDS). Local state, mirrored to the `_a` URL key.
-  const [selectedDataSource, setSelectedDataSource] =
-    useState<Dataset['dataSource']>(initialDataSource);
-  const dataSource = selectedDataSource;
+  const [state, dispatch] = useReducer(drilldownPageReducer, initialState);
+  const { sourceTypeId, scope: sourceScope, dataSource, dataSourceResolved, batchAction } = state;
   const dataSourceId = dataSource?.id;
+  const registeredSource = useMemo(() => {
+    if (sourceTypeId === OPENSEARCH_SOURCE_TYPE_ID) return undefined;
+    const found = drilldownSourceTypes.find((sourceType) => sourceType.id === sourceTypeId);
+    return isDrilldownSourceType(found) ? found : undefined;
+  }, [sourceTypeId, drilldownSourceTypes]);
 
-  // If the source was restored from the session store (the URL had no `_a`, e.g. re-entry from a
-  // bare `#/`), seed it into the URL now so `_a` is authoritative immediately — shareable and
-  // reload-safe without waiting for the picker to fire a change.
+  // Persist the source, scope and data source to `_a` (merged, so other keys stay) and to the tab's
+  // session, from one place. The last `_a` written (key-sorted, as rison keeps it) lets the URL
+  // listener below tell the page's own writes from outside changes.
+  const lastWrittenAppState = useRef<string>();
   useEffect(() => {
-    if (!urlStateStorage?.get('_a')) {
-      const seeded: DrilldownAppState = {
-        ...(initialDataSource ? { dataSource: initialDataSource } : {}),
-        ...(initialSource.id !== OPENSEARCH_SOURCE_TYPE_ID
-          ? { sourceType: initialSource.id, scope: initialSource.scope }
-          : {}),
-      };
-      if (Object.keys(seeded).length) urlStateStorage?.set('_a', seeded, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!urlStateStorage) return;
+    const current = urlStateStorage.get<DrilldownAppState>('_a');
+    const next = appStateFor({ sourceTypeId, scope: sourceScope, dataSource }, current);
+    // Nothing to keep yet (OpenSearch, no data source, no `_a`): leave the URL as it is.
+    if (!current && Object.keys(next).length === 0) return;
+    const nextKey = stableKey(next);
+    lastWrittenAppState.current = nextKey;
+    if (stableKey(current ?? {}) !== nextKey) urlStateStorage.set('_a', next, { replace: true });
+  }, [urlStateStorage, sourceTypeId, sourceScope, dataSource]);
+  useEffect(() => {
+    if (sourceTypeId === OPENSEARCH_SOURCE_TYPE_ID) sessionStore.remove(SOURCE_STORAGE_KEY);
+    else sessionStore.set(SOURCE_STORAGE_KEY, { sourceType: sourceTypeId, scope: sourceScope });
+  }, [sessionStore, sourceTypeId, sourceScope]);
+  useEffect(() => {
+    if (!dataSourceResolved) return;
+    if (dataSource) sessionStore.set(DATA_SOURCE_STORAGE_KEY, dataSource);
+    else sessionStore.remove(DATA_SOURCE_STORAGE_KEY);
+  }, [sessionStore, dataSource, dataSourceResolved]);
+
+  // Follow `_a` changes the page didn't make (a hand-edited URL, back/forward within the app). The
+  // page's own writes come back here too, so a change is skipped when it equals the page's last
+  // write (compared key-sorted), and when it isn't what the URL holds any more: the change of an
+  // earlier write of the page's can arrive after a later one, and applying it would undo that.
+  useEffect(() => {
+    if (!urlStateStorage?.change$) return;
+    const sub = urlStateStorage.change$<DrilldownAppState>('_a').subscribe((appState) => {
+      if (!appState) return;
+      const key = stableKey(appState);
+      if (key === lastWrittenAppState.current) return;
+      if (key !== stableKey(urlStateStorage.get<DrilldownAppState>('_a') ?? {})) return;
+      dispatch({ type: 'applyExternalAppState', appState, knownSourceTypeIds });
+    });
+    return () => sub.unsubscribe();
+  }, [urlStateStorage, knownSourceTypeIds]);
 
   // Default the time range to the last 15 minutes on mount UNLESS this drilldown's own URL already
   // pins a range (`_g.time`). The timefilter is a shared singleton, so without this the drilldown
@@ -207,9 +199,6 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   // MDS is off, the implicit local cluster is the queryable target. We mirror DataSourceControl's
   // own render gate so the two stay in sync.
   const mdsEnabled = !!services.dataSourceManagement?.ui?.DataSourceSelector;
-  // Whether the selector has resolved to a concrete data source yet (only meaningful when MDS is on).
-  // Seeded true when a data source was restored from the URL so the list shows immediately on reload.
-  const [dataSourceResolved, setDataSourceResolved] = useState(!!initialDataSource?.id);
   // With MDS on we must NOT fall back to local-cluster indexes when no data source is selected — the
   // picker reports an empty selection and we show one of the two empty states below instead.
   const canQueryIndexes = !mdsEnabled || (dataSourceResolved && !!dataSourceId);
@@ -239,14 +228,16 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     };
   }, [mdsEnabled, canQueryIndexes, hasAnyDataSource, services.savedObjects.client]);
 
-  // Shared, debounced search across datasets + indexes.
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  useDebounce(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS, [searchInput]);
+  // Shared, debounced search across the lists.
+  const searchInput = state.searchInput;
+  const search = state.search;
+  useDebounce(() => dispatch({ type: 'commitSearch' }), SEARCH_DEBOUNCE_MS, [searchInput]);
 
-  // The batch (multi-select) action RowsView reports up — drives the toolbar button.
-  // Only its label and onClick are read here, so OpenSearch's and a registered source's both fit.
-  const [batchAction, setBatchAction] = useState<SourceBatchAction | null>(null);
+  // The batch (multi-select) action the list reports up: drives the toolbar button.
+  const setBatchAction = useCallback(
+    (action: DrilldownPageState['batchAction']) => dispatch({ type: 'setBatchAction', action }),
+    []
+  );
 
   // Reset the one-time "permission denied" toast whenever the data source changes: a different source
   // is a fresh permission context, so its own failures should be allowed to toast once.
@@ -281,7 +272,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   const [refreshNonce, setRefreshNonce] = useState(0);
   const onRefresh = useCallback(() => setRefreshNonce((n) => n + 1), []);
 
-  // refreshKey changes when the range OR the manual-refresh nonce changes → RowsView re-fetches.
+  // refreshKey changes when the range OR the manual-refresh nonce changes → the lists re-fetch.
   const refreshKey = `${time.from}|${time.to}|${refreshNonce}`;
 
   const onTimeChange = useCallback(
@@ -299,101 +290,29 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     [timefilter]
   );
 
-  const onDataSourceChange = useCallback(
-    (ds: { id?: string; title?: string }) => {
-      // An `id` means a concrete data source is selected. An empty id means the picker reported no
-      // selection — with MDS on that's an empty workspace (no attached data sources), which must NOT
-      // silently fall back to the local cluster (`dataSourceResolved` stays false → empty state).
-      setDataSourceResolved(!!ds.id);
-      const nextDataSource = ds.id
+  const onDataSourceChange = useCallback((ds: { id?: string; title?: string }) => {
+    dispatch({
+      type: 'setDataSource',
+      dataSource: ds.id
         ? ({ id: ds.id, title: ds.title ?? '', type: 'DATA_SOURCE' } as Dataset['dataSource'])
-        : undefined;
-      setSelectedDataSource(nextDataSource);
-      // Persist to the `_a` URL key so the selection is restored on reload / shared via the URL.
-      writeAppState({ dataSource: nextDataSource });
-      // Also remember it per-tab so re-entry from a bare `#/` (nav-popover / query-bar) restores it.
-      if (nextDataSource) sessionStore.set(DATA_SOURCE_STORAGE_KEY, nextDataSource);
-      else sessionStore.remove(DATA_SOURCE_STORAGE_KEY);
-    },
-    [writeAppState, sessionStore]
-  );
-
-  // The per-tab store of the source and its scope (see SOURCE_STORAGE_KEY); OpenSearch is the default.
-  const rememberSource = useCallback(
-    (id: string, scope: SourceTypeLogsDrilldownScope | undefined) => {
-      if (id === OPENSEARCH_SOURCE_TYPE_ID) sessionStore.remove(SOURCE_STORAGE_KEY);
-      else sessionStore.set(SOURCE_STORAGE_KEY, { sourceType: id, scope });
-    },
-    [sessionStore]
-  );
-
-  // Follow `_a` changes the page didn't make (a hand-edited URL, back/forward within the app): the
-  // page reads `_a` on mount only, and its own writes come back here equal to its state (no-ops).
-  const [dataSourceControlKey, setDataSourceControlKey] = useState(0);
-  const pageStateRef = useRef({ sourceTypeId, sourceScope, dataSourceId });
-  pageStateRef.current = { sourceTypeId, sourceScope, dataSourceId };
-  useEffect(() => {
-    if (!urlStateStorage?.change$) return;
-    const sub = urlStateStorage.change$<DrilldownAppState>('_a').subscribe((appState) => {
-      // The page's own write coming back (compared to what it wrote, not to React state, which can
-      // lag a microtask behind the URL).
-      if (!appState || JSON.stringify(appState) === lastWrittenAppState.current) return;
-      const current = pageStateRef.current;
-      const wanted = appState.sourceType ?? OPENSEARCH_SOURCE_TYPE_ID;
-      const known =
-        wanted === OPENSEARCH_SOURCE_TYPE_ID ||
-        drilldownSourceTypes.some((sourceType) => sourceType.id === wanted);
-      if (known && wanted !== current.sourceTypeId) {
-        setSourceTypeId(wanted);
-        setSourceScope(wanted === OPENSEARCH_SOURCE_TYPE_ID ? undefined : appState.scope);
-        setBatchAction(null);
-        // As a pick from the Source picker: the search is per source.
-        setSearchInput('');
-        setSearch('');
-        rememberSource(wanted, wanted === OPENSEARCH_SOURCE_TYPE_ID ? undefined : appState.scope);
-      } else if (
-        known &&
-        wanted !== OPENSEARCH_SOURCE_TYPE_ID &&
-        JSON.stringify(appState.scope ?? null) !== JSON.stringify(current.sourceScope ?? null)
-      ) {
-        setSourceScope(appState.scope);
-        setBatchAction(null);
-        rememberSource(wanted, appState.scope);
-      }
-      const nextDataSourceId = appState.dataSource?.id;
-      if (nextDataSourceId && nextDataSourceId !== current.dataSourceId) {
-        setSelectedDataSource(appState.dataSource);
-        setDataSourceResolved(true);
-        setDataSourceControlKey((n) => n + 1);
-      }
+        : undefined,
     });
-    return () => sub.unsubscribe();
-  }, [urlStateStorage, drilldownSourceTypes, rememberSource]);
+  }, []);
 
   const onSourceTypeChange = useCallback(
-    (id: string) => {
-      if (id === sourceTypeId) return;
-      setSourceTypeId(id);
-      // A new source starts from its picker's default scope; the search is per source too.
-      setSourceScope(undefined);
-      setSearchInput('');
-      setSearch('');
-      setBatchAction(null);
-      const isOpenSearch = id === OPENSEARCH_SOURCE_TYPE_ID;
-      writeAppState({ sourceType: isOpenSearch ? undefined : id, scope: undefined });
-      rememberSource(id, undefined);
-    },
-    [sourceTypeId, writeAppState, rememberSource]
+    (id: string) => dispatch({ type: 'selectSource', sourceTypeId: id }),
+    []
   );
 
   const onScopeChange = useCallback(
-    (scope: SourceTypeLogsDrilldownScope) => {
-      setSourceScope(scope);
-      setBatchAction(null);
-      writeAppState({ scope });
-      rememberSource(sourceTypeId, scope);
-    },
-    [writeAppState, rememberSource, sourceTypeId]
+    (scope: SourceTypeLogsDrilldownScope) => dispatch({ type: 'setScope', scope }),
+    []
+  );
+
+  const dataSourcePickerKey = state.dataSourcePickerKey;
+  const setSearchInput = useCallback(
+    (value: string) => dispatch({ type: 'setSearchInput', value }),
+    []
   );
 
   const { classify, getCached } = useIndexClassification(services, dataSourceId);
@@ -443,20 +362,23 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
           className={registeredSource ? 'logsDrilldown__toolbarScope' : 'logsDrilldown__toolbarDs'}
         >
           {registeredSource ? (
-            <registeredSource.logsDrilldown.ScopeSelector
-              scope={sourceScope}
-              onChange={onScopeChange}
-              data={services.data}
-            />
+            // The source's own picker is another plugin's code: a throw stays in this slot.
+            <EuiErrorBoundary>
+              <registeredSource.logsDrilldown.ScopeSelector
+                scope={sourceScope}
+                onChange={onScopeChange}
+                data={services.data}
+              />
+            </EuiErrorBoundary>
           ) : (
             <DataSourceControl
-              // Remounted when the URL changes the data source from outside (see below).
-              key={dataSourceControlKey}
+              // Remounted when the URL names another data source, so the picker validates it.
+              key={dataSourcePickerKey}
               services={services}
               onChange={onDataSourceChange}
-              // The data source in use, not the one the page opened with: the picker remounts when
-              // the user comes back from another source, and reports this one as selected.
-              defaultDataSourceId={dataSourceId ?? initialDataSource?.id}
+              // The data source in use (it starts from the URL or session, else the picker's
+              // default): the picker remounts when the user comes back from another source.
+              defaultDataSourceId={dataSourceId}
             />
           )}
         </EuiFlexItem>
@@ -510,6 +432,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
               fill
               isDisabled={!batchAction}
               onClick={() => batchAction?.onClick()}
+              isLoading={!!batchAction?.isLoading}
               data-test-subj="logsExploreToolbarBatch"
             >
               {batchAction?.label ??
@@ -540,13 +463,13 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       registeredSource,
       sourceScope,
       onScopeChange,
-      dataSourceControlKey,
+      dataSourcePickerKey,
       dataSourceId,
       searchInput,
+      setSearchInput,
       batchAction,
       setHeaderActionMenu,
       datePicker,
-      initialDataSource,
     ]
   );
 
@@ -560,17 +483,20 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       <EuiSpacer size="s" />
       {registeredSource ? (
         sourceScope ? (
-          <SourceRowsView
-            key={registeredSource.id}
-            services={services}
-            sourceType={registeredSource}
-            scope={sourceScope}
-            search={search}
-            refreshKey={refreshKey}
-            listRefreshKey={refreshNonce}
-            onBrushTime={onBrushTime}
-            onBatchActionChange={setBatchAction}
-          />
+          // The cards call the source's code (listing, grouping, its empty state): a throw shows
+          // an error here instead of blanking the page.
+          <EuiErrorBoundary key={registeredSource.id}>
+            <SourceRowsView
+              services={services}
+              sourceType={registeredSource}
+              scope={sourceScope}
+              search={search}
+              refreshKey={refreshKey}
+              listRefreshKey={refreshNonce}
+              onBrushTime={onBrushTime}
+              onBatchActionChange={setBatchAction}
+            />
+          </EuiErrorBoundary>
         ) : (
           <EuiEmptyPrompt
             iconType="search"

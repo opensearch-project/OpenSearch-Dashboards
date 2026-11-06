@@ -85,6 +85,66 @@ describe('useSourceItems', () => {
     expect(result.current.error).toBeUndefined();
   });
 
+  it('asks for a page size, keeps at most that many of a longer page, and stops at the cap', async () => {
+    const drilldown = makeDrilldown();
+    const many = (from: number, n: number) => Array.from({ length: n }, (_, i) => `i${from + i}`);
+    drilldown.listItems.mockResolvedValueOnce(page(many(0, 80), 't2'));
+    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    await waitFor(() => expect(result.current.items).toHaveLength(50));
+    expect(drilldown.listItems).toHaveBeenCalledWith(expect.objectContaining({ pageSize: 50 }));
+    // 19 more pages of 50 reach the 1000 cap; "Load more" then stops.
+    for (let i = 1; i < 20; i++) {
+      drilldown.listItems.mockResolvedValueOnce(page(many(i * 50, 50), `t${i + 2}`));
+      act(() => result.current.loadMore());
+      await waitFor(() => expect(result.current.items).toHaveLength((i + 1) * 50));
+    }
+    expect(result.current.capped).toBe(true);
+    expect(result.current.nextToken).toBeUndefined();
+  });
+
+  it('drops a "Load more" answer that arrives after a refresh started', async () => {
+    const drilldown = makeDrilldown();
+    let answerMore: (value: unknown) => void = () => {};
+    let answerRefresh: (value: unknown) => void = () => {};
+    drilldown.listItems
+      .mockResolvedValueOnce(page(['a'], 'old-t2'))
+      .mockReturnValueOnce(new Promise((resolve) => (answerMore = resolve)))
+      .mockReturnValueOnce(new Promise((resolve) => (answerRefresh = resolve)));
+    const { result, rerender } = renderHook(
+      ({ refresh }) => useSourceItems(drilldown, { region: 'r' }, '', refresh),
+      { initialProps: { refresh: 0 } }
+    );
+    await waitFor(() => expect(result.current.items).toHaveLength(1));
+    act(() => result.current.loadMore());
+    rerender({ refresh: 1 });
+    // The refresh drops the old listing's "Load more".
+    expect(result.current.nextToken).toBeUndefined();
+    await act(async () => answerRefresh(page(['n1'], 'new-t2')));
+    await act(async () => answerMore(page(['old-page-2'], 'old-t3')));
+    expect(result.current.items.map((i) => i.id)).toEqual(['n1']);
+    expect(result.current.nextToken).toBe('new-t2');
+  });
+
+  it("turns a source's synchronous throw into a listing error", async () => {
+    const drilldown = makeDrilldown();
+    drilldown.listItems.mockImplementation(() => {
+      throw new Error('bad scope');
+    });
+    const { result } = renderHook(() => useSourceItems(drilldown, { region: 'r' }, ''));
+    await waitFor(() => expect(result.current.error).toBe('bad scope'));
+  });
+
+  it('lists a scope once whatever its key order', async () => {
+    const drilldown = makeDrilldown();
+    drilldown.listItems.mockResolvedValue(page(['a']));
+    const { rerender } = renderHook(({ scope }) => useSourceItems(drilldown, scope, ''), {
+      initialProps: { scope: { region: 'r', accountId: 'x' } as Record<string, unknown> },
+    });
+    await waitFor(() => expect(drilldown.listItems).toHaveBeenCalledTimes(1));
+    rerender({ scope: { accountId: 'x', region: 'r' } });
+    expect(drilldown.listItems).toHaveBeenCalledTimes(1);
+  });
+
   it('marks a failed "Load more" as such and keeps the list', async () => {
     const drilldown = makeDrilldown();
     drilldown.listItems

@@ -19,38 +19,25 @@ import {
 import { i18n } from '@osd/i18n';
 import rison from 'rison-node';
 import { PLUGIN_ID, ExploreFlavor } from '../../../../../common';
+import { datasetTypeRequiresExplicitRun } from '../../../../../../data/common';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type {
-  SourceTypeDefinition,
-  SourceTypeLogsDrilldown,
   SourceTypeLogsDrilldownItem,
   SourceTypeLogsDrilldownScope,
 } from '../../../../services/source_type_registry';
 import { ExploreServices } from '../../../../types';
-import { useConcurrentQueries } from '../../metrics/explore/hooks/use_concurrent_queries';
-import { datasetTypeRequiresExplicitRun } from '../../../../../../data/common';
+import { useConcurrentQueries } from '../../../utils/hooks/use_concurrent_queries';
+import { AUTO_RUN_CONCURRENCY, SOURCE_LIST_MAX_ITEMS } from '../constants';
 import { runSourceCard, SourceCardResult } from '../hooks/source_queries';
 import { useExplicitRuns } from '../hooks/use_explicit_runs';
 import { useSourceItems } from '../hooks/use_source_items';
+import { stableKey } from '../stable_key';
+import { DrilldownSourceType, SourceBatchAction, SourceGrouping } from '../types';
 import { SourceItemCard } from './source_item_card';
-
-/** Cards running at once on a source that runs them as they scroll into view. */
-const AUTO_RUN_CONCURRENCY = 4;
-
-/** The page toolbar's action for the selected items. */
-export interface SourceBatchAction {
-  label: string;
-  onClick: () => void;
-}
-
-enum Grouping {
-  ALPHABETICAL = 'alphabetical',
-  PREFIX = 'prefix',
-}
 
 interface Props {
   services: ExploreServices;
-  sourceType: SourceTypeDefinition & { logsDrilldown: SourceTypeLogsDrilldown };
+  sourceType: DrilldownSourceType;
   scope: SourceTypeLogsDrilldownScope;
   search: string;
   /** Changes with the time range and on Refresh. */
@@ -61,11 +48,23 @@ interface Props {
   onBatchActionChange: (action: SourceBatchAction | null) => void;
 }
 
+/** A source's `groupOf`, which is third-party code: a throw puts the item in no group. */
+const groupOfSafely = (
+  groupOf: (item: SourceTypeLogsDrilldownItem) => string,
+  item: SourceTypeLogsDrilldownItem
+): string => {
+  try {
+    return groupOf(item) || '';
+  } catch {
+    return '';
+  }
+};
+
 /**
  * A registered source's items on the Explore logs page. Lists them through the source (free), and
- * runs each card's preview and histogram either when the user presses its Run button (a source
- * whose dataset type requires an explicit run) or as it scrolls into view. The selected items open
- * as one dataset on the Logs page.
+ * runs each card's preview and histogram, through the item's dataset and the data plugin's search
+ * service, either when the user presses its Run button (a source whose dataset type requires an
+ * explicit run) or as it scrolls into view. The selected items open as one dataset on the Logs page.
  */
 export const SourceRowsView: React.FC<Props> = ({
   services,
@@ -86,8 +85,18 @@ export const SourceRowsView: React.FC<Props> = ({
       return sourceType.label;
     }
   }, [sourceType]);
-  const { items, nextToken, loading, loadingMore, error, errorCause, errorFrom, loadMore, retry } =
-    useSourceItems(drilldown, scope, search, listRefreshKey);
+  const {
+    items,
+    nextToken,
+    loading,
+    loadingMore,
+    capped,
+    error,
+    errorCause,
+    errorFrom,
+    loadMore,
+    retry,
+  } = useSourceItems(drilldown, scope, search, listRefreshKey);
 
   // The source's dataset types decide whether its queries wait for the user, as on the Logs page.
   // A type that isn't registered (yet) is read as waiting: its queries may be billed, so the page
@@ -111,7 +120,8 @@ export const SourceRowsView: React.FC<Props> = ({
   itemsRef.current = itemsById;
   const refreshKeyRef = useRef(refreshKey);
   refreshKeyRef.current = refreshKey;
-  const scopeKey = JSON.stringify(scope);
+  // Key-sorted, like the URL keeps it: a scope read back from `_a` is the same scope.
+  const scopeKey = stableKey(scope);
 
   const fetchFn = useCallback(
     async (key: string, signal: AbortSignal): Promise<SourceCardResult> => {
@@ -119,7 +129,9 @@ export const SourceRowsView: React.FC<Props> = ({
       if (!item) throw new Error(`Unknown item ${key}`);
       const bounds = services.data.query.timefilter.timefilter.getBounds();
       return runSourceCard({
+        services,
         drilldown,
+        datasetTypes: sourceType.datasetTypes,
         scope,
         item,
         from: bounds.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
@@ -130,7 +142,7 @@ export const SourceRowsView: React.FC<Props> = ({
     },
     // `scopeKey` stands for `scope`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [drilldown, scopeKey, services.data.query.timefilter.timefilter]
+    [drilldown, scopeKey, services, sourceType.datasetTypes]
   );
 
   // A source that runs on its own runs cards as they scroll into view, and again on every time
@@ -156,23 +168,63 @@ export const SourceRowsView: React.FC<Props> = ({
     return { result, error: runError, loading: !result && !runError };
   };
 
-  // The ticked items themselves (not only their ids), so a tick a search hides still counts and
-  // still opens: the button and the handoff always mean every ticked item. Cleared on a scope change.
-  const [checked, setChecked] = useState<Map<string, SourceTypeLogsDrilldownItem>>(new Map());
-  useEffect(() => setChecked(new Map()), [scopeKey]);
-  const toggleChecked = useCallback((item: SourceTypeLogsDrilldownItem) => {
-    setChecked((prev) => {
-      const next = new Map(prev);
-      if (next.has(item.id)) next.delete(item.id);
-      else next.set(item.id, item);
-      return next;
-    });
+  // Stable per-item callbacks for the memoized cards.
+  const explicitRunRef = useRef(explicitRun);
+  explicitRunRef.current = explicitRun;
+  const autoRef = useRef(auto);
+  autoRef.current = auto;
+  const explicitRef = useRef(explicit);
+  explicitRef.current = explicit;
+  const onRun = useCallback((itemId: string) => {
+    if (explicitRunRef.current) explicitRef.current.run(itemId);
+    else autoRef.current.invalidate(itemId);
+  }, []);
+  const onVisibilityChange = useCallback((itemId: string, visible: boolean) => {
+    if (!explicitRunRef.current) autoRef.current.onVisibilityChange(itemId, visible);
   }, []);
 
+  // The ticked items themselves (not only their ids), so a tick a search hides still counts and
+  // still opens: the button and the handoff always mean every ticked item. Cleared on a scope
+  // change. Never more than the source's `maxSelection`, whatever the checkboxes allow.
+  const [checked, setChecked] = useState<Map<string, SourceTypeLogsDrilldownItem>>(new Map());
+  useEffect(() => setChecked(new Map()), [scopeKey]);
+  const maxSelection = drilldown.maxSelection;
+  const toggleChecked = useCallback(
+    (item: SourceTypeLogsDrilldownItem) => {
+      setChecked((prev) => {
+        if (prev.has(item.id)) {
+          const next = new Map(prev);
+          next.delete(item.id);
+          return next;
+        }
+        if (maxSelection !== undefined && prev.size >= maxSelection) return prev;
+        return new Map(prev).set(item.id, item);
+      });
+    },
+    [maxSelection]
+  );
+
+  const toasts = services.notifications.toasts;
+  const [opening, setOpening] = useState(false);
+  const openingRef = useRef(false);
   const openInLogs = useCallback(
     async (selected: SourceTypeLogsDrilldownItem[]) => {
+      // One open at a time: a second click while one is opening does nothing.
+      if (openingRef.current) return;
+      openingRef.current = true;
+      setOpening(true);
       try {
-        const dataset = await drilldown.toDataset({ scope, items: selected });
+        const limited =
+          maxSelection === undefined ? selected : selected.slice(0, Math.max(maxSelection, 0));
+        const dataset = await drilldown.toDataset({ scope, items: limited });
+        if (!dataset || !sourceType.datasetTypes.includes(dataset.type)) {
+          throw new Error(
+            i18n.translate('explore.logsDrilldown.source.wrongDatasetType', {
+              defaultMessage: 'The source returned a dataset of another type ({type}).',
+              values: { type: dataset?.type ?? '' },
+            })
+          );
+        }
         const datasetService = services.data.query.queryString.getDatasetService();
         try {
           await datasetService.cacheDataset(
@@ -186,8 +238,15 @@ export const SourceRowsView: React.FC<Props> = ({
             },
             false
           );
-        } catch {
-          // Non-fatal: the Logs page resolves the dataset through its type.
+        } catch (cacheError) {
+          // The Logs page can still resolve the dataset through its type, but say what happened
+          // in case it can't.
+          toasts.addWarning({
+            title: i18n.translate('explore.logsDrilldown.source.cacheFailed', {
+              defaultMessage: "The selection's fields couldn't be loaded",
+            }),
+            text: cacheError instanceof Error ? cacheError.message : String(cacheError),
+          });
         }
         const query = services.data.query.queryString.getInitialQueryByDataset(dataset);
         services.data.query.queryString.setQuery(query);
@@ -202,26 +261,29 @@ export const SourceRowsView: React.FC<Props> = ({
           path: `#/?_q=${encodeURIComponent(rison.encode(urlQuery as Record<string, any>))}`,
         });
       } catch (e) {
-        services.notifications.toasts.addDanger({
+        toasts.addDanger({
           title: i18n.translate('explore.logsDrilldown.source.openFailed', {
             defaultMessage: 'Could not open the selection in Logs',
           }),
           text: e instanceof Error ? e.message : String(e),
         });
+      } finally {
+        openingRef.current = false;
+        setOpening(false);
       }
     },
     // `scopeKey` stands for `scope`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [drilldown, scopeKey, services]
+    [drilldown, scopeKey, services, sourceType.datasetTypes, maxSelection, toasts]
   );
 
   // The source's limit on one dataset: past it, unticked cards can't be ticked (as the Logs page's
   // log group selector stops at its limit).
   const selectionFull =
-    drilldown.maxSelection !== undefined && checked.size >= drilldown.maxSelection
+    maxSelection !== undefined && checked.size >= maxSelection
       ? i18n.translate('explore.logsDrilldown.source.selectionFull', {
           defaultMessage: 'You can open at most {max} at once.',
-          values: { max: drilldown.maxSelection },
+          values: { max: maxSelection },
         })
       : undefined;
 
@@ -238,20 +300,23 @@ export const SourceRowsView: React.FC<Props> = ({
             onClick: () => {
               openInLogs(selected);
             },
+            isLoading: opening,
           }
         : null
     );
-  }, [checked, openInLogs, onBatchActionChange]);
+  }, [checked, openInLogs, onBatchActionChange, opening]);
   useEffect(() => () => onBatchActionChange(null), [onBatchActionChange]);
 
-  const [grouping, setGrouping] = useState<Grouping>(Grouping.ALPHABETICAL);
+  const [grouping, setGrouping] = useState<SourceGrouping>(SourceGrouping.ALPHABETICAL);
   const groups = useMemo((): Array<[string, SourceTypeLogsDrilldownItem[]]> => {
     const sorted = [...items].sort((a, b) => a.name.localeCompare(b.name));
-    if (grouping !== Grouping.PREFIX || !drilldown.groupOf) return [['', sorted]];
+    if (grouping !== SourceGrouping.PREFIX || !drilldown.groupOf) return [['', sorted]];
     const byGroup = new Map<string, SourceTypeLogsDrilldownItem[]>();
     for (const item of sorted) {
-      const group = drilldown.groupOf(item) || '';
-      byGroup.set(group, [...(byGroup.get(group) ?? []), item]);
+      const group = groupOfSafely(drilldown.groupOf, item);
+      let members = byGroup.get(group);
+      if (!members) byGroup.set(group, (members = []));
+      members.push(item);
     }
     return Array.from(byGroup.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [items, grouping, drilldown]);
@@ -348,20 +413,20 @@ export const SourceRowsView: React.FC<Props> = ({
               buttonSize="compressed"
               options={[
                 {
-                  id: Grouping.ALPHABETICAL,
+                  id: SourceGrouping.ALPHABETICAL,
                   label: i18n.translate('explore.logsDrilldown.source.groupingAlphabetical', {
                     defaultMessage: 'A-Z',
                   }),
                 },
                 {
-                  id: Grouping.PREFIX,
+                  id: SourceGrouping.PREFIX,
                   label: i18n.translate('explore.logsDrilldown.source.groupingPrefix', {
                     defaultMessage: 'Prefix',
                   }),
                 },
               ]}
               idSelected={grouping}
-              onChange={(id) => setGrouping(id as Grouping)}
+              onChange={(id) => setGrouping(id as SourceGrouping)}
               data-test-subj="logsDrilldownSourceGrouping"
             />
           </EuiFlexItem>
@@ -391,7 +456,7 @@ export const SourceRowsView: React.FC<Props> = ({
                   services={services}
                   item={item}
                   icon={sourceType.icon}
-                  hasHistogram={!!drilldown.fetchHistogram}
+                  hasHistogram={!!drilldown.buildHistogramQuery}
                   explicitRun={explicitRun}
                   result={result}
                   error={cardError}
@@ -399,11 +464,9 @@ export const SourceRowsView: React.FC<Props> = ({
                   stale={explicitRun && !!result && result.ranWith !== refreshKey}
                   checked={checked.has(item.id)}
                   checkDisabledReason={selectionFull}
-                  onToggleCheck={() => toggleChecked(item)}
-                  onRun={() => (explicitRun ? explicit.run(item.id) : auto.invalidate(item.id))}
-                  onVisibilityChange={(visible) => {
-                    if (!explicitRun) auto.onVisibilityChange(item.id, visible);
-                  }}
+                  onToggleCheck={toggleChecked}
+                  onRun={onRun}
+                  onVisibilityChange={onVisibilityChange}
                   onBrushTime={onBrushTime}
                 />
                 <EuiSpacer size="s" />
@@ -419,6 +482,17 @@ export const SourceRowsView: React.FC<Props> = ({
             {i18n.translate('explore.logsDrilldown.source.retry', { defaultMessage: 'Retry' })}
           </EuiButton>
         </EuiCallOut>
+      )}
+      {capped && (
+        <EuiCallOut
+          size="s"
+          iconType="iInCircle"
+          data-test-subj="logsDrilldownSourceCapped"
+          title={i18n.translate('explore.logsDrilldown.source.capped', {
+            defaultMessage: 'Showing the first {max}. Search to narrow the list and find the rest.',
+            values: { max: SOURCE_LIST_MAX_ITEMS },
+          })}
+        />
       )}
       {nextToken && !error && (
         <EuiFlexGroup justifyContent="center">

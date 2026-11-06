@@ -106,15 +106,24 @@ jest.mock('../../../services/source_type_registry', () => ({
 }));
 
 const timeUpdate$ = new Subject<void>();
+/** Sorts object keys at every level, as rison does when `_a` goes through the URL. */
+const risonOrder = (value: any): any =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? Object.keys(value)
+        .sort()
+        .reduce((sorted: any, key) => ({ ...sorted, [key]: risonOrder(value[key]) }), {})
+    : value;
+
 const makeUrlStateStorage = (
   initial: Record<string, any> = {},
-  { syncChanges = false }: { syncChanges?: boolean } = {}
+  { syncChanges = false, sortKeys = false }: { syncChanges?: boolean; sortKeys?: boolean } = {}
 ) => {
   const store: Record<string, any> = { ...initial };
   const changes = new Subject<any>();
   return {
     get: jest.fn((key: string) => store[key] ?? null),
-    set: jest.fn((key: string, value: any) => {
+    set: jest.fn((key: string, written: any) => {
+      const value = sortKeys ? risonOrder(written) : written;
       store[key] = value;
       // Like the real storage, the change comes back a microtask later; `syncChanges` reports it
       // before React re-renders (the window where the page's state lags the URL).
@@ -130,10 +139,11 @@ const makeUrlStateStorage = (
     store,
   };
 };
-const makeServices = (urlStateStorage?: any) =>
+const makeServices = (urlStateStorage?: any, { mds = false }: { mds?: boolean } = {}) =>
   ({
     chrome: { setBreadcrumbs: jest.fn() },
-    dataSourceManagement: undefined,
+    // MDS on: the data source picker exists, and the OpenSearch list waits for it to resolve.
+    dataSourceManagement: mds ? { ui: { DataSourceSelector: () => null } } : undefined,
     savedObjects: { client: { find: jest.fn().mockResolvedValue({ total: 1 }) } },
     uiSettings: { get: jest.fn() },
     osdUrlStateStorage: urlStateStorage,
@@ -286,6 +296,80 @@ describe('LogsDrilldownPage source types', () => {
     });
     act(() => url.external({ sourceType: 'fake-logs', scope: { region: 'b-2' } }));
     expect(screen.getByPlaceholderText('Search fake groups…')).toHaveValue('');
+  });
+
+  it('reads its own write of a two-key scope back as the same scope (rison sorts keys)', async () => {
+    const TwoKeyScope = ({ scope, onChange }: any) => {
+      React.useEffect(() => {
+        if (!scope) onChange({ region: 'us-east-1', accountId: '123' });
+      }, [scope, onChange]);
+      return null;
+    };
+    mockRegistered = [
+      mockOpenSearch,
+      {
+        ...mockFakeSource,
+        logsDrilldown: { ...mockFakeSource.logsDrilldown, ScopeSelector: TwoKeyScope },
+      },
+    ];
+    const url = makeUrlStateStorage({}, { sortKeys: true });
+    render(<LogsDrilldownPage services={makeServices(url)} />);
+    fireEvent.click(screen.getByTestId('pick-fake-logs'));
+    const scopeBefore = lastSourceRowsProps.scope;
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // The URL now holds `{ accountId, region }`; the page keeps its own scope object.
+    expect(url.store._a.scope).toEqual({ accountId: '123', region: 'us-east-1' });
+    expect(lastSourceRowsProps.scope).toBe(scopeBefore);
+  });
+
+  describe('with MDS on', () => {
+    it('comes back to OpenSearch on the data source in use, resolved, after another source', () => {
+      const url = makeUrlStateStorage({ _a: { dataSource: { id: 'ds-1', title: 'one' } } });
+      render(<LogsDrilldownPage services={makeServices(url, { mds: true })} />);
+      expect(screen.getByTestId('mock-rows-view')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('pick-fake-logs'));
+      fireEvent.click(screen.getByTestId('pick-opensearch'));
+      expect(lastDataSourceControlProps.defaultDataSourceId).toBe('ds-1');
+      expect(screen.getByTestId('mock-rows-view')).toBeInTheDocument();
+    });
+
+    it("doesn't list an outside data source until the picker confirms it", () => {
+      const url = makeUrlStateStorage({ _a: { dataSource: { id: 'ds-1', title: 'one' } } });
+      render(<LogsDrilldownPage services={makeServices(url, { mds: true })} />);
+      const mountsBefore = mockDataSourceControlMounts;
+      act(() => url.external({ dataSource: { id: 'ds-gone', title: 'gone' } }));
+      // Remounted to validate the id, and the indexes wait for its answer.
+      expect(mockDataSourceControlMounts).toBe(mountsBefore + 1);
+      expect(lastDataSourceControlProps.defaultDataSourceId).toBe('ds-gone');
+      expect(screen.queryByTestId('mock-rows-view')).not.toBeInTheDocument();
+      // The picker falls back to a data source that exists.
+      fireEvent.click(screen.getByTestId('mock-data-source-control'));
+      expect(screen.getByTestId('mock-rows-view')).toBeInTheDocument();
+    });
+  });
+
+  it("keeps the page when the source's scope picker throws", () => {
+    const failing = {
+      ...mockFakeSource,
+      logsDrilldown: {
+        ...mockFakeSource.logsDrilldown,
+        ScopeSelector: () => {
+          throw new Error('picker broke');
+        },
+      },
+    };
+    mockRegistered = [mockOpenSearch, failing];
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      render(<LogsDrilldownPage services={makeServices(makeUrlStateStorage())} />);
+      fireEvent.click(screen.getByTestId('pick-fake-logs'));
+      expect(screen.getByTestId('logsDrilldownPage')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-source-type-control')).toBeInTheDocument();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('keeps the data source in the URL when switching source types', () => {

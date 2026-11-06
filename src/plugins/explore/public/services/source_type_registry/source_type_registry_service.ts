@@ -234,7 +234,8 @@ export interface SourceTypeDefinition {
 
 /**
  * Where the Explore logs page lists a source's items, e.g. a region. JSON-safe: the page keeps it
- * in its URL (`_a`), so it survives a reload and can be shared.
+ * in its URL (`_a`) and the tab's session, so it survives a reload and can be shared. That also
+ * makes it user input: validate it before use, as any value from a URL.
  */
 export type SourceTypeLogsDrilldownScope = Record<string, unknown>;
 
@@ -244,8 +245,9 @@ export interface SourceTypeLogsDrilldownScopeSelectorProps {
   scope?: SourceTypeLogsDrilldownScope;
   /**
    * Call with the scope to list. When `scope` is undefined on mount, call it once with a default
-   * (as the data source picker auto-selects one), or the page waits for the user to pick one. Never
-   * replace a `scope` the page passed in: it may come from a shared link.
+   * (as the data source picker auto-selects one), or the page waits for the user to pick one. Keep
+   * a valid `scope` the page passed in as is: it may come from a shared link. A scope that's no
+   * longer valid (e.g. it names a connection that was removed) may be replaced with a valid one.
    */
   onChange: (scope: SourceTypeLogsDrilldownScope) => void;
   data: DataPublicPluginStart;
@@ -290,21 +292,12 @@ export interface SourceTypeLogsDrilldownItemPage {
   nextToken?: string;
 }
 
-/** What the page passes to a source's preview and histogram calls. */
+/** What the page passes to a source's preview and histogram query builders. */
 export interface SourceTypeLogsDrilldownQueryArgs {
   scope: SourceTypeLogsDrilldownScope;
   item: SourceTypeLogsDrilldownItem;
-  /** The page's time range, as epoch milliseconds. */
-  from: number;
-  to: number;
-  signal: AbortSignal;
-}
-
-/** Events over time for a card's histogram, one series per severity (or a single `count`). */
-export interface SourceTypeLogsDrilldownHistogram {
-  series: Array<{ name: string; dataPoints: Array<[number, number]> }>;
-  /** The bucket width in milliseconds. */
-  intervalMs: number;
+  /** The item's own dataset (`toDataset` with this item alone), which the query runs on. */
+  dataset: Dataset;
 }
 
 /**
@@ -331,20 +324,27 @@ export interface SourceTypeLogsDrilldown {
     scope: SourceTypeLogsDrilldownScope;
     search: string;
     nextToken?: string;
+    /** At most this many items per page; the page keeps only this many of a longer page. */
+    pageSize: number;
     signal: AbortSignal;
   }): Promise<SourceTypeLogsDrilldownItemPage>;
   /**
-   * Events in the time range (at most `size`) as flat rows, newest first. A source may return a
-   * sample rather than the newest events where reading the newest would cost more (e.g. a scan of
-   * the whole range).
+   * A card's preview query, in the dataset's language: at most `size` events in the page's time
+   * range, newest first. A source may ask for a sample rather than the newest events where reading
+   * the newest would cost more (e.g. a scan of the whole range). The page runs it through the data
+   * plugin's search service on `dataset` (the language's search interceptor, as on the Logs page),
+   * keeps at most `size` rows, and shows them in the order returned.
    */
-  fetchPreview(
-    args: SourceTypeLogsDrilldownQueryArgs & { size: number }
-  ): Promise<{ rows: Array<Record<string, unknown>> }>;
-  /** Event counts over the time range. Omit to show cards without a histogram. */
-  fetchHistogram?(
-    args: SourceTypeLogsDrilldownQueryArgs
-  ): Promise<SourceTypeLogsDrilldownHistogram>;
+  buildPreviewQuery(args: SourceTypeLogsDrilldownQueryArgs & { size: number }): string;
+  /**
+   * A card's histogram query, in the dataset's language: event counts per `interval` bucket over
+   * the page's time range, returning the columns named by {@link SourceTypeHistogramColumns}. The
+   * page picks `interval` (in the form Explore's histogram uses, e.g. `30s`, `5m`, `1d`) for about
+   * 20 bars, and runs it like the preview. Return undefined (or omit this) for no histogram.
+   */
+  buildHistogramQuery?(
+    args: SourceTypeLogsDrilldownQueryArgs & { interval: string; timeFieldName: string }
+  ): string | undefined;
   /**
    * The most items one dataset can hold (e.g. how many log groups one query scans). The page stops
    * further ticks at this many. Omit for no limit.

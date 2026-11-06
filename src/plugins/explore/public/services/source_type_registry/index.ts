@@ -15,7 +15,6 @@ export {
   SourceTypeLanguageSettings,
   SourceTypeLogsDrilldown,
   SourceTypeLogsDrilldownEmptyStateProps,
-  SourceTypeLogsDrilldownHistogram,
   SourceTypeLogsDrilldownItem,
   SourceTypeLogsDrilldownItemPage,
   SourceTypeLogsDrilldownQueryArgs,

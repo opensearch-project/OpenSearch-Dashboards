@@ -41,28 +41,70 @@ const installIntersectionObserver = () => {
   return FakeIntersectionObserver.callbacks;
 };
 
-const makeDrilldown = (overrides: Record<string, unknown> = {}) => ({
-  ScopeSelector: () => null,
-  listItems: jest.fn().mockResolvedValue({
-    items: [
-      { id: '/aws/lambda/a', name: '/aws/lambda/a', details: [{ label: 'Size', value: '1 MB' }] },
-      { id: '/aws/ecs/b', name: '/aws/ecs/b' },
-    ],
-    nextToken: 'page-2',
-  }),
-  fetchPreview: jest.fn().mockResolvedValue({ rows: [{ '@timestamp': '2026-11-05', msg: 'hi' }] }),
-  fetchHistogram: jest.fn().mockResolvedValue({
-    series: [{ name: 'count', dataPoints: [[1000, 3]] }],
-    intervalMs: 1000,
-  }),
-  toDataset: jest.fn().mockResolvedValue({ id: 'd', title: 'd', type: 'FAKE_LOGS' }),
-  groupOf: (item: { name: string }) => item.name.split('/').slice(0, 3).join('/') + '/',
-  ...overrides,
-});
+/*
+ * The page runs a card's queries through the data plugin's search service. The fake search source
+ * below answers by query text, through these runners, so a test can count and fail each kind:
+ * `fetchPreview` for the preview query, `fetchHistogram` for the histogram query (rows either way).
+ */
+let mockRunners: { fetchPreview: jest.Mock; fetchHistogram: jest.Mock } = {
+  fetchPreview: jest.fn(),
+  fetchHistogram: jest.fn(),
+};
+
+const makeDrilldown = (overrides: Record<string, any> = {}) => {
+  const drilldown = {
+    ScopeSelector: () => null,
+    listItems: jest.fn().mockResolvedValue({
+      items: [
+        { id: '/aws/lambda/a', name: '/aws/lambda/a', details: [{ label: 'Size', value: '1 MB' }] },
+        { id: '/aws/ecs/b', name: '/aws/ecs/b' },
+      ],
+      nextToken: 'page-2',
+    }),
+    fetchPreview: jest
+      .fn()
+      .mockResolvedValue({ rows: [{ '@timestamp': '2026-11-05', msg: 'hi' }] }),
+    fetchHistogram: jest.fn().mockResolvedValue({ rows: [{ '@timestamp': 1000, count: 3 }] }),
+    buildPreviewQuery: jest.fn(() => 'PREVIEW'),
+    buildHistogramQuery: jest.fn(() => 'HISTOGRAM'),
+    toDataset: jest.fn().mockResolvedValue({
+      id: 'd',
+      title: 'd',
+      type: 'FAKE_LOGS',
+      language: 'FAKE_QL',
+      timeFieldName: '@timestamp',
+    }),
+    groupOf: (item: { name: string }) => item.name.split('/').slice(0, 3).join('/') + '/',
+    ...overrides,
+  };
+  mockRunners = { fetchPreview: drilldown.fetchPreview, fetchHistogram: drilldown.fetchHistogram };
+  return drilldown;
+};
+
+const makeSearchSource = () => {
+  let fields: any = {};
+  return {
+    setFields: (next: any) => {
+      fields = next;
+    },
+    fetch: async ({ abortSignal }: { abortSignal: AbortSignal }) => {
+      const runner =
+        fields.query.query === 'PREVIEW' ? mockRunners.fetchPreview : mockRunners.fetchHistogram;
+      const { rows } = await runner({
+        query: fields.query,
+        size: fields.size,
+        signal: abortSignal,
+      });
+      return { hits: { hits: rows.map((row: unknown) => ({ _source: row })) } };
+    },
+  };
+};
 
 const makeServices = () =>
   ({
     data: {
+      dataViews: { get: jest.fn().mockResolvedValue({ id: 'd' }) },
+      search: { searchSource: { create: jest.fn(async () => makeSearchSource()) } },
       query: {
         queryString: {
           getDatasetService: () => ({
@@ -83,7 +125,7 @@ const makeServices = () =>
       },
     },
     core: { application: { navigateToApp: jest.fn() } },
-    notifications: { toasts: { addDanger: jest.fn() } },
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
     uiSettings: {},
     savedObjects: {},
     http: {},
@@ -143,11 +185,21 @@ describe('SourceRowsView', () => {
       await screen.findByTestId('logsDrilldownSourceCardLogs-/aws/lambda/a')
     ).toHaveTextContent('hi');
     expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
-    expect(drilldown.fetchPreview).toHaveBeenCalledWith(
+    // The source builds the query for the item's own dataset; the page runs it through search.
+    expect(drilldown.buildPreviewQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         item: expect.objectContaining({ id: '/aws/lambda/a' }),
-        from: 0,
-        to: 2000,
+        dataset: expect.objectContaining({ type: 'FAKE_LOGS' }),
+        size: 10,
+      })
+    );
+    expect(drilldown.toDataset).toHaveBeenCalledWith({
+      scope: { region: 'us-east-1' },
+      items: [expect.objectContaining({ id: '/aws/lambda/a' })],
+    });
+    expect(drilldown.fetchPreview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ query: 'PREVIEW', language: 'FAKE_QL' }),
         size: 10,
       })
     );
@@ -257,6 +309,67 @@ describe('SourceRowsView', () => {
     expect(path).toMatch(/^#\/\?_q=/);
     expect(decodeURIComponent(path)).toContain('type:FAKE_LOGS');
     expect(drilldown.fetchPreview).not.toHaveBeenCalled();
+  });
+
+  const tickAndOpen = async (drilldown: any) => {
+    const view = renderView(drilldown);
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-/aws/ecs/b'));
+    const action =
+      view.onBatchActionChange.mock.calls[view.onBatchActionChange.mock.calls.length - 1][0];
+    return { ...view, action };
+  };
+
+  it("refuses a dataset of another source's type, with a toast", async () => {
+    const drilldown = makeDrilldown({
+      toDataset: jest.fn().mockResolvedValue({ id: 'x', title: 'x', type: 'OTHER' }),
+    });
+    const { services, action } = await tickAndOpen(drilldown);
+    await act(async () => action.onClick());
+    expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(services.core.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('opens once for a double click', async () => {
+    let answer: (value: unknown) => void = () => {};
+    const drilldown = makeDrilldown({
+      toDataset: jest.fn(() => new Promise((resolve) => (answer = resolve))),
+    });
+    const { services, action } = await tickAndOpen(drilldown);
+    act(() => {
+      action.onClick();
+      action.onClick();
+    });
+    await act(async () => answer({ id: 'd', title: 'd', type: 'FAKE_LOGS', language: 'FAKE_QL' }));
+    expect(drilldown.toDataset).toHaveBeenCalledTimes(1);
+    expect(services.core.application.navigateToApp).toHaveBeenCalledTimes(1);
+  });
+
+  it("warns when the selection's fields can't be loaded, and still opens it", async () => {
+    const drilldown = makeDrilldown();
+    const { services, action } = await tickAndOpen(drilldown);
+    services.data.query.queryString.getDatasetService = () => ({
+      cacheDataset: jest.fn().mockRejectedValue(new Error('no fields')),
+      getType: () => ({ meta: { requiresExplicitRun: true } }),
+    });
+    await act(async () => action.onClick());
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'no fields' })
+    );
+    expect(services.core.application.navigateToApp).toHaveBeenCalled();
+  });
+
+  it("keeps an item whose group can't be computed, in no group", async () => {
+    const drilldown = makeDrilldown({
+      groupOf: (item: { name: string }) => {
+        if (item.name.includes('ecs')) throw new Error('bad');
+        return '/aws/lambda/';
+      },
+    });
+    renderView(drilldown);
+    await screen.findByTestId('logsDrilldownSourceRows');
+    fireEvent.click(screen.getByTestId('prefix'));
+    expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
+    expect(screen.getByText('/aws/lambda/ (1)')).toBeInTheDocument();
   });
 
   it('shows a listing failure with a Retry', async () => {
@@ -429,6 +542,7 @@ describe('SourceRowsView', () => {
     let resolveList: (page: unknown) => void = () => {};
     drilldown.listItems.mockReturnValueOnce(new Promise((resolve) => (resolveList = resolve)));
     rerender(viewWith(drilldown, services, onBatchActionChange, { listRefreshKey: 1 }));
+    await flush();
     expect(drilldown.listItems).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
     await act(async () => resolveList({ items: [{ id: 'new', name: 'new' }] }));

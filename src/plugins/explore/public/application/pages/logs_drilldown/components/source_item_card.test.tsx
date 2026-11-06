@@ -58,7 +58,7 @@ describe('SourceItemCard', () => {
     expect(screen.getByTestId('logsDrilldownSourceCardDetails-g')).not.toHaveTextContent('Empty');
     expect(screen.getByTestId('logsDrilldownSourceCardIdle-g')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('logsDrilldownSourceCardRun-g'));
-    expect(onRun).toHaveBeenCalled();
+    expect(onRun).toHaveBeenCalledWith('g');
   });
 
   it('shows the events and histogram after a run, and offers Run again', () => {

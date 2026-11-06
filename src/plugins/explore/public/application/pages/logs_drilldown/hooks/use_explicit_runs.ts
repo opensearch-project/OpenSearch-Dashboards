@@ -4,10 +4,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { EXPLICIT_RUN_CONCURRENCY } from '../constants';
 
 export interface ExplicitRun<T> {
   result?: T;
   error?: string;
+  /** Errors are kept as is too, so a card can read more than the message (status, name). */
+  errorCause?: unknown;
+  /** Running, or waiting for a free slot (see `concurrency`). */
   running: boolean;
 }
 
@@ -17,21 +21,32 @@ const messageOf = (error: unknown) =>
 /**
  * Per-card runs that start only when `run(key)` is called, for sources whose queries wait for the
  * user. Unlike the viewport scheduler, nothing ever runs on its own: not on scroll, not on a reset.
- * A new run of a card aborts its previous one and keeps the old result on screen until it answers.
- * Everything is aborted and forgotten when `resetKey` changes or on unmount.
+ * At most `concurrency` run at once; more Run presses wait their turn (a run can start several
+ * billed queries, and async backends cap concurrent queries). A new run of a card replaces its
+ * previous one (aborting it) and keeps the old result on screen until it answers. Everything is
+ * aborted and forgotten when `resetKey` changes or on unmount.
  */
 export const useExplicitRuns = <T>(
   fetchFn: (key: string, signal: AbortSignal) => Promise<T>,
-  resetKey: string
+  resetKey: string,
+  concurrency = EXPLICIT_RUN_CONCURRENCY
 ) => {
   const [runs, setRuns] = useState<Map<string, ExplicitRun<T>>>(new Map());
   const controllers = useRef(new Map<string, AbortController>());
+  const queue = useRef<string[]>([]);
   const fetchRef = useRef(fetchFn);
   fetchRef.current = fetchFn;
+
+  const update = useCallback(
+    (key: string, next: (prev?: ExplicitRun<T>) => ExplicitRun<T>) =>
+      setRuns((prev) => new Map(prev).set(key, next(prev.get(key)))),
+    []
+  );
 
   const abortAll = useCallback(() => {
     controllers.current.forEach((controller) => controller.abort());
     controllers.current.clear();
+    queue.current = [];
   }, []);
 
   useEffect(() => {
@@ -40,18 +55,11 @@ export const useExplicitRuns = <T>(
     return abortAll;
   }, [resetKey, abortAll]);
 
-  const update = useCallback(
-    (key: string, next: (prev?: ExplicitRun<T>) => ExplicitRun<T>) =>
-      setRuns((prev) => new Map(prev).set(key, next(prev.get(key)))),
-    []
-  );
-
-  const run = useCallback(
-    (key: string) => {
-      controllers.current.get(key)?.abort();
+  const startNext = useCallback(() => {
+    while (controllers.current.size < concurrency && queue.current.length) {
+      const key = queue.current.shift()!;
       const controller = new AbortController();
       controllers.current.set(key, controller);
-      update(key, (prev) => ({ ...prev, running: true, error: undefined }));
       fetchRef
         .current(key, controller.signal)
         .then((result) => {
@@ -63,14 +71,26 @@ export const useExplicitRuns = <T>(
           update(key, (prev) => ({
             result: prev?.result,
             error: messageOf(error),
+            errorCause: error,
             running: false,
           }));
         })
         .finally(() => {
           if (controllers.current.get(key) === controller) controllers.current.delete(key);
+          startNext();
         });
+    }
+  }, [concurrency, update]);
+
+  const run = useCallback(
+    (key: string) => {
+      controllers.current.get(key)?.abort();
+      controllers.current.delete(key);
+      queue.current = [...queue.current.filter((queued) => queued !== key), key];
+      update(key, (prev) => ({ ...prev, running: true, error: undefined, errorCause: undefined }));
+      startNext();
     },
-    [update]
+    [update, startNext]
   );
 
   return { runs, run };

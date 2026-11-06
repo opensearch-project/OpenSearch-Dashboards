@@ -36,7 +36,7 @@ let mockResults = new Map<string, any>();
 // Capture the fetchFn RowsView passes to the scheduler so a test can invoke it directly (the stub
 // otherwise never runs it) — used to exercise the per-card fetch error → permission-toast wiring.
 let capturedFetchFn: ((key: string, signal: AbortSignal) => Promise<any>) | undefined;
-jest.mock('../../metrics/explore/hooks/use_concurrent_queries', () => ({
+jest.mock('../../../utils/hooks/use_concurrent_queries', () => ({
   useConcurrentQueries: (fetchFn: (key: string, signal: AbortSignal) => Promise<any>) => {
     capturedFetchFn = fetchFn;
     return {
