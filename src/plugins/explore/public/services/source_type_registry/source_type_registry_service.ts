@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { Dataset } from '../../../../data/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import {
@@ -225,6 +225,137 @@ export interface SourceTypeDefinition {
    * translated sentence.
    */
   metricsEmptyHint?: string;
+  /**
+   * Offers this source on the Explore logs page (the logs drilldown), next to OpenSearch's indexes.
+   * Omit it to keep the source off that page. Applies to sources offered on the Logs flavor.
+   */
+  logsDrilldown?: SourceTypeLogsDrilldown;
+}
+
+/**
+ * Where the Explore logs page lists a source's items, e.g. a region. JSON-safe: the page keeps it
+ * in its URL (`_a`), so it survives a reload and can be shared.
+ */
+export type SourceTypeLogsDrilldownScope = Record<string, unknown>;
+
+/** Props the Explore logs page passes to a source's scope picker. */
+export interface SourceTypeLogsDrilldownScopeSelectorProps {
+  /** The scope in use; undefined until the picker reports one. */
+  scope?: SourceTypeLogsDrilldownScope;
+  /**
+   * Call with the scope to list. Call it once on mount with a default (as the data source picker
+   * auto-selects one), or the page waits for the user to pick one.
+   */
+  onChange: (scope: SourceTypeLogsDrilldownScope) => void;
+  data: DataPublicPluginStart;
+}
+
+/**
+ * Props the Explore logs page passes to a source's empty state: shown when a scope lists nothing,
+ * or its listing failed with nothing listed yet.
+ */
+export interface SourceTypeLogsDrilldownEmptyStateProps {
+  scope: SourceTypeLogsDrilldownScope;
+  /** The search the listing ran with; empty for none. */
+  search: string;
+  /** What `listItems` rejected with, as is (status, body…); undefined when it listed nothing. */
+  error?: unknown;
+  /** Lists the scope again, like the page's Retry. */
+  onRefresh: () => void;
+  /** What the page shows here otherwise. Render it for any case the source doesn't handle. */
+  children: ReactNode;
+}
+
+/** One item the Explore logs page shows as a card, e.g. a log group. */
+export interface SourceTypeLogsDrilldownItem {
+  /** Unique within the scope; the page keys cards and selection on it. */
+  id: string;
+  name: string;
+  /** Free metadata shown on the card before anything runs, e.g. size or retention. */
+  details?: Array<{ label: string; value: string }>;
+  /** The time field of the item's events, shown on the card and used to read preview rows. */
+  timeFieldName?: string;
+  /** The field the item's events keep their level in, if any (colours preview lines). */
+  severityField?: string;
+}
+
+/** One page of a source's items. */
+export interface SourceTypeLogsDrilldownItemPage {
+  items: SourceTypeLogsDrilldownItem[];
+  /** Pass back to list the next page; undefined on the last page. */
+  nextToken?: string;
+}
+
+/** What the page passes to a source's preview and histogram calls. */
+export interface SourceTypeLogsDrilldownQueryArgs {
+  scope: SourceTypeLogsDrilldownScope;
+  item: SourceTypeLogsDrilldownItem;
+  /** The page's time range, as epoch milliseconds. */
+  from: number;
+  to: number;
+  signal: AbortSignal;
+}
+
+/** Events over time for a card's histogram, one series per severity (or a single `count`). */
+export interface SourceTypeLogsDrilldownHistogram {
+  series: Array<{ name: string; dataPoints: Array<[number, number]> }>;
+  /** The bucket width in milliseconds. */
+  intervalMs: number;
+}
+
+/**
+ * How the Explore logs page lists and previews a source's items. Listing must not run billed
+ * queries: the page lists on every scope and search change. Previews and histograms may: when the
+ * source's dataset type sets `meta.requiresExplicitRun`, the page runs them only when the user
+ * presses a card's Run button, and a later time range change marks the card stale instead of
+ * running it again. Otherwise cards run as they scroll into view, like OpenSearch's.
+ */
+export interface SourceTypeLogsDrilldown {
+  /** The page-level picker that sets the scope (replaces the data source picker). */
+  ScopeSelector: ComponentType<SourceTypeLogsDrilldownScopeSelectorProps>;
+  /** Placeholder for the page's search box, e.g. "Search log groups…". */
+  searchPlaceholder?: string;
+  /**
+   * One page of items for a scope, filtered by the search text (the page doesn't filter them
+   * again). Reject on failure: the page shows the error and a Retry.
+   */
+  listItems(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    search: string;
+    nextToken?: string;
+    signal: AbortSignal;
+  }): Promise<SourceTypeLogsDrilldownItemPage>;
+  /** The latest events (at most `size`) as flat rows, newest first. */
+  fetchPreview(
+    args: SourceTypeLogsDrilldownQueryArgs & { size: number }
+  ): Promise<{ rows: Array<Record<string, unknown>> }>;
+  /** Event counts over the time range. Omit to show cards without a histogram. */
+  fetchHistogram?(
+    args: SourceTypeLogsDrilldownQueryArgs
+  ): Promise<SourceTypeLogsDrilldownHistogram>;
+  /**
+   * The most items one dataset can hold (e.g. how many log groups one query scans). The page stops
+   * further ticks at this many. Omit for no limit.
+   */
+  maxSelection?: number;
+  /**
+   * The dataset the selected items open as on the Logs page. Set `language` on it: the Logs page
+   * switches to it. Its type must be one of the source's `datasetTypes`.
+   */
+  toDataset(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    items: SourceTypeLogsDrilldownItem[];
+  }): Promise<Dataset>;
+  /**
+   * The group an item belongs to for the page's Prefix grouping, e.g. `/aws/lambda/`. Omit to
+   * offer A–Z only.
+   */
+  groupOf?(item: SourceTypeLogsDrilldownItem): string;
+  /**
+   * Replaces the page's empty and listing-failed states with the source's own, e.g. why a region
+   * lists nothing and what to do. It gets the page's own state as `children`.
+   */
+  EmptyState?: ComponentType<SourceTypeLogsDrilldownEmptyStateProps>;
 }
 
 /** A time range as the metric browser passes it (date math, e.g. `now-15m`). */

@@ -5,7 +5,7 @@
 
 import './index.scss';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -24,9 +24,19 @@ import { MountPointPortal } from '../../../../../opensearch_dashboards_react/pub
 import { Dataset } from '../../../../../data/common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
+import { ExploreFlavor } from '../../../../common';
+import {
+  getSourceTypeRegistry,
+  OPENSEARCH_SOURCE_TYPE_ID,
+  SourceTypeDefinition,
+  SourceTypeLogsDrilldown,
+  SourceTypeLogsDrilldownScope,
+} from '../../../services/source_type_registry';
 import { ExploreServices } from '../../../types';
 import { DataSourceControl } from './components/data_source_control';
-import { RowsView, BatchAction } from './components/rows_view';
+import { RowsView } from './components/rows_view';
+import { SourceBatchAction, SourceRowsView } from './components/source_rows_view';
+import { SourceTypeControl } from './components/source_type_control';
 import { useIndexClassification } from './hooks/use_index_classification';
 import { resetPermissionToast } from './permission_toast';
 
@@ -36,6 +46,34 @@ const SEARCH_DEBOUNCE_MS = 300;
 // bare `#/` (no `_a`), so the URL alone can't survive re-entry — this sessionStorage fallback keeps
 // the last selection for the tab session. URL `_a` still wins when present (shareable/bookmarkable).
 const DATA_SOURCE_STORAGE_KEY = 'logsDrilldown.dataSource';
+// The same per-tab fallback for the source type and a registered source's scope.
+const SOURCE_TYPE_STORAGE_KEY = 'logsDrilldown.sourceType';
+const SOURCE_SCOPE_STORAGE_KEY = 'logsDrilldown.sourceScope';
+
+/** The page's `_a` URL state. */
+interface DrilldownAppState {
+  dataSource?: Dataset['dataSource'];
+  /** The source type id; absent means OpenSearch. */
+  sourceType?: string;
+  /** A registered source's scope (see `SourceTypeLogsDrilldownScope`). */
+  scope?: SourceTypeLogsDrilldownScope;
+}
+
+type DrilldownSourceType = SourceTypeDefinition & { logsDrilldown: SourceTypeLogsDrilldown };
+
+/** Sources offered on the page: OpenSearch, then registered Logs sources that support it. */
+const getDrilldownSourceTypes = (): SourceTypeDefinition[] => {
+  try {
+    return getSourceTypeRegistry()
+      .getAll(ExploreFlavor.Logs)
+      .filter(
+        (sourceType) => sourceType.id === OPENSEARCH_SOURCE_TYPE_ID || !!sourceType.logsDrilldown
+      );
+  } catch {
+    // No registry (e.g. the page rendered on its own in a test): OpenSearch only, no picker.
+    return [];
+  }
+};
 
 type Props = {
   services: ExploreServices;
@@ -60,11 +98,55 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   // when it's absent — as when the nav-popover / query-bar action opens the drilldown at a bare
   // `#/` — fall back to the per-tab session store so the last selection isn't lost on re-entry.
   const initialDataSource = useMemo<Dataset['dataSource'] | undefined>(() => {
-    const fromUrl = urlStateStorage?.get<{ dataSource?: Dataset['dataSource'] }>('_a')?.dataSource;
+    const fromUrl = urlStateStorage?.get<DrilldownAppState>('_a')?.dataSource;
     return fromUrl ?? sessionStore.get(DATA_SOURCE_STORAGE_KEY) ?? undefined;
     // Read once on mount; later changes are written out, not read back in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Merges a change into `_a`, so the data source, source type and scope don't overwrite each other.
+  const writeAppState = useCallback(
+    (patch: Partial<DrilldownAppState>) => {
+      const current = urlStateStorage?.get<DrilldownAppState>('_a') ?? {};
+      urlStateStorage?.set('_a', { ...current, ...patch }, { replace: true });
+    },
+    [urlStateStorage]
+  );
+
+  // The sources offered here. Read once: sources register by the time an app mounts.
+  const drilldownSourceTypes = useMemo(getDrilldownSourceTypes, []);
+
+  // The selected source type and, for a registered one, its scope. A URL with `_a` wins (no
+  // `sourceType` there means OpenSearch, e.g. a shared OpenSearch link); without `_a`, the per-tab
+  // store; then OpenSearch. An unknown id (a source no longer registered) falls back to OpenSearch.
+  const initialSource = useMemo(() => {
+    const appState = urlStateStorage?.get<DrilldownAppState>('_a');
+    const id: string | undefined = appState
+      ? appState.sourceType
+      : (sessionStore.get(SOURCE_TYPE_STORAGE_KEY) ?? undefined);
+    const known = drilldownSourceTypes.some((sourceType) => sourceType.id === id);
+    if (!id || !known || id === OPENSEARCH_SOURCE_TYPE_ID) {
+      return { id: OPENSEARCH_SOURCE_TYPE_ID, scope: undefined };
+    }
+    const scope: SourceTypeLogsDrilldownScope | undefined = appState
+      ? appState.scope
+      : (sessionStore.get(SOURCE_SCOPE_STORAGE_KEY) ?? undefined);
+    return { id, scope };
+    // Read once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [sourceTypeId, setSourceTypeId] = useState(initialSource.id);
+  const [sourceScope, setSourceScope] = useState<SourceTypeLogsDrilldownScope | undefined>(
+    initialSource.scope
+  );
+  const registeredSource = useMemo(
+    () =>
+      sourceTypeId === OPENSEARCH_SOURCE_TYPE_ID
+        ? undefined
+        : (drilldownSourceTypes.find((sourceType) => sourceType.id === sourceTypeId) as
+            DrilldownSourceType | undefined),
+    [sourceTypeId, drilldownSourceTypes]
+  );
 
   // Data source scoping the list (MDS). Local state, mirrored to the `_a` URL key.
   const [selectedDataSource, setSelectedDataSource] =
@@ -76,8 +158,14 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   // bare `#/`), seed it into the URL now so `_a` is authoritative immediately — shareable and
   // reload-safe without waiting for the picker to fire a change.
   useEffect(() => {
-    if (initialDataSource && !urlStateStorage?.get('_a')) {
-      urlStateStorage?.set('_a', { dataSource: initialDataSource }, { replace: true });
+    if (!urlStateStorage?.get('_a')) {
+      const seeded: DrilldownAppState = {
+        ...(initialDataSource ? { dataSource: initialDataSource } : {}),
+        ...(initialSource.id !== OPENSEARCH_SOURCE_TYPE_ID
+          ? { sourceType: initialSource.id, scope: initialSource.scope }
+          : {}),
+      };
+      if (Object.keys(seeded).length) urlStateStorage?.set('_a', seeded, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -152,7 +240,8 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   useDebounce(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS, [searchInput]);
 
   // The batch (multi-select) action RowsView reports up — drives the toolbar button.
-  const [batchAction, setBatchAction] = useState<BatchAction | null>(null);
+  // Only its label and onClick are read here, so OpenSearch's and a registered source's both fit.
+  const [batchAction, setBatchAction] = useState<SourceBatchAction | null>(null);
 
   // Reset the one-time "permission denied" toast whenever the data source changes: a different source
   // is a fresh permission context, so its own failures should be allowed to toast once.
@@ -175,6 +264,10 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   const [time, setTime] = useState(() => timefilter.getTime());
   useEffect(() => {
     const sub = timefilter.getTimeUpdate$().subscribe(() => setTime(timefilter.getTime()));
+    // The URL sync above runs first and may already have set the range from `_g` before this
+    // subscription existed; read it once, or the picker shows the old range while every card
+    // queries the URL's (which on a billed source scans more than the picker says).
+    setTime(timefilter.getTime());
     return () => sub.unsubscribe();
   }, [timefilter]);
 
@@ -212,12 +305,76 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
         : undefined;
       setSelectedDataSource(nextDataSource);
       // Persist to the `_a` URL key so the selection is restored on reload / shared via the URL.
-      urlStateStorage?.set('_a', { dataSource: nextDataSource }, { replace: true });
+      writeAppState({ dataSource: nextDataSource });
       // Also remember it per-tab so re-entry from a bare `#/` (nav-popover / query-bar) restores it.
       if (nextDataSource) sessionStore.set(DATA_SOURCE_STORAGE_KEY, nextDataSource);
       else sessionStore.remove(DATA_SOURCE_STORAGE_KEY);
     },
-    [urlStateStorage, sessionStore]
+    [writeAppState, sessionStore]
+  );
+
+  // Follow `_a` changes the page didn't make (a hand-edited URL, back/forward within the app): the
+  // page reads `_a` on mount only, and its own writes come back here equal to its state (no-ops).
+  const [dataSourceControlKey, setDataSourceControlKey] = useState(0);
+  const pageStateRef = useRef({ sourceTypeId, sourceScope, dataSourceId });
+  pageStateRef.current = { sourceTypeId, sourceScope, dataSourceId };
+  useEffect(() => {
+    if (!urlStateStorage?.change$) return;
+    const sub = urlStateStorage.change$<DrilldownAppState>('_a').subscribe((appState) => {
+      if (!appState) return;
+      const current = pageStateRef.current;
+      const wanted = appState.sourceType ?? OPENSEARCH_SOURCE_TYPE_ID;
+      const known =
+        wanted === OPENSEARCH_SOURCE_TYPE_ID ||
+        drilldownSourceTypes.some((sourceType) => sourceType.id === wanted);
+      if (known && wanted !== current.sourceTypeId) {
+        setSourceTypeId(wanted);
+        setSourceScope(wanted === OPENSEARCH_SOURCE_TYPE_ID ? undefined : appState.scope);
+        setBatchAction(null);
+      } else if (
+        known &&
+        wanted !== OPENSEARCH_SOURCE_TYPE_ID &&
+        JSON.stringify(appState.scope ?? null) !== JSON.stringify(current.sourceScope ?? null)
+      ) {
+        setSourceScope(appState.scope);
+        setBatchAction(null);
+      }
+      const nextDataSourceId = appState.dataSource?.id;
+      if (nextDataSourceId && nextDataSourceId !== current.dataSourceId) {
+        setSelectedDataSource(appState.dataSource);
+        setDataSourceResolved(true);
+        setDataSourceControlKey((n) => n + 1);
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [urlStateStorage, drilldownSourceTypes]);
+
+  const onSourceTypeChange = useCallback(
+    (id: string) => {
+      if (id === sourceTypeId) return;
+      setSourceTypeId(id);
+      // A new source starts from its picker's default scope; the search is per source too.
+      setSourceScope(undefined);
+      setSearchInput('');
+      setSearch('');
+      setBatchAction(null);
+      const isOpenSearch = id === OPENSEARCH_SOURCE_TYPE_ID;
+      writeAppState({ sourceType: isOpenSearch ? undefined : id, scope: undefined });
+      if (isOpenSearch) sessionStore.remove(SOURCE_TYPE_STORAGE_KEY);
+      else sessionStore.set(SOURCE_TYPE_STORAGE_KEY, id);
+      sessionStore.remove(SOURCE_SCOPE_STORAGE_KEY);
+    },
+    [sourceTypeId, writeAppState, sessionStore]
+  );
+
+  const onScopeChange = useCallback(
+    (scope: SourceTypeLogsDrilldownScope) => {
+      setSourceScope(scope);
+      setBatchAction(null);
+      writeAppState({ scope });
+      sessionStore.set(SOURCE_SCOPE_STORAGE_KEY, scope);
+    },
+    [writeAppState, sessionStore]
   );
 
   const { classify, getCached } = useIndexClassification(services, dataSourceId);
@@ -248,21 +405,57 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
         responsive={false}
         className="logsDrilldown__toolbar"
       >
-        <EuiFlexItem grow={false} className="logsDrilldown__toolbarDs">
-          <DataSourceControl
-            services={services}
-            onChange={onDataSourceChange}
-            defaultDataSourceId={initialDataSource?.id}
-          />
+        {drilldownSourceTypes.length > 1 && (
+          <EuiFlexItem grow={false} className="logsDrilldown__toolbarSourceType">
+            <SourceTypeControl
+              options={drilldownSourceTypes.map((sourceType) => ({
+                id: sourceType.id,
+                label: getSourceTypeRegistry().getLabel(sourceType, ExploreFlavor.Logs),
+              }))}
+              selectedId={sourceTypeId}
+              onChange={onSourceTypeChange}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          grow={false}
+          // OpenSearch's data source picker keeps its fixed width; a source's own picker sizes to
+          // its content, so the search box starts right after it.
+          className={registeredSource ? 'logsDrilldown__toolbarScope' : 'logsDrilldown__toolbarDs'}
+        >
+          {registeredSource ? (
+            <registeredSource.logsDrilldown.ScopeSelector
+              scope={sourceScope}
+              onChange={onScopeChange}
+              data={services.data}
+            />
+          ) : (
+            <DataSourceControl
+              // Remounted when the URL changes the data source from outside (see below).
+              key={dataSourceControlKey}
+              services={services}
+              onChange={onDataSourceChange}
+              // The data source in use, not the one the page opened with: the picker remounts when
+              // the user comes back from another source, and reports this one as selected.
+              defaultDataSourceId={dataSourceId ?? initialDataSource?.id}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldSearch
             compressed
             fullWidth
             isClearable
-            placeholder={i18n.translate('explore.logsDrilldown.searchPlaceholder', {
-              defaultMessage: 'Search datasets and indexes…',
-            })}
+            placeholder={
+              registeredSource
+                ? (registeredSource.logsDrilldown.searchPlaceholder ??
+                  i18n.translate('explore.logsDrilldown.source.searchPlaceholder', {
+                    defaultMessage: 'Search…',
+                  }))
+                : i18n.translate('explore.logsDrilldown.searchPlaceholder', {
+                    defaultMessage: 'Search datasets and indexes…',
+                  })
+            }
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             aria-label={i18n.translate('explore.logsDrilldown.searchAriaLabel', {
@@ -277,9 +470,13 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
             content={
               batchAction
                 ? undefined
-                : i18n.translate('explore.logsDrilldown.rows.createDatasetDisabledTip', {
-                    defaultMessage: 'Select one or more indexes to create a dataset',
-                  })
+                : registeredSource
+                  ? i18n.translate('explore.logsDrilldown.source.openInLogsDisabledTip', {
+                      defaultMessage: 'Select one or more items to open them in Logs',
+                    })
+                  : i18n.translate('explore.logsDrilldown.rows.createDatasetDisabledTip', {
+                      defaultMessage: 'Select one or more indexes to create a dataset',
+                    })
             }
           >
             <EuiButton
@@ -290,9 +487,13 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
               data-test-subj="logsExploreToolbarBatch"
             >
               {batchAction?.label ??
-                i18n.translate('explore.logsDrilldown.rows.createDataset', {
-                  defaultMessage: 'Create dataset',
-                })}
+                (registeredSource
+                  ? i18n.translate('explore.logsDrilldown.source.openInLogsDefault', {
+                      defaultMessage: 'Open in Logs',
+                    })
+                  : i18n.translate('explore.logsDrilldown.rows.createDataset', {
+                      defaultMessage: 'Create dataset',
+                    }))}
             </EuiButton>
           </EuiToolTip>
         </EuiFlexItem>
@@ -307,6 +508,14 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     [
       services,
       onDataSourceChange,
+      drilldownSourceTypes,
+      sourceTypeId,
+      onSourceTypeChange,
+      registeredSource,
+      sourceScope,
+      onScopeChange,
+      dataSourceControlKey,
+      dataSourceId,
       searchInput,
       batchAction,
       setHeaderActionMenu,
@@ -323,7 +532,42 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       )}
       {toolbar}
       <EuiSpacer size="s" />
-      {canQueryIndexes ? (
+      {registeredSource ? (
+        sourceScope ? (
+          <SourceRowsView
+            key={registeredSource.id}
+            services={services}
+            sourceType={registeredSource}
+            scope={sourceScope}
+            search={search}
+            refreshKey={refreshKey}
+            onBrushTime={onBrushTime}
+            onBatchActionChange={setBatchAction}
+          />
+        ) : (
+          <EuiEmptyPrompt
+            iconType="search"
+            data-test-subj="logsDrilldownSelectScope"
+            title={
+              <h2>
+                {i18n.translate('explore.logsDrilldown.selectScope.title', {
+                  defaultMessage: 'Choose what to explore',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('explore.logsDrilldown.selectScope.body', {
+                  defaultMessage: 'Use the picker above to choose where {source} lists from.',
+                  values: {
+                    source: getSourceTypeRegistry().getLabel(registeredSource, ExploreFlavor.Logs),
+                  },
+                })}
+              </p>
+            }
+          />
+        )
+      ) : canQueryIndexes ? (
         <RowsView
           services={services}
           dataSourceId={dataSourceId}
