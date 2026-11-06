@@ -110,6 +110,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
       inspectionHanlder={openInspector}
       extraActions={compatibleSlotItems}
       rowsCountOverride={filteredRowsCount}
+      fieldSchema={results?.fieldSchema}
     />
   );
 };

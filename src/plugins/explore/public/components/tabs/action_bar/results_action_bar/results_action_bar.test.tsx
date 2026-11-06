@@ -138,6 +138,38 @@ describe('ResultsActionBar', () => {
     );
   });
 
+  test('exports the response schema columns without the Max export on the Statistics tab', () => {
+    const statisticsStore = mockStore({
+      ui: { ...initialState.ui, activeTabId: 'explore_statistics' },
+    });
+    render(
+      <Provider store={statisticsStore}>
+        <DiscoverResultsActionBar
+          {...props}
+          fieldSchema={[{ name: 'count()' }, { name: 'category' }, { name: '' }]}
+        />
+      </Provider>
+    );
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnNamesOverride: ['count()', 'category'],
+        shouldShowMaxExport: false,
+      })
+    );
+  });
+
+  test('keeps the Logs columns outside of the Statistics tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} fieldSchema={[{ name: 'count()' }]} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ columnNamesOverride: undefined })
+    );
+  });
+
   describe('Visible row count', () => {
     const mockBuilderWithVisData = (rowCount: number) =>
       jest.spyOn(visualizationBuilder, 'getVisualizationBuilder').mockReturnValue({

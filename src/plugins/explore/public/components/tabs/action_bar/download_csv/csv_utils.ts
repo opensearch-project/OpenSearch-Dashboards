@@ -12,13 +12,23 @@ import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { VisTabular } from '../../../visualizations/utils/vis_data_to_tabular';
 
+const getRawValueForCsv = (row: OpenSearchSearchHit, colName: string) => {
+  const rawValue = (row._source as Record<string, unknown> | undefined)?.[colName];
+  if (rawValue === undefined || rawValue === null) {
+    return '';
+  }
+  return typeof rawValue === 'object' ? JSON.stringify(rawValue) : String(rawValue);
+};
+
 export const formatRowsForCsv =
   ({
     displayedColumnNames,
     indexPattern,
+    useRawValues = false,
   }: {
     displayedColumnNames: string[];
     indexPattern: IndexPattern;
+    useRawValues?: boolean;
   }) =>
   (row: OpenSearchSearchHit) => {
     return displayedColumnNames.map((colName) => {
@@ -26,6 +36,10 @@ export const formatRowsForCsv =
 
       if (typeof row === 'undefined') {
         return '';
+      }
+
+      if (useRawValues) {
+        return getRawValueForCsv(row, colName);
       }
 
       if (fieldInfo?.type === '_source') {
@@ -51,13 +65,17 @@ export const buildCsv = ({
   displayedColumnNames,
   indexPattern,
   uiSettings,
+  useRawValues = false,
 }: {
   rows: OpenSearchSearchHit[];
   displayedColumnNames: string[];
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
+  useRawValues?: boolean;
 }) => {
-  const csvRowData = rows.map(formatRowsForCsv({ displayedColumnNames, indexPattern }));
+  const csvRowData = rows.map(
+    formatRowsForCsv({ displayedColumnNames, indexPattern, useRawValues })
+  );
   return unparse(
     { fields: displayedColumnNames, data: csvRowData },
     {
