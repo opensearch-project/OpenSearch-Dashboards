@@ -19,6 +19,7 @@ import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { TableCell } from './table_cell';
+import { isSourceColumn } from '../../../../../../helpers/is_source_column';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
@@ -80,7 +81,7 @@ const TableRowUI = ({
           );
         }
 
-        if (fieldInfo?.type === '_source') {
+        if (isSourceColumn(colName, fieldInfo)) {
           return (
             <td
               key={colName}

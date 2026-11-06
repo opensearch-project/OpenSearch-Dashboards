@@ -57,6 +57,39 @@ describe('buildCsv', () => {
   });
 });
 
+describe('buildCsv: the _source column', () => {
+  const uiSettings = { get: (_key: string, defaultValue: unknown) => defaultValue } as any;
+  const row = { _source: { service: 'orders', status: 200 } };
+  const datasetWith = (field?: object) =>
+    ({
+      fields: { getByName: () => field },
+      formatField: () => 'formatted as one value',
+      formatHit: (hit: any) => hit._source,
+    }) as any;
+  const firstCell = (csv: string) => csv.split(/\r?\n/)[1];
+
+  it('writes the whole row for an index pattern that lists _source', () => {
+    const csv = buildCsv({
+      rows: [row] as any,
+      displayedColumnNames: ['_source'],
+      indexPattern: datasetWith({ name: '_source', type: '_source' }),
+      uiSettings,
+    });
+    expect(firstCell(csv)).toContain('orders');
+  });
+
+  it("writes the whole row for a dataset that doesn't list _source", () => {
+    const csv = buildCsv({
+      rows: [row] as any,
+      displayedColumnNames: ['_source'],
+      indexPattern: datasetWith(undefined),
+      uiSettings,
+    });
+    expect(firstCell(csv)).toContain('orders');
+    expect(firstCell(csv)).not.toContain('formatted as one value');
+  });
+});
+
 describe('buildCsvFromTabular', () => {
   const uiSettings = { get: (_key: string, defaultValue: unknown) => defaultValue } as any;
 
