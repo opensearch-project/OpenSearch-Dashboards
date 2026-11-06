@@ -243,8 +243,9 @@ export interface SourceTypeLogsDrilldownScopeSelectorProps {
   /** The scope in use; undefined until the picker reports one. */
   scope?: SourceTypeLogsDrilldownScope;
   /**
-   * Call with the scope to list. Call it once on mount with a default (as the data source picker
-   * auto-selects one), or the page waits for the user to pick one.
+   * Call with the scope to list. When `scope` is undefined on mount, call it once with a default
+   * (as the data source picker auto-selects one), or the page waits for the user to pick one. Never
+   * replace a `scope` the page passed in: it may come from a shared link.
    */
   onChange: (scope: SourceTypeLogsDrilldownScope) => void;
   data: DataPublicPluginStart;
@@ -271,7 +272,10 @@ export interface SourceTypeLogsDrilldownItem {
   /** Unique within the scope; the page keys cards and selection on it. */
   id: string;
   name: string;
-  /** Free metadata shown on the card before anything runs, e.g. size or retention. */
+  /**
+   * Free metadata shown on the card before anything runs, e.g. size or retention. Pass translated
+   * strings.
+   */
   details?: Array<{ label: string; value: string }>;
   /** The time field of the item's events, shown on the card and used to read preview rows. */
   timeFieldName?: string;
@@ -305,15 +309,19 @@ export interface SourceTypeLogsDrilldownHistogram {
 
 /**
  * How the Explore logs page lists and previews a source's items. Listing must not run billed
- * queries: the page lists on every scope and search change. Previews and histograms may: when the
- * source's dataset type sets `meta.requiresExplicitRun`, the page runs them only when the user
- * presses a card's Run button, and a later time range change marks the card stale instead of
- * running it again. Otherwise cards run as they scroll into view, like OpenSearch's.
+ * queries: the page lists on every scope and search change, on "Load more", and on its Refresh
+ * button (not on a time range change). Previews and histograms may: when the source's dataset
+ * type sets `meta.requiresExplicitRun` (or isn't registered), the page runs them only when the user
+ * presses a card's Run button, and a later time range change or Refresh marks the card stale
+ * instead of running it again. Otherwise cards run as they scroll into view, like OpenSearch's.
  */
 export interface SourceTypeLogsDrilldown {
   /** The page-level picker that sets the scope (replaces the data source picker). */
   ScopeSelector: ComponentType<SourceTypeLogsDrilldownScopeSelectorProps>;
-  /** Placeholder for the page's search box, e.g. "Search log groups…". */
+  /**
+   * Placeholder (and accessible name) for the page's search box, e.g. "Search log groups…". Pass a
+   * translated string.
+   */
   searchPlaceholder?: string;
   /**
    * One page of items for a scope, filtered by the search text (the page doesn't filter them
@@ -325,7 +333,11 @@ export interface SourceTypeLogsDrilldown {
     nextToken?: string;
     signal: AbortSignal;
   }): Promise<SourceTypeLogsDrilldownItemPage>;
-  /** The latest events (at most `size`) as flat rows, newest first. */
+  /**
+   * Events in the time range (at most `size`) as flat rows, newest first. A source may return a
+   * sample rather than the newest events where reading the newest would cost more (e.g. a scan of
+   * the whole range).
+   */
   fetchPreview(
     args: SourceTypeLogsDrilldownQueryArgs & { size: number }
   ): Promise<{ rows: Array<Record<string, unknown>> }>;

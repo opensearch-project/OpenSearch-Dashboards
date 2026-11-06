@@ -26,6 +26,21 @@ let mockTypeRegistered = true;
 
 const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
+/** jsdom has no IntersectionObserver: a fake that collects each card's callback. */
+class FakeIntersectionObserver {
+  static callbacks: Array<(entries: any[]) => void> = [];
+  constructor(callback: (entries: any[]) => void) {
+    FakeIntersectionObserver.callbacks.push(callback);
+  }
+  observe() {}
+  disconnect() {}
+}
+const installIntersectionObserver = () => {
+  FakeIntersectionObserver.callbacks = [];
+  (global as any).IntersectionObserver = FakeIntersectionObserver;
+  return FakeIntersectionObserver.callbacks;
+};
+
 const makeDrilldown = (overrides: Record<string, unknown> = {}) => ({
   ScopeSelector: () => null,
   listItems: jest.fn().mockResolvedValue({
@@ -374,33 +389,93 @@ describe('SourceRowsView', () => {
     });
   });
 
-  it('lists again on Refresh, keeping the cards meanwhile', async () => {
+  const viewWith = (drilldown: any, services: any, onBatchActionChange: any, props: any) => (
+    <SourceRowsView
+      services={services}
+      sourceType={{
+        id: 'fake',
+        label: 'Fake Logs',
+        datasetTypes: ['FAKE_LOGS'],
+        resolveDefaultDataset: jest.fn(),
+        logsDrilldown: drilldown,
+      }}
+      scope={{ region: 'us-east-1' }}
+      search=""
+      refreshKey="a"
+      onBrushTime={jest.fn()}
+      onBatchActionChange={onBatchActionChange}
+      {...props}
+    />
+  );
+
+  it('does not list again on a time range change, so loaded pages stay', async () => {
+    const drilldown = makeDrilldown();
+    drilldown.listItems
+      .mockResolvedValueOnce({ items: [{ id: 'a', name: 'a' }], nextToken: 't2' })
+      .mockResolvedValueOnce({ items: [{ id: 'b', name: 'b' }] });
+    const { rerender, services, onBatchActionChange } = renderView(drilldown);
+    fireEvent.click(await screen.findByTestId('logsDrilldownSourceLoadMore'));
+    await screen.findByTestId('logsDrilldownSourceCard-b');
+    rerender(viewWith(drilldown, services, onBatchActionChange, { refreshKey: 'later' }));
+    await flush();
+    expect(drilldown.listItems).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId('logsDrilldownSourceCard-b')).toBeInTheDocument();
+  });
+
+  it("lists again on the page's Refresh, keeping the cards meanwhile", async () => {
     const drilldown = makeDrilldown();
     const { rerender, services, onBatchActionChange } = renderView(drilldown);
     await screen.findByTestId('logsDrilldownSourceCard-/aws/ecs/b');
     let resolveList: (page: unknown) => void = () => {};
     drilldown.listItems.mockReturnValueOnce(new Promise((resolve) => (resolveList = resolve)));
-    rerender(
-      <SourceRowsView
-        services={services}
-        sourceType={{
-          id: 'fake',
-          label: 'Fake Logs',
-          datasetTypes: ['FAKE_LOGS'],
-          resolveDefaultDataset: jest.fn(),
-          logsDrilldown: drilldown,
-        }}
-        scope={{ region: 'us-east-1' }}
-        search=""
-        refreshKey="b"
-        onBrushTime={jest.fn()}
-        onBatchActionChange={onBatchActionChange}
-      />
-    );
+    rerender(viewWith(drilldown, services, onBatchActionChange, { listRefreshKey: 1 }));
     expect(drilldown.listItems).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
     await act(async () => resolveList({ items: [{ id: 'new', name: 'new' }] }));
     expect(await screen.findByTestId('logsDrilldownSourceCard-new')).toBeInTheDocument();
+  });
+
+  it('keeps the list when a refresh fails, and Retry lists again', async () => {
+    const drilldown = makeDrilldown();
+    const { rerender, services, onBatchActionChange } = renderView(drilldown);
+    await screen.findByTestId('logsDrilldownSourceCard-/aws/ecs/b');
+    drilldown.listItems
+      .mockRejectedValueOnce(new Error('throttled'))
+      .mockResolvedValueOnce({ items: [{ id: 'again', name: 'again' }] });
+    rerender(viewWith(drilldown, services, onBatchActionChange, { listRefreshKey: 1 }));
+    expect(await screen.findByText('throttled')).toBeInTheDocument();
+    expect(screen.getByTestId('logsDrilldownSourceCard-/aws/ecs/b')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Retry'));
+    expect(await screen.findByTestId('logsDrilldownSourceCard-again')).toBeInTheDocument();
+  });
+
+  it('never runs a card on scroll, search or time change when the source requires an explicit run', async () => {
+    const observers = installIntersectionObserver();
+    jest.useFakeTimers();
+    try {
+      const drilldown = makeDrilldown();
+      const { rerender, services, onBatchActionChange } = renderView(drilldown);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(observers.length).toBeGreaterThan(0);
+      act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+      rerender(
+        viewWith(drilldown, services, onBatchActionChange, { refreshKey: 'b', search: 'aws' })
+      );
+      act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(drilldown.fetchPreview).not.toHaveBeenCalled();
+      expect(drilldown.fetchHistogram).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+      delete (global as any).IntersectionObserver;
+    }
   });
 
   it("stops ticks at the source's maxSelection", async () => {
@@ -421,14 +496,7 @@ describe('SourceRowsView', () => {
 
   it('runs cards as they scroll into view on a source that does not require an explicit run', async () => {
     mockRequiresExplicitRun = false;
-    const observers: Array<(entries: any[]) => void> = [];
-    (global as any).IntersectionObserver = class {
-      constructor(callback: (entries: any[]) => void) {
-        observers.push(callback);
-      }
-      observe() {}
-      disconnect() {}
-    };
+    const observers = installIntersectionObserver();
     jest.useFakeTimers();
     try {
       const drilldown = makeDrilldown();

@@ -92,6 +92,9 @@ export function useConcurrentQueries<T>(
         s.inflight.set(key, controller);
         fetchFn(key, controller.signal)
           .then((value) => {
+            // A fetch that ignored its signal can still answer after a reset or invalidate: drop
+            // it, or it would mark the key fetched with a result from before the reset.
+            if (controller.signal.aborted) return;
             s.fetched.add(key);
             s.buffered.set(key, value);
             scheduleFlush();
@@ -103,7 +106,8 @@ export function useConcurrentQueries<T>(
             scheduleFlush();
           })
           .finally(() => {
-            s.inflight.delete(key);
+            // Only this fetch's entry: after an invalidate, a newer fetch of the key may be in flight.
+            if (s.inflight.get(key) === controller) s.inflight.delete(key);
             drainRef.current();
           });
       }, DEBOUNCE_MS);

@@ -19,6 +19,7 @@ import {
 import { i18n } from '@osd/i18n';
 import rison from 'rison-node';
 import { PLUGIN_ID, ExploreFlavor } from '../../../../../common';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type {
   SourceTypeDefinition,
   SourceTypeLogsDrilldown,
@@ -54,6 +55,8 @@ interface Props {
   search: string;
   /** Changes with the time range and on Refresh. */
   refreshKey: string;
+  /** Changes on the page's Refresh button only: lists the items again. */
+  listRefreshKey?: number;
   onBrushTime: (from: number, to: number) => void;
   onBatchActionChange: (action: SourceBatchAction | null) => void;
 }
@@ -70,12 +73,21 @@ export const SourceRowsView: React.FC<Props> = ({
   scope,
   search,
   refreshKey,
+  listRefreshKey = 0,
   onBrushTime,
   onBatchActionChange,
 }) => {
   const drilldown = sourceType.logsDrilldown;
-  const { items, nextToken, loading, loadingMore, error, errorCause, loadMore, retry } =
-    useSourceItems(drilldown, scope, search, refreshKey);
+  // The source's name on the Logs flavor, with the registry's overrides (as the Source picker).
+  const sourceLabel = useMemo(() => {
+    try {
+      return getSourceTypeRegistry().getLabel(sourceType, ExploreFlavor.Logs);
+    } catch {
+      return sourceType.label;
+    }
+  }, [sourceType]);
+  const { items, nextToken, loading, loadingMore, error, errorCause, errorFrom, loadMore, retry } =
+    useSourceItems(drilldown, scope, search, listRefreshKey);
 
   // The source's dataset types decide whether its queries wait for the user, as on the Logs page.
   // A type that isn't registered (yet) is read as waiting: its queries may be billed, so the page
@@ -271,13 +283,13 @@ export const SourceRowsView: React.FC<Props> = ({
         iconType="alert"
         title={i18n.translate('explore.logsDrilldown.source.listFailed', {
           defaultMessage: 'Could not list {source}',
-          values: { source: sourceType.label },
+          values: { source: sourceLabel },
         })}
         data-test-subj="logsDrilldownSourceListError"
       >
         <p>{error}</p>
         <EuiButton size="s" onClick={retry}>
-          {i18n.translate('explore.logsDrilldown.source.listRetry', { defaultMessage: 'Retry' })}
+          {i18n.translate('explore.logsDrilldown.source.retry', { defaultMessage: 'Retry' })}
         </EuiButton>
       </EuiCallOut>,
       errorCause
@@ -305,7 +317,7 @@ export const SourceRowsView: React.FC<Props> = ({
                 })
               : i18n.translate('explore.logsDrilldown.source.emptyScope', {
                   defaultMessage: '{source} has nothing to show for this selection.',
-                  values: { source: sourceType.label },
+                  values: { source: sourceLabel },
                 })}
           </p>
         }
@@ -322,7 +334,7 @@ export const SourceRowsView: React.FC<Props> = ({
               {i18n.translate('explore.logsDrilldown.source.explicitRunHint', {
                 defaultMessage:
                   'Queries on {source} run only when you ask: press Run on a card to load it.',
-                values: { source: sourceType.label },
+                values: { source: sourceLabel },
               })}
             </EuiText>
           )}
@@ -402,10 +414,9 @@ export const SourceRowsView: React.FC<Props> = ({
       ))}
       {error && (
         <EuiCallOut size="s" color="danger" iconType="alert" title={error}>
-          <EuiButton size="s" onClick={loadMore}>
-            {i18n.translate('explore.logsDrilldown.source.loadMoreRetry', {
-              defaultMessage: 'Retry',
-            })}
+          {/* Retry what failed: a "Load more", or a refresh of the list. */}
+          <EuiButton size="s" onClick={errorFrom === 'more' ? loadMore : retry}>
+            {i18n.translate('explore.logsDrilldown.source.retry', { defaultMessage: 'Retry' })}
           </EuiButton>
         </EuiCallOut>
       )}

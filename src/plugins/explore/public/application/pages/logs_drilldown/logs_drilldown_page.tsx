@@ -46,9 +46,9 @@ const SEARCH_DEBOUNCE_MS = 300;
 // bare `#/` (no `_a`), so the URL alone can't survive re-entry — this sessionStorage fallback keeps
 // the last selection for the tab session. URL `_a` still wins when present (shareable/bookmarkable).
 const DATA_SOURCE_STORAGE_KEY = 'logsDrilldown.dataSource';
-// The same per-tab fallback for the source type and a registered source's scope.
-const SOURCE_TYPE_STORAGE_KEY = 'logsDrilldown.sourceType';
-const SOURCE_SCOPE_STORAGE_KEY = 'logsDrilldown.sourceScope';
+// The same per-tab fallback for the source type and its scope, kept together (`{ sourceType, scope }`)
+// so a scope is never restored for another source.
+const SOURCE_STORAGE_KEY = 'logsDrilldown.source';
 
 /** The page's `_a` URL state. */
 interface DrilldownAppState {
@@ -105,10 +105,14 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   }, []);
 
   // Merges a change into `_a`, so the data source, source type and scope don't overwrite each other.
+  // The last `_a` the page wrote, so the URL listener below can tell its own writes from others'.
+  const lastWrittenAppState = useRef<string>();
   const writeAppState = useCallback(
     (patch: Partial<DrilldownAppState>) => {
       const current = urlStateStorage?.get<DrilldownAppState>('_a') ?? {};
-      urlStateStorage?.set('_a', { ...current, ...patch }, { replace: true });
+      const next = { ...current, ...patch };
+      lastWrittenAppState.current = JSON.stringify(next);
+      urlStateStorage?.set('_a', next, { replace: true });
     },
     [urlStateStorage]
   );
@@ -121,16 +125,17 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   // store; then OpenSearch. An unknown id (a source no longer registered) falls back to OpenSearch.
   const initialSource = useMemo(() => {
     const appState = urlStateStorage?.get<DrilldownAppState>('_a');
-    const id: string | undefined = appState
-      ? appState.sourceType
-      : (sessionStore.get(SOURCE_TYPE_STORAGE_KEY) ?? undefined);
+    const stored: Pick<DrilldownAppState, 'sourceType' | 'scope'> | undefined = appState
+      ? undefined
+      : (sessionStore.get(SOURCE_STORAGE_KEY) ?? undefined);
+    const id: string | undefined = appState ? appState.sourceType : stored?.sourceType;
     const known = drilldownSourceTypes.some((sourceType) => sourceType.id === id);
     if (!id || !known || id === OPENSEARCH_SOURCE_TYPE_ID) {
       return { id: OPENSEARCH_SOURCE_TYPE_ID, scope: undefined };
     }
     const scope: SourceTypeLogsDrilldownScope | undefined = appState
       ? appState.scope
-      : (sessionStore.get(SOURCE_SCOPE_STORAGE_KEY) ?? undefined);
+      : stored?.scope;
     return { id, scope };
     // Read once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -313,6 +318,15 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     [writeAppState, sessionStore]
   );
 
+  // The per-tab store of the source and its scope (see SOURCE_STORAGE_KEY); OpenSearch is the default.
+  const rememberSource = useCallback(
+    (id: string, scope: SourceTypeLogsDrilldownScope | undefined) => {
+      if (id === OPENSEARCH_SOURCE_TYPE_ID) sessionStore.remove(SOURCE_STORAGE_KEY);
+      else sessionStore.set(SOURCE_STORAGE_KEY, { sourceType: id, scope });
+    },
+    [sessionStore]
+  );
+
   // Follow `_a` changes the page didn't make (a hand-edited URL, back/forward within the app): the
   // page reads `_a` on mount only, and its own writes come back here equal to its state (no-ops).
   const [dataSourceControlKey, setDataSourceControlKey] = useState(0);
@@ -321,7 +335,9 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   useEffect(() => {
     if (!urlStateStorage?.change$) return;
     const sub = urlStateStorage.change$<DrilldownAppState>('_a').subscribe((appState) => {
-      if (!appState) return;
+      // The page's own write coming back (compared to what it wrote, not to React state, which can
+      // lag a microtask behind the URL).
+      if (!appState || JSON.stringify(appState) === lastWrittenAppState.current) return;
       const current = pageStateRef.current;
       const wanted = appState.sourceType ?? OPENSEARCH_SOURCE_TYPE_ID;
       const known =
@@ -331,6 +347,10 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
         setSourceTypeId(wanted);
         setSourceScope(wanted === OPENSEARCH_SOURCE_TYPE_ID ? undefined : appState.scope);
         setBatchAction(null);
+        // As a pick from the Source picker: the search is per source.
+        setSearchInput('');
+        setSearch('');
+        rememberSource(wanted, wanted === OPENSEARCH_SOURCE_TYPE_ID ? undefined : appState.scope);
       } else if (
         known &&
         wanted !== OPENSEARCH_SOURCE_TYPE_ID &&
@@ -338,6 +358,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       ) {
         setSourceScope(appState.scope);
         setBatchAction(null);
+        rememberSource(wanted, appState.scope);
       }
       const nextDataSourceId = appState.dataSource?.id;
       if (nextDataSourceId && nextDataSourceId !== current.dataSourceId) {
@@ -347,7 +368,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       }
     });
     return () => sub.unsubscribe();
-  }, [urlStateStorage, drilldownSourceTypes]);
+  }, [urlStateStorage, drilldownSourceTypes, rememberSource]);
 
   const onSourceTypeChange = useCallback(
     (id: string) => {
@@ -360,11 +381,9 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       setBatchAction(null);
       const isOpenSearch = id === OPENSEARCH_SOURCE_TYPE_ID;
       writeAppState({ sourceType: isOpenSearch ? undefined : id, scope: undefined });
-      if (isOpenSearch) sessionStore.remove(SOURCE_TYPE_STORAGE_KEY);
-      else sessionStore.set(SOURCE_TYPE_STORAGE_KEY, id);
-      sessionStore.remove(SOURCE_SCOPE_STORAGE_KEY);
+      rememberSource(id, undefined);
     },
-    [sourceTypeId, writeAppState, sessionStore]
+    [sourceTypeId, writeAppState, rememberSource]
   );
 
   const onScopeChange = useCallback(
@@ -372,9 +391,9 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       setSourceScope(scope);
       setBatchAction(null);
       writeAppState({ scope });
-      sessionStore.set(SOURCE_SCOPE_STORAGE_KEY, scope);
+      rememberSource(sourceTypeId, scope);
     },
-    [writeAppState, sessionStore]
+    [writeAppState, rememberSource, sourceTypeId]
   );
 
   const { classify, getCached } = useIndexClassification(services, dataSourceId);
@@ -458,9 +477,16 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
             }
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            aria-label={i18n.translate('explore.logsDrilldown.searchAriaLabel', {
-              defaultMessage: 'Search datasets and indexes',
-            })}
+            aria-label={
+              registeredSource
+                ? (registeredSource.logsDrilldown.searchPlaceholder ??
+                  i18n.translate('explore.logsDrilldown.source.searchAriaLabel', {
+                    defaultMessage: 'Search',
+                  }))
+                : i18n.translate('explore.logsDrilldown.searchAriaLabel', {
+                    defaultMessage: 'Search datasets and indexes',
+                  })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -541,6 +567,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
             scope={sourceScope}
             search={search}
             refreshKey={refreshKey}
+            listRefreshKey={refreshNonce}
             onBrushTime={onBrushTime}
             onBatchActionChange={setBatchAction}
           />

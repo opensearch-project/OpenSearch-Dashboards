@@ -46,9 +46,14 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   MountPointPortal: ({ children }: any) => <div>{children}</div>,
 }));
 let lastDataSourceControlProps: any;
+let mockDataSourceControlMounts = 0;
 jest.mock('./components/data_source_control', () => ({
   DataSourceControl: (props: any) => {
     lastDataSourceControlProps = props;
+    // Counts mounts, so a test can tell a remount from a re-render.
+    jest.requireActual('react').useEffect(() => {
+      mockDataSourceControlMounts++;
+    }, []);
     return (
       <button
         data-test-subj="mock-data-source-control"
@@ -101,14 +106,20 @@ jest.mock('../../../services/source_type_registry', () => ({
 }));
 
 const timeUpdate$ = new Subject<void>();
-const makeUrlStateStorage = (initial: Record<string, any> = {}) => {
+const makeUrlStateStorage = (
+  initial: Record<string, any> = {},
+  { syncChanges = false }: { syncChanges?: boolean } = {}
+) => {
   const store: Record<string, any> = { ...initial };
   const changes = new Subject<any>();
   return {
     get: jest.fn((key: string) => store[key] ?? null),
     set: jest.fn((key: string, value: any) => {
       store[key] = value;
-      changes.next(value);
+      // Like the real storage, the change comes back a microtask later; `syncChanges` reports it
+      // before React re-renders (the window where the page's state lags the URL).
+      if (syncChanges) changes.next(value);
+      else Promise.resolve().then(() => changes.next(value));
     }),
     change$: () => changes.asObservable(),
     // A change the page didn't make (a hand-edited URL, back/forward).
@@ -202,7 +213,10 @@ describe('LogsDrilldownPage source types', () => {
   });
 
   it('a URL `_a` without a source type opens OpenSearch, over the tab session', () => {
-    window.sessionStorage.setItem('logsDrilldown.sourceType', JSON.stringify('fake-logs'));
+    window.sessionStorage.setItem(
+      'logsDrilldown.source',
+      JSON.stringify({ sourceType: 'fake-logs', scope: { region: 'x' } })
+    );
     const url = makeUrlStateStorage({ _a: { dataSource: { id: 'ds-1', title: 'one' } } });
     render(<LogsDrilldownPage services={makeServices(url)} />);
     expect(screen.getByTestId('mock-source-type-control')).toHaveAttribute(
@@ -232,6 +246,46 @@ describe('LogsDrilldownPage source types', () => {
       'opensearch'
     );
     expect(lastDataSourceControlProps.defaultDataSourceId).toBe('ds-9');
+  });
+
+  it("doesn't remount the data source picker for its own URL write", async () => {
+    const url = makeUrlStateStorage(
+      { _a: { dataSource: { id: 'ds-1', title: 'one' } } },
+      { syncChanges: true }
+    );
+    render(<LogsDrilldownPage services={makeServices(url)} />);
+    const mountsBefore = mockDataSourceControlMounts;
+    fireEvent.click(screen.getByTestId('mock-data-source-control'));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // The page's own `_a` write came back through change$; the picker must not be remounted.
+    expect(lastDataSourceControlProps.defaultDataSourceId).toBe('ds-picked');
+    expect(mockDataSourceControlMounts).toBe(mountsBefore);
+  });
+
+  it('remembers the source with its own scope, and restores both together', async () => {
+    const url = makeUrlStateStorage();
+    const { unmount } = render(<LogsDrilldownPage services={makeServices(url)} />);
+    fireEvent.click(screen.getByTestId('pick-fake-logs'));
+    expect(JSON.parse(window.sessionStorage.getItem('logsDrilldown.source') || 'null')).toEqual({
+      sourceType: 'fake-logs',
+      scope: { region: 'us-east-1' },
+    });
+    unmount();
+    // Re-entry from a bare `#/` (no `_a`): the source and its scope come back together.
+    render(<LogsDrilldownPage services={makeServices(makeUrlStateStorage())} />);
+    expect(lastSourceRowsProps.scope).toEqual({ region: 'us-east-1' });
+  });
+
+  it('clears the search when the URL switches the source', () => {
+    const url = makeUrlStateStorage();
+    render(<LogsDrilldownPage services={makeServices(url)} />);
+    fireEvent.change(screen.getByPlaceholderText('Search datasets and indexes…'), {
+      target: { value: 'abc' },
+    });
+    act(() => url.external({ sourceType: 'fake-logs', scope: { region: 'b-2' } }));
+    expect(screen.getByPlaceholderText('Search fake groups…')).toHaveValue('');
   });
 
   it('keeps the data source in the URL when switching source types', () => {

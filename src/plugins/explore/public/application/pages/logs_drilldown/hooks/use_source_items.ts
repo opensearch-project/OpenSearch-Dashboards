@@ -20,6 +20,8 @@ interface SourceItemsState {
   error?: string;
   /** What the listing rejected with, as is (for the source's empty state). */
   errorCause?: unknown;
+  /** Which call failed: the listing (or its refresh) or a "Load more". */
+  errorFrom?: 'list' | 'more';
 }
 
 const EMPTY: SourceItemsState = { items: [], loading: false, loadingMore: false };
@@ -36,8 +38,11 @@ export const useSourceItems = (
   drilldown: SourceTypeLogsDrilldown,
   scope: SourceTypeLogsDrilldownScope | undefined,
   search: string,
-  /** Changes on the page's Refresh (and time range): lists again, keeping the list meanwhile. */
-  refreshKey = ''
+  /**
+   * Changes on the page's Refresh button only (not on a time range change: listing doesn't depend
+   * on time). Lists again from the first page, keeping the shown list until the answer.
+   */
+  refreshKey: string | number = ''
 ) => {
   const [state, setState] = useState<SourceItemsState>(EMPTY);
   const controllerRef = useRef<AbortController>();
@@ -78,7 +83,18 @@ export const useSourceItems = (
       })
       .catch((error) => {
         if (controller.signal.aborted) return;
-        setState({ ...EMPTY, error: messageOf(error), errorCause: error });
+        // A failed refresh keeps the list it had, with the error under it (and a Retry).
+        setState((prev) =>
+          refreshing && prev.items.length > 0
+            ? {
+                ...prev,
+                loading: false,
+                error: messageOf(error),
+                errorCause: error,
+                errorFrom: 'list',
+              }
+            : { ...EMPTY, error: messageOf(error), errorCause: error, errorFrom: 'list' }
+        );
       });
     return () => controller.abort();
     // `scopeKey` stands for `scope`: a new object with the same content must not list again.
@@ -112,6 +128,7 @@ export const useSourceItems = (
           loadingMore: false,
           error: messageOf(error),
           errorCause: error,
+          errorFrom: 'more',
         }));
       });
   }, [drilldown, scope, search, state.nextToken, state.loadingMore]);

@@ -241,7 +241,7 @@ export const SourceItemCard: React.FC<Props> = ({
         ) : (
           <div className="logStreamCard__histEmpty" style={{ height: HIST_HEIGHT }}>
             <EuiText size="xs" color="subdued" title={result.histogramError}>
-              {i18n.translate('explore.logsDrilldown.source.histogramUnavailable', {
+              {i18n.translate('explore.logsDrilldown.rows.histError', {
                 defaultMessage: 'Histogram unavailable',
               })}
             </EuiText>
@@ -258,7 +258,8 @@ export const SourceItemCard: React.FC<Props> = ({
             data-test-subj={`logsDrilldownSourceCardStale-${item.id}`}
           >
             {i18n.translate('explore.logsDrilldown.source.stale', {
-              defaultMessage: 'The time range changed since this ran. Run it again to update it.',
+              defaultMessage:
+                'The time range changed or the page was refreshed since this ran. Run it again to update it.',
             })}
           </EuiText>
         )}
