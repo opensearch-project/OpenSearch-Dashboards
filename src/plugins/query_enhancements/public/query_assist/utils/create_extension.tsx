@@ -6,10 +6,10 @@
 import { i18n } from '@osd/i18n';
 import { ENABLE_AI_FEATURES, HttpSetup } from 'opensearch-dashboards/public';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { useObservable } from 'react-use';
 import { distinctUntilChanged, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
-import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
+import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA, Query } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
   QueryEditorExtensionConfig,
@@ -71,9 +71,15 @@ export { clearCache };
  * @returns observable list of query assist agent configured languages in the
  * selected data source.
  */
-const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
-  data.query.queryString.getUpdates$().pipe(
-    startWith(data.query.queryString.getQuery()),
+
+const getAvailableLanguages$ = (
+  http: HttpSetup,
+  data: DataPublicPluginSetup,
+  query$: Observable<Query> = data.query.queryString
+    .getUpdates$()
+    .pipe(startWith(data.query.queryString.getQuery()))
+) =>
+  query$.pipe(
     distinctUntilChanged(),
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
@@ -134,8 +140,18 @@ export const createQueryAssistExtension = (
         };
       }
     },
-    isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(
+
+    isEnabled$: (dependencies) => {
+      const userProvidedQuery = dependencies?.userProvidedQuery;
+      if (userProvidedQuery) {
+        return getAvailableLanguages$(http, data, of(userProvidedQuery)).pipe(
+          map(
+            (availableLanguages) =>
+              availableLanguages.includes(userProvidedQuery.language) && assistantEnabled$.value
+          )
+        );
+      }
+      return getAvailableLanguages$(http, data).pipe(
         withLatestFrom(
           data.query.queryString.getUpdates$().pipe(
             startWith(data.query.queryString.getQuery()),
@@ -146,7 +162,8 @@ export const createQueryAssistExtension = (
           ([availableLanguages, currentLanguage]) =>
             availableLanguages.includes(currentLanguage) && assistantEnabled$.value
         )
-      ),
+      );
+    },
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
