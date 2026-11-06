@@ -9,6 +9,8 @@ export {
   SourceTypeDatasetSelectorProps,
   SourceTypeDefinition,
   SourceTypeDependencies,
+  SourceTypeEmptyStateLocation,
+  SourceTypeEmptyStateProps,
   SourceTypeHistogramColumns,
   SourceTypeHistogramConfig,
   SourceTypeLanguageGuide,

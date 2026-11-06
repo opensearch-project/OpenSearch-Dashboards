@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { Dataset } from '../../../../data/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import {
@@ -160,6 +160,28 @@ export interface SourceTypeQueryEditorProps {
 }
 
 /**
+ * Where Explore asks a source for an empty state of its own:
+ * - `logsResults`: the Logs page's results area, in place of everything Explore shows there (the
+ *   "Start searching" prompt, no results, the results themselves).
+ * - `metricsExplore`: the Metrics page's Explore tab (the metric browser, or a metric's detail).
+ * More may be added: render `children` for any location the source doesn't handle.
+ */
+export type SourceTypeEmptyStateLocation = 'logsResults' | 'metricsExplore';
+
+/** Props Explore passes to a source type's empty state. */
+export interface SourceTypeEmptyStateProps {
+  location: SourceTypeEmptyStateLocation;
+  /** The active dataset (one of this source's). */
+  dataset: Dataset;
+  data: DataPublicPluginStart;
+  flavor?: ExploreFlavor | null;
+  /** Does what the page's Refresh does: reruns the query, or reloads the Explore tab. */
+  onRefresh: () => void;
+  /** What Explore shows here otherwise. Render it to keep Explore's own content. */
+  children: ReactNode;
+}
+
+/**
  * A kind of data source the query panel's "Source type" column offers (OpenSearch is built in).
  *
  * Dataset types (data plugin) describe how to list and query datasets. A source type is Explore's
@@ -203,6 +225,13 @@ export interface SourceTypeDefinition {
    * settings only while one of this source's datasets is active.
    */
   languageSettings?: Record<string, SourceTypeLanguageSettings>;
+  /**
+   * Shows the source's own empty state while one of its datasets is active, for example when the
+   * dataset has nothing to query and the source can say why. Explore renders it at each
+   * {@link SourceTypeEmptyStateLocation} with its own content as `children`; render `children`
+   * wherever the source has nothing to add.
+   */
+  emptyState?: ComponentType<SourceTypeEmptyStateProps>;
   /**
    * Metrics page: the id of the data plugin resource client (`resourceClientFactory`) that the
    * Explore tab's metric browser and the PromQL builder use for this source's datasets. The client
