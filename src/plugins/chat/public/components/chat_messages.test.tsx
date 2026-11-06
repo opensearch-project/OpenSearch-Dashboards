@@ -65,7 +65,7 @@ describe('ChatMessages', () => {
   let notifyContextStore: () => void;
   let subscribeToContextStore: jest.Mock;
   let currentAppId$: BehaviorSubject<string | undefined>;
-  let getCurrentDataSourceId: jest.Mock;
+  let peekCurrentDataSourceId: jest.Mock;
 
   const defaultProps: React.ComponentProps<typeof ChatMessages> = {
     layoutMode: ChatLayoutMode.SIDECAR,
@@ -83,7 +83,7 @@ describe('ChatMessages', () => {
     agentVisibleContexts = [];
     notifyContextStore = () => {};
     currentAppId$ = new BehaviorSubject<string | undefined>('explore');
-    getCurrentDataSourceId = jest.fn().mockResolvedValue('ds-1');
+    peekCurrentDataSourceId = jest.fn().mockResolvedValue('ds-1');
 
     subscribeToContextStore = jest.fn((callback: () => void) => {
       notifyContextStore = callback;
@@ -96,7 +96,7 @@ describe('ChatMessages', () => {
     useChatContextMock.mockReturnValue({
       chatService: {
         getAgentVisibleContexts: () => agentVisibleContexts,
-        getCurrentDataSourceId,
+        peekCurrentDataSourceId,
       },
     });
 
@@ -482,10 +482,10 @@ describe('ChatMessages', () => {
       render(<ChatMessages {...defaultProps} />);
       await waitFor(() => expect(getSuggestions).toHaveBeenCalled());
 
-      expect(getCurrentDataSourceId).not.toHaveBeenCalled();
+      expect(peekCurrentDataSourceId).not.toHaveBeenCalled();
       const { getDataSourceId } = getSuggestions.mock.calls[0][0];
       await expect(getDataSourceId()).resolves.toBe('ds-1');
-      expect(getCurrentDataSourceId).toHaveBeenCalledTimes(1);
+      expect(peekCurrentDataSourceId).toHaveBeenCalledTimes(1);
     });
 
     it('keeps showing the defaults when the provider fails', async () => {
