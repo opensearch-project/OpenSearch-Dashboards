@@ -554,7 +554,7 @@ describe('ChatService', () => {
       );
     });
 
-    it('should include session data source history in available-data-sources-context context', async () => {
+    it('should list every available data source and the active one in available-data-sources-context', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
@@ -576,8 +576,7 @@ describe('ChatService', () => {
       (window as any).assistantContextStore = createStatefulContextStore();
 
       service.newThread();
-      service.setSessionDataSourceList('ds-1');
-      service.setSessionDataSourceList('ds-2');
+      service.setDataSourceId('ds-2');
       mockUiSettings.get.mockReturnValue(undefined);
 
       await service.sendMessage('test', []);
@@ -588,17 +587,109 @@ describe('ChatService', () => {
       );
 
       expect(availableDataSourcesContext.value).toContain(
-        'Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): "Source One" (id: ds-1), "Source Two" (id: ds-2)'
+        'Currently active data source: "Source Two" (id: ds-2)'
       );
       expect(availableDataSourcesContext.value).toContain(
-        'IMPORTANT — this conversation involves MORE THAN ONE data source.'
+        'Data sources available in this conversation: "Source One" (id: ds-1), "Source Two" (id: ds-2)'
       );
-      expect(availableDataSourcesContext.value).toContain(
-        'A data source being currently active or previously confirmed does NOT satisfy this'
+      expect(availableDataSourcesContext.value).toContain('call\nswitch_data_source');
+      expect(availableDataSourcesContext.value).toContain('ask_user');
+      // The page shows no data source here, so no page note.
+      expect(availableDataSourcesContext.value).not.toContain('The current page shows data from');
+    });
+
+    it('should say the active data source wins when the page shows another one', async () => {
+      mockAgent.runAgent.mockReturnValue(new Observable<BaseEvent>());
+      const service = new ChatService(mockUiSettings, mockCoreChatService, undefined, {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One' } },
+            { id: 'ds-2', attributes: { title: 'Source Two' } },
+          ],
+        }),
+      } as any);
+      const store = createStatefulContextStore();
+      store.addContext({
+        categories: ['page', 'static'],
+        description: 'Page context',
+        value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+      });
+      (window as any).assistantContextStore = store;
+
+      service.newThread();
+      service.setDataSourceId('ds-2');
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const ctx = runInput.context.find(
+        (c: any) => c.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+      expect(ctx?.value).toContain(
+        'The current page shows data from "Source One", but "Source Two" was chosen'
       );
     });
 
-    it('should not include available-data-sources-context context when only one data source has appeared in the session', async () => {
+    it('should name the active data source by id in the page note when it is outside the list', async () => {
+      mockAgent.runAgent.mockReturnValue(new Observable<BaseEvent>());
+      const service = new ChatService(mockUiSettings, mockCoreChatService, undefined, {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One' } },
+            { id: 'ds-2', attributes: { title: 'Source Two' } },
+          ],
+        }),
+      } as any);
+      const store = createStatefulContextStore();
+      store.addContext({
+        categories: ['page', 'static'],
+        description: 'Page context',
+        value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+      });
+      (window as any).assistantContextStore = store;
+
+      service.newThread();
+      service.setDataSourceId('ds-far');
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const ctx = runInput.context.find(
+        (c: any) => c.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+      expect(ctx?.value).toContain(
+        'The current page shows data from "Source One", but "ds-far" was chosen'
+      );
+    });
+
+    it('should not add the page note for a page opened after the active one was chosen', async () => {
+      mockAgent.runAgent.mockReturnValue(new Observable<BaseEvent>());
+      const service = new ChatService(mockUiSettings, mockCoreChatService, undefined, {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One' } },
+            { id: 'ds-2', attributes: { title: 'Source Two' } },
+          ],
+        }),
+      } as any);
+      const store = createStatefulContextStore();
+      (window as any).assistantContextStore = store;
+      service.newThread();
+      service.setDataSourceId('ds-2');
+      // The user opens a page on another data source while a run is still going.
+      store.addContext({
+        categories: ['page', 'static'],
+        description: 'Page context',
+        value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+      });
+
+      await service.sendMessage('test', []);
+
+      const ctx = mockAgent.runAgent.mock.calls[0][0].context.find(
+        (c: any) => c.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+      expect(ctx?.value).not.toContain('The current page shows data from');
+    });
+
+    it('should not include available-data-sources-context context when only one data source is available', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
@@ -606,7 +697,6 @@ describe('ChatService', () => {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
-            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
           ],
         }),
       };
@@ -621,7 +711,7 @@ describe('ChatService', () => {
       (window as any).assistantContextStore = contextStore;
 
       service.newThread();
-      service.setSessionDataSourceList('ds-1');
+      service.setDataSourceId('ds-1');
       mockUiSettings.get.mockReturnValue(undefined);
 
       await service.sendMessage('test', []);
@@ -1570,6 +1660,25 @@ describe('ChatService', () => {
       expect(result.observable).toBeDefined();
     });
 
+    it('should offer the caller data source for that message only, without making it active', async () => {
+      let seenDuringSend: string | undefined;
+      chatService.setChatWindowInstance({
+        sendMessage: jest.fn(async () => {
+          seenDuringSend = await chatService.peekCurrentDataSourceId();
+        }),
+        startNewChat: jest.fn(),
+      } as any);
+      mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
+
+      chatService.setDataSourceId('ds-previous');
+      await chatService.sendMessageWithWindow('test', [], { dataSourceId: 'ds-caller' });
+
+      // The window's send validates it and decides; nothing is written before that.
+      expect(seenDuringSend).toBe('ds-caller');
+      expect(chatService.getConfirmedDataSourceId()).toBe('ds-previous');
+      expect(await chatService.peekCurrentDataSourceId()).toBe('ds-previous');
+    });
+
     it('should clear conversation when clearConversation option is true', async () => {
       const mockStartNewChat = jest.fn();
       const mockSendMessage = jest.fn().mockResolvedValue(undefined);
@@ -2199,7 +2308,7 @@ describe('ChatService', () => {
     });
   });
 
-  describe('getWorkspaceAwareDataSourceId with page context priority', () => {
+  describe('page context and default data source fallback', () => {
     let mockWorkspaces: any;
 
     beforeEach(() => {
@@ -2239,7 +2348,7 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.peekCurrentDataSourceId();
 
       expect(result).toBe('page-data-source-id');
     });
@@ -2266,7 +2375,7 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.peekCurrentDataSourceId();
 
       expect(result).toBe('workspace-fallback-id');
     });
@@ -2292,7 +2401,7 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.peekCurrentDataSourceId();
 
       expect(result).toBe('workspace-fallback-id');
     });
@@ -2307,7 +2416,7 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.peekCurrentDataSourceId();
 
       // Should still fallback to workspace data source even without context store
       expect(result).toBe('workspace-data-source-id');
@@ -2327,9 +2436,10 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.peekCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      // A broken page context is skipped; the default data source still applies
+      expect(result).toBe('workspace-data-source-id');
     });
 
     afterEach(() => {
@@ -2362,7 +2472,7 @@ describe('ChatService', () => {
       };
     });
 
-    it('should return sorted data sources excluding AnalyticEngine', async () => {
+    it('should return every data source, AnalyticEngine included, sorted by title', async () => {
       const service = new (ChatService as any)(
         mockUiSettings,
         mockCoreChatService,
@@ -2375,6 +2485,7 @@ describe('ChatService', () => {
       expect(result).toEqual([
         { id: 'ds-2', title: 'Alpha Source' },
         { id: 'ds-1', title: 'Beta Source' },
+        { id: 'ds-3', title: 'Gamma AE' },
       ]);
     });
 
@@ -2413,81 +2524,129 @@ describe('ChatService', () => {
 
       expect(result).toEqual([]);
     });
-
-    it('should bypass the cache when forceRefresh is true', async () => {
-      const service = new (ChatService as any)(
-        mockUiSettings,
-        mockCoreChatService,
-        undefined,
-        mockSavedObjectsClient
-      );
-
-      await service.getAvailableDataSources();
-      await service.getAvailableDataSources(true);
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-    });
   });
 
   describe('validateDataSourceId', () => {
     let mockSavedObjectsClient: any;
 
-    const buildClient = (ids: string[]) => ({
+    // listed: what find() returns; readable: what get() can read (in this workspace)
+    const buildClient = (listed: string[], readable: string[] = listed) => ({
       find: jest.fn().mockResolvedValue({
-        savedObjects: ids.map((id) => ({
-          id,
-          attributes: { title: `title-${id}`, dataSourceEngineType: 'OpenSearch' },
-        })),
+        savedObjects: listed.map((id) => ({ id, attributes: { title: `title-${id}` } })),
       }),
+      get: jest.fn(async (_type: string, id: string) =>
+        readable.includes(id)
+          ? { id, attributes: { title: `title-${id}` } }
+          : { id, error: { statusCode: 404, message: 'Not found' } }
+      ),
     });
 
     beforeEach(() => {
-      mockSavedObjectsClient = buildClient(['ds-1', 'ds-2']);
+      mockSavedObjectsClient = buildClient(['ds-1', 'ds-2'], ['ds-1', 'ds-2', 'ds-far']);
     });
 
     const buildService = (client: any = mockSavedObjectsClient) =>
       new (ChatService as any)(mockUiSettings, mockCoreChatService, undefined, client);
 
-    it('should accept a known data source id and return its info', async () => {
+    it('should accept a listed data source without reading it', async () => {
       const result = await buildService().validateDataSourceId('ds-1');
 
       expect(result.valid).toBe(true);
       expect(result.dataSource).toEqual({ id: 'ds-1', title: 'title-ds-1' });
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
     });
 
-    it('should reject an unknown id and report the valid ids', async () => {
-      const result = await buildService().validateDataSourceId('not-a-data-source');
+    it('should accept an unlisted readable data source and add it to the available list', async () => {
+      const service = buildService();
+
+      const result = await service.validateDataSourceId('ds-far');
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('data-source', 'ds-far');
+      expect(result.valid).toBe(true);
+      expect(result.dataSource).toEqual({ id: 'ds-far', title: 'title-ds-far' });
+      expect(result.availableDataSources.map((ds: any) => ds.id)).toEqual([
+        'ds-1',
+        'ds-2',
+        'ds-far',
+      ]);
+      expect((await service.getAvailableDataSources()).map((ds: any) => ds.id)).toContain('ds-far');
+
+      // Already in the list now: no second read.
+      await service.validateDataSourceId('ds-far');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reject an unreadable id and leave the available list unchanged', async () => {
+      const service = buildService();
+
+      const result = await service.validateDataSourceId('not-a-data-source');
 
       expect(result.valid).toBe(false);
       expect(result.dataSource).toBeUndefined();
       expect(result.availableDataSources.map((ds: any) => ds.id)).toEqual(['ds-1', 'ds-2']);
     });
 
-    it('should refresh the cached list once before rejecting an id', async () => {
+    it('should reject an id on any read failure and read it again next time', async () => {
+      mockSavedObjectsClient.get = jest.fn().mockRejectedValue(new Error('Internal Server Error'));
       const service = buildService();
-      // Warm the cache, then have the client report a newly created data source.
-      await service.getAvailableDataSources();
-      mockSavedObjectsClient.find.mockResolvedValue({
-        savedObjects: [
-          { id: 'ds-1', attributes: { title: 'title-ds-1' } },
-          { id: 'ds-2', attributes: { title: 'title-ds-2' } },
-          { id: 'ds-new', attributes: { title: 'Freshly created' } },
-        ],
-      });
 
-      const result = await service.validateDataSourceId('ds-new');
-
-      expect(result.valid).toBe(true);
-      expect(result.dataSource).toEqual({ id: 'ds-new', title: 'Freshly created' });
+      expect((await service.validateDataSourceId('ds-far')).valid).toBe(false);
+      expect((await service.validateDataSourceId('ds-far')).valid).toBe(false);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(2);
     });
 
-    it('should fail open when the data source list cannot be resolved', async () => {
-      // An empty list also means "no savedObjectsClient" or "find() threw" — validation
-      // must not make switching impossible in that case.
+    it('should forget data sources added by a read on newThread', async () => {
+      const service = buildService();
+      await service.validateDataSourceId('ds-far');
+
+      service.newThread();
+
+      expect((await service.getAvailableDataSources()).map((ds: any) => ds.id)).toEqual([
+        'ds-1',
+        'ds-2',
+      ]);
+    });
+
+    it('should add a data source read by two checks at once only once', async () => {
+      const service = buildService();
+
+      await Promise.all([
+        service.validateDataSourceId('ds-far'),
+        service.validateDataSourceId('ds-far'),
+      ]);
+
+      const ids = (await service.getAvailableDataSources()).map((ds: any) => ds.id);
+      expect(ids.filter((id: string) => id === 'ds-far')).toHaveLength(1);
+    });
+
+    it('should forget data sources added by a read when another conversation is opened', async () => {
+      const service = buildService();
+      await service.validateDataSourceId('ds-far');
+
+      service.clearSessionDataSourceAndContext();
+
+      expect((await service.getAvailableDataSources()).map((ds: any) => ds.id)).toEqual([
+        'ds-1',
+        'ds-2',
+      ]);
+    });
+
+    it('should accept an AnalyticEngine data source', async () => {
+      mockSavedObjectsClient.get = jest.fn().mockResolvedValue({
+        id: 'ds-analytic',
+        attributes: { title: 'Analytic', dataSourceEngineType: 'AnalyticEngine' },
+      });
+
+      const result = await buildService().validateDataSourceId('ds-analytic');
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject any id when data sources cannot be read at all', async () => {
       const serviceWithoutClient = new (ChatService as any)(mockUiSettings, mockCoreChatService);
       const result = await serviceWithoutClient.validateDataSourceId('anything');
 
-      expect(result.valid).toBe(true);
+      expect(result.valid).toBe(false);
       expect(result.availableDataSources).toEqual([]);
     });
   });
@@ -2527,7 +2686,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
-    it('should not confirm workspace-resolved data source when called in read-only mode', async () => {
+    it('should not make the default data source active when only peeking', async () => {
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-1');
 
@@ -2542,7 +2701,6 @@ describe('ChatService', () => {
 
       expect(result).toBe('ds-1');
       expect(service.getConfirmedDataSourceId()).toBeUndefined();
-      expect(service.getSessionDataSourceList()).toEqual([]);
     });
 
     it('should return data source ID even if not in available data sources', async () => {
@@ -2578,7 +2736,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
-    it('should return cachedDataSourceId when it is valid', async () => {
+    it('should return the active data source', async () => {
       const service = new (ChatService as any)(
         mockUiSettings,
         mockCoreChatService,
@@ -2592,7 +2750,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-2');
     });
 
-    it('should return cachedDataSourceId even if not in available data sources', async () => {
+    it('should return the active data source even if not in available data sources', async () => {
       const service = new (ChatService as any)(
         mockUiSettings,
         mockCoreChatService,
@@ -2606,7 +2764,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-removed');
     });
 
-    it('should prioritize page context data source when valid', async () => {
+    it('should use the page context data source when there is no active one', async () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
@@ -2629,7 +2787,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
-    it('should not confirm page-context data source when called in read-only mode', async () => {
+    it('should not make the page data source active when only peeking', async () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
@@ -2651,7 +2809,6 @@ describe('ChatService', () => {
 
       expect(result).toBe('ds-1');
       expect(service.getConfirmedDataSourceId()).toBeUndefined();
-      expect(service.getSessionDataSourceList()).toEqual([]);
     });
 
     it('should return page context data source even if not in available list', async () => {
@@ -2683,17 +2840,429 @@ describe('ChatService', () => {
     });
   });
 
-  describe('session data source list', () => {
-    it('should dedupe data source ids and clear them on newThread', () => {
-      chatService.setSessionDataSourceList('ds-1');
-      chatService.setSessionDataSourceList('ds-1');
-      chatService.setSessionDataSourceList('ds-2');
+  describe('active data source', () => {
+    const setPageDataSource = (id?: string) => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue(
+          id
+            ? [
+                {
+                  categories: ['page', 'static'],
+                  description: 'Page context',
+                  value: { appId: 'explore', dataset: { dataSource: { id } } },
+                },
+              ]
+            : []
+        ),
+        addContext: jest.fn(),
+        removeContextById: jest.fn(),
+      };
+    };
 
-      expect(chatService.getSessionDataSourceList()).toEqual(['ds-1', 'ds-2']);
+    let service: any;
+    const existing = ['ds-default', 'ds-page', 'ds-other', 'ds-agent'];
 
-      chatService.newThread();
+    // What the chat window does on send: validate the candidate, then make it active or drop it.
+    const sendWith = async (): Promise<string | undefined> => {
+      const candidate = await service.peekDataSourceCandidate();
+      if (!candidate) return undefined;
+      const { valid } = await service.validateDataSourceId(candidate.id);
+      if (valid)
+        service.setDataSourceId(candidate.id, { pageDataSourceId: candidate.pageDataSourceId });
+      else service.discardDataSourceCandidate(candidate);
+      return valid ? candidate.id : undefined;
+    };
 
-      expect(chatService.getSessionDataSourceList()).toEqual([]);
+    beforeEach(() => {
+      localStorage.clear();
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-default');
+      service = new (ChatService as any)(mockUiSettings, mockCoreChatService, undefined, {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: existing.map((id) => ({ id, attributes: { title: id } })),
+        }),
+        get: jest.fn(async (_type: string, id: string) =>
+          existing.includes(id)
+            ? { id, attributes: { title: id } }
+            : { id, error: { statusCode: 404, message: 'Not found' } }
+        ),
+      });
+      service.newThread();
+    });
+
+    it('should not make anything active before a message is sent', async () => {
+      setPageDataSource('ds-page');
+
+      expect(await service.peekCurrentDataSourceId()).toBe('ds-page');
+      expect(await service.getCurrentDataSourceId()).toBe('ds-page');
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+      expect(localStorage.getItem('chat.conversationDataSourceState')).toBeNull();
+    });
+
+    it('should not make an invalid page data source active, and not retry it as a page change', async () => {
+      setPageDataSource('ds-deleted');
+
+      expect(await sendWith()).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+
+      // After the user picks, the same page does not take over again.
+      service.setDataSourceId('ds-other');
+      expect(await sendWith()).toBe('ds-other');
+    });
+
+    it('should use a valid caller data source for the message and make it active', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      service.pendingDataSourceId = 'ds-agent';
+
+      expect(await sendWith()).toBe('ds-agent');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-agent');
+    });
+
+    it('should drop an invalid caller data source without touching the active one', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      service.pendingDataSourceId = 'ds-bogus';
+
+      expect(await sendWith()).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBe('ds-page');
+      expect(await sendWith()).toBe('ds-page');
+    });
+
+    it('should drop a deleted active data source when the next message is sent', async () => {
+      service.setDataSourceId('ds-deleted');
+
+      expect(await sendWith()).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+      localStorage.clear();
+    });
+
+    it('should make the first resolved data source active and persist it per thread', async () => {
+      setPageDataSource('ds-page');
+
+      expect(await sendWith()).toBe('ds-page');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-page');
+      expect(
+        JSON.parse(localStorage.getItem('chat.conversationDataSourceState')!)[
+          mockCoreChatService.getThreadId() as string
+        ]
+      ).toEqual({ confirmedDataSourceId: 'ds-page' });
+    });
+
+    it('should fall back to the default data source when there is no active or page one', async () => {
+      setPageDataSource(undefined);
+
+      expect(await sendWith()).toBe('ds-default');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-default');
+    });
+
+    it('should keep the active data source while the page data source does not change', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+
+      // The agent switches; the user stays on the same page
+      service.setDataSourceId('ds-agent');
+
+      expect(await sendWith()).toBe('ds-agent');
+    });
+
+    it('should make a changed page data source active', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      service.setDataSourceId('ds-agent');
+
+      // The user moves to a page on another data source
+      setPageDataSource('ds-other');
+
+      expect(await sendWith()).toBe('ds-other');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-other');
+    });
+
+    it('should not treat leaving a page without a data source as a change', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      service.setDataSourceId('ds-agent');
+
+      setPageDataSource(undefined);
+      expect(await sendWith()).toBe('ds-agent');
+
+      setPageDataSource('ds-page');
+      expect(await sendWith()).toBe('ds-agent');
+    });
+
+    it('should let a later explicit choice win over a page change not yet seen', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+
+      // The page moves, then the user picks before the next resolution
+      setPageDataSource('ds-other');
+      service.setDataSourceId('ds-agent');
+
+      expect(await sendWith()).toBe('ds-agent');
+    });
+
+    it('should not change state when only peeking, including a page change', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      setPageDataSource('ds-other');
+
+      expect(await service.peekCurrentDataSourceId()).toBe('ds-other');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-page');
+    });
+
+    it('should restore the stored active data source when the page shows no data source', async () => {
+      const threadId = mockCoreChatService.getThreadId() as string;
+      localStorage.setItem(
+        'chat.conversationDataSourceState',
+        JSON.stringify({ [threadId]: { confirmedDataSourceId: 'ds-agent' } })
+      );
+      setPageDataSource(undefined);
+
+      service.restoreDataSourceStateFromStore(threadId);
+
+      expect(service.getConfirmedDataSourceId()).toBe('ds-agent');
+      expect(await sendWith()).toBe('ds-agent');
+    });
+
+    it('should let the page a restored thread is opened on override the stored data source', async () => {
+      const threadId = mockCoreChatService.getThreadId() as string;
+      localStorage.setItem(
+        'chat.conversationDataSourceState',
+        JSON.stringify({ [threadId]: { confirmedDataSourceId: 'ds-agent' } })
+      );
+      setPageDataSource('ds-page');
+
+      service.restoreDataSourceStateFromStore(threadId);
+      expect(service.getConfirmedDataSourceId()).toBe('ds-agent');
+
+      expect(await sendWith()).toBe('ds-page');
+      // Seen once: staying on the page does not take over a later choice.
+      service.setDataSourceId('ds-other');
+      expect(await sendWith()).toBe('ds-other');
+    });
+
+    it('should ignore fields of older stored entries', async () => {
+      const threadId = mockCoreChatService.getThreadId() as string;
+      localStorage.setItem(
+        'chat.conversationDataSourceState',
+        JSON.stringify({
+          [threadId]: { confirmedDataSourceId: 'ds-agent', sessionDataSourceList: ['ds-page'] },
+        })
+      );
+
+      service.restoreDataSourceStateFromStore(threadId);
+
+      expect(service.getConfirmedDataSourceId()).toBe('ds-agent');
+    });
+
+    it('should report where each candidate comes from', async () => {
+      setPageDataSource(undefined);
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-default',
+        source: 'default',
+      });
+
+      setPageDataSource('ds-page');
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-page',
+        source: 'page',
+        pageDataSourceId: 'ds-page',
+      });
+
+      await sendWith();
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-page',
+        source: 'active',
+        pageDataSourceId: 'ds-page',
+      });
+
+      service.pendingDataSourceId = 'ds-agent';
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-agent',
+        source: 'caller',
+        pageDataSourceId: 'ds-page',
+      });
+    });
+
+    it('should not read a listed data source on send', async () => {
+      setPageDataSource('ds-page');
+      await sendWith();
+      await sendWith();
+
+      expect(service.savedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should drop a restored active data source that no longer exists on the next send', async () => {
+      const threadId = mockCoreChatService.getThreadId() as string;
+      localStorage.setItem(
+        'chat.conversationDataSourceState',
+        JSON.stringify({ [threadId]: { confirmedDataSourceId: 'ds-deleted' } })
+      );
+
+      service.restoreDataSourceStateFromStore(threadId);
+      // Restoring does not validate; using it does.
+      expect(service.getConfirmedDataSourceId()).toBe('ds-deleted');
+
+      expect(await sendWith()).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+    });
+
+    it('should write the store only when the active data source changes', async () => {
+      const setItem = jest.spyOn(Storage.prototype, 'setItem');
+      setPageDataSource('ds-page');
+      await sendWith();
+      const writes = setItem.mock.calls.length;
+
+      await sendWith();
+      await sendWith();
+      expect(setItem.mock.calls.length).toBe(writes);
+
+      service.setDataSourceId('ds-agent');
+      expect(setItem.mock.calls.length).toBe(writes + 1);
+      setItem.mockRestore();
+    });
+
+    it('should ignore a stored data source that is not a string', async () => {
+      const threadId = mockCoreChatService.getThreadId() as string;
+      localStorage.setItem(
+        'chat.conversationDataSourceState',
+        JSON.stringify({ [threadId]: { confirmedDataSourceId: { id: 'ds-agent' } } })
+      );
+
+      service.restoreDataSourceStateFromStore(threadId);
+
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+    });
+
+    it('should treat a page change during validation as new on the next message', async () => {
+      setPageDataSource('ds-page');
+      const candidate = await service.peekDataSourceCandidate();
+      // The user moves to another data source while the candidate is being checked.
+      setPageDataSource('ds-other');
+      expect((await service.validateDataSourceId(candidate.id)).valid).toBe(true);
+      service.setDataSourceId(candidate.id, { pageDataSourceId: candidate.pageDataSourceId });
+      expect(service.getConfirmedDataSourceId()).toBe('ds-page');
+
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-other',
+        source: 'page',
+        pageDataSourceId: 'ds-other',
+      });
+    });
+
+    it('should check an invalid default again on the next send until the user picks one', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-deleted');
+      setPageDataSource(undefined);
+
+      expect(await sendWith()).toBeUndefined();
+      expect(await service.peekDataSourceCandidate()).toEqual({
+        id: 'ds-deleted',
+        source: 'default',
+        pageDataSourceId: undefined,
+      });
+
+      service.setDataSourceId('ds-other');
+      expect(await sendWith()).toBe('ds-other');
+    });
+
+    it('should give the history data source only when it can be used', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      setPageDataSource(undefined);
+      expect(await service.getHistoryDataSourceId()).toBe('ds-default');
+
+      // A default that points at a deleted data source must not reach the history request.
+      getDefaultDataSourceId.mockResolvedValue('ds-deleted');
+      expect(await service.getHistoryDataSourceId()).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+
+      setPageDataSource('ds-page');
+      expect(await service.getHistoryDataSourceId()).toBe('ds-page');
+    });
+
+    it('should clear the active data source on newThread', async () => {
+      service.setDataSourceId('ds-agent');
+      service.newThread();
+
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+    });
+
+    describe('data source chosen in the picker', () => {
+      const PICKED = (id: string) => `"${id}" was chosen by the user in the data source picker.`;
+      // The available-data-sources context the next run would send.
+      const dsContext = async (): Promise<string> => {
+        await service.buildAvailableDsContext(await service.getCurrentDataSourceId());
+        const calls = (window as any).assistantContextStore.addContext.mock.calls;
+        return calls[calls.length - 1][0].value;
+      };
+      const stored = () =>
+        JSON.parse(localStorage.getItem('chat.conversationDataSourceState')!)[
+          mockCoreChatService.getThreadId() as string
+        ];
+
+      beforeEach(() => setPageDataSource(undefined));
+
+      it('should tell the agent the user chose the active data source in the picker', async () => {
+        service.setDataSourceId('ds-other', { chosenInPicker: true });
+        expect(await sendWith()).toBe('ds-other');
+
+        const value = await dsContext();
+        expect(value).toContain(
+          `Currently active data source: "ds-other" (id: ds-other)\n${PICKED('ds-other')}\n`
+        );
+        expect(stored()).toEqual({ confirmedDataSourceId: 'ds-other', chosenInPicker: true });
+      });
+
+      it('should keep saying so on later messages with the same data source', async () => {
+        service.setDataSourceId('ds-other', { chosenInPicker: true });
+        await sendWith();
+        await sendWith();
+
+        expect(await dsContext()).toContain(PICKED('ds-other'));
+      });
+
+      it('should not say so for a default, page or switched data source', async () => {
+        expect(await sendWith()).toBe('ds-default');
+        expect(await dsContext()).not.toContain('data source picker');
+
+        service.setDataSourceId('ds-other', { chosenInPicker: true });
+        service.setDataSourceId('ds-agent');
+        expect(await dsContext()).not.toContain('data source picker');
+        expect(stored()).toEqual({ confirmedDataSourceId: 'ds-agent' });
+
+        service.setDataSourceId('ds-other', { chosenInPicker: true });
+        setPageDataSource('ds-page');
+        expect(await sendWith()).toBe('ds-page');
+        expect(await dsContext()).not.toContain('data source picker');
+      });
+
+      it('should restore it with the stored active data source', async () => {
+        const threadId = mockCoreChatService.getThreadId() as string;
+        localStorage.setItem(
+          'chat.conversationDataSourceState',
+          JSON.stringify({
+            [threadId]: { confirmedDataSourceId: 'ds-other', chosenInPicker: true },
+          })
+        );
+
+        service.restoreDataSourceStateFromStore(threadId);
+        expect(await sendWith()).toBe('ds-other');
+
+        expect(await dsContext()).toContain(PICKED('ds-other'));
+      });
+
+      it('should drop it with an active data source that can no longer be used', async () => {
+        service.setDataSourceId('ds-deleted', { chosenInPicker: true });
+        expect(await sendWith()).toBeUndefined();
+
+        // The default is used next, and it was not chosen in the picker.
+        expect(await sendWith()).toBe('ds-default');
+        expect(await dsContext()).not.toContain('data source picker');
+      });
     });
   });
 

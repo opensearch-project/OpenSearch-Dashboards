@@ -33,8 +33,7 @@ describe('useSwitchDataSourceAction', () => {
 
     mockChatService = {
       setDataSourceId: jest.fn(),
-      getConfirmedDataSourceId: jest.fn().mockReturnValue(undefined),
-      getSessionDataSourceList: jest.fn().mockReturnValue(['ds-a', 'ds-b']),
+      getConfirmedDataSourceId: jest.fn().mockReturnValue('ds-b'),
       validateDataSourceId: jest.fn().mockResolvedValue({
         valid: true,
         dataSource: { id: 'ds-a', title: 'Cluster A' },
@@ -66,7 +65,7 @@ describe('useSwitchDataSourceAction', () => {
   });
 
   describe('handler', () => {
-    it('should set the confirmed data source and resolve its authoritative title', async () => {
+    it('should set the active data source and resolve its authoritative title', async () => {
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
@@ -83,11 +82,10 @@ describe('useSwitchDataSourceAction', () => {
       );
     });
 
-    it('should no-op without validating or mutating when only one data source is in the session', async () => {
-      mockChatService.getSessionDataSourceList.mockReturnValue(['ds-a']);
+    it('should no-op without validating or mutating when the id is already active', async () => {
       renderHook();
 
-      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+      const result = await registeredAction.handler({ dataSourceId: 'ds-b' });
 
       expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
       expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
@@ -95,10 +93,10 @@ describe('useSwitchDataSourceAction', () => {
         expect.objectContaining({
           success: true,
           skipped: true,
+          dataSourceId: 'ds-b',
         })
       );
-      expect(result.message).toContain('Skipped switch_data_source');
-      expect(result.message).toContain('1 data source');
+      expect(result.message).toContain('already the active data source');
     });
 
     it('should reject an id that is not a known data source without mutating state', async () => {

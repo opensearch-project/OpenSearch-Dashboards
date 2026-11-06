@@ -7,15 +7,15 @@
  * The data-source UI state tracked for a single conversation.
  */
 export interface ConversationDataSourceState {
-  // Data source ids that have appeared in the conversation.
-  sessionDataSourceList: string[];
-  // The user-confirmed conversation-level data source override.
+  // The data source this conversation last ran against.
   confirmedDataSourceId?: string;
+  // Whether the user chose that data source in the data source picker.
+  chosenInPicker?: boolean;
 }
 
 /**
  * localStorage threadId-key-value store for per-conversation data source state.
- * It stores: the session data source list + confirmed data source
+ * It stores the conversation's active data source, read when the conversation is loaded
  *
  * since agentic memory provider's saveConversation is a no-op. use this to store and restore runtime state
  */
@@ -55,8 +55,8 @@ export class ConversationDataSourceStore {
 
     delete map[threadId];
     map[threadId] = {
-      sessionDataSourceList: [...(state.sessionDataSourceList ?? [])],
       confirmedDataSourceId: state.confirmedDataSourceId,
+      ...(state.chosenInPicker ? { chosenInPicker: true } : {}),
     };
 
     const threadIds = Object.keys(map);

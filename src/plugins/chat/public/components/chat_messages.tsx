@@ -484,7 +484,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
         .getSuggestions({
           appId: currentAppId,
           pathname: window.location.pathname,
-          getDataSourceId: () => chatService.getCurrentDataSourceId(),
+          getDataSourceId: () => chatService.peekCurrentDataSourceId(),
           contexts: chatService.getAgentVisibleContexts(),
           defaults: visibleDefaults,
         })

@@ -32,6 +32,17 @@ export interface DataSourceInfo {
   title: string;
 }
 
+/** Where a data source id for the next message came from. */
+export type DataSourceCandidateSource = 'caller' | 'page' | 'active' | 'default';
+
+export interface DataSourceCandidate {
+  id: string;
+  source: DataSourceCandidateSource;
+  // The page data source when the candidate was picked. Validation is async and the page can
+  // change meanwhile; the page seen here is the one this message accounts for.
+  pageDataSourceId?: string;
+}
+
 export interface ChatState {
   messages: Message[];
   isStreaming: boolean;
@@ -84,14 +95,24 @@ export class ChatService {
 
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
-  // User-confirmed conversation-level data source override.
+  // The conversation's active data source. The latest valid data source to arrive wins: the
+  // picker, switch_data_source, an external caller, or a new page data source. The default data
+  // source is used only when there is none.
   private confirmedDataSourceId?: string;
-  // Data source ids that have appeared in this conversation.
-  private sessionDataSourceList: string[] = [];
-  // Persists confirmedDataSourceId + sessionDataSourceList per threadId
+  // Whether the user chose the active data source in the picker. The agent is told so: without
+  // it, a general request such as "What indices do I have?" can make it ask the user again.
+  private activeChosenInPicker = false;
+  // The page data source last seen. A page data source counts as new only when it differs from
+  // this one. Kept in memory only, so after a reload the page counts as new once.
+  private lastPageDataSourceId?: string;
+  // A data source passed by an external caller (sendMessageWithWindow) for the next message.
+  private pendingDataSourceId?: string;
+  // Persists confirmedDataSourceId per threadId. Read only when a conversation is loaded.
   private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
+  // Data sources outside the cached list that a direct get confirmed, merged into the list.
+  private extraDataSources: DataSourceInfo[] = [];
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -291,11 +312,16 @@ export class ChatService {
       chatWindowInstance.startNewChat();
     }
 
-    if (options?.dataSourceId) {
-      this.setDataSourceId(options.dataSourceId);
-    }
+    // The caller's data source is checked when the message is sent, and becomes active only if
+    // it is valid.
+    this.pendingDataSourceId = options?.dataSourceId || undefined;
 
-    await chatWindowInstance.sendMessage({ content, messages });
+    try {
+      await chatWindowInstance.sendMessage({ content, messages });
+    } finally {
+      // Applies to this message only, also when the send was skipped (e.g. while streaming).
+      this.pendingDataSourceId = undefined;
+    }
 
     // Create a user message for consistency with the return type
     const userMessage: UserMessage = {
@@ -312,12 +338,14 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  private getDataSourceFromPageContext(readOnly?: boolean) {
-    const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
-    if (!readOnly && dsId) {
-      this.setDataSourceId(dsId);
+  private getDataSourceFromPageContext(): string | undefined {
+    try {
+      const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+      return typeof dsId === 'string' && dsId ? dsId : undefined;
+    } catch {
+      // A broken page context must not block sending; fall back to the other sources.
+      return undefined;
     }
-    return dsId;
   }
 
   private getAllAssistantContexts(): any[] {
@@ -379,48 +407,23 @@ export class ChatService {
   }
 
   /**
-   * Get workspace-aware data source ID
-   * Determines the correct data source based on current workspace context
+   * The default data source for the current scope: the workspace default inside a workspace,
+   * the global default otherwise.
    */
-  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
+  private async getDefaultDataSourceIdForScope(): Promise<string | undefined> {
     try {
-      // Try to get data source from page context first
-      const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
-      if (pageDataSourceId) {
-        if (!readOnly) {
-          this.setDataSourceId(pageDataSourceId);
-        }
-
-        return pageDataSourceId;
-      }
-
-      // Fallback to existing workspace-aware logic
       if (!this.uiSettings) {
         // eslint-disable-next-line no-console
         console.warn('UI Settings not available, using default data source');
         return undefined;
       }
 
-      // Get workspace context
-      const workspaces = this.workspaces;
-      if (!workspaces) {
-        // eslint-disable-next-line no-console
-        console.warn('Workspaces service not available, using global scope');
-        return undefined;
-      }
-
-      const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
-
-      // Determine scope based on workspace context
-      const scope: UiSettingScope = !!currentWorkspaceId
+      const currentWorkspaceId = this.workspaces?.currentWorkspaceId$.getValue();
+      const scope: UiSettingScope = currentWorkspaceId
         ? UiSettingScope.WORKSPACE
         : UiSettingScope.GLOBAL;
 
-      // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
-        this.setDataSourceId(dataSourceId || undefined);
-      }
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -430,121 +433,172 @@ export class ChatService {
   }
 
   /**
-   * Get the current data source ID from all resolution sources.
+   * The data source the next message would use and where it came from, without changing any
+   * state. The chat window validates it when the message is sent and only then makes it active.
    *
-   * Priority (highest to lowest):
-   *   1. getDataSourceFromPageContext() — data source inferred from the current page/panel context
-   *   2. confirmedDataSourceId — explicit conversation-level override confirmed or selected by the user
-   *   3. getWorkspaceAwareDataSourceId() — workspace default
-   *
-   * @param readOnly when true, resolve without committing anything: no setDataSourceId
+   * The latest data source to arrive wins:
+   *   1. caller: passed by an external caller for this message (sendMessageWithWindow)
+   *   2. page: the page context data source, when it differs from the one last seen
+   *   3. active: the conversation's active data source
+   *   4. default: the default data source of the current workspace or of the global scope
    */
-  public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
-    const ds =
-      this.getDataSourceFromPageContext(readOnly) ||
-      this.confirmedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId(readOnly));
+  public async peekDataSourceCandidate(): Promise<DataSourceCandidate | undefined> {
+    const pageDataSourceId = this.getDataSourceFromPageContext();
+    if (this.pendingDataSourceId) {
+      return { id: this.pendingDataSourceId, source: 'caller', pageDataSourceId };
+    }
 
-    return ds;
+    if (pageDataSourceId && pageDataSourceId !== this.lastPageDataSourceId) {
+      return { id: pageDataSourceId, source: 'page', pageDataSourceId };
+    }
+
+    if (this.confirmedDataSourceId) {
+      return { id: this.confirmedDataSourceId, source: 'active', pageDataSourceId };
+    }
+
+    const defaultDataSourceId = await this.getDefaultDataSourceIdForScope();
+    return defaultDataSourceId
+      ? { id: defaultDataSourceId, source: 'default', pageDataSourceId }
+      : undefined;
+  }
+
+  public async peekCurrentDataSourceId(): Promise<string | undefined> {
+    return (await this.peekDataSourceCandidate())?.id;
   }
 
   /**
-   * Pure read of the resolved data source — never mutates conversation state.
+   * The data source to read conversation history from: the next message's candidate, only if
+   * it can be used. An unusable one (e.g. a default data source that was deleted) gives
+   * undefined, so the history request does not fail. It does not change the active data
+   * source; like any check, a data source confirmed by a direct read joins the available list.
    */
-  public peekCurrentDataSourceId(): Promise<string | undefined> {
-    return this.getCurrentDataSourceId(true);
+  public async getHistoryDataSourceId(): Promise<string | undefined> {
+    const candidate = await this.peekDataSourceCandidate();
+    if (!candidate) return undefined;
+    const { valid } = await this.validateDataSourceId(candidate.id);
+    return valid ? candidate.id : undefined;
+  }
+
+  /**
+   * The data source runs are routed to: the active one. Falls back to the unvalidated candidate
+   * when nothing is active yet (e.g. a run started through the core sendMessage API, which skips
+   * the chat window's validation).
+   */
+  public async getCurrentDataSourceId(): Promise<string | undefined> {
+    return this.confirmedDataSourceId ?? (await this.peekCurrentDataSourceId());
   }
 
   public getConfirmedDataSourceId(): string | undefined {
     return this.confirmedDataSourceId;
   }
 
+  /**
+   * Drop a candidate that failed validation. The user then picks one, and the choice becomes
+   * active. A caller id applies to one message only, and a page id is recorded as seen so the same
+   * page is not tried again. An active id is cleared. The default data source is a setting, not
+   * conversation state: nothing is dropped, so until the user picks one each send checks it again
+   * and shows the picker again.
+   */
+  public discardDataSourceCandidate(candidate: DataSourceCandidate): void {
+    switch (candidate.source) {
+      case 'caller':
+        this.pendingDataSourceId = undefined;
+        break;
+      case 'page':
+        this.lastPageDataSourceId = candidate.id;
+        break;
+      case 'active':
+        this.confirmedDataSourceId = undefined;
+        this.activeChosenInPicker = false;
+        this.persistDataSourceState();
+        break;
+      case 'default':
+        break;
+    }
+  }
+
   public clearSessionDataSourceAndContext(): void {
     this.confirmedDataSourceId = undefined;
-    this.sessionDataSourceList = [];
+    this.activeChosenInPicker = false;
+    this.lastPageDataSourceId = undefined;
+    this.pendingDataSourceId = undefined;
+    this.extraDataSources = [];
     this.clearDynamicContextFromStore(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
   }
 
-  public setSessionDataSourceList(id: string | undefined): void {
-    if (!id || this.sessionDataSourceList.includes(id)) {
-      return;
-    }
-
-    this.sessionDataSourceList = [...this.sessionDataSourceList, id];
-    this.persistDataSourceState();
-  }
-
-  public getSessionDataSourceList(): string[] {
-    return [...this.sessionDataSourceList];
-  }
+  /**
+   * @deprecated The chat no longer keeps a list of data sources seen in a conversation; every
+   * available data source is offered to the agent. This is a no-op kept for existing callers.
+   */
+  public setSessionDataSourceList(_id: string | undefined): void {}
 
   private clearConversationDataSourceState(): void {
     this.confirmedDataSourceId = undefined;
-    this.sessionDataSourceList = [];
+    this.activeChosenInPicker = false;
+    this.lastPageDataSourceId = undefined;
+    this.pendingDataSourceId = undefined;
     this.cachedAvailableDataSources = undefined;
+    this.extraDataSources = [];
   }
 
   private persistDataSourceState(): void {
     const threadId = this.getThreadId();
     if (!threadId) return;
     this.conversationDataSourceStore.set(threadId, {
-      sessionDataSourceList: this.sessionDataSourceList,
       confirmedDataSourceId: this.confirmedDataSourceId,
+      chosenInPicker: this.activeChosenInPicker,
     });
   }
 
   /**
-   * Restore a conversation's data source state from the store
+   * Load a conversation's active data source from the store. It is validated when the next
+   * message is sent. The page the conversation is opened on counts as a new page data source.
    */
-  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
-    const stored = this.conversationDataSourceStore.get(threadId);
-    if (!stored) return;
-
-    const [validIds, confirmedValid] = await Promise.all([
-      Promise.all(
-        (stored.sessionDataSourceList ?? []).map((id) =>
-          this.validateDataSourceId(id)
-            .then(({ valid }) => (valid ? id : undefined))
-            .catch(() => undefined)
-        )
-      ),
-      stored.confirmedDataSourceId
-        ? this.validateDataSourceId(stored.confirmedDataSourceId)
-            .then(({ valid }) => valid)
-            .catch(() => false)
-        : Promise.resolve(false),
-    ]);
-
-    if (this.getThreadId() !== threadId) return;
-
-    this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
-    this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
-
-    this.persistDataSourceState();
+  private restoreDataSourceStateFromStore(threadId: string): void {
+    const state = this.conversationDataSourceStore.get(threadId);
+    const stored = state?.confirmedDataSourceId;
+    this.confirmedDataSourceId = typeof stored === 'string' && stored ? stored : undefined;
+    this.activeChosenInPicker = !!this.confirmedDataSourceId && state?.chosenInPicker === true;
+    this.lastPageDataSourceId = undefined;
   }
 
   /**
-   * Check a data source id against the available data source list.
+   * Check that a data source can be used. A data source in the available list is accepted
+   * without a request. Otherwise it is read directly: if that succeeds it is added to the list,
+   * and any failure means it cannot be used. Also returns the available list, for the picker and
+   * for error messages.
    */
   public async validateDataSourceId(id: string): Promise<{
     valid: boolean;
     dataSource?: DataSourceInfo;
     availableDataSources: DataSourceInfo[];
   }> {
-    let available = await this.getAvailableDataSources();
-    let dataSource = available.find((ds) => ds.id === id);
+    const available = await this.getAvailableDataSources();
+    const listed = available.find((ds) => ds.id === id);
+    if (listed) return { valid: true, dataSource: listed, availableDataSources: available };
 
-    // A data source created after the cache warmed would be rejected — refresh once.
-    if (!dataSource && available.length > 0) {
-      available = await this.getAvailableDataSources(true);
-      dataSource = available.find((ds) => ds.id === id);
+    let dataSource: DataSourceInfo | undefined;
+    if (this.savedObjectsClient) {
+      try {
+        const savedObject = await this.savedObjectsClient.get<{ title?: string }>(
+          'data-source',
+          id
+        );
+        if (savedObject && !savedObject.error) {
+          dataSource = { id, title: savedObject.attributes?.title || id };
+        }
+      } catch {
+        // Any failure means the data source cannot be used.
+      }
     }
 
-    if (available.length === 0) {
-      return { valid: true, availableDataSources: available };
-    }
+    if (!dataSource) return { valid: false, availableDataSources: available };
 
-    return { valid: !!dataSource, dataSource, availableDataSources: available };
+    // Two checks of the same id can run at once (a send and switch_data_source).
+    if (!this.extraDataSources.some((ds) => ds.id === id)) {
+      this.extraDataSources = [...this.extraDataSources, dataSource];
+    }
+    return { valid: true, dataSource, availableDataSources: await this.getAvailableDataSources() };
   }
 
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
@@ -557,49 +611,72 @@ export class ChatService {
 
   private async buildAvailableDsContext(dataSourceId?: string) {
     const contextStore = (window as any).assistantContextStore;
+    if (!contextStore) return this.getAgentContexts();
 
-    const sessionDataSourceList = this.getSessionDataSourceList();
+    const availableDataSources = await this.getAvailableDataSources();
 
-    if (contextStore && sessionDataSourceList.length > 1) {
-      const availableDataSources = await this.getAvailableDataSources();
+    // With a single data source there is nothing to switch to.
+    if (availableDataSources.length > 1) {
+      const label = (ds: DataSourceInfo) => `"${ds.title}" (id: ${ds.id})`;
       const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
-
       const activeDsLabel = activeDatasource
-        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
-        : `id: ${dataSourceId}`;
-      const sessionDsLabel = sessionDataSourceList
-        .map((id) => {
-          const sessionDataSource = availableDataSources.find((ds) => ds.id === id);
-          return sessionDataSource
-            ? `"${sessionDataSource.title}" (id: ${sessionDataSource.id})`
-            : `id: ${id}`;
-        })
-        .join(', ');
+        ? label(activeDatasource)
+        : dataSourceId
+          ? `id: ${dataSourceId}`
+          : 'none';
+
+      // The page can show another data source when one was chosen after the page was opened
+      // (the agent switched, or Ask AI passed its own). Say which one wins, or the model tends
+      // to switch back to the page's data source or ask again.
+      const pageDataSourceId = this.getDataSourceFromPageContext();
+      // Only a page already seen when the active one was chosen: a page opened during a run
+      // (a tool-result continuation) is newer than the active data source.
+      const pageDsTitle =
+        pageDataSourceId &&
+        pageDataSourceId !== dataSourceId &&
+        pageDataSourceId === this.lastPageDataSourceId
+          ? (availableDataSources.find((ds) => ds.id === pageDataSourceId)?.title ??
+            pageDataSourceId)
+          : undefined;
+      const activeDsTitle = activeDatasource?.title ?? dataSourceId;
+      const pageLines =
+        pageDsTitle && activeDsTitle
+          ? [
+              `The current page shows data from "${pageDsTitle}", but "${activeDsTitle}" was chosen`,
+              `later in this conversation. Keep using the active data source unless the request is`,
+              `about the data on the page.`,
+            ]
+          : [];
+
+      // Without this, some models still ask which data source to use for a general request.
+      const pickerLines =
+        this.activeChosenInPicker && activeDatasource && dataSourceId === this.confirmedDataSourceId
+          ? [`"${activeDatasource.title}" was chosen by the user in the data source picker.`]
+          : [];
 
       contextStore.addContext({
         id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
         description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
         value: [
           `Currently active data source: ${activeDsLabel}`,
-          `Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): ${sessionDsLabel}`,
-          `IMPORTANT — this conversation involves MORE THAN ONE data source.`,
-          `Before ANY data-source-aware action (inspecting fields, querying data, or creating a`,
-          `visualization), you MUST have the USER pick which data source to use for the current`,
-          `request by calling the ask_user tool with inputType 'select'. Build ONE option per data`,
-          `source listed above: set each option's label to the data source's NAME/title (this is what`,
-          `the user sees — NEVER show the raw id to the user) and its value to that data source's id`,
-          `(used internally to switch, not displayed). Example: ask_user({ inputType: 'select', prompt:`,
-          `'This conversation uses multiple data sources. Which one should I use?', options: [{ label:`,
-          `'<data source name>', value: '<data source id>' }, ...] }).`,
-          `A data source being currently active or previously confirmed does NOT satisfy this`,
-          `requirement — you MUST still call ask_user whenever the user has not explicitly chosen one`,
-          `for the current request. Do NOT silently reuse the current/last data source, do NOT guess,`,
-          `and do NOT ask which data source to use in free-form text.`,
-          `Once the user answers, call switch_data_source with the chosen id to apply it, then proceed`,
-          `using that data source for the rest of the current request.`,
+          ...pickerLines,
+          `Data sources available in this conversation: ${availableDataSources
+            .map(label)
+            .join(', ')}`,
+          ...pageLines,
+          `Data-source-aware tools (inspecting fields, querying data, creating visualizations) run`,
+          `against the active data source.`,
+          // The model follows these more reliably here than in the tool description.
+          `If the current request is about data in a different data source from this list, call`,
+          `switch_data_source with that data source's id, on its own, and wait for its result before`,
+          `calling any other tool.`,
+          `If it is unclear which of these data sources the request is about, ask the user with the`,
+          `ask_user tool (inputType 'select', one option per data source name; never show the raw id),`,
+          `then call switch_data_source with the id of the chosen one.`,
+          `Otherwise keep using the active data source and do not call switch_data_source.`,
         ].join('\n'),
       });
-    } else if (contextStore) {
+    } else {
       contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
     }
 
@@ -728,8 +805,6 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // try the confirmed conversation override first; getCurrentDataSourceId still falls back
-    // to getWorkspaceAwareDataSourceId
     const dataSourceId = await this.getCurrentDataSourceId();
     const context = await this.buildAvailableDsContext(dataSourceId);
 
@@ -1141,7 +1216,7 @@ export class ChatService {
       }
 
       // Restore the per-conversation data source state
-      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
+      this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
 
       return this.injectUnfinishedToolCallEvents(events);
     }
@@ -1166,7 +1241,7 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
-    await this.restoreDataSourceStateFromStore(threadId);
+    this.restoreDataSourceStateFromStore(threadId);
 
     return this.injectUnfinishedToolCallEvents(events);
   }
@@ -1201,36 +1276,63 @@ export class ChatService {
   }
 
   /**
-   * Explicitly set the data source ID (e.g., after user selection)
+   * Set the conversation's active data source. Callers pass only a validated id: the picker
+   * offers listed data sources, and the send path and switch_data_source validate first.
+   *
+   * @param options.pageDataSourceId the send path passes the page data source it read before
+   * validating, so a page change during validation still counts as new on the next message.
+   * Others omit it and the current page is used.
+   * @param options.chosenInPicker the picker passes true. Setting the same id again (every valid
+   * send does) keeps the flag; any other data source clears it.
    */
-  public setDataSourceId(id: string | undefined): void {
+  public setDataSourceId(
+    id: string | undefined,
+    options?: { pageDataSourceId?: string; chosenInPicker?: boolean }
+  ): void {
+    const changed = id !== this.confirmedDataSourceId;
+    const chosenInPicker = changed
+      ? !!options?.chosenInPicker
+      : this.activeChosenInPicker || !!options?.chosenInPicker;
+    const originChanged = (!!id && chosenInPicker) !== this.activeChosenInPicker;
     this.confirmedDataSourceId = id;
-    if (!id) return;
-    this.setSessionDataSourceList(id);
-    this.persistDataSourceState();
+    this.activeChosenInPicker = !!id && chosenInPicker;
+    this.pendingDataSourceId = undefined;
+    // That page is now accounted for, so only a later page change overrides this choice.
+    const pageDataSourceId =
+      options && 'pageDataSourceId' in options
+        ? options.pageDataSourceId
+        : this.getDataSourceFromPageContext();
+    this.lastPageDataSourceId = pageDataSourceId ?? this.lastPageDataSourceId;
+    // Every valid send calls this; write the store only when the active data source or where it
+    // came from changes.
+    if (changed || originChanged) this.persistDataSourceState();
   }
 
   /**
-   * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
+   * Get all available data sources: the first page of up to 100, sorted by title, plus any
+   * data source outside it that validateDataSourceId() confirmed with a direct get.
    */
-  public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
-    // The cache lives until newThread(), so a data source created mid-session is invisible
-    // to it. forceRefresh lets validateDataSourceId() re-check.
-    if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
+    const listed = await this.getListedDataSources();
+    const extra = this.extraDataSources.filter((ds) => !listed.some((l) => l.id === ds.id));
+    return extra.length ? [...listed, ...extra] : listed;
+  }
+
+  /**
+   * The cache lives until newThread(): a data source created later is found by a direct get.
+   */
+  private async getListedDataSources(): Promise<DataSourceInfo[]> {
+    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 
     try {
-      const response = await this.savedObjectsClient.find<{
-        title: string;
-        dataSourceEngineType?: string;
-      }>({
+      const response = await this.savedObjectsClient.find<{ title: string }>({
         type: 'data-source',
-        fields: ['title', 'dataSourceEngineType'],
+        fields: ['title'],
         perPage: 100,
       });
 
       this.cachedAvailableDataSources = (response?.savedObjects || [])
-        .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
         .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
         .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
       return this.cachedAvailableDataSources;

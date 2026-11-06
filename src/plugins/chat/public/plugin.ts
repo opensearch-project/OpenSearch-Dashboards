@@ -179,6 +179,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+        // Deprecated no-op, kept for existing callers.
         setSessionDataSourceList: (dataSourceId: string | undefined) => {
           this.chatService?.setSessionDataSourceList(dataSourceId);
         },
@@ -190,7 +191,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       try {
         const agenticMemoryProvider = new AgenticMemoryProvider(
           core.http,
-          () => this.chatService?.peekCurrentDataSourceId() ?? Promise.resolve(undefined)
+          () => this.chatService?.getHistoryDataSourceId() ?? Promise.resolve(undefined)
         );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {

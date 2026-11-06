@@ -174,6 +174,10 @@ export interface ChatServiceInterface {
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
 
+  /**
+   * @deprecated No-op. The chat no longer keeps a list of data sources seen in a conversation;
+   * pass `dataSourceId` to `sendMessageWithWindow` to run a message on a data source instead.
+   */
   setSessionDataSourceList(dataSourceId: string | undefined): void;
 }
 
@@ -194,6 +198,7 @@ export interface ChatImplementationFunctions {
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
+  /** @deprecated No-op, see {@link ChatServiceInterface.setSessionDataSourceList}. */
   setSessionDataSourceList: (dataSourceId: string | undefined) => void;
 }
 

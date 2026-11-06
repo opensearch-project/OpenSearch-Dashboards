@@ -42,6 +42,7 @@ import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
 import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
+import type { DataSourceCandidate } from '../services/chat_service';
 import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
 
@@ -57,6 +58,34 @@ interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onClose: () => void;
 }
+
+/**
+ * Why the data source picker is shown: which data source failed validation and where it came from.
+ */
+const getUnusableDataSourceNotice = ({ id, source }: DataSourceCandidate): string => {
+  switch (source) {
+    case 'caller':
+      return i18n.translate('chat.dataSourceUnusable.caller', {
+        defaultMessage: 'The provided data source "{id}" cannot be used.',
+        values: { id },
+      });
+    case 'page':
+      return i18n.translate('chat.dataSourceUnusable.page', {
+        defaultMessage: 'The data source of the current page "{id}" cannot be used.',
+        values: { id },
+      });
+    case 'active':
+      return i18n.translate('chat.dataSourceUnusable.active', {
+        defaultMessage: 'The data source used in this conversation "{id}" can no longer be used.',
+        values: { id },
+      });
+    case 'default':
+      return i18n.translate('chat.dataSourceUnusable.default', {
+        defaultMessage: 'The default data source "{id}" cannot be used.',
+        values: { id },
+      });
+  }
+};
 
 /**
  * ChatWindow with AssistantAction support
@@ -245,31 +274,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
     });
 
-    // Cache data source compatibility check to avoid network call on every message
-    const unsupportedDataSourceRef = useRef<{ dataSourceId: string; result: boolean } | null>(null);
-
-    const isUnsupportedDataSource = useCallback(
-      async (dataSourceId: string): Promise<boolean> => {
-        try {
-          if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
-            return unsupportedDataSourceRef.current.result;
-          }
-          const savedObjectsClient = services.core?.savedObjects?.client;
-          if (!savedObjectsClient) return false;
-          const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
-            'data-source',
-            dataSourceId
-          );
-          const result = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
-          unsupportedDataSourceRef.current = { dataSourceId, result };
-          return result;
-        } catch {
-          return false;
-        }
-      },
-      [services.core?.savedObjects?.client]
-    );
-
     // Helper function to handle message streaming with observable subscription
     const subscribeToMessageStream = useCallback(
       async (messages: Message[], userMessage: UserMessage) => {
@@ -383,14 +387,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Handler for when user selects a data source from the prompt
     const handleDataSourceSelect = useCallback(
       async (id: string) => {
-        chatService.setDataSourceId(id);
+        chatService.setDataSourceId(id, { chosenInPicker: true });
         setAvailableDataSources([]);
         const pending = pendingMessage;
         setPendingMessage(null);
         if (!pending) return;
 
         const messageContent = typeof pending.content === 'string' ? pending.content : '';
-        const historyMessages = timeline.slice(0, -1);
+        // History is everything before the pending message. A notice after it (why the picker
+        // is shown) is not part of the history sent with this message.
+        const pendingIndex = timeline.findIndex((msg) => msg.id === pending.id);
+        const historyMessages =
+          pendingIndex >= 0 ? timeline.slice(0, pendingIndex) : timeline.slice(0, -1);
 
         // Pending user message is already in the timeline — replace it if a slash command
         const handled = await executeSlashCommand(messageContent, historyMessages, pending);
@@ -411,53 +419,60 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         userMsg: UserMessage
       ): Promise<
         | { valid: true }
-        | { valid: false; reason: 'unsupported' | 'needs_selection' | 'no_data_sources' }
+        | { valid: false; reason: 'needs_selection' | 'no_data_sources' | 'thread_changed' }
       > => {
-        const currentDataSourceId = await chatService.getCurrentDataSourceId();
+        const threadId = chatService.getThreadId();
+        // 1. The data source this message would use, checked here, when it is used.
+        const candidate = await chatService.peekDataSourceCandidate();
+        const { valid: isValid, availableDataSources: compatibleDataSources } = candidate
+          ? await chatService.validateDataSourceId(candidate.id)
+          : { valid: false, availableDataSources: await chatService.getAvailableDataSources() };
 
-        // 1. Check if current data source is unsupported (e.g. AnalyticEngine)
-        if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
-          const systemMsg: SystemMessage = {
+        // The user started a new chat or opened another conversation while this was checked:
+        // its result belongs to the old thread, so drop the message.
+        if (chatService.getThreadId() !== threadId)
+          return { valid: false, reason: 'thread_changed' };
+
+        if (isValid && candidate) {
+          // Only a validated id becomes the conversation's active data source.
+          chatService.setDataSourceId(candidate.id, {
+            pageDataSourceId: candidate.pageDataSourceId,
+          });
+          return { valid: true };
+        }
+
+        // 2. Not usable: drop it so it is not tried again, say why, and let the user pick one.
+        if (candidate) {
+          chatService.discardDataSourceCandidate(candidate);
+          const noticeMsg: SystemMessage = {
             id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
             role: 'system',
-            content: i18n.translate('chat.dataSourceUnsupported', {
-              defaultMessage: 'The current data source does not support AI features.',
-            }),
+            content: getUnusableDataSourceNotice(candidate),
           };
-          setTimelineSynced((prev) => [...prev, systemMsg]);
-          return { valid: false, reason: 'unsupported' };
+          setTimelineSynced((prev) => [...prev, noticeMsg]);
         }
 
-        // 2. Check if current data source is valid (exists in available list)
-        const compatibleDataSources = await chatService.getAvailableDataSources();
-        const isValid =
-          currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
-
-        if (!isValid) {
-          if (compatibleDataSources.length >= 1) {
-            // Compatible data sources exist — prompt user to pick one.
-            // User message is already in timeline; handleDataSourceSelect will continue.
-            setPendingMessage(userMsg);
-            setAvailableDataSources(compatibleDataSources);
-            return { valid: false, reason: 'needs_selection' };
-          }
-
-          // 3. No data sources associated with this workspace
-          const infoMsg: Message = {
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            role: 'assistant',
-            content: i18n.translate('chat.noDataSourceMessage', {
-              defaultMessage:
-                'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
-            }),
-          };
-          setTimelineSynced((prev) => [...prev, infoMsg]);
-          return { valid: false, reason: 'no_data_sources' };
+        if (compatibleDataSources.length >= 1) {
+          // Compatible data sources exist — prompt user to pick one.
+          // User message is already in timeline; handleDataSourceSelect will continue.
+          setPendingMessage(userMsg);
+          setAvailableDataSources(compatibleDataSources);
+          return { valid: false, reason: 'needs_selection' };
         }
 
-        return { valid: true };
+        // 3. No data sources associated with this workspace
+        const infoMsg: Message = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          role: 'assistant',
+          content: i18n.translate('chat.noDataSourceMessage', {
+            defaultMessage:
+              'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
+          }),
+        };
+        setTimelineSynced((prev) => [...prev, infoMsg]);
+        return { valid: false, reason: 'no_data_sources' };
       },
-      [chatService, setTimelineSynced, isUnsupportedDataSource]
+      [chatService, setTimelineSynced]
     );
 
     const handleSend = async (options?: {
