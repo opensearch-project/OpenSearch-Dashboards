@@ -633,13 +633,24 @@ export class ChatService {
           : 'none';
 
       const pinnedId = await this.getPinnedPageDataSourceId();
-      const switchLine = pinnedId
-        ? `The current page pins the active data source, so it cannot be changed here. If the ` +
-          `user asks for a different data source, do NOT call switch_data_source; tell them to ` +
-          `leave this page or change the page dataset to use another one.`
-        : `If the user's current request explicitly names a different data source from this list ` +
-          `(by name or id), call switch_data_source with that data source's id before using any ` +
-          `data-source-aware tool.`;
+      // When the page fixes the data source, a switch cannot take effect, so steer the agent away
+      // from both switch_data_source and ask_user. Otherwise let it switch (explicit) or ask
+      // (ambiguous).
+      const switchLines = pinnedId
+        ? [
+            `The current page fixes the active data source, so it cannot be changed here. If the ` +
+              `user asks for or refers to a different data source, do NOT call switch_data_source ` +
+              `or ask_user; tell them this page fixes the data source and they should leave the ` +
+              `page or change the page dataset to use another one.`,
+          ]
+        : [
+            `If the user's current request explicitly names a different data source from this list ` +
+              `(by name or id), call switch_data_source with that data source's id before using any ` +
+              `data-source-aware tool.`,
+            `If the user refers to a data source that is ambiguous or not in this list, call ` +
+              `ask_user with inputType 'select' (label = data source name, value = its id) instead ` +
+              `of guessing, then call switch_data_source with the chosen id.`,
+          ];
 
       contextStore.addContext({
         id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
@@ -647,10 +658,7 @@ export class ChatService {
         value: [
           `Currently active data source: ${activeDsLabel}. Data-source-aware tools use it automatically.`,
           `Data sources available to the user: ${availableDataSources.map(label).join(', ')}.`,
-          switchLine,
-          `If the user refers to a data source that is ambiguous or not in this list, call ask_user ` +
-            `with inputType 'select' (label = data source name, value = its id) instead of guessing, ` +
-            `then call switch_data_source with the chosen id.`,
+          ...switchLines,
           `Otherwise keep using the active data source. Do not switch on your own judgment and do ` +
             `not ask the user to confirm the active data source.`,
         ].join('\n'),

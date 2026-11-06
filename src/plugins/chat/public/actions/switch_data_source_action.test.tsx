@@ -85,19 +85,37 @@ describe('useSwitchDataSourceAction', () => {
     });
 
     it('should refuse to switch when the page pins a different data source', async () => {
-      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-page');
+      // ds-b is in the available list, so the refusal names its title, not the raw id.
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-b');
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
       expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.message).toContain('"ds-page"');
-      expect(result.message).toContain('Switching is not possible');
+      // The agent message carries the instruction and the title.
+      expect(result.message).toContain('"Cluster B"');
+      expect(result.message).not.toContain('ds-b');
+      // The user-facing text is separate, plain, and uses the title but no agent instructions.
+      expect(result.displayMessage).toContain('"Cluster B"');
+      expect(result.displayMessage).not.toContain('Do not retry');
+      expect(result.displayMessage).not.toContain('tell the user');
     });
 
     it('should allow switching to the data source the page already pins', async () => {
       mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-a');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(result.success).toBe(true);
+    });
+
+    it('should allow switching when the page pins no usable data source', async () => {
+      // getPinnedPageDataSourceId returns undefined both when the page names no data source and
+      // when the page id is not usable; either way a switch is allowed.
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue(undefined);
       renderHook();
 
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });

@@ -27,7 +27,10 @@ interface SwitchDataSourceResult {
   skipped?: boolean;
   dataSourceId?: string;
   datasourceTitle?: string;
+  // Sent to the agent. May carry instructions meant for the model, not the user.
   message?: string;
+  // Shown to the user in the card when present. Plain, user-facing text with no agent instructions.
+  displayMessage?: string;
   error?: string;
 }
 
@@ -82,6 +85,7 @@ const SwitchDataSourceCard = ({
 
   if (!isSuccess) {
     const errorMsg =
+      parsedResult?.displayMessage ??
       parsedResult?.message ??
       parsedResult?.error ??
       i18n.translate('chat.switchDataSource.error.default', {
@@ -194,12 +198,19 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
         // the page's data source. Refuse it instead of pretending to switch.
         const pinnedId = await chatService.getPinnedPageDataSourceId();
         if (pinnedId && pinnedId !== args.dataSourceId) {
+          const pinnedTitle =
+            availableDataSources.find((ds) => ds.id === pinnedId)?.title ?? pinnedId;
           return {
             success: false,
             message:
-              `The current page pins data source "${pinnedId}". Switching is not possible on this ` +
-              'page; tell the user to leave this page (or change the page dataset) to use another ' +
-              'data source.',
+              `The active data source is fixed to "${pinnedTitle}" by the current page and cannot ` +
+              'be changed here. Do not retry; tell the user this page fixes the data source and ' +
+              'they should leave the page or change the page dataset to use a different one.',
+            displayMessage: i18n.translate('chat.switchDataSource.error.pagePinned', {
+              defaultMessage:
+                'This page is fixed to "{title}", so the data source can\'t be changed here. Leave this page or change the page dataset to use another one.',
+              values: { title: pinnedTitle },
+            }),
           };
         }
 
