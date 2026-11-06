@@ -35,6 +35,7 @@ import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
 import { switchToPromQL } from './utils/switch_to_promql';
+import { getExplorationSource } from './utils/exploration_source';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 import { usePreviewGate } from './hooks/use_preview_gate';
@@ -64,8 +65,11 @@ export const MetricsExploreTab = () => {
   const queryGenRef = useRef(new MetricQueryGenerator());
 
   // The Metrics page only shows this tab for sources with a metrics resource client.
+  const sourceTypeRegistry = getSourceTypeRegistry();
   const resourceClientId =
-    getSourceTypeRegistry().getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
+    sourceTypeRegistry.getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
+  // How the error and empty states name and introduce the source.
+  const source = getExplorationSource(queryState.dataset);
   const client = useMemo(() => {
     return new PrometheusClient(services, dataConnectionId, resourceClientId);
   }, [services, dataConnectionId, resourceClientId]);
@@ -247,6 +251,7 @@ export const MetricsExploreTab = () => {
         timeBounds,
         previewsEnabled,
         requestPreviews,
+        source,
       }}
     >
       <CursorContext.Provider value={cursorBus}>

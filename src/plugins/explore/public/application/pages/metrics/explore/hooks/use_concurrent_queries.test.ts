@@ -188,6 +188,43 @@ describe('useConcurrentQueries', () => {
     expect(result.current.results.size).toBe(0);
   });
 
+  it("prefers the server's message of a failed HTTP call", async () => {
+    // The status text (empty over HTTP/2) is the message; the server's error is the body.
+    const fetchFn = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error(''), { body: { message: 'access denied' } }));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('access denied');
+  });
+
+  it("shows a serialised PromQL error's details, never its type or the JSON", async () => {
+    const message = JSON.stringify({
+      error: { type: 'PromQLQueryError', reason: 'PromQL query failed', details: 'access denied' },
+      status: 403,
+    });
+    const fetchFn = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('Forbidden'), { body: { message } }));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('access denied');
+  });
+
   it('stringifies non-Error rejections', async () => {
     const fetchFn = jest.fn().mockRejectedValue('stringly');
     const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
