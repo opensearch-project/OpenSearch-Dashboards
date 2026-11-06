@@ -24,13 +24,72 @@ import {
   ToolCallEndEvent,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
+import { SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 import { ConversationHistoryService } from './conversation_history_service';
-import { ConversationDataSourceStore } from './conversation_data_source_store';
+import { DataSourceUnresolvedError } from './data_source_unresolved_error';
+
+export { DataSourceUnresolvedError };
 
 export interface DataSourceInfo {
   id: string;
   title: string;
 }
+
+/**
+ * Where the active data source of a run came from.
+ * - page: the data source of the dataset on the current page (it pins the data source).
+ * - caller: the data source the caller of sendMessageWithWindow passed with this message.
+ * - pending: a choice the agent has not recorded yet: a picker choice, or a data source a caller
+ *   passed with an earlier message.
+ * - conversation: the last successful switch_data_source in the conversation.
+ * - workspaceDefault / globalDefault: the default data source of the workspace, or the global
+ *   default when not in a workspace.
+ * - previousRun: the data source of the run whose tool result a continuation sends.
+ */
+export type DataSourceSource =
+  | 'page'
+  // The data source passed with this message (sendMessageWithWindow's dataSourceId). Sending
+  // the message makes it the pending choice.
+  | 'caller'
+  // A data source chosen for the conversation but not recorded yet (see `pendingOrigin`). Used
+  // ahead of the conversation's own, and the agent is asked to record it with switch_data_source.
+  | 'pending'
+  | 'conversation'
+  | 'workspaceDefault'
+  | 'globalDefault'
+  // A continuation that resolved nothing keeps the data source of the run that requested the tool.
+  | 'previousRun';
+
+/**
+ * The data source a run uses, and why. Resolution is a pure read, so callers act on `kind` instead
+ * of guessing why no data source was found.
+ */
+export type DataSourceResolution =
+  // Multiple data sources are not enabled: runs carry no data source id.
+  | { kind: 'disabled' }
+  // The data source list could not be read.
+  | { kind: 'list_failed' }
+  // No data source is available to this workspace.
+  | { kind: 'none_exist' }
+  // Data sources exist but none resolved: the user has to pick one.
+  | { kind: 'needs_selection'; available: DataSourceInfo[]; listComplete: boolean }
+  | {
+      kind: 'resolved';
+      active: DataSourceInfo;
+      source: DataSourceSource;
+      // Where a pending choice came from; set only when `source` is 'pending'.
+      pendingOrigin?: 'picker' | 'caller';
+      available: DataSourceInfo[];
+      // false when `available` may not hold every data source: the workspace has more than the
+      // list shows, the active one was found only by a direct lookup, or a continuation fell
+      // back to the previous run's data source.
+      listComplete: boolean;
+    };
+
+type DataSourceListResult = { ok: true; list: DataSourceInfo[]; complete: boolean } | { ok: false };
+
+// One page of data sources. More would crowd the agent context; ids past it are looked up directly.
+export const AVAILABLE_DATA_SOURCES_LIMIT = 100;
 
 export interface ChatState {
   messages: Message[];
@@ -84,14 +143,35 @@ export class ChatService {
 
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
-  // User-confirmed conversation-level data source override.
-  private confirmedDataSourceId?: string;
-  // Data source ids that have appeared in this conversation.
-  private sessionDataSourceList: string[] = [];
-  // Persists confirmedDataSourceId + sessionDataSourceList per threadId
-  private conversationDataSourceStore = new ConversationDataSourceStore();
-  // Cached available data sources for the current workspace
-  private cachedAvailableDataSources?: DataSourceInfo[];
+  // Whether multiple data sources are enabled. When false, runs carry no data source id.
+  private dataSourceEnabled: boolean;
+  // The available data sources of the current conversation, read once per thread. A failed read
+  // is dropped so the next caller reads again.
+  private dataSources?: { threadId: string; promise: Promise<DataSourceListResult> };
+  // Definite answers of direct lookups for ids missing from the list, per thread. null means the
+  // id is not an available data source. Failed lookups are not cached.
+  private dataSourceLookups?: {
+    threadId: string;
+    results: Map<string, DataSourceInfo | null>;
+    inFlight: Map<string, Promise<DataSourceInfo | null | 'failed'>>;
+  };
+  // The conversation's data source: its last successful switch_data_source. Never a page or
+  // default id; nothing about it is stored in the browser.
+  private conversationDataSourceId?: string;
+  // A data source chosen for the conversation that the agent has not recorded with
+  // switch_data_source yet: a picker choice, or one a caller passed. Cleared once recorded.
+  private pendingDataSource?: { id: string; origin: 'picker' | 'caller' };
+  // The default data source setting, read once per thread and scope.
+  private defaultDataSourceRead?: {
+    threadId: string;
+    inWorkspace: boolean;
+    promise: Promise<string | undefined>;
+  };
+  // The data source each run was dispatched with, for the tools that run executes.
+  private runDataSources = new Map<string, DataSourceInfo | undefined>();
+  private lastRunDataSource?: DataSourceInfo;
+  // Incremented per loadConversation, so only the latest load applies its thread.
+  private conversationLoadToken = 0;
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -100,7 +180,9 @@ export class ChatService {
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
     workspaces?: WorkspacesStart,
-    savedObjectsClient?: SavedObjectsClientContract
+    savedObjectsClient?: SavedObjectsClientContract,
+    // Without a saved objects client there is no way to read data sources.
+    dataSourceEnabled: boolean = !!savedObjectsClient
   ) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
@@ -108,6 +190,7 @@ export class ChatService {
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
     this.savedObjectsClient = savedObjectsClient;
+    this.dataSourceEnabled = dataSourceEnabled && !!savedObjectsClient;
 
     // Initialize conversation history service
     if (!coreChatService) {
@@ -291,11 +374,12 @@ export class ChatService {
       chatWindowInstance.startNewChat();
     }
 
-    if (options?.dataSourceId) {
-      this.setDataSourceId(options.dataSourceId);
-    }
-
-    await chatWindowInstance.sendMessage({ content, messages });
+    // The window applies the requested data source only if it actually sends the message.
+    await chatWindowInstance.sendMessage({
+      content,
+      messages,
+      dataSourceId: options?.dataSourceId,
+    });
 
     // Create a user message for consistency with the return type
     const userMessage: UserMessage = {
@@ -312,12 +396,16 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  private getDataSourceFromPageContext(readOnly?: boolean) {
-    const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
-    if (!readOnly && dsId) {
-      this.setDataSourceId(dsId);
+  /**
+   * Read the data source id from the current page/panel context. Pure read: it never
+   * mutates conversation state, and a throwing context store resolves to undefined.
+   */
+  private getDataSourceFromPageContext(): string | undefined {
+    try {
+      return this.getPageContextValue()?.dataset?.dataSource?.id;
+    } catch {
+      return undefined;
     }
-    return dsId;
   }
 
   private getAllAssistantContexts(): any[] {
@@ -378,244 +466,493 @@ export class ChatService {
     return undefined;
   }
 
+  public isDataSourceEnabled(): boolean {
+    return this.dataSourceEnabled;
+  }
+
   /**
-   * Get workspace-aware data source ID
-   * Determines the correct data source based on current workspace context
+   * Read the default data source id: in a workspace only the workspace-level default (the
+   * workspace scope never falls back to the global one), otherwise the global default. A failed
+   * read counts as no default.
    */
-  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
-    try {
-      // Try to get data source from page context first
-      const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
-      if (pageDataSourceId) {
-        if (!readOnly) {
-          this.setDataSourceId(pageDataSourceId);
+  private getScopedDefaultDataSourceId(inWorkspace: boolean): Promise<string | undefined> {
+    // Read once per conversation and scope, like the list: history, suggestions and every run
+    // resolve the default, and each read is a request. A failed read is not kept.
+    const threadId = this.getThreadId();
+    // Check the entry itself: before a thread exists, threadId and a missing entry's threadId are
+    // both undefined.
+    const cached = this.defaultDataSourceRead;
+    if (cached && cached.threadId === threadId && cached.inWorkspace === inWorkspace) {
+      return cached.promise;
+    }
+
+    const entry = {
+      threadId,
+      inWorkspace,
+      promise: getDefaultDataSourceId(
+        this.uiSettings,
+        inWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+      ).then(
+        (id) => id || undefined,
+        () => {
+          if (this.defaultDataSourceRead === entry) this.defaultDataSourceRead = undefined;
+          return undefined;
         }
+      ),
+    };
+    this.defaultDataSourceRead = entry;
+    return entry.promise;
+  }
 
-        return pageDataSourceId;
+  /**
+   * The available data sources of the current conversation. Read once per thread and shared by
+   * every caller; a failed read is not kept, so the next caller reads again.
+   */
+  private ensureDataSources(): Promise<DataSourceListResult> {
+    const threadId = this.getThreadId();
+    const cached = this.dataSources;
+    if (cached && cached.threadId === threadId) return cached.promise;
+    const entry = { threadId, promise: this.fetchDataSources() };
+    this.dataSources = entry;
+    entry.promise.then((result) => {
+      if (!result.ok && this.dataSources === entry) this.dataSources = undefined;
+    });
+    return entry.promise;
+  }
+
+  /** Start reading the data source list for a conversation that was just opened, without waiting. */
+  private prefetchDataSources(): void {
+    if (this.dataSourceEnabled) this.ensureDataSources();
+  }
+
+  /** Read one page of data sources. `complete` is false when the workspace has more. */
+  private async fetchDataSources(): Promise<DataSourceListResult> {
+    if (!this.savedObjectsClient) return { ok: false };
+    try {
+      const response = await this.savedObjectsClient.find<{ title: string }>({
+        type: 'data-source',
+        fields: ['title'],
+        perPage: AVAILABLE_DATA_SOURCES_LIMIT,
+      });
+      const list = (response?.savedObjects || [])
+        .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
+        .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      const total = typeof response?.total === 'number' ? response.total : list.length;
+      return { ok: true, list, complete: total <= list.length };
+    } catch {
+      return { ok: false };
+    }
+  }
+
+  /**
+   * Look a data source up by id, for an id the list does not contain (one past the first page, or
+   * created after the list was read). It is available only if it is a data source with attributes
+   * that belongs to the current workspace (data source admins can read ones outside it). A failed
+   * lookup is treated as not available and is not cached.
+   */
+  private lookupDataSource(id: string): Promise<DataSourceInfo | null | 'failed'> {
+    const threadId = this.getThreadId();
+    if (!this.dataSourceLookups || this.dataSourceLookups.threadId !== threadId) {
+      this.dataSourceLookups = { threadId, results: new Map(), inFlight: new Map() };
+    }
+    const { results, inFlight } = this.dataSourceLookups;
+    const cached = results.get(id);
+    if (cached !== undefined) return Promise.resolve(cached);
+    // Concurrent resolutions of the same id (a send and the suggestions) share one request.
+    const pending = inFlight.get(id);
+    if (pending) return pending;
+    const lookup = this.fetchDataSourceById(id, results).finally(() => inFlight.delete(id));
+    inFlight.set(id, lookup);
+    return lookup;
+  }
+
+  private async fetchDataSourceById(
+    id: string,
+    results: Map<string, DataSourceInfo | null>
+  ): Promise<DataSourceInfo | null | 'failed'> {
+    if (!this.savedObjectsClient) return 'failed';
+
+    // Only a missing or forbidden object is a definite "not available".
+    const isDefinite = (status: unknown) => status === 403 || status === 404;
+    let found: DataSourceInfo | null;
+    try {
+      const ds = await this.savedObjectsClient.get<{ title?: string }>('data-source', id);
+      const error = (ds as { error?: { statusCode?: number } } | undefined)?.error;
+      if (error) {
+        if (!isDefinite(error.statusCode)) return 'failed';
+        found = null;
+      } else {
+        const workspaceId = this.workspaces?.currentWorkspaceId$.getValue();
+        const usable =
+          !!ds &&
+          ds.type === 'data-source' &&
+          // A missing object can come back as an id/type-only object with empty attributes.
+          !!ds.attributes &&
+          Object.keys(ds.attributes).length > 0 &&
+          (!workspaceId || (ds.workspaces ?? []).includes(workspaceId));
+        found = usable ? { id: ds.id, title: ds.attributes.title || ds.id } : null;
       }
+    } catch (e) {
+      // The whole request can be rejected with the status (e.g. a 403 for the workspace).
+      const err = e as { res?: { status?: number }; body?: { statusCode?: number } };
+      if (!isDefinite(err?.res?.status ?? err?.body?.statusCode)) return 'failed';
+      found = null;
+    }
+    results.set(id, found);
+    return found;
+  }
 
-      // Fallback to existing workspace-aware logic
-      if (!this.uiSettings) {
-        // eslint-disable-next-line no-console
-        console.warn('UI Settings not available, using default data source');
-        return undefined;
+  /**
+   * The one availability check: an id is available if it is in the list, or a direct lookup finds
+   * it. `failed` is true when the lookup itself failed, so the answer is not definite.
+   */
+  private async checkDataSource(
+    id: string | undefined,
+    list: DataSourceInfo[] | undefined
+  ): Promise<{ dataSource?: DataSourceInfo; failed: boolean }> {
+    if (!id) return { failed: false };
+    const fromList = list?.find((ds) => ds.id === id);
+    if (fromList) return { dataSource: fromList, failed: false };
+    const lookup = await this.lookupDataSource(id);
+    if (lookup === 'failed') return { failed: true };
+    return { dataSource: lookup ?? undefined, failed: false };
+  }
+
+  /**
+   * Check an id read from the page, the conversation history or the default setting. A failed
+   * lookup counts as not found, so resolution moves on to the next candidate.
+   */
+  private async verifyDataSource(
+    id: string | undefined,
+    list: DataSourceInfo[] | undefined
+  ): Promise<DataSourceInfo | undefined> {
+    return (await this.checkDataSource(id, list)).dataSource;
+  }
+
+  /**
+   * Build a resolved result. The active data source is always in `available`, even when only the
+   * lookup found it; the list then may not hold every data source.
+   */
+  private toResolution(
+    active: DataSourceInfo,
+    source: DataSourceSource,
+    list: DataSourceInfo[] | undefined,
+    listComplete: boolean,
+    pendingOrigin?: 'picker' | 'caller'
+  ): DataSourceResolution {
+    const known = list ?? [];
+    const inList = known.some((ds) => ds.id === active.id);
+    return {
+      kind: 'resolved',
+      active,
+      source,
+      ...(pendingOrigin ? { pendingOrigin } : {}),
+      available: inList ? known : [...known, active],
+      listComplete: listComplete && inList,
+    };
+  }
+
+  /**
+   * Resolve the data source for the next run. A pure read: nothing is written.
+   *
+   * Candidates, highest priority first: the page's dataset data source, the data source a caller
+   * passed with this message (`callerDataSourceId`), a choice not recorded yet, the
+   * conversation's data source, then the default (workspace-level in a workspace, global
+   * otherwise). Each one is used only if it is verified; otherwise the next one is tried. When
+   * none is, the user has to pick one (`needs_selection`).
+   */
+  public async resolveDataSourceForRun(options?: {
+    callerDataSourceId?: string;
+  }): Promise<DataSourceResolution> {
+    if (!this.dataSourceEnabled) return { kind: 'disabled' };
+
+    // Read the conversation's state before awaiting, so one resolution never mixes two
+    // conversations if the user switches while it runs.
+    const conversationDataSourceId = this.conversationDataSourceId;
+    const pendingDataSource = this.pendingDataSource;
+    const listResult = await this.ensureDataSources();
+    const list = listResult.ok ? listResult.list : undefined;
+    const resolved = (
+      active: DataSourceInfo,
+      source: DataSourceSource,
+      pendingOrigin?: 'picker' | 'caller'
+    ) =>
+      this.toResolution(active, source, list, listResult.ok && listResult.complete, pendingOrigin);
+
+    const page = await this.verifyDataSource(this.getDataSourceFromPageContext(), list);
+    if (page) return resolved(page, 'page');
+
+    // The data source of what this message asks about. One that does not verify leaves any
+    // earlier choice in place.
+    const callerId = options?.callerDataSourceId;
+    if (callerId) {
+      const caller = await this.verifyDataSource(callerId, list);
+      if (caller) {
+        return resolved(caller, caller.id === conversationDataSourceId ? 'conversation' : 'caller');
       }
-
-      // Get workspace context
-      const workspaces = this.workspaces;
-      if (!workspaces) {
-        // eslint-disable-next-line no-console
-        console.warn('Workspaces service not available, using global scope');
-        return undefined;
-      }
-
-      const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
-
-      // Determine scope based on workspace context
-      const scope: UiSettingScope = !!currentWorkspaceId
-        ? UiSettingScope.WORKSPACE
-        : UiSettingScope.GLOBAL;
-
-      // Get default data source with proper scope
-      const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
-        this.setDataSourceId(dataSourceId || undefined);
-      }
-      return dataSourceId || undefined;
-    } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to determine data source, proceeding without:', error);
-      return undefined; // Graceful fallback - undefined means local cluster
+      console.debug(`Chat: the data source "${callerId}" passed by the caller is not available.`);
     }
+
+    // A choice not recorded yet comes before the conversation's own: it is the newer intent.
+    if (pendingDataSource) {
+      const pending = await this.verifyDataSource(pendingDataSource.id, list);
+      if (pending) return resolved(pending, 'pending', pendingDataSource.origin);
+      // eslint-disable-next-line no-console
+      console.debug(
+        `Chat: the chosen data source "${pendingDataSource.id}" is not available; ignoring it.`
+      );
+    }
+
+    const conversation = await this.verifyDataSource(conversationDataSourceId, list);
+    if (conversation) return resolved(conversation, 'conversation');
+
+    const inWorkspace = !!this.workspaces?.currentWorkspaceId$.getValue();
+    const defaultId = await this.getScopedDefaultDataSourceId(inWorkspace);
+    const defaultDataSource = await this.verifyDataSource(defaultId, list);
+    if (defaultDataSource) {
+      return resolved(defaultDataSource, inWorkspace ? 'workspaceDefault' : 'globalDefault');
+    }
+
+    if (!listResult.ok) return { kind: 'list_failed' };
+    if (listResult.list.length === 0) return { kind: 'none_exist' };
+    return {
+      kind: 'needs_selection',
+      available: listResult.list,
+      listComplete: listResult.complete,
+    };
+  }
+
+  /** The resolved data source id for read-only callers (history, suggestions), if any. */
+  public async getDataSourceIdForRead(): Promise<string | undefined> {
+    const resolution = await this.resolveDataSourceForRun();
+    return resolution.kind === 'resolved' ? resolution.active.id : undefined;
   }
 
   /**
-   * Get the current data source ID from all resolution sources.
-   *
-   * Priority (highest to lowest):
-   *   1. getDataSourceFromPageContext() — data source inferred from the current page/panel context
-   *   2. confirmedDataSourceId — explicit conversation-level override confirmed or selected by the user
-   *   3. getWorkspaceAwareDataSourceId() — workspace default
-   *
-   * @param readOnly when true, resolve without committing anything: no setDataSourceId
+   * Check a data source id the agent asked to switch to, the same way candidates are checked.
+   * `unverifiable` is true when the check itself failed (the list could not be read and the id
+   * was not found, or the direct lookup failed), so the agent can ask the user to retry instead
+   * of saying the data source does not exist.
    */
-  public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
-    const ds =
-      this.getDataSourceFromPageContext(readOnly) ||
-      this.confirmedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId(readOnly));
+  public async verifyDataSourceId(
+    id: string
+  ): Promise<{ dataSource?: DataSourceInfo; available: DataSourceInfo[]; unverifiable: boolean }> {
+    if (!this.dataSourceEnabled) return { available: [], unverifiable: false };
+    const listResult = await this.ensureDataSources();
+    const list = listResult.ok ? listResult.list : [];
+    const { dataSource, failed } = await this.checkDataSource(id, list);
+    if (dataSource) return { dataSource, available: list, unverifiable: false };
+    return { available: list, unverifiable: failed || !listResult.ok };
+  }
 
-    return ds;
+  /** The verified data source of the current page's dataset, if any. It pins the active one. */
+  public async getPageDataSource(): Promise<DataSourceInfo | undefined> {
+    const pageId = this.getDataSourceFromPageContext();
+    if (!pageId || !this.dataSourceEnabled) return undefined;
+    const listResult = await this.ensureDataSources();
+    return this.verifyDataSource(pageId, listResult.ok ? listResult.list : undefined);
+  }
+
+  public getConversationDataSourceId(): string | undefined {
+    return this.conversationDataSourceId;
+  }
+
+  /** The chosen data source the agent has not recorded yet, if any. */
+  public getPendingDataSourceId(): string | undefined {
+    return this.pendingDataSource?.id;
   }
 
   /**
-   * Pure read of the resolved data source — never mutates conversation state.
+   * Choose a data source for the conversation without recording it: a picker choice, or one a
+   * caller passed with a message that was sent (sendMessage sets it then). It is used ahead of
+   * the conversation's own data source (verified like every candidate, ignored when not
+   * available), and the agent is asked to record it with switch_data_source so it can be read
+   * back from the history.
    */
-  public peekCurrentDataSourceId(): Promise<string | undefined> {
-    return this.getCurrentDataSourceId(true);
+  public setPendingDataSource(id: string, origin: 'picker' | 'caller'): void {
+    // Already the recorded data source: there is nothing for the agent to record.
+    this.pendingDataSource = id === this.conversationDataSourceId ? undefined : { id, origin };
   }
 
-  public getConfirmedDataSourceId(): string | undefined {
-    return this.confirmedDataSourceId;
+  /**
+   * Record the conversation's data source: a successful switch_data_source. Any pending choice is
+   * settled by it (recorded, or replaced by the data source the user named instead).
+   */
+  public setConversationDataSource(id: string): void {
+    this.conversationDataSourceId = id;
+    this.pendingDataSource = undefined;
   }
 
-  public clearSessionDataSourceAndContext(): void {
-    this.confirmedDataSourceId = undefined;
-    this.sessionDataSourceList = [];
-    this.clearDynamicContextFromStore(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+  /**
+   * The data source a run was dispatched with, for the tools that run executes. Runs are matched
+   * by the runId the client sent, which AG-UI servers echo in RUN_STARTED. If a server uses its
+   * own runId, this falls back to the last dispatched run (the one whose tools are executing,
+   * since a continuation waits for them), then to a fresh resolution (tools replayed from history
+   * have no run).
+   */
+  public async getRunDataSource(runId?: string): Promise<DataSourceInfo | undefined> {
+    if (runId && this.runDataSources.has(runId)) return this.runDataSources.get(runId);
+    if (this.lastRunDataSource) return this.lastRunDataSource;
+    const resolution = await this.resolveDataSourceForRun();
+    return resolution.kind === 'resolved' ? resolution.active : undefined;
   }
 
-  public setSessionDataSourceList(id: string | undefined): void {
-    if (!id || this.sessionDataSourceList.includes(id)) {
-      return;
+  private recordRunDataSource(runId: string, dataSource: DataSourceInfo | undefined): void {
+    this.runDataSources.set(runId, dataSource);
+    // Keep only recent runs; older runs have no tools left to execute.
+    if (this.runDataSources.size > 20) {
+      this.runDataSources.delete(this.runDataSources.keys().next().value as string);
     }
-
-    this.sessionDataSourceList = [...this.sessionDataSourceList, id];
-    this.persistDataSourceState();
-  }
-
-  public getSessionDataSourceList(): string[] {
-    return [...this.sessionDataSourceList];
+    this.lastRunDataSource = dataSource;
   }
 
   private clearConversationDataSourceState(): void {
-    this.confirmedDataSourceId = undefined;
-    this.sessionDataSourceList = [];
-    this.cachedAvailableDataSources = undefined;
-  }
-
-  private persistDataSourceState(): void {
-    const threadId = this.getThreadId();
-    if (!threadId) return;
-    this.conversationDataSourceStore.set(threadId, {
-      sessionDataSourceList: this.sessionDataSourceList,
-      confirmedDataSourceId: this.confirmedDataSourceId,
-    });
+    this.conversationDataSourceId = undefined;
+    this.pendingDataSource = undefined;
+    this.defaultDataSourceRead = undefined;
+    this.runDataSources.clear();
+    this.lastRunDataSource = undefined;
+    this.dataSources = undefined;
+    this.dataSourceLookups = undefined;
   }
 
   /**
-   * Restore a conversation's data source state from the store
+   * Resolve the data source for a frontend-tool continuation. When nothing resolves (for example
+   * the user left the page that pinned it), the continuation keeps the data source of the run
+   * that requested the tool so the tool result still reaches the same agent.
    */
-  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
-    const stored = this.conversationDataSourceStore.get(threadId);
-    if (!stored) return;
-
-    const [validIds, confirmedValid] = await Promise.all([
-      Promise.all(
-        (stored.sessionDataSourceList ?? []).map((id) =>
-          this.validateDataSourceId(id)
-            .then(({ valid }) => (valid ? id : undefined))
-            .catch(() => undefined)
-        )
-      ),
-      stored.confirmedDataSourceId
-        ? this.validateDataSourceId(stored.confirmedDataSourceId)
-            .then(({ valid }) => valid)
-            .catch(() => false)
-        : Promise.resolve(false),
-    ]);
-
-    if (this.getThreadId() !== threadId) return;
-
-    this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
-    this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
-
-    this.persistDataSourceState();
+  private async resolveForContinuation(): Promise<DataSourceResolution> {
+    const resolution = await this.resolveDataSourceForRun();
+    if (resolution.kind === 'resolved' || resolution.kind === 'disabled') return resolution;
+    const last = this.lastRunDataSource;
+    // No earlier run to fall back to (a tool replayed from history whose data source no longer
+    // verifies): the result is still delivered, without a data source id, so the run can finish.
+    if (!last) return resolution;
+    // Not the conversation's data source: no picker or page line applies to it.
+    const list = resolution.kind === 'needs_selection' ? resolution.available : undefined;
+    return this.toResolution(last, 'previousRun', list, false);
   }
 
   /**
-   * Check a data source id against the available data source list.
+   * Find the data source the conversation history selected: the result of its last successful
+   * switch_data_source call. Rejected or failed calls, calls without a result and results that are
+   * not JSON are ignored. The id is not checked here; resolution verifies it before use.
    */
-  public async validateDataSourceId(id: string): Promise<{
-    valid: boolean;
-    dataSource?: DataSourceInfo;
-    availableDataSources: DataSourceInfo[];
-  }> {
-    let available = await this.getAvailableDataSources();
-    let dataSource = available.find((ds) => ds.id === id);
-
-    // A data source created after the cache warmed would be rejected — refresh once.
-    if (!dataSource && available.length > 0) {
-      available = await this.getAvailableDataSources(true);
-      dataSource = available.find((ds) => ds.id === id);
+  private readConversationDataSourceFromHistory(events: Event[]): string | undefined {
+    // Every snapshot counts, in order, in case a backend restores one per run.
+    const messages = events
+      .filter((e) => e.type === EventType.MESSAGES_SNAPSHOT)
+      .flatMap((e) => (e as MessagesSnapshotEvent).messages ?? []);
+    const switchCallIds = new Set<string>();
+    for (const message of messages) {
+      if (message.role !== 'assistant' || !('toolCalls' in message) || !message.toolCalls) continue;
+      for (const call of message.toolCalls) {
+        if (call.function?.name === SWITCH_DATA_SOURCE_TOOL_NAME) switchCallIds.add(call.id);
+      }
     }
 
-    if (available.length === 0) {
-      return { valid: true, availableDataSources: available };
+    let found: string | undefined;
+    for (const message of messages) {
+      if (message.role !== 'tool' || !('toolCallId' in message)) continue;
+      if (!switchCallIds.has((message as ToolMessage).toolCallId)) continue;
+      try {
+        const content = (message as ToolMessage).content;
+        const result = typeof content === 'string' ? JSON.parse(content) : content;
+        if (result?.success === true && typeof result.dataSourceId === 'string') {
+          found = result.dataSourceId;
+        }
+      } catch {
+        // Not a JSON result; skip it.
+      }
     }
-
-    return { valid: !!dataSource, dataSource, availableDataSources: available };
+    return found;
   }
 
-  public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
-    const id = await this.getCurrentDataSourceId();
-    if (!id) return undefined;
-    const availableDs = await this.getAvailableDataSources();
-    const title = availableDs.find((ds) => ds.id === id)?.title;
-    return { id, title };
-  }
-
-  private async buildAvailableDsContext(dataSourceId?: string) {
+  /**
+   * Publish the data source context for a run and return every context the agent may see. A
+   * resolved run lists the available data sources and names the active one; otherwise the
+   * data source context is removed.
+   */
+  private buildDataSourceContext(resolution: DataSourceResolution) {
     const contextStore = (window as any).assistantContextStore;
 
-    const sessionDataSourceList = this.getSessionDataSourceList();
+    if (contextStore) {
+      if (resolution.kind === 'resolved') {
+        const { active, available, source, listComplete } = resolution;
+        // JSON.stringify quotes and escapes the title so a title containing a quote or newline
+        // cannot break the list format.
+        const label = (ds: DataSourceInfo) => `${JSON.stringify(ds.title)} (id: ${ds.id})`;
+        const availableLabel = available.map(label).join(', ');
 
-    if (contextStore && sessionDataSourceList.length > 1) {
-      const availableDataSources = await this.getAvailableDataSources();
-      const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
-
-      const activeDsLabel = activeDatasource
-        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
-        : `id: ${dataSourceId}`;
-      const sessionDsLabel = sessionDataSourceList
-        .map((id) => {
-          const sessionDataSource = availableDataSources.find((ds) => ds.id === id);
-          return sessionDataSource
-            ? `"${sessionDataSource.title}" (id: ${sessionDataSource.id})`
-            : `id: ${id}`;
-        })
-        .join(', ');
-
-      contextStore.addContext({
-        id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
-        description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
-        value: [
-          `Currently active data source: ${activeDsLabel}`,
-          `Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): ${sessionDsLabel}`,
-          `IMPORTANT — this conversation involves MORE THAN ONE data source.`,
-          `Before ANY data-source-aware action (inspecting fields, querying data, or creating a`,
-          `visualization), you MUST have the USER pick which data source to use for the current`,
-          `request by calling the ask_user tool with inputType 'select'. Build ONE option per data`,
-          `source listed above: set each option's label to the data source's NAME/title (this is what`,
-          `the user sees — NEVER show the raw id to the user) and its value to that data source's id`,
-          `(used internally to switch, not displayed). Example: ask_user({ inputType: 'select', prompt:`,
-          `'This conversation uses multiple data sources. Which one should I use?', options: [{ label:`,
-          `'<data source name>', value: '<data source id>' }, ...] }).`,
-          `A data source being currently active or previously confirmed does NOT satisfy this`,
-          `requirement — you MUST still call ask_user whenever the user has not explicitly chosen one`,
-          `for the current request. Do NOT silently reuse the current/last data source, do NOT guess,`,
-          `and do NOT ask which data source to use in free-form text.`,
-          `Once the user answers, call switch_data_source with the chosen id to apply it, then proceed`,
-          `using that data source for the rest of the current request.`,
-        ].join('\n'),
-      });
-    } else if (contextStore) {
-      contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+        contextStore.addContext({
+          id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
+          description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+          value: [
+            listComplete
+              ? `Available data sources (the ONLY data sources the user can use): ${availableLabel}`
+              : `Available data sources (this list may not include every data source): ${availableLabel}`,
+            `Currently active data source: ${label(active)}`,
+            `Server-side tools only reach the active data source; its cluster name is its title.`,
+            ...(source === 'page'
+              ? [
+                  `The dataset on the current page belongs to the active data source, so the data source cannot be switched while the user is on this page. If the user asks for another data source, tell them to select a dataset from it on the page, or to leave the page.`,
+                ]
+              : []),
+            ...(source === 'caller'
+              ? [
+                  `The user's request is about data in ${label(active)} (for example a visualization they asked about). Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to make it the conversation's data source.`,
+                ]
+              : []),
+            ...(source === 'pending'
+              ? [
+                  resolution.pendingOrigin === 'picker'
+                    ? `The user selected ${label(active)} in the data source picker. Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to record the choice in the conversation.`
+                    : `${label(active)} was chosen for this conversation by an earlier request but is not recorded yet. Before calling any other tool, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with dataSourceId "${active.id}" to make it the conversation's data source.`,
+                ]
+              : []),
+            `When the user explicitly names a data source by its title, match the name against the available list:`,
+            `- If it is the active data source, proceed.`,
+            `- If it is another available data source, call ${SWITCH_DATA_SOURCE_TOOL_NAME} with its id first.`,
+            listComplete
+              ? `- If it matches none, tell the user it is not available and list the available names.`
+              : `- If it matches none, tell the user you could not find it among the listed data sources and list their names.`,
+            `If the user does not name a data source, use the active one: it is the selected data source. Do not switch based on what the question is about.`,
+            `Never pass any name other than the active data source's title as a cluster name.`,
+          ].join('\n'),
+        });
+      } else {
+        contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+      }
     }
 
-    // Build the per-run context from the store (static + dynamic + the datasource context above),
+    // Build the per-run context from the store (static + dynamic + the data source context above),
     // filtering out categories the model must never receive (e.g. the PPL quick-fix request id).
     return this.getAgentContexts();
   }
 
+  /**
+   * Send a user message. `options.resolution` is the data source resolution the caller already
+   * made for this send (the chat window does, to decide whether to show the picker); without it,
+   * the data source is resolved here. Throws DataSourceUnresolvedError when there is no data
+   * source to run with.
+   */
   public async sendMessage(
     content: string,
     messages: Message[],
-    userMessage?: UserMessage
+    userMessage?: UserMessage,
+    options?: { resolution?: DataSourceResolution }
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
   }> {
+    // Resolve once for this run: the run, its context and its tools all use this result.
+    const resolution = options?.resolution ?? (await this.resolveDataSourceForRun());
+    if (resolution.kind !== 'resolved' && resolution.kind !== 'disabled') {
+      throw new DataSourceUnresolvedError(resolution);
+    }
+    const runDataSource = resolution.kind === 'resolved' ? resolution.active : undefined;
+
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
@@ -640,19 +977,26 @@ export class ChatService {
       }
     }
 
-    // Get workspace-aware data source ID
-    const dataSourceId = await this.getCurrentDataSourceId();
-    const context = await this.buildAvailableDsContext(dataSourceId);
-
     const threadId = this.getThreadId();
 
     if (!threadId) {
+      this.removeActiveRequest(requestId);
       throw new Error('Thread ID is required to send a message');
     }
 
+    // A data source passed with this message stays chosen for the conversation once it is sent,
+    // until the agent records it.
+    if (resolution.kind === 'resolved' && resolution.source === 'caller') {
+      this.setPendingDataSource(resolution.active.id, 'caller');
+    }
+
+    const context = this.buildDataSourceContext(resolution);
+    const runId = this.generateRunId();
+    this.recordRunDataSource(runId, runDataSource);
+
     const runInput: RunAgentInput = {
       threadId,
-      runId: this.generateRunId(),
+      runId,
       messages: this.conversationHistoryService.getMemoryProvider().includeFullHistory
         ? [...messages, userMessage]
         : [userMessage],
@@ -664,7 +1008,7 @@ export class ChatService {
       forwardedProps: { allowConversationTitle: true },
     };
 
-    const observable = this.agent.runAgent(runInput, dataSourceId);
+    const observable = this.agent.runAgent(runInput, runDataSource?.id);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -728,11 +1072,6 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // try the confirmed conversation override first; getCurrentDataSourceId still falls back
-    // to getWorkspaceAwareDataSourceId
-    const dataSourceId = await this.getCurrentDataSourceId();
-    const context = await this.buildAvailableDsContext(dataSourceId);
-
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =
       this.conversationHistoryService.getMemoryProvider().includeFullHistory;
@@ -746,18 +1085,6 @@ export class ChatService {
       // silent console error.
       return skip('no_thread_id');
     }
-
-    const runInput: RunAgentInput = {
-      threadId,
-      runId: this.generateRunId(),
-      messages: mappedMessages,
-      tools: this.availableTools || [],
-      context, // All contexts (static + dynamic) with stringified values
-      state: {}, // Empty for agent internal use only
-      // Client capability signal: this client can parse and strip the inline
-      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
-      forwardedProps: { allowConversationTitle: true },
-    };
 
     // Abort the halted main run so it does not overlap the continuation.
     this.agent.abort();
@@ -773,10 +1100,30 @@ export class ChatService {
     // server's per-thread concurrency guard (ConcurrencyException). This
     // serializes the two runs instead of racing them.
     await this.waitForActiveRunsToClear(requestId);
-    if (signal?.aborted) return skip('aborted');
+    // The conversation changed during the waits: this result belongs to the one that is gone.
+    if (signal?.aborted || this.getThreadId() !== threadId) return skip('aborted');
+
+    // Resolve right before dispatch, after the waits: a switch_data_source in the previous run
+    // applies from this continuation on, and a skipped continuation never touches the context.
+    const resolution = await this.resolveForContinuation();
+    if (signal?.aborted || this.getThreadId() !== threadId) return skip('aborted');
+    const runDataSource = resolution.kind === 'resolved' ? resolution.active : undefined;
+    const runId = this.generateRunId();
+    const runInput: RunAgentInput = {
+      threadId,
+      runId,
+      messages: mappedMessages,
+      tools: this.availableTools || [],
+      context: this.buildDataSourceContext(resolution), // All contexts, stringified values
+      state: {}, // Empty for agent internal use only
+      // Client capability signal: this client can parse and strip the inline
+      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
+      forwardedProps: { allowConversationTitle: true },
+    };
 
     // Continue the conversation with the tool result
-    const observable = this.agent.runAgent(runInput, dataSourceId);
+    this.recordRunDataSource(runId, runDataSource);
+    const observable = this.agent.runAgent(runInput, runDataSource?.id);
     const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
     this.events$ = trackedObservable;
@@ -910,9 +1257,6 @@ export class ChatService {
 
     if (signal?.aborted) return skip('aborted');
 
-    const dataSourceId = await this.getCurrentDataSourceId();
-    const context = await this.buildAvailableDsContext(dataSourceId);
-
     const includeFullHistory =
       this.conversationHistoryService.getMemoryProvider().includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, ...toolMessages] : [...toolMessages];
@@ -920,26 +1264,33 @@ export class ChatService {
     const threadId = this.getThreadId();
     if (!threadId) return skip('no_thread_id');
 
-    const runInput: RunAgentInput = {
-      threadId,
-      runId: this.generateRunId(),
-      messages: mappedMessages,
-      tools: this.availableTools || [],
-      context,
-      state: {},
-      // Client capability signal: this client can parse and strip the inline
-      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
-      forwardedProps: { allowConversationTitle: true },
-    };
-
     // Abort the halted main run so it does not overlap the continuation.
     this.agent.abort();
 
     // Each result is dispatched directly; the server reconciles it via its wire->native map
     // (see sendToolResult), which is idempotent and cross-process.
     if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
+    if (this.getThreadId() !== threadId) return skip('aborted');
 
-    const observable = this.agent.runAgent(runInput, dataSourceId);
+    // Resolve right before dispatch (see sendToolResult).
+    const resolution = await this.resolveForContinuation();
+    if (signal?.aborted || this.getThreadId() !== threadId) return skip('aborted');
+    const runDataSource = resolution.kind === 'resolved' ? resolution.active : undefined;
+    const runId = this.generateRunId();
+    const runInput: RunAgentInput = {
+      threadId,
+      runId,
+      messages: mappedMessages,
+      tools: this.availableTools || [],
+      context: this.buildDataSourceContext(resolution),
+      state: {},
+      // Client capability signal: this client can parse and strip the inline
+      // CONVERSATION_TITLE: sentinel, so the server may emit the title line.
+      forwardedProps: { allowConversationTitle: true },
+    };
+
+    this.recordRunDataSource(runId, runDataSource);
+    const observable = this.agent.runAgent(runInput, runDataSource?.id);
     const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
     this.events$ = trackedObservable;
@@ -996,8 +1347,11 @@ export class ChatService {
     }
     this.coreChatService.newThread();
 
-    // Clear data source selection and cache for new session
+    // A new conversation has no data source of its own and reads the list afresh. A history load
+    // still in flight must not take the thread back.
+    ++this.conversationLoadToken;
     this.clearConversationDataSourceState();
+    this.prefetchDataSources();
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
@@ -1103,80 +1457,47 @@ export class ChatService {
   }
 
   /**
-   * Restore the latest conversation from agentic memory.
-   * Returns the AG-UI event array (with unfinished tool calls injected) for replay,
-   * or null if no conversation exists or a thread is already active.
-   */
-  public async restoreLatestConversation(): Promise<Event[] | null> {
-    // Check if thread ID is already set - if so, skip restore and use existing thread
-    const currentThreadId = this.coreChatService?.getThreadId();
-    if (currentThreadId) {
-      // Thread already set, don't restore from latest conversation
-      return null;
-    }
-
-    // Get the latest conversation summary from conversation history service
-    const result = await this.conversationHistoryService.getConversations({
-      page: 0,
-      pageSize: 1,
-    });
-
-    if (result.conversations.length > 0) {
-      // Found a latest conversation - get full details
-      const latestConversationSummary = result.conversations[0];
-      // Get the full conversation with all events
-      const events = await this.conversationHistoryService.getConversation(
-        latestConversationSummary.threadId
-      );
-
-      if (!events) {
-        // No events found, generate a new thread
-        this.newThread();
-        return null;
-      }
-
-      // Set the thread ID in core service
-      if (this.coreChatService) {
-        this.coreChatService.setThreadId(latestConversationSummary.threadId);
-      }
-
-      // Restore the per-conversation data source state
-      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
-
-      return this.injectUnfinishedToolCallEvents(events);
-    }
-
-    // No conversation found, generate a new thread
-    this.newThread();
-    return null;
-  }
-
-  /**
    * Load a specific conversation from history by thread ID.
    * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
+   *
+   * The conversation's data source is read back from its history (its last successful
+   * switch_data_source); nothing about it is stored in the browser.
    */
   public async loadConversation(threadId: string): Promise<Event[] | null> {
+    const loadToken = ++this.conversationLoadToken;
+
+    // The current conversation keeps its data source while this loads: the history is fetched
+    // with the same data source the conversation list came from, and a failed load leaves the
+    // user in the current conversation with nothing changed.
     const events = await this.conversationHistoryService.getConversation(threadId);
+    // A newer load (or a new chat) started while this one was waiting: it owns the thread.
+    if (loadToken !== this.conversationLoadToken) {
+      return null;
+    }
     if (!events) {
       return null;
     }
+
+    // Switching for real: drop the previous conversation's data source state and context.
+    this.clearConversationDataSourceState();
+    this.clearDynamicContextFromStore(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
 
     // Set the thread ID in core service
     if (this.coreChatService) {
       this.coreChatService.setThreadId(threadId);
     }
 
-    await this.restoreDataSourceStateFromStore(threadId);
+    this.conversationDataSourceId = this.readConversationDataSourceFromHistory(events);
+    this.prefetchDataSources();
 
     return this.injectUnfinishedToolCallEvents(events);
   }
 
   /**
-   * Delete a conversation and its persisted data source state.
+   * Delete a conversation.
    */
   public async deleteConversation(threadId: string): Promise<void> {
     await this.conversationHistoryService.deleteConversation(threadId);
-    this.conversationDataSourceStore.delete(threadId);
   }
 
   /**
@@ -1198,45 +1519,6 @@ export class ChatService {
       content: content.trim(),
       rawMessage: rawMessage || content.trim(),
     };
-  }
-
-  /**
-   * Explicitly set the data source ID (e.g., after user selection)
-   */
-  public setDataSourceId(id: string | undefined): void {
-    this.confirmedDataSourceId = id;
-    if (!id) return;
-    this.setSessionDataSourceList(id);
-    this.persistDataSourceState();
-  }
-
-  /**
-   * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
-   */
-  public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
-    // The cache lives until newThread(), so a data source created mid-session is invisible
-    // to it. forceRefresh lets validateDataSourceId() re-check.
-    if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
-    if (!this.savedObjectsClient) return [];
-
-    try {
-      const response = await this.savedObjectsClient.find<{
-        title: string;
-        dataSourceEngineType?: string;
-      }>({
-        type: 'data-source',
-        fields: ['title', 'dataSourceEngineType'],
-        perPage: 100,
-      });
-
-      this.cachedAvailableDataSources = (response?.savedObjects || [])
-        .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
-        .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
-        .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
-      return this.cachedAvailableDataSources;
-    } catch {
-      return [];
-    }
   }
 
   /**

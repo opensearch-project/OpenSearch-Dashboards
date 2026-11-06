@@ -57,6 +57,8 @@ export class ChatEventHandler {
   private activeAssistantMessages = new Map<string, AssistantMessage>();
   private pendingToolCalls = new Map<string, ToolCall>();
   private lastTextMessageStartId: string | null = null;
+  // The run whose events are being handled, so its tools use the data source it was sent with.
+  private currentRunId?: string;
   private toolExecutor: ToolExecutor;
 
   private assistantActionService: AssistantActionService;
@@ -161,6 +163,7 @@ export class ChatEventHandler {
    * Handle run started - set streaming state and start timing
    */
   private handleRunStarted(event: any): void {
+    this.currentRunId = typeof event?.runId === 'string' ? event.runId : undefined;
     this.onStreamingStateChange(true);
 
     // Fresh run, fresh batch.
@@ -491,7 +494,8 @@ export class ChatEventHandler {
             toolCall.function.name,
             args,
             toolCallId,
-            await this.chatService.getCurrentDataSourceInfo(),
+            // The data source the run that requested this tool was dispatched with.
+            await this.chatService.getRunDataSource(this.currentRunId),
             this.chatService.getCurrentTimeRange()
           );
 

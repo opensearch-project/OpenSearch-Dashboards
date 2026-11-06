@@ -132,7 +132,20 @@ describe('ChatPlugin', () => {
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
         mockCoreStart.workspaces,
-        mockCoreStart.savedObjects.client
+        mockCoreStart.savedObjects.client,
+        false
+      );
+    });
+
+    it('should enable data sources in the chat service only when the dataSource plugin is present', () => {
+      plugin.start(mockCoreStart, { ...mockDeps, dataSource: {} } as any);
+
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client,
+        true
       );
     });
 
@@ -164,7 +177,8 @@ describe('ChatPlugin', () => {
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
         mockCoreStart.workspaces,
-        mockCoreStart.savedObjects.client
+        mockCoreStart.savedObjects.client,
+        false
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -177,7 +191,8 @@ describe('ChatPlugin', () => {
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
         mockCoreStart.workspaces,
-        mockCoreStart.savedObjects.client
+        mockCoreStart.savedObjects.client,
+        false
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -242,7 +257,8 @@ describe('ChatPlugin', () => {
           mockCoreStart.uiSettings,
           mockCoreStart.chat,
           mockCoreStart.workspaces,
-          mockCoreStart.savedObjects.client
+          mockCoreStart.savedObjects.client,
+          false
         );
       });
     });
