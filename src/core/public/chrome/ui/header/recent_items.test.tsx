@@ -243,43 +243,36 @@ describe('Recent items', () => {
     expect(defaultMockProps.http.get).not.toHaveBeenCalled();
   });
 
-  it.each([true, false])(
-    'reuses loaded details on reopening (accessible items: %s)',
-    async (hasItems) => {
-      if (!hasItems) {
-        jest.mocked(defaultMockProps.http.get).mockResolvedValue(savedObjectsFromServer[1]);
-      }
-      render(
-        <RecentItems
-          {...defaultMockProps}
-          recentlyAccessed$={mockRecentlyAccessed$}
-          workspaceList$={mockWorkspaceList$}
-        />
-      );
-      const button = screen.getByTestId('recentItemsSectionButton');
+  it('reuses successful details on reopening', async () => {
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+    await screen.findByText('visualizeMock');
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+    expect(defaultMockProps.http.get).toHaveBeenCalledWith(
+      expect.stringContaining('/management/saved_objects/visualization/'),
+      { prependOptions: { withoutClientBasePath: true } }
+    );
+
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+    await act(async () => {
       fireEvent.click(button);
-      const expectedText = hasItems ? 'visualizeMock' : 'No recently viewed items';
-      await screen.findByText(expectedText);
-      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
-      expect(defaultMockProps.http.get).toHaveBeenCalledWith(
-        expect.stringContaining('/management/saved_objects/visualization/'),
-        { prependOptions: { withoutClientBasePath: true } }
-      );
+    });
 
-      await act(async () => {
-        fireEvent.mouseDown(document.body);
-      });
-      expect(button).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(button);
-      });
-
-      expect(screen.getByText(expectedText)).toBeInTheDocument();
-      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
-      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
-    }
-  );
+    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+  });
 
   it.each([true, false])(
     'updates history order, labels, and workspace names without reloading (menu open: %s)',
@@ -340,6 +333,306 @@ describe('Recent items', () => {
     }
   );
 
+  it.each(['rejected request', 'error response'])(
+    'retries only failed details on the next opening: %s',
+    async (failure) => {
+      const first = mockRecentlyAccessed$.getValue()[0];
+      const second = {
+        ...first,
+        id: 'another-visualization',
+        label: 'Second visualization',
+        link: '/app/visualize/another-visualization',
+      };
+      const recentlyAccessed$ = new BehaviorSubject([first, second]);
+      const retry = Promise.withResolvers<SavedObjectWithMetadata>();
+      const get = jest.mocked(defaultMockProps.http.get);
+      if (failure === 'rejected request') {
+        get.mockRejectedValueOnce(new Error('Temporary network failure'));
+      } else {
+        get.mockResolvedValueOnce({
+          ...savedObjectsFromServer[0],
+          error: savedObjectsFromServer[1].error,
+        });
+      }
+      get.mockResolvedValueOnce({ ...savedObjectsFromServer[0], id: second.id });
+      get.mockReturnValueOnce(retry.promise);
+      render(
+        <RecentItems
+          {...defaultMockProps}
+          recentlyAccessed$={recentlyAccessed$}
+          workspaceList$={mockWorkspaceList$}
+        />
+      );
+      const button = screen.getByTestId('recentItemsSectionButton');
+      fireEvent.click(button);
+      await screen.findByText('Second visualization');
+      expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+      expect(get).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        recentlyAccessed$.next([
+          { ...second, meta: { ...second.meta, lastAccessedTime: 10 } },
+          { ...first, label: 'Updated visualization' },
+        ]);
+      });
+      expect(get).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        fireEvent.mouseDown(document.body);
+      });
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(get).toHaveBeenCalledTimes(3);
+      expect(get).toHaveBeenLastCalledWith(expect.stringContaining(first.id), {
+        prependOptions: { withoutClientBasePath: true },
+      });
+      expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+      expect(screen.queryByText('Second visualization')).not.toBeInTheDocument();
+
+      await act(async () => {
+        retry.resolve(savedObjectsFromServer[0]);
+      });
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        'Second visualization (WorkspaceMock_1)',
+        'Updated visualization (WorkspaceMock_1)',
+      ]);
+
+      await act(async () => {
+        fireEvent.mouseDown(document.body);
+      });
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(get).toHaveBeenCalledTimes(3);
+    }
+  );
+
+  it('retries on the next opening when all detail requests failed', async () => {
+    jest.mocked(defaultMockProps.http.get).mockRejectedValueOnce(new Error('Network failure'));
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+    await screen.findByText('No recently viewed items');
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    fireEvent.click(button);
+    expect(await screen.findByText('visualizeMock')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('defers new objects and failed details until the menu is reopened', async () => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const second = {
+      ...first,
+      id: 'new-visualization',
+      label: 'New asset',
+      link: '/app/visualize/new-visualization',
+    };
+    const recentlyAccessed$ = new BehaviorSubject([first]);
+    jest.mocked(defaultMockProps.http.get).mockRejectedValueOnce(new Error('Network failure'));
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={recentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+    await screen.findByText('No recently viewed items');
+
+    jest.mocked(defaultMockProps.http.get).mockResolvedValueOnce({
+      ...savedObjectsFromServer[0],
+      id: second.id,
+    });
+    await act(async () => {
+      recentlyAccessed$.next([second, first]);
+    });
+    expect(screen.queryByText('New asset')).not.toBeInTheDocument();
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(3);
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'New asset (WorkspaceMock_1)',
+      'visualizeMock (WorkspaceMock_1)',
+    ]);
+  });
+
+  it('retries a request that failed after the menu was closed', async () => {
+    const pendingDetails = Promise.withResolvers<SavedObjectWithMetadata>();
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(pendingDetails.promise);
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={new BehaviorSubject([mockRecentlyAccessed$.getValue()[0]])}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+
+    await act(async () => {
+      pendingDetails.reject(new Error('Network failure'));
+    });
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([true, false])(
+    'fetches added objects on the next opening (history changes while open: %s)',
+    async (menuOpen) => {
+      const first = mockRecentlyAccessed$.getValue()[0];
+      const second = {
+        ...first,
+        id: 'new-visualization',
+        label: 'New asset',
+        link: '/app/visualize/new-visualization',
+      };
+      const recentlyAccessed$ = new BehaviorSubject([first]);
+      render(
+        <RecentItems
+          {...defaultMockProps}
+          recentlyAccessed$={recentlyAccessed$}
+          workspaceList$={mockWorkspaceList$}
+        />
+      );
+      const button = screen.getByTestId('recentItemsSectionButton');
+      fireEvent.click(button);
+      await screen.findByText('visualizeMock');
+      if (!menuOpen) {
+        await act(async () => {
+          fireEvent.mouseDown(document.body);
+        });
+      }
+
+      const addedRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+      jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(addedRequest.promise);
+      await act(async () => {
+        recentlyAccessed$.next([second, first]);
+      });
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      if (menuOpen) {
+        expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+        expect(screen.queryByText('New asset')).not.toBeInTheDocument();
+        await act(async () => {
+          fireEvent.mouseDown(document.body);
+        });
+      }
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+      expect(defaultMockProps.http.get).toHaveBeenLastCalledWith(
+        expect.stringContaining(second.id),
+        { prependOptions: { withoutClientBasePath: true } }
+      );
+      expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+      expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+
+      await act(async () => {
+        addedRequest.resolve({ ...savedObjectsFromServer[0], id: second.id });
+      });
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        'New asset (WorkspaceMock_1)',
+        'visualizeMock (WorkspaceMock_1)',
+      ]);
+    }
+  );
+
+  it.each([true, false])(
+    'shares pending requests on reopening and waits for all to settle (first succeeds: %s)',
+    async (firstSucceeds) => {
+      const first = mockRecentlyAccessed$.getValue()[0];
+      const second = {
+        ...first,
+        id: 'new-visualization',
+        label: 'New asset',
+        link: '/app/visualize/new-visualization',
+      };
+      const recentlyAccessed$ = new BehaviorSubject([first]);
+      const firstRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+      const secondRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+      jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(firstRequest.promise);
+      jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(secondRequest.promise);
+      render(
+        <RecentItems
+          {...defaultMockProps}
+          recentlyAccessed$={recentlyAccessed$}
+          workspaceList$={mockWorkspaceList$}
+        />
+      );
+      const button = screen.getByTestId('recentItemsSectionButton');
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      await act(async () => {
+        recentlyAccessed$.next([second, first]);
+      });
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        fireEvent.mouseDown(document.body);
+      });
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        if (firstSucceeds) {
+          firstRequest.resolve(savedObjectsFromServer[0]);
+        } else {
+          firstRequest.reject(new Error('Network failure'));
+        }
+      });
+      expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+      expect(screen.queryByText('New asset')).not.toBeInTheDocument();
+      expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+
+      await act(async () => {
+        secondRequest.resolve({ ...savedObjectsFromServer[0], id: second.id });
+      });
+      expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        'New asset (WorkspaceMock_1)',
+        ...(firstSucceeds ? ['visualizeMock (WorkspaceMock_1)'] : []),
+      ]);
+      expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    }
+  );
+
   it('loads changed object identities on the next opening after a change while closed', async () => {
     const first = mockRecentlyAccessed$.getValue()[0];
     const recentlyAccessed$ = new BehaviorSubject([first]);
@@ -376,7 +669,7 @@ describe('Recent items', () => {
   it.each([
     { id: 'new-visualization', type: 'visualization' },
     { id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b', type: 'dashboard' },
-  ])('loads changed object identities while open: %j', async ({ id, type }) => {
+  ])('defers changed object identities until reopening: %j', async ({ id, type }) => {
     const first = mockRecentlyAccessed$.getValue()[0];
     const recentlyAccessed$ = new BehaviorSubject([first]);
     render(
@@ -386,7 +679,8 @@ describe('Recent items', () => {
         workspaceList$={mockWorkspaceList$}
       />
     );
-    fireEvent.click(screen.getByTestId('recentItemsSectionButton'));
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
     await screen.findByText('visualizeMock');
 
     const second = { ...first, id, meta: { type }, label: 'New asset' };
@@ -399,6 +693,13 @@ describe('Recent items', () => {
       recentlyAccessed$.next([second]);
     });
 
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('New asset')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    fireEvent.click(button);
     expect(await screen.findByText('New asset')).toBeInTheDocument();
     expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
     expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
@@ -472,7 +773,7 @@ describe('Recent items', () => {
     }
   );
 
-  it('ignores previous object details that complete after the requested objects change', async () => {
+  it('ignores an earlier opening that completes after a newer opening', async () => {
     const first = mockRecentlyAccessed$.getValue()[0];
     const second = { ...first, id: 'new-visualization', label: 'New asset' };
     const recentlyAccessed$ = new BehaviorSubject([first]);
@@ -494,6 +795,12 @@ describe('Recent items', () => {
     act(() => {
       recentlyAccessed$.next([second]);
     });
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    await act(async () => {
+      fireEvent.click(button);
+    });
 
     await act(async () => {
       secondRequest.resolve({ ...savedObjectsFromServer[0], id: second.id });
@@ -506,6 +813,69 @@ describe('Recent items', () => {
     expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
     expect(screen.getByText('New asset')).toBeInTheDocument();
     expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+
+    act(() => {
+      recentlyAccessed$.next([first]);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    fireEvent.click(button);
+    expect(await screen.findByText('visualizeMock')).toBeInTheDocument();
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(3);
+  });
+
+  it('keeps a replacement request when a removed object request fails later', async () => {
+    const first = mockRecentlyAccessed$.getValue()[0];
+    const recentlyAccessed$ = new BehaviorSubject([first]);
+    const removedRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+    const replacementRequest = Promise.withResolvers<SavedObjectWithMetadata>();
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(removedRequest.promise);
+    jest.mocked(defaultMockProps.http.get).mockReturnValueOnce(replacementRequest.promise);
+    render(
+      <RecentItems
+        {...defaultMockProps}
+        recentlyAccessed$={recentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    const button = screen.getByTestId('recentItemsSectionButton');
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    await act(async () => {
+      recentlyAccessed$.next([]);
+    });
+    await act(async () => {
+      recentlyAccessed$.next([first]);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      removedRequest.reject(new Error('Obsolete request failure'));
+    });
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(defaultMockProps.http.get).toHaveBeenCalledTimes(2);
+    expect(screen.getByLabelText('Loading recent items')).toBeInTheDocument();
+
+    await act(async () => {
+      replacementRequest.resolve(savedObjectsFromServer[0]);
+    });
+    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Loading recent items')).not.toBeInTheDocument();
   });
 
   it('omits failed requests and keeps accessible items', async () => {
