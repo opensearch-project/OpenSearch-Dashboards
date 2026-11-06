@@ -4,7 +4,7 @@
  */
 
 import type { CelestialEdge, CelestialNode } from '../../types';
-import { layoutSignature, reuseLayout } from './layout_reuse.utils';
+import { layoutOptionsKey, layoutSignature, reuseLayout } from './layout_reuse.utils';
 
 const node = (id: string, extra: Partial<CelestialNode> = {}): CelestialNode =>
   ({
@@ -79,5 +79,39 @@ describe('reuseLayout', () => {
   it('leaves elements the previous layout did not have unchanged', () => {
     const fresh = node('z');
     expect(reuseLayout({ nodes: [], edges: [] }, [fresh], []).nodes[0]).toBe(fresh);
+  });
+});
+
+describe('reuseLayout order and container sizes', () => {
+  it("keeps the previous result's order (parents before children)", () => {
+    const previous = {
+      nodes: [node('p', { width: 300, height: 200 }), node('a', { parentId: 'p' })],
+      edges: [],
+    };
+    const next = reuseLayout(previous, [node('a', { parentId: 'p' }), node('p')], []);
+    expect(next.nodes.map((n) => n.id)).toEqual(['p', 'a']);
+  });
+
+  it('copies a container height the layout changed even when the width is the same', () => {
+    const previous = {
+      nodes: [node('p', { width: 272, height: 420, style: { width: '272px', height: '420px' } })],
+      edges: [],
+    };
+    const next = reuseLayout(previous, [node('p', { width: 272, height: 156 })], []);
+    expect(next.nodes[0]).toMatchObject({
+      width: 272,
+      height: 420,
+      style: { width: '272px', height: '420px' },
+    });
+  });
+});
+
+describe('layoutOptionsKey', () => {
+  it('compares options by value, in any key order', () => {
+    expect(layoutOptionsKey({ direction: 'TB', rankSeparation: 80 })).toBe(
+      layoutOptionsKey({ rankSeparation: 80, direction: 'TB' })
+    );
+    expect(layoutOptionsKey({ direction: 'TB' })).not.toBe(layoutOptionsKey({ direction: 'LR' }));
+    expect(layoutOptionsKey(undefined)).toBe('');
   });
 });

@@ -8,7 +8,7 @@ import { ActionsIcon } from '../../shared/resources';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { t } from '../../shared/i18n/t';
 import { DEFAULT_METRICS } from '../../shared/constants/common.constants';
-import { formatRequestCount } from '../../shared/utils/format_count';
+import { formatRequestCount, hasRequestMetrics } from '../../shared/utils/format_count';
 import { Description } from '../description';
 import { HealthDonut } from '../health_donut';
 import { CelestialCardProps } from './types';
@@ -34,6 +34,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
 
   const { onGroupToggle, onDashboardClick, selectedNodeId } = useCelestialNodeActionsContext();
 
+  const hasMetrics = hasRequestMetrics(metrics);
   const totalRequests = formatRequestCount(metrics);
 
   const isSliStatusDisplayed = health?.status && ['breached', 'recovered'].includes(health?.status);
@@ -144,10 +145,11 @@ export const CelestialCard = (props: CelestialCardProps) => {
           {!!icon && (
             <div className="osd:col-span-14">
               <HealthDonut
-                metrics={metrics || { ...DEFAULT_METRICS }}
+                // Without metrics the ring stays empty and the legend (0% rows) is not shown.
+                metrics={hasMetrics && metrics ? metrics : { ...DEFAULT_METRICS }}
                 size={60}
                 icon={icon}
-                isLegendEnabled={true}
+                isLegendEnabled={hasMetrics}
               />
             </div>
           )}

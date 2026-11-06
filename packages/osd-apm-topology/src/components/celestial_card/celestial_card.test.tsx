@@ -338,6 +338,18 @@ describe('CelestialCard', () => {
     });
   });
 
+  it('shows no 0% legend on hover when the node has no metrics', () => {
+    render(<CelestialCard {...defaultProps} metrics={undefined} />, { wrapper: Providers });
+    fireEvent.mouseEnter(screen.getByTestId(HEALTH_DONUT_TEST_ID));
+    expect(screen.queryByText(/requests ok/)).toBeNull();
+  });
+
+  it('shows the legend on hover when the node has metrics', () => {
+    render(<CelestialCard {...defaultProps} />, { wrapper: Providers });
+    fireEvent.mouseEnter(screen.getByTestId(HEALTH_DONUT_TEST_ID));
+    expect(screen.getByText(/requests ok/)).toBeInTheDocument();
+  });
+
   it('shows requests as missing when the node has no metrics, and a real 0 as 0', () => {
     const { rerender } = render(<CelestialCard {...defaultProps} metrics={undefined} />, {
       wrapper: Providers,

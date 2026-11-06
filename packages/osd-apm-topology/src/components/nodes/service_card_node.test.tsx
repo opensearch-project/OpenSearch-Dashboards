@@ -176,5 +176,7 @@ describe('ServiceCardNode', () => {
     render(<ServiceCardNode {...createNodeProps({ metrics: undefined })} />);
     expect(screen.getByText('Req: -')).toBeInTheDocument();
     expect(screen.queryByText('Req: 0')).toBeNull();
+    // The error bar shows the rate as missing too, not 0.0%.
+    expect(screen.queryByText('0.0%')).toBeNull();
   });
 });

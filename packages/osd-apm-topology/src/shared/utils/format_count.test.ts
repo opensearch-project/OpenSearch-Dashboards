@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { formatCount, formatRequestCount, MISSING_COUNT } from './format_count';
+import { formatCount, formatRequestCount, hasRequestMetrics, MISSING_COUNT } from './format_count';
 
 describe('formatCount', () => {
   it('abbreviates thousands and millions', () => {
@@ -17,6 +17,9 @@ describe('formatCount', () => {
 describe('formatRequestCount', () => {
   it('shows a node without metrics as missing, not 0', () => {
     expect(formatRequestCount(undefined)).toBe(MISSING_COUNT);
+    expect(formatRequestCount({})).toBe(MISSING_COUNT);
+    expect(hasRequestMetrics({})).toBe(false);
+    expect(hasRequestMetrics({ requests: 0 })).toBe(true);
     expect(formatRequestCount({ requests: 0 })).toBe('0');
     expect(formatRequestCount({ requests: 1200 })).toBe('1.2K');
   });

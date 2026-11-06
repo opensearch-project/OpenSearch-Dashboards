@@ -4,6 +4,17 @@
  */
 
 import type { CelestialEdge, CelestialNode } from '../../types';
+import type { LayoutOptions } from '../hooks/use_celestial_layout.hook';
+
+/** A value key for layout options (all primitives), independent of key order. */
+export const layoutOptionsKey = (options?: LayoutOptions): string =>
+  options
+    ? JSON.stringify(
+        Object.keys(options)
+          .sort()
+          .map((key) => [key, options[key as keyof LayoutOptions]])
+      )
+    : '';
 
 /**
  * Everything the layout reads: node order, ids, visibility, sizes and nesting, and the
@@ -23,31 +34,37 @@ export const layoutSignature = (nodes: CelestialNode[], edges: CelestialEdge[]):
 
 /**
  * Apply a previous layout to nodes and edges whose layout inputs are unchanged (same
- * layoutSignature): positions, container sizes and edge handles come from the previous
- * result, everything else from the new elements.
+ * layoutSignature): positions, the sizes the layout gave containers, and edge handles come
+ * from the previous result, everything else from the new elements. Nodes keep the previous
+ * result's order (the layout puts parents before their children, as React Flow expects).
  */
 export const reuseLayout = (
   previous: { nodes: CelestialNode[]; edges: CelestialEdge[] },
   nodes: CelestialNode[],
   edges: CelestialEdge[]
 ): { nodes: CelestialNode[]; edges: CelestialEdge[] } => {
-  const laidOut = new Map(previous.nodes.map((node) => [node.id, node]));
+  const byId = new Map(nodes.map((node) => [node.id, node]));
   const wired = new Map(previous.edges.map((edge) => [edge.id, edge]));
-  return {
-    nodes: nodes.map((node) => {
-      const prev = laidOut.get(node.id);
-      if (!prev) return node;
-      return {
+  const placed = previous.nodes.flatMap((prev) => {
+    const node = byId.get(prev.id);
+    if (!node) return [];
+    byId.delete(prev.id);
+    return [
+      {
         ...node,
         position: prev.position,
-        // Containers are sized by the layout.
-        ...(prev.width !== node.width && { width: prev.width, height: prev.height }),
-        ...(prev.style !== node.style &&
-          prev.style?.width !== undefined && {
-            style: { ...node.style, width: prev.style.width, height: prev.style.height },
-          }),
-      };
-    }),
+        // Containers are sized by the layout (width and height, and their style).
+        ...(prev.width !== undefined && { width: prev.width }),
+        ...(prev.height !== undefined && { height: prev.height }),
+        ...((prev.style?.width !== undefined || prev.style?.height !== undefined) && {
+          style: { ...node.style, width: prev.style?.width, height: prev.style?.height },
+        }),
+      },
+    ];
+  });
+  return {
+    // Any node the previous layout did not have (not expected with an equal signature) last.
+    nodes: [...placed, ...byId.values()],
     edges: edges.map((edge) => {
       const prev = wired.get(edge.id);
       return prev

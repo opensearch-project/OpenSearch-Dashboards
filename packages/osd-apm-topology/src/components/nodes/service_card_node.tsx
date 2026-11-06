@@ -8,7 +8,11 @@ import type { Node, NodeProps } from '@xyflow/react';
 import type { CelestialCardProps } from '../celestial_card/types';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { DEFAULT_METRICS } from '../../shared/constants/common.constants';
-import { formatRequestCount } from '../../shared/utils/format_count';
+import {
+  formatRequestCount,
+  hasRequestMetrics,
+  MISSING_COUNT,
+} from '../../shared/utils/format_count';
 import { HealthDonut } from '../health_donut';
 import { NodeShell } from './node_shell';
 import { TypeBadge } from './type_badge';
@@ -34,6 +38,7 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
   const isSelected = data.id === selectedNodeId;
   const isBreach = !!data.health?.breached;
 
+  const hasMetrics = hasRequestMetrics(data.metrics);
   const totalRequests = formatRequestCount(data.metrics);
 
   const errorRate = data.metrics?.requests
@@ -119,10 +124,11 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
           {showDonut && data.icon && (
             <div className="osd:flex-shrink-0">
               <HealthDonut
-                metrics={data.metrics || { ...DEFAULT_METRICS }}
+                // Without metrics the ring stays empty and the legend (0% rows) is not shown.
+                metrics={hasMetrics && data.metrics ? data.metrics : { ...DEFAULT_METRICS }}
                 size={48}
                 icon={data.icon}
-                isLegendEnabled={true}
+                isLegendEnabled={hasMetrics}
               />
             </div>
           )}
@@ -134,7 +140,7 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
               value={errorRate}
               max={100}
               color="var(--osd-color-ok)"
-              label={`${errorRate.toFixed(1)}%`}
+              label={hasMetrics ? `${errorRate.toFixed(1)}%` : MISSING_COUNT}
             />
           </div>
         </div>
