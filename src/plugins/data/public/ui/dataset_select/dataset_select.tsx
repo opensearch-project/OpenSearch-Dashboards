@@ -102,6 +102,11 @@ export interface DatasetSelectProps {
    * Pass this to stay controlled regardless of the current selection.
    */
   isControlled?: boolean;
+  /**
+   * Select the default dataset on the first load when none is selected. Defaults to true; pass
+   * false when an empty selection is meaningful
+   */
+  autoSelectDefault?: boolean;
 }
 
 interface ViewDatasetsModalProps {
@@ -309,6 +314,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   showNonTimeFieldDatasets = true,
   controlledSelectedDataset,
   isControlled: isControlledProp,
+  autoSelectDefault = true,
 }) => {
   const isControlled = isControlledProp ?? controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
@@ -582,6 +588,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       // IMPORTANT: Don't override a dataset that's already selected - it may have been set by
       // a saved query, test, or manual selection, and may not be in the fetched list
       if (
+        autoSelectDefault &&
         !hasCompletedInitialLoad.current &&
         signalType !== null &&
         !currentlySelectedDataset &&
@@ -611,6 +618,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     supportedTypes,
     showNonTimeFieldDatasets,
     isControlled,
+    autoSelectDefault,
   ]);
 
   useEffect(() => {
