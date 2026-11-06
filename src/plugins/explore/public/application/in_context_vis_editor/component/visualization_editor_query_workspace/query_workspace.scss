@@ -1,0 +1,215 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.queryWorkspace {
+  height: 100%;
+
+  &__body {
+    height: 100%;
+    gap: $euiSizeXS;
+  }
+}
+
+.queryWorkspace .queryWorkspace__body .queryWorkspace__card {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.queryWorkspaceDetail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  &__header {
+    flex: 0 0 auto;
+    border-bottom: $euiBorderThin;
+    box-shadow: inset 3px 0 0 $euiColorSuccess;
+    padding: $euiSizeS $euiSizeM;
+  }
+
+  &__header--query {
+    box-shadow: inset 3px 0 0 $euiColorPrimary;
+  }
+
+  &__divider {
+    height: $euiSize;
+    border-left: $euiBorderThin;
+  }
+
+  &__headerContent {
+    min-width: 0;
+    max-width: 360px;
+  }
+
+  &__body {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &__content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: $euiSizeS;
+  }
+
+  &__footer {
+    flex: 0 0 auto;
+    border-top: $euiBorderThin;
+    padding: $euiSizeXS $euiSizeS;
+  }
+}
+
+.queryWorkspaceSection {
+  // EuiAccordion's child wrapper sets `transform: translatez(0)`, which turns it into the
+  // containing block for the `position: fixed` item react-beautiful-dnd drags, so the
+  // dragged/displaced rows get offset and clipped by its `overflow: hidden`.
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiAccordion__childWrapper {
+    transform: none;
+  }
+
+  &__items {
+    padding-top: $euiSizeS;
+  }
+
+  &__addButton {
+    background: $euiColorLightestShade;
+    border-radius: $euiBorderRadiusSmall;
+  }
+}
+
+.queryWorkspaceSectionItem {
+  margin-bottom: $euiSizeXS;
+
+  &__buttonWrapper {
+    position: relative;
+  }
+
+  &__button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: $euiSizeXL;
+    gap: $euiSizeS;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    background: transparent;
+    color: $euiTextColor;
+    padding: 0 $euiSizeS;
+    box-shadow: inset 3px 0 0 $euiColorSuccess;
+    padding-right: $euiSizeXXL;
+  }
+
+  &__button-isActive {
+    background: transparentize($euiColorSuccess, 0.9);
+    border-color: $euiColorSuccess;
+  }
+
+  &__button--queries {
+    box-shadow: inset 3px 0 0 $euiColorPrimary;
+  }
+
+  &__button--queries.queryWorkspaceSectionItem__button-isActive {
+    background: transparentize($euiColorPrimary, 0.9);
+    border-color: $euiColorPrimary;
+    box-shadow: inset 3px 0 0 $euiColorPrimary;
+  }
+
+  &__button.queryWorkspaceSectionItem__button-hasWarning {
+    box-shadow: inset 3px 0 0 $euiColorWarning;
+
+    &.queryWorkspaceSectionItem__button-isActive {
+      background: transparentize($euiColorWarning, 0.9);
+      border-color: $euiColorWarning;
+    }
+  }
+
+  // Failed query / broken transformation.
+  &__button.queryWorkspaceSectionItem__button-isInvalid {
+    box-shadow: inset 3px 0 0 $euiColorDanger;
+
+    &.queryWorkspaceSectionItem__button-isActive {
+      background: transparentize($euiColorDanger, 0.9);
+      border-color: $euiColorDanger;
+    }
+  }
+
+  &__button-isHidden {
+    color: $euiColorMediumShade;
+  }
+
+  &__icon {
+    color: $euiColorSuccess;
+  }
+
+  &__label {
+    @include euiTextTruncate;
+
+    min-width: 0;
+  }
+
+  &__dragHandle {
+    cursor: grab;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__actions {
+    position: absolute;
+    top: 50%;
+    right: $euiSizeS;
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+    transform: translateY(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $euiAnimSpeedFast ease;
+  }
+
+  &__buttonWrapper:hover &__actions,
+  &__buttonWrapper:focus-within &__actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// Error callout above the selected query row's editor.
+.queryWorkspaceQueryIssues {
+  &__details {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+// Query options: a bar under the detail panel; opening it covers the panel content.
+.queryWorkspaceQueryOptions {
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+  }
+
+  &__form {
+    width: 360px;
+    max-width: 100%;
+    padding: $euiSizeM;
+    background: $euiColorEmptyShade;
+    border-right: $euiBorderThin;
+    overflow-y: auto;
+  }
+
+  &__backdrop {
+    flex: 1 1 auto;
+    background: transparentize($euiColorEmptyShade, 0.3);
+    backdrop-filter: blur(2px);
+  }
+}
