@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useSyncExternalStore } from 'react';
 import { Dataset } from '../../../../data/common';
+import { createFieldMappingCheck, PPLRunner } from './field_mapping_check';
+
+export type { PPLRunner };
 
 /**
  * Set by Data Prepper (`otel_traces`), an SDK or the user on the outermost GenAI span of a trace
@@ -137,91 +139,28 @@ export const dropShadowedAiRoots = <T extends SpanHit>(hits: T[]): T[] => {
   );
 };
 
-const CHECK_TTL_MS = 5 * 60_000;
-const checks = new Map<string, { at: number; present: boolean }>();
-const pending = new Map<string, Promise<void>>();
-
-// Query cache keys include the AI-root condition, so components that memoize a key subscribe here
-// to recompute it once a check changes the condition.
-let version = 0;
-const listeners = new Set<() => void>();
-const record = (datasetId: string, present: boolean) => {
-  const changed = checks.get(datasetId)?.present !== present;
-  checks.set(datasetId, { at: Date.now(), present });
-  if (changed) {
-    version += 1;
-    listeners.forEach((listener) => listener());
-  }
-};
-const subscribe = (listener: () => void) => {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-};
+const aiRootFieldCheck = createFieldMappingCheck(AI_ROOT_FIELD_PPL);
 
 /** Changes whenever the AI-root condition of any dataset changes; use in memo dependencies. */
-export const useAiRootFieldVersion = (): number => useSyncExternalStore(subscribe, () => version);
-
-const FIELD_NOT_FOUND = /FIELD_NOT_FOUND|can't resolve Symbol|Field \[[^\]]*\] not found/i;
-
-const isFieldNotFound = (error: unknown): boolean => {
-  const parts: unknown[] = [error];
-  if (error && typeof error === 'object') {
-    const e = error as { message?: unknown; body?: unknown };
-    parts.push(e.message, e.body);
-  }
-  return parts.some((part) => {
-    if (part === undefined || part === null) return false;
-    const text = typeof part === 'string' ? part : JSON.stringify(part);
-    return FIELD_NOT_FOUND.test(text ?? '');
-  });
-};
+export const useAiRootFieldVersion = (): number => aiRootFieldCheck.useVersion();
 
 export const hasAiRootField = (datasetId: string | undefined): boolean =>
-  !!datasetId && !!checks.get(datasetId)?.present;
-
-export interface PPLRunner {
-  executeQuery(dataset: Dataset, pplQuery: string): Promise<unknown>;
-}
+  aiRootFieldCheck.isPresent(datasetId);
 
 /**
  * Checks once per dataset (re-checked after a few minutes, so a newly mapped field is picked up)
  * whether the AI-root marker is in the index mapping. A one-row query on the field fails while
  * it is unmapped.
  */
-export const ensureAiRootFieldChecked = async (
+export const ensureAiRootFieldChecked = (
   ppl: PPLRunner | undefined,
   dataset: Dataset | undefined | null,
   sourceCommand: string
-): Promise<void> => {
-  if (!ppl || !dataset?.id || !sourceCommand) return;
-  const cached = checks.get(dataset.id);
-  if (cached && Date.now() - cached.at < CHECK_TTL_MS) return;
-  const inFlight = pending.get(dataset.id);
-  if (inFlight) return inFlight;
-  const check = ppl
-    .executeQuery(dataset, `${sourceCommand} | where isnotnull(${AI_ROOT_FIELD_PPL}) | head 1`)
-    .then(
-      () => record(dataset.id, true),
-      (error: unknown) => {
-        // Cache "unmapped" only when the field is reported missing; a timeout or 5xx is retried on
-        // the next query instead of hiding agent traces for the whole cache period.
-        if (isFieldNotFound(error)) record(dataset.id, false);
-      }
-    )
-    .then(() => undefined)
-    .finally(() => pending.delete(dataset.id));
-  pending.set(dataset.id, check);
-  return check;
-};
+): Promise<void> => aiRootFieldCheck.ensureChecked(ppl, dataset, sourceCommand);
 
 /** For tests. */
-export const resetAiRootFieldChecks = () => {
-  checks.clear();
-  pending.clear();
-};
+export const resetAiRootFieldChecks = () => aiRootFieldCheck.reset();
 
 /** For tests and callers that already know the mapping. */
 export const setAiRootFieldPresent = (datasetId: string, present: boolean) =>
-  record(datasetId, present);
+  aiRootFieldCheck.setPresent(datasetId, present);

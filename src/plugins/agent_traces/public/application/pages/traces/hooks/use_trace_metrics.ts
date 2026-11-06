@@ -20,6 +20,7 @@ import { RootState } from '../../../utils/state_management/store';
 import { extractSpanFilterQuery } from '../table_shared';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 import { aiRootCondition, ensureAiRootFieldChecked } from '../../../utils/ai_root';
+import { ensureGenAiFieldChecked, lacksGenAiData } from '../../../utils/genai_data_check';
 import { getSourceCommand } from '../../sessions/session_utils';
 import { shadowedAiRootsExclusion } from './shadowed_ai_roots';
 
@@ -43,6 +44,22 @@ export interface TraceMetrics {
   /** Distinct gen_ai.conversation.id values; null when unavailable (e.g. field not mapped). */
   totalSessions: number | null;
 }
+
+const EMPTY_TRACE_METRICS: TraceMetrics = {
+  totalTraces: 0,
+  totalSpans: 0,
+  filteredTraces: 0,
+  totalAgentRuns: 0,
+  filteredAgentRuns: 0,
+  countsMayIncludeDuplicates: false,
+  filteredSpans: 0,
+  totalTokens: 0,
+  latencyP50Nanos: 0,
+  latencyP99Nanos: 0,
+  errorTraces: 0,
+  errorSpans: 0,
+  totalSessions: null,
+};
 
 export interface UseTraceMetricsResult {
   metrics: TraceMetrics | null;
@@ -119,7 +136,12 @@ const doFetchMetrics = async (
   filteredQuery: string
 ): Promise<TraceMetrics> => {
   const source = getSourceCommand(sourceOnlyQuery);
-  await ensureAiRootFieldChecked(pplService, datasetParam, source);
+  await Promise.all([
+    ensureAiRootFieldChecked(pplService, datasetParam, source),
+    ensureGenAiFieldChecked(pplService, datasetParam, source),
+  ]);
+  // Every metrics query names `gen_ai.operation.name`; a dataset without it has nothing to count.
+  if (lacksGenAiData(datasetParam.id)) return EMPTY_TRACE_METRICS;
   // AI roots: a GenAI trace root, or a span marked as the agent root (usually the outermost GenAI
   // span under a non-GenAI root; an SDK may mark a non-GenAI span, so the filter keeps those too),
   // minus shadowed ones so each agent run is counted once.

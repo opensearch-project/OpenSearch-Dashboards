@@ -9,7 +9,6 @@ import { selectQueryStatusMapByKey } from '../../../../application/utils/state_m
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 import { CanvasPanel } from '../../../panel/canvas_panel';
-import { DiscoverNoIndexPatterns } from '../../../../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
 import { DiscoverNoResults } from '../../../../application/legacy/discover/application/components/no_results/no_results';
@@ -20,6 +19,13 @@ import {
   defaultPrepareQueryString,
 } from '../../../../application/utils/state_management/actions/query_actions';
 import { useDatasetContext } from '../../../../application/context';
+import {
+  isCheckingGenAiData,
+  lacksGenAiData,
+  useGenAiDataCheckVersion,
+} from '../../../../application/utils/genai_data_check';
+import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
+import { AgentTracesNoAgentData } from '../../../empty_states';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import './bottom_right_container.scss';
 
@@ -51,14 +57,37 @@ export const BottomRightContainer = () => {
   const dataTableStatus = useSelector((state: RootState) => {
     return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
+  // Re-render when the dataset's GenAI data check starts, ends or changes its result.
+  useGenAiDataCheckVersion();
 
   if (dataset == null) {
     return (
       <CanvasPanel>
         <>
           <EuiSpacer size="xxl" />
-          <DiscoverNoIndexPatterns />
+          <TraceAutoDetectCallout />
         </>
+      </CanvasPanel>
+    );
+  }
+
+  // Checked before any tab mounts: the tabs query `gen_ai.operation.name`, which fails on a
+  // dataset that has no GenAI spans.
+  if (lacksGenAiData(dataset.id)) {
+    return (
+      <CanvasPanel>
+        <>
+          <EuiSpacer size="xxl" />
+          <AgentTracesNoAgentData datasetTitle={dataset.displayName || dataset.title} />
+        </>
+      </CanvasPanel>
+    );
+  }
+
+  if (isCheckingGenAiData(dataset.id) && status !== QueryExecutionStatus.READY) {
+    return (
+      <CanvasPanel>
+        <LoadingSpinner />
       </CanvasPanel>
     );
   }
