@@ -82,7 +82,6 @@ export class Bundle {
   /**
    * Absolute path to a manifest file with "requiredBundles" which will be
    * used to allow bundleRefs from this bundle to the exports of another bundle.
-   * Every bundle mentioned in the `requiredBundles` must be built together.
    */
   public readonly manifestPath: BundleSpec['manifestPath'];
 
