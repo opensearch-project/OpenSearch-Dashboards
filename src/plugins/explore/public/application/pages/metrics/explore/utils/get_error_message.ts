@@ -64,13 +64,38 @@ export const getErrorMessage = (error: unknown): string => {
   return getServerErrorMessage(error) ?? nonEmptyString(message) ?? String(error);
 };
 
-/** A failure as the error callout shows it: its text, and whether the server wrote it. */
+/**
+ * Whether a server message is only a name for the failure, not an explanation: the HTTP status
+ * phrase (the body's `error`, or the status text), a client's generic error name, or an object
+ * stringified by mistake. Such a message is still shown, with the generic advice kept.
+ */
+const isBareFailureName = (text: string, error: unknown): boolean => {
+  const { body, message } = (error ?? {}) as { body?: unknown; message?: unknown };
+  const statusPhrase =
+    body && typeof body === 'object' ? (body as { error?: unknown }).error : undefined;
+  const normalized = text.trim().toLowerCase();
+  return (
+    /^\[object \w+\]$/.test(normalized) ||
+    normalized === 'response error' ||
+    [statusPhrase, message].some(
+      (name) => typeof name === 'string' && name.trim().toLowerCase() === normalized
+    )
+  );
+};
+
+/**
+ * A failure as the error callout shows it: its text, and whether the server explained it (then
+ * the callout leads with the source instead of the generic "Check your connection" advice).
+ */
 export interface MetricsLoadError {
   message: string;
   fromServer: boolean;
 }
 
-export const toMetricsLoadError = (error: unknown): MetricsLoadError => ({
-  message: getErrorMessage(error),
-  fromServer: getServerErrorMessage(error) !== undefined,
-});
+export const toMetricsLoadError = (error: unknown): MetricsLoadError => {
+  const server = getServerErrorMessage(error);
+  return {
+    message: getErrorMessage(error),
+    fromServer: server !== undefined && !isBareFailureName(server, error),
+  };
+};

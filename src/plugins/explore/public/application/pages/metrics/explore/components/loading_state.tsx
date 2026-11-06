@@ -75,7 +75,12 @@ export function ErrorCallout({
           )}
           <p
             data-test-subj="metricsExploreErrorMessage"
-            style={{ fontFamily: 'monospace', wordBreak: 'break-word' }}
+            // The server's own sentence reads as text; anything else (a status, a code) as code.
+            style={
+              fromServer
+                ? { wordBreak: 'break-word' }
+                : { fontFamily: 'monospace', wordBreak: 'break-word' }
+            }
           >
             {message}
           </p>

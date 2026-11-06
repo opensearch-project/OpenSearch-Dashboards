@@ -215,7 +215,8 @@ export interface SourceTypeDefinition {
    * Metrics page: the advice Explore gives when this source has no metrics to show for the time
    * range (the Explore tab's metric list, or a PromQL query that returns nothing), after a
    * sentence that names the source. For example, which of the source's metrics PromQL reaches.
-   * Defaults to "Try adjusting the time range."
+   * Defaults to "Try adjusting the time range." Pass a translated string: it is placed into a
+   * translated sentence.
    */
   metricsEmptyHint?: string;
 }

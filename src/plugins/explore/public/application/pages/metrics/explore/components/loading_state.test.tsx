@@ -64,6 +64,18 @@ describe('ErrorCallout', () => {
     }
   );
 
+  it("shows the server's sentence as text, and other messages as code", () => {
+    const { unmount } = render(<ErrorCallout error="Ask for access." fromServer />);
+    expect(screen.getByTestId('metricsExploreErrorMessage')).not.toHaveStyle({
+      fontFamily: 'monospace',
+    });
+    unmount();
+    render(<ErrorCallout error="Bad Gateway" />);
+    expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveStyle({
+      fontFamily: 'monospace',
+    });
+  });
+
   it('reads as before for Prometheus', () => {
     render(<ErrorCallout error="Bad Request" sourceLabel="Prometheus" />);
     expect(

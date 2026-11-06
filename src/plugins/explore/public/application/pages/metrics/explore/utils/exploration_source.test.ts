@@ -64,6 +64,17 @@ describe('getExplorationSource', () => {
     expect(source.emptyHint).toBeUndefined();
   });
 
+  it('offers no built-in PromQL samples for a registered source without its own PromQL guide', () => {
+    for (const languageSettings of [undefined, {}, { SQL: { sampleQueries: [] } }]) {
+      registry = new SourceTypeRegistryService();
+      setSourceTypeRegistry(registry);
+      registry.register(mySource({ languageSettings } as Partial<SourceTypeDefinition>));
+      const source = getExplorationSource({ type: 'MY_METRICS' });
+      expect(source.sampleQueries).toEqual([]);
+      expect(source.codeLanguage).toBeUndefined();
+    }
+  });
+
   it('follows a label the deployment sets', () => {
     registry.setLabel('opensearch', 'Managed Prometheus', ExploreFlavor.Metrics);
     expect(getExplorationSource({ type: 'PROMETHEUS' }).label).toBe('Managed Prometheus');

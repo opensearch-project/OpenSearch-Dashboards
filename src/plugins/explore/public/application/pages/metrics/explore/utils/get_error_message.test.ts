@@ -119,6 +119,24 @@ describe('getErrorMessage', () => {
     }
   });
 
+  it('shows a bare failure name, but not as the server explaining the failure', () => {
+    for (const [statusText, body] of [
+      ['Not Found', { statusCode: 404, error: 'Not Found', message: 'Not Found' }],
+      ['', { statusCode: 400, error: 'Bad Request', message: 'Bad Request' }],
+      ['Internal Server Error', { message: 'Unable to get resources: Response Error' }],
+      ['Bad Gateway', { message: '[object Object]' }],
+      ['Forbidden', { message: 'forbidden' }],
+    ] as Array<[string, Record<string, unknown>]>) {
+      const error = httpError(statusText, body);
+      const shown = getServerErrorMessage(error);
+      expect(toMetricsLoadError(error)).toEqual({ message: shown, fromServer: false });
+    }
+    // A real explanation still counts as the server's.
+    expect(
+      toMetricsLoadError(httpError('Not Found', { error: 'Not Found', message: 'no such source' }))
+    ).toEqual({ message: 'no such source', fromServer: true });
+  });
+
   it('keeps a message that is not a JSON object as it is', () => {
     for (const message of ['[1,2]', '"quoted"', '42', 'null', '{not json']) {
       expect(getErrorMessage(httpError('x', { message }))).toBe(message);

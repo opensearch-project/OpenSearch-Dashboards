@@ -5,7 +5,10 @@
 
 import { i18n } from '@osd/i18n';
 import { ExploreFlavor } from '../../../../../../common';
-import { getSourceTypeRegistry } from '../../../../../services/source_type_registry';
+import {
+  getSourceTypeRegistry,
+  OPENSEARCH_SOURCE_TYPE_ID,
+} from '../../../../../services/source_type_registry';
 import type { ExplorationSource } from '../contexts/exploration_context';
 
 /**
@@ -16,7 +19,11 @@ import type { ExplorationSource } from '../contexts/exploration_context';
 export const getExplorationSource = (dataset?: { type?: string }): ExplorationSource => {
   const registry = getSourceTypeRegistry();
   const sourceType = registry.getForDataset(dataset);
-  const promqlGuide = registry.getLanguageGuide('PROMQL', dataset);
+  // The built-in PromQL samples query Prometheus metrics: a registered source shows only the samples
+  // of its own PromQL guide, none without one.
+  const ownPromql =
+    sourceType.id === OPENSEARCH_SOURCE_TYPE_ID || !!sourceType.languageSettings?.PROMQL;
+  const promqlGuide = ownPromql ? registry.getLanguageGuide('PROMQL', dataset) : {};
   return {
     label: registry.getLabel(sourceType, ExploreFlavor.Metrics),
     emptyHint: sourceType.metricsEmptyHint,
