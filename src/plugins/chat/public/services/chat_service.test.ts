@@ -554,7 +554,7 @@ describe('ChatService', () => {
       );
     });
 
-    it('should include session data source history in available-data-sources-context context', async () => {
+    it('should list every available data source in available-data-sources-context', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
@@ -576,8 +576,7 @@ describe('ChatService', () => {
       (window as any).assistantContextStore = createStatefulContextStore();
 
       service.newThread();
-      service.setSessionDataSourceList('ds-1');
-      service.setSessionDataSourceList('ds-2');
+      service.setDataSourceId('ds-2');
       mockUiSettings.get.mockReturnValue(undefined);
 
       await service.sendMessage('test', []);
@@ -588,17 +587,15 @@ describe('ChatService', () => {
       );
 
       expect(availableDataSourcesContext.value).toContain(
-        'Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): "Source One" (id: ds-1), "Source Two" (id: ds-2)'
+        'Currently active data source: "Source Two" (id: ds-2).'
       );
       expect(availableDataSourcesContext.value).toContain(
-        'IMPORTANT — this conversation involves MORE THAN ONE data source.'
+        'Data sources available to the user: "Source One" (id: ds-1), "Source Two" (id: ds-2).'
       );
-      expect(availableDataSourcesContext.value).toContain(
-        'A data source being currently active or previously confirmed does NOT satisfy this'
-      );
+      expect(availableDataSourcesContext.value).toContain('call switch_data_source');
     });
 
-    it('should not include available-data-sources-context context when only one data source has appeared in the session', async () => {
+    it('should not include available-data-sources-context context when only one data source is available', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
@@ -606,7 +603,6 @@ describe('ChatService', () => {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
-            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
           ],
         }),
       };
@@ -621,7 +617,7 @@ describe('ChatService', () => {
       (window as any).assistantContextStore = contextStore;
 
       service.newThread();
-      service.setSessionDataSourceList('ds-1');
+      service.setDataSourceId('ds-1');
       mockUiSettings.get.mockReturnValue(undefined);
 
       await service.sendMessage('test', []);
@@ -2239,7 +2235,7 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.getCurrentDataSourceId();
 
       expect(result).toBe('page-data-source-id');
     });
@@ -2327,9 +2323,10 @@ describe('ChatService', () => {
         mockWorkspaces
       );
 
-      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+      const result = await serviceWithSettings.getCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      // An unreadable page context is skipped; the workspace default still applies.
+      expect(result).toBe('workspace-data-source-id');
     });
 
     afterEach(() => {
@@ -2545,7 +2542,7 @@ describe('ChatService', () => {
       expect(service.getSessionDataSourceList()).toEqual([]);
     });
 
-    it('should return data source ID even if not in available data sources', async () => {
+    it('should skip an invalid default data source without writing it to state', async () => {
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-invalid');
 
@@ -2558,7 +2555,55 @@ describe('ChatService', () => {
 
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBe('ds-invalid');
+      expect(result).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+      expect(service.getSessionDataSourceList()).toEqual([]);
+      expect(service.getRejectedDataSources()).toEqual([{ source: 'default', id: 'ds-invalid' }]);
+    });
+
+    it('should not re-fetch the data source list for an id already known to be invalid', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-invalid');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      await service.getCurrentDataSourceId();
+      const callsAfterFirst = mockSavedObjectsClient.find.mock.calls.length;
+      await service.getCurrentDataSourceId();
+      await service.peekCurrentDataSourceId();
+
+      expect(mockSavedObjectsClient.find.mock.calls.length).toBe(callsAfterFirst);
+    });
+
+    it('should fall back to the next valid candidate when a higher one is invalid', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-gone' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+      expect(service.getSessionDataSourceList()).toEqual(['ds-1']);
     });
 
     it('should return data source ID even when no compatible data sources are available', async () => {
@@ -2592,7 +2637,9 @@ describe('ChatService', () => {
       expect(result).toBe('ds-2');
     });
 
-    it('should return cachedDataSourceId even if not in available data sources', async () => {
+    it('should drop a confirmed data source that is no longer available', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue(undefined);
       const service = new (ChatService as any)(
         mockUiSettings,
         mockCoreChatService,
@@ -2603,7 +2650,9 @@ describe('ChatService', () => {
       service.setDataSourceId('ds-removed');
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBe('ds-removed');
+      expect(result).toBeUndefined();
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+      expect(service.getRejectedDataSources()).toEqual([{ source: 'confirmed', id: 'ds-removed' }]);
     });
 
     it('should prioritize page context data source when valid', async () => {
@@ -2654,7 +2703,7 @@ describe('ChatService', () => {
       expect(service.getSessionDataSourceList()).toEqual([]);
     });
 
-    it('should return page context data source even if not in available list', async () => {
+    it('should skip a page context data source that is not in the available list', async () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
@@ -2672,9 +2721,15 @@ describe('ChatService', () => {
         mockSavedObjectsClient
       );
 
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue(undefined);
+
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBe('ds-not-in-workspace');
+      expect(result).toBeUndefined();
+      expect(service.getRejectedDataSources()).toEqual([
+        { source: 'page', id: 'ds-not-in-workspace' },
+      ]);
     });
 
     afterEach(() => {

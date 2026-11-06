@@ -146,22 +146,13 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
     name: SWITCH_DATA_SOURCE_TOOL_NAME,
     description:
       'WHAT THIS TOOL DOES: sets the active data source for subsequent data-source-aware tools ' +
-      '(for example, tools that inspect fields, query data, or create visualizations) only in conversations involving multiple data sources. ' +
-      'PRECONDITION: call this tool only when available-data-sources-context is present and its sessionDataSourceList has ' +
-      'MORE THAN ONE distinct data source. If zero or exactly one data source has appeared, do NOT call it at all: ' +
-      'with one, that data source is already active and calling this tool is redundant; ' +
-      'with none, there is nothing to select. ' +
-      'WHEN THE PRECONDITION IS MET: determine the data source for the CURRENT request. ' +
-      '(1) If the user explicitly named one in the current request by name or by position, e.g. ' +
-      '"the first one", call this tool with that id. ' +
-      "(2) Otherwise, you MUST FIRST call the ask_user tool (inputType 'select'; one option per data " +
-      "source in this conversation, label = the data source's title/name, value = its id) to let " +
-      'the user choose, then call this tool with the id they chose. ' +
+      '(for example, tools that inspect fields, query data, or create visualizations). ' +
+      'WHEN TO CALL: only when the user explicitly asks for a data source listed in ' +
+      'available-data-sources-context that is not the currently active one, or after the user ' +
+      'picked one through ask_user. Do NOT call it when the requested data source is already active. ' +
       'NOTES: (1) A data source id/title in page, panel, visualization, or message context is metadata, not a request to switch. ' +
-      '(2) A data source chosen earlier in the conversation does NOT carry over to a new request; ' +
-      'do not reuse it silently, guess, or decide on your own that the choice is obvious. ' +
-      '(3) A dataset or index-pattern id is not a data source id. ' +
-      '(4) Once set, subsequent data-source-aware tools use it automatically; do not pass a data source id to them.',
+      '(2) A dataset or index-pattern id is not a data source id. ' +
+      '(3) Once set, subsequent data-source-aware tools use it automatically; do not pass a data source id to them.',
     parameters: {
       type: 'object',
       properties: {
@@ -183,18 +174,7 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
-        const sessionDataSourceList = chatService.getSessionDataSourceList();
-        if (sessionDataSourceList.length <= 1) {
-          return {
-            success: true,
-            skipped: true,
-            message:
-              `Skipped switch_data_source because this conversation has ` +
-              `${sessionDataSourceList.length} data source. No data source switch is needed.`,
-          };
-        }
-
-        // Validate  first
+        // Validate first
         const { valid, dataSource, availableDataSources } = await chatService.validateDataSourceId(
           args.dataSourceId
         );

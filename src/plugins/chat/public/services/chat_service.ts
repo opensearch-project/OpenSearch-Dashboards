@@ -54,6 +54,13 @@ export const AVAILABLE_DATA_SOURCES_CONTEXT_ID = 'available-data-sources-context
 export const AVAILABLE_DATA_SOURCES_CONTEXT_DES =
   'Context for available data sources in this conversation';
 
+export type DataSourceCandidateSource = 'page' | 'confirmed' | 'default';
+
+export interface RejectedDataSource {
+  source: DataSourceCandidateSource;
+  id: string;
+}
+
 export class ChatService {
   private agent: AgUiAgent;
   public availableTools: ToolDefinition[] = [];
@@ -92,6 +99,10 @@ export class ChatService {
   private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
+  // Ids that failed validation in this conversation, so they are not re-fetched on every resolve
+  private invalidDataSourceIds = new Set<string>();
+  // Candidates skipped by the last committing resolve, used to explain the picker to the user
+  private rejectedDataSources: RejectedDataSource[] = [];
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -292,7 +303,13 @@ export class ChatService {
     }
 
     if (options?.dataSourceId) {
-      this.setDataSourceId(options.dataSourceId);
+      // Only a usable caller data source may replace the current choice.
+      if (await this.isUsableDataSourceId(options.dataSourceId)) {
+        this.setDataSourceId(options.dataSourceId);
+      } else {
+        // eslint-disable-next-line no-console
+        console.debug(`Ignoring unusable caller data source id "${options.dataSourceId}"`);
+      }
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -312,12 +329,12 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  private getDataSourceFromPageContext(readOnly?: boolean) {
-    const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
-    if (!readOnly && dsId) {
-      this.setDataSourceId(dsId);
+  private getDataSourceFromPageContext(): string | undefined {
+    try {
+      return this.getPageContextValue()?.dataset?.dataSource?.id;
+    } catch {
+      return undefined;
     }
-    return dsId;
   }
 
   private getAllAssistantContexts(): any[] {
@@ -382,19 +399,8 @@ export class ChatService {
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
-  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
+  private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
-      // Try to get data source from page context first
-      const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
-      if (pageDataSourceId) {
-        if (!readOnly) {
-          this.setDataSourceId(pageDataSourceId);
-        }
-
-        return pageDataSourceId;
-      }
-
-      // Fallback to existing workspace-aware logic
       if (!this.uiSettings) {
         // eslint-disable-next-line no-console
         console.warn('UI Settings not available, using default data source');
@@ -418,9 +424,6 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      if (!readOnly) {
-        this.setDataSourceId(dataSourceId || undefined);
-      }
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -437,15 +440,61 @@ export class ChatService {
    *   2. confirmedDataSourceId — explicit conversation-level override confirmed or selected by the user
    *   3. getWorkspaceAwareDataSourceId() — workspace default
    *
+   * Each candidate is validated before use; an unusable one is skipped (and never
+   * written to conversation state), so the next candidate gets a chance. Returns
+   * undefined when no candidate is usable; the window then shows the picker.
+   *
    * @param readOnly when true, resolve without committing anything: no setDataSourceId
    */
   public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
-    const ds =
-      this.getDataSourceFromPageContext(readOnly) ||
-      this.confirmedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId(readOnly));
+    const rejected: RejectedDataSource[] = [];
+    const candidates: Array<{
+      source: DataSourceCandidateSource;
+      getId: () => string | undefined | Promise<string | undefined>;
+    }> = [
+      { source: 'page', getId: () => this.getDataSourceFromPageContext() },
+      { source: 'confirmed', getId: () => this.confirmedDataSourceId },
+      { source: 'default', getId: () => this.getWorkspaceAwareDataSourceId() },
+    ];
 
-    return ds;
+    for (const { source, getId } of candidates) {
+      const id = await getId();
+      if (!id) continue;
+      if (await this.isUsableDataSourceId(id)) {
+        if (!readOnly) {
+          this.rejectedDataSources = rejected;
+          if (id !== this.confirmedDataSourceId) this.setDataSourceId(id);
+        }
+        return id;
+      }
+      rejected.push({ source, id });
+      // A confirmed id that no longer validates must not linger in state or storage.
+      if (!readOnly && source === 'confirmed') {
+        this.confirmedDataSourceId = undefined;
+        this.persistDataSourceState();
+      }
+    }
+
+    if (!readOnly) this.rejectedDataSources = rejected;
+    return undefined;
+  }
+
+  /**
+   * Candidates the last committing resolve skipped because they failed validation.
+   */
+  public getRejectedDataSources(): RejectedDataSource[] {
+    return [...this.rejectedDataSources];
+  }
+
+  private async isUsableDataSourceId(id: string): Promise<boolean> {
+    if (this.invalidDataSourceIds.has(id)) return false;
+    try {
+      const { valid } = await this.validateDataSourceId(id);
+      if (!valid) this.invalidDataSourceIds.add(id);
+      return valid;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -482,6 +531,8 @@ export class ChatService {
     this.confirmedDataSourceId = undefined;
     this.sessionDataSourceList = [];
     this.cachedAvailableDataSources = undefined;
+    this.invalidDataSourceIds.clear();
+    this.rejectedDataSources = [];
   }
 
   private persistDataSourceState(): void {
@@ -558,45 +609,31 @@ export class ChatService {
   private async buildAvailableDsContext(dataSourceId?: string) {
     const contextStore = (window as any).assistantContextStore;
 
-    const sessionDataSourceList = this.getSessionDataSourceList();
+    const availableDataSources = contextStore ? await this.getAvailableDataSources() : [];
 
-    if (contextStore && sessionDataSourceList.length > 1) {
-      const availableDataSources = await this.getAvailableDataSources();
+    if (contextStore && availableDataSources.length > 1) {
+      const label = (ds: DataSourceInfo) => `"${ds.title}" (id: ${ds.id})`;
       const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
-
       const activeDsLabel = activeDatasource
-        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
-        : `id: ${dataSourceId}`;
-      const sessionDsLabel = sessionDataSourceList
-        .map((id) => {
-          const sessionDataSource = availableDataSources.find((ds) => ds.id === id);
-          return sessionDataSource
-            ? `"${sessionDataSource.title}" (id: ${sessionDataSource.id})`
-            : `id: ${id}`;
-        })
-        .join(', ');
+        ? label(activeDatasource)
+        : dataSourceId
+          ? `id: ${dataSourceId}`
+          : 'none';
 
       contextStore.addContext({
         id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
         description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
         value: [
-          `Currently active data source: ${activeDsLabel}`,
-          `Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): ${sessionDsLabel}`,
-          `IMPORTANT — this conversation involves MORE THAN ONE data source.`,
-          `Before ANY data-source-aware action (inspecting fields, querying data, or creating a`,
-          `visualization), you MUST have the USER pick which data source to use for the current`,
-          `request by calling the ask_user tool with inputType 'select'. Build ONE option per data`,
-          `source listed above: set each option's label to the data source's NAME/title (this is what`,
-          `the user sees — NEVER show the raw id to the user) and its value to that data source's id`,
-          `(used internally to switch, not displayed). Example: ask_user({ inputType: 'select', prompt:`,
-          `'This conversation uses multiple data sources. Which one should I use?', options: [{ label:`,
-          `'<data source name>', value: '<data source id>' }, ...] }).`,
-          `A data source being currently active or previously confirmed does NOT satisfy this`,
-          `requirement — you MUST still call ask_user whenever the user has not explicitly chosen one`,
-          `for the current request. Do NOT silently reuse the current/last data source, do NOT guess,`,
-          `and do NOT ask which data source to use in free-form text.`,
-          `Once the user answers, call switch_data_source with the chosen id to apply it, then proceed`,
-          `using that data source for the rest of the current request.`,
+          `Currently active data source: ${activeDsLabel}. Data-source-aware tools use it automatically.`,
+          `Data sources available to the user: ${availableDataSources.map(label).join(', ')}.`,
+          `If the user's current request explicitly names a different data source from this list ` +
+            `(by name or id), call switch_data_source with that data source's id before using any ` +
+            `data-source-aware tool.`,
+          `If the user refers to a data source that is ambiguous or not in this list, call ask_user ` +
+            `with inputType 'select' (label = data source name, value = its id) instead of guessing, ` +
+            `then call switch_data_source with the chosen id.`,
+          `Otherwise keep using the active data source. Do not switch on your own judgment and do ` +
+            `not ask the user to confirm the active data source.`,
         ].join('\n'),
       });
     } else if (contextStore) {

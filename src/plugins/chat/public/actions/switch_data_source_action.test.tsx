@@ -83,22 +83,22 @@ describe('useSwitchDataSourceAction', () => {
       );
     });
 
-    it('should no-op without validating or mutating when only one data source is in the session', async () => {
+    it('should switch even when the session has seen only one data source', async () => {
       mockChatService.getSessionDataSourceList.mockReturnValue(['ds-a']);
+      (mockChatService.validateDataSourceId as jest.Mock).mockResolvedValue({
+        valid: true,
+        dataSource: { id: 'ds-b', title: 'Cluster B' },
+        availableDataSources: [
+          { id: 'ds-a', title: 'Cluster A' },
+          { id: 'ds-b', title: 'Cluster B' },
+        ],
+      });
       renderHook();
 
-      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+      const result = await registeredAction.handler({ dataSourceId: 'ds-b' });
 
-      expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
-      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
-      expect(result).toEqual(
-        expect.objectContaining({
-          success: true,
-          skipped: true,
-        })
-      );
-      expect(result.message).toContain('Skipped switch_data_source');
-      expect(result.message).toContain('1 data source');
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-b');
+      expect(result).toEqual(expect.objectContaining({ success: true, dataSourceId: 'ds-b' }));
     });
 
     it('should reject an id that is not a known data source without mutating state', async () => {
