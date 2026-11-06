@@ -479,8 +479,12 @@ export class ChatService {
     // Read once per conversation and scope, like the list: history, suggestions and every run
     // resolve the default, and each read is a request. A failed read is not kept.
     const threadId = this.getThreadId();
+    // Check the entry itself: before a thread exists, threadId and a missing entry's threadId are
+    // both undefined.
     const cached = this.defaultDataSourceRead;
-    if (cached?.threadId === threadId && cached.inWorkspace === inWorkspace) return cached.promise;
+    if (cached && cached.threadId === threadId && cached.inWorkspace === inWorkspace) {
+      return cached.promise;
+    }
 
     const entry = {
       threadId,
@@ -506,7 +510,8 @@ export class ChatService {
    */
   private ensureDataSources(): Promise<DataSourceListResult> {
     const threadId = this.getThreadId();
-    if (this.dataSources?.threadId === threadId) return this.dataSources.promise;
+    const cached = this.dataSources;
+    if (cached && cached.threadId === threadId) return cached.promise;
     const entry = { threadId, promise: this.fetchDataSources() };
     this.dataSources = entry;
     entry.promise.then((result) => {
@@ -547,7 +552,7 @@ export class ChatService {
    */
   private lookupDataSource(id: string): Promise<DataSourceInfo | null | 'failed'> {
     const threadId = this.getThreadId();
-    if (this.dataSourceLookups?.threadId !== threadId) {
+    if (!this.dataSourceLookups || this.dataSourceLookups.threadId !== threadId) {
       this.dataSourceLookups = { threadId, results: new Map(), inFlight: new Map() };
     }
     const { results, inFlight } = this.dataSourceLookups;

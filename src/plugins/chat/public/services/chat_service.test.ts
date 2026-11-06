@@ -2415,6 +2415,53 @@ describe('ChatService', () => {
       });
     });
 
+    describe('before the conversation has a thread', () => {
+      // The welcome screen lists recent conversations before any thread exists, so these reads
+      // run with no thread id and nothing cached yet.
+      const setupWithoutThread = (options: DataSourceHarnessOptions = {}) => {
+        const harness = setupDataSources(options);
+        mockThreadId$.next(undefined);
+        return harness;
+      };
+
+      it('returns no id for an invalid default instead of failing', async () => {
+        const { service, get } = setupWithoutThread({ defaultId: 'ds-gone' });
+
+        await expect(service.getDataSourceIdForRead()).resolves.toBeUndefined();
+        expect(get).toHaveBeenCalledWith('data-source', 'ds-gone');
+      });
+
+      it('returns a valid default', async () => {
+        const { service } = setupWithoutThread({ defaultId: DS_B.id });
+
+        await expect(service.getDataSourceIdForRead()).resolves.toBe(DS_B.id);
+      });
+
+      it('returns no id when the list cannot be read', async () => {
+        const { service, find } = setupWithoutThread({ defaultId: DS_B.id });
+        find.mockRejectedValue(new Error('boom'));
+
+        await expect(service.getDataSourceIdForRead()).resolves.toBeUndefined();
+      });
+
+      it('reads the list and the invalid default once until a thread starts', async () => {
+        const { service, find, get } = setupWithoutThread({ defaultId: 'ds-gone' });
+
+        await service.getDataSourceIdForRead();
+        await service.getDataSourceIdForRead();
+        expect(find).toHaveBeenCalledTimes(1);
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledTimes(1);
+        expect(get).toHaveBeenCalledTimes(1);
+
+        // A new thread reads its own list and default.
+        mockThreadId$.next('thread-ds-2');
+        const resolution = await service.resolveDataSourceForRun();
+        expect(resolution.kind).toBe('needs_selection');
+        expect(find).toHaveBeenCalledTimes(2);
+        expect(getDefaultDataSourceIdMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
     describe('direct lookup of ids missing from the list', () => {
       const resolveWithDefault = async (getResult: () => Promise<any>) => {
         const { service, get } = setupDataSources({ defaultId: 'ds-x' });
