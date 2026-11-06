@@ -26,7 +26,7 @@ import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
 import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
-import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
+import { SourceEmptyState } from '../../../source_empty_state/source_empty_state';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -128,13 +128,8 @@ export const BottomRightContainer = () => {
   };
 
   const results = renderResults();
+  if (results === null) return null;
   // A registered source may replace the results area with an empty state of its own.
-  const SourceEmptyState = query.dataset
-    ? getSourceTypeRegistry().getForDataset(query.dataset).emptyState
-    : undefined;
-  if (!SourceEmptyState || !query.dataset) {
-    return results === null ? null : <CanvasPanel>{results}</CanvasPanel>;
-  }
   return (
     <CanvasPanel>
       <SourceEmptyState

@@ -39,6 +39,7 @@ import { getExplorationSource } from './utils/exploration_source';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 import { usePreviewGate } from './hooks/use_preview_gate';
+import { SourceEmptyState } from '../../../../components/source_empty_state/source_empty_state';
 import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 
 export const MetricsExploreTab = () => {
@@ -227,9 +228,6 @@ export const MetricsExploreTab = () => {
 
   // A registered source may replace the tab with an empty state of its own. Its Refresh is the
   // query bar's (the effect on hasUserInitiatedQuery above).
-  const SourceEmptyState = queryState.dataset
-    ? sourceTypeRegistry.getForDataset(queryState.dataset).emptyState
-    : undefined;
   const onRefresh = useCallback(
     () => reduxDispatch(setHasUserInitiatedQuery(true)),
     [reduxDispatch]
@@ -266,19 +264,15 @@ export const MetricsExploreTab = () => {
     >
       <CursorContext.Provider value={cursorBus}>
         <div className="metricsExploreTab">
-          {SourceEmptyState && queryState.dataset ? (
-            <SourceEmptyState
-              location="metricsExplore"
-              dataset={queryState.dataset}
-              data={services.data}
-              flavor={ExploreFlavor.Metrics}
-              onRefresh={onRefresh}
-            >
-              {renderContent()}
-            </SourceEmptyState>
-          ) : (
-            renderContent()
-          )}
+          <SourceEmptyState
+            location="metricsExplore"
+            dataset={queryState.dataset}
+            data={services.data}
+            flavor={ExploreFlavor.Metrics}
+            onRefresh={onRefresh}
+          >
+            {renderContent()}
+          </SourceEmptyState>
         </div>
       </CursorContext.Provider>
     </ExplorationContext.Provider>

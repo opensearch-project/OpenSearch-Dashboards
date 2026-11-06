@@ -161,8 +161,8 @@ export interface SourceTypeQueryEditorProps {
 
 /**
  * Where Explore asks a source for an empty state of its own:
- * - `logsResults`: the Logs page's results area, in place of everything Explore shows there (the
- *   "Start searching" prompt, no results, the results themselves).
+ * - `logsResults`: the results area of the Logs and Traces pages (`flavor` says which), in place
+ *   of everything Explore shows there (the "Start searching" prompt, no results, the results).
  * - `metricsExplore`: the Metrics page's Explore tab (the metric browser, or a metric's detail).
  * More may be added: render `children` for any location the source doesn't handle.
  */
@@ -229,7 +229,7 @@ export interface SourceTypeDefinition {
    * Shows the source's own empty state while one of its datasets is active, for example when the
    * dataset has nothing to query and the source can say why. Explore renders it at each
    * {@link SourceTypeEmptyStateLocation} with its own content as `children`; render `children`
-   * wherever the source has nothing to add.
+   * wherever the source has nothing to add. If it throws, Explore shows its own content there.
    */
   emptyState?: ComponentType<SourceTypeEmptyStateProps>;
   /**

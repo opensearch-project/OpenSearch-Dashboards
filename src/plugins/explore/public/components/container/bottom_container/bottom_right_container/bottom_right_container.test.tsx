@@ -423,6 +423,13 @@ describe('BottomRightContainer', () => {
       expect(executeQueries).toHaveBeenCalledWith({ services: mockServices });
     });
 
+    it('renders nothing before any status applies, as without a source', () => {
+      const { container } = renderWithQuery('UNKNOWN_STATUS' as any, { dataset: sourceDataset });
+
+      expect(container).toBeEmptyDOMElement();
+      expect(SourceEmptyState).not.toHaveBeenCalled();
+    });
+
     it("leaves other sources' datasets alone", () => {
       renderWithQuery(QueryExecutionStatus.UNINITIALIZED, {
         dataset: { id: 'logs-*', title: 'logs-*', type: 'INDEX_PATTERN' },
