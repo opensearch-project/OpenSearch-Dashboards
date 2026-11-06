@@ -266,6 +266,39 @@ describe('ExploreTabsComponent', () => {
     expect(screen.getByText('Visualization Content')).toBeInTheDocument();
   });
 
+  it('says the results are from the previous selection while they are kept', () => {
+    const store = createMockStore({
+      ui: { activeTabId: 'explore_visualization_tab', showHistogram: true },
+      queryEditor: { overallQueryStatus: { status: 'ready' }, isSelectionStale: true },
+    });
+    render(
+      <Provider store={store}>
+        <OpenSearchDashboardsContextProvider services={mockServices}>
+          <ExploreTabs />
+        </OpenSearchDashboardsContextProvider>
+      </Provider>
+    );
+    expect(screen.getByTestId('exploreStaleSelectionCallout')).toHaveTextContent(
+      'Results are from the previous selection. Run the query to update them.'
+    );
+    expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+  });
+
+  it('shows no stale-selection message otherwise', () => {
+    const store = createMockStore({
+      ui: { activeTabId: 'explore_visualization_tab', showHistogram: true },
+      queryEditor: { overallQueryStatus: { status: 'ready' } },
+    });
+    render(
+      <Provider store={store}>
+        <OpenSearchDashboardsContextProvider services={mockServices}>
+          <ExploreTabs />
+        </OpenSearchDashboardsContextProvider>
+      </Provider>
+    );
+    expect(screen.queryByTestId('exploreStaleSelectionCallout')).not.toBeInTheDocument();
+  });
+
   describe('while the active tab has its own query in flight', () => {
     const renderTabs = (queryEditor: Record<string, unknown>, results = {}) => {
       const store = createMockStore({

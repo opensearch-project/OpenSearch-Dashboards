@@ -23,6 +23,7 @@ import {
   clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
+  setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -412,6 +413,11 @@ export const executeQueries = createAsyncThunk<
 
   if (!services) {
     return;
+  }
+
+  // The results about to load are for the current selection (see the dataset change middleware).
+  if (state.queryEditor.isSelectionStale) {
+    dispatch(setIsSelectionStale(false));
   }
 
   const defaultCacheKey = defaultPrepareQueryString(query);
