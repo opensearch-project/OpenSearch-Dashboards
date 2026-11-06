@@ -51,6 +51,10 @@ export const CollapsibleNavTop = ({
   searchElement,
 }: CollapsibleNavTopProps) => {
   const homeIcon = logos.Mark.url;
+  // The home button renders only the logo, so it needs an accessible name.
+  const homeAriaLabel = i18n.translate('core.ui.primaryNav.homeButtonAriaLabel', {
+    defaultMessage: 'Go to home page',
+  });
 
   const homeLinkProps = useMemo(() => {
     if (homeLink) {
@@ -103,6 +107,7 @@ export const CollapsibleNavTop = ({
               flush="both"
               {...homeLinkProps}
               onClick={onIconClick}
+              aria-label={homeAriaLabel}
               className="navGroupEnabledHomeIcon iconSideNavTop__logo"
             >
               <EuiIcon type={homeIcon} size="l" data-test-subj={`collapsibleNavIcon-${homeIcon}`} />
@@ -173,6 +178,7 @@ export const CollapsibleNavTop = ({
                 flush="both"
                 {...homeLinkProps}
                 onClick={onIconClick}
+                aria-label={homeAriaLabel}
                 className="navGroupEnabledHomeIcon"
               >
                 <EuiIcon
