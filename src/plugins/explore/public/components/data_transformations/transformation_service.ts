@@ -75,6 +75,8 @@ export class TransformationService implements ITransformationService {
   public pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
   // Per-instance fields projected from each step's input rows.
   public stageFields$ = new BehaviorSubject<Map<string, FieldSchema[]>>(new Map());
+  // Per-instance outcome of the last applyPipeline run.
+  public stepResults$ = new BehaviorSubject<Map<string, TransformationStepResult>>(new Map());
   private debouncedPipeline$ = this.pipeline$.pipe(debounceTime(300));
 
   private urlStateStorage?: IOsdUrlStateStorage;
@@ -193,6 +195,7 @@ export class TransformationService implements ITransformationService {
 
     if (instances.length === 0) {
       this.stageFields$.next(new Map());
+      this.stepResults$.next(new Map());
       return { rows: inputRows, finalSchema: inputSchema, steps: [] };
     }
 
@@ -245,6 +248,7 @@ export class TransformationService implements ITransformationService {
     }
 
     this.stageFields$.next(stageFields);
+    this.stepResults$.next(new Map(steps.map((step) => [step.instanceId, step])));
 
     const hasActiveTransformations = instances.some((instance) => !instance.hide);
     const finalSchema = hasActiveTransformations ? currentSchema : inputSchema;
@@ -313,6 +317,7 @@ export class TransformationService implements ITransformationService {
     }
     this.pipeline$.complete();
     this.stageFields$.complete();
+    this.stepResults$.complete();
     this.definitions.clear();
   }
 }
