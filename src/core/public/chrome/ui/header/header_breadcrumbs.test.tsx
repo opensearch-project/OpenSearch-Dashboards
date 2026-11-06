@@ -95,7 +95,7 @@ describe('HeaderBreadcrumbs', () => {
   });
 
   it('renders updates to the breadcrumbs$ observable with updated header', () => {
-    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'First' }]);
     const wrapper = mount(
       <HeaderBreadcrumbs
         appTitle$={new BehaviorSubject('')}
