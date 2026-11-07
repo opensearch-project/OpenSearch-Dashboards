@@ -11,6 +11,9 @@ import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
   getPPLSourceTimeFieldChecker,
+  canAppendPPLDefaultSort,
+  maskPPLBracketsAndStrings,
+  PPLPatternsMode,
   Query,
   TimeBounds,
   UI_SETTINGS,
@@ -21,6 +24,7 @@ import {
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
+  patternsModeCache,
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
@@ -39,35 +43,6 @@ import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
-
-// Commands after which `sort - <dataset time field>` must not be appended: the user already ordered
-// or limited the result, or the command replaced the row type. chart and timechart emit a time
-// column of their own naming (`@timestamp`, or chart's `over` argument), so sorting on the dataset's
-// field turns a working query into `Field [<field>] not found`.
-const DEFAULT_SORT_BLOCKING_COMMANDS = [
-  'sort',
-  'stats',
-  'head',
-  'rare',
-  'top',
-  'rename',
-  'chart',
-  'timechart',
-];
-const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
-  `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
-  'i'
-);
-
-const canAppendDefaultSort = (queryString: string): boolean => {
-  const masked = queryString
-    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
-    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-
-  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
-
-  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
-};
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -113,8 +88,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) =>
-        fetch(context, this.appendDefaultSort(query), this.getAggConfig(searchRequest, query))
+      switchMap(async (query) => ({
+        query,
+        patternsDefaultMode: await this.resolvePatternsDefaultMode(query),
+      })),
+      switchMap(({ query, patternsDefaultMode }) =>
+        fetch(
+          context,
+          this.appendDefaultSort(query, patternsDefaultMode),
+          this.getAggConfig(searchRequest, query)
+        )
       )
     );
   }
@@ -258,11 +241,27 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   /**
+   * The cluster's default `patterns` mode for the query's data source. Only fetched (once per data
+   * source) when the query has a `patterns` command without an explicit `mode=`; undefined when
+   * unknown.
+   */
+  private resolvePatternsDefaultMode(query: Query): Promise<PPLPatternsMode | undefined> {
+    if (!isPPLSearchQuery(query)) {
+      return Promise.resolve(undefined);
+    }
+    return patternsModeCache.ensure(
+      this.deps.http,
+      maskPPLBracketsAndStrings(query.query),
+      query.dataset?.dataSource?.id
+    );
+  }
+
+  /**
    * Appends a default descending sort on the time field to match legacy Discover behavior,
    * unless the query already sorts, aggregates, projects specific fields, or limits results.
    * Applied only to the results query, not to the histogram aggregation query.
    */
-  private appendDefaultSort(query: Query): Query {
+  private appendDefaultSort(query: Query, patternsDefaultMode?: PPLPatternsMode): Query {
     if (
       !isPPLSearchQuery(query) ||
       !query.dataset?.timeFieldName ||
@@ -274,7 +273,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
           typeof query.query === 'string' ? query.query : '',
           query.dataset
         ) === true) ||
-      !canAppendDefaultSort(query.query)
+      !canAppendPPLDefaultSort(query.query, { patternsDefaultMode })
     ) {
       return query;
     }

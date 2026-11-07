@@ -78,6 +78,11 @@ describe('canAppendDefaultSort', () => {
     'rename a as b',
     'chart count() over a',
     'timechart span=1h count()',
+    // pivots that drop the dataset time field, matching the interceptor
+    'transpose',
+    'xyseries a b in ("x") c',
+    'timechart span=1h count() | timewrap 1d',
+    'patterns message mode=aggregation',
   ])('declines when the query contains | %s', (cmd) => {
     expect(canAppendDefaultSort(`source=logs | ${cmd}`)).toBe(false);
   });
@@ -93,6 +98,31 @@ describe('canAppendDefaultSort', () => {
   it('is not fooled by a command name inside a bracketed subquery', () => {
     expect(canAppendDefaultSort('source=logs | where a in [ source=o | stats count() ]')).toBe(
       true
+    );
+  });
+
+  it('masks a multi-line bracketed subquery', () => {
+    expect(canAppendDefaultSort('source=logs | where a in [\n source=o | stats count()\n]')).toBe(
+      true
+    );
+  });
+
+  // A patterns without mode= follows the cluster default; unknown skips the sort, since the
+  // command may aggregate away the time field.
+  it.each([
+    ['label', true],
+    ['aggregation', false],
+    [undefined, false],
+  ] as const)('for a patterns without mode= with cluster default %s, allows: %s', (mode, ok) => {
+    expect(canAppendDefaultSort('source=logs | patterns message', mode)).toBe(ok);
+  });
+
+  it('lets an explicit patterns mode win over the cluster default', () => {
+    expect(canAppendDefaultSort('source=logs | patterns message mode=label', 'aggregation')).toBe(
+      true
+    );
+    expect(canAppendDefaultSort('source=logs | patterns message mode=aggregation', 'label')).toBe(
+      false
     );
   });
 });
@@ -147,5 +177,17 @@ describe('enrichStreamingQuery', () => {
       timeRange: RANGE,
     });
     expect(out.indexOf('WHERE')).toBeLessThan(out.indexOf('rex'));
+  });
+});
+
+describe('enrichStreamingQuery with a patterns command', () => {
+  it('passes the cluster default patterns mode to the sort decision', () => {
+    const base = { queryString: 'source=logs | patterns message', timeFieldName: '@timestamp' };
+    expect(enrichStreamingQuery({ ...base, patternsDefaultMode: 'label' })).toBe(
+      'source=logs | patterns message | sort - `@timestamp`'
+    );
+    expect(enrichStreamingQuery({ ...base, patternsDefaultMode: 'aggregation' })).toBe(
+      'source=logs | patterns message'
+    );
   });
 });
