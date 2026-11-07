@@ -78,8 +78,6 @@ The project uses multiple files to manage the Node.js version for different purp
 | `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
 | `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
 
-#### Install Chrome and ChromeDriver (browser tests only)
-
 #### ChromeDriver for functional tests
 ChromeDriver is required when running the existing Selenium-based functional tests. See [TESTING.md](TESTING.md) for installation and configuration instructions.
 
