@@ -177,7 +177,12 @@ describe('configureLegacyClient', () => {
       logger
     );
 
-    expect(parseClientOptionsMock).toHaveBeenCalled();
+    expect(parseClientOptionsMock).toHaveBeenCalledWith(
+      config,
+      dataSourceAttr.endpoint,
+      expect.anything(),
+      logger
+    );
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(configOptions);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
