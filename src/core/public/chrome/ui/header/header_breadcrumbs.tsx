@@ -109,11 +109,15 @@ export function HeaderBreadcrumbs({
   }
 
   if (useUpdatedHeader) {
-    // Case 2: Updated header, simplified breadcrumbs
+    // Case 2: Updated header, simplified breadcrumbs. With renderFullLength
+    // (a layout with no page title) the current page is the last crumb, as
+    // plain text, with no separator after it.
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
         hideLastBreadCrumb={!renderFullLength}
+        hideTrailingSeparator={!!renderFullLength}
+        disableTrailingLink={!!renderFullLength}
         max={5}
         data-test-subj="breadcrumbs"
         truncate={true}
