@@ -277,6 +277,85 @@ describe('useConcurrentQueries', () => {
     expect(result.current.results.size).toBe(0);
   });
 
+  it('drops a result that answers after its fetch was aborted by a reset', async () => {
+    const answers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn(
+      // Ignores its signal, like a third-party fetch might.
+      () => new Promise<string>((resolve) => answers.push(resolve))
+    );
+    const { result, rerender } = renderHook(({ dep }) => useConcurrentQueries(fetchFn, [dep]), {
+      initialProps: { dep: 1 },
+    });
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    rerender({ dep: 2 });
+    await act(async () => {
+      answers[0]('stale');
+    });
+    expect(result.current.results.get('a')).toBeUndefined();
+    // The key is fetched again for the new deps, not marked done by the stale answer.
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      answers[1]('fresh');
+    });
+    expect(result.current.results.get('a')).toBe('fresh');
+  });
+
+  it("an old fetch finishing late doesn't clear a newer fetch's in-flight entry", async () => {
+    const answers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn(() => new Promise<string>((resolve) => answers.push(resolve)));
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1], 1));
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    act(() => result.current.invalidate('a'));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    // The aborted first fetch settles; the second must still count as in flight (concurrency 1).
+    await act(async () => {
+      answers[0]('old');
+    });
+    act(() => result.current.onVisibilityChange('b', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      answers[1]('new');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('new');
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("invalidate() clears the key's last error, so a retry shows loading and then its result", async () => {
+    const fetchFn = jest.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce('ok');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.errors.get('a')).toBe('boom');
+    act(() => result.current.invalidate('a'));
+    expect(result.current.errors.has('a')).toBe(false);
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('ok');
+    expect(result.current.errors.has('a')).toBe(false);
+  });
+
   it('fetches nothing while disabled, then fetches the visible keys once enabled', async () => {
     const fetchFn = jest.fn().mockImplementation((key: string) => Promise.resolve(`v-${key}`));
     const { result, rerender } = renderHook(

@@ -254,6 +254,149 @@ export interface SourceTypeDefinition {
    * translated sentence.
    */
   metricsEmptyHint?: string;
+  /**
+   * Offers this source on the Explore logs page (the logs drilldown), next to OpenSearch's indexes.
+   * Omit it to keep the source off that page. Applies to sources offered on the Logs flavor.
+   */
+  logsDrilldown?: SourceTypeLogsDrilldown;
+}
+
+/**
+ * Where the Explore logs page lists a source's items, such as a zone or an account. JSON-safe: the page keeps it
+ * in its URL (`_a`) and the tab's session, so it survives a reload and can be shared. That also
+ * makes it user input: validate it before use, as any value from a URL.
+ */
+export type SourceTypeLogsDrilldownScope = Record<string, unknown>;
+
+/** Props the Explore logs page passes to a source's scope picker. */
+export interface SourceTypeLogsDrilldownScopeSelectorProps {
+  /** The scope in use; undefined until the picker reports one. */
+  scope?: SourceTypeLogsDrilldownScope;
+  /**
+   * Call with the scope to list. When `scope` is undefined on mount, call it once with a default
+   * (as the data source picker auto-selects one), or the page waits for the user to pick one. Keep
+   * a valid `scope` the page passed in as is: it may come from a shared link. A scope that's no
+   * longer valid (e.g. it names something that was removed) may be replaced with a valid one.
+   */
+  onChange: (scope: SourceTypeLogsDrilldownScope) => void;
+  data: DataPublicPluginStart;
+}
+
+/**
+ * Props the Explore logs page passes to a source's empty state: shown when a scope lists nothing,
+ * or its listing failed with nothing listed yet.
+ */
+export interface SourceTypeLogsDrilldownEmptyStateProps {
+  scope: SourceTypeLogsDrilldownScope;
+  /** The search the listing ran with; empty for none. */
+  search: string;
+  /** What `listItems` rejected with, as is (status, body…); undefined when it listed nothing. */
+  error?: unknown;
+  /** Lists the scope again, like the page's Retry. */
+  onRefresh: () => void;
+  /** What the page shows here otherwise. Render it for any case the source doesn't handle. */
+  children: ReactNode;
+}
+
+/** One item the Explore logs page shows as a card, such as a stream. */
+export interface SourceTypeLogsDrilldownItem {
+  /** Unique within the scope; the page keys cards and selection on it. */
+  id: string;
+  name: string;
+  /**
+   * Free metadata shown on the card before anything runs, e.g. size or retention. Pass translated
+   * strings.
+   */
+  details?: Array<{ label: string; value: string }>;
+  /** The time field of the item's events, shown on the card and used to read preview rows. */
+  timeFieldName?: string;
+  /** The field the item's events keep their level in, if any (colours preview lines). */
+  severityField?: string;
+}
+
+/** One page of a source's items. */
+export interface SourceTypeLogsDrilldownItemPage {
+  items: SourceTypeLogsDrilldownItem[];
+  /** Pass back to list the next page; undefined on the last page. */
+  nextToken?: string;
+}
+
+/** What the page passes to a source's preview and histogram query builders. */
+export interface SourceTypeLogsDrilldownQueryArgs {
+  scope: SourceTypeLogsDrilldownScope;
+  item: SourceTypeLogsDrilldownItem;
+  /** The item's own dataset (`toDataset` with this item alone), which the query runs on. */
+  dataset: Dataset;
+}
+
+/**
+ * How the Explore logs page lists and previews a source's items. Listing must not run billed
+ * queries: the page lists on every scope and search change, on "Load more", and on its Refresh
+ * button (not on a time range change). Previews and histograms may: when the source's dataset
+ * type sets `meta.requiresExplicitRun` (or isn't registered), the page runs them only when the user
+ * presses a card's Run button, and a later time range change or Refresh marks the card stale
+ * instead of running it again. Otherwise cards run as they scroll into view, like OpenSearch's.
+ */
+export interface SourceTypeLogsDrilldown {
+  /** The page-level picker that sets the scope (replaces the data source picker). */
+  ScopeSelector: ComponentType<SourceTypeLogsDrilldownScopeSelectorProps>;
+  /**
+   * Placeholder (and accessible name) for the page's search box, e.g. "Search streams…". Pass a
+   * translated string.
+   */
+  searchPlaceholder?: string;
+  /**
+   * One page of items for a scope, filtered by the search text (the page doesn't filter them
+   * again). Reject on failure: the page shows the error and a Retry.
+   */
+  listItems(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    search: string;
+    nextToken?: string;
+    /** At most this many items per page; the page keeps only this many of a longer page. */
+    pageSize: number;
+    signal: AbortSignal;
+  }): Promise<SourceTypeLogsDrilldownItemPage>;
+  /**
+   * A card's preview query, in the dataset's language: at most `size` events in the page's time
+   * range, newest first. A source may ask for a sample rather than the newest events where reading
+   * the newest would cost more (e.g. a scan of the whole range). The page runs it through the data
+   * plugin's search service on `dataset` (the language's search interceptor, as on the Logs page),
+   * keeps at most `size` rows, and shows them in the order returned.
+   */
+  buildPreviewQuery(args: SourceTypeLogsDrilldownQueryArgs & { size: number }): string;
+  /**
+   * A card's histogram query, in the dataset's language: event counts per `interval` bucket over
+   * the page's time range, returning the columns named by {@link SourceTypeHistogramColumns}. The
+   * page picks `interval` (in the form Explore's histogram uses, e.g. `30s`, `5m`, `1d`) for about
+   * 20 bars, and runs it like the preview. Return undefined (or omit this) for no histogram.
+   */
+  buildHistogramQuery?(
+    args: SourceTypeLogsDrilldownQueryArgs & { interval: string; timeFieldName: string }
+  ): string | undefined;
+  /**
+   * The most items one dataset can hold (e.g. how many items one query can read). The page stops
+   * further ticks at this many. Omit for no limit.
+   */
+  maxSelection?: number;
+  /**
+   * The dataset the selected items open as on the Logs page. Set `language` on it: the Logs page
+   * switches to it. Its type must be one of the source's `datasetTypes`.
+   */
+  toDataset(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    items: SourceTypeLogsDrilldownItem[];
+  }): Promise<Dataset>;
+  /**
+   * The group an item belongs to for the page's Prefix grouping, e.g. `app/web/`. Omit to
+   * offer A–Z only.
+   */
+  groupOf?(item: SourceTypeLogsDrilldownItem): string;
+  /**
+   * Replaces the page's empty and listing-failed states with the source's own, e.g. why a scope
+   * lists nothing and what to do. It gets the page's own state as `children`.
+   */
+  EmptyState?: ComponentType<SourceTypeLogsDrilldownEmptyStateProps>;
 }
 
 /** A time range as the metric browser passes it (date math, e.g. `now-15m`). */

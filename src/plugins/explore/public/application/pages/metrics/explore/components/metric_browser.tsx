@@ -30,7 +30,7 @@ import { MetricCard } from './metric_card';
 import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { MetricsEmptyState } from './metrics_empty_state';
-import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { useConcurrentQueries } from '../../../../utils/hooks/use_concurrent_queries';
 import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
 import { getNoMetricsBody } from '../utils/exploration_source';
 

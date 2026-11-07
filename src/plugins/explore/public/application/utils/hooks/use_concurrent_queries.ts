@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getErrorMessage } from '../utils/get_error_message';
+import { getErrorMessage } from '../../pages/metrics/explore/utils/get_error_message';
 
 const DEFAULT_CONCURRENCY = 6;
 const DEBOUNCE_MS = 200;
@@ -92,6 +92,9 @@ export function useConcurrentQueries<T>(
         s.inflight.set(key, controller);
         fetchFn(key, controller.signal)
           .then((value) => {
+            // A fetch that ignored its signal can still answer after a reset or invalidate: drop
+            // it, or it would mark the key fetched with a result from before the reset.
+            if (controller.signal.aborted) return;
             s.fetched.add(key);
             s.buffered.set(key, value);
             scheduleFlush();
@@ -103,7 +106,8 @@ export function useConcurrentQueries<T>(
             scheduleFlush();
           })
           .finally(() => {
-            s.inflight.delete(key);
+            // Only this fetch's entry: after an invalidate, a newer fetch of the key may be in flight.
+            if (s.inflight.get(key) === controller) s.inflight.delete(key);
             drainRef.current();
           });
       }, DEBOUNCE_MS);
@@ -197,6 +201,15 @@ export function useConcurrentQueries<T>(
   const invalidate = useCallback((key: string) => {
     const s = stateRef.current;
     s.fetched.delete(key);
+    // A retry starts from scratch: drop the key's last error, so the caller sees it loading again
+    // (and not the old error once the retry succeeds, which only writes a result).
+    s.bufferedErrors.delete(key);
+    setErrors((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Map(prev);
+      next.delete(key);
+      return next;
+    });
     const ctrl = s.inflight.get(key);
     if (ctrl) {
       ctrl.abort();

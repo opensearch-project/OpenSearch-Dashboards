@@ -29,7 +29,7 @@ import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
-import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { useConcurrentQueries } from '../../../../utils/hooks/use_concurrent_queries';
 import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
 
 interface BreakdownSeries {
