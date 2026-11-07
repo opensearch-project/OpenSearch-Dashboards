@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
+import { EXPLORE_VISUALIZATION_TAB_ID, ExploreFlavor } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
@@ -39,6 +39,7 @@ import { getExplorationSource } from './utils/exploration_source';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 import { usePreviewGate } from './hooks/use_preview_gate';
+import { SourceEmptyState } from '../../../../components/source_empty_state/source_empty_state';
 import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 
 export const MetricsExploreTab = () => {
@@ -225,6 +226,13 @@ export const MetricsExploreTab = () => {
 
   const cursorBus = useMemo(() => createCursorBus(), []);
 
+  // A registered source may replace the tab with an empty state of its own. Its Refresh is the
+  // query bar's (the effect on hasUserInitiatedQuery above).
+  const onRefresh = useCallback(
+    () => reduxDispatch(setHasUserInitiatedQuery(true)),
+    [reduxDispatch]
+  );
+
   const handleTimeRangeChange = useCallback(
     (from: string, to: string) => {
       const timefilter = services.data?.query?.timefilter?.timefilter;
@@ -255,7 +263,17 @@ export const MetricsExploreTab = () => {
       }}
     >
       <CursorContext.Provider value={cursorBus}>
-        <div className="metricsExploreTab">{renderContent()}</div>
+        <div className="metricsExploreTab">
+          <SourceEmptyState
+            location="metricsExplore"
+            dataset={queryState.dataset}
+            data={services.data}
+            flavor={ExploreFlavor.Metrics}
+            onRefresh={onRefresh}
+          >
+            {renderContent()}
+          </SourceEmptyState>
+        </div>
       </CursorContext.Provider>
     </ExplorationContext.Provider>
   );
