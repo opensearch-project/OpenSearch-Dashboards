@@ -335,6 +335,24 @@ describe('detectAndSetOptimalTab', () => {
       expect(http.get).not.toHaveBeenCalled();
     });
 
+    // The New button dispatches its state reset and this thunk back to back; setting the tab in the
+    // same tick keeps them in one render, as before the patterns lookup existed.
+    it('sets the tab synchronously when no setting has to be fetched', () => {
+      const mockDispatch = jest.fn();
+      const mockGetState = jest.fn().mockReturnValue({
+        query: { query: 'source = idx | stats count() by host', language: 'PPL' },
+        ui: { activeTabId: EXPLORE_LOGS_TAB_ID },
+      });
+      const http = { get: jest.fn() };
+
+      // Deliberately not awaited.
+      detectAndSetOptimalTab({ services: { http } as any })(mockDispatch, mockGetState, undefined);
+
+      const setTab = mockDispatch.mock.calls.find((call) => call[0]?.type === 'ui/setActiveTab');
+      expect(setTab?.[0].payload).toBe(EXPLORE_STATISTICS_TAB_ID);
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
     it('does not fetch the setting for queries without patterns', async () => {
       const { tab, http } = await runWithClusterMode(
         'source = idx | stats count() by host',

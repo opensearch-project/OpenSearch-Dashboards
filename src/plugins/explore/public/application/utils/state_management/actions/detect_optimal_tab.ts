@@ -14,7 +14,9 @@ import {
 } from '../../../../../common';
 import {
   ensurePatternsDefaultMode,
+  getPatternsDefaultMode,
   maskedPPLQueryHasTrait,
+  patternsDefaultModeNeedsFetch,
   PPLTraitOptions,
 } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
@@ -53,11 +55,13 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const state = getState();
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
   const maskedQuery = maskPPLSubqueriesAndStrings(queryString);
-  // A `patterns` without `mode=` aggregates only if the cluster default says so; this fetches the
-  // setting only for such queries.
-  const options: PPLTraitOptions = {
-    patternsDefaultMode: await ensurePatternsDefaultMode(services?.http, state.query),
-  };
+  // A `patterns` without `mode=` aggregates only if the cluster default says so. Awaited only when
+  // the setting must be fetched: every other query sets the tab synchronously, in the same tick as
+  // the state changes that dispatched this (e.g. the New button's reset), so they render together.
+  if (patternsDefaultModeNeedsFetch(state.query)) {
+    await ensurePatternsDefaultMode(services?.http, state.query);
+  }
+  const options: PPLTraitOptions = { patternsDefaultMode: getPatternsDefaultMode(state.query) };
   const currentTab = state.ui.activeTabId || EXPLORE_LOGS_TAB_ID;
 
   let targetTab: string;
