@@ -236,12 +236,12 @@ export const DiscoverNoResults = ({
   const tabs = useMemo(() => {
     const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
       return (
-        <>
+        <React.Fragment key={sampleTitle}>
           <EuiText size="s">{sampleTitle}</EuiText>
           <EuiSpacer size="s" />
           <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
           <EuiSpacer size="s" />
-        </>
+        </React.Fragment>
       );
     };
     return [
