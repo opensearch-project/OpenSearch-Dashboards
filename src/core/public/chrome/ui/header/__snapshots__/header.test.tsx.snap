@@ -11453,7 +11453,7 @@ exports[`Header renders application header without title 1`] = `
                         }
                       }
                       hideTrailingSeparator={false}
-                      renderFullLength={true}
+                      renderFullLength={false}
                       useUpdatedHeader={true}
                     >
                       <EuiSimplifiedBreadcrumbs
@@ -11470,8 +11470,8 @@ exports[`Header renders application header without title 1`] = `
                           ]
                         }
                         data-test-subj="breadcrumbs"
-                        disableTrailingLink={true}
-                        hideLastBreadCrumb={false}
+                        disableTrailingLink={false}
+                        hideLastBreadCrumb={true}
                         hideTrailingSeparator={true}
                         max={5}
                         responsive={
@@ -11503,29 +11503,6 @@ exports[`Header renders application header without title 1`] = `
                               </span>
                             </EuiInnerText>
                           </div>
-                          <EuiBreadcrumbSeparator>
-                            <svg
-                              className="euiBreadcrumbSeparator"
-                              preserveAspectRatio="none"
-                              viewBox="0 0 8 12"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M2 12H0L6 0h2z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </EuiBreadcrumbSeparator>
-                          <EuiInnerText>
-                            <span
-                              aria-current="page"
-                              className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
-                              data-test-subj="breadcrumb last"
-                              title="testTitle"
-                            >
-                              testTitle
-                            </span>
-                          </EuiInnerText>
                         </nav>
                       </EuiSimplifiedBreadcrumbs>
                     </HeaderBreadcrumbs>
@@ -21592,7 +21569,7 @@ exports[`Header renders page header with application title 1`] = `
                 data-test-subj="breadcrumbs"
                 disableTrailingLink={false}
                 hideLastBreadCrumb={true}
-                hideTrailingSeparator={false}
+                hideTrailingSeparator={true}
                 max={5}
                 responsive={
                   Object {
@@ -21623,19 +21600,6 @@ exports[`Header renders page header with application title 1`] = `
                       </span>
                     </EuiInnerText>
                   </div>
-                  <EuiBreadcrumbSeparator>
-                    <svg
-                      className="euiBreadcrumbSeparator"
-                      preserveAspectRatio="none"
-                      viewBox="0 0 8 12"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M2 12H0L6 0h2z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </EuiBreadcrumbSeparator>
                 </nav>
               </EuiSimplifiedBreadcrumbs>
             </HeaderBreadcrumbs>

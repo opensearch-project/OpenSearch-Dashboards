@@ -267,18 +267,19 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    // No page title in this layout, so the current page is the last crumb, as
-    // plain text, and the only separator sits between the two crumbs.
+    // The app's screen title names the current page, so the bar does not
+    // repeat it, and there is no separator after the last visible crumb.
     const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
-    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('testTitle');
-    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(1);
+    expect(bar.find('[data-test-subj="breadcrumb last"]').exists()).toBeFalsy();
+    expect(bar.text()).not.toContain('testTitle');
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(0);
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component).toMatchSnapshot();
   });
 
-  it('keeps every crumb of a three-level trail visible in the application header', () => {
+  it('keeps the parent crumbs of a three-level trail visible in the application header', () => {
     const props = {
       ...mockProps(),
       breadcrumbs$: new BehaviorSubject([
@@ -292,12 +293,14 @@ describe('Header', () => {
     };
     const component = mountWithIntl(<Header {...props} />);
     const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
-    // Nothing collapses into an ellipsis at this width: every crumb stays in view.
+    // Nothing collapses into an ellipsis at this width, the current page is
+    // left to the app's screen title, and the one separator sits between the
+    // two visible crumbs (no trailing "/").
     expect(bar.find('.euiSimplifiedBreadcrumb--collapsed').exists()).toBeFalsy();
     expect(bar.find('[data-test-subj="breadcrumb first"]').first().text()).toBe('Workspace');
     expect(bar.find('a[title="Section"]').exists()).toBeTruthy();
-    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('Page');
-    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(2);
+    expect(bar.text()).not.toContain('Page');
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(1);
   });
 
   it('should remember the collapse state when new nav is enabled', () => {

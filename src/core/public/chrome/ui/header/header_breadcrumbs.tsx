@@ -109,14 +109,16 @@ export function HeaderBreadcrumbs({
   }
 
   if (useUpdatedHeader) {
-    // Case 2: Updated header, simplified breadcrumbs. With renderFullLength
-    // (a layout with no page title) the current page is the last crumb, as
-    // plain text, with no separator after it.
+    // Case 2: Updated header, simplified breadcrumbs. The current page is
+    // hidden unless renderFullLength is set, because the page title (the page
+    // header's <h1>, or an app's screen title in the application header)
+    // already names it. Separators only sit between visible crumbs, so the
+    // bar never ends in a trailing "/".
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
         hideLastBreadCrumb={!renderFullLength}
-        hideTrailingSeparator={!!renderFullLength}
+        hideTrailingSeparator
         disableTrailingLink={!!renderFullLength}
         max={5}
         data-test-subj="breadcrumbs"
