@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
+import { ExploreEmbeddable, getCrosshairGroup, SearchProps } from './explore_embeddable';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
@@ -459,6 +459,127 @@ describe('ExploreEmbeddable', () => {
       const malformed = '{"error":{"reason":"Fake query failed","details":"cut';
       const error = await failWith(httpError(malformed));
       expect(error.message).toBe(malformed);
+    });
+  });
+
+  describe('saved search without a usable chart', () => {
+    // The rows of a PPL `source = logs | stats count() by service` query.
+    const statsResult = {
+      transformedData: [
+        { 'count()': 15, service: 'cart' },
+        { 'count()': 12, service: 'checkout' },
+      ],
+      numericalColumns: [
+        { id: 0, name: 'count()', column: 'count()', schema: VisFieldType.Numerical } as any,
+      ],
+      categoricalColumns: [
+        { id: 1, name: 'service', column: 'service', schema: VisFieldType.Categorical } as any,
+      ],
+      dateColumns: [],
+      unknownColumns: [],
+    };
+
+    const fetchWith = async (
+      visualization: Record<string, unknown>,
+      activeTab: string,
+      query = 'source = logs | stats count() by service'
+    ) => {
+      const normalize = await import('../components/visualizations/utils/normalize_result_rows');
+      jest.spyOn(normalize, 'normalizeResultRows').mockReturnValueOnce(statsResult);
+      mockSavedExplore.searchSource.getField = jest.fn((field: string) => {
+        if (field === 'index') return { id: 'test-index' };
+        if (field === 'query') return { query, language: 'PPL' };
+        return null;
+      });
+      mockSavedExplore.visualization = JSON.stringify(visualization);
+      mockSavedExplore.uiState = JSON.stringify({ activeTab });
+      // @ts-ignore
+      embeddable.node = mockNode;
+      // @ts-ignore
+      await embeddable.updateHandler(embeddable.searchProps, true);
+      // @ts-ignore
+      return embeddable.searchProps as SearchProps;
+    };
+
+    const expectTable = (searchProps: SearchProps) => {
+      expect(embeddable.getOutput().error).toBeUndefined();
+      expect(searchProps.error).toBeUndefined();
+      expect(searchProps.chartType).toBe('table');
+      expect(searchProps.chartRender).toBeUndefined();
+      expect(searchProps.tableData?.columns.map((column) => column.name)).toEqual([
+        'count()',
+        'service',
+      ]);
+      expect(searchProps.tableData?.rows).toEqual(statsResult.transformedData);
+    };
+
+    test('shows a Statistics tab search saved without a chart as a table', async () => {
+      // What saving a search without a chart stores: a chart type and no axes.
+      expectTable(
+        await fetchWith({ title: '', chartType: 'line', params: {} }, 'explore_statistics')
+      );
+    });
+
+    test('shows a search saved without any chart type as a table', async () => {
+      expectTable(await fetchWith({}, 'explore_statistics'));
+    });
+
+    test('shows a Visualization tab search saved without axes as a table', async () => {
+      expectTable(
+        await fetchWith({ chartType: 'line', axesMapping: {} }, 'explore_visualization_tab')
+      );
+    });
+
+    test('shows a Statistics tab search whose saved chart no longer fits as a table', async () => {
+      // No chart rule matches the saved axes for these columns.
+      jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce(undefined);
+      expectTable(
+        await fetchWith(
+          { chartType: 'line', axesMapping: { x: 'timestamp', y: 'bytes' } },
+          'explore_statistics'
+        )
+      );
+    });
+
+    test('fails visibly when a saved chart on the Visualization tab no longer fits', async () => {
+      jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce(undefined);
+      const searchProps = await fetchWith(
+        { chartType: 'line', axesMapping: { x: 'timestamp', y: 'bytes' } },
+        'explore_visualization_tab'
+      );
+      expect(searchProps.error?.message).toBe(
+        'Cannot load saved visualization "Test Explore" with id test-id'
+      );
+      expect(embeddable.getOutput().error).toEqual(searchProps.error);
+    });
+
+    test('draws a saved chart that fits the result columns', async () => {
+      jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce({
+        priority: 100,
+        mappings: [],
+        render: jest.fn(),
+      });
+      const searchProps = await fetchWith(
+        { chartType: 'bar', axesMapping: { x: 'service', y: 'count()' } },
+        'explore_visualization_tab'
+      );
+      expect(searchProps.error).toBeUndefined();
+      expect(searchProps.chartType).toBe('bar');
+      expect(searchProps.chartRender).toEqual(expect.any(Function));
+      expect(searchProps.tableData).toBeUndefined();
+    });
+
+    test('keeps showing a Logs tab search as the log table', async () => {
+      const searchProps = await fetchWith(
+        { chartType: 'line', params: {} },
+        'logs',
+        'source = logs'
+      );
+      expect(searchProps.error).toBeUndefined();
+      expect(searchProps.activeTab).toBe('logs');
+      expect(searchProps.tableData).toBeUndefined();
+      expect(searchProps.chartRender).toBeUndefined();
+      expect(searchProps.rows).toHaveLength(2);
     });
   });
 
