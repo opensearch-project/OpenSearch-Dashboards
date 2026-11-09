@@ -4,8 +4,9 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
+import { uniq } from 'lodash';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../data/common';
+import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../data/common';
 import { ExploreServices } from '../../../types';
 import { EXPLORE_DEFAULT_LANGUAGE, ExploreFlavor } from '../../../../common';
 import {
@@ -15,8 +16,8 @@ import {
 
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useEditorOperations } from '../hooks/use_editor_operations';
-import { SupportLanguageType } from '../query_builder/query_builder';
-import { getRequiredSignalType } from '../query_builder/utils';
+
+import { resolveDatasetLanguage, getInitialQueryString } from '../query_builder/utils';
 import '../visualization_editor.scss';
 
 /**
@@ -30,13 +31,12 @@ const namesItsDataset = (query: string, language: string | undefined): boolean =
     : language === 'SQL'
       ? /\bfrom\b/i.test(query)
       : false;
+const PROMETHEUS_DATASET_TYPE = 'PROMETHEUS';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-
-  const { queryEditorState, queryBuilder, queryState } = useQueryBuilderState();
-
-  const { clearEditor } = useEditorOperations();
+  const { queryBuilder, queryState, container } = useQueryBuilderState();
+  const { clearEditor, setEditorText, resetEditorMode } = useEditorOperations();
 
   const {
     data: {
@@ -47,21 +47,6 @@ export const DatasetSelectWidget = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // The languages the dataset's type can run, or undefined when its type isn't known.
-  const getTypeLanguages = useCallback(
-    (dataset: Dataset): string[] | undefined => {
-      try {
-        return queryString
-          .getDatasetService?.()
-          ?.getType(dataset.type)
-          ?.supportedLanguages(dataset);
-      } catch {
-        return undefined;
-      }
-    },
-    [queryString]
-  );
-
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset | undefined) => {
       try {
@@ -71,46 +56,48 @@ export const DatasetSelectWidget = () => {
             query: EMPTY_QUERY.QUERY,
             language: EXPLORE_DEFAULT_LANGUAGE,
             dataset: undefined,
+            queryOptions: undefined,
           });
-
-          queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+          container.markStale();
 
           clearEditor();
           return;
         }
 
-        const initialQuery = queryString.getInitialQueryByDataset(dataset);
+        const currentQuery = queryState.query ?? '';
+        const currentLanguage = queryState.language;
+        const previousTitle = queryState.dataset?.title;
+        // The current language if the dataset can run it, else the dataset's own.
+        const language =
+          resolveDatasetLanguage(services, dataset, currentLanguage) ?? EXPLORE_DEFAULT_LANGUAGE;
 
-        // A dataset that runs the current language (e.g. other log groups of the same source) keeps
-        // the query, so the chart keeps the columns it is built on, and the editor keeps its text.
-        // A query that names the previous dataset (a PPL source or SQL FROM) is for that dataset
-        // only, and another language can't run it: those start from an empty query.
-        const currentQuery = queryState?.query ?? '';
-        const currentLanguage = queryState?.language;
-        const previousTitle = queryState?.dataset?.title;
-        const typeLanguages = getTypeLanguages(dataset);
-        const runsCurrentLanguage =
-          !!currentLanguage &&
-          (typeLanguages
-            ? typeLanguages.includes(currentLanguage)
-            : initialQuery.language === currentLanguage);
+        // A dataset that runs the current language keeps the query (and the editor its text), so the
+        // chart keeps its columns. A query that names the previous dataset (PPL source / SQL FROM) is
+        // for that dataset only: it starts from the new dataset's initial query.
+        const runsCurrentLanguage = !!currentLanguage && language === currentLanguage;
         const namesPreviousDataset =
           namesItsDataset(currentQuery, currentLanguage) ||
           (!!previousTitle && currentQuery.includes(previousTitle));
-        if (runsCurrentLanguage && !namesPreviousDataset) {
+        const hasQueryToKeep = !!currentQuery.trim();
+        if (hasQueryToKeep && runsCurrentLanguage && !namesPreviousDataset) {
           queryBuilder.updateQueryState({ dataset });
-          queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+          container.markStale();
           return;
         }
 
-        queryBuilder.updateQueryState({
-          ...initialQuery,
-          query: EMPTY_QUERY.QUERY,
-          dataset,
-        });
-        queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+        const query = getInitialQueryString(queryString, dataset, language);
 
-        clearEditor();
+        queryBuilder.updateQueryState({
+          language,
+          dataset,
+          query,
+          queryOptions: undefined,
+        });
+        container.markStale();
+
+        setEditorText(query);
+        // reset to query mode
+        resetEditorMode();
       } catch (error) {
         services.notifications?.toasts.addError(error, {
           title: 'Error selecting dataset',
@@ -120,43 +107,46 @@ export const DatasetSelectWidget = () => {
     [
       queryString,
       clearEditor,
+      setEditorText,
+      resetEditorMode,
       queryBuilder,
+      container,
+      services,
       queryState,
-      getTypeLanguages,
-      services.notifications?.toasts,
     ]
   );
 
   // The active dataset's source type decides the picker, as in Explore's main query panel: its own
   // datasetSelector if it has one, else the generic picker limited to its dataset types.
-  const activeDataset = queryState?.dataset;
+  const activeDataset = queryState.dataset;
   const activeSourceType = getSourceTypeRegistry().getForDataset(activeDataset);
   const isRegisteredSource = activeSourceType.id !== OPENSEARCH_SOURCE_TYPE_ID;
 
   const supportedTypes = useMemo(() => {
     if (isRegisteredSource) return activeSourceType.datasetTypes;
 
-    if (queryEditorState.languageType === SupportLanguageType.promQL) return ['PROMETHEUS'];
+    const datasetService = queryString.getDatasetService();
 
-    return (
-      services.supportedTypes || [
+    const metricsTypes = [
+      // built-in Prometheus type from OpenSearch source
+      ...(datasetService.getType(PROMETHEUS_DATASET_TYPE) ? [PROMETHEUS_DATASET_TYPE] : []),
+    ];
+
+    return uniq([
+      ...(services.supportedTypes || [
         DEFAULT_DATA.SET_TYPES.INDEX,
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      ]
-    );
-  }, [
-    services.supportedTypes,
-    queryEditorState.languageType,
-    isRegisteredSource,
-    activeSourceType,
-  ]);
+      ]),
+      ...metricsTypes,
+    ]);
+  }, [queryString, services.supportedTypes, isRegisteredSource, activeSourceType]);
 
   const signalTypes = useMemo(
-    () => getRequiredSignalType(queryEditorState.languageType),
-    [queryEditorState.languageType]
+    () => [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES, CORE_SIGNAL_TYPES.METRICS],
+    []
   );
 
-  // Its choice still goes through handleDatasetSelect, so the initial query applies.
+  // Its choice goes through handleDatasetSelect, so the language, initial query and stale mark apply.
   const { datasetSelector: SourceDatasetSelector } = activeSourceType;
   if (SourceDatasetSelector) {
     return (
@@ -166,7 +156,7 @@ export const DatasetSelectWidget = () => {
           onSelect={handleDatasetSelect}
           data={services.data}
           flavor={
-            getSourceTypeRegistry().isMetricsLanguage(queryEditorState.languageType)
+            getSourceTypeRegistry().isMetricsLanguage(queryState.language)
               ? ExploreFlavor.Metrics
               : null
           }
@@ -183,6 +173,11 @@ export const DatasetSelectWidget = () => {
         supportedTypes={supportedTypes}
         signalType={signalTypes}
         showNonTimeFieldDatasets={false}
+        controlledSelectedDataset={queryState.dataset}
+        isControlled={true}
+        // A row without a dataset stays empty until the user picks one; a fresh editor's first
+        // row already gets the default dataset from loadContainerState.
+        autoSelectDefault={false}
       />
     </div>
   );

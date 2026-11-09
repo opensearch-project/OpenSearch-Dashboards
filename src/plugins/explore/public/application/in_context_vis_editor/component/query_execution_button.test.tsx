@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryExecutionButton } from './query_execution_button';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -21,14 +22,17 @@ jest.mock('../../../../../data/public', () => ({
   useCancelButtonTiming: jest.fn((v) => v),
 }));
 
-const buildState = (overrides: Record<string, any> = {}) => ({
+// dateRange is the shared range of all queries (top-level), not part of the row's editor state.
+// isStale is the container's "rows changed since the last run" flag.
+const buildState = ({ dateRange, isStale = false, ...overrides }: Record<string, any> = {}) => ({
   queryEditorState: {
-    isQueryEditorDirty: false,
-    dateRange: undefined,
     userInitiatedQuery: false,
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
     ...overrides,
   },
+  dateRange,
+  // container: { getIsStale$: () => of(isStale) },
+  container: { isStale$: new BehaviorSubject(isStale) },
 });
 
 beforeEach(() => {
@@ -44,7 +48,7 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
   });
 
-  it('shows Refresh when query is not dirty', () => {
+  it('shows Refresh when the rows have not changed since the last run', () => {
     render(<QueryExecutionButton />);
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
@@ -53,8 +57,8 @@ describe('QueryExecutionButton', () => {
     expect(button).toHaveClass('euiButton--primary');
   });
 
-  it('shows Update when query is dirty', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isQueryEditorDirty: true }));
+  it('shows Update when the rows changed since the last run', () => {
+    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isStale: true }));
     render(<QueryExecutionButton />);
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');

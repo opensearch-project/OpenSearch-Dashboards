@@ -6,23 +6,19 @@
 import {
   isSignalTypeCompatible,
   getRequiredSignalType,
-  resolveDatasetByLanguage,
-  getPreloadedQueryState,
   queryExecution,
   showPromptModeNotAvailableWarning,
   showMissingPromptWarning,
   showMissingDatasetWarning,
   handleAgentError,
+  resolveDatasetLanguage,
+  getInitialQueryString,
 } from './utils';
 import { SupportLanguageType } from './query_builder';
-import {
-  SourceTypeRegistryService,
-  setSourceTypeRegistry,
-} from '../../../services/source_type_registry';
-import { ExploreFlavor } from '../../../../common';
+import type { Dataset } from '../../../../../data/common';
+import type { QueryStringContract } from '../../../../../data/public';
 import { AgentError, ProhibitedQueryError } from '../../../components/query_panel/utils/error';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
-import { fetchFirstAvailableDataset } from '../../../application/utils/state_management/utils/redux_persistence';
 import {
   createSearchSourceWithQuery,
   shouldSkipQueryExecution,
@@ -168,167 +164,15 @@ const buildServices = () =>
     notifications: { toasts: { addError: jest.fn() } },
   }) as any;
 
-describe('resolveDatasetByLanguage', () => {
-  it('returns existing dataset when signal type is compatible', async () => {
-    const services = buildServices();
-    const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl, mockDataset);
-    expect(result).toBe(mockDataset);
-    expect(fetchFirstAvailableDataset).not.toHaveBeenCalled();
-  });
-
-  it('fetches first available dataset when existing dataset is incompatible', async () => {
-    const services = buildServices();
-    (services.data.dataViews.get as jest.Mock).mockResolvedValue({ signalType: 'metrics' });
-    const availableDataset = { id: 'fallback', title: 'fallback-index', type: 'INDEX_PATTERN' };
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(availableDataset);
-
-    const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl, mockDataset);
-    expect(result).toBe(availableDataset);
-  });
-
-  it('uses the configured default when no existing dataset is selected', async () => {
-    const services = buildServices();
-    services.data.query.queryString.getQuery.mockReturnValue({});
-    const defaultDataset = {
-      id: 'default',
-      title: 'default-index',
-      type: 'INDEX_PATTERN',
-    };
-    services.data.query.getDefaultDataset.mockResolvedValue(defaultDataset);
-    const availableDataset = { id: 'fallback', title: 'fallback-index', type: 'INDEX_PATTERN' };
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(availableDataset);
-
-    const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl);
-
-    expect(result).toBe(defaultDataset);
-    expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
-    expect(fetchFirstAvailableDataset).not.toHaveBeenCalled();
-  });
-
-  it('fetches first available dataset when no configured default is available', async () => {
-    const services = buildServices();
-    services.data.query.queryString.getQuery.mockReturnValue({});
-    const availableDataset = { id: 'fallback', title: 'fallback-index', type: 'INDEX_PATTERN' };
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(availableDataset);
-
-    const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl);
-
-    expect(result).toBe(availableDataset);
-  });
-});
-
-describe("a registered Metrics source's own language", () => {
-  const metricsDataset = {
-    id: 'my-metrics',
-    title: 'My metrics',
-    type: 'MY_DATASET_TYPE',
-    signalType: 'metrics',
-  };
-  beforeEach(() => {
-    const registry = new SourceTypeRegistryService();
-    registry.register({
-      id: 'my-source',
-      label: 'My Source',
-      datasetTypes: ['MY_DATASET_TYPE'],
-      flavors: [ExploreFlavor.Metrics],
-      languageSettings: { MY_SQL: {} },
-      resolveDefaultDataset: async () => undefined,
-    });
-    setSourceTypeRegistry(registry);
-  });
-  afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
-
-  it('needs a metrics dataset, like PromQL', () => {
-    expect(getRequiredSignalType('MY_SQL' as SupportLanguageType)).toBe('metrics');
-  });
-
-  it("keeps a saved visualization's metrics dataset", async () => {
-    const services = buildServices();
-    (services.data.dataViews.get as jest.Mock).mockResolvedValue({ signalType: 'metrics' });
-
-    const result = await resolveDatasetByLanguage(
-      services,
-      'MY_SQL' as SupportLanguageType,
-      metricsDataset
-    );
-
-    expect(result).toBe(metricsDataset);
-    expect(fetchFirstAvailableDataset).not.toHaveBeenCalled();
-  });
-
-  it('falls back to a metrics dataset, not a logs index pattern', async () => {
-    const services = buildServices();
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(metricsDataset);
-
-    await resolveDatasetByLanguage(services, 'MY_SQL' as SupportLanguageType, mockDataset);
-
-    expect(fetchFirstAvailableDataset).toHaveBeenCalledWith(
-      services,
-      ExploreFlavor.Metrics,
-      'metrics'
-    );
-  });
-
-  // The dataset carries PROMQL as its default, but the visualization was saved in MY_SQL.
-  const withDatasetType = (supported: string[]) => {
-    const services = buildServices();
-    (services.data.dataViews.get as jest.Mock).mockResolvedValue({ signalType: 'metrics' });
-    services.data.query.queryString.getDatasetService = () => ({
-      getType: () => ({ supportedLanguages: () => supported }),
-    });
-    return services;
-  };
-  const datasetWithDefault = { ...metricsDataset, language: 'PROMQL' };
-
-  it("reopens a saved visualization in its saved language, not the dataset's default", async () => {
-    const services = withDatasetType(['PROMQL', 'MY_SQL']);
-
-    await getPreloadedQueryState(services, 'MY_SQL' as SupportLanguageType, datasetWithDefault);
-
-    expect(services.data.query.queryString.getInitialQueryByDataset).toHaveBeenCalledWith(
-      expect.objectContaining({ language: 'MY_SQL' })
-    );
-  });
-
-  it("keeps the dataset's default when its type can't run the saved language", async () => {
-    const services = withDatasetType(['PROMQL']);
-
-    await getPreloadedQueryState(services, 'MY_SQL' as SupportLanguageType, datasetWithDefault);
-
-    expect(services.data.query.queryString.getInitialQueryByDataset).toHaveBeenCalledWith(
-      expect.objectContaining({ language: 'PROMQL' })
-    );
-  });
-});
-
-describe('getPreloadedQueryState', () => {
-  it('returns query state with dataset when dataset is resolved', async () => {
-    const services = buildServices();
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(mockDataset);
-
-    const result = await getPreloadedQueryState(services, SupportLanguageType.ppl);
-    expect(result).toMatchObject({ query: '', dataset: mockDataset });
-  });
-
-  it('returns empty query state when no dataset is resolved', async () => {
-    const services = buildServices();
-    services.data.query.queryString.getQuery.mockReturnValue({});
-    services.data.query.queryString.getDefaultQuery.mockReturnValue({});
-    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(undefined);
-
-    const result = await getPreloadedQueryState(services, SupportLanguageType.ppl);
-    expect(result).toEqual({ query: '', language: SupportLanguageType.ppl, dataset: undefined });
-  });
-});
-
 describe('queryExecution', () => {
+  const emptyQuery = { query: '', language: SupportLanguageType.ppl };
   const updateEditorStateFn = jest.fn();
   const updateResultFn = jest.fn();
-  const activeQueryAbortControllers = new Map<string, AbortController>();
+  let activeQueryAbortController: AbortController;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    activeQueryAbortControllers.clear();
+    activeQueryAbortController = new AbortController();
   });
 
   it('skips execution when shouldSkipQueryExecution returns true', async () => {
@@ -337,10 +181,11 @@ describe('queryExecution', () => {
 
     await queryExecution({
       services,
+      query: emptyQuery,
       queryString: '| head 10',
       updateEditorStateFn,
       updateResultFn,
-      activeQueryAbortControllers,
+      activeQueryAbortController,
     });
 
     expect(updateEditorStateFn).not.toHaveBeenCalled();
@@ -360,10 +205,11 @@ describe('queryExecution', () => {
 
     await queryExecution({
       services,
+      query: emptyQuery,
       queryString: 'source=logs',
       updateEditorStateFn,
       updateResultFn,
-      activeQueryAbortControllers,
+      activeQueryAbortController,
     });
 
     expect(updateEditorStateFn).toHaveBeenCalledWith(
@@ -393,10 +239,11 @@ describe('queryExecution', () => {
 
     await queryExecution({
       services,
+      query: emptyQuery,
       queryString: 'source=logs',
       updateEditorStateFn,
       updateResultFn,
-      activeQueryAbortControllers,
+      activeQueryAbortController,
     });
 
     expect(updateEditorStateFn).toHaveBeenCalledWith(
@@ -421,10 +268,11 @@ describe('queryExecution', () => {
 
     await queryExecution({
       services,
+      query: emptyQuery,
       queryString: 'source=logs',
       updateEditorStateFn,
       updateResultFn,
-      activeQueryAbortControllers,
+      activeQueryAbortController,
     });
 
     expect(updateEditorStateFn).toHaveBeenCalledWith(
@@ -452,10 +300,11 @@ describe('queryExecution', () => {
     await expect(
       queryExecution({
         services,
+        query: emptyQuery,
         queryString: 'source=logs',
         updateEditorStateFn,
         updateResultFn,
-        activeQueryAbortControllers,
+        activeQueryAbortController,
       })
     ).rejects.toThrow('error');
 
@@ -479,10 +328,11 @@ describe('queryExecution', () => {
       .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
     await queryExecution({
       services,
+      query: { query: 'source=logs', language: 'PPL' } as any,
       queryString: 'source=logs',
       updateEditorStateFn,
       updateResultFn,
-      activeQueryAbortControllers,
+      activeQueryAbortController: new AbortController(),
     }).catch(() => {});
     const errorCall = [...updateEditorStateFn.mock.calls]
       .reverse()
@@ -512,5 +362,208 @@ describe('queryExecution', () => {
     const message = await runFailingQuery(queryError);
     expect(message.reason).toBe('Query failed');
     expect(message.details).toBe('Bad Request');
+  });
+});
+
+describe('queryExecution per-row isolation', () => {
+  const updateEditorStateFn = jest.fn();
+  const updateResultFn = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockSearchSource = () => ({
+    fetch: jest.fn().mockResolvedValue({ hits: { hits: [{ _id: '1' }] } }),
+    getSearchRequestBody: jest.fn().mockResolvedValue({}),
+    getDataFrame: jest.fn().mockReturnValue({ schema: [] }),
+  });
+
+  it("sends the row's own query (not the global one) and drops non-metrics queryOptions", async () => {
+    const services = buildServices();
+    (createSearchSourceWithQuery as jest.Mock).mockResolvedValue(mockSearchSource());
+    services.data.query.queryString.getLanguageService = jest
+      .fn()
+      .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
+
+    await queryExecution({
+      services,
+      query: { query: 'source=logs', language: 'PPL', queryOptions: { maxDataPoints: 5 } } as any,
+      queryString: 'source=logs',
+      updateEditorStateFn,
+      updateResultFn,
+      activeQueryAbortController: new AbortController(),
+    });
+
+    const [preparedQuery, , , options] = (createSearchSourceWithQuery as jest.Mock).mock.calls[0];
+    expect(options).toEqual({ useProvidedQuery: true });
+    expect(preparedQuery).toMatchObject({ language: 'PPL', query: 'source=logs' });
+    expect(preparedQuery.queryOptions).toBeUndefined();
+  });
+
+  it('uses the active abort controller for the request', async () => {
+    const services = buildServices();
+    const controller = new AbortController();
+    let signalDuringFetch: AbortSignal | undefined;
+    const searchSource = mockSearchSource();
+    searchSource.fetch.mockImplementation(async ({ abortSignal }) => {
+      signalDuringFetch = abortSignal;
+      return { hits: { hits: [] } };
+    });
+    (createSearchSourceWithQuery as jest.Mock).mockResolvedValue(searchSource);
+    services.data.query.queryString.getLanguageService = jest
+      .fn()
+      .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
+
+    await queryExecution({
+      services,
+      query: { query: 'q', language: 'PPL' } as any,
+      queryString: 'q',
+      updateEditorStateFn,
+      updateResultFn,
+      activeQueryAbortController: controller,
+    });
+
+    expect(signalDuringFetch).toBe(controller.signal);
+  });
+
+  it('drops the response when the run is aborted while fetching', async () => {
+    const services = buildServices();
+    const controller = new AbortController();
+    const searchSource = mockSearchSource();
+    searchSource.fetch.mockImplementation(async () => {
+      controller.abort();
+      return { hits: { hits: [{ _id: '1' }] } };
+    });
+    (createSearchSourceWithQuery as jest.Mock).mockResolvedValue(searchSource);
+    services.data.query.queryString.getLanguageService = jest
+      .fn()
+      .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
+
+    await queryExecution({
+      services,
+      query: { query: 'q', language: 'PPL' } as any,
+      queryString: 'q',
+      updateEditorStateFn,
+      updateResultFn,
+      activeQueryAbortController: controller,
+    });
+
+    expect(updateResultFn).not.toHaveBeenCalled();
+    // Only the LOADING update from before the fetch.
+    expect(updateEditorStateFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('writes nothing and does not throw when an aborted run fails', async () => {
+    const services = buildServices();
+    const controller = new AbortController();
+    const searchSource = mockSearchSource();
+    searchSource.fetch.mockImplementation(async () => {
+      controller.abort();
+      throw Object.assign(new Error('aborted'), { name: 'AbortError' });
+    });
+    (createSearchSourceWithQuery as jest.Mock).mockResolvedValue(searchSource);
+    services.data.query.queryString.getLanguageService = jest
+      .fn()
+      .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
+
+    await queryExecution({
+      services,
+      query: { query: 'q', language: 'PPL' } as any,
+      queryString: 'q',
+      updateEditorStateFn,
+      updateResultFn,
+      activeQueryAbortController: controller,
+    });
+
+    expect(updateResultFn).not.toHaveBeenCalled();
+    expect(updateEditorStateFn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('resolveDatasetLanguage', () => {
+  const servicesFor = (supported?: string[]) =>
+    ({
+      data: {
+        query: {
+          queryString: {
+            getDatasetService: () => ({
+              getType: () => (supported ? { supportedLanguages: () => supported } : undefined),
+            }),
+          },
+        },
+      },
+    }) as any;
+  const promDataset = { id: 'prom', title: 'prom', type: 'PROMETHEUS' } as any;
+  const indexDataset = { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' } as any;
+
+  it('switches to a language the dataset can run when it carries none', () => {
+    expect(resolveDatasetLanguage(servicesFor(['PROMQL']), promDataset, 'PPL')).toBe('PROMQL');
+  });
+
+  it('keeps the current language when the dataset can run it', () => {
+    expect(
+      resolveDatasetLanguage(servicesFor(['kuery', 'lucene', 'PPL']), indexDataset, 'PPL')
+    ).toBe('PPL');
+  });
+
+  it("prefers the dataset's own language over the first supported one", () => {
+    expect(
+      resolveDatasetLanguage(
+        servicesFor(['PPL', 'PROMQL']),
+        { ...promDataset, language: 'PROMQL' },
+        'AI'
+      )
+    ).toBe('PROMQL');
+  });
+
+  it('ignores languages the editor does not offer', () => {
+    expect(resolveDatasetLanguage(servicesFor(['kuery', 'PPL']), indexDataset, 'kuery')).toBe(
+      'PPL'
+    );
+  });
+
+  it("falls back to the dataset's or current language for an unknown dataset type", () => {
+    expect(resolveDatasetLanguage(servicesFor(undefined), indexDataset, 'PPL')).toBe('PPL');
+    expect(
+      resolveDatasetLanguage(servicesFor(undefined), { ...indexDataset, language: 'SQL' }, 'PPL')
+    ).toBe('SQL');
+  });
+});
+
+describe('getInitialQueryString', () => {
+  const dataset = { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' } as Dataset;
+  const queryStringFor = () =>
+    ({
+      getInitialQueryByDataset: jest.fn(
+        ({ language, title }: { language: string; title: string }) => ({
+          query: language === 'SQL' ? `SELECT * FROM ${title} LIMIT 10` : `${language} on ${title}`,
+        })
+      ),
+    }) as unknown as QueryStringContract;
+
+  it('starts PPL empty', () => {
+    const queryString = queryStringFor();
+    expect(getInitialQueryString(queryString, dataset, 'PPL')).toBe('');
+    expect(queryString.getInitialQueryByDataset).not.toHaveBeenCalled();
+  });
+
+  it("uses the language's own initial query on the dataset, e.g. SQL's base query", () => {
+    const queryString = queryStringFor();
+    expect(getInitialQueryString(queryString, dataset, 'SQL')).toBe('SELECT * FROM logs LIMIT 10');
+    expect(queryString.getInitialQueryByDataset).toHaveBeenCalledWith({
+      ...dataset,
+      language: 'SQL',
+    });
+  });
+
+  it("uses a registered language's own initial query", () => {
+    expect(getInitialQueryString(queryStringFor(), dataset, 'my_language')).toBe(
+      'my_language on logs'
+    );
+  });
+
+  it('starts empty without a dataset', () => {
+    expect(getInitialQueryString(queryStringFor(), undefined, 'SQL')).toBe('');
   });
 });

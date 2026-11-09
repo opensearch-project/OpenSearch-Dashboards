@@ -9,6 +9,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { useInitialSaveExplore } from './hooks/use_initial_save_explore';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
 import { useQueryBuilderState } from './hooks/use_query_builder_state';
+import { useMultiQueryBuilder } from './multi_query_builder/multi_query_builder_context';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { useHeaderVariants } from '../utils/hooks/use_header_variants';
 import { syncQueryStateWithUrl } from '../../../../data/public';
@@ -29,6 +30,18 @@ jest.mock('./hooks/use_initial_container_context', () => ({
   useInitialContainerContext: jest.fn(),
 }));
 jest.mock('./hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
+// The page reads the container from the session's context and loads it from the resolved state.
+jest.mock('./multi_query_builder/multi_query_builder_context', () => ({
+  useMultiQueryBuilder: jest.fn(),
+}));
+jest.mock('./multi_query_builder/container_state_utils', () => ({
+  // loadContainerState: jest.fn().mockResolvedValue({ queries: [], editorState: { rows: [] } }),
+  loadContainerState: jest.fn().mockResolvedValue({
+    state: { queries: [], editorState: { rows: [] } },
+    warnings: [],
+  }),
+  showContainerStateWarnings: jest.fn(),
+}));
 jest.mock('./hooks/use_visualization_builder', () => ({ useVisualizationBuilder: jest.fn() }));
 jest.mock('./query_builder/query_builder', () => ({ getQueryBuilder: jest.fn() }));
 jest.mock('../utils/hooks/use_header_variants');
@@ -51,13 +64,26 @@ const mockQueryBuilder = {
   executeQuery: jest.fn(),
   reset: jest.fn(),
   queryState$: { getValue: jest.fn().mockReturnValue({ query: '' }) },
+};
+
+// The page lifecycle (init / execute on load / reset / variable names) goes through the container.
+const mockContainer = {
+  // init: jest.fn().mockResolvedValue(undefined),
+  isLoaded: jest.fn().mockReturnValue(false),
+  load: jest.fn(),
+  executeAll: jest.fn(),
+  reset: jest.fn(),
+  getAllRows: jest.fn(() => [mockQueryBuilder]),
   setVariableNames: jest.fn(),
+  setSavedBaseline: jest.fn(),
 };
 
 const mockVisualizationBuilder = {
   setVisConfig: jest.fn(),
   init: jest.fn(),
   reset: jest.fn(),
+  visConfig$: { getValue: jest.fn() },
+  setSavedBaseline: jest.fn(),
 };
 
 const mockServices = {
@@ -78,7 +104,12 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: mockServices });
-  (useQueryBuilderState as jest.Mock).mockReturnValue({ queryBuilder: mockQueryBuilder });
+  // (useQueryBuilderState as jest.Mock).mockReturnValue({ queryBuilder: mockQueryBuilder });
+  (useQueryBuilderState as jest.Mock).mockReturnValue({
+    queryBuilder: mockQueryBuilder,
+    container: mockContainer,
+  });
+  (useMultiQueryBuilder as jest.Mock).mockReturnValue(mockContainer);
   (useVisualizationBuilder as jest.Mock).mockReturnValue({
     visualizationBuilderForEditor: mockVisualizationBuilder,
   });
@@ -192,7 +223,7 @@ describe('VisualizationEditorPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(mockQueryBuilder.executeQuery).toHaveBeenCalled();
+      expect(mockContainer.executeAll).toHaveBeenCalled();
     });
   });
 
@@ -209,12 +240,13 @@ describe('VisualizationEditorPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(mockQueryBuilder.init).toHaveBeenCalled();
+      expect(mockContainer.load).toHaveBeenCalled();
     });
-    expect(mockQueryBuilder.executeQuery).not.toHaveBeenCalled();
+    expect(mockContainer.executeAll).not.toHaveBeenCalled();
   });
 
-  it('resets queryBuilder and visualizationBuilder on unmount', async () => {
+  // The page no longer resets the query builder: MultiQueryBuilderProvider disposes it.
+  it('resets the visualizationBuilder, not the query builder, on unmount', async () => {
     (useInitialSaveExplore as jest.Mock).mockReturnValue({
       savedExplore: { id: '1', title: 'My Explore' },
       isLoading: false,
@@ -224,11 +256,11 @@ describe('VisualizationEditorPage', () => {
     });
 
     const { unmount } = renderPage();
-    await waitFor(() => expect(mockQueryBuilder.init).toHaveBeenCalled());
+    await waitFor(() => expect(mockContainer.load).toHaveBeenCalled());
 
     unmount();
 
-    expect(mockQueryBuilder.reset).toHaveBeenCalled();
+    expect(mockContainer.reset).not.toHaveBeenCalled();
     expect(mockVisualizationBuilder.reset).toHaveBeenCalled();
   });
 });

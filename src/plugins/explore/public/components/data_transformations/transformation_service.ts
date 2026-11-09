@@ -278,6 +278,21 @@ export class TransformationService implements ITransformationService {
       });
   }
 
+  /** Stops persisting the pipeline to the URL (the pipeline itself stays). */
+  stopUrlSync(): void {
+    this.urlSyncSubscription?.unsubscribe();
+    this.urlSyncSubscription = undefined;
+    this.urlStateStorage = undefined;
+  }
+
+  /** Back to an empty pipeline for a new session; the registered definitions stay. */
+  reset(): void {
+    this.stopUrlSync();
+    this.pipeline$.next([]);
+    this.stageFields$.next(new Map());
+    this.stepResults$.next(new Map());
+  }
+
   private restoreFromUrl(): void {
     if (!this.urlStateStorage) return;
 
