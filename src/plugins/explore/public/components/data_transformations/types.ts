@@ -114,6 +114,8 @@ export interface ITransformationService {
 
   // URL persistence
   initUrlSync(urlStateStorage: IOsdUrlStateStorage): void;
+  stopUrlSync(): void;
+  reset(): void;
 
   destroy(): void;
   restoreFromState(states: UrlTransformationState[]): void;

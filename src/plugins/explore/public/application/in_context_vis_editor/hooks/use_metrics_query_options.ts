@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useObservable } from 'react-use';
 import { resolveStep, ResolvedStep } from '../../../../../query_enhancements/common/metrics';
 import type { PromQLStepResolution } from '../../../../../query_enhancements/common';
 import { ExploreServices } from '../../../types';
@@ -17,9 +18,12 @@ export interface MetricsQuerySettings {
 }
 
 export function useMetricsQuerySettings(services: ExploreServices): MetricsQuerySettings {
-  const { queryState, queryBuilder } = useQueryBuilderState();
-
-  const maxDataPoints = queryState.queryOptions?.maxDataPoints;
+  // Max data points is panel-level (the Query options bar), shared by every row.
+  const { container } = useQueryBuilderState();
+  const { maxDataPoints } = useObservable(
+    container.multiQueryEditorState$,
+    container.multiQueryEditorState$.getValue()
+  );
 
   const [timeTick, setTimeTick] = useState(0);
   useEffect(() => {
@@ -41,13 +45,9 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [maxDataPoints, timeTick, services.data.query.timefilter]
   );
-
   const onMaxDataPointsChange = useCallback(
-    (next?: number) => {
-      queryBuilder.updateQueryOptions({ maxDataPoints: next });
-      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
-    },
-    [queryBuilder]
+    (value?: number) => container.setMaxDataPoints(value),
+    [container]
   );
 
   return { maxDataPoints, onMaxDataPointsChange, getResolvedStep };

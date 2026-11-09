@@ -1194,9 +1194,10 @@ export const createSearchSourceWithQuery = async (
     includeHistogram?: boolean;
     customInterval?: string;
     sizeParam?: number;
+    useProvidedQuery?: boolean;
   } = {}
 ) => {
-  const { includeHistogram = false, customInterval, sizeParam } = options;
+  const { includeHistogram = false, customInterval, sizeParam, useProvidedQuery = false } = options;
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
@@ -1214,8 +1215,9 @@ export const createSearchSourceWithQuery = async (
   }
 
   searchSource.setParent(timeRangeSearchSource);
+  const baseQuery = useProvidedQuery ? preparedQuery : data.query.queryString.getQuery();
   const queryStringWithExecutedQuery = {
-    ...data.query.queryString.getQuery(),
+    ...baseQuery,
     query: preparedQuery.query,
     // When query profiling is enabled, ask the engine to profile this query so the response
     // reports whether it ran on the complex worker pool (see results.profile.isComplex). PPL-only:

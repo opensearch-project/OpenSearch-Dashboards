@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { QueryPanel } from './visualization_editor_query_panel';
-import { QueryEditorState, SupportLanguageType } from '../query_builder/query_builder';
+import { QueryEditorState, QueryState } from '../query_builder/query_builder';
 import { EditorMode, QueryExecutionStatus } from '../../utils/state_management/types';
 import {
   SourceTypeDefinition,
@@ -49,25 +49,41 @@ const source = (overrides: Partial<SourceTypeDefinition>): SourceTypeDefinition 
   ...overrides,
 });
 
+// const renderPanel = (
+//   language: string,
+//   datasetType: string,
+//   editorMode: EditorMode = EditorMode.Query
+// ) => {
+//   const queryState: QueryState = {
+//     query: '',
+//     language,
+//     dataset: { id: 'ds', title: 'ds', type: datasetType },
+//   };
+// datasetType undefined renders a row with no dataset.
 const renderPanel = (
   language: string,
-  datasetType: string,
+  datasetType: string | undefined,
   editorMode: EditorMode = EditorMode.Query
 ) => {
-  (useQueryBuilderState as jest.Mock).mockReturnValue({
-    queryState: { query: '', language, dataset: { id: 'ds', title: 'ds', type: datasetType } },
-  });
+  const queryState: QueryState = {
+    query: '',
+    language,
+    dataset: datasetType ? { id: 'ds', title: 'ds', type: datasetType } : undefined,
+  };
+  (useQueryBuilderState as jest.Mock).mockReturnValue({ queryState });
+  // The panel reads the row's language and dataset from its own queryState$.
+  const queryState$ = new BehaviorSubject<QueryState>(queryState);
   const state$ = new BehaviorSubject<QueryEditorState>({
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
     editorMode,
     promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
-    isQueryEditorDirty: false,
     userInitiatedQuery: false,
-    languageType:
-      language === 'PROMQL' ? SupportLanguageType.promQL : (language as SupportLanguageType),
+    // languageType:
+    //   language === 'PROMQL' ? SupportLanguageType.promQL : (language as SupportLanguageType),
   } as QueryEditorState);
-  return render(<QueryPanel queryEditorState$={state$} />);
+  // return render(<QueryPanel queryEditorState$={state$} />);
+  return render(<QueryPanel queryState$={queryState$} queryEditorState$={state$} />);
 };
 
 describe('visualization editor QueryPanel', () => {
@@ -76,6 +92,19 @@ describe('visualization editor QueryPanel', () => {
   beforeEach(() => {
     registry = new SourceTypeRegistryService();
     setSourceTypeRegistry(registry);
+  });
+
+  it('shows an empty state instead of the editor while the row has no dataset', () => {
+    renderPanel('PPL', undefined);
+    expect(screen.getByTestId('visEditorQueryPanelNoDataset')).toBeInTheDocument();
+    expect(screen.getByText('Select a dataset first')).toBeInTheDocument();
+    expect(screen.queryByTestId('codeEditor')).not.toBeInTheDocument();
+  });
+
+  it('shows the editor, not the empty state, once the row has a dataset', () => {
+    renderPanel('PPL', 'INDEX_PATTERN');
+    expect(screen.queryByTestId('visEditorQueryPanelNoDataset')).not.toBeInTheDocument();
+    expect(screen.getByTestId('codeEditor')).toBeInTheDocument();
   });
 
   it('shows the PromQL rows for a Prometheus connection', () => {

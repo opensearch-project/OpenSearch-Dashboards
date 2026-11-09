@@ -8,6 +8,8 @@ import { useSavedExplore } from '../../../application/utils/hooks/use_saved_expl
 import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 import { QueryState } from '../query_builder/query_builder';
 
+import { parseSavedContainerState, buildSingleQueryToList } from '../multi_query_builder/utils';
+
 export const useInitialSaveExplore = () => {
   const exploreId = useCurrentExploreId('edit');
   const { savedExplore, error, isLoading } = useSavedExplore(exploreId);
@@ -22,6 +24,12 @@ export const useInitialSaveExplore = () => {
       return undefined;
     }
   }, [savedExplore]);
+
+  const savedContainerState = useMemo(
+    () =>
+      parseSavedContainerState(savedExplore?.queries) ?? buildSingleQueryToList(savedQueryState),
+    [savedExplore?.queries, savedQueryState]
+  );
 
   // parse saved vis state and transformation from saved explore
   const savedVisConfig = useMemo(() => {
@@ -38,6 +46,7 @@ export const useInitialSaveExplore = () => {
   return {
     savedExplore,
     savedQueryState,
+    savedContainerState,
     savedVisConfig,
     error,
     isLoading,

@@ -10,6 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 jest.mock('../hooks/use_visualization_builder', () => ({ useVisualizationBuilder: jest.fn() }));
+// The raw table's query select lists the container's series.
+jest.mock('../multi_query_builder/multi_query_builder_context', () => {
+  const { BehaviorSubject: Subject } = jest.requireActual('rxjs');
+  // One stable container, as the real Provider gives.
+  const container = { getSeriesResult$: () => new Subject([]) };
+  return { useMultiQueryBuilder: () => container };
+});
 jest.mock('./save_vis_button', () => ({
   SaveVisButton: () => <div data-test-subj="save-vis-button" />,
 }));
@@ -25,6 +32,8 @@ const buildVisualizationBuilder = (visConfig: any, showRawTable: boolean) => ({
     visConfig$: new BehaviorSubject(visConfig),
     showRawTable$: new BehaviorSubject(showRawTable),
     setShowRawTable: mockSetShowRawTable,
+    rawTableRefId$: new BehaviorSubject(undefined),
+    setRawTableRefId: jest.fn(),
   },
 });
 

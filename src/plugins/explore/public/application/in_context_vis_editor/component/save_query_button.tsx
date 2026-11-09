@@ -22,7 +22,7 @@ import { QueryState } from '../query_builder/query_builder';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
+  const { queryBuilder, container, queryEditorState, queryState } = useQueryBuilderState();
   const { getEditorRef, setEditorText } = useEditorOperations();
 
   const savedQueryService = services.data.query.savedQueries;
@@ -118,7 +118,7 @@ export const SaveQueryButton = () => {
 
       // Handle time filter if present
       if (savedQuery.attributes.timefilter && timeFilter) {
-        queryBuilder.updateQueryEditorState({
+        container.updateMultiQueryEditorState({
           dateRange: {
             from: savedQuery.attributes.timefilter.from,
             to: savedQuery.attributes.timefilter.to,
@@ -131,7 +131,7 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
     },
-    [queryBuilder, setEditorText, timeFilter]
+    [queryBuilder, container, setEditorText, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {

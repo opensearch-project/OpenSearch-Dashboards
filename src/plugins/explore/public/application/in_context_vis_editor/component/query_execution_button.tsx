@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
+import { useObservable } from 'react-use';
 import { QueryExecutionButtonStatus } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { isTimeRangeInvalid } from '../../../components/top_nav/utils/validate_time_range';
 import { QueryRunStopButton } from '../../../components/top_nav/query_execution_button';
@@ -21,20 +22,15 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   onClick,
   onCancel,
 }) => {
-  const { queryEditorState } = useQueryBuilderState();
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
-  const dateRange = queryEditorState.dateRange;
+  const { queryEditorState, dateRange, container } = useQueryBuilderState();
+  const isStale = useObservable(container.isStale$, container.isStale$.getValue());
 
   const isRunning =
     queryEditorState.userInitiatedQuery &&
     queryEditorState.queryStatus.status === QueryExecutionStatus.LOADING;
 
   const status: QueryExecutionButtonStatus =
-    dateRange && isTimeRangeInvalid(dateRange)
-      ? 'DISABLED'
-      : isQueryEditorDirty
-        ? 'UPDATE'
-        : 'REFRESH';
+    dateRange && isTimeRangeInvalid(dateRange) ? 'DISABLED' : isStale ? 'UPDATE' : 'REFRESH';
 
   return (
     <QueryRunStopButton

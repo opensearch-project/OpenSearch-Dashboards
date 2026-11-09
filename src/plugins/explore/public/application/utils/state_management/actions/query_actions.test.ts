@@ -69,6 +69,7 @@ import {
   executeDataTableQuery,
   executeBucketCountQuery,
   shouldSkipQueryExecution,
+  createSearchSourceWithQuery,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
@@ -3222,6 +3223,48 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(3);
       expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('createSearchSourceWithQuery', () => {
+    const getSentQuery = () =>
+      (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query)?.[0]?.query;
+
+    it('merges the query string into the global query by default', async () => {
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        query: 'global',
+        language: 'SQL',
+      });
+      await createSearchSourceWithQuery(
+        { query: 'source=logs', language: 'PPL' },
+        mockDataView,
+        mockServices
+      );
+      expect(getSentQuery()).toEqual(
+        expect.objectContaining({ query: 'source=logs', language: 'SQL' })
+      );
+    });
+
+    it('uses the provided query as-is with useProvidedQuery', async () => {
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        query: 'global',
+        language: 'SQL',
+      });
+      const dataset = { id: 'prom', type: 'PROMETHEUS' };
+      await createSearchSourceWithQuery(
+        { query: 'up', language: 'PROMQL', dataset, queryOptions: { maxDataPoints: 10 } },
+        mockDataView,
+        mockServices,
+        { useProvidedQuery: true }
+      );
+      expect(getSentQuery()).toEqual(
+        expect.objectContaining({
+          query: 'up',
+          language: 'PROMQL',
+          dataset,
+          queryOptions: { maxDataPoints: 10 },
+        })
+      );
     });
   });
 
