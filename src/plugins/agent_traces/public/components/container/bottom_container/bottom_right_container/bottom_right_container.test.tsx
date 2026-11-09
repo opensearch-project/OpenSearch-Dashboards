@@ -4,17 +4,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 // Mock the components
-jest.mock(
-  '../../../../application/legacy/discover/application/components/no_index_patterns/no_index_patterns',
-  () => ({
-    DiscoverNoIndexPatterns: () => <div data-test-subj="no-index-patterns">No Index Patterns</div>,
-  })
-);
+jest.mock('../../../empty_states', () => ({
+  AgentTracesNoAgentData: ({ datasetTitle }: { datasetTitle?: string }) => (
+    <div data-test-subj="no-agent-data">{datasetTitle}</div>
+  ),
+}));
 
 jest.mock(
   '../../../../application/legacy/discover/application/components/uninitialized/uninitialized',
@@ -91,6 +90,11 @@ import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { AgentTracesFlavor } from '../../../../../common';
+import {
+  ensureGenAiFieldChecked,
+  resetGenAiDataChecks,
+  setGenAiDataPresent,
+} from '../../../../application/utils/genai_data_check';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -158,7 +162,7 @@ describe('BottomRightContainer', () => {
     );
   };
 
-  it('renders no index patterns when dataset is null', () => {
+  it('renders the trace auto-detect callout and get-started state when dataset is null', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: undefined,
       isLoading: false,
@@ -166,7 +170,80 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent();
-    expect(screen.getByTestId('no-index-patterns')).toBeInTheDocument();
+    expect(screen.getByTestId('trace-auto-detect-callout')).toBeInTheDocument();
+  });
+
+  describe('dataset without GenAI spans', () => {
+    afterEach(() => resetGenAiDataChecks());
+
+    it('renders the no agent data state instead of the tabs', () => {
+      setGenAiDataPresent('apm-spans', false);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { id: 'apm-spans', title: 'apm-span-*', displayName: 'APM spans' } as any,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent(QueryExecutionStatus.READY);
+      expect(screen.getByTestId('no-agent-data')).toHaveTextContent('APM spans');
+      expect(screen.queryByTestId('agentTraces-tabs-vis-style-panel')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the index pattern title when the dataset has no display name', () => {
+      setGenAiDataPresent('apm-spans', false);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { id: 'apm-spans', title: 'apm-span-*' } as any,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent(QueryExecutionStatus.READY);
+      expect(screen.getByTestId('no-agent-data')).toHaveTextContent('apm-span-*');
+    });
+
+    it('renders the tabs when the dataset has GenAI spans', () => {
+      setGenAiDataPresent('agent-spans', true);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { id: 'agent-spans', title: 'otel-v1-apm-span-*' } as any,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent(QueryExecutionStatus.READY);
+      expect(screen.queryByTestId('no-agent-data')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentTraces-tabs-vis-style-panel')).toBeInTheDocument();
+    });
+
+    it('shows a spinner while the GenAI data check runs', async () => {
+      let finish: () => void = () => {};
+      const ppl = {
+        executeQuery: jest.fn(
+          () =>
+            new Promise((resolve) => {
+              finish = () => resolve({});
+            })
+        ),
+      };
+      const check = ensureGenAiFieldChecked(
+        ppl,
+        { id: 'pending-spans', title: 'x', type: 'INDEX_PATTERN' } as any,
+        'source = x'
+      );
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { id: 'pending-spans', title: 'x' } as any,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent(QueryExecutionStatus.UNINITIALIZED);
+      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+
+      await act(async () => {
+        finish();
+        await check;
+      });
+      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    });
   });
 
   it('renders uninitialized state when status is UNINITIALIZED', () => {
@@ -276,7 +353,7 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent();
-    expect(screen.getByTestId('no-index-patterns')).toBeInTheDocument();
+    expect(screen.getByTestId('trace-auto-detect-callout')).toBeInTheDocument();
   });
 
   it('should pass correct props to DiscoverNoResults', () => {

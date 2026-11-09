@@ -49,6 +49,16 @@ jest.mock('./utils', () => ({
   })),
 }));
 
+jest.mock('../../genai_data_check', () => ({
+  ensureGenAiFieldChecked: jest.fn(() => Promise.resolve()),
+  lacksGenAiData: jest.fn(() => false),
+}));
+jest.mock('../../ai_root', () => ({
+  ...jest.requireActual('../../ai_root'),
+  ensureAiRootFieldChecked: jest.fn(() => Promise.resolve()),
+}));
+
+import * as genAiDataCheck from '../../genai_data_check';
 import { configureStore } from '@reduxjs/toolkit';
 import {
   abortAllActiveQueries,
@@ -855,6 +865,66 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       await thunk(mockDispatch, mockGetState, undefined);
 
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('visualization');
+    });
+
+    describe('dataset GenAI data check', () => {
+      const dataset = { id: 'spans', title: 'spans-*', type: 'INDEX_PATTERN' };
+      const stateWithDataset = {
+        query: { query: '', language: 'PPL', dataset },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+      const lacksGenAiData = genAiDataCheck.lacksGenAiData as jest.Mock;
+      const ensureGenAiFieldChecked = genAiDataCheck.ensureGenAiFieldChecked as jest.Mock;
+
+      afterEach(() => lacksGenAiData.mockReturnValue(false));
+
+      it('checks the dataset and skips every tab query when it has no GenAI spans', async () => {
+        lacksGenAiData.mockReturnValue(true);
+        const prepareQuery = jest.fn().mockReturnValue('source=spans-*');
+        mockGetState.mockReturnValue(stateWithDataset);
+        (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({ prepareQuery });
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(ensureGenAiFieldChecked).toHaveBeenCalledWith(
+          expect.anything(),
+          dataset,
+          expect.any(String)
+        );
+        expect(lacksGenAiData).toHaveBeenCalledWith('spans');
+        expect(prepareQuery).not.toHaveBeenCalled();
+      });
+
+      it('skips a tab query run directly when the dataset has no GenAI spans', async () => {
+        lacksGenAiData.mockReturnValue(true);
+        mockGetState.mockReturnValue(stateWithDataset);
+        (mockServices.tabRegistry.getTab as jest.Mock).mockClear();
+
+        await executeTabQuery({
+          services: mockServices,
+          cacheKey: 'source=spans-*',
+          queryString: 'source=spans-*',
+        })(mockDispatch, mockGetState, undefined);
+
+        expect(lacksGenAiData).toHaveBeenCalledWith('spans');
+        expect(mockServices.tabRegistry.getTab).not.toHaveBeenCalled();
+        expect(mockDispatch).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: expect.stringContaining('setIndividualQueryStatus') })
+        );
+      });
+
+      it('runs the tab queries when the dataset has GenAI spans', async () => {
+        const prepareQuery = jest.fn().mockReturnValue('source=spans-*');
+        mockGetState.mockReturnValue(stateWithDataset);
+        (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({ prepareQuery });
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(prepareQuery).toHaveBeenCalled();
+      });
     });
 
     it('should handle missing tab registry gracefully', async () => {
