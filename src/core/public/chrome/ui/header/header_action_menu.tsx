@@ -31,22 +31,13 @@
 import { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
-
-/**
- * Attribute an app puts on the screen title it renders in the header action
- * menu (the navigation plugin's TopNavMenu does). The header reads it so the
- * application-header breadcrumbs don't show the same page name again.
- */
-export const SCREEN_TITLE_ATTRIBUTE = 'data-osd-screen-title';
+import { SCREEN_TITLE_ATTRIBUTE } from '../../constants';
 
 interface HeaderActionMenuProps {
   actionMenu$: Observable<MountPoint | undefined>;
   /** Called with the mounted screen title's text, or undefined when there is none. */
   onScreenTitleChange?: (screenTitle: string | undefined) => void;
 }
-
-const readScreenTitle = (root: HTMLElement): string | undefined =>
-  root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`)?.textContent?.trim() || undefined;
 
 export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({
   actionMenu$,
@@ -87,23 +78,39 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({
   }, [mounter]);
 
   // Report the app's screen title. Apps often fill it in after mount (an
-  // effect sets it once data loads), so watch the mounted content.
+  // effect sets it once data loads), so keep watching. The menu root is
+  // watched only for added and removed nodes, which is how the title element
+  // appears, disappears or is replaced; its text is watched on the title
+  // element alone, so text changes elsewhere in the menu (the date picker,
+  // a refresh countdown) don't trigger a read.
   useLayoutEffect(() => {
     const root = elementRef.current;
     if (!onScreenTitleChange || !root) return;
     let last: string | undefined;
+    let titleElement: Element | null = null;
+    // `report` is defined below; the observers only call it after this effect has run.
+    const titleObserver = new MutationObserver(() => report());
     const report = () => {
-      const next = readScreenTitle(root);
+      const element = root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`);
+      if (element !== titleElement) {
+        titleObserver.disconnect();
+        titleElement = element;
+        if (element) {
+          titleObserver.observe(element, { childList: true, subtree: true, characterData: true });
+        }
+      }
+      const next = element?.textContent?.trim() || undefined;
       if (next !== last) {
         last = next;
         onScreenTitleChange(next);
       }
     };
+    const rootObserver = new MutationObserver(report);
+    rootObserver.observe(root, { childList: true, subtree: true });
     report();
-    const observer = new MutationObserver(report);
-    observer.observe(root, { childList: true, subtree: true, characterData: true });
     return () => {
-      observer.disconnect();
+      rootObserver.disconnect();
+      titleObserver.disconnect();
       onScreenTitleChange(undefined);
     };
   }, [onScreenTitleChange]);

@@ -5592,7 +5592,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
-                    onScreenTitleChange={[Function]}
                   >
                     <div
                       className="headerAppActionMenu"
@@ -16188,7 +16187,6 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
-                    onScreenTitleChange={[Function]}
                   >
                     <div
                       className="headerAppActionMenu"
@@ -26510,7 +26508,6 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                         "thrownError": null,
                       }
                     }
-                    onScreenTitleChange={[Function]}
                   >
                     <div
                       className="headerAppActionMenu"

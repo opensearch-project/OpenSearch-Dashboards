@@ -33,6 +33,7 @@ import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderActionMenu } from './header_action_menu';
 import { MountPoint, UnmountCallback } from '../../../types';
+import { SCREEN_TITLE_ATTRIBUTE } from '../../constants';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 
@@ -171,5 +172,48 @@ describe('HeaderActionMenu', () => {
     await refresh();
     await new Promise((resolve) => setImmediate(resolve));
     expect(onScreenTitleChange).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it('follows the title text and a replaced title element, but not text elsewhere', async () => {
+    const onScreenTitleChange = jest.fn();
+    component = mount(
+      <HeaderActionMenu actionMenu$={menuMount$} onScreenTitleChange={onScreenTitleChange} />
+    );
+    act(() => {
+      menuMount$.next(
+        createMountPoint(
+          'FOO',
+          `<h1 ${SCREEN_TITLE_ATTRIBUTE}="">Logs</h1><span class="countdown">10</span>`
+        )
+      );
+    });
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+    await flush();
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('Logs');
+    const root = component.getDOMNode();
+
+    // Text edited in place, the way React updates `{screenTitle}`.
+    root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`)!.firstChild!.nodeValue = 'Traces';
+    await flush();
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('Traces');
+
+    // A text change outside the title is not observed: the menu is not even re-read.
+    const countdown = root.querySelector('.countdown')!;
+    const reads = jest.spyOn(root, 'querySelector');
+    countdown.firstChild!.nodeValue = '9';
+    await flush();
+    expect(reads).not.toHaveBeenCalled();
+    reads.mockRestore();
+
+    // The title element replaced by a new one: the new element is read and watched.
+    const replacement = document.createElement('h1');
+    replacement.setAttribute(SCREEN_TITLE_ATTRIBUTE, '');
+    replacement.textContent = 'Metrics';
+    root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`)!.replaceWith(replacement);
+    await flush();
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('Metrics');
+    replacement.firstChild!.nodeValue = 'Metrics 2';
+    await flush();
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('Metrics 2');
   });
 });

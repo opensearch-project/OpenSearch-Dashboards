@@ -526,7 +526,10 @@ export function Header({
       <EuiHeaderSectionItem border="none" className="headerAppActionMenuSection">
         <HeaderActionMenu
           actionMenu$={application.currentActionMenu$}
-          onScreenTitleChange={setScreenTitle}
+          // Only the application header reads the screen title.
+          onScreenTitleChange={
+            useUpdatedHeader && useApplicationHeader ? setScreenTitle : undefined
+          }
         />
       </EuiHeaderSectionItem>
     );

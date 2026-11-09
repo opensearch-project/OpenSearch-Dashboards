@@ -42,7 +42,7 @@ import {
 } from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
-import { HeaderVariant } from '../../constants';
+import { HeaderVariant, SCREEN_TITLE_ATTRIBUTE } from '../../constants';
 import { MountPoint } from '../../../types';
 import { Header } from './header';
 
@@ -308,7 +308,7 @@ describe('Header', () => {
     // Mounts an action menu that renders a screen title the way TopNavMenu does.
     const mountScreenTitle = (title: string) => (element: HTMLElement) => {
       const h1 = document.createElement('h1');
-      h1.setAttribute('data-osd-screen-title', '');
+      h1.setAttribute(SCREEN_TITLE_ATTRIBUTE, '');
       h1.textContent = title;
       element.appendChild(h1);
       return () => h1.remove();
