@@ -22,6 +22,7 @@ import { registerPPLCancelRoute } from './ppl_cancel';
 import { registerPPLStreamRoutes } from './ppl_stream';
 import { registerPPLAnalyzeRoute } from './ppl_analyze';
 import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
+import { definePPLPatternModeSettingsRoute } from './ppl_pattern_mode_settings';
 import { definePPLExplainRoute } from './ppl_explain';
 
 /**
@@ -248,5 +249,6 @@ export function defineRoutes(
 
   definePPLBundleRoute(logger, router);
   definePPLCalciteSettingsRoute(logger, router);
+  definePPLPatternModeSettingsRoute(logger, router);
   definePPLExplainRoute(logger, router);
 }

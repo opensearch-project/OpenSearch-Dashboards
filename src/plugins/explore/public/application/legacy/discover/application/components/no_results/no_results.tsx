@@ -48,6 +48,10 @@ import {
   SavedQueryService,
 } from '../../../../../../../../data/public';
 import { MetricsEmptyState } from '../../../../../pages/metrics/explore/components/metrics_empty_state';
+import {
+  getExplorationSource,
+  getNoMetricsBody,
+} from '../../../../../pages/metrics/explore/utils/exploration_source';
 
 interface Props {
   queryString: QueryStringContract;
@@ -276,16 +280,17 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
   }, [savedQueries, sampleQueries]);
 
   if (query?.language === 'PROMQL') {
+    // Named and introduced as the query's source type does it (Prometheus for the built-in one).
+    const source = getExplorationSource(query.dataset);
     return (
       <I18nProvider>
         <MetricsEmptyState
           title={i18n.translate('explore.metricsExplore.emptyTitle', {
             defaultMessage: 'No metrics found',
           })}
-          body={i18n.translate('explore.metricsExplore.emptyBody', {
-            defaultMessage:
-              'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
-          })}
+          body={getNoMetricsBody(source)}
+          sampleQueries={source.sampleQueries}
+          codeLanguage={source.codeLanguage}
         />
       </I18nProvider>
     );

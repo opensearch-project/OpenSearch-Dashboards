@@ -11,6 +11,7 @@ import {
   SourceTypeDependencies,
   SourceTypeRegistryService,
 } from './source_type_registry_service';
+import type { SourceTypeVisualBuilder } from './visual_builder';
 import { DataPublicPluginStart } from '../../../../data/public';
 
 const mockFetchFirstAvailableDataset = jest.fn();
@@ -129,6 +130,18 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getMetricsResourceClientId(undefined)).toBe('prometheus');
     expect(registry.getMetricsResourceClientId({ type: 'BROWSABLE' })).toBe('my-metrics');
     expect(registry.getMetricsResourceClientId({ type: 'QUERY_ONLY' })).toBeUndefined();
+  });
+
+  it("keeps Prometheus's advice for an empty metric list on the built-in source only", () => {
+    registry.register(
+      fakeSource({ id: 'own', datasetTypes: ['OWN'], metricsEmptyHint: 'Own advice.' })
+    );
+    expect(registry.getForDataset({ type: 'PROMETHEUS' }).metricsEmptyHint).toBe(
+      'Try adjusting the time range or verify the data source is scraping targets.'
+    );
+    expect(registry.getForDataset({ type: 'OWN' }).metricsEmptyHint).toBe('Own advice.');
+    registry.register(fakeSource());
+    expect(registry.getForDataset({ type: 'FAKE' }).metricsEmptyHint).toBeUndefined();
   });
 
   it('treats PromQL and the languages Metrics sources list as metrics languages', () => {
@@ -318,6 +331,42 @@ describe('SourceTypeRegistryService', () => {
       expect(
         registry.hasVisualBuilder(registry.get(OPENSEARCH_SOURCE_TYPE_ID) as SourceTypeDefinition)
       ).toBe(true);
+    });
+
+    describe('visual builder translations', () => {
+      const translation: SourceTypeVisualBuilder = {
+        build: () => '',
+        parse: () => ({
+          canBuild: false,
+          state: { searchExpression: '', filters: [], aggregations: [], groupBy: { fields: [] } },
+        }),
+        aggregationColumn: () => null,
+        filterText: () => null,
+      };
+
+      beforeEach(() => {
+        registry.register(
+          fakeSource({
+            id: 'insights',
+            datasetTypes: ['INSIGHTS'],
+            flavors: [ExploreFlavor.Logs],
+            languageSettings: { InsightsQL: { visualBuilder: translation } },
+          })
+        );
+      });
+
+      it("enables the builder with the source's translation", () => {
+        expect(registry.supportsVisualBuilder('InsightsQL', { type: 'INSIGHTS' })).toBe(true);
+        expect(registry.getVisualBuilder('InsightsQL', { type: 'INSIGHTS' })).toBe(translation);
+        expect(registry.hasVisualBuilder(registry.get('insights') as SourceTypeDefinition)).toBe(
+          true
+        );
+      });
+
+      it('leaves the PPL translation in place for languages without one', () => {
+        expect(registry.getVisualBuilder('PPL', { type: 'INDEX_PATTERN' })).toBeUndefined();
+        expect(registry.getVisualBuilder('CloudQL', { type: 'CLOUD' })).toBeUndefined();
+      });
     });
 
     it("ignores a source's settings for a built-in language when no dataset is active", () => {

@@ -19,6 +19,7 @@ import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { isSourceColumn } from '../../../helpers/is_source_column';
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -112,7 +113,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
         }
 
-        if (fieldInfo?.type === '_source') {
+        if (isSourceColumn(colName, fieldInfo)) {
           return (
             <SourceFieldTableCell
               key={colName}

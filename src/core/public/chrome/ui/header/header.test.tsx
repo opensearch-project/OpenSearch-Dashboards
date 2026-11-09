@@ -232,6 +232,12 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
+    // The title already names the current page, so the bar does not repeat it.
+    expect(
+      component
+        .find('nav[data-test-subj="breadcrumbs"] [data-test-subj="breadcrumb last"]')
+        .exists()
+    ).toBeFalsy();
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
@@ -261,10 +267,37 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
+    // No page title in this layout, so the current page is the last crumb, as
+    // plain text, and the only separator sits between the two crumbs.
+    const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('testTitle');
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(1);
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component).toMatchSnapshot();
+  });
+
+  it('keeps every crumb of a three-level trail visible in the application header', () => {
+    const props = {
+      ...mockProps(),
+      breadcrumbs$: new BehaviorSubject([
+        { text: 'Workspace', href: '#/workspace' },
+        { text: 'Section', href: '#/section' },
+        { text: 'Page' },
+      ]),
+      branding: { useExpandedHeader: false },
+      useUpdatedHeader: true,
+      headerVariant$: new BehaviorSubject(HeaderVariant.APPLICATION),
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+    // Nothing collapses into an ellipsis at this width: every crumb stays in view.
+    expect(bar.find('.euiSimplifiedBreadcrumb--collapsed').exists()).toBeFalsy();
+    expect(bar.find('[data-test-subj="breadcrumb first"]').first().text()).toBe('Workspace');
+    expect(bar.find('a[title="Section"]').exists()).toBeTruthy();
+    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('Page');
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(2);
   });
 
   it('should remember the collapse state when new nav is enabled', () => {

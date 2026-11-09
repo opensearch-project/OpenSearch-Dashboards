@@ -422,6 +422,27 @@ describe('IndexPatternWithDataSource', () => {
 
       expect(hit).toEqual(hitClone);
     });
+
+    test('adds the meta fields it has, and none once setMetaFields replaces them with []', () => {
+      const withMeta = new IndexPattern({
+        spec: { id: 'meta-test', type: 'index-pattern', fields: {} },
+        savedObjectsClient: {} as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: ['_source', '_id', '_type', '_index', '_score'],
+      });
+      const hit = { _index: 'frame', _source: { message: 'hello' } };
+      // Every meta field but _source becomes a key of the flattened hit, even without a value.
+      expect(Object.keys(withMeta.flattenHit(hit)).sort()).toEqual(
+        ['_id', '_index', '_score', '_type', 'message'].sort()
+      );
+
+      withMeta.setMetaFields([]);
+      expect(withMeta.metaFields).toEqual([]);
+      expect(withMeta.flattenHit({ _index: 'frame', _source: { message: 'hello' } })).toEqual({
+        message: 'hello',
+      });
+    });
   });
 
   describe('getDisplayName', () => {

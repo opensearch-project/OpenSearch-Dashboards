@@ -7,7 +7,8 @@ import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { AggFn } from './types';
-import { AGG_FUNCTIONS } from './operations';
+import { AGG_FN_MAP } from './operations';
+import { aggregationsFor, useVisualBuilder } from './visual_builder_language';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
 interface AggregationMenuProps {
@@ -21,21 +22,23 @@ export const AggregationMenu: React.FC<AggregationMenuProps> = ({
   onChange,
   dataTestSubj,
 }) => {
-  const selected = AGG_FUNCTIONS.find((f) => f.id === value);
+  const language = useVisualBuilder();
+  // Looked up in the full catalog so a parsed aggregation keeps its label.
+  const selected = AGG_FN_MAP[value];
   const ariaLabel = i18n.translate('explore.pplBuilder.aggregation', {
     defaultMessage: 'Aggregation',
   });
 
   const options = useMemo<SearchMenuOption[]>(
     () =>
-      AGG_FUNCTIONS.map((item) => ({
+      aggregationsFor(language).map((item) => ({
         key: item.id,
         label: item.label,
         filterText: item.label,
         onSelect: () => onChange(item.id),
         dataTestSubj: `pplBuilderAggOption-${item.id}`,
       })),
-    [onChange]
+    [onChange, language]
   );
 
   return (

@@ -49,7 +49,8 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasAggregation: jest.fn(() => false),
+  queryIsAggregation: jest.fn(() => false),
+  queryIsBucketCountable: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -73,7 +74,7 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import * as utilsModule from './utils';
-import { queryHasAggregation } from './utils';
+import { queryIsAggregation, queryIsBucketCountable } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
 import {
@@ -120,6 +121,10 @@ jest.mock('../../languages', () => ({
 }));
 
 jest.mock('../../../../../../data/public', () => ({
+  // Real cache: executeQueries resolves the cluster's default patterns mode through it.
+  patternsModeCache: jest.requireActual(
+    '../../../../../../data/public/ppl_settings/patterns_mode_cache'
+  ).patternsModeCache,
   indexPatterns: {
     isDefault: jest.fn(),
   },
@@ -1249,6 +1254,28 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         .map(([a]) => a)
         .find((a) => typeof a === 'object' && a?.type === 'queryEditor/setHasUserInitiatedQuery');
       expect(flag.payload).toBe(true);
+    });
+
+    it('clears the stale-selection flag, since the results that load are for the current selection', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {}, isSelectionStale: true },
+      });
+
+      await executeQueries({
+        services: { tabRegistry: { getTab: jest.fn() } } as unknown as ExploreServices,
+      })(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'queryEditor/setIsSelectionStale', payload: false })
+      );
     });
 
     // Tab queries are dispatched only once the data table settles. Unless the run itself counts as
@@ -2541,7 +2568,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       mockDispatch = jest.fn();
       mockGetState.mockReturnValue(stateWithKey());
       (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
-      (queryHasAggregation as jest.Mock).mockReturnValue(false);
+      (queryIsAggregation as jest.Mock).mockReturnValue(false);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(false);
     });
 
     it('streams partial rows for a row query and reports scan progress', async () => {
@@ -2564,10 +2592,25 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
 
     it('does not stream partials for an aggregation query', async () => {
-      (queryHasAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(true);
       fetchWithOnePartial();
 
       await runDataTableQuery('source=logs | stats count() by host');
+
+      expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
+      expect(setResults).toHaveBeenCalledTimes(1); // the final result only
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('does not stream partials for an aggregation whose buckets cannot be counted', async () => {
+      // e.g. timewrap: an aggregation, but excluded from the bucket-count probe. Streaming is gated
+      // on queryIsAggregation, not queryIsBucketCountable.
+      (queryIsAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(false);
+      fetchWithOnePartial();
+
+      await runDataTableQuery('source=logs | timechart span=1h count() | timewrap 1d');
 
       expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
       expect(setResults).toHaveBeenCalledTimes(1); // the final result only

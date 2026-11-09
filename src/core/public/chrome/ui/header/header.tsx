@@ -706,7 +706,10 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
-          <EuiFlexItem grow={false}>{renderBreadcrumbs(false, false)}</EuiFlexItem>
+          {/* This layout has no page title, so show the current page as the last
+              crumb (plain text) with no separator after it, keeping the
+              updated header's crumb limits. */}
+          <EuiFlexItem grow={false}>{renderBreadcrumbs(true, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>
         <EuiHeaderSection side="right">

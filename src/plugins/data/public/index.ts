@@ -679,6 +679,7 @@ export {
   extractFieldMetadata,
 } from './ppl_lint/lint_context_builder';
 export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
+export { patternsModeCache } from './ppl_settings/patterns_mode_cache';
 export { explainQueryPreparer } from './ppl_lint/explain_query_preparer';
 // Host metadata probes for the context-fed lint rules; both editor hosts call
 // them from their loadFields effect.

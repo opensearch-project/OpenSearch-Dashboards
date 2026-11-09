@@ -176,8 +176,14 @@ export class DatasetService {
           dataSourceMeta: dataset.dataSource ? dataset.dataSource.meta : undefined,
         } as IndexPatternSpec;
 
+        // The type's own meta fields, when it names them (none for data outside OpenSearch).
+        const typeMetaFields = type?.meta.metaFields;
+
         if (defaultCache) {
           const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+          if (temporaryIndexPattern && typeMetaFields) {
+            temporaryIndexPattern.setMetaFields(typeMetaFields);
+          }
 
           // Load schema asynchronously if it's an async index pattern
           if (asyncType && temporaryIndexPattern) {
@@ -200,6 +206,9 @@ export class DatasetService {
           }
         } else {
           const temporaryDataView = await services.data?.dataViews.create(spec, true);
+          if (temporaryDataView && typeMetaFields) {
+            temporaryDataView.setMetaFields(typeMetaFields);
+          }
 
           if (asyncType && temporaryDataView) {
             type!
@@ -229,6 +238,7 @@ export class DatasetService {
   /**
    * Ensures the cache holds the saved-object-backed data view when the dataset has been saved.
    * Returns false for ad-hoc datasets that have no saved object.
+   * Applies the dataset type's meta fields to the saved view when the type sets them.
    */
   private async loadPersistedDataView(
     dataset: Dataset,
@@ -280,6 +290,12 @@ export class DatasetService {
     // Older saved objects may predate persisted signalType; keep the caller's value in that case.
     if (!persisted.signalType && (signalType ?? dataset.signalType)) {
       persisted.signalType = signalType ?? dataset.signalType;
+    }
+
+    // The type's own meta fields apply to its saved views too; saved objects don't store them.
+    const metaFields = this.getType(dataset.type)?.meta.metaFields;
+    if (metaFields) {
+      persisted.setMetaFields(metaFields);
     }
     return true;
   }

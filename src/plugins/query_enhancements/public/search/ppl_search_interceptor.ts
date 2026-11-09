@@ -10,6 +10,10 @@ import { first, switchMap } from 'rxjs/operators';
 import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
+  getPPLSourceTimeFieldChecker,
+  canAppendPPLDefaultSort,
+  maskPPLBracketsAndStrings,
+  PPLPatternsMode,
   Query,
   TimeBounds,
   UI_SETTINGS,
@@ -20,6 +24,7 @@ import {
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
+  patternsModeCache,
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
@@ -38,35 +43,6 @@ import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
-
-// Commands after which `sort - <dataset time field>` must not be appended: the user already ordered
-// or limited the result, or the command replaced the row type. chart and timechart emit a time
-// column of their own naming (`@timestamp`, or chart's `over` argument), so sorting on the dataset's
-// field turns a working query into `Field [<field>] not found`.
-const DEFAULT_SORT_BLOCKING_COMMANDS = [
-  'sort',
-  'stats',
-  'head',
-  'rare',
-  'top',
-  'rename',
-  'chart',
-  'timechart',
-];
-const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
-  `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
-  'i'
-);
-
-const canAppendDefaultSort = (queryString: string): boolean => {
-  const masked = queryString
-    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
-    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-
-  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
-
-  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
-};
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -112,8 +88,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) =>
-        fetch(context, this.appendDefaultSort(query), this.getAggConfig(searchRequest, query))
+      switchMap(async (query) => ({
+        query,
+        patternsDefaultMode: await this.resolvePatternsDefaultMode(query),
+      })),
+      switchMap(({ query, patternsDefaultMode }) =>
+        fetch(
+          context,
+          this.appendDefaultSort(query, patternsDefaultMode),
+          this.getAggConfig(searchRequest, query)
+        )
       )
     );
   }
@@ -186,12 +170,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     // Check if skipTimeFilter is set in the search request fields
     const skipTimeFilter = request.params?.body?.skipTimeFilter;
 
+    // Resolved even when skipTimeFilter is set: appendDefaultSort reads the cached answer, and a
+    // time sort on a source without the field fails just like the filter would.
+    const sourceLacksTimeField = await this.sourceLacksTimeField(query);
+
     let timeBounds: TimeBounds | undefined;
 
     if (
       dataset &&
       dataset.timeFieldName &&
       !skipTimeFilter && // Skip time filters if skipTimeFilter is true
+      // Skip the time filter only when source= names an index that lacks the dataset's time field
+      // (e.g. a lookup); filtering on it would fail with `field not found`. Another index that has
+      // the field (logs-b on dataset logs-a, an alias, a remote cluster) keeps the date picker.
+      !sourceLacksTimeField &&
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
@@ -235,15 +227,53 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   /**
+   * Whether the query's `source=` names an index that lacks the dataset's time field. Shared with
+   * Explore's non-time-series detection via the data plugin, so both reach the same verdict for a
+   * query. Resolves false (apply the time filter) when it cannot tell, including when the index
+   * patterns service is not available yet.
+   */
+  private async sourceLacksTimeField(query: Query): Promise<boolean> {
+    if (!this.indexPatterns || !query.dataset?.timeFieldName) return false;
+    return getPPLSourceTimeFieldChecker(this.indexPatterns).sourceLacksTimeField(
+      typeof query.query === 'string' ? query.query : '',
+      query.dataset
+    );
+  }
+
+  /**
+   * The cluster's default `patterns` mode for the query's data source. Only fetched (once per data
+   * source) when the query has a `patterns` command without an explicit `mode=`; undefined when
+   * unknown.
+   */
+  private resolvePatternsDefaultMode(query: Query): Promise<PPLPatternsMode | undefined> {
+    if (!isPPLSearchQuery(query)) {
+      return Promise.resolve(undefined);
+    }
+    return patternsModeCache.ensure(
+      this.deps.http,
+      maskPPLBracketsAndStrings(query.query),
+      query.dataset?.dataSource?.id
+    );
+  }
+
+  /**
    * Appends a default descending sort on the time field to match legacy Discover behavior,
    * unless the query already sorts, aggregates, projects specific fields, or limits results.
    * Applied only to the results query, not to the histogram aggregation query.
    */
-  private appendDefaultSort(query: Query): Query {
+  private appendDefaultSort(query: Query, patternsDefaultMode?: PPLPatternsMode): Query {
     if (
       !isPPLSearchQuery(query) ||
       !query.dataset?.timeFieldName ||
-      !canAppendDefaultSort(query.query)
+      // Don't sort on the dataset time field when the source lacks it. buildQuery has already
+      // resolved this for the same source, so the synchronous cached answer is available; an
+      // unknown answer (failed lookup) keeps the sort, matching the filter's apply-on-error.
+      (this.indexPatterns &&
+        getPPLSourceTimeFieldChecker(this.indexPatterns).peek(
+          typeof query.query === 'string' ? query.query : '',
+          query.dataset
+        ) === true) ||
+      !canAppendPPLDefaultSort(query.query, { patternsDefaultMode })
     ) {
       return query;
     }

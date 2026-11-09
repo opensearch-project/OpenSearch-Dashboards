@@ -23,6 +23,7 @@ import {
   clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
+  setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -63,8 +64,14 @@ import {
   buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
-  queryHasAggregation,
+  queryIsAggregation,
+  queryIsBucketCountable,
 } from './utils';
+import {
+  ensurePatternsDefaultMode,
+  getPatternsDefaultMode,
+  patternsDefaultModeNeedsFetch,
+} from '../../languages/ppl/aggregation_commands';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { hasFieldValue } from '../../../../utils/has_field_value';
 import { ExploreFlavor } from '../../../../../common';
@@ -337,6 +344,8 @@ const getStreamingConfig = async (
       timeFieldName,
       timeRange,
       engineType,
+      // Resolved by executeQueries before this runs.
+      patternsDefaultMode: getPatternsDefaultMode(query),
     });
 
     if (!timeFieldName || !query.dataset?.id) {
@@ -413,6 +422,21 @@ export const executeQueries = createAsyncThunk<
   if (!services) {
     return;
   }
+
+  // The results about to load are for the current selection (see the dataset change middleware).
+  if (state.queryEditor.isSelectionStale) {
+    dispatch(setIsSelectionStale(false));
+  }
+
+  // The cache keys below come from the stripped query, and whether a `patterns` without `mode=` is
+  // stripped depends on the cluster's default mode, so resolve it first. Awaited only when it must
+  // fetch (a `patterns` without `mode=`, once per data source; tab detection usually already has):
+  // the setup up to the run's abort registration below stays synchronous, so Stop takes effect
+  // from the moment the run starts.
+  if (patternsDefaultModeNeedsFetch(query)) {
+    await ensurePatternsDefaultMode(services.http, query);
+  }
+  const patternsDefaultMode = getPatternsDefaultMode(query);
 
   const defaultCacheKey = defaultPrepareQueryString(query);
   // Use separate cache keys for data table and histogram
@@ -596,9 +620,14 @@ export const executeQueries = createAsyncThunk<
     }
 
     // Execute bucket count query for aggregation queries (non-blocking)
-    // This appends | stats count() to get the true total bucket count
+    // This appends | stats count() to get the true total bucket count. Gated on
+    // queryIsBucketCountable: `timewrap` and label-mode `patterns` are skipped because a count probe
+    // can't reproduce their rendered bucket count.
     const originalQueryString = typeof query.query === 'string' ? query.query : '';
-    if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
+    if (
+      query.language === 'PPL' &&
+      queryIsBucketCountable(originalQueryString, { patternsDefaultMode })
+    ) {
       const bucketCountCacheKey = prepareBucketCountCacheKey(query);
       const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
       const needsBucketCountQuery =
@@ -1008,7 +1037,11 @@ const executeQueryBase = async (
     // Async sources that return rows while still running hand them to `onPartialResults` on
     // each poll. Only row views stream them: an aggregation's running values reorder as the
     // scan proceeds, so aggregation views wait for the final result.
-    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+    const streamsPartialRows =
+      !isHistogramQuery &&
+      !queryIsAggregation(queryString, {
+        patternsDefaultMode: getPatternsDefaultMode(getState().query),
+      });
 
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
       // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
