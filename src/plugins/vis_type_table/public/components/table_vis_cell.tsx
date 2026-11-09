@@ -9,6 +9,23 @@ import dompurify from 'dompurify';
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { FormattedColumn } from '../types';
 
+const tableCellDompurify = dompurify(window);
+
+tableCellDompurify.addHook('uponSanitizeAttribute', (node, event) => {
+  if (event.attrName === 'target') {
+    event.forceKeepAttr = true;
+  }
+});
+
+tableCellDompurify.addHook('afterSanitizeElements', (node) => {
+  if (node instanceof Element && node.tagName?.toUpperCase() === 'A') {
+    const target = node.getAttribute('target');
+    if (target && target !== '_self') {
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  }
+});
+
 export const getTableVisCellValue = (
   sortedRows: OpenSearchDashboardsDatatableRow[],
   columns: FormattedColumn[]
@@ -23,20 +40,6 @@ export const getTableVisCellValue = (
   const rawContent = row[columnId];
   const colIndex = columns.findIndex((col) => col.id === columnId);
   const htmlContent = columns[colIndex].formatter.convert(rawContent, 'html');
-  dompurify.addHook('uponSanitizeAttribute', (node, event) => {
-    if (event.attrName === 'target') {
-      event.forceKeepAttr = true;
-    }
-  });
-
-  dompurify.addHook('afterSanitizeElements', (node) => {
-    if (node instanceof Element && node.tagName?.toUpperCase() === 'A') {
-      const target = node.getAttribute('target');
-      if (target && target !== '_self') {
-        node.setAttribute('rel', 'noopener noreferrer');
-      }
-    }
-  });
   const formattedContent = (
     /*
      * Justification for dangerouslySetInnerHTML:
@@ -46,7 +49,7 @@ export const getTableVisCellValue = (
      * `htmlContent` is created by converting raw data via HTML field formatter, so we need to make sure this value never contains
      * any unsafe HTML (e.g. by bypassing the field formatter).
      */
-    <div dangerouslySetInnerHTML={{ __html: dompurify.sanitize(htmlContent) }} /> // eslint-disable-line react/no-danger
+    <div dangerouslySetInnerHTML={{ __html: tableCellDompurify.sanitize(htmlContent) }} /> // eslint-disable-line react/no-danger
   );
   return formattedContent || null;
 };
