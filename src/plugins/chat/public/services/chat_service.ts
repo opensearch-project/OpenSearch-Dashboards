@@ -603,11 +603,12 @@ export class ChatService {
       dataSource = available.find((ds) => ds.id === id);
     }
 
-    if (available.length === 0) {
-      return { valid: true, availableDataSources: available };
-    }
+    const valid = available.length === 0 || !!dataSource;
+    // An id that validates now (e.g. the user switched to it) must not stay in the negative cache,
+    // or the next resolve would drop it as invalid.
+    if (valid) this.invalidDataSourceIds.delete(id);
 
-    return { valid: !!dataSource, dataSource, availableDataSources: available };
+    return { valid, dataSource, availableDataSources: available };
   }
 
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
@@ -1297,6 +1298,9 @@ export class ChatService {
         .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
         .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
         .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      // Forgive only the rejected ids the fresh list now contains; clearing all of them would
+      // make every unknown id re-fetch the list on each resolve.
+      for (const ds of this.cachedAvailableDataSources) this.invalidDataSourceIds.delete(ds.id);
       return this.cachedAvailableDataSources;
     } catch {
       return [];
