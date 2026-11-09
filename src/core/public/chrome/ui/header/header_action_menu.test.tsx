@@ -146,4 +146,30 @@ describe('HeaderActionMenu', () => {
     expect(unmounts.FOO).toHaveBeenCalledTimes(1);
     expect(unmounts.BAR).not.toHaveBeenCalled();
   });
+
+  it('reports the mounted screen title and its later changes', async () => {
+    const onScreenTitleChange = jest.fn();
+    component = mount(
+      <HeaderActionMenu actionMenu$={menuMount$} onScreenTitleChange={onScreenTitleChange} />
+    );
+    act(() => {
+      menuMount$.next(createMountPoint('FOO', '<h1 data-osd-screen-title="">Logs</h1>'));
+    });
+    await refresh();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('Logs');
+
+    // Apps fill the title in after mount: the change is picked up.
+    const h1 = component.getDOMNode().querySelector('[data-osd-screen-title]')!;
+    h1.textContent = 'My dashboard';
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith('My dashboard');
+
+    act(() => {
+      menuMount$.next(createMountPoint('BAR', '<div>no title</div>'));
+    });
+    await refresh();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(onScreenTitleChange).toHaveBeenLastCalledWith(undefined);
+  });
 });

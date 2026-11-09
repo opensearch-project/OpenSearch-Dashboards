@@ -32,11 +32,26 @@ import { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
 
+/**
+ * Attribute an app puts on the screen title it renders in the header action
+ * menu (the navigation plugin's TopNavMenu does). The header reads it so the
+ * application-header breadcrumbs don't show the same page name again.
+ */
+export const SCREEN_TITLE_ATTRIBUTE = 'data-osd-screen-title';
+
 interface HeaderActionMenuProps {
   actionMenu$: Observable<MountPoint | undefined>;
+  /** Called with the mounted screen title's text, or undefined when there is none. */
+  onScreenTitleChange?: (screenTitle: string | undefined) => void;
 }
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => {
+const readScreenTitle = (root: HTMLElement): string | undefined =>
+  root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`)?.textContent?.trim() || undefined;
+
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({
+  actionMenu$,
+  onScreenTitleChange,
+}) => {
   // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
   // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
   // therefore executing the mount method, causing everything to crash.
@@ -70,6 +85,28 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
       }
     }
   }, [mounter]);
+
+  // Report the app's screen title. Apps often fill it in after mount (an
+  // effect sets it once data loads), so watch the mounted content.
+  useLayoutEffect(() => {
+    const root = elementRef.current;
+    if (!onScreenTitleChange || !root) return;
+    let last: string | undefined;
+    const report = () => {
+      const next = readScreenTitle(root);
+      if (next !== last) {
+        last = next;
+        onScreenTitleChange(next);
+      }
+    };
+    report();
+    const observer = new MutationObserver(report);
+    observer.observe(root, { childList: true, subtree: true, characterData: true });
+    return () => {
+      observer.disconnect();
+      onScreenTitleChange(undefined);
+    };
+  }, [onScreenTitleChange]);
 
   return (
     <div data-test-subj="headerAppActionMenu" className="headerAppActionMenu" ref={elementRef} />
