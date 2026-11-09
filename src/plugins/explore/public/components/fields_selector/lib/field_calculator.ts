@@ -44,6 +44,8 @@ interface FieldValuesParams {
 interface FieldValueCountsParams extends FieldValuesParams {
   count?: number;
   grouped?: boolean;
+  /** Reuse the results processor's flattened rows when analysing multiple fields. */
+  flattenedHits?: Array<Record<string, unknown>>;
 }
 
 const getFieldValues = ({ hits, field, dataSet: indexPattern }: FieldValuesParams) => {
@@ -53,7 +55,7 @@ const getFieldValues = ({ hits, field, dataSet: indexPattern }: FieldValuesParam
 };
 
 const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts => {
-  const { hits, field, dataSet: indexPattern, count = 5, grouped = false } = params;
+  const { hits, field, dataSet: indexPattern, count = 5, grouped = false, flattenedHits } = params;
   const { type: fieldType } = field;
 
   if (NO_ANALYSIS_TYPES.includes(fieldType)) {
@@ -70,7 +72,9 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
     };
   }
 
-  const allValues = getFieldValues({ hits, field, dataSet: indexPattern });
+  const allValues = flattenedHits
+    ? flattenedHits.map((hit) => hit[field.name])
+    : getFieldValues({ hits, field, dataSet: indexPattern });
   const missing = allValues.filter((v) => v === undefined || v === null).length;
 
   try {

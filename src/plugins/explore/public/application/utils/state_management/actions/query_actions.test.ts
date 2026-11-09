@@ -75,7 +75,8 @@ import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import * as utilsModule from './utils';
 import { queryIsAggregation, queryIsBucketCountable } from './utils';
-import { Query, DataView } from 'src/plugins/data/common';
+import { Query, DataView, fieldList } from 'src/plugins/data/common';
+import { ISearchResult } from '../slices';
 import { ExploreServices } from '../../../../types';
 import {
   SAMPLE_SIZE_SETTING,
@@ -572,6 +573,107 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultResultsProcessor', () => {
+    it('flattens each hit once when preparing suggestions for a large sparse mapping', () => {
+      const fields = fieldList();
+      fields.replaceAll([
+        { name: 'servicename', type: 'string' },
+        { name: 'enabled', type: 'boolean' },
+        { name: 'tags', type: 'string' },
+        { name: 'cached', type: 'string', suggestions: { topValues: ['existing'] } },
+        { name: 'child', type: 'string', subType: { multi: { parent: 'servicename' } } },
+        ...Array.from({ length: 1000 }, (_, index) => ({
+          name: `missing_${index}`,
+          type: 'string',
+        })),
+      ]);
+      const dataset = {
+        ...mockDataView,
+        fields,
+        getFormatterForField: () => ({ convert: String }),
+      } as unknown as DataView;
+      const rawResults = {
+        hits: {
+          hits: [
+            {
+              _id: '1',
+              _source: {
+                servicename: 'service1',
+                enabled: false,
+                tags: ['beta', 'alpha'],
+                cached: 'replacement',
+                child: 'child-value',
+              },
+            },
+            {
+              _id: '2',
+              _source: {
+                servicename: 'service2',
+                enabled: true,
+                tags: ['alpha'],
+              },
+            },
+            {
+              _id: '3',
+              _source: {
+                servicename: 'service1',
+                enabled: false,
+                tags: null,
+              },
+            },
+          ],
+          total: 3,
+        },
+        elapsedMs: 100,
+      } as ISearchResult;
+      const mockGetFieldValueCounts = jest.mocked(fieldCalculatorModule.getFieldValueCounts);
+      const actualCalculator = jest.requireActual<typeof fieldCalculatorModule>(
+        '../../../../components/fields_selector/lib/field_calculator'
+      );
+      mockGetFieldValueCounts.mockImplementation(actualCalculator.getFieldValueCounts);
+
+      try {
+        const result = defaultResultsProcessor(rawResults, dataset);
+
+        expect(dataset.flattenHit).toHaveBeenCalledTimes(rawResults.hits.hits.length);
+        expect(mockGetFieldValueCounts.mock.calls.map(([params]) => params.field.name)).toEqual([
+          'servicename',
+          'enabled',
+          'tags',
+        ]);
+        expect(fields.getByName('servicename')?.spec.suggestions?.topValues).toEqual([
+          'service1',
+          'service2',
+        ]);
+        expect(fields.getByName('enabled')?.spec.suggestions?.topValues).toEqual(['false', 'true']);
+        expect(fields.getByName('tags')?.spec.suggestions?.topValues).toEqual(['alpha', 'beta']);
+        expect(fields.getByName('cached')?.spec.suggestions?.topValues).toEqual(['existing']);
+        expect(fields.getByName('child')?.spec.suggestions).toBeUndefined();
+        expect(fields.getByName('missing_0')?.spec.suggestions).toBeUndefined();
+        expect(result.fieldCounts).toEqual({
+          servicename: 3,
+          enabled: 3,
+          tags: 3,
+          cached: 1,
+          child: 1,
+        });
+        expect(result.nonEmptyFieldCounts).toEqual({
+          servicename: 3,
+          enabled: 3,
+          tags: 2,
+          cached: 1,
+          child: 1,
+        });
+
+        const repeated = defaultResultsProcessor(rawResults, dataset);
+        expect(dataset.flattenHit).toHaveBeenCalledTimes(rawResults.hits.hits.length * 2);
+        expect(mockGetFieldValueCounts).toHaveBeenCalledTimes(3);
+        expect(repeated.fieldCounts).toEqual(result.fieldCounts);
+        expect(repeated.nonEmptyFieldCounts).toEqual(result.nonEmptyFieldCounts);
+      } finally {
+        mockGetFieldValueCounts.mockReset();
+      }
+    });
+
     it('should process search results and calculate field counts', () => {
       const rawResults = {
         hits: {
@@ -764,6 +866,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       // Verify that getFieldValueCounts was called as part of updateFieldTopQueryValues
       expect(mockGetFieldValueCounts).toHaveBeenCalledWith({
         hits: rawResults.hits.hits,
+        flattenedHits: rawResults.hits.hits.map(
+          (hit: { _source: Record<string, unknown> }) => hit._source
+        ),
         field: mockField,
         dataSet: mockDatasetWithFields,
         count: 5,
