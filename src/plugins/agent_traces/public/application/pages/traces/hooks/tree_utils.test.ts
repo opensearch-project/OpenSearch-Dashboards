@@ -40,7 +40,7 @@ describe('tree_utils', () => {
   describe('formatTimestamp', () => {
     it('formats UTC timestamp in the given timezone', () => {
       const result = formatTimestamp('2025-01-01 12:00:00', 'America/New_York');
-      expect(result).toBe('01/01/2025, 7:00:00.000 AM');
+      expect(result).toBe('Jan 1, 2025 @ 07:00:00.000');
     });
 
     it('returns dash for empty timestamp', () => {
