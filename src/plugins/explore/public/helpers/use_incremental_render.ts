@@ -88,9 +88,8 @@ export function useIncrementalRender({
     setSentinelElement(node);
   }, []);
 
-  // Re-observed whenever the count grows: an observer reports only changes in visibility, so on a
-  // screen tall enough to fit every rendered item the sentinel would stay visible, nothing could
-  // scroll, and the list would stop growing. Observing anew reports its current state.
+  // Re-observed as the count grows: an observer reports only visibility changes, so a sentinel that
+  // stays visible on a tall screen would otherwise stop the list growing.
   const canGrow = count < total && (cap === undefined || count < cap);
   useEffect(() => {
     if (!enabled || !sentinelElement || !canGrow) {
@@ -99,9 +98,8 @@ export function useIncrementalRender({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          // Render one page now and queue a lookahead for the frame-throttled loop below. The
-          // lookahead is set rather than added to, since a sentinel that stays visible reports on
-          // every page.
+          // Render one page now and queue a lookahead for the frame-throttled loop below. Set, not
+          // added to, since a sentinel that stays visible reports on every page.
           setCount((prev) => clampToCap(prev + pageSize));
           setDesiredCount((prev) => clampToCap(Math.max(prev, countRef.current + lookahead)));
         }

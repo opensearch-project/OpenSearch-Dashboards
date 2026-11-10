@@ -73,7 +73,7 @@ export const ExploreLogsChart = ({
   const dispatch = useDispatch();
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
   const onChangeInterval = (newInterval: string) => {
-    // A streamed histogram for the old setting would keep writing its buckets into the chart.
+    // Otherwise a streamed histogram for the old setting keeps writing into the chart.
     const streamedHistogramKey = prepareHistogramCacheKey(query);
     if (supersedeStreamingQuery(streamedHistogramKey)) {
       dispatch(clearQueryStatusMapByKey(streamedHistogramKey));

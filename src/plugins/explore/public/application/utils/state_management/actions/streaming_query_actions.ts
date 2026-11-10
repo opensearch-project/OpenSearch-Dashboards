@@ -31,13 +31,10 @@ import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
 import { streamJobError } from '../../streaming/stream_error_status';
 
-/**
- * Minimum time between the starts of two polls, so a query costs at most one request per second.
- * A long poll that already waited this long is followed at once.
- */
+/** Minimum time between the starts of two polls. */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
 
-/** Kept well under the 30s OpenSearch client request timeout and common proxy idle timeouts. */
+/** Under the 30s OpenSearch client request timeout. */
 export const STREAMING_LONG_POLL_WAIT = '10s';
 
 /**
@@ -76,7 +73,6 @@ export interface ExecuteStreamingQueryArgs {
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
-  /** Called once, when the first table rows are published. */
   onFirstRows?: () => void;
 }
 
@@ -96,10 +92,7 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
 
-/**
- * Resolves once the page is visible. A poll renews the job's lease, so a hidden tab that kept
- * polling would hold an abandoned job's result in cluster memory indefinitely.
- */
+// Each poll renews the job's lease, so a forgotten hidden tab would keep its result in memory.
 const untilVisible = (signal: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (typeof document === 'undefined' || !document.hidden) return resolve();
@@ -120,14 +113,10 @@ const untilVisible = (signal: AbortSignal): Promise<void> =>
     signal.addEventListener('abort', onAbort, { once: true });
   });
 
-/** Delays before each retry of a poll that failed transiently. */
 const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
 
-/**
- * A dropped connection, a 5xx or a 429. The http client reports a connection that never got a
- * response as a `TypeError` carrying the request; any other error without a status, such as a
- * response that would not parse, fails the same way on retry.
- */
+// The http client reports a connection that got no response as a TypeError carrying the request.
+// Other status-less errors, such as an unparseable body, would fail the same way again.
 const isTransientPollError = (error: unknown): boolean => {
   if (isAbort(error) || error instanceof PPLStreamJobNotFoundError) return false;
   const e = error as {
@@ -138,7 +127,6 @@ const isTransientPollError = (error: unknown): boolean => {
   };
   const status = e?.response?.status ?? e?.body?.statusCode;
   if (status === undefined) return e?.name === 'TypeError' && e.request !== undefined;
-  // 429 is a request to slow down, which the backoff below does.
   return status === 429 || status >= 500;
 };
 
@@ -275,7 +263,6 @@ export const executeStreamingQuery = createAsyncThunk<
       );
     };
 
-    /** Releases the server-side job, which otherwise holds its result until `keep_alive` lapses. */
     const release = () => {
       if (jobId) stream.cancel(jobId, dataSourceId).catch(() => undefined);
     };
@@ -403,8 +390,7 @@ export const executeStreamingQuery = createAsyncThunk<
         // window the route allows and keep polling only to observe progress and terminal status.
         const pollCount = streamingPollCount(ROWS_PER_POLL, !asHistogram && rows.isFull);
 
-        // Committed rows not yet read can be fetched now, so only a caught-up client waits on the
-        // server for a newer snapshot. A backend without `sequence` cannot be long-polled.
+        // Only a caught-up client waits for a newer snapshot; unread committed rows are fetched now.
         const canWait =
           last.sequence !== undefined &&
           (asHistogram || updateMode === 'REPLACE' || rows.isFull || rows.nextOffset >= last.total);
@@ -447,7 +433,6 @@ export const executeStreamingQuery = createAsyncThunk<
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
         let drainFailed = false;
         if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
-          // Show the window in hand while the rest is paged in, which can take several seconds.
           publish(snapshot, true);
           // A failure paging the tail of an already-completed query must not discard the rows
           // already held; publish the terminal snapshot with what we have, marked incomplete. An
@@ -478,8 +463,7 @@ export const executeStreamingQuery = createAsyncThunk<
         return;
       }
       if (error instanceof PPLStreamJobNotFoundError) {
-        // Expired (e.g. while the tab was hidden) or lost with its node: the rows shown are all
-        // there will be, but the query did not finish.
+        // Expired or lost with its node: the query did not finish.
         finalise(false, true);
         return;
       }
@@ -489,8 +473,7 @@ export const executeStreamingQuery = createAsyncThunk<
       if (!lastStreaming && (!isCurrent || isCurrent())) {
         throw new PPLStreamUnavailableError(error);
       }
-      // Rows are on screen and re-running would replace them, so keep them and mark the result
-      // incomplete rather than replacing the table with an error.
+      // Re-running would replace the rows on screen, so keep them and mark the result incomplete.
       // eslint-disable-next-line no-console
       console.warn('[STREAMING] Polling failed; keeping the rows already shown:', error);
       finalise(false, true);

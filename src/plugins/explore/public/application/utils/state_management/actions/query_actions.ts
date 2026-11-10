@@ -334,8 +334,7 @@ const getStreamingConfig = async (
     ) {
       return undefined;
     }
-    // The Metrics page shows only the Visualization tab, which charts a result as complete: a
-    // streamed table would go unread, or be charted part-way when the tab reads the same query.
+    // Metrics shows only the Visualization tab, which would chart a partial table as complete.
     if ((await getCurrentFlavor(services)) === ExploreFlavor.Metrics) return undefined;
 
     const timeFieldName = query.dataset?.timeFieldName;
@@ -505,19 +504,17 @@ export const executeQueries = createAsyncThunk<
   }
 
   const tabPromises = [];
-  // The table's promise, which a streamed run settles only when its query finishes.
   let tablePromises: Promise<unknown> = Promise.resolve();
   try {
     const promises = [];
     // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
     let streamedHistogram = false;
-    // A streamed table run lasts as long as the query, so dependants start on its first rows.
     let streamingTable = false;
     let reportFirstRows: () => void = () => undefined;
     const firstRows = new Promise<void>((resolve) => (reportFirstRows = resolve));
     // Execute query without aggregations
     if (needsDataTableQuery) {
-      // This query's results replace the page's, so streams for any earlier query stop here.
+      // An earlier query's streams run under other keys, so registering this run replaces nothing.
       for (const supersededKey of supersedeOtherStreamingQueries([
         dataTableCacheKey,
         histogramCacheKey,
@@ -664,9 +661,7 @@ export const executeQueries = createAsyncThunk<
       }
     }
 
-    // Traces and tab queries may read the table's results (the RED queries are skipped for an empty
-    // table, the Patterns tab takes its default field from the first row), so they wait for it. A
-    // streamed table lasts as long as its query, so its first rows are enough.
+    // Traces and tab queries read the table's first rows, not the whole stream.
     tablePromises = Promise.all(promises);
     await (streamingTable ? Promise.race([firstRows, tablePromises]) : tablePromises);
     if (runController.signal.aborted) {
@@ -818,7 +813,7 @@ export const executeQueries = createAsyncThunk<
     }
   }
 
-  // Wait for all tab queries to complete, and for the table if it is still streaming
+  // Wait for all tab queries to complete
   await Promise.all([...tabPromises, tablePromises]);
 });
 

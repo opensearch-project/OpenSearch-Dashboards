@@ -17,10 +17,9 @@ interface StreamingRun {
 
 const runs = new Map<string, StreamingRun>();
 
-/** Runs a newer query replaced; they must not publish, not even their own cancellation. */
+/** Runs a newer query replaced; they must not publish, not even their cancellation. */
 const superseded = new WeakSet<object>();
 
-/** Tokens are identities, so any object or function qualifies; the default token is a function. */
 const isWeakKey = (value: unknown): value is object =>
   (typeof value === 'object' && value !== null) || typeof value === 'function';
 
@@ -55,12 +54,8 @@ export const isCurrentStreamingRun = (cacheKey: string, token: unknown): boolean
 };
 
 /**
- * Aborts the runs for every key not in `keep`, as a new query does to its predecessor's. Keys differ
- * when the query text, dataset or time range changed, so registering the new run does not replace
- * them; left alone, they keep polling and write their results and status into the new query's page.
- *
- * Returns the keys it aborted. A superseded run cannot publish, so its last status ("loading") is
- * left behind, and the caller must clear it or the page's overall status stays loading.
+ * Aborts the runs for every key not in `keep`. Returns the keys aborted: their last status is still
+ * loading, and the caller must clear it.
  */
 export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[] =>
   [...runs.keys()].filter(
@@ -68,10 +63,8 @@ export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[
   );
 
 /**
- * Aborts the run for `cacheKey` so that it cannot publish, for a caller about to re-run that key
- * another way. Unlike `abortStreamingQuery`, which is Stop, the run does not report how far it got:
- * that would land on the replacement's status. Returns whether there was a run, whose status the
- * caller must then clear.
+ * Unlike `abortStreamingQuery` (Stop), the run does not report how far it got, which would land on
+ * its replacement's status. Returns whether there was a run, whose status the caller must clear.
  */
 export const supersedeStreamingQuery = (cacheKey: string): boolean => {
   const run = runs.get(cacheKey);

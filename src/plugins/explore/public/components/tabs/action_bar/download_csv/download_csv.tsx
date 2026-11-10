@@ -21,7 +21,6 @@ export interface DiscoverDownloadCsvProps {
   indexPattern: IndexPattern;
   shouldShowMaxExport?: boolean;
   visibleRowsCount?: number;
-  /** The rows are still arriving, so exporting them would capture an arbitrary part of the result. */
   isStreaming?: boolean;
 }
 

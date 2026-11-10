@@ -15,19 +15,12 @@ const PROGRESS_LABEL = i18n.translate('explore.streaming.progressLabel', {
   defaultMessage: 'Query progress',
 });
 
-/** Steps at which progress is announced; finer would announce on almost every poll. */
+/** A live region speaks on every text change, so progress is announced in steps. */
 const ANNOUNCE_STEP_PERCENT = 25;
 
-/**
- * Highest step announced while running. A job reports 100% once scanning ends while its rows are
- * still being read, and "100% done" would then contradict the "finished" that follows.
- */
+/** A job reports 100% while its rows are still being read, before "finished". */
 const MAX_RUNNING_STEP_PERCENT = 75;
 
-/**
- * Text for the screen-reader announcer. A live region speaks whenever its text changes, so this
- * changes only at the run's start, at each progress step, and when it ends.
- */
 export const formatStreamingAnnouncement = (streaming?: StreamingQueryStatus): string => {
   const phase = getStreamingPhase(streaming);
   const percent = formatProgressPercent(streaming?.fractionDone);
@@ -67,10 +60,6 @@ export const formatStreamingAnnouncement = (streaming?: StreamingQueryStatus): s
   }
 };
 
-/**
- * The query panel's bar for a streaming run: determinate while the engine reports a fraction,
- * indeterminate otherwise.
- */
 export const StreamingProgressBar = ({ streaming }: { streaming?: StreamingQueryStatus }) => {
   const known = typeof streaming?.fractionDone === 'number' && streaming.fractionDone >= 0;
   return (

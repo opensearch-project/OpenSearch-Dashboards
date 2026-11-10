@@ -52,8 +52,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     return resultsCache.get(cacheKey1)?.hits?.hits || resultsCache.get(cacheKey2)?.hits?.hits;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadata1, metadata2, cacheKey1, cacheKey2]);
-  // A streamed result grows until the query finishes; summarising it sooner would describe, and
-  // count, only the rows that had arrived.
+  // Summarising a stream early would describe only the rows that had arrived.
   const { isPolling } = useStreamingStatus(cacheKey2);
 
   const [loading, setLoading] = useState(false); // track loading state
