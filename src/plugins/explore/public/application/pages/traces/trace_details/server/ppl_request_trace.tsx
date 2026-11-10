@@ -43,7 +43,10 @@ export class TracePPLService extends PPLService {
       query += ` | where ${filter.field} ${operator} ${escapedValue}`;
     });
 
-    query += ` | head ${limit}`;
+    // A span index pattern can match more than one copy of a span (e.g. `otel-v*-apm-span-*`
+    // when Data Prepper writes to both the v1 and v2 span indices). A spanId is unique within a
+    // trace, so keep one row per span.
+    query += ` | dedup spanId | head ${limit}`;
     return query;
   }
 
@@ -87,7 +90,7 @@ export class TracePPLService extends PPLService {
 
     try {
       // Construct the PPL query to filter by trace ID and span ID using the dataset title
-      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
+      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | dedup spanId | head ${limit}`;
 
       const queryRequest = buildPPLQueryRequest(dataset, pplQuery);
       return await executePPLQuery(this.dataService, queryRequest);

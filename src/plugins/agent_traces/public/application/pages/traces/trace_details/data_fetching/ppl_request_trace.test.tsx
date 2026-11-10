@@ -76,7 +76,7 @@ describe('ppl_request_trace', () => {
           title: 'test-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-index | where traceId = "test-trace-id" | head 100'
+        'source = test-index | where traceId = "test-trace-id" | dedup spanId | head 100'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(
         mockDataService,
@@ -97,7 +97,7 @@ describe('ppl_request_trace', () => {
           title: 'test-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | head 100'
+        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | dedup spanId | head 100'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(
         mockDataService,
@@ -121,7 +121,7 @@ describe('ppl_request_trace', () => {
           title: 'test-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | where status = "error" | head 100'
+        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | where status = "error" | dedup spanId | head 100'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(
         mockDataService,
@@ -146,7 +146,7 @@ describe('ppl_request_trace', () => {
           title: 'test-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test\\"service" | where count = 123 | where active = true | head 100'
+        'source = test-index | where traceId = "test-trace-id" | where serviceName = "test\\"service" | where count = 123 | where active = true | dedup spanId | head 100'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(
         mockDataService,
@@ -167,7 +167,7 @@ describe('ppl_request_trace', () => {
           title: 'test-index',
           type: 'INDEX_PATTERN',
         },
-        'source = test-index | where traceId = "test-trace-id" | head 50'
+        'source = test-index | where traceId = "test-trace-id" | dedup spanId | head 50'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(
         mockDataService,
@@ -224,7 +224,7 @@ describe('ppl_request_trace', () => {
           type: 'INDEX_PATTERN',
           timeFieldName: 'endTime',
         },
-        'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 100'
+        'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | dedup spanId | head 100'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
         query: { query: 'mock-query' },
@@ -244,7 +244,7 @@ describe('ppl_request_trace', () => {
           type: 'INDEX_PATTERN',
           timeFieldName: 'endTime',
         },
-        'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 50'
+        'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | dedup spanId | head 50'
       );
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
         query: { query: 'mock-query' },
