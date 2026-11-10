@@ -622,6 +622,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         { name: 'servicename', type: 'string' },
         { name: 'enabled', type: 'boolean' },
         { name: 'tags', type: 'string' },
+        { name: 'blank', type: 'string' },
+        { name: 'empty', type: 'string' },
+        { name: 'empty_array', type: 'string' },
+        { name: 'null_array', type: 'string' },
         { name: 'cached', type: 'string', suggestions: { topValues: ['existing'] } },
         { name: 'child', type: 'string', subType: { multi: { parent: 'servicename' } } },
         ...Array.from({ length: 1000 }, (_, index) => ({
@@ -643,6 +647,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
                 servicename: 'service1',
                 enabled: false,
                 tags: ['beta', 'alpha'],
+                blank: '',
+                empty: null,
+                empty_array: [],
+                null_array: [null],
                 cached: 'replacement',
                 child: 'child-value',
               },
@@ -653,6 +661,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
                 servicename: 'service2',
                 enabled: true,
                 tags: ['alpha'],
+                blank: '',
+                empty: null,
+                empty_array: [],
+                null_array: [null],
               },
             },
             {
@@ -661,6 +673,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
                 servicename: 'service1',
                 enabled: false,
                 tags: null,
+                blank: '',
+                empty: null,
+                empty_array: [],
+                null_array: [null],
               },
             },
           ],
@@ -682,6 +698,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           'servicename',
           'enabled',
           'tags',
+          'blank',
         ]);
         expect(fields.getByName('servicename')?.spec.suggestions?.topValues).toEqual([
           'service1',
@@ -689,6 +706,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ]);
         expect(fields.getByName('enabled')?.spec.suggestions?.topValues).toEqual(['false', 'true']);
         expect(fields.getByName('tags')?.spec.suggestions?.topValues).toEqual(['alpha', 'beta']);
+        expect(fields.getByName('blank')?.spec.suggestions?.topValues).toEqual(['']);
         expect(fields.getByName('cached')?.spec.suggestions?.topValues).toEqual(['existing']);
         expect(fields.getByName('child')?.spec.suggestions).toBeUndefined();
         expect(fields.getByName('missing_0')?.spec.suggestions).toBeUndefined();
@@ -696,6 +714,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           servicename: 3,
           enabled: 3,
           tags: 3,
+          blank: 3,
+          empty: 3,
+          empty_array: 3,
+          null_array: 3,
           cached: 1,
           child: 1,
         });
@@ -703,13 +725,14 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           servicename: 3,
           enabled: 3,
           tags: 2,
+          blank: 3,
           cached: 1,
           child: 1,
         });
 
         const repeated = defaultResultsProcessor(rawResults, dataset);
         expect(dataset.flattenHit).toHaveBeenCalledTimes(rawResults.hits.hits.length * 2);
-        expect(mockGetFieldValueCounts).toHaveBeenCalledTimes(3);
+        expect(mockGetFieldValueCounts).toHaveBeenCalledTimes(4);
         expect(repeated.fieldCounts).toEqual(result.fieldCounts);
         expect(repeated.nonEmptyFieldCounts).toEqual(result.nonEmptyFieldCounts);
       } finally {

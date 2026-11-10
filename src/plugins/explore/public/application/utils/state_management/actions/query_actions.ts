@@ -198,7 +198,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
     }
 
     // Update topAggValues for valid fields when we have search results
-    updateFieldTopQueryValues(rawResults.hits.hits, dataset, flattenedHits, fieldCounts);
+    updateFieldTopQueryValues(rawResults.hits.hits, dataset, flattenedHits, nonEmptyFieldCounts);
   }
 
   const result: ProcessedSearchResults = {
@@ -226,14 +226,14 @@ const updateFieldTopQueryValues = (
   hits: ISearchResult['hits']['hits'],
   dataset: DataView,
   flattenedHits: Array<Record<string, unknown>>,
-  fieldCounts: Record<string, number>
+  nonEmptyFieldCounts: Record<string, number>
 ): void => {
   if (!hits.length || !dataset) return;
 
   // Get string fields that don't already have topQueryValues
   const stringFields = dataset.fields.filter(
     (field) =>
-      fieldCounts[field.name] > 0 &&
+      nonEmptyFieldCounts[field.name] > 0 &&
       field.isSuggestionAvailable() &&
       !field.subType &&
       !field.spec?.suggestions?.topValues
