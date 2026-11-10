@@ -14,6 +14,8 @@ import {
   QueryResultStatus,
 } from '../../../application/utils/state_management/types';
 import { ContainerState } from './container_state_utils';
+import { hitsToSeriesResult } from '../../../components/visualizations/utils/normalize_result_rows';
+import { FieldSchema, NormalizedRow } from '../../../components/data_transformations/types';
 
 export type QueryRows = QueryBuilder[];
 export type UrlRowEntry<T> = [refId: string, state: T];
@@ -39,8 +41,8 @@ export interface RowExecutionState {
 // One row's result in the shape for Visualization
 export interface SeriesResult {
   refId: string;
-  rows: NonNullable<QueryResultState>['hits']['hits'];
-  fieldSchema: NonNullable<NonNullable<QueryResultState>['fieldSchema']>;
+  rows: NormalizedRow[];
+  fieldSchema: FieldSchema[];
   seriesDisplayNames?: Record<string, string>;
 }
 
@@ -93,13 +95,14 @@ export const computeAggregateStatus = (
   return { status, failedQueries };
 };
 
-export const toSeriesResult = ({ refId, result }: RowExecutionState): SeriesResult => ({
-  refId,
-  rows: result?.hits?.hits ?? [],
-  fieldSchema: result?.fieldSchema ?? [],
-  // seriesDisplayNames maps a series' original name to its display name.
-  seriesDisplayNames: result?.frameMeta?.seriesDisplayNames as Record<string, string> | undefined,
-});
+export const toSeriesResult = ({ refId, result }: RowExecutionState): SeriesResult =>
+  hitsToSeriesResult(
+    refId,
+    result?.hits?.hits ?? [],
+    result?.fieldSchema ?? [],
+    // seriesDisplayNames maps a series' original name to its display name.
+    result?.frameMeta?.seriesDisplayNames as Record<string, string> | undefined
+  );
 
 const isRowEntry = (value: unknown): value is UrlRowEntry<unknown> =>
   Array.isArray(value) && value.length === 2 && typeof value[0] === 'string';

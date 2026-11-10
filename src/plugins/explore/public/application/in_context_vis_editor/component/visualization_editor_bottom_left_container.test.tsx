@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { ResizableQueryPanelAndVisualization } from './visualization_editor_bottom_left_container';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
@@ -108,6 +108,7 @@ beforeEach(() => {
   (useVisualizationBuilder as jest.Mock).mockReturnValue({
     visualizationBuilderForEditor: {
       handleData: jest.fn(),
+      handleSeries: jest.fn(),
       renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
       showRawTable$: new BehaviorSubject(false),
       rawTableRefId$: new BehaviorSubject(undefined),
@@ -186,6 +187,7 @@ describe('ResizableQueryPanelAndVisualization', () => {
     (useVisualizationBuilder as jest.Mock).mockReturnValue({
       visualizationBuilderForEditor: {
         handleData: jest.fn(),
+        handleSeries: jest.fn(),
         renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
         showRawTable$: new BehaviorSubject(true),
         rawTableRefId$: new BehaviorSubject('B'),
@@ -195,7 +197,9 @@ describe('ResizableQueryPanelAndVisualization', () => {
     mockSeries$.next([
       {
         refId: 'B',
-        rows: [{ _index: 'i', _id: '1', _source: { Series: 'up', Value: 1 } }],
+        // rows: [{ _index: 'i', _id: '1', _source: { Series: 'up', Value: 1 } }],
+        // Series rows are flattened.
+        rows: [{ Series: 'up', Value: 1 }],
         fieldSchema: [
           { name: 'Series', type: 'string' },
           { name: 'Value', type: 'number' },
@@ -210,5 +214,31 @@ describe('ResizableQueryPanelAndVisualization', () => {
     expect(JSON.parse(screen.getByTestId('raw-table').textContent ?? '[]')).toEqual([
       { Series: 'up', Value: 1 },
     ]);
+  });
+
+  it('hands every visible query to the vis, and nothing before a result', () => {
+    const handleSeries = jest.fn();
+    (useVisualizationBuilder as jest.Mock).mockReturnValue({
+      visualizationBuilderForEditor: {
+        handleData: jest.fn(),
+        handleSeries,
+        renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
+        showRawTable$: new BehaviorSubject(false),
+        rawTableRefId$: new BehaviorSubject(undefined),
+      },
+    });
+    (useQueryBuilderState as jest.Mock).mockReturnValue(
+      buildState({ status: QueryExecutionStatus.READY })
+    );
+    render(<ResizableQueryPanelAndVisualization />);
+    // No result yet: empty data would turn the chart into a table for good.
+    expect(handleSeries).not.toHaveBeenCalled();
+
+    const series = [
+      { refId: 'A', rows: [{ Value: 1 }], fieldSchema: [] },
+      { refId: 'B', rows: [{ Value: 2 }], fieldSchema: [] },
+    ];
+    act(() => mockSeries$.next(series));
+    expect(handleSeries).toHaveBeenLastCalledWith(series);
   });
 });
