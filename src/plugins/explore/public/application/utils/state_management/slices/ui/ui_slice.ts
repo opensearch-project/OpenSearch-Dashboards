@@ -15,6 +15,15 @@ export interface UIState {
    * for until the user opts in.
    */
   hideEmptyFields: boolean;
+  /**
+   * Draws string values that hold JSON as a collapsible tree. Unset means on, so state saved
+   * before this setting existed shows them as trees too.
+   */
+  showJsonFormat?: boolean;
+  /**
+   * Opens up to 15 levels of each JSON tree in the table. Only applies while showJsonFormat is on.
+   */
+  expandAllJson?: boolean;
   metricsPageMode?: 'explore' | 'query';
 }
 
@@ -44,6 +53,12 @@ const uiSlice = createSlice({
     setHideEmptyFields: (state, action: PayloadAction<boolean>) => {
       state.hideEmptyFields = action.payload;
     },
+    setShowJsonFormat: (state, action: PayloadAction<boolean>) => {
+      state.showJsonFormat = action.payload;
+    },
+    setExpandAllJson: (state, action: PayloadAction<boolean>) => {
+      state.expandAllJson = action.payload;
+    },
     setMetricsPageMode: (state, action: PayloadAction<'explore' | 'query'>) => {
       state.metricsPageMode = action.payload;
     },
@@ -56,6 +71,8 @@ export const {
   setShowHistogram,
   setWrapCellText,
   setHideEmptyFields,
+  setShowJsonFormat,
+  setExpandAllJson,
   setMetricsPageMode,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
