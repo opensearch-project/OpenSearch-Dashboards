@@ -5,6 +5,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
+import { JsonTreeSettingsContext } from '../../json_tree/json_tree';
 import { useDatasetContext } from '../../../application/context';
 import { useTraceFlyoutContext } from '../../../application/pages/traces/trace_flyout/trace_flyout_context';
 
@@ -567,6 +568,170 @@ describe('TableCell', () => {
 
       const logActionMenu = screen.getByTestId('logActionMenu');
       expect(logActionMenu).toBeInTheDocument();
+    });
+  });
+
+  describe('JSON values', () => {
+    const jsonValue = '{"level":"error","code":42}';
+    const renderWithJsonFormatOn = (ui: React.ReactElement, expandAllJson = false) =>
+      render(ui, {
+        wrapper: ({ children }) => (
+          <JsonTreeSettingsContext.Provider value={{ showJsonFormat: true, expandAllJson }}>
+            {children}
+          </JsonTreeSettingsContext.Provider>
+        ),
+      });
+
+    it('draws the tree when Show as JSON format is turned on while the cell is on screen', () => {
+      const withFormat = (showJsonFormat: boolean) => (
+        <JsonTreeSettingsContext.Provider value={{ showJsonFormat, expandAllJson: false }}>
+          <TableCell {...defaultProps} fieldMapping={jsonValue} />
+        </JsonTreeSettingsContext.Provider>
+      );
+      const { container, rerender } = render(withFormat(false));
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+
+      rerender(withFormat(true));
+
+      expect(container.querySelector('.exploreJsonTree')).toBeInTheDocument();
+    });
+
+    it('keeps the formatted value while Show as JSON format is off', () => {
+      const { container } = render(<TableCell {...defaultProps} fieldMapping={jsonValue} />);
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
+    });
+
+    it('keeps the formatted value when Expand all is left on but Show as JSON format is off', () => {
+      const { container } = render(
+        <JsonTreeSettingsContext.Provider value={{ showJsonFormat: false, expandAllJson: true }}>
+          <TableCell {...defaultProps} fieldMapping={jsonValue} />
+        </JsonTreeSettingsContext.Provider>
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
+    });
+
+    it('opens each level of a tree of up to 15 levels while Expand all is on', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping={'{"a":{"b":{"c":1}}}'} />,
+        true
+      );
+      expect(Array.from(container.querySelectorAll('details'), (d) => d.open)).toEqual([
+        true,
+        true,
+        true,
+      ]);
+    });
+
+    it('renders a JSON string value as a tree from the raw value', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          sanitizedCellValue="formatted text that is not shown"
+        />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField')).toHaveClass('exploreJsonTree');
+      expect(screen.getByText('"error"')).toBeInTheDocument();
+      expect(screen.queryByText('formatted text that is not shown')).not.toBeInTheDocument();
+    });
+
+    it('marks the search terms the formatter highlighted', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          sanitizedCellValue={'{"level":"<mark>error</mark>","code":42}'}
+        />
+      );
+
+      expect(
+        Array.from(container.querySelectorAll('.exploreJsonTree mark'), (m) => m.textContent)
+      ).toEqual(['error']);
+    });
+
+    it('marks new search terms when the same value comes back', () => {
+      const { container, rerender } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          sanitizedCellValue={'{"level":"<mark>error</mark>","code":42}'}
+        />
+      );
+      rerender(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          sanitizedCellValue={'{"level":"error","code":<mark>42</mark>}'}
+        />
+      );
+
+      expect(
+        Array.from(container.querySelectorAll('.exploreJsonTree mark'), (m) => m.textContent)
+      ).toEqual(['42']);
+    });
+
+    it('starts over when the cell gets a new value', () => {
+      const { rerender } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping={jsonValue} />
+      );
+      fireEvent.click(screen.getByText('Show as raw text'));
+      expect(screen.getByText('Show as formatted JSON')).toBeInTheDocument();
+
+      rerender(<TableCell {...defaultProps} fieldMapping='{"level":"warn"}' />);
+
+      expect(screen.getByText('"warn"')).toBeInTheDocument();
+      expect(screen.getByText('Show as raw text')).toBeInTheDocument();
+    });
+
+    it('shows the raw value in the raw view', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping={jsonValue} />
+      );
+      fireEvent.click(screen.getByText('Show as raw text'));
+      expect(container.querySelector('.exploreJsonTree__raw')?.textContent).toBe(jsonValue);
+    });
+
+    it('keeps the formatted value for the time field', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping={jsonValue} isTimeField={true} />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
+    });
+
+    it('keeps the formatted value on the traces page', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping={jsonValue} isOnTracesPage={true} />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
+    });
+
+    it('keeps the formatted value for a string that is not JSON', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell {...defaultProps} fieldMapping="plain log line" />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
     });
   });
 });

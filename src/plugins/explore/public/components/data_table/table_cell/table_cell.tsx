@@ -21,6 +21,7 @@ import {
   isDurationColumn,
 } from './trace_utils/trace_utils';
 import { LogActionMenu } from '../../log_action_menu';
+import { JsonTree, useJsonTreeValue } from '../../json_tree/json_tree';
 
 export interface ITableCellProps {
   /**
@@ -68,6 +69,11 @@ export const TableCellUI = ({
   // Prefer the explicitly-passed dataset; fall back to context for callers that
   // don't supply it.
   const dataset = datasetProp ?? contextDataset;
+  // Time values and every traces-page column keep the formatter's output.
+  const { jsonTreeValue, highlightTerms } = useJsonTreeValue(
+    isTimeField || isOnTracesPage ? undefined : fieldMapping,
+    sanitizedCellValue
+  );
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
@@ -83,6 +89,15 @@ export const TableCellUI = ({
       />
     ) : isOnTracesPage && isDurationColumn(columnId) ? (
       <DurationTableCell sanitizedCellValue={sanitizedCellValue} />
+    ) : jsonTreeValue ? (
+      <JsonTree
+        // A new value remounts the tree, so its open state starts over.
+        key={fieldMapping}
+        value={jsonTreeValue}
+        raw={fieldMapping}
+        highlightTerms={highlightTerms}
+        data-test-subj="osdDocTableCellDataField"
+      />
     ) : (
       <span
         className="exploreDocTableCell__dataField"
