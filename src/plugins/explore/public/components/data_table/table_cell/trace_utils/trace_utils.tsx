@@ -14,6 +14,7 @@ import { useTraceFlyoutContext } from '../../../../application/pages/traces/trac
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 import { formatSpanDuration } from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../common';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -47,7 +48,7 @@ export const buildTraceDetailsUrl = (
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
   let datasetParams = `dataset:(id:'${dataset?.id || 'default-dataset-id'}',title:'${
-    dataset?.title || 'otel-v1-apm-span-*'
+    dataset?.title || DEFAULT_TRACE_SPAN_INDEX_PATTERN
   }',type:'${dataset?.type || 'INDEX_PATTERN'}'`;
 
   // Add timeFieldName if present
@@ -85,7 +86,7 @@ export const getTraceDetailsUrlParams = (
     ...(traceIdValue && { traceId: traceIdValue }),
     dataset: {
       id: dataset?.id || 'default-dataset-id',
-      title: dataset?.title || 'otel-v1-apm-span-*',
+      title: dataset?.title || DEFAULT_TRACE_SPAN_INDEX_PATTERN,
       type: dataset?.type || 'INDEX_PATTERN',
       timeFieldName: dataset?.timeFieldName || 'timestamp',
       ...(dataSourceInfo && {

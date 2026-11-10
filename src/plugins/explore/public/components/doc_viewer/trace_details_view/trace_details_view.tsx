@@ -21,6 +21,7 @@ import {
 } from '../../../application/pages/traces/trace_details/public/traces/ppl_to_trace_hits';
 import { generateColorMap } from '../../../application/pages/traces/trace_details/public/traces/generate_color_map';
 import { navigateToTraceDetailsWithSpan } from '../../data_table/table_cell/trace_utils/trace_utils';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../common';
 
 const extractTraceIdFromHit = (hit: any): string | null => {
   for (const path of TRACE_ID_FIELD_PATHS) {
@@ -91,7 +92,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
       spanId,
       dataset: {
         id: currentDataset?.id || 'default-dataset-id',
-        title: currentDataset?.title || 'otel-v1-apm-span-*',
+        title: currentDataset?.title || DEFAULT_TRACE_SPAN_INDEX_PATTERN,
         type: currentDataset?.type || 'INDEX_PATTERN',
         timeFieldName: currentDataset?.timeFieldName,
         // Preserve dataSource information for external data sources

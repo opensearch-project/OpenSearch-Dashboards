@@ -13,6 +13,20 @@ import {
 
 const TRACES_SIGNAL_TYPE = 'traces';
 
+/** Data Prepper `trace-analytics-plain-raw-v2` span index pattern. */
+export const OTEL_V2_SPAN_INDEX_PATTERN = 'otel-v2-apm-span*';
+/** Data Prepper `trace-analytics-plain-raw` (v1) span index pattern. */
+export const OTEL_V1_SPAN_INDEX_PATTERN = 'otel-v1-apm-span*';
+/**
+ * Span index patterns probed in priority order. v2 comes first: when Data Prepper
+ * writes to both (e.g. during a v1 → v2 migration), only the v2 pattern is used so
+ * spans aren't double-counted. v1 remains the fallback for existing pipelines.
+ */
+export const OTEL_SPAN_INDEX_PATTERNS = [
+  OTEL_V2_SPAN_INDEX_PATTERN,
+  OTEL_V1_SPAN_INDEX_PATTERN,
+] as const;
+
 /**
  * Build the set of data source ids that already have at least one trace dataset,
  * from a precomputed list of index-pattern signal types.
@@ -42,7 +56,7 @@ export interface DetectionResult {
 
 /**
  * Auto-detect trace data following OpenTelemetry conventions
- * Checks for otel-v1-apm-span* (traces) and logs-otel-v1* (logs)
+ * Checks for otel-v2-apm-span* then otel-v1-apm-span* (traces) and logs-otel-v1* (logs)
  */
 export async function detectTraceData(
   savedObjectsClient: SavedObjectsClientContract,
@@ -90,35 +104,39 @@ export async function detectTraceData(
     return result;
   }
 
-  // 2. Check for conventional trace indices: otel-v1-apm-span*
-  try {
-    const traceFields = await indexPatternsService.getFieldsForWildcard({
-      pattern: 'otel-v1-apm-span*',
-      dataSourceId,
-    });
+  // 2. Check for conventional trace indices, preferring otel-v2-apm-span* over
+  //    otel-v1-apm-span*. The first pattern with the required fields wins.
+  for (const pattern of OTEL_SPAN_INDEX_PATTERNS) {
+    try {
+      const traceFields = await indexPatternsService.getFieldsForWildcard({
+        pattern,
+        dataSourceId,
+      });
 
-    // Verify required trace fields exist
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    const hasSpanId = traceFields.some((f) => f.name === 'spanId');
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    const hasTraceId = traceFields.some((f) => f.name === 'traceId');
-
-    // Filter to date fields actually valid for a Date Histogram (aggregatable, non-nested),
-    // then apply trace-specific precedence (startTime → endTime).
-    const validDateFieldNames = traceFields
+      // Verify required trace fields exist
       // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .filter((f) => isValidTimeField(f))
+      const hasSpanId = traceFields.some((f) => f.name === 'spanId');
       // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .map((f) => f.name);
-    const traceTimeField = pickTimeField(validDateFieldNames, TRACE_TIME_FIELD_CANDIDATES);
+      const hasTraceId = traceFields.some((f) => f.name === 'traceId');
 
-    if (hasSpanId && hasTraceId && traceTimeField) {
-      result.tracesDetected = true;
-      result.tracePattern = 'otel-v1-apm-span*';
-      result.traceTimeField = traceTimeField;
+      // Filter to date fields actually valid for a Date Histogram (aggregatable, non-nested),
+      // then apply trace-specific precedence (startTime → endTime).
+      const validDateFieldNames = traceFields
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
+        .filter((f) => isValidTimeField(f))
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
+        .map((f) => f.name);
+      const traceTimeField = pickTimeField(validDateFieldNames, TRACE_TIME_FIELD_CANDIDATES);
+
+      if (hasSpanId && hasTraceId && traceTimeField) {
+        result.tracesDetected = true;
+        result.tracePattern = pattern;
+        result.traceTimeField = traceTimeField;
+        break;
+      }
+    } catch {
+      // No matching indices for this pattern, try the next one
     }
-  } catch {
-    // No matching indices found, continue
   }
 
   // 3. Check for conventional log indices: logs-otel-v1*

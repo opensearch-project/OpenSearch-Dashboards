@@ -81,6 +81,59 @@ describe('detectTraceData', () => {
     });
   });
 
+  describe('otel v2 span template', () => {
+    const spanFields = [
+      { name: 'spanId', type: 'string' },
+      { name: 'traceId', type: 'string' },
+      { name: 'startTime', type: 'date', aggregatable: true },
+    ];
+
+    it('should detect otel-v2-apm-span* when only v2 indices exist', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*') return spanFields as any;
+        throw new Error('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracesDetected).toBe(true);
+      expect(result.tracePattern).toBe('otel-v2-apm-span*');
+      expect(result.traceTimeField).toBe('startTime');
+    });
+
+    it('should prefer otel-v2-apm-span* and skip the v1 probe when both exist', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*' || pattern === 'otel-v1-apm-span*') {
+          return spanFields as any;
+        }
+        throw new Error('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracePattern).toBe('otel-v2-apm-span*');
+      expect(mockIndexPatternsService.getFieldsForWildcard).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pattern: 'otel-v1-apm-span*' })
+      );
+    });
+
+    it('should fall back to otel-v1-apm-span* when v2 lacks required fields', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*') return [{ name: 'traceId', type: 'string' }] as any;
+        if (pattern === 'otel-v1-apm-span*') return spanFields as any;
+        throw new Error('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracesDetected).toBe(true);
+      expect(result.tracePattern).toBe('otel-v1-apm-span*');
+    });
+  });
+
   it('should prefer startTime over endTime as the trace time field when both exist', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
     // @ts-expect-error TS2339 TODO(ts-error): fixme
