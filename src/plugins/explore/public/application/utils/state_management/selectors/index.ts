@@ -54,6 +54,16 @@ export const selectHideEmptyFields = createSelector(
   (uiState) => uiState.hideEmptyFields ?? false
 );
 
+export const selectShowJsonFormat = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showJsonFormat ?? true
+);
+
+export const selectExpandAllJson = createSelector(
+  [selectUIState],
+  (uiState) => uiState.expandAllJson ?? false
+);
+
 export const selectPatternsField = createSelector(
   [selectTabState],
   (tabState) => tabState.patterns.patternsField
