@@ -1,0 +1,65 @@
+.exploreJsonTree {
+  @include ouiCodeFont;
+
+  font-size: $euiFontSizeXS;
+  line-height: $euiLineHeight;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: left;
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
+
+.exploreJsonTree__children,
+.exploreJsonTree__showMore {
+  padding-left: $euiSizeL;
+}
+
+.exploreJsonTree__toggleIcon {
+  color: $euiColorPrimaryText;
+
+  &::after {
+    content: "[+]";
+  }
+}
+
+details[open] > summary > .exploreJsonTree__toggleIcon::after {
+  content: "[-]";
+}
+
+details[open] > summary > .exploreJsonTree__collapsedClosingBracket {
+  display: none;
+}
+
+.exploreJsonTree__key {
+  color: $euiColorAccentText;
+}
+
+.exploreJsonTree__string {
+  color: $euiColorSuccessText;
+}
+
+.exploreJsonTree__number {
+  color: $euiColorPrimaryText;
+}
+
+.exploreJsonTree__boolean,
+.exploreJsonTree__null {
+  color: $euiColorWarningText;
+}
+
+.exploreJsonTree__count {
+  color: $euiTextSubduedColor;
+}
+
+.exploreJsonTree__raw {
+  // Raw JSON wraps only at the cell edge. Without break-all the browser breaks before every "{".
+  word-break: break-all;
+}
