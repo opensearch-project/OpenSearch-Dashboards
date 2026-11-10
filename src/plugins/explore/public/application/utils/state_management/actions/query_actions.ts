@@ -176,13 +176,14 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
   dataset: DataView
 ): ProcessedSearchResults => {
-  const fieldCounts: Record<string, number> = {};
+  // Mapped field names can collide with Object.prototype members.
+  const fieldCounts: Record<string, number> = Object.create(null);
   // Counts only occurrences that carry an actual value. Tabular responses (e.g. PPL)
   // include every field of the schema on every row, with null for the ones a document
   // doesn't populate, so fieldCounts alone can't tell a populated field from an empty
   // one. Kept separate from fieldCounts because the fields sidebar relies on the
   // latter's "present in the response" meaning.
-  const nonEmptyFieldCounts: Record<string, number> = {};
+  const nonEmptyFieldCounts: Record<string, number> = Object.create(null);
   if (rawResults.hits && rawResults.hits.hits && dataset) {
     const flattenedHits: Array<Record<string, unknown>> = [];
     for (const hit of rawResults.hits.hits) {

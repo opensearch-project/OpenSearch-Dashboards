@@ -76,6 +76,7 @@ import { setResults } from '../slices';
 import * as utilsModule from './utils';
 import { queryIsAggregation, queryIsBucketCountable } from './utils';
 import { Query, DataView, fieldList } from 'src/plugins/data/common';
+import { flattenHitWrapper } from 'src/plugins/data/common/index_patterns/index_patterns/flatten_hit';
 import { ISearchResult } from '../slices';
 import { ExploreServices } from '../../../../types';
 import {
@@ -573,6 +574,48 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultResultsProcessor', () => {
+    it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty'])(
+      'preserves suggestions and numeric counts for the "%s" field',
+      (fieldName) => {
+        const fields = fieldList();
+        fields.replaceAll([{ name: fieldName, type: 'string' }]);
+        const dataset = {
+          ...mockDataView,
+          fields,
+          getFormatterForField: () => ({ convert: String }),
+        } as unknown as DataView;
+        dataset.flattenHit = flattenHitWrapper(dataset);
+        const rawResults = {
+          hits: {
+            hits: ['alpha', 'beta', 'alpha', null].map((value) => ({
+              _source: {},
+              fields: { [fieldName]: [value] },
+            })),
+            total: 4,
+          },
+          elapsedMs: 100,
+        } as ISearchResult;
+        const mockGetFieldValueCounts = jest.mocked(fieldCalculatorModule.getFieldValueCounts);
+        const actualCalculator = jest.requireActual<typeof fieldCalculatorModule>(
+          '../../../../components/fields_selector/lib/field_calculator'
+        );
+        mockGetFieldValueCounts.mockImplementation(actualCalculator.getFieldValueCounts);
+
+        try {
+          const result = defaultResultsProcessor(rawResults, dataset);
+
+          expect(fields.getByName(fieldName)?.spec.suggestions?.topValues).toEqual([
+            'alpha',
+            'beta',
+          ]);
+          expect(result.fieldCounts[fieldName]).toBe(4);
+          expect(result.nonEmptyFieldCounts[fieldName]).toBe(3);
+        } finally {
+          mockGetFieldValueCounts.mockReset();
+        }
+      }
+    );
+
     it('flattens each hit once when preparing suggestions for a large sparse mapping', () => {
       const fields = fieldList();
       fields.replaceAll([
