@@ -817,9 +817,6 @@ describe('pplSearchStrategyProvider', () => {
           { name: 'field1', type: 'long', values: [] },
           { name: 'field2', type: 'text', values: [] },
         ],
-        // aggs is initialised to {} before the loop, so it is always present when aggConfig is
-        // set — even when every individual aggregation request fails (all keys are skipped).
-        aggs: {},
         meta: {
           date_histogram: {
             field: 'timestamp',
@@ -833,6 +830,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 10,
     });
+    // When all aggregation queries fail, aggs must remain undefined so Explore does not
+    // take the histogram branch with an empty aggregations object.
+    expect((result.body as any).aggs).toBeUndefined();
     expect(usage.trackSuccess).toHaveBeenCalledWith(10);
   });
 
@@ -877,22 +877,22 @@ describe('pplSearchStrategyProvider', () => {
     (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
 
     const originalQuery = 'source = my_table';
-    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
-    const result = await strategy.search(
-      mockRequestHandlerContext,
-      {
-        body: {
-          query: { query: originalQuery, dataset: { id: 'test-dataset' } },
-          aggConfig: {
-            qs: {
-              '1': 'source = my_table | stats count() by span(ts, 1h)',
-              '2': 'source = my_table | stats avg(val) by span(ts, 1h)',
-            },
+    const mockRawRequest = { headers: { authorization: 'Bearer token' } };
+    const searchRequest = {
+      body: {
+        query: { query: originalQuery, dataset: { id: 'test-dataset' } },
+        aggConfig: {
+          qs: {
+            '1': 'source = my_table | stats count() by span(ts, 1h)',
+            '2': 'source = my_table | stats avg(val) by span(ts, 1h)',
           },
         },
-      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
-      {}
-    );
+      },
+      rawRequest: mockRawRequest,
+    } as unknown as IOpenSearchDashboardsSearchRequest<unknown>;
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(mockRequestHandlerContext, searchRequest, {});
 
     // Both keys must be present — neither should overwrite the other
     // @ts-expect-error TS2339 TODO(ts-error): fixme
@@ -907,13 +907,18 @@ describe('pplSearchStrategyProvider', () => {
       ],
     });
 
-    // The original query string on the request must not have been mutated
+    // The original request must not be mutated
+    expect(searchRequest.body.query.query).toBe(originalQuery);
+
     expect(mockDescribeQuery.mock.calls[1][1].body.query.query).toBe(
       'source = my_table | stats count() by span(ts, 1h)'
     );
     expect(mockDescribeQuery.mock.calls[2][1].body.query.query).toBe(
       'source = my_table | stats avg(val) by span(ts, 1h)'
     );
+    // rawRequest must be preserved so auth headers are retained
+    expect(mockDescribeQuery.mock.calls[1][1].rawRequest).toBe(mockRawRequest);
+    expect(mockDescribeQuery.mock.calls[2][1].rawRequest).toBe(mockRawRequest);
     // The two agg calls must receive independent request objects (not the same reference)
     expect(mockDescribeQuery.mock.calls[1][1]).not.toBe(mockDescribeQuery.mock.calls[2][1]);
     expect(mockDescribeQuery.mock.calls[1][1].body).not.toBe(
