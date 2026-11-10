@@ -143,9 +143,9 @@ describe('computeAggregateStatus', () => {
 });
 
 describe('toSeriesResult', () => {
-  it("takes the row's hits, schema and series display names", () => {
+  it("flattens the row's hits, and keeps every schema field and its series display names", () => {
     const hits = [{ _id: '1', _source: { value: 1 } }];
-    const fieldSchema = [{ name: 'value', type: 'number' }];
+    const fieldSchema = [{ name: 'value', type: 'number' }, { name: 'partial' }];
     expect(
       toSeriesResult(
         rowState('B', QueryExecutionStatus.READY, {
@@ -154,7 +154,13 @@ describe('toSeriesResult', () => {
           frameMeta: { seriesDisplayNames: { s: 'S' } },
         })
       )
-    ).toEqual({ refId: 'B', rows: hits, fieldSchema, seriesDisplayNames: { s: 'S' } });
+    ).toEqual({
+      refId: 'B',
+      rows: [{ value: 1 }],
+      // A field without a name or type is dropped.
+      fieldSchema: [{ name: 'value', type: 'number' }],
+      seriesDisplayNames: { s: 'S' },
+    });
   });
 
   it('is empty without a result', () => {
@@ -182,7 +188,7 @@ describe('toRowListItem', () => {
 });
 
 describe('resolveRawTableRefId', () => {
-  const series = (refId: string) => ({ refId, rows: [], fieldSchema: [] }) as SeriesResult;
+  const series = (refId: string): SeriesResult => ({ refId, rows: [], fieldSchema: [] });
 
   it('keeps the chosen query while it has results', () => {
     expect(resolveRawTableRefId([series('A'), series('B')], 'B')).toBe('B');

@@ -20,8 +20,6 @@ import { inlineDatasetReferences } from './inline_dataset_references';
  * object (`meta.noSavedObject`), and a type without the flag, such as a saved dataset of the
  * dataset service.
  */
-// Moved from saved_explore_references.test.ts: that name is taken by the `queries` rows' tests.
-// describe('saved explore references', () => {
 describe('inline dataset references', () => {
   const INDEX_REF_NAME = 'kibanaSavedObjectMeta.searchSourceJSON.index';
   const typeConfigs: Record<string, { meta: { noSavedObject?: boolean } }> = {

@@ -33,10 +33,7 @@ import {
   defaultTableChartStyles,
   TableChartStyle,
 } from '../../../components/visualizations/table/table_vis_config';
-import {
-  normalizeResultRows,
-  normalizeSearchHits,
-} from '../../../components/visualizations/utils/normalize_result_rows';
+import { normalizeResultRows } from '../../../components/visualizations/utils/normalize_result_rows';
 import { useMultiQueryBuilder } from '../multi_query_builder/multi_query_builder_context';
 import { resolveRawTableRefId, SeriesResult } from '../multi_query_builder/utils';
 
@@ -175,14 +172,9 @@ export const VisualizationContainer = React.memo(() => {
   const series = useObservable<SeriesResult[]>(series$, []);
 
   useEffect(() => {
-    // TODO use first series to visualize, then replace it
-    const [first] = series;
-    if (!first) return;
-    visualizationBuilder.handleData(
-      first?.rows ?? [],
-      first?.fieldSchema ?? [],
-      first?.seriesDisplayNames
-    );
+    // No result yet: drawing empty data would fall the chart back to a table.
+    if (series.length === 0) return;
+    visualizationBuilder.handleSeries(series);
   }, [visualizationBuilder, series]);
 
   // The raw table shows one query's own result (before transformations), picked in the action bar.
@@ -194,11 +186,8 @@ export const VisualizationContainer = React.memo(() => {
   }, [series, rawTableRefId]);
   const rawTable = useMemo(() => {
     if (!rawTableSeries) return undefined;
-    // Hits carry their fields on _source: flatten them first.
-    const normalized = normalizeResultRows(
-      normalizeSearchHits(rawTableSeries.rows),
-      rawTableSeries.fieldSchema
-    );
+
+    const normalized = normalizeResultRows(rawTableSeries.rows, rawTableSeries.fieldSchema);
     return {
       rows: normalized.transformedData,
       columns: [

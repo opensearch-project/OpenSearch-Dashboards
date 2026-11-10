@@ -165,3 +165,8 @@ export function inferSchemaFromRows(rows: NormalizedRow[]): Array<{ name: string
 
   return Array.from(fieldValues, ([name, value]) => ({ name, type: inferType(value) }));
 }
+
+export const isCompleteFieldSchema = (field: {
+  name?: string;
+  type?: string;
+}): field is FieldSchema => Boolean(field.name && field.type);

@@ -15,7 +15,8 @@ import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/pub
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
-import { normalizeResultRows, normalizeSearchHits } from './utils/normalize_result_rows';
+import { normalizeResultRows, hitsToSeriesResult } from './utils/normalize_result_rows';
+import { SeriesResult } from '../../application/in_context_vis_editor/multi_query_builder/utils';
 import { ChartConfig, SplitConfig, SplitLayout, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
@@ -39,6 +40,9 @@ interface VisState {
   showSplitLabel?: boolean;
 }
 
+// handleData's single query, as one series.
+const SINGLE_QUERY_REF_ID = 'A';
+
 // create a transformation service with every transformation registered.
 const createTransformationService = () => {
   const service = new TransformationService();
@@ -57,9 +61,9 @@ export class VisualizationBuilder {
   // The builder's own, for its whole life: reset() empties it rather than replacing it, so the
   // pipeline streams read here (dirty check, re-running handleData) never go stale.
   private readonly transformationService: TransformationService = createTransformationService();
-  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
-  private lastSchema: Array<{ type?: string; name?: string }> = [];
-  private seriesDisplayNames?: Record<string, string> = {};
+
+  // The last series drawn, re-run when the pipeline changes.
+  private lastSeries: SeriesResult[] = [];
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -82,8 +86,8 @@ export class VisualizationBuilder {
   private watchPipeline() {
     this.subscriptions.push(
       this.transformationService.getPipeline$().subscribe(() => {
-        if (this.lastRawRows.length > 0) {
-          this.handleData(this.lastRawRows, this.lastSchema, this.seriesDisplayNames);
+        if (this.lastSeries.some(({ rows }) => rows.length > 0)) {
+          this.handleSeries(this.lastSeries);
         }
       })
     );
@@ -485,16 +489,24 @@ export class VisualizationBuilder {
     schema: Array<{ type?: string; name?: string }>,
     seriesDisplayNames?: Record<string, string>
   ) {
-    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
-    // cache the reference
-    this.lastRawRows = rows;
-    this.lastSchema = schema;
-    this.seriesDisplayNames = seriesDisplayNames;
+    // One query is one series.
+    this.handleSeries([hitsToSeriesResult(SINGLE_QUERY_REF_ID, rows, schema, seriesDisplayNames)]);
+  }
 
-    const normalizedRows = normalizeSearchHits(rows);
+  /**
+   * Every visible query's result (rows already flattened, toSeriesResult). Applies the current
+   * transformation pipeline, then publishes the result to data$.
+   */
+  handleSeries(series: SeriesResult[]) {
+    // A pipeline change re-runs the last series through it (watchPipeline).
+    this.lastSeries = series;
+
+    // TODO multi query: draw every series; for now the first one.
+    const [first] = series;
+    if (!first) return;
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      normalizedRows,
-      schema
+      first.rows,
+      first.fieldSchema
     );
     const { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
       normalizeResultRows(transformedRows, finalSchema);
@@ -505,7 +517,7 @@ export class VisualizationBuilder {
       categoricalColumns,
       dateColumns,
       unknownColumns,
-      seriesDisplayNames: this.seriesDisplayNames,
+      seriesDisplayNames: first.seriesDisplayNames,
     });
   }
 
@@ -618,9 +630,8 @@ export class VisualizationBuilder {
     this.variables$ = new BehaviorSubject<VariableValue[]>([]);
     this.transformationService.reset();
     this.savedVisSnapshot$ = new BehaviorSubject<VisSnapshot | undefined>(undefined);
-    this.lastRawRows = [];
-    this.lastSchema = [];
-    this.seriesDisplayNames = {};
+
+    this.lastSeries = [];
     this.watchPipeline();
     this.isInitialized = false;
   }

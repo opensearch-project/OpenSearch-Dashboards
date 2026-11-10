@@ -149,7 +149,8 @@ describe('MultiQueryBuilder (rows, selection, execution, results)', () => {
   const ppl = (query: string, dataset?: any) => ({ query, language: 'PPL', dataset }) as any;
   const logs = { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' };
   const readyStatus = { status: QueryExecutionStatus.READY };
-  const result = (id: string) => ({ hits: { hits: [{ _id: id }] }, fieldSchema: [] }) as any;
+  const result = (id: string) =>
+    ({ hits: { hits: [{ _id: id, _source: { id } }] }, fieldSchema: [] }) as any;
 
   beforeEach(() => {
     container = new MultiQueryBuilder(getServices);
@@ -573,7 +574,7 @@ describe('MultiQueryBuilder (rows, selection, execution, results)', () => {
       container.addRow({ refId: 'B' });
       rowA.updateQueryResultForEditor(result('A'));
 
-      expect(container.getSeriesResult('A')?.rows).toEqual([{ _id: 'A' }]);
+      expect(container.getSeriesResult('A')?.rows).toEqual([{ id: 'A' }]);
       expect(container.getSeriesResult('B')).toBeUndefined();
 
       rowA.updateQueryEditorState({ isHidden: true });
