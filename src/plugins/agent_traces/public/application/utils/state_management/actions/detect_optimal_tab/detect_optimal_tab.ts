@@ -13,10 +13,9 @@ import {
   AGENT_TRACES_VISUALIZATION_TAB_ID,
 } from '../../../../../../common';
 
-/**
- * Returns true when the user query contains a stats/aggregation pipe.
- */
-export const hasStatsPipe = (queryString: string): boolean => /\|\s*stats\s/i.test(queryString);
+import { hasStatsPipe } from './has_stats_pipe';
+
+export { hasStatsPipe };
 
 /**
  * Detect the optimal tab based on the current query and sets it as active.
