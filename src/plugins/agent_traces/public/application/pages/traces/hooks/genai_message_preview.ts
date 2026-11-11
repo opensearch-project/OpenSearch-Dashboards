@@ -14,6 +14,8 @@
  * chat history in send order, so the input preview is the last `user` message.
  */
 
+import { getSpanCategory } from '../../../../services/span_categorization';
+
 export type GenAiRole = 'system' | 'user' | 'assistant' | 'tool' | string;
 
 export interface GenAiMessagePart {
@@ -172,20 +174,48 @@ const previewToolValue = (value: unknown): string => {
 };
 
 interface SpanLike {
+  kind?: string;
   input?: unknown;
   output?: unknown;
   rawDocument?: Record<string, unknown>;
 }
 
 /**
- * Input preview for any span row: message preview first, then (for `execute_tool` spans,
- * per semconv) `gen_ai.tool.call.arguments`.
+ * Whether the span is a tool execution (`gen_ai.operation.name` is `execute_tool`). Uses the same
+ * check as the span's TOOL badge (`getSpanCategory`), so the two never disagree.
  */
-export const previewSpanInput = (row: SpanLike): string =>
-  previewInputMessages(row.input) ||
+export const isExecuteToolSpan = (row: SpanLike): boolean => {
+  const operationName = readAttribute(row.rawDocument, 'gen_ai.operation.name');
+  const kind = typeof operationName === 'string' ? operationName : row.kind;
+  return getSpanCategory({ kind }) === 'TOOL';
+};
+
+/** The span's `gen_ai.tool.call.arguments`, as text, or '' when absent. */
+export const spanToolCallArguments = (row: SpanLike): string =>
   previewToolValue(readAttribute(row.rawDocument, 'gen_ai.tool.call.arguments'));
 
-/** Output preview for any span row: message preview first, then `gen_ai.tool.call.result`. */
-export const previewSpanOutput = (row: SpanLike): string =>
-  previewOutputMessages(row.output) ||
+/** The span's `gen_ai.tool.call.result`, as text, or '' when absent. */
+export const spanToolCallResult = (row: SpanLike): string =>
   previewToolValue(readAttribute(row.rawDocument, 'gen_ai.tool.call.result'));
+
+/**
+ * Input preview for any span row.
+ *
+ * On `execute_tool` spans the semantic conventions define the tool's input as
+ * `gen_ai.tool.call.arguments`, so that comes first. Some instrumentations (Strands with
+ * `gen_ai_span_attributes_only`) also put `gen_ai.input.messages` on tool spans, holding only a
+ * `tool_call` part, which would preview as `[tool_call: name]`. Other spans preview their
+ * messages, falling back to the tool arguments.
+ */
+export const previewSpanInput = (row: SpanLike): string => {
+  const toolArguments = spanToolCallArguments(row);
+  if (toolArguments && isExecuteToolSpan(row)) return toolArguments;
+  return previewInputMessages(row.input) || toolArguments;
+};
+
+/** Output preview for any span row; `gen_ai.tool.call.result` first on `execute_tool` spans. */
+export const previewSpanOutput = (row: SpanLike): string => {
+  const toolResult = spanToolCallResult(row);
+  if (toolResult && isExecuteToolSpan(row)) return toolResult;
+  return previewOutputMessages(row.output) || toolResult;
+};
