@@ -35,6 +35,19 @@ export interface UseCaseServiceSetupDeps {
   getStartServices: CoreSetup['getStartServices'];
 }
 
+const areWorkspaceUseCasesEqual = (
+  useCases: WorkspaceUseCase[],
+  anotherUseCases: WorkspaceUseCase[]
+) => {
+  return (
+    useCases.length === anotherUseCases.length &&
+    useCases.every(
+      (useCase) =>
+        !!anotherUseCases.find((anotherUseCase) => isEqualWorkspaceUseCase(useCase, anotherUseCase))
+    )
+  );
+};
+
 export class UseCaseService {
   private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
 
@@ -172,19 +185,7 @@ export class UseCaseService {
                 return Object.values(navGroupsMap).map(convertNavGroupToWorkspaceUseCase);
               })
             )
-            .pipe(
-              distinctUntilChanged((useCases, anotherUseCases) => {
-                return (
-                  useCases.length === anotherUseCases.length &&
-                  useCases.every(
-                    (useCase) =>
-                      !!anotherUseCases.find((anotherUseCase) =>
-                        isEqualWorkspaceUseCase(useCase, anotherUseCase)
-                      )
-                  )
-                );
-              })
-            )
+            .pipe(distinctUntilChanged(areWorkspaceUseCasesEqual))
             .pipe(
               map((useCases) =>
                 useCases.sort((a, b) => {
@@ -233,7 +234,8 @@ export class UseCaseService {
                   title: app.title,
                 })),
               } as WorkspaceUseCase);
-          })
+          }),
+          distinctUntilChanged(areWorkspaceUseCasesEqual)
         );
       },
     };

@@ -18,16 +18,19 @@ import {
   EuiButtonGroup,
   EuiLoadingChart,
   EuiIcon,
+  EuiCallOut,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { LabelInfo, MetricType, inferMetricType, LayoutMode, breakdownGridStyle } from '../types';
+import { isNativeHistogram } from '../services/query_generator';
 import { useExploration } from '../contexts/exploration_context';
 import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
-import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { useConcurrentQueries } from '../../../../utils/hooks/use_concurrent_queries';
+import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
 
 interface BreakdownSeries {
   labelValue: string;
@@ -67,7 +70,8 @@ const BreakdownErrorContent: React.FC<{ error: string }> = ({ error }) => (
   </EuiFlexGroup>
 );
 
-function seriesLabelForType(type: MetricType): string {
+function seriesLabelForType(type: MetricType, nativeHistogram = false): string {
+  if (nativeHistogram) return 'histogram_avg';
   switch (type) {
     case MetricType.COUNTER:
       return 'sum(rate)';
@@ -86,6 +90,10 @@ const BreakdownPanel: React.FC<{
   breakdownYRange?: { yMin: number; yMax: number };
   layout: LayoutMode;
   metricType: MetricType;
+  /** The metric is a native histogram (see isNativeHistogram). */
+  nativeHistogram?: boolean;
+  /** The breakdown query waits for the user (see "Load charts"). */
+  deferred?: boolean;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
@@ -97,6 +105,8 @@ const BreakdownPanel: React.FC<{
   breakdownYRange,
   layout,
   metricType,
+  nativeHistogram,
+  deferred,
   onVisibilityChange,
   onTimeRangeChange,
   timeBounds,
@@ -146,7 +156,15 @@ const BreakdownPanel: React.FC<{
               height: 160,
             }}
           >
-            <EuiLoadingChart size="m" />
+            {deferred ? (
+              <EuiText size="xs" color="subdued" data-test-subj="metricsExploreBreakdownDeferred">
+                {i18n.translate('explore.metricsExplore.notLoaded', {
+                  defaultMessage: 'Not loaded',
+                })}
+              </EuiText>
+            ) : (
+              <EuiLoadingChart size="m" />
+            )}
           </div>
         </EuiPanel>
       </div>
@@ -187,7 +205,7 @@ const BreakdownPanel: React.FC<{
                 <SparklineChart
                   values={s.values}
                   height={160}
-                  label={seriesLabelForType(metricType)}
+                  label={seriesLabelForType(metricType, nativeHistogram)}
                   stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
                   isDarkMode={darkMode}
                   onTimeRangeChange={onTimeRangeChange}
@@ -261,6 +279,9 @@ export const MetricDetail: React.FC = () => {
     refreshCounter,
     onTimeRangeChange,
     timeBounds,
+    previewsEnabled = true,
+    requestPreviews,
+    source,
   } = useExploration();
   const [chartData, setChartData] = useState<Array<[number, string]>>([]);
   const [labels, setLabels] = useState<LabelInfo[]>([]);
@@ -270,7 +291,7 @@ export const MetricDetail: React.FC = () => {
     unit: '',
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MetricsLoadError | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<Array<{ label: string }>>([]);
 
   const promql = queryGen.forMetric(state.metric, metadata.type, stepSec, state.filters);
@@ -286,15 +307,21 @@ export const MetricDetail: React.FC = () => {
         const meta = metaMap[state.metric];
         if (meta && !cancelled) setMetadata({ type: meta.type, help: meta.help, unit: meta.unit });
         const type = inferMetricType(state.metric, meta?.type || MetricType.UNKNOWN);
-        const query = queryGen.forMetric(state.metric, type, stepSec, state.filters);
-        const result = await client.queryRange(query);
-        if (!cancelled) setChartData(result?.[0]?.values || []);
+        // The range query waits for the user on a dataset type that requires an explicit Run
+        // (also on a cold load of a detail URL); the metadata and label lookups still load.
+        if (previewsEnabled) {
+          const query = queryGen.forMetric(state.metric, type, stepSec, state.filters);
+          const result = await client.queryRange(query);
+          if (!cancelled) setChartData(result?.[0]?.values || []);
+        } else if (!cancelled) {
+          setChartData([]);
+        }
         const labelNames = await client.getLabelsForMetric(state.metric);
         if (!cancelled) {
           setLabels(labelNames.map((name) => ({ name, cardinality: 0 })));
         }
       } catch (e) {
-        if (!cancelled) setError(String(e));
+        if (!cancelled) setError(toMetricsLoadError(e));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -303,7 +330,7 @@ export const MetricDetail: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [state.metric, state.filters, client, queryGen, stepSec, refreshCounter]);
+  }, [state.metric, state.filters, client, queryGen, stepSec, refreshCounter, previewsEnabled]);
 
   // Clear selection when data source changes
   const filterKey = `${state.metric}|${JSON.stringify(state.filters)}|${refreshCounter}`;
@@ -341,13 +368,12 @@ export const MetricDetail: React.FC = () => {
     results: breakdowns,
     errors: breakdownErrors,
     onVisibilityChange,
-  } = useConcurrentQueries<LabelBreakdownData>(breakdownFetch, [
-    client,
-    state.filters,
-    refreshCounter,
-    selectedLabelName,
-    loading,
-  ]);
+  } = useConcurrentQueries<LabelBreakdownData>(
+    breakdownFetch,
+    [client, state.filters, refreshCounter, selectedLabelName, loading, previewsEnabled],
+    undefined,
+    previewsEnabled
+  );
 
   const labelOptions = useMemo(() => labels.map((l) => ({ label: l.name })), [labels]);
 
@@ -383,7 +409,39 @@ export const MetricDetail: React.FC = () => {
   );
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorCallout error={error} />;
+  if (error)
+    return (
+      <ErrorCallout
+        error={error.message}
+        fromServer={error.fromServer}
+        sourceLabel={source?.label}
+      />
+    );
+
+  const deferredCallout = !previewsEnabled && (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        iconType="iInCircle"
+        title={i18n.translate('explore.metricsExplore.detailDeferredTitle', {
+          defaultMessage: 'Charts load only when you ask for them for this data source.',
+        })}
+        data-test-subj="metricsExploreDetailDeferred"
+      >
+        <EuiButton
+          size="s"
+          iconType="play"
+          onClick={() => requestPreviews?.()}
+          data-test-subj="metricsExploreDetailLoadButton"
+        >
+          {i18n.translate('explore.metricsExplore.loadCharts', {
+            defaultMessage: 'Load charts',
+          })}
+        </EuiButton>
+      </EuiCallOut>
+    </>
+  );
 
   return (
     <>
@@ -443,6 +501,7 @@ export const MetricDetail: React.FC = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {deferredCallout}
 
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -480,6 +539,12 @@ export const MetricDetail: React.FC = () => {
             timeFrom={timeBounds?.min}
             timeTo={timeBounds?.max}
           />
+        ) : !previewsEnabled ? (
+          <EuiText size="s" color="subdued" data-test-subj="metricsExploreDetailChartDeferred">
+            {i18n.translate('explore.metricsExplore.detailChartDeferred', {
+              defaultMessage: 'Not loaded. Select Load charts to run the query.',
+            })}
+          </EuiText>
         ) : (
           <EuiText size="s" color="subdued">
             {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
@@ -557,6 +622,8 @@ export const MetricDetail: React.FC = () => {
                 breakdownYRange={breakdownYRange}
                 layout={state.layout}
                 metricType={metricType}
+                nativeHistogram={isNativeHistogram(state.metric, metricType)}
+                deferred={!previewsEnabled}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
                 timeBounds={timeBounds}

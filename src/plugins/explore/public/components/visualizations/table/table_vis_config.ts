@@ -54,6 +54,9 @@ export const createTableConfig = (): VisualizationType<'table'> => ({
   name: 'Table',
   icon: 'visTable',
   type: 'table',
+  metadata: {
+    description: 'Raw tabular display.',
+  },
   getRules: () => [],
   ui: {
     style: {

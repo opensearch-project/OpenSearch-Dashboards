@@ -316,6 +316,31 @@ describe('indexTypeConfig', () => {
     expect(result[1]).toEqual({ name: 'field2', type: 'number' });
   });
 
+  test('fetchFields passes through searchable, esTypes and readFromDocValues', async () => {
+    const mockFields = [
+      {
+        name: 'resource.attributes.telemetry.sdk.language',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+    ];
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({
+      getFieldsForWildcard: jest.fn().mockResolvedValue(mockFields),
+    });
+
+    const mockDataset: Dataset = { id: 'logs', title: 'logs*', type: 'INDEXES' };
+    const result = await indexTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0]).toMatchObject({
+      esTypes: ['keyword'],
+      searchable: true,
+      readFromDocValues: true,
+    });
+  });
+
   test('fetchFields passes through aggregatable and subType', async () => {
     const mockFields = [
       { name: 'startTime', type: 'date', aggregatable: true, subType: undefined },
@@ -346,6 +371,27 @@ describe('indexTypeConfig', () => {
       aggregatable: false,
       subType: { nested: { path: 'events' } },
     });
+  });
+
+  test('fetchFields preserves the searchable flag so filter buttons stay enabled', async () => {
+    const mockFields = [
+      { name: 'Carrier', type: 'string', aggregatable: true, searchable: true },
+      { name: 'notSearchable', type: 'string', aggregatable: true, searchable: false },
+    ];
+    const mockGetFieldsForWildcard = jest.fn().mockResolvedValue(mockFields);
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({
+      getFieldsForWildcard: mockGetFieldsForWildcard,
+    });
+
+    const mockDataset: Dataset = {
+      id: 'index1',
+      title: 'opensearch_dashboards_sample_data_flights',
+      type: 'INDEX',
+    };
+    const result = await indexTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0].searchable).toBe(true);
+    expect(result[1].searchable).toBe(false);
   });
 
   test('supportedLanguages returns correct languages', () => {

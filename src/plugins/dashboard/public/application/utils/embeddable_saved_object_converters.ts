@@ -67,3 +67,17 @@ export function convertPanelStateToSavedDashboardPanel(
     ...(savedObjectId !== undefined && { id: savedObjectId }),
   };
 }
+
+/**
+ * A saved panel as the dashboard writes it, for comparing with the panels it is showing. Panels
+ * written by other apps may leave out `embeddableConfig`, which the dashboard always writes
+ * (`{}` when empty); without this, such a panel reads as changed as soon as the dashboard loads.
+ */
+export function normalizeSavedDashboardPanel(
+  savedDashboardPanel: SavedDashboardPanel | undefined
+): SavedDashboardPanel | undefined {
+  if (!savedDashboardPanel || savedDashboardPanel.embeddableConfig !== undefined) {
+    return savedDashboardPanel;
+  }
+  return { ...savedDashboardPanel, embeddableConfig: {} };
+}

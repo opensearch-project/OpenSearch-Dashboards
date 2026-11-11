@@ -7,16 +7,21 @@ import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import {
+  TransformationInstance,
+  TransformationDefinition,
+  FieldReference,
+  FieldSchema,
+} from '../index';
 import { TransformationConfigSchema } from '../types';
+import { createAppliedResult, createInvalidConfigResult } from '../transformation_utils';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 type FilterFieldsMode = 'include' | 'exclude';
 
 interface FilterFieldsConfig {
   mode: FilterFieldsMode;
-  fieldOptions: FieldSchema[];
+  fieldOptions: FieldReference[];
 }
 
 const isConfigComplete = (config: FilterFieldsConfig): boolean => config.fieldOptions.length > 0;
@@ -74,7 +79,9 @@ const FilterFieldsEditor = ({
         <FieldSelector
           configFields={config.fieldOptions.map((f) => f.name)}
           availableFields={availableFields}
-          updateConfigFields={(fields) => update({ fieldOptions: fields })}
+          updateConfigFields={(fields) =>
+            update({ fieldOptions: fields.map(({ name }) => ({ name })) })
+          }
           supportMulti={true}
         />
       </EuiFlexItem>
@@ -91,28 +98,20 @@ export function createFilterFieldsTransformation(): TransformationInstance<Filte
       fieldOptions: [],
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: FilterFieldsConfig) => {
-      if (!isConfigComplete(config)) return data;
+    transformationMethod: (data, config: FilterFieldsConfig) => {
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Filter Fields configuration is incomplete.');
+      }
 
       const fieldNames = new Set(config.fieldOptions.map((f) => f.name));
 
-      return data.map((row) => {
-        const source = row._source as Record<string, unknown>;
-        const newSource =
-          config.mode === 'include'
-            ? Object.fromEntries(Object.entries(source).filter(([key]) => fieldNames.has(key)))
-            : Object.fromEntries(Object.entries(source).filter(([key]) => !fieldNames.has(key)));
+      const transformed = data.map((row) =>
+        config.mode === 'include'
+          ? Object.fromEntries(Object.entries(row).filter(([key]) => fieldNames.has(key)))
+          : Object.fromEntries(Object.entries(row).filter(([key]) => !fieldNames.has(key)))
+      );
 
-        return { ...row, _source: newSource };
-      });
-    },
-    validateConfig: (config: FilterFieldsConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      const valid = config.fieldOptions.filter((f) => fieldNames.has(f.name));
-      if (valid.length !== config.fieldOptions.length) {
-        return { ...config, fieldOptions: valid };
-      }
-      return config;
+      return createAppliedResult(transformed);
     },
     Editor: FilterFieldsEditor,
   };

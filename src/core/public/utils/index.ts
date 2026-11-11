@@ -41,3 +41,4 @@ export {
 export { debounce } from './debounce';
 export { useObservableValue } from './use_observable_value';
 export { getNonce } from './csp';
+export { isImeComposing } from './ime';

@@ -6,10 +6,15 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useIndexList } from './use_index_list';
+import { resetPermissionToast } from '../permission_toast';
+import { resetServerlessCaches } from '../serverless';
 
 // The INDEX dataset type's fetch() result (children = indexes) + the _cat/indices creation dates.
 const indexFetch = jest.fn();
 const httpGet = jest.fn();
+// The data-source saved object lookup (engine type). Default: lookup fails → treated as not serverless.
+const savedObjectsGet = jest.fn();
+const addWarning = jest.fn();
 
 const makeServices = () =>
   ({
@@ -24,7 +29,14 @@ const makeServices = () =>
       },
     },
     http: { get: httpGet },
+    savedObjects: { client: { get: savedObjectsGet } },
+    notifications: { toasts: { addWarning } },
   }) as unknown as any;
+
+const serverlessDataSource = () =>
+  savedObjectsGet.mockResolvedValue({
+    attributes: { dataSourceEngineType: 'OpenSearch Serverless' },
+  });
 
 const children = (names: string[], remote: string[] = []) => ({
   children: names.map((title) => ({
@@ -48,8 +60,11 @@ const Harness: React.FC<{ services: any; search: string; dataSourceId?: string }
 describe('useIndexList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetPermissionToast();
+    resetServerlessCaches();
     // Default: _cat/indices returns nothing usable → name-descending fallback.
     httpGet.mockResolvedValue([]);
+    savedObjectsGet.mockRejectedValue(new Error('not found'));
   });
 
   // --- positive cases ---
@@ -205,6 +220,113 @@ describe('useIndexList', () => {
     expect(result.items.map((i) => i.name)).toEqual(['z', 'm', 'a']);
     // The fetch itself succeeded, so there is no error surfaced.
     expect(result.error).toBeUndefined();
+  });
+
+  // --- OpenSearch Serverless data sources ---
+  it('asks serverless only for the columns it supports (no creation.date, no sort)', async () => {
+    serverlessDataSource();
+    indexFetch.mockResolvedValue(children(['logs-a']));
+    render(<Harness services={makeServices()} search="" dataSourceId="ds-sl" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(savedObjectsGet).toHaveBeenCalledWith('data-source', 'ds-sl');
+    const query = httpGet.mock.calls[0][1].query;
+    expect(query.h).toBe('index,docs.count,store.size');
+    expect(query.s).toBeUndefined();
+  });
+
+  it('keeps serverless docs/size, leaves health and shard counts unknown, orders by name', async () => {
+    serverlessDataSource();
+    indexFetch.mockResolvedValue(children(['logs-a', 'logs-c', 'logs-b']));
+    // Serverless `_cat/indices` shape: no creation.date; health/pri/rep are empty strings.
+    httpGet.mockResolvedValue([
+      { index: 'logs-a', 'docs.count': '12', 'store.size': '3.7kb', health: '', pri: '', rep: '' },
+      { index: 'logs-b', 'docs.count': '0', 'store.size': '0b', health: '', pri: '', rep: '' },
+      { index: 'logs-c', 'docs.count': '7', 'store.size': '1kb' },
+    ]);
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(result.items.map((i) => i.name)).toEqual(['logs-c', 'logs-b', 'logs-a']);
+    const byName = Object.fromEntries(result.items.map((i: any) => [i.name, i]));
+    expect(byName['logs-a'].docsCount).toBe(12);
+    expect(byName['logs-a'].storeSize).toBe('3.7kb');
+    expect(byName['logs-b'].docsCount).toBe(0); // real 0 still drives empty-index detection
+    expect(byName['logs-a'].health).toBeUndefined();
+    expect(byName['logs-a'].primaryShards).toBeUndefined(); // '' is unknown, never 0
+    expect(byName['logs-a'].replicaCount).toBeUndefined();
+    expect(byName['logs-a'].createdAt).toBeUndefined();
+  });
+
+  it('keeps the provisioned request (creation.date sort) when the data source is not serverless', async () => {
+    savedObjectsGet.mockResolvedValue({ attributes: { dataSourceEngineType: 'OpenSearch' } });
+    indexFetch.mockResolvedValue(children(['a']));
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    const query = httpGet.mock.calls[0][1].query;
+    expect(query.h).toBe('index,creation.date,docs.count,health,store.size,pri,rep');
+    expect(query.s).toBe('creation.date:desc');
+  });
+
+  it('does NOT show the permission toast when cat.indices fails with a non-auth 400', async () => {
+    indexFetch.mockResolvedValue(children(['a', 'b']));
+    httpGet.mockRejectedValue({
+      statusCode: 400,
+      message: 'unsupported_operation_exception: Unable to sort by unknown sort key',
+    });
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(result.items.map((i) => i.name)).toEqual(['b', 'a']);
+    expect(addWarning).not.toHaveBeenCalled();
+  });
+
+  it('retries a 400 with the serverless columns when the engine type is not saved', async () => {
+    // e.g. a serverless data source created through the saved-objects API: no dataSourceEngineType.
+    indexFetch.mockResolvedValue(children(['logs-a', 'logs-b']));
+    httpGet
+      .mockRejectedValueOnce({
+        body: { statusCode: 400, message: 'Unable to sort by unknown sort key `creation.date`' },
+      })
+      .mockResolvedValueOnce([
+        { index: 'logs-a', 'docs.count': '7', 'store.size': '1kb' },
+        { index: 'logs-b', 'docs.count': '3', 'store.size': '2kb' },
+      ]);
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(httpGet).toHaveBeenCalledTimes(2);
+    expect(httpGet.mock.calls[0][1].query.s).toBe('creation.date:desc');
+    expect(httpGet.mock.calls[1][1].query).toEqual({
+      format: 'json',
+      h: 'index,docs.count,store.size',
+    });
+    expect(result.items.map((i) => [i.name, i.docsCount, i.storeSize])).toEqual([
+      ['logs-b', 3, '2kb'],
+      ['logs-a', 7, '1kb'],
+    ]);
+    expect(addWarning).not.toHaveBeenCalled();
+  });
+
+  it('does not retry cat.indices for non-400 failures', async () => {
+    indexFetch.mockResolvedValue(children(['a']));
+    httpGet.mockRejectedValue({ statusCode: 500 });
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(httpGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks up the engine type in parallel with resolve_index', async () => {
+    let resolveIndexes: (v: unknown) => void = () => {};
+    indexFetch.mockReturnValue(new Promise((r) => (resolveIndexes = r)));
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(savedObjectsGet).toHaveBeenCalledWith('data-source', 'ds-default'));
+    resolveIndexes(children(['a']));
+    await waitFor(() => expect(result.loading).toBe(false));
+  });
+
+  it('still shows the permission toast once when cat.indices is forbidden (403)', async () => {
+    indexFetch.mockResolvedValue(children(['a']));
+    httpGet.mockRejectedValue({ statusCode: 403 });
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(addWarning).toHaveBeenCalledTimes(1);
   });
 
   it('returns an empty list (no crash) when the fetch has no children', async () => {

@@ -3,13 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
+import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
+import { VisFieldType } from '../components/visualizations/types';
 import { Container, ContainerInput, EmbeddableInput } from '../../../embeddable/public';
 import { IVariableInterpolationService } from '../../../dashboard/public';
 
@@ -378,6 +383,85 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.getOutput().error).toBeUndefined();
   });
 
+  describe('fetch error message', () => {
+    // A failed request as the http service rejects it: `body.message` holds the server's message,
+    // which a search strategy sets to a serialised `{ error: { type, reason, details }, status }`.
+    const httpError = (message: string, statusText = 'Forbidden') =>
+      Object.assign(new Error(statusText), {
+        body: { statusCode: 403, error: statusText, message },
+      });
+    const envelope = (error: Record<string, string>) => JSON.stringify({ error, status: 403 });
+
+    const failWith = async (error: unknown) => {
+      mockSavedExplore.searchSource.fetch.mockRejectedValueOnce(error);
+      // @ts-ignore
+      embeddable.node = mockNode;
+      // @ts-ignore
+      await embeddable.updateHandler(embeddable.searchProps, true);
+      const output = embeddable.getOutput();
+      expect(output.loading).toBe(false);
+      // @ts-ignore
+      expect(embeddable.searchProps.error).toEqual(output.error);
+      return output.error!;
+    };
+
+    test('shows the details of a serialised error', async () => {
+      const error = await failWith(
+        httpError(
+          envelope({
+            type: 'FakeQueryException',
+            reason: 'Fake query failed',
+            details: 'The fake source refused the query.',
+          })
+        )
+      );
+      expect(error.message).toBe('The fake source refused the query.');
+      expect(error.name).toBe('Forbidden');
+    });
+
+    test('shows the reason of a serialised error without details', async () => {
+      const error = await failWith(httpError(envelope({ reason: 'Fake query failed' })));
+      expect(error.message).toBe('Fake query failed');
+    });
+
+    test("never shows a serialised error's type", async () => {
+      const withText = await failWith(
+        httpError(envelope({ type: 'FAKE_INTERNAL_CODE', details: 'The fake source is down.' }))
+      );
+      expect(withText.message).toBe('The fake source is down.');
+      expect(withText.name).not.toBe('FAKE_INTERNAL_CODE');
+
+      // No text to show: neither the raw JSON nor the type, but the error's own message.
+      const typeOnly = await failWith(httpError(envelope({ type: 'FAKE_INTERNAL_CODE' })));
+      expect(typeOnly.message).toBe('Forbidden');
+      expect(typeOnly.name).not.toBe('FAKE_INTERNAL_CODE');
+    });
+
+    test('falls back to the default text when a serialised error has no text at all', async () => {
+      const error = await failWith(httpError(envelope({ type: 'FAKE_INTERNAL_CODE' }), ''));
+      expect(error.message).toBe('An error occurred');
+    });
+
+    test('shows the details of a serialised error thrown without a response body', async () => {
+      const error = await failWith(
+        new Error(envelope({ reason: 'Fake query failed', details: 'Fake details.' }))
+      );
+      expect(error.message).toBe('Fake details.');
+    });
+
+    test('shows a plain message as it is', async () => {
+      const error = await failWith(httpError('Fake source is not reachable', 'Bad Request'));
+      expect(error.message).toBe('Fake source is not reachable');
+      expect(error.name).toBe('Bad Request');
+    });
+
+    test('shows a malformed serialised error as it is', async () => {
+      const malformed = '{"error":{"reason":"Fake query failed","details":"cut';
+      const error = await failWith(httpError(malformed));
+      expect(error.message).toBe(malformed);
+    });
+  });
+
   test('reload calls updateHandler with force=true', () => {
     // @ts-ignore
     const spy = jest.spyOn(embeddable as any, 'updateHandler').mockResolvedValue(undefined);
@@ -635,6 +719,184 @@ describe('ExploreEmbeddable', () => {
     expect(fetchSpy).toHaveBeenCalled();
   });
 
+  test('updateHandler skips fetch while not visible and records one is owed', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore - set input directly to avoid retriggering the input subscription
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+  });
+
+  test('updateHandler runs the owed fetch once when the panel becomes visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // Owe a fetch from a prior not-visible cycle; input is otherwise unchanged.
+    // @ts-ignore
+    embeddable.pendingFetchOnResume = true;
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, false);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+  });
+
+  test('updateHandler does not owe a fetch for a visibility-only change', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // Initial visible load establishes prevState.
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // Hide the panel; input$ emits with only isVisible changed.
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // The collapse itself must not record an owed fetch.
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // Show the panel again; no data input changed while hidden.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updateHandler fetches once on resume after a forced refresh while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // A forced refresh (e.g. auto-refresh or reload) arrives while hidden.
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+    // Expand with no data change; the owed fetch runs exactly once.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('updateHandler fetches once on resume after a data change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    embeddable.input.timeRange = { from: 'now-1h', to: 'now' };
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // The data change while hidden records an owed fetch.
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(true);
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('updateHandler does not owe a fetch when only disabled filters change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    embeddable.input.filters = [];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // Adding a disabled filter does not change the query, so no fetch is owed.
+    // @ts-ignore
+    embeddable.input.filters = [
+      {
+        meta: { alias: null, negate: false, disabled: true },
+        query: { match_phrase: { 'machine.os': 'win 8' } },
+      },
+    ];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updateHandler does not owe a fetch for a columns or sort change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps, true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // Columns and sort are display-only and never fetch, even while visible.
+    // @ts-ignore
+    embeddable.input.columns = ['machine.os'];
+    // @ts-ignore
+    embeddable.input.sort = [['machine.os', 'asc']];
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    // On resume the new columns and sort are applied without a fetch.
+    // @ts-ignore
+    embeddable.input.isVisible = true;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(embeddable.searchProps.columns).toEqual(['machine.os']);
+    // @ts-ignore
+    expect(embeddable.searchProps.sort).toEqual([['machine.os', 'asc']]);
+  });
+
   test('fetch handles missing searchProps gracefully', async () => {
     // @ts-ignore
     embeddable.searchProps = undefined;
@@ -709,7 +971,7 @@ describe('ExploreEmbeddable', () => {
   test('formats row values using field formatter when available', async () => {
     const mockConverter = jest.fn().mockReturnValue('formatted');
     const mockGetFormatterForField = jest.fn().mockReturnValue({ convert: mockConverter });
-    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price', type: 'number' });
 
     mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
       if (field === 'index') {
@@ -725,7 +987,7 @@ describe('ExploreEmbeddable', () => {
       await import('../components/visualizations/utils/normalize_result_rows');
     jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
       transformedData: [{ price: 42 }],
-      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      numericalColumns: [{ id: 0, name: 'price', column: 'price', schema: VisFieldType.Numerical }],
       categoricalColumns: [],
       dateColumns: [],
       unknownColumns: [],
@@ -770,6 +1032,260 @@ describe('ExploreEmbeddable', () => {
     await embeddable.fetch();
 
     expect(adaptLegacyDataSpy).toHaveBeenCalled();
+  });
+
+  describe('data link variables', () => {
+    const createEmbeddableInDashboard = (
+      id: string,
+      interpolation: Partial<IVariableInterpolationService>,
+      { rendered = true } = {}
+    ) => {
+      const parent = createTestContainer(
+        id,
+        { panels: { [id]: { type: EXPLORE_EMBEDDABLE_TYPE, explicitInput: { id } } } },
+        interpolation
+      );
+      const mockServices = createMockServices();
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: mockSavedExplore,
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id },
+        mockExecuteTriggerActions,
+        parent
+      );
+      if (rendered) {
+        emb.render(document.createElement('div'));
+      }
+      return { parent, emb };
+    };
+
+    test('keeps dashboard variables in search props, before the first render too', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-var-emb',
+        { getVariables },
+        { rendered: false }
+      );
+
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'a' }]);
+      // @ts-ignore - private for testing
+      const previousSearchProps = emb.searchProps;
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'b' }]);
+      // The same object, so the callbacks set up on it keep seeing current state.
+      // @ts-ignore - private for testing
+      expect(emb.searchProps).toBe(previousSearchProps);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('ignores emits while variables are loading', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard('links-loading-emb', { getVariables });
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'], loading: true }]);
+
+      expect(renderSpy).not.toHaveBeenCalled();
+      // @ts-ignore - private for testing
+      expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'a' }]);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('re-renders once on a variable change, and not when the values are unchanged', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard('links-render-emb', { getVariables });
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+
+      // Option reloads emit with the same values: no re-render.
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['a'] }]);
+      expect(renderSpy).not.toHaveBeenCalled();
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('does not render again when the query uses variables and refetches', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard('links-refetch-emb', {
+        getVariables,
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn().mockReturnValue('source = logs | where service = "b"'),
+      });
+      emb.originalQuery = 'source = logs | where service = "$service"';
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+      const updateSpy = jest.spyOn(emb as any, 'updateHandler').mockImplementation(() => {});
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      // The refetch must carry the new values, not the ones before this emit.
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ variables: [{ name: 'service', value: 'b' }] }),
+        true
+      );
+      expect(renderSpy).not.toHaveBeenCalled();
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('re-renders without a refetch when the interpolated query is unchanged', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard('links-same-query-emb', {
+        getVariables,
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn().mockReturnValue('source = logs | where env = "prod"'),
+      });
+      emb.originalQuery = 'source = logs | where env = "$env"';
+      // @ts-ignore - private for testing
+      emb.lastInterpolatedQuery = 'source = logs | where env = "prod"';
+      const renderSpy = jest.spyOn(emb as any, 'renderComponent');
+      const updateSpy = jest.spyOn(emb as any, 'updateHandler').mockImplementation(() => {});
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      expect(updateSpy).not.toHaveBeenCalled();
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+      expect(renderSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ variables: [{ name: 'service', value: 'b' }] })
+      );
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('keeps every added column after a variable-only change', () => {
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-columns-emb',
+        { getVariables },
+        { rendered: false }
+      );
+      jest.spyOn(emb as any, 'fetch').mockResolvedValue(undefined);
+      emb.render(document.createElement('div'));
+
+      getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+      parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+
+      // The panel always calls the callbacks of the latest search props it was rendered with.
+      // @ts-ignore - private for testing
+      emb.searchProps.onAddColumn('column3');
+      // @ts-ignore - private for testing
+      emb.searchProps.onAddColumn('column4');
+
+      expect(emb.getInput().columns).toEqual(['column1', 'column2', 'column3', 'column4']);
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('a variable-only re-render updates the panel without remounting it', async () => {
+      const realCreateRoot = jest.requireActual('react-dom/client').createRoot;
+      (createRoot as jest.Mock).mockImplementationOnce((node: HTMLElement) => realCreateRoot(node));
+      let mounts = 0;
+      let renderedVariables: unknown;
+      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(({ searchProps }) => {
+        useEffect(() => {
+          mounts++;
+        }, []);
+        renderedVariables = searchProps.variables;
+        return null;
+      });
+      const getVariables = jest.fn().mockReturnValue([{ name: 'service', value: 'a' }]);
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-remount-emb',
+        { getVariables },
+        { rendered: false }
+      );
+      jest.spyOn(emb as any, 'fetch').mockResolvedValue(undefined);
+
+      try {
+        await act(async () => {
+          emb.render(document.createElement('div'));
+        });
+        expect(mounts).toBe(1);
+
+        getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
+        await act(async () => {
+          parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
+        });
+
+        expect(renderedVariables).toEqual([{ name: 'service', value: 'b' }]);
+        // A remount would reset TableVis pagination and column filters.
+        expect(mounts).toBe(1);
+      } finally {
+        (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
+        await act(async () => {
+          emb.destroy();
+        });
+        parent.destroy();
+      }
+    });
+
+    test('a fetch hands the new rows to the mounted panel', async () => {
+      const realCreateRoot = jest.requireActual('react-dom/client').createRoot;
+      (createRoot as jest.Mock).mockImplementationOnce((node: HTMLElement) => realCreateRoot(node));
+      let mounts = 0;
+      let renderedRows: unknown;
+      (ExploreEmbeddableComponent as jest.Mock).mockImplementation(({ searchProps }) => {
+        useEffect(() => {
+          mounts++;
+        }, []);
+        renderedRows = searchProps.rows;
+        return null;
+      });
+      const { parent, emb } = createEmbeddableInDashboard(
+        'links-refetch-emb',
+        { getVariables: jest.fn().mockReturnValue([]) },
+        { rendered: false }
+      );
+
+      try {
+        await act(async () => {
+          emb.render(document.createElement('div'));
+        });
+        expect(mounts).toBe(1);
+        const rowsBeforeReload = renderedRows;
+
+        await act(async () => {
+          emb.reload();
+        });
+        expect(renderedRows).toBeDefined();
+        expect(renderedRows).not.toBe(rowsBeforeReload);
+        expect(mounts).toBe(1);
+      } finally {
+        (ExploreEmbeddableComponent as jest.Mock).mockImplementation(() => null);
+        await act(async () => {
+          emb.destroy();
+        });
+        parent.destroy();
+      }
+    });
   });
 
   describe('variable interpolation in panel metadata', () => {

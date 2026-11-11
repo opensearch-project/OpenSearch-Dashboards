@@ -39,6 +39,14 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 }
 
+.app-wrapper.hidden-chrome .deLayout {
+  height: 100vh;
+}
+
+.app-wrapper.hidden-chrome .deLayout.dsc--next {
+  height: calc(100vh - #{$osdHeaderOffset * 1});
+}
+
 .mainPage {
   overflow-x: hidden;
   overflow-y: auto;

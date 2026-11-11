@@ -234,7 +234,8 @@ describe('redux_persistence', () => {
       const result = await loadReduxState(mockServices);
 
       expect(result.query).toEqual(mockQueryState);
-      expect(result.ui).toEqual(mockAppState.ui);
+      // URL values are kept; sections the URL omits are filled with defaults.
+      expect(result.ui).toMatchObject(mockAppState.ui);
       expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQueryState);
     });
 
@@ -263,6 +264,35 @@ describe('redux_persistence', () => {
 
       expect(result.query).toEqual(mockQueryState);
       expect(result.ui.activeTabId).toBe(''); // Should use preloaded UI state
+    });
+
+    it('should merge a partial URL app state over the defaults instead of replacing them', async () => {
+      const mockQueryState = {
+        query: 'up',
+        language: 'PROMQL',
+        dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
+      };
+      // e.g. a deep link that sets only the metrics page mode: `_a=(ui:(metricsPageMode:query),tab:())`
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce({ ui: { metricsPageMode: 'query' }, tab: {} });
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.tab.patterns).toEqual({ patternsField: undefined, usingRegexPatterns: false });
+      expect(result.tab.logs).toEqual({});
+      expect(result.ui.metricsPageMode).toBe('query');
+      expect(result.ui.activeTabId).toBe('');
+    });
+
+    it('should keep tab values from the URL over the defaults', async () => {
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce({ query: '', language: 'PPL', dataset: undefined })
+        .mockReturnValueOnce({ tab: { patterns: { patternsField: 'message' } } });
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.tab.patterns).toEqual({ patternsField: 'message', usingRegexPatterns: false });
     });
 
     it('should handle errors and fallback to preloaded state', async () => {

@@ -6,6 +6,7 @@
 import {
   assembleSessionRows,
   buildRootSpansQuery,
+  preferAiRoots,
   buildSessionSpansQuery,
   buildMatchingSessionIdsQuery,
   buildSessionStatsQuery,
@@ -88,6 +89,53 @@ describe('session_utils', () => {
         'source = x | where `attributes.gen_ai.conversation.id` in ("s1") | stats count() as spans by traceId, `attributes.gen_ai.conversation.id` | head 42'
       );
       expect(buildRootSpansQuery('source = x', ['t1', 't2'])).toContain('| head 2');
+    });
+
+    it('also fetches marked AI roots when asked', () => {
+      expect(buildRootSpansQuery('source = x', ['t1', 't2'], true)).toBe(
+        'source = x | where (parentSpanId = "" or `attributes.derived.gen_ai.is_root` = true) and traceId in ("t1", "t2") | sort startTime | head 8'
+      );
+    });
+
+    it('keeps the marked AI roots of a trace instead of its HTTP root', () => {
+      const row = (traceId: string, spanId: string, marked: boolean) =>
+        ({
+          traceId,
+          spanId,
+          rawDocument: marked ? { attributes: { 'derived.gen_ai.is_root': true } } : {},
+        }) as any;
+      const rows = [row('t1', 'http', false), row('t1', 'agent', true), row('t2', 'root', false)];
+      expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['agent', 'root']);
+    });
+
+    it('keeps a GenAI root over a span an SDK marked below it', () => {
+      const rows = [
+        {
+          traceId: 't1',
+          spanId: 'root',
+          parentSpanId: '',
+          rawDocument: { attributes: { 'gen_ai.operation.name': 'invoke_agent' } },
+        },
+        {
+          traceId: 't1',
+          spanId: 'inner',
+          parentSpanId: 'root',
+          rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+        },
+      ] as any;
+      expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['root']);
+    });
+
+    it('keeps a marked root over marked spans below it', () => {
+      const row = (spanId: string, parentSpanId: string) =>
+        ({
+          traceId: 't1',
+          spanId,
+          parentSpanId,
+          rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+        }) as any;
+      const rows = [row('root', ''), row('child', 'root')];
+      expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['root']);
     });
 
     it('extracts the source command', () => {

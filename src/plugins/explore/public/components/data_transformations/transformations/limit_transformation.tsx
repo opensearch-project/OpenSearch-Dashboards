@@ -8,7 +8,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition } from '../index';
 import { TransformationConfigSchema } from '../types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { createAppliedResult } from '../transformation_utils';
 import { DebouncedFieldNumber } from '../../visualizations/style_panel/utils';
 
 interface LimitConfig {
@@ -44,9 +44,8 @@ export function createLimitTransformation(): TransformationInstance<LimitConfig>
     definition_id: 'limit',
     config: { limit: 10 },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: LimitConfig) => {
-      if (config.limit === undefined) return data;
-      return data.slice(0, config.limit);
+    transformationMethod: (data, config: LimitConfig) => {
+      return createAppliedResult(config.limit === undefined ? data : data.slice(0, config.limit));
     },
     Editor: LimitEditor,
   };

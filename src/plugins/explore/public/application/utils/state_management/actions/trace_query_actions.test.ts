@@ -49,6 +49,7 @@ jest.mock('./utils', () => ({
 
 import {
   prepareTraceCacheKeys,
+  abortAllTraceQueries,
   executeTraceAggregationQueries,
   executeRequestCountQuery,
   executeErrorCountQuery,
@@ -440,6 +441,22 @@ describe('Trace Query Actions - Test Suite', () => {
     });
 
     describe('executeRequestCountQuery', () => {
+      it('is aborted by abortAllTraceQueries while in flight', async () => {
+        mockSearchSource.fetch.mockReturnValue(new Promise(() => undefined));
+        executeRequestCountQuery({
+          services: mockServices,
+          cacheKey: 'trace-requests:source=traces',
+          baseQuery: 'source=traces',
+          config: createTraceConfig(),
+        })(mockDispatch, mockGetState, undefined);
+        // Let it reach the fetch, past the dataset lookup.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        abortAllTraceQueries();
+
+        expect(mockAbortController.abort).toHaveBeenCalledTimes(1);
+      });
+
       it('should execute request count query successfully', async () => {
         const params = {
           services: mockServices,

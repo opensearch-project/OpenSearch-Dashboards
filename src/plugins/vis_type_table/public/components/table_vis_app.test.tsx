@@ -70,7 +70,7 @@ describe('TableVisApp', () => {
     expect(getByTestId('TableVisComponent')).toBeInTheDocument();
   });
 
-  it('should render TableVisComponentGroup component if split direction is column', () => {
+  it('should use split-column sizing when split direction is column', () => {
     const visDataMock: TableVisData = {
       tableGroups: [
         {
@@ -88,11 +88,11 @@ describe('TableVisApp', () => {
         handlers={handlersMock}
       />
     );
-    expect(container.querySelector('.visTable')).not.toBeNull();
+    expect(container.querySelector('.visTable--splitColumns')).not.toBeNull();
     expect(getByTestId('TableVisComponentGroup')).toBeInTheDocument();
   });
 
-  it('should render TableVisComponentGroup component if split direction is row', () => {
+  it('should keep full-width layout when split direction is row', () => {
     const visDataMock: TableVisData = {
       tableGroups: [
         {
@@ -111,6 +111,7 @@ describe('TableVisApp', () => {
       />
     );
     expect(container.querySelector('.visTable')).not.toBeNull();
+    expect(container.querySelector('.visTable--splitColumns')).toBeNull();
     expect(getByTestId('TableVisComponentGroup')).toBeInTheDocument();
   });
 

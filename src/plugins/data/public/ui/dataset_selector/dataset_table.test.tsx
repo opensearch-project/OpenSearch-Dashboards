@@ -83,6 +83,59 @@ describe('DataSetTable', () => {
     expect(screen.getByText('Load more')).toBeInTheDocument();
   });
 
+  it('renders a child using its displayName when set, falling back to title when absent', () => {
+    const pathWithDisplayName: DataStructure[] = [
+      ...mockPath.slice(0, 2),
+      {
+        ...mockPath[2],
+        children: [
+          {
+            id: 'child1',
+            title: 'raw-title',
+            description: 'Description 1',
+            type: 'index',
+            meta: { displayName: 'Friendly Name' },
+          },
+          { id: 'child2', title: 'Child 2', description: 'Description 2', type: 'index' },
+        ],
+      },
+    ];
+
+    renderWithIntl(<DatasetTable {...mockProps} path={pathWithDisplayName} />);
+
+    expect(screen.getByText('Friendly Name')).toBeInTheDocument();
+    expect(screen.queryByText('raw-title')).not.toBeInTheDocument();
+    expect(screen.getByText('Child 2')).toBeInTheDocument();
+  });
+
+  it('renders children sorted alphabetically by display label, case-insensitively', () => {
+    const unsortedPath: DataStructure[] = [
+      ...mockPath.slice(0, 2),
+      {
+        ...mockPath[2],
+        children: [
+          { id: 'child-z', title: 'Zebra', type: 'index' },
+          { id: 'child-a', title: 'apple', type: 'index' },
+          // Its title would sort last, but its displayName should sort it in the middle.
+          {
+            id: 'child-friendly',
+            title: 'zzz-raw-title',
+            type: 'index',
+            meta: { displayName: 'Mango Display Name' },
+          },
+        ],
+      },
+    ];
+
+    const { container } = renderWithIntl(<DatasetTable {...mockProps} path={unsortedPath} />);
+
+    const renderedTitles = Array.from(container.querySelectorAll('.datasetTable__itemTitle')).map(
+      (el) => el.textContent
+    );
+
+    expect(renderedTitles).toEqual(['apple', 'Mango Display Name', 'Zebra']);
+  });
+
   it('calls selectDataStructure when an index is selected', async () => {
     renderWithIntl(<DatasetTable {...mockProps} />);
 

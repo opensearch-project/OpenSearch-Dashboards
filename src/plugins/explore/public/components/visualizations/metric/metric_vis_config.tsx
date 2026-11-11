@@ -111,6 +111,10 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
   name: 'Metric',
   icon: 'visMetric',
   type: 'metric',
+  metadata: {
+    description:
+      'Single aggregated number, optionally with sparkline. Use for KPIs, totals, counts.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'metric'>> = [
       {

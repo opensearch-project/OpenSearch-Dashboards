@@ -87,3 +87,43 @@ describe('MetricQueryGenerator', () => {
     });
   });
 });
+
+describe('MetricQueryGenerator with names PromQL cannot take bare', () => {
+  const generator = new MetricQueryGenerator();
+
+  it('selects them by __name__, with filters after it', () => {
+    expect(generator.forMetric('2xx', MetricType.UNKNOWN, 60)).toBe('avg({__name__="2xx"})');
+    expect(
+      generator.forMetric('Errors.count', MetricType.COUNTER, 60, [
+        { name: 'FunctionName', operator: '=', value: 'f' } as any,
+      ])
+    ).toBe('sum(rate({__name__="Errors.count",FunctionName="f"}[4m]))');
+  });
+});
+
+describe('MetricQueryGenerator with native histograms', () => {
+  const generator = new MetricQueryGenerator();
+
+  it('averages a counter histogram over the step: rated, summed, then histogram_avg', () => {
+    expect(generator.forMetric('http_duration', MetricType.HISTOGRAM, 60)).toBe(
+      'histogram_avg(sum (rate(http_duration[4m])))'
+    );
+    expect(generator.forBreakdown('http_duration', MetricType.HISTOGRAM, 'job', 60)).toBe(
+      'histogram_avg(sum by (job) (rate(http_duration[4m])))'
+    );
+  });
+  it('averages a gauge histogram as it is, weighted across series', () => {
+    expect(generator.forMetric('CPUUtilization', MetricType.GAUGE_HISTOGRAM, 60)).toBe(
+      'histogram_avg(sum (CPUUtilization))'
+    );
+    expect(
+      generator.forBreakdown('CPUUtilization', MetricType.GAUGE_HISTOGRAM, 'InstanceId', 60)
+    ).toBe('histogram_avg(sum by (InstanceId) (CPUUtilization))');
+  });
+
+  it('keeps the classic bucket form for _bucket series', () => {
+    expect(generator.forMetric('http_duration_bucket', MetricType.HISTOGRAM, 60)).toBe(
+      'histogram_quantile(0.95, sum(rate(http_duration_bucket[4m])) by (le))'
+    );
+  });
+});

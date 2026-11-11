@@ -42,6 +42,12 @@ interface Props {
   useUpdatedHeader?: boolean;
   renderFullLength?: boolean;
   hideTrailingSeparator?: boolean;
+  /**
+   * The screen title the app renders next to the breadcrumbs, if any (read
+   * from the header action menu). Used by the application header to avoid
+   * showing the current page twice.
+   */
+  screenTitle?: string;
 }
 
 export function HeaderBreadcrumbs({
@@ -51,6 +57,7 @@ export function HeaderBreadcrumbs({
   useUpdatedHeader,
   renderFullLength,
   hideTrailingSeparator,
+  screenTitle,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -109,11 +116,46 @@ export function HeaderBreadcrumbs({
   }
 
   if (useUpdatedHeader) {
-    // Case 2: Updated header, simplified breadcrumbs
+    if (renderFullLength) {
+      // Case 2a: Application header. The current page is the last crumb, as
+      // plain text, with no separator after it. When the app's screen title,
+      // rendered right after the crumbs, already shows that same page, the
+      // crumb stays in the trail for screen readers (it keeps
+      // aria-current="page") but is hidden visually, and the separator before
+      // it leads into the title: "Analytics / Dashboards / **My dashboard**".
+      const last = crumbs[crumbs.length - 1];
+      const titleNamesCurrentPage =
+        !!screenTitle && typeof last?.text === 'string' && last.text.trim() === screenTitle;
+      const crumbsToRender = titleNamesCurrentPage
+        ? [
+            ...crumbs.slice(0, -1),
+            { ...last, className: classNames(last.className, 'euiScreenReaderOnly') },
+          ]
+        : crumbs;
+      return (
+        <EuiSimplifiedBreadcrumbs
+          breadcrumbs={crumbsToRender}
+          hideTrailingSeparator
+          disableTrailingLink
+          max={5}
+          data-test-subj="breadcrumbs"
+          truncate={true}
+          responsive={{
+            xs: 1,
+            s: 1,
+            m: 1,
+            l: 4,
+          }}
+        />
+      );
+    }
+
+    // Case 2b: Page header, simplified breadcrumbs. The page's <h1> title
+    // names the current page, so the bar hides that crumb.
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
-        hideLastBreadCrumb={!renderFullLength}
+        hideLastBreadCrumb
         max={5}
         data-test-subj="breadcrumbs"
         truncate={true}

@@ -32,6 +32,7 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { safeSetItem } from '@osd/std';
 import {
   UserProvidedValues,
   PublicUiSettingsParams,
@@ -264,7 +265,13 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     } else {
       newSettings[key] = { userValue: newVal };
     }
-    window.localStorage.setItem(`uiSettings`, JSON.stringify(newSettings));
+    if (!safeSetItem(window.localStorage, `uiSettings`, JSON.stringify(newSettings))) {
+      // Not persisted, so update() must not report the setting as saved. Throw
+      // onto its existing failure path, which reverts and emits updateErrors$.
+      throw new Error(
+        `Unable to save "${key}": browser storage for this site is full. Clear site data and retry.`
+      );
+    }
     return { settings: newSettings };
   }
 

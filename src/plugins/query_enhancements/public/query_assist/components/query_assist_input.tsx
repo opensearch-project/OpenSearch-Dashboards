@@ -10,6 +10,7 @@ import assistantMark from '../../assets/sparkle_mark.svg';
 import { getData } from '../../services';
 import { AgentError } from '../utils';
 import { WarningBadge } from './warning_badge';
+import { isImeComposing } from '../../../../../core/public/utils';
 
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -85,7 +86,9 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           disabled={props.isDisabled}
           onClick={() => setIsSuggestionsVisible(true)}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => setIsSuggestionsVisible(e.key !== 'Enter')}
+          onKeyDown={(e) => {
+            if (!isImeComposing(e)) setIsSuggestionsVisible(e.key !== 'Enter');
+          }}
           placeholder={props.placeholder}
           prepend={<EuiIcon type={assistantMark} />}
           append={<WarningBadge error={props.error} question={props.previousQuestion} />}

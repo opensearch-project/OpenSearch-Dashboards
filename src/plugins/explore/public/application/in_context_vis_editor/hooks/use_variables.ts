@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect } from 'react';
+import { EMPTY } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import {
   Variable,
   VariableService,
   VariableInterpolationService,
   createNoOpVariableInterpolationService,
+  hasLoadingVariables,
 } from '../../../../../dashboard/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { useQueryBuilderState } from './use_query_builder_state';
+import { useVisualizationBuilder } from './use_visualization_builder';
 import { prepareQueryForLanguage } from '../../utils/languages';
 import { VARIABLE_VALUES_URL_KEY } from '../types';
 
@@ -27,6 +31,7 @@ import { VARIABLE_VALUES_URL_KEY } from '../types';
 export const useVariables = (containerVariables?: Variable[]) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryBuilder } = useQueryBuilderState();
+  const { visualizationBuilderForEditor } = useVisualizationBuilder();
 
   // Create service & interpolation
   const variableService = useMemo(() => {
@@ -53,30 +58,30 @@ export const useVariables = (containerVariables?: Variable[]) => {
     }
   }, [queryBuilder, interpolationService]);
 
-  // Initial refresh
-  const hasRefreshed = useRef(false);
-  useEffect(() => {
-    if (variableService && !hasRefreshed.current) {
-      hasRefreshed.current = true;
-      variableService.refreshAllVariableOptions();
-    }
-  }, [variableService]);
-
-  // Refresh on time range change (only variables with useTimeFilter enabled)
+  // Refresh variable options whenever their queries or the time range change.
   useEffect(() => {
     if (!variableService) return;
-    const sub = services.data.query.timefilter.timefilter
-      .getTimeUpdate$()
-      .subscribe(() => variableService.refreshTimeFilteredVariableOptions());
-    return () => sub.unsubscribe();
+    const { timefilter } = services.data.query.timefilter;
+    return variableService.startRefreshScheduler({
+      time$: timefilter.getTimeUpdate$().pipe(
+        map(() => timefilter.getTime()),
+        startWith(timefilter.getTime())
+      ),
+      // The editor's run button only re-runs the panel query; time changes
+      // still refresh the variables through time$.
+      reload$: EMPTY,
+    });
   }, [variableService, services.data]);
 
-  // Re-execute query when interpolated result changes
+  // When values settle: give the table preview the values for its data links,
+  // and re-execute the query if its interpolated form changed
   useEffect(() => {
     if (!variableService || !interpolationService) return;
 
-    const sub = variableService.getVariables$().subscribe((variables: any[]) => {
-      if (variables.some((v: any) => 'loading' in v && v.loading)) return;
+    const sub = variableService.getVariables$().subscribe((variables) => {
+      if (hasLoadingVariables(variables)) return;
+
+      visualizationBuilderForEditor.setVariables(interpolationService.getVariables());
 
       const queryState = queryBuilder.queryState$.getValue();
       const currentQuery = prepareQueryForLanguage(queryState).query;
@@ -89,7 +94,7 @@ export const useVariables = (containerVariables?: Variable[]) => {
     });
 
     return () => sub.unsubscribe();
-  }, [variableService, interpolationService, queryBuilder]);
+  }, [variableService, interpolationService, queryBuilder, visualizationBuilderForEditor]);
 
   // Sync variable values to URL
   useEffect(() => {

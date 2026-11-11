@@ -18,6 +18,7 @@ import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
 import { PPLFilterUtils } from './filters';
 import { PPLSearchInterceptor, DEFAULT_PPL_ASYNC_HEAD_SIZE } from './ppl_search_interceptor';
+import { patternsModeCache } from '../../../data/public/ppl_settings/patterns_mode_cache';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../common/utils', () => ({
@@ -458,6 +459,44 @@ describe('PPLSearchInterceptor', () => {
         mockQueryResult,
         aggConfig
       );
+    });
+
+    describe('requested fetchSize', () => {
+      const runSearchWith = async (strategy: string, fetchSize?: number) => {
+        jest.spyOn(pplSearchInterceptor as any, 'buildQuery').mockResolvedValue({
+          language: 'PPL',
+          query: 'source=test_index',
+          dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        });
+        mockFetch.mockReturnValue(of({ data: 'mock response' }) as any);
+        const request = {
+          ...mockRequest,
+          params: {
+            ...mockRequest.params,
+            body: { ...mockRequest.params?.body, ...(fetchSize && { fetchSize }) },
+          },
+        };
+
+        await (pplSearchInterceptor as any)
+          .runSearch(request, new AbortController().signal, strategy)
+          .toPromise();
+        return mockFetch.mock.calls[0][0];
+      };
+
+      it('forwards a requested fetchSize for the ppl strategy', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL, 1000);
+        expect(context.body?.fetchSize).toBe(1000);
+      });
+
+      it('does not forward fetchSize for the async ppl strategy', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL_ASYNC, 1000);
+        expect(context.body).not.toHaveProperty('fetchSize');
+      });
+
+      it('does not add fetchSize when the request has none', async () => {
+        const context = await runSearchWith(SEARCH_STRATEGY.PPL);
+        expect(context.body).not.toHaveProperty('fetchSize');
+      });
     });
 
     it('should build query using buildQuery method', async () => {
@@ -1264,6 +1303,66 @@ describe('PPLSearchInterceptor', () => {
     });
   });
 
+  describe('runSearch with a patterns command', () => {
+    const datasetWithTime = {
+      type: 'DEFAULT',
+      timeFieldName: '@timestamp',
+      dataSource: { id: 'ds-1', title: 'ds', type: 'OpenSearch' },
+    };
+
+    const runWithQuery = async (query: string, clusterMode: 'label' | 'aggregation') => {
+      (mockCoreStart.http.get as jest.Mock).mockResolvedValue({
+        patternMode: clusterMode,
+        patternModeMeasured: true,
+      });
+      jest
+        .spyOn(pplSearchInterceptor as any, 'buildQuery')
+        .mockResolvedValue({ language: 'PPL', query, dataset: datasetWithTime });
+      jest.spyOn(pplSearchInterceptor as any, 'getAggConfig').mockReturnValue(undefined);
+
+      await (pplSearchInterceptor as any)
+        .runSearch({ params: { body: {} } }, undefined, SEARCH_STRATEGY.PPL)
+        .toPromise();
+
+      return mockFetch.mock.calls[mockFetch.mock.calls.length - 1][1].query;
+    };
+
+    beforeEach(() => {
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      mockFetch.mockReturnValue(of({ data: 'mock response' }));
+    });
+
+    afterEach(() => {
+      patternsModeCache.dispose();
+    });
+
+    it('reads the cluster default for the data source and appends the sort when it is label', async () => {
+      const query = 'source=test_index | patterns message';
+
+      expect(await runWithQuery(query, 'label')).toBe(`${query} | sort - \`@timestamp\``);
+      expect(mockCoreStart.http.get).toHaveBeenCalledWith(
+        '/api/enhancements/ppl/pattern_mode_settings',
+        { query: { dataSourceId: 'ds-1' } }
+      );
+    });
+
+    it('skips the sort when the cluster default is aggregation', async () => {
+      const query = 'source=test_index | patterns message';
+
+      expect(await runWithQuery(query, 'aggregation')).toBe(query);
+    });
+
+    it('does not read the setting when the query has no patterns without mode=', async () => {
+      await runWithQuery('source=test_index | where a = 1', 'aggregation');
+      await runWithQuery('source=test_index | patterns message mode=label', 'aggregation');
+
+      expect(mockCoreStart.http.get).not.toHaveBeenCalledWith(
+        '/api/enhancements/ppl/pattern_mode_settings',
+        expect.anything()
+      );
+    });
+  });
+
   describe('appendDefaultSort', () => {
     const datasetWithTime = { type: 'DEFAULT', timeFieldName: '@timestamp' };
 
@@ -1302,6 +1401,12 @@ describe('PPLSearchInterceptor', () => {
       'source=test_index | timechart span=1m count() by host',
       'source=test_index |chart count() over ts by host',
       'source=test_index |   timechart   count()',
+      // transpose/xyseries/timewrap pivot or aggregate away the dataset time field, and
+      // aggregation-mode patterns does too, so a default sort on that field would fail to resolve.
+      'source=test_index | transpose',
+      'source=test_index | xyseries host bytes clientip',
+      'source=test_index | timechart count() | timewrap 1d',
+      'source=test_index | patterns message mode=aggregation',
     ])('does not append a sort when the query already customizes it: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',
@@ -1317,6 +1422,9 @@ describe('PPLSearchInterceptor', () => {
       "source=test_index | where msg = 'took first | head spot'",
       'source=test_index | where id in [source=other | stats count()]',
       'source=test_index | where topic = "x"',
+      // A multi-line bracketed subquery must be fully masked, so an aggregating command inside it
+      // (even aggregation-mode patterns) does not block the outer doc query's default sort.
+      'source=test_index | where id in [\n  source=other | patterns message mode=aggregation\n]',
     ])('appends a sort when command keywords only appear in literals/subqueries: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',
@@ -1325,6 +1433,57 @@ describe('PPLSearchInterceptor', () => {
       });
 
       expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
+    });
+
+    // Explicit label-mode patterns keeps document rows and the dataset time field, so the default
+    // sort is still valid and must be appended.
+    it.each([
+      'source=test_index | patterns message mode=label',
+      'source=test_index | patterns message method=brain mode=label new_field=pat',
+      'source=test_index | patterns message MODE = LABEL',
+    ])('appends a sort for explicit label-mode patterns: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
+    });
+
+    // Without an explicit mode, the cluster setting `plugins.ppl.pattern.mode` decides, so the
+    // command may aggregate and drop the time field. The sort is skipped rather than risk
+    // `Field [@timestamp] not found`.
+    it.each([
+      'source=test_index | patterns message',
+      'source=test_index | patterns message method=brain',
+      // mode=label on a later stage doesn't apply to this patterns command
+      'source=test_index | patterns message | eval mode=label',
+    ])('does not append a sort for patterns without an explicit label mode: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe(query);
+    });
+
+    // With the cluster default known, a patterns without mode= follows it: label keeps document rows
+    // (sort appended), aggregation drops the time field (sort skipped). An explicit mode always wins.
+    it.each([
+      ['source=test_index | patterns message', 'label', true],
+      ['source=test_index | patterns message method=brain', 'label', true],
+      ['source=test_index | patterns message', 'aggregation', false],
+      ['source=test_index | patterns message mode=label', 'aggregation', true],
+      ['source=test_index | patterns message mode=aggregation', 'label', false],
+    ])('for %s with cluster default %s, appends a sort: %s', (query, mode, appends) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort(
+        { language: 'PPL', query, dataset: datasetWithTime },
+        mode
+      );
+
+      expect(result.query).toBe(appends ? `${query} | sort - \`@timestamp\`` : query);
     });
 
     it('does not append a sort when the dataset has no time field', () => {
@@ -1368,6 +1527,100 @@ describe('PPLSearchInterceptor', () => {
       expect(aggConfig.qs['1']).toBe(
         'source=test_index | fields * | stats count() by span(@timestamp, 1h)'
       );
+    });
+  });
+
+  // The date picker is skipped only when the queried source genuinely lacks the dataset's time
+  // field, decided by asking the cluster for the source's fields (shared with Explore).
+  describe('time filter for a source other than the dataset', () => {
+    const dataset = { type: 'DEFAULT', title: 'logs-a', timeFieldName: '@timestamp' };
+    let getFieldsForWildcard: jest.Mock;
+
+    const build = async (queryString: string) => {
+      const query = { language: 'PPL', query: queryString, dataset };
+      const request: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [query] } } },
+      };
+      const built = await (pplSearchInterceptor as any).buildQuery(request);
+      return { built, sorted: (pplSearchInterceptor as any).appendDefaultSort(built) };
+    };
+
+    beforeEach(() => {
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
+      mockPPLFilterUtils.getTimeFilter.mockImplementation(mockTimeFilter as any);
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest
+          .fn()
+          .mockReturnValue({ languageOverrides: { PPL: { hideDatePicker: true } } }),
+      });
+      getFieldsForWildcard = jest.fn(async ({ pattern }: { pattern: string }) => {
+        if (pattern === 'logs-b') return [{ name: '@timestamp' }, { name: 'host' }];
+        if (pattern === 'lookup') return [{ name: 'key' }, { name: 'value' }];
+        throw new Error(`no such index [${pattern}]`);
+      });
+      (mockDataService.indexPatterns as any).getFieldsForWildcard = getFieldsForWildcard;
+    });
+
+    it('applies the time filter and sort when the other source has the time field', async () => {
+      const { built, sorted } = await build('source=logs-b');
+
+      expect(getFieldsForWildcard).toHaveBeenCalledWith({
+        pattern: 'logs-b',
+        dataSourceId: undefined,
+      });
+      expect(built.query).toBe('source=logs-b | WHERE @timestamp >= "2023-01-01"');
+      expect(built.time_field).toBe('@timestamp');
+      expect(sorted.query).toBe(
+        'source=logs-b | WHERE @timestamp >= "2023-01-01" | sort - `@timestamp`'
+      );
+    });
+
+    it('skips the time filter and sort when the source lacks the time field', async () => {
+      const { built, sorted } = await build('source=lookup | head 5');
+
+      expect(built.query).toBe('source=lookup | head 5');
+      expect(built.time_field).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
+      expect(sorted.query).toBe('source=lookup | head 5');
+    });
+
+    it('applies the time filter without a lookup when the source matches the dataset', async () => {
+      const { built, sorted } = await build('source=logs-a | fields host');
+
+      expect(getFieldsForWildcard).not.toHaveBeenCalled();
+      expect(built.query).toBe('source=logs-a | WHERE @timestamp >= "2023-01-01" | fields host');
+      // The sort is withheld here by the fields projection, not by the source check.
+      expect(sorted.query).toBe(built.query);
+    });
+
+    it('applies the time filter and sort when the field lookup fails', async () => {
+      const { built, sorted } = await build('source=remote:logs');
+
+      expect(getFieldsForWildcard).toHaveBeenCalled();
+      expect(built.query).toBe('source=remote:logs | WHERE @timestamp >= "2023-01-01"');
+      expect(sorted.query).toBe(
+        'source=remote:logs | WHERE @timestamp >= "2023-01-01" | sort - `@timestamp`'
+      );
+    });
+
+    it('looks each source up once', async () => {
+      await build('source=lookup');
+      await build('source=lookup | stats count() by key');
+      expect(getFieldsForWildcard).toHaveBeenCalledTimes(1);
+    });
+
+    it('still withholds the sort for a lookup source when the time filter is skipped by request', async () => {
+      const query = { language: 'PPL', query: 'source=lookup', dataset };
+      const built = await (pplSearchInterceptor as any).buildQuery({
+        params: { body: { query: { queries: [query] }, skipTimeFilter: true } },
+      });
+      expect((pplSearchInterceptor as any).appendDefaultSort(built).query).toBe('source=lookup');
     });
   });
 

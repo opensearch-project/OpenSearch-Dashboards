@@ -13,6 +13,7 @@ import {
   queryReducer,
   queryEditorReducer,
   legacyReducer,
+  setQueryState,
 } from '../../utils/state_management/slices';
 import {
   setIndividualQueryStatus,
@@ -23,6 +24,7 @@ import {
   SourceTypeRegistryService,
   setSourceTypeRegistry,
 } from '../../../services/source_type_registry';
+import type { SourceTypeVisualBuilder } from '../../../services/source_type_registry';
 import { ExploreFlavor } from '../../../../common';
 
 jest.mock('@osd/i18n', () => ({
@@ -54,6 +56,12 @@ jest.mock('../../../../../data/public', () => ({
   },
 }));
 
+// `useStreamingStatus` needs only this helper, and importing it for real pulls in the same
+// createHistogramConfigs chain the PPLBuilder stub below exists to avoid.
+jest.mock('../../utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: (query: { query: string }) => query.query,
+}));
+
 // Keep the real parsePPL/types (mode decision depends on parsePPL) but stub the
 // heavy PPLBuilder, whose module pulls in the data plugin via
 // createHistogramConfigs. Re-export from the leaf modules to avoid that chain.
@@ -65,31 +73,58 @@ jest.mock('./ppl_builder', () => ({
   // (a fieldless metric).
   PPLBuilder: ({
     initialState,
+    language,
     onQueryChange,
   }: {
     initialState?: any;
+    language?: Pick<SourceTypeVisualBuilder, 'build'> & { reportsBuiltQuery?: boolean };
     onQueryChange?: (query: string, state: any) => void;
-  }) => (
-    <div data-test-subj="ppl-builder-stub">
-      Builder
-      <span data-test-subj="stub-initial-state">{JSON.stringify(initialState)}</span>
-      <button
-        type="button"
-        data-test-subj="stub-add-partial-metric"
-        onClick={() =>
-          // A fieldless metric compiles to nothing, so the emitted query is just
-          // the search expression; the partial work lives only in state.
-          onQueryChange?.('service="web-store"', {
-            searchExpression: 'service="web-store"',
-            aggregations: [{ id: 'ag-partial', fn: 'avg' }],
+  }) => {
+    // Like the real builder, a language flagged `reportsBuiltQuery` reports the query its rows
+    // build whenever that query (or the language) changes.
+    const ReactActual = jest.requireActual('react');
+    const built = language?.build({
+      searchExpression: '',
+      filters: [],
+      aggregations: [],
+      groupBy: { fields: [] },
+      ...initialState,
+    });
+    ReactActual.useEffect(() => {
+      if (language?.reportsBuiltQuery && built !== undefined) onQueryChange?.(built, initialState);
+    }, [built]);
+    return (
+      <div data-test-subj="pplBuilderStub">
+        Builder
+        <span data-test-subj="stubInitialState">{JSON.stringify(initialState)}</span>
+        <span data-test-subj="stubBuiltQuery">
+          {/* Some tests seed a partial state; fill the rest so PPL's build can read it. */}
+          {language?.build({
+            searchExpression: '',
+            filters: [],
+            aggregations: [],
             groupBy: { fields: [] },
-          })
-        }
-      >
-        add partial metric
-      </button>
-    </div>
-  ),
+            ...initialState,
+          })}
+        </span>
+        <button
+          type="button"
+          data-test-subj="stubAddPartialMetric"
+          onClick={() =>
+            // A fieldless metric compiles to nothing, so the emitted query is just
+            // the search expression; the partial work lives only in state.
+            onQueryChange?.('service="web-store"', {
+              searchExpression: 'service="web-store"',
+              aggregations: [{ id: 'ag-partial', fn: 'avg' }],
+              groupBy: { fields: [] },
+            })
+          }
+        >
+          add partial metric
+        </button>
+      </div>
+    );
+  },
 }));
 
 // Surface whether the analyze props were passed through (vs. gated to `undefined`
@@ -153,6 +188,24 @@ const makeStore = (
     } as any,
   });
 
+/** Mirrors the shape `useStreamingStatus` reads: streaming progress under the results cacheKey. */
+const makeStreamingStore = (streaming?: Record<string, unknown>, loading = true) =>
+  configureStore({
+    reducer: { query: queryReducer, queryEditor: queryEditorReducer, legacy: legacyReducer },
+    preloadedState: {
+      query: { query: 'source = logs', language: 'PPL', dataset: { id: '1', title: 'logs' } },
+      queryEditor: {
+        queryStatusMap: loading ? { 'source = logs': { status: 'loading', streaming } } : {},
+        overallQueryStatus: { status: loading ? 'loading' : 'ready' },
+        promptModeIsAvailable: false,
+        promptToQueryIsLoading: false,
+        editorMode: 'single-query',
+        lastExecutedPrompt: '',
+      },
+      legacy: {},
+    } as any,
+  });
+
 const setupServices = () => {
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({
     services: {
@@ -192,19 +245,19 @@ describe('LogsQueryPanel', () => {
   it('defaults a fresh query to code mode', () => {
     renderPanel('');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('opens a parseable query in code mode', () => {
     renderPanel('source = logs service="web-store"');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('opens an unparseable query in code mode', () => {
     renderPanel('source = logs | sort field');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   it('can switch to Builder from Code for a representable query and back', () => {
@@ -212,12 +265,12 @@ describe('LogsQueryPanel', () => {
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
     expect(screen.queryByTestId('code-editor-stub')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
   });
 
   // Renders the panel while a query is loading, optionally with the progress a source reported.
@@ -231,14 +284,12 @@ describe('LogsQueryPanel', () => {
           startTime: Date.now(),
         })
       );
-      if (progress) {
-        store.dispatch(
-          setIndividualQueryStatus({
-            cacheKey: 'rows',
-            status: { status: QueryExecutionStatus.LOADING, progress },
-          })
-        );
-      }
+      store.dispatch(
+        setIndividualQueryStatus({
+          cacheKey: 'rows',
+          status: { status: QueryExecutionStatus.LOADING, progress },
+        })
+      );
     });
     render(
       <Provider store={store}>
@@ -299,6 +350,122 @@ describe('LogsQueryPanel', () => {
     }
   });
 
+  describe("a source's own visual builder translation", () => {
+    // FakeQL's builder shows only the "Search for" text: `find <text>`.
+    const fakeVisualBuilder: SourceTypeVisualBuilder = {
+      build: (state) => `find ${state.searchExpression}`,
+      parse: (query) => {
+        const match = query.match(/^find (.*)$/);
+        return {
+          canBuild: !!match,
+          state: {
+            searchExpression: match?.[1] ?? '',
+            filters: [],
+            aggregations: [],
+            groupBy: { fields: [] },
+          },
+        };
+      },
+      aggregationColumn: () => null,
+      filterText: () => null,
+    };
+
+    const renderFakeQL = (query: string) =>
+      render(
+        <Provider
+          store={makeStore(query, undefined, 'FakeQL', {
+            id: 'fake-1',
+            title: 'fake',
+            type: 'FAKE',
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+    beforeEach(() => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: { visualBuilder: fakeVisualBuilder } },
+      });
+      setSourceTypeRegistry(registry);
+    });
+
+    afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+    it('opens the builder with the query as the translation reads it', () => {
+      renderFakeQL('find error');
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
+
+      expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
+      expect(JSON.parse(screen.getByTestId('stubInitialState').textContent ?? '')).toEqual(
+        expect.objectContaining({ searchExpression: 'error' })
+      );
+      // The builder is handed the translation, so it writes FakeQL rather than PPL.
+      expect(screen.getByTestId('stubBuiltQuery')).toHaveTextContent('find error');
+    });
+
+    it('re-reads the query in a new language instead of rewriting it, when only the language changes', () => {
+      // Two languages whose builders report the query their rows build, as the real one does.
+      const prefixed = (prefix: string): SourceTypeVisualBuilder =>
+        ({
+          ...fakeVisualBuilder,
+          build: (state) => `${prefix} ${state.searchExpression}`,
+          parse: (query) => ({
+            ...fakeVisualBuilder.parse(query.replace(new RegExp(`^${prefix} `), 'find ')),
+            canBuild: query.startsWith(`${prefix} `),
+          }),
+          reportsBuiltQuery: true,
+        }) as SourceTypeVisualBuilder;
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: {
+          FakeQL: { visualBuilder: prefixed('find') },
+          OtherQL: { visualBuilder: prefixed('other') },
+        },
+      });
+      setSourceTypeRegistry(registry);
+      const store = makeStore('find error', undefined, 'FakeQL', {
+        id: 'fake-1',
+        title: 'fake',
+        type: 'FAKE',
+      });
+      render(
+        <Provider store={store}>
+          <LogsQueryPanel />
+        </Provider>
+      );
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
+      mockSetQuery.mockClear();
+
+      // Same text, another language: OtherQL can't read `find error`, so Code, with the text kept.
+      act(() => {
+        store.dispatch(setQueryState({ ...store.getState().query, language: 'OtherQL' }));
+      });
+
+      expect(screen.queryByTestId('pplBuilderStub')).not.toBeInTheDocument();
+      expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+      expect(mockSetQuery).not.toHaveBeenCalled();
+    });
+
+    it("disables the Builder option for a query the translation can't read", () => {
+      // Valid PPL, but not FakeQL's builder syntax.
+      renderFakeQL('source = logs service="web-store"');
+
+      expect(screen.getByTestId('pplBuilderModeToggle-builder')).toBeDisabled();
+    });
+  });
+
   it('disables the Builder option for an unrepresentable query in Code mode', () => {
     renderPanel('source = logs | sort field');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
@@ -308,23 +475,23 @@ describe('LogsQueryPanel', () => {
   it('preserves partial builder work across a Code round-trip when the code is unedited', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderStub')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
 
     // Toggle to Code and back WITHOUT editing the code.
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
     // The preserved state is restored verbatim; a re-parse would drop the metric.
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
 
   it('preserves partial work when Monaco returns the same query with a trailing newline / CRLF', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // A trailing newline / CRLF from Monaco must NOT count as an edit: the
@@ -332,14 +499,14 @@ describe('LogsQueryPanel', () => {
     mockEditorText.current = 'service="web-store"\r\n';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
 
   it('re-parses (dropping partial work) when the code was edited before switching back', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
-    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stubAddPartialMetric'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // Edited code no longer matches the builder's output, so it is authoritative:
@@ -347,7 +514,7 @@ describe('LogsQueryPanel', () => {
     mockEditorText.current = 'service="web-store" | stats count()';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
-    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    const initial = JSON.parse(screen.getByTestId('stubInitialState').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: expect.any(String), fn: 'count' }]);
   });
 
@@ -392,6 +559,66 @@ describe('LogsQueryPanel', () => {
       // Switch into the visual builder, where analyze props are gated to undefined.
       fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
       expect(screen.queryByTestId('widgets-analyze-enabled')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('loading indicator', () => {
+    it('replaces the generic loading bar with streaming progress while polling', () => {
+      render(
+        <Provider
+          store={makeStreamingStore({
+            isPolling: true,
+            fractionDone: 0.42,
+            total: 100,
+            rowsFetched: 10,
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+    });
+
+    it('keeps the streaming bar when the engine reports no fraction', () => {
+      render(
+        <Provider
+          store={makeStreamingStore({
+            isPolling: true,
+            fractionDone: -1,
+            total: 100,
+            rowsFetched: 10,
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+    });
+
+    it('uses the generic loading bar when no streaming query is in flight', () => {
+      render(
+        <Provider store={makeStreamingStore(undefined, true)}>
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelStreamingProgress')).not.toBeInTheDocument();
+    });
+
+    it('shows no bar at all once nothing is loading', () => {
+      render(
+        <Provider store={makeStreamingStore(undefined, false)}>
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelStreamingProgress')).not.toBeInTheDocument();
     });
   });
 });

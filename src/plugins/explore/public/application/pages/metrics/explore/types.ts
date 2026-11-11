@@ -13,6 +13,8 @@ export enum MetricType {
   COUNTER = 'counter',
   GAUGE = 'gauge',
   HISTOGRAM = 'histogram',
+  /** A histogram of current values (OpenMetrics `gaugehistogram`): read as is, not as a rate. */
+  GAUGE_HISTOGRAM = 'gaugehistogram',
   SUMMARY = 'summary',
   UNKNOWN = 'unknown',
 }
@@ -72,6 +74,7 @@ export const TYPE_COLORS: Record<MetricType, string> = {
   [MetricType.COUNTER]: 'primary',
   [MetricType.GAUGE]: 'success',
   [MetricType.HISTOGRAM]: 'warning',
+  [MetricType.GAUGE_HISTOGRAM]: 'warning',
   [MetricType.SUMMARY]: 'accent',
   [MetricType.UNKNOWN]: 'default',
 };

@@ -53,11 +53,11 @@ jest.mock('../../../application/legacy/discover/opensearch_dashboards_services',
 }));
 
 jest.mock('./utils', () => ({
-  TextToDashboardMeta: {
+  createTextToDashboardMeta: jest.fn(() => ({
     name: 'text_to_dashboard',
     description: 'desc',
     parameters: { type: 'object', properties: {}, required: ['visualizations'] },
-  },
+  })),
 }));
 
 const visSpec = (title: string, indexName = 'flights') => ({

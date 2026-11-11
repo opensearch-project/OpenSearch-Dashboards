@@ -376,7 +376,12 @@ describe('ExplorePlugin', () => {
         expect.objectContaining({
           name: 'VisualizationEditor',
           aliasApp: 'visualization-editor',
-          title: expect.any(String),
+          title: 'Visualization editor',
+          description: 'Create and refine visualizations in one editor.',
+          promotion: {
+            buttonText: 'Create visualization',
+            description: 'Create and refine visualizations in one editor.',
+          },
         })
       );
 
@@ -547,6 +552,55 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it("maps each registered source's dataset types to its metrics resource client", () => {
+      const sourceTypes = (plugin as any).sourceTypeRegistry;
+      sourceTypes.register({
+        id: 'my-source',
+        label: 'My Source',
+        datasetTypes: ['MY_DATASET_TYPE', 'MY_OTHER_TYPE'],
+        metricsResourceClientId: 'my-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+      sourceTypes.register({
+        id: 'no-client',
+        label: 'No client',
+        datasetTypes: ['NO_CLIENT_TYPE'],
+        resolveDefaultDataset: async () => undefined,
+      });
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+
+      plugin.start(coreStart, deps);
+
+      expect(setClientForDatasetType.mock.calls).toEqual([
+        ['MY_DATASET_TYPE', 'my-metrics'],
+        ['MY_OTHER_TYPE', 'my-metrics'],
+      ]);
+    });
+
+    it('maps a source registered after start, as a plugin starting after Explore would', () => {
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+      plugin.start(coreStart, deps);
+      expect(setClientForDatasetType).not.toHaveBeenCalled();
+
+      (plugin as any).sourceTypeRegistry.register({
+        id: 'late-source',
+        label: 'Late Source',
+        datasetTypes: ['LATE_TYPE'],
+        metricsResourceClientId: 'late-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+
+      expect(setClientForDatasetType).toHaveBeenCalledWith('LATE_TYPE', 'late-metrics');
+    });
+
     it('should not register Ask AI embeddable action when contextProvider is not available', () => {
       const startDepsWithoutContextProvider = {
         ...startDeps,
@@ -633,23 +687,52 @@ describe('ExplorePlugin', () => {
       expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
     });
 
-    it('keeps the visualization editor alias visible outside Explore-enabled workspaces', async () => {
-      currentWorkspace$.next(null);
-      const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
-      const metricsAlias = { name: 'MetricsVisualization', hidden: false };
-      const editorAlias = { name: 'VisualizationEditor', hidden: false };
-      (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
-        discoverAlias,
-        metricsAlias,
-        editorAlias,
-      ]);
+    it.each(['use-case-essentials', 'use-case-search'])(
+      'groups classic visualizations and keeps the editor visible in %s workspaces',
+      async (workspaceFeature) => {
+        currentWorkspace$.next({ features: [workspaceFeature] });
+        const classicVis = { name: 'area', isClassic: true };
+        const controlsVis = { name: 'input_control_vis', isClassic: true };
+        const nonClassicVis = { name: 'markdown' };
+        const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
+        const metricsAlias = { name: 'MetricsVisualization', hidden: false };
+        const editorAlias = { name: 'VisualizationEditor', hidden: false };
+        const classicAction = { id: 'add_vis_action_area', grouping: [] as any[] };
+        const controlsAction = {
+          id: 'add_vis_action_input_control_vis',
+          grouping: [] as any[],
+        };
+        const nonClassicAction = { id: 'add_vis_action_markdown', grouping: [] as any[] };
+        (startDeps.visualizations.all as jest.Mock).mockReturnValue([
+          classicVis,
+          controlsVis,
+          nonClassicVis,
+        ]);
+        (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
+          discoverAlias,
+          metricsAlias,
+          editorAlias,
+        ]);
+        (startDeps.uiActions.getTriggerActions as jest.Mock).mockReturnValue([
+          classicAction,
+          controlsAction,
+          nonClassicAction,
+        ]);
 
-      await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
+        await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
 
-      expect(discoverAlias.hidden).toBe(true);
-      expect(metricsAlias.hidden).toBe(true);
-      expect(editorAlias.hidden).toBe(false);
-    });
+        expect(classicAction.grouping).toHaveLength(1);
+        expect(classicAction.grouping[0].id).toBe('others');
+        expect(classicAction.grouping[0].getDisplayName()).toBe('More');
+        expect(classicAction.grouping[0].getIconType()).toBe('boxesHorizontal');
+        expect(controlsAction.grouping).toHaveLength(1);
+        expect(controlsAction.grouping[0].id).toBe('others');
+        expect(nonClassicAction.grouping).toEqual([]);
+        expect(discoverAlias.hidden).toBe(true);
+        expect(metricsAlias.hidden).toBe(true);
+        expect(editorAlias.hidden).toBe(false);
+      }
+    );
   });
 
   describe('stop', () => {

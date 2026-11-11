@@ -11,3 +11,4 @@ export * from './use_editor_text';
 export * from './use_switch_language';
 export * from './use_set_editor_text';
 export * from './use_set_editor_text_with_query';
+export * from './use_switch_source_type';

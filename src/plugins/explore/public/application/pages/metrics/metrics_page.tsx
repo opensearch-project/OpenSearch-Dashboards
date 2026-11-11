@@ -18,6 +18,7 @@ import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_metrics_dataset';
+import { useCurrentExploreId } from '../../utils/hooks/use_current_explore_id';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
@@ -31,9 +32,10 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { savedExplore } = useInitPage();
+  const { savedExplore, savedExploreError } = useInitPage();
   const dispatch = useDispatch();
-  useInitializeMetricsDataset({ services, savedExplore });
+  const savedExploreId = useCurrentExploreId();
+  useInitializeMetricsDataset({ services, savedExplore, savedExploreId, savedExploreError });
 
   // Switch to query tab when loading a saved search
   useEffect(() => {

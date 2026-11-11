@@ -15,6 +15,12 @@ jest.mock('../run_query', () => ({
 
 jest.mock('../../../slices', () => ({
   clearLastExecutedData: jest.fn(),
+  clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
+  clearQueryStatusMap: jest.fn(() => ({ type: 'queryEditor/clearQueryStatusMap' })),
+  setIsQueryEditorDirty: jest.fn((dirty: boolean) => ({
+    type: 'queryEditor/setIsQueryEditorDirty',
+    payload: dirty,
+  })),
 }));
 
 const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
@@ -111,5 +117,117 @@ describe('loadQueryActionCreator', () => {
     await actionCreator(mockDispatch);
 
     expect(calls).toEqual(['clearLastExecutedData', 'setEditorTextWithQuery', 'runQuery']);
+  });
+
+  it('only fills the editor when the dataset type requires an explicit Run', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getQuery: () => ({ query: '', dataset: undefined }),
+            getDatasetService: () => ({
+              getType: (type: string) =>
+                type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined,
+            }),
+          },
+        },
+      },
+    } as any;
+    const getState = () =>
+      ({ query: { dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } } }) as any;
+
+    await loadQueryActionCreator(
+      explicitServices,
+      mockSetEditorTextWithQuery,
+      testQuery
+    )(mockDispatch, getState);
+
+    expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
+    expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+    // The previous results are cleared and the query is staged for Run.
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'results/clearResults' });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'queryEditor/clearQueryStatusMap' });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setIsQueryEditorDirty',
+      payload: true,
+    });
+  });
+
+  it('runs for a dataset type that requires an explicit Run when the user asked for it', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getQuery: () => ({ query: '', dataset: undefined }),
+            getDatasetService: () => ({
+              getType: () => ({ meta: { requiresExplicitRun: true } }),
+            }),
+          },
+        },
+      },
+    } as any;
+    const getState = () =>
+      ({ query: { dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } } }) as any;
+
+    await loadQueryActionCreator(
+      explicitServices,
+      mockSetEditorTextWithQuery,
+      testQuery,
+      undefined,
+      {
+        userInitiated: true,
+      }
+    )(mockDispatch, getState);
+
+    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(explicitServices, testQuery);
+  });
+
+  it('waits when either the current or the loaded dataset requires an explicit Run', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getQuery: () => ({ query: '', dataset: undefined }),
+            getDatasetService: () => ({
+              getType: (type: string) =>
+                type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined,
+            }),
+          },
+        },
+      },
+    } as any;
+    const ordinaryState = () =>
+      ({ query: { dataset: { id: 'i', title: 'i', type: 'INDEX_PATTERN' } } }) as any;
+    const explicitState = () =>
+      ({ query: { dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } } }) as any;
+
+    // The loaded query's own dataset requires a Run.
+    await loadQueryActionCreator(explicitServices, mockSetEditorTextWithQuery, testQuery, {
+      type: 'EXPLICIT_RUN_TYPE',
+    })(mockDispatch, ordinaryState);
+    expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+
+    // The current dataset (the one the query runs against) requires a Run.
+    await loadQueryActionCreator(explicitServices, mockSetEditorTextWithQuery, testQuery, {
+      type: 'INDEX_PATTERN',
+    })(mockDispatch, explicitState);
+    expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+
+    // Neither does.
+    await loadQueryActionCreator(explicitServices, mockSetEditorTextWithQuery, testQuery, {
+      type: 'INDEX_PATTERN',
+    })(mockDispatch, ordinaryState);
+    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(explicitServices, testQuery);
+  });
+
+  it('still runs a loaded query of any other dataset type', async () => {
+    const getState = () =>
+      ({ query: { dataset: { id: 'i', title: 'i', type: 'INDEX_PATTERN' } } }) as any;
+    await loadQueryActionCreator(
+      mockServices,
+      mockSetEditorTextWithQuery,
+      testQuery
+    )(mockDispatch, getState);
+    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testQuery);
   });
 });

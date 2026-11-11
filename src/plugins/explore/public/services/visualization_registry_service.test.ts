@@ -11,6 +11,7 @@ describe('VisualizationRegistryService', () => {
   let service: VisualizationRegistryService;
   let mockRegisterVisualization: jest.SpyInstance;
   let mockGetVisualization: jest.SpyInstance;
+  let mockGetVisualizationsFullMetadata: jest.SpyInstance;
 
   const createMockVisualization = (type: string): VisualizationType<any> =>
     ({
@@ -27,6 +28,9 @@ describe('VisualizationRegistryService', () => {
     mockGetVisualization = jest
       .spyOn(VisualizationRegistry.prototype, 'getVisualization')
       .mockImplementation(jest.fn());
+    mockGetVisualizationsFullMetadata = jest
+      .spyOn(VisualizationRegistry.prototype, 'getVisualizationsFullMetadata')
+      .mockImplementation(jest.fn());
 
     service = new VisualizationRegistryService();
   });
@@ -39,6 +43,12 @@ describe('VisualizationRegistryService', () => {
     it('should create a service with a VisualizationRegistry instance', () => {
       const registry = service.getRegistry();
       expect(registry).toBeInstanceOf(VisualizationRegistry);
+    });
+
+    it('registers Sankey as a built-in visualization', () => {
+      expect(mockRegisterVisualization).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'sankey' })])
+      );
     });
   });
 
@@ -72,13 +82,15 @@ describe('VisualizationRegistryService', () => {
   });
 
   describe('start', () => {
-    it('should return an object with registerVisualization and getVisualization methods', () => {
+    it('should return registry access methods', () => {
       const start = service.start();
 
       expect(start).toHaveProperty('registerVisualization');
       expect(start).toHaveProperty('getVisualization');
+      expect(start).toHaveProperty('getVisualizationsFullMetadata');
       expect(typeof start.registerVisualization).toBe('function');
       expect(typeof start.getVisualization).toBe('function');
+      expect(typeof start.getVisualizationsFullMetadata).toBe('function');
     });
 
     it('should delegate registerVisualization to the registry', () => {
@@ -110,6 +122,23 @@ describe('VisualizationRegistryService', () => {
       const result = start.getVisualization('nonexistent');
 
       expect(result).toBeUndefined();
+    });
+
+    it('should delegate getVisualizationsFullMetadata to the registry', () => {
+      const start = service.start();
+      const assistantMetadata = [
+        {
+          type: 'line',
+          name: 'Line',
+          description: 'Show trends over time.',
+        },
+      ];
+      mockGetVisualizationsFullMetadata.mockReturnValueOnce(assistantMetadata);
+
+      const result = start.getVisualizationsFullMetadata();
+
+      expect(mockGetVisualizationsFullMetadata).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(assistantMetadata);
     });
   });
 

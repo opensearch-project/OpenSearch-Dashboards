@@ -121,6 +121,19 @@ describe('TableRowContent', () => {
     expect(screen.getByTestId('source-cell-_source')).toBeInTheDocument();
   });
 
+  it("renders the source field cell for a _source column the dataset doesn't list", () => {
+    // Datasets whose rows come from a data frame have no _source field; their rows still do.
+    mockDataset.fields.getByName.mockReturnValue(undefined);
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['_source']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('source-cell-_source')).toBeInTheDocument();
+  });
+
   it('renders empty cells when formatField returns undefined', () => {
     mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
     mockDataset.formatField.mockReturnValue(undefined);

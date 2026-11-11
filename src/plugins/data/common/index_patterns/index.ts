@@ -33,6 +33,7 @@ export * from './types';
 export { IndexPatternsService } from './index_patterns';
 export type { IndexPattern } from './index_patterns';
 export * from './errors';
+export { isPayloadTooLargeError } from './lib';
 export {
   validateDataSourceReference,
   getIndexPatternTitle,

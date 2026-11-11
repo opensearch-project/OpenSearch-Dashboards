@@ -5,6 +5,12 @@
 
 import { Dataset } from '../../../data/common';
 
+/** Stored in `current` when "All" is selected; expanded to the live options at query time. */
+export const ALL_OPTION_VALUE = '$__all';
+
+export const isAllMarker = (current?: string[]): boolean =>
+  current?.length === 1 && current[0] === ALL_OPTION_VALUE;
+
 /**
  * Variable types supported by Dashboard
  */
@@ -32,6 +38,8 @@ export interface VariableMeta {
   multi?: boolean;
   /** Include "All" option */
   includeAll?: boolean;
+  /** Raw (unescaped) replacement for `$var` when "All" is selected; unset expands all options. */
+  customAllValue?: string;
   /** Hide variable from UI */
   hide?: boolean;
   /** Allow adding custom values */
@@ -170,3 +178,7 @@ export interface VariableState {
  * A variable combined with its runtime state, used by UI components.
  */
 export type VariableWithState = Variable & VariableState;
+
+/** True while any variable is still loading its options; values are not final yet. */
+export const hasLoadingVariables = (variables: VariableWithState[]): boolean =>
+  variables.some((v) => v.loading);

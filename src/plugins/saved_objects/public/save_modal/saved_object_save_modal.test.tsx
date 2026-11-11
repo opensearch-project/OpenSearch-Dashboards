@@ -65,4 +65,43 @@ describe('SavedObjectSaveModal', () => {
       'Save and done'
     );
   });
+
+  it('re-checks isValid when the modal state changes', () => {
+    const wrapper = mountWithIntl(
+      <SavedObjectSaveModal
+        onSave={() => void 0}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        showCopyOnSave={true}
+        objectType="visualization"
+        showDescription={true}
+        isValid={({ copyOnSave }) => !copyOnSave}
+      />
+    );
+    const disabled = () =>
+      wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').prop('disabled');
+    expect(disabled()).toBe(false);
+    wrapper.find('button[data-test-subj="saveAsNewCheckbox"]').simulate('click');
+    expect(disabled()).toBe(true);
+  });
+
+  it('disables save and ignores submit while isValid returns false', () => {
+    const onSave = jest.fn();
+    const wrapper = mountWithIntl(
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        showCopyOnSave={false}
+        objectType="visualization"
+        showDescription={true}
+        isValid={() => false}
+      />
+    );
+    expect(
+      wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').prop('disabled')
+    ).toBe(true);
+    wrapper.find('form#savedObjectSaveModalForm').simulate('submit');
+    expect(onSave).not.toHaveBeenCalled();
+  });
 });

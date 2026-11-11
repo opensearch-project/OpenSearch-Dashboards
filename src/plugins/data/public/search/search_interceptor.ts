@@ -43,7 +43,13 @@ import {
   OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
-import { SearchTimeoutError, PainlessError, isPainlessError } from './errors';
+import {
+  SearchTimeoutError,
+  PainlessError,
+  isPainlessError,
+  DataSourceError,
+  isDataSourceError,
+} from './errors';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export interface SearchInterceptorDeps {
@@ -104,6 +110,8 @@ export class SearchInterceptor {
       return e;
     } else if (isPainlessError(e)) {
       return new PainlessError(e, request);
+    } else if (isDataSourceError(e)) {
+      return new DataSourceError(e);
     } else {
       return e;
     }
@@ -270,6 +278,14 @@ export class SearchInterceptor {
       this.deps.toasts.addDanger({
         title: 'Search Error',
         text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+      return;
+    }
+
+    if (e instanceof DataSourceError) {
+      this.deps.toasts.addDanger({
+        title: 'Search Error',
+        text: toMountPoint(e.getErrorMessage()),
       });
       return;
     }

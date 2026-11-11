@@ -101,4 +101,23 @@ describe('get_time', () => {
       clock.restore();
     });
   });
+
+  describe('when the named time field is absent from the index pattern', () => {
+    it('produces no filter, so the query is unbounded', () => {
+      const filter = getTime(
+        {
+          id: 'ip1',
+          title: 'metrics-index',
+          timeFieldName: '@timestamp',
+          fields: [{ name: '_id', type: 'string', aggregatable: false, searchable: true }],
+        } as any,
+        { from: 'now-1h', to: 'now' }
+      );
+
+      // Consumers must gate on the field resolving (see TopNav.showDatePicker)
+      // rather than on timeFieldName being set, or they advertise a range that
+      // was never applied.
+      expect(filter).toBeUndefined();
+    });
+  });
 });

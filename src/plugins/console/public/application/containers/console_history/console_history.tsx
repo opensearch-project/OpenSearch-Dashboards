@@ -31,7 +31,6 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { memoize } from 'lodash';
-import moment from 'moment';
 import {
   keys,
   EuiSpacer,
@@ -48,6 +47,7 @@ import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
+import { describeRequest } from './describe_request';
 
 interface Props {
   close: () => void;
@@ -76,17 +76,7 @@ export function ConsoleHistory({ close }: Props) {
   const selectedReq = useRef<any>(null);
 
   const describeReq = useMemo(() => {
-    const _describeReq = (req: any) => {
-      const endpoint = req.endpoint;
-      const date = moment(req.time);
-
-      let formattedDate = date.format('MMM D');
-      if (date.diff(moment(), 'days') > -7) {
-        formattedDate = date.fromNow();
-      }
-
-      return `${endpoint} (${formattedDate})`;
-    };
+    const _describeReq = (req: any) => describeRequest(req);
 
     (_describeReq as any).cache = new WeakMap();
 

@@ -135,6 +135,8 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  // A data fetch was requested while not visible and must run once visible again.
+  private pendingFetchOnResume: boolean = false;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -307,6 +309,13 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    // Resume edge: flush the fetch owed while hidden. The dirty checks above can
+    // report clean because inputs were already synced into this.* while hidden.
+    if (this.pendingFetchOnResume && this.input.isVisible !== false) {
+      this.pendingFetchOnResume = false;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
@@ -446,6 +455,15 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
+    // Pause fetching while not visible (e.g. a collapsed section); record the
+    // owed fetch and flush it once on resume. Read the input directly so the
+    // auto-refresh path (which bypasses handleChanges) is covered too. See
+    // EmbeddableInput.isVisible.
+    if (this.input.isVisible === false) {
+      this.pendingFetchOnResume = true;
+      return;
+    }
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,

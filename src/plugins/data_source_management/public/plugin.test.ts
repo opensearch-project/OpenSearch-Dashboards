@@ -109,6 +109,35 @@ describe('#dataSourceManagement', () => {
     }).toThrow('cannot call `registerAuthenticationMethod` after data source management startup.');
   });
 
+  it('can register a direct query connection flow in setup', () => {
+    const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    const flow = {
+      id: 'example-flow',
+      title: 'Example connection',
+      buttonLabel: 'Connect example data source',
+      mount: jest.fn(() => jest.fn()),
+    };
+    expect(setup.registerDirectQueryConnectionFlow).toBeInstanceOf(Function);
+    expect(() => setup.registerDirectQueryConnectionFlow(flow)).not.toThrow();
+    // The registry stays internal: the start contract doesn't expose it.
+    expect(doStart()).not.toHaveProperty('getDirectQueryConnectionFlowRegistry');
+  });
+
+  it('should throw error if registering a direct query connection flow after startup', () => {
+    const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    doStart();
+    expect(() => {
+      setup.registerDirectQueryConnectionFlow({
+        id: 'late',
+        title: 'Late',
+        buttonLabel: 'Late',
+        mount: jest.fn(),
+      });
+    }).toThrow(
+      'cannot call `registerDirectQueryConnectionFlow` after data source management startup.'
+    );
+  });
+
   it('should register application in the management section', () => {
     const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {

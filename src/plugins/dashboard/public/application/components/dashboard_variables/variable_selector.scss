@@ -92,3 +92,9 @@
     fill: $euiColorDarkShade !important;
   }
 }
+
+// Hint row shown at the bottom of a truncated option list
+.variableSelectorTruncationHint {
+  font-style: italic;
+  opacity: 0.7;
+}

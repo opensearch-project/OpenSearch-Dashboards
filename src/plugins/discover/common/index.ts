@@ -4,6 +4,8 @@
  */
 
 export const PLUGIN_ID = 'discover';
+export const DISCOVER_PAGE_CONTEXT_ID = 'discover-page-context';
+export const DISCOVER_HOST_APP_ID = 'data-explorer';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGREGATION_SAMPLE_SIZE_SETTING = 'discover:aggregationSampleSize';

@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import SimpleGit from 'simple-git';
-import { fromNode as fcb } from 'bluebird';
+import { simpleGit } from 'simple-git';
 
 import { REPO_ROOT } from '@osd/utils';
 import { File } from '../file';
@@ -66,9 +65,9 @@ function getFileList(diffText) {
  * @return {Promise<Array<File>>}
  */
 export async function getFilesForCommit() {
-  const simpleGit = new SimpleGit(REPO_ROOT);
+  const git = simpleGit(REPO_ROOT);
 
-  const staged = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb)); // staged
+  const staged = await git.diff(['--name-status', '--cached']); // staged
 
   return getFileList(staged);
 }
@@ -79,9 +78,9 @@ export async function getFilesForCommit() {
  * @return {Promise<Array<File>>}
  */
 export async function getUnstagedFiles() {
-  const simpleGit = new SimpleGit(REPO_ROOT);
+  const git = simpleGit(REPO_ROOT);
 
-  const unstaged = await fcb((cb) => simpleGit.diff(['--name-status'], cb));
+  const unstaged = await git.diff(['--name-status']);
 
   return getFileList(unstaged);
 }

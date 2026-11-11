@@ -70,9 +70,12 @@ describe('promql code_completion', () => {
       appName: 'test-app',
       data: {
         resourceClientFactory: {
-          get: jest.fn().mockReturnValue(mockPrometheusClient),
+          getForDatasetType: jest.fn().mockReturnValue(mockPrometheusClient),
         },
         query: {
+          queryString: {
+            getQuery: jest.fn().mockReturnValue({}),
+          },
           timefilter: {
             timefilter: {
               getTime: jest.fn().mockReturnValue(mockTimeRange),
@@ -91,9 +94,10 @@ describe('promql code_completion', () => {
       jest.clearAllMocks();
 
       // Re-setup ALL mocks that were cleared
-      (mockServices.data.resourceClientFactory.get as jest.Mock).mockReturnValue(
+      (mockServices.data.resourceClientFactory.getForDatasetType as jest.Mock).mockReturnValue(
         mockPrometheusClient
       );
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({});
       mockPrometheusClient.getMetrics.mockResolvedValue(['prometheus_http_requests_total']);
       mockPrometheusClient.getLabels.mockResolvedValue([]);
       mockPrometheusClient.getLabelValues.mockResolvedValue([]);
@@ -207,6 +211,49 @@ describe('promql code_completion', () => {
         mockDataSourceMeta,
         mockTimeRange
       );
+      expect(mockServices.data.resourceClientFactory.getForDatasetType).toHaveBeenCalledWith(
+        undefined,
+        'prometheus'
+      );
+    });
+
+    it("lists metrics from the resource client of the dataset's type", async () => {
+      const myClient = {
+        getMetrics: jest.fn().mockResolvedValue(['my_metric']),
+        getLabels: jest.fn().mockResolvedValue([]),
+        getLabelValues: jest.fn().mockResolvedValue([]),
+      };
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        dataset: { id: 'my-dataset', type: 'MY_DATASET_TYPE' },
+      });
+      (mockServices.data.resourceClientFactory.getForDatasetType as jest.Mock).mockImplementation(
+        (datasetType: string) => (datasetType === 'MY_DATASET_TYPE' ? myClient : undefined)
+      );
+
+      const result = await getSimpleSuggestions('');
+
+      expect(mockServices.data.resourceClientFactory.getForDatasetType).toHaveBeenCalledWith(
+        'MY_DATASET_TYPE',
+        'prometheus'
+      );
+      checkSuggestionsContain(result, {
+        text: 'my_metric',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+      expect(mockPrometheusClient.getMetrics).not.toHaveBeenCalled();
+    });
+
+    it('keeps the static suggestions when no resource client is available', async () => {
+      (mockServices.data.resourceClientFactory.getForDatasetType as jest.Mock).mockReturnValue(
+        undefined
+      );
+
+      const result = await getSimpleSuggestions('');
+
+      checkSuggestionsContain(result, {
+        text: 'rate',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
     });
   });
 });

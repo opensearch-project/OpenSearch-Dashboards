@@ -148,6 +148,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   );
   const [multi, setMulti] = useState(existingVariable?.multi || false);
   const [includeAll, setIncludeAll] = useState(existingVariable?.includeAll || false);
+  const [customAllValue, setCustomAllValue] = useState(existingVariable?.customAllValue || '');
   const [allowCustomValue, setAllowCustomValue] = useState(
     existingVariable?.allowCustomValue || false
   );
@@ -342,7 +343,13 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       label: label.trim() || undefined,
       description: description.trim() || undefined,
       type,
-      ...(type !== VariableType.Text && { multi, includeAll, sort, allowCustomValue }),
+      ...(type !== VariableType.Text && {
+        multi,
+        includeAll,
+        sort,
+        allowCustomValue,
+        customAllValue: includeAll && customAllValue.trim() ? customAllValue.trim() : undefined,
+      }),
     };
 
     if (type === VariableType.Query) {
@@ -402,6 +409,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     customValues,
     multi,
     includeAll,
+    customAllValue,
     allowCustomValue,
     sort,
     regex,
@@ -823,6 +831,29 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
                       checked={includeAll}
                       onChange={(e) => setIncludeAll(e.target.checked)}
                       data-test-subj="variableEditorIncludeAll"
+                      compressed
+                    />
+                  </EuiFormRow>
+                )}
+
+                {multi && includeAll && (
+                  <EuiFormRow
+                    label={i18n.translate('dashboard.variableEditor.customAllValueLabel', {
+                      defaultMessage: 'Custom all value',
+                    })}
+                    helpText={i18n.translate('dashboard.variableEditor.customAllValueHelp', {
+                      defaultMessage:
+                        'Raw value to substitute when All is selected (e.g. .+ for PromQL regex). Leave empty to expand all option values.',
+                    })}
+                  >
+                    <EuiFieldText
+                      value={customAllValue}
+                      onChange={(e) => setCustomAllValue(e.target.value)}
+                      placeholder={i18n.translate(
+                        'dashboard.variableEditor.customAllValuePlaceholder',
+                        { defaultMessage: 'e.g. .+ or *' }
+                      )}
+                      data-test-subj="variableEditorCustomAllValue"
                       compressed
                     />
                   </EuiFormRow>

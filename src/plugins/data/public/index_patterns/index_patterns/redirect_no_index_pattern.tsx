@@ -43,7 +43,8 @@ export const onRedirectNoIndexPattern =
     overlays: CoreStart['overlays']
   ) =>
   () => {
-    const canManageIndexPatterns = capabilities.management.opensearchDashboards.indexPatterns;
+    const canManageIndexPatterns =
+      capabilities.management.opensearchDashboards.indexPatterns && capabilities.indexPatterns.save;
     const redirectTarget = canManageIndexPatterns
       ? '/management/opensearch-dashboards/indexPatterns'
       : '/home';

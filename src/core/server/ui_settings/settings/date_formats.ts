@@ -67,6 +67,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
         },
       }),
       schema: schema.string(),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
     'dateFormat:tz': {
       name: i18n.translate('core.ui_settings.params.dateFormat.timezoneTitle', {
@@ -176,6 +177,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
         },
       }),
       schema: schema.string(),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
   };
 };

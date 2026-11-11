@@ -199,43 +199,48 @@ export class CorrelationService {
    * Check correlations for current dataset and find log references
    */
   async checkCorrelationsForLogs(dataset: Dataset): Promise<Dataset[]> {
-    if (!dataset?.id) return [];
     try {
-      // Find correlations that reference the current dataset
-      const correlationsResponse = await this.findCorrelationsByDataset(dataset.id);
-      const logDatasets: Dataset[] = [];
-      if (correlationsResponse.savedObjects && correlationsResponse.savedObjects.length > 0) {
-        for (const correlation of correlationsResponse.savedObjects) {
-          // Parse the correlation structure - it's stored in entities array
-          const correlationAttrs = correlation.attributes as CorrelationAttributes;
-          const entities = correlationAttrs?.entities;
-          if (Array.isArray(entities) && correlation.references) {
-            // Check if this correlation contains both traces and logs datasets
-            const hasTracesDataset = entities.some((item: CorrelationEntity) => item.tracesDataset);
-            const hasLogsDataset = entities.some((item: CorrelationEntity) => item.logsDataset);
-            if (hasTracesDataset && hasLogsDataset) {
-              // Find references that are not the current dataset (traces dataset)
-              // These should be the log datasets
-              const logDatasetRefs = correlation.references.filter((ref) => ref.id !== dataset.id);
-              for (const logDatasetRef of logDatasetRefs) {
-                try {
-                  const logDataset = await this.fetchLogDataset(logDatasetRef.id);
-                  logDatasets.push(logDataset);
-                } catch (fetchError) {
-                  // eslint-disable-next-line no-console
-                  console.warn('Failed to fetch log dataset:', logDatasetRef.id, fetchError);
-                }
-              }
-            }
-          }
-        }
-      }
-      return logDatasets;
+      return await this.findLogDatasets(dataset);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to check correlations for logs:', error);
       return [];
     }
+  }
+
+  /** Logs datasets correlated with a traces dataset. Throws when the lookup fails. */
+  async findLogDatasets(dataset: Dataset): Promise<Dataset[]> {
+    if (!dataset?.id) return [];
+    // Find correlations that reference the current dataset
+    const correlationsResponse = await this.findCorrelationsByDataset(dataset.id);
+    const logDatasets: Dataset[] = [];
+    if (correlationsResponse.savedObjects && correlationsResponse.savedObjects.length > 0) {
+      for (const correlation of correlationsResponse.savedObjects) {
+        // Parse the correlation structure - it's stored in entities array
+        const correlationAttrs = correlation.attributes as CorrelationAttributes;
+        const entities = correlationAttrs?.entities;
+        if (Array.isArray(entities) && correlation.references) {
+          // Check if this correlation contains both traces and logs datasets
+          const hasTracesDataset = entities.some((item: CorrelationEntity) => item.tracesDataset);
+          const hasLogsDataset = entities.some((item: CorrelationEntity) => item.logsDataset);
+          if (hasTracesDataset && hasLogsDataset) {
+            // Find references that are not the current dataset (traces dataset)
+            // These should be the log datasets
+            const logDatasetRefs = correlation.references.filter((ref) => ref.id !== dataset.id);
+            for (const logDatasetRef of logDatasetRefs) {
+              try {
+                const logDataset = await this.fetchLogDataset(logDatasetRef.id);
+                logDatasets.push(logDataset);
+              } catch (fetchError) {
+                // eslint-disable-next-line no-console
+                console.warn('Failed to fetch log dataset:', logDatasetRef.id, fetchError);
+              }
+            }
+          }
+        }
+      }
+    }
+    return logDatasets;
   }
 
   async checkCorrelationsAndFetchLogs(
@@ -247,33 +252,41 @@ export class CorrelationService {
     logDatasets: Dataset[];
     datasetLogs: Record<string, LogHit[]>;
     logHitCount: number;
+    /** Failures (the correlations lookup or a logs dataset's query); other datasets still load. */
+    errors: string[];
   }> {
     if (!dataset?.id || !data || !traceId) {
-      return { logDatasets: [], datasetLogs: {}, logHitCount: 0 };
+      return { logDatasets: [], datasetLogs: {}, logHitCount: 0, errors: [] };
     }
-    let logHitCount = 0;
-    const datasetLogs: Record<string, LogHit[]> = {};
+    const errors: string[] = [];
+    let logDatasets: Dataset[] = [];
     try {
-      const logDatasets = await this.checkCorrelationsForLogs(dataset);
-      if (logDatasets.length > 0) {
-        const sampleSize = size || this.uiSettings.get(SAMPLE_SIZE_SETTING);
-        // Fetch logs for all datasets
-        for (const logDataset of logDatasets) {
+      logDatasets = await this.findLogDatasets(dataset);
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+      return { logDatasets: [], datasetLogs: {}, logHitCount: 0, errors };
+    }
+    const sampleSize = size || this.uiSettings.get(SAMPLE_SIZE_SETTING);
+    const datasetLogs: Record<string, LogHit[]> = {};
+    // One query per logs dataset, in parallel; a failing dataset does not hide the others.
+    await Promise.all(
+      logDatasets.map(async (logDataset) => {
+        try {
           const logsResponse = await fetchTraceLogsByTraceId(data, {
             traceId,
             dataset: logDataset,
             limit: sampleSize,
           });
-          const logs = transformLogsResponseToHits(logsResponse);
-          logHitCount += logs.length;
-          datasetLogs[logDataset.id] = logs;
+          datasetLogs[logDataset.id] = transformLogsResponseToHits(logsResponse);
+        } catch (error) {
+          datasetLogs[logDataset.id] = [];
+          errors.push(
+            `${logDataset.title}: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
-      }
-      return { logDatasets, datasetLogs, logHitCount };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error in checkCorrelationsAndFetchLogs:', error);
-      return { logDatasets: [], datasetLogs: {}, logHitCount: 0 };
-    }
+      })
+    );
+    const logHitCount = Object.values(datasetLogs).reduce((sum, logs) => sum + logs.length, 0);
+    return { logDatasets, datasetLogs, logHitCount, errors };
   }
 }

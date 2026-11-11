@@ -99,6 +99,32 @@ describe('span_transforms', () => {
       expect(span.output).toBe('—');
     });
 
+    it('keeps a real 0 token count', () => {
+      const span = traceHitToAgentSpan(
+        {
+          attributes: { gen_ai: { usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 } } },
+        } as any,
+        0
+      );
+      expect(span.genAiInputTokens).toBe(0);
+      expect(span.genAiOutputTokens).toBe(0);
+      expect(span.genAiTotalTokens).toBe(0);
+    });
+
+    it('reads token counts as numbers, and empty or non-numeric ones as missing', () => {
+      const span = traceHitToAgentSpan(
+        {
+          attributes: {
+            gen_ai: { usage: { input_tokens: '12', output_tokens: '', total_tokens: 'n/a' } },
+          },
+        } as any,
+        0
+      );
+      expect(span.genAiInputTokens).toBe(12);
+      expect(span.genAiOutputTokens).toBeNull();
+      expect(span.genAiTotalTokens).toBeNull();
+    });
+
     it('ignores message fields outside the current OTel GenAI schema', () => {
       const hitWithLegacyFields: any = {
         attributes: {

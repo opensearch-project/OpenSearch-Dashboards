@@ -7,17 +7,47 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
-import { VisFieldType } from '../visualizations/types';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
 
 export interface FieldSchema {
   name: string;
-  visFieldType: VisFieldType;
+  type: string;
 }
+
+export interface FieldReference {
+  name: string;
+}
+
+export type NormalizedRow = Record<string, unknown>;
+
 export interface UrlTransformationState {
   definitionId: string;
   config: Record<string, unknown>;
   hide: boolean;
+}
+
+export type TransformationIssueCode = 'invalid_config' | 'missing_fields' | 'execution_error';
+
+export interface TransformationIssue {
+  code: TransformationIssueCode;
+  message: string;
+  fields?: string[];
+}
+
+export type TransformationExecutionStatus = 'applied' | 'partially_applied' | 'skipped';
+
+export interface TransformationExecutionResult {
+  rows: NormalizedRow[];
+  status: TransformationExecutionStatus;
+  issues: TransformationIssue[];
+  // Explicit semantic type changes made during execution.
+  typeOverrides?: Record<string, string>;
+}
+
+export interface TransformationStepResult {
+  instanceId: string;
+  definitionId: string;
+  status: TransformationExecutionStatus | 'failed';
+  issues: TransformationIssue[];
 }
 
 export interface TransformationInstance<TConfig = Record<string, unknown>> {
@@ -28,24 +58,14 @@ export interface TransformationInstance<TConfig = Record<string, unknown>> {
   config: TConfig;
   // set true to skip transformation during pipeline execution
   hide: boolean;
-  // core transformation method
-  transformationMethod: (data: OpenSearchSearchHit[], config: TConfig) => OpenSearchSearchHit[];
+  // Execute against the current rows and report the outcome without changing config.
+  transformationMethod: (data: NormalizedRow[], config: TConfig) => TransformationExecutionResult;
   // config editor
   Editor: React.ComponentType<{
     config: TConfig;
     onChange: (newConfig: TConfig) => void;
     availableFields: FieldSchema[];
   }>;
-  // rechange schema types after transformation (e.g. convert field type)
-  transformSchema?: (
-    schema: Array<{ name?: string; type?: string }>,
-    config: TConfig
-  ) => Array<{ name?: string; type?: string }>;
-  // clean config when changing
-  validateConfig?: (
-    config: TConfig,
-    availableFields: Array<{ name?: string; type?: string }>
-  ) => TConfig;
 }
 
 export type TransformationPipeline = TransformationInstance[];
@@ -71,7 +91,7 @@ export interface ITransformationService {
 
   //  Pipeline instance management --
   readonly pipeline$: BehaviorSubject<TransformationPipeline>;
-  readonly stageSchemas$: BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>;
+  readonly stageFields$: BehaviorSubject<Map<string, FieldSchema[]>>;
   getPipeline$(): Observable<TransformationPipeline>;
   addInstance(id: string): void;
   removeInstance(id: string): void;
@@ -79,14 +99,16 @@ export interface ITransformationService {
   toggleInstanceHide(id: string): void;
   setPipeline(instances: TransformationPipeline): void;
   clearPipeline(): void;
+  serializePipeline(pipeline?: TransformationPipeline): UrlTransformationState[];
 
   // execution
   applyPipeline(
-    rawRows: OpenSearchSearchHit[],
-    originalSchema: Array<{ name?: string; type?: string }>
+    rows: NormalizedRow[],
+    originalSchema?: Array<{ name?: string; type?: string }>
   ): {
-    rows: OpenSearchSearchHit[];
-    finalSchema: Array<{ name?: string; type?: string }>;
+    rows: NormalizedRow[];
+    finalSchema: FieldSchema[];
+    steps: TransformationStepResult[];
   };
 
   // URL persistence

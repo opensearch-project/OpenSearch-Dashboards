@@ -34,6 +34,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@osd/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
+import { safeSetItem } from '@osd/std';
 import {
   NEWSFEED_DEFAULT_SERVICE_BASE_URL,
   NEWSFEED_FALLBACK_LANGUAGE,
@@ -104,7 +105,7 @@ export class NewsfeedApiDriver {
 
     const newHashes = items.map((i) => i.hash);
     const updatedHashes = [...new Set(old.concat(newHashes))];
-    localStorage.setItem(this.hashSetStorageKey, updatedHashes.join(','));
+    safeSetItem(localStorage, this.hashSetStorageKey, updatedHashes.join(','));
 
     return { previous: old, current: updatedHashes };
   }

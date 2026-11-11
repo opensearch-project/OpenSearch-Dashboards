@@ -8,10 +8,15 @@ import { LearnMoreLink } from './learn_more_link';
 import { useSelector } from 'react-redux';
 import { getServices } from '../../../../services/services';
 import {
+  selectDataset,
   selectIsPromptEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { ExploreServices } from '../../../../types';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -40,15 +45,18 @@ describe('LearnMoreLink', () => {
     title,
     docLink,
     isPromptMode = false,
+    dataset,
   }: {
     language?: string;
     title?: string;
     docLink?: { title: string; url: string };
     isPromptMode?: boolean;
+    dataset?: { type: string };
   } = {}) => {
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectIsPromptEditorMode) return isPromptMode;
       if (selector === selectQueryLanguage) return language;
+      if (selector === selectDataset) return dataset;
       throw new Error('unexpected selector');
     });
 
@@ -73,6 +81,7 @@ describe('LearnMoreLink', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setSourceTypeRegistry(new SourceTypeRegistryService());
   });
 
   it.each([
@@ -138,5 +147,24 @@ describe('LearnMoreLink', () => {
 
     render(<LearnMoreLink />);
     expect(screen.queryByTestId('exploreQueryPanelLearnMore')).not.toBeInTheDocument();
+  });
+  it("links to a source's own docs for the language on that source's datasets", () => {
+    // The same SQL chip means another store's dialect there, so core's OpenSearch SQL docs
+    // would be the wrong page.
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'other',
+      label: 'Other',
+      datasetTypes: ['OTHER'],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: {
+        SQL: { docLink: { title: 'Other SQL documentation', url: 'https://other.test/sql' } },
+      },
+    });
+    setSourceTypeRegistry(registry);
+    setup({ language: 'SQL', dataset: { type: 'OTHER' } });
+    const link = renderLink();
+    expect(link).toHaveAttribute('href', 'https://other.test/sql');
+    expect(link).toHaveTextContent('Other SQL documentation');
   });
 });

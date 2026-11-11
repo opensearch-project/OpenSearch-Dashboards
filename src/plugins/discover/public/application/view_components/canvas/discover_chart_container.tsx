@@ -11,6 +11,7 @@ import { useDiscoverContext } from '../context';
 import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { hasUsableTimeField } from '../../helpers/has_usable_time_field';
 
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -18,10 +19,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
   const { indexPattern } = useDiscoverContext();
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
-  const isTimeBased = useMemo(
-    () => (indexPattern ? indexPattern.isTimeBased() : false),
-    [indexPattern]
-  );
+  const isTimeBased = useMemo(() => hasUsableTimeField(indexPattern), [indexPattern]);
 
   if (!hits || !isTimeBased) return null;
 

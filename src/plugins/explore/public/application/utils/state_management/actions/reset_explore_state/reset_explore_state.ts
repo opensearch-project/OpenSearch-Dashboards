@@ -17,6 +17,7 @@ import { executeQueries } from '../query_actions';
 import { AppDispatch } from '../../store';
 import { useClearEditors } from '../../../../hooks';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
+import { datasetRequiresExplicitRun } from '../../../requires_explicit_run';
 
 /**
  * Redux Thunk for resetting the Explore state to its preloaded state.
@@ -35,5 +36,7 @@ export const resetExploreStateActionCreator =
     dispatch(setQueryState(state.query));
     dispatch(setQueryEditorState(state.queryEditor));
     await dispatch(detectAndSetOptimalTab({ services }));
+    // A dataset type that requires an explicit Run waits for the user.
+    if (datasetRequiresExplicitRun(services.data?.query?.queryString, state.query?.dataset)) return;
     await dispatch(executeQueries({ services }));
   };

@@ -316,3 +316,58 @@ describe('VariableEditorFlyout — variable reference suggestions', () => {
     expect(getLastPanelProps().existingVariableNames).toEqual(['alpha', 'bravo']);
   });
 });
+
+describe('VariableEditorFlyout — customAllValue', () => {
+  const allVariable = (overrides: Partial<Variable> = {}): Variable =>
+    customVariable({ multi: true, includeAll: true, ...overrides });
+
+  it('shows the Custom all value field only when multi + includeAll are on', () => {
+    expect(
+      findTestSubject(mountEditor(allVariable()).component, 'variableEditorCustomAllValue').length
+    ).toBe(1);
+    // includeAll off → field hidden
+    expect(
+      findTestSubject(
+        mountEditor(allVariable({ includeAll: false })).component,
+        'variableEditorCustomAllValue'
+      ).length
+    ).toBe(0);
+    // multi off → field hidden
+    expect(
+      findTestSubject(
+        mountEditor(allVariable({ multi: false })).component,
+        'variableEditorCustomAllValue'
+      ).length
+    ).toBe(0);
+  });
+
+  it('saves a trimmed customAllValue', async () => {
+    const { component, onSave } = mountEditor(allVariable());
+    findTestSubject(component, 'variableEditorCustomAllValue').simulate('change', {
+      target: { value: '  .+  ' },
+    });
+    await clickSave(component);
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ customAllValue: '.+' }));
+  });
+
+  it('persists an existing customAllValue on open', () => {
+    const { component } = mountEditor(allVariable({ customAllValue: '.*prod.*' }));
+    expect(
+      (
+        findTestSubject(component, 'variableEditorCustomAllValue').first().props() as {
+          value: string;
+        }
+      ).value
+    ).toBe('.*prod.*');
+  });
+
+  it('clears customAllValue when the field is emptied (regression: cleared value was not saved)', async () => {
+    const { component, onSave } = mountEditor(allVariable({ customAllValue: '.+' }));
+    findTestSubject(component, 'variableEditorCustomAllValue').simulate('change', {
+      target: { value: '' },
+    });
+    await clickSave(component);
+    // Must be explicitly undefined so the persisted value is overwritten, not left stale.
+    expect(onSave.mock.calls[0][0].customAllValue).toBeUndefined();
+  });
+});

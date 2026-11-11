@@ -31,6 +31,7 @@
 import { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { keys, EuiText } from '@elastic/eui';
+import { isImeComposing } from '../../../../core/public/utils';
 
 import './_ui_ace_keyboard_mode.scss';
 
@@ -77,7 +78,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
     };
 
     const aceKeydownListener = (event: KeyboardEvent) => {
-      if (event.key === keys.ESCAPE && !autoCompleteVisibleRef.current) {
+      if (event.key === keys.ESCAPE && !autoCompleteVisibleRef.current && !isImeComposing(event)) {
         event.preventDefault();
         event.stopPropagation();
         enableOverlay();

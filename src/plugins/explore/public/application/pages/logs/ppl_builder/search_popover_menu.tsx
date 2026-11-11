@@ -13,6 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { isImeComposing } from '../../../../../../../core/public/utils';
 import { compareValueSuggestions } from './value_suggestion_order';
 
 const SEARCH_DEBOUNCE_MS = 400;
@@ -256,7 +257,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
           value={search}
           onChange={(e) => changeSearch(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') applyFirst();
+            if (e.key === 'Enter' && !isImeComposing(e)) applyFirst();
             if (e.key === 'Escape') close();
           }}
           placeholder={searchPlaceholder}

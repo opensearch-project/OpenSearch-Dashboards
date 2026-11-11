@@ -23,6 +23,18 @@ import {
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
+import { queryManagerService } from '../connections/query_manager_service';
+import type { BaseConnectionManager } from '../connections/managers/base_connection_manager';
+
+type PromQLQueryManager = BaseConnectionManager<unknown, PromQLQueryParams, PromQLQueryResponse>;
+
+/**
+ * The query manager for a dataset's PromQL: the one registered (`registerQueryManager`) under the
+ * dataset's type, so a PromQL-compatible store can serve its own datasets, else Prometheus.
+ */
+export const resolvePromQLQueryManager = (datasetType?: string): PromQLQueryManager =>
+  ((datasetType && queryManagerService.getManager(datasetType)) as
+    PromQLQueryManager | undefined) ?? prometheusManager;
 
 function normalizeResult(
   resultType: string | undefined,
@@ -64,6 +76,8 @@ interface LabeledQueryResult {
   label: string;
   response?: PromQLQueryResponse;
   error?: string;
+  /** HTTP status of the failure, when the connection reported one (e.g. 400 for a bad query). */
+  errorStatus?: number;
   legendFormat?: string;
 }
 
@@ -78,6 +92,7 @@ export const promqlSearchStrategyProvider = (
         const { body: requestBody } = request;
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
+        const manager = resolvePromQLQueryManager(dataset?.type);
 
         const requestOptions = requestBody.options as PromQLSearchOptions | undefined;
         const { maxDataPoints, perQueryOptions } = requestOptions ?? {};
@@ -138,12 +153,26 @@ export const promqlSearchStrategyProvider = (
           plans,
           shared,
           datasetId,
+          manager,
           logger
         );
 
-        // For single query, preserve fail-fast behavior
+        // For single query, preserve fail-fast behavior, with the failure's own status (a bad
+        // query is a 400, not a 503).
         if (isSingleQuery && queryResults[0]?.error) {
-          throw new Error(queryResults[0].error);
+          const status = queryResults[0].errorStatus;
+          // The search route returns the message as the body and takes the response status from
+          // its JSON `status`; Explore's error panel shows `error.details`.
+          throw new Error(
+            JSON.stringify({
+              error: {
+                type: 'PromQLQueryError',
+                reason: 'PromQL query failed',
+                details: queryResults[0].error,
+              },
+              ...(status ? { status, statusCode: status } : {}),
+            })
+          );
         }
 
         const stepResolution: PromQLStepResolution | undefined = isInstantQuery
@@ -201,6 +230,26 @@ type SharedExecOptions =
       time: string;
     };
 
+interface UpstreamError {
+  statusCode?: unknown;
+  status?: unknown;
+  body?: unknown;
+  response?: unknown;
+}
+
+const asUpstreamError = (error: unknown): UpstreamError =>
+  typeof error === 'object' && error !== null ? (error as UpstreamError) : {};
+
+// Upstream statuses the browser can act on as is. A 401 or 403 from the connection (e.g. a bad
+// datasource credential) would read as the user's own session ending, so it becomes a 502; any
+// other failure stays the route's 503.
+const FORWARDED_STATUSES = [400, 404, 422];
+const toClientStatus = (upstreamStatus: number): number | undefined => {
+  if (FORWARDED_STATUSES.includes(upstreamStatus)) return upstreamStatus;
+  if (upstreamStatus === 401 || upstreamStatus === 403) return 502;
+  return undefined;
+};
+
 /**
  * Executes multiple PromQL queries in parallel
  */
@@ -210,6 +259,7 @@ async function executeMultipleQueries(
   plans: QueryPlan[],
   shared: SharedExecOptions,
   datasetId: string,
+  manager: PromQLQueryManager,
   logger: Logger
 ): Promise<LabeledQueryResult[]> {
   const promises = plans.map(async (plan): Promise<LabeledQueryResult> => {
@@ -235,7 +285,7 @@ async function executeMultipleQueries(
     };
 
     try {
-      const queryRes = await prometheusManager.query(context, request, params);
+      const queryRes = await manager.query(context, request, params);
 
       return {
         label: plan.label,
@@ -249,8 +299,9 @@ async function executeMultipleQueries(
         errorMessage = error.message;
       }
 
+      const upstream = asUpstreamError(error);
       // Try to extract detailed error from response body from SQL plugin
-      const responseBody = (error as any)?.body ?? (error as any)?.response;
+      const responseBody = upstream.body ?? upstream.response;
       if (responseBody) {
         try {
           const parsed = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
@@ -264,9 +315,11 @@ async function executeMultipleQueries(
         }
       }
 
+      const status = toClientStatus(Number(upstream.statusCode ?? upstream.status));
       return {
         label: plan.label,
         error: errorMessage,
+        ...(status ? { errorStatus: status } : {}),
         legendFormat: plan.legendFormat,
       };
     }

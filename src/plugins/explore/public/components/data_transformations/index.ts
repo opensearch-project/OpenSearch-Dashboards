@@ -9,6 +9,8 @@ export type {
   TransformationDefinition,
   ITransformationService,
   FieldSchema,
+  FieldReference,
+  NormalizedRow,
   UrlTransformationState,
   TransformationConfigSchema,
   ConfigFieldSpec,
@@ -16,11 +18,7 @@ export type {
   ConfigEnumOption,
 } from './types';
 
-export {
-  TransformationService,
-  createNoOpTransformationService,
-  TRANSFORMATION_STATE_KEY,
-} from './transformation_service';
+export { TransformationService, TRANSFORMATION_STATE_KEY } from './transformation_service';
 export { addTransformation, removeTransformation } from './transformation_utils';
 export {
   createLimitTransformation,
@@ -59,4 +57,8 @@ export { TransformPanel } from './transform_panel';
 export type { TransformPanelProps } from './transform_panel';
 export { TransformSelectorButton } from './transform_selector_overlay';
 export { useTransformationService } from './use_transformation_service';
-export { registerAllTransformations } from './register_all_transformations';
+export {
+  getAllTransformationDefinitions,
+  getTransformationConfigSchemaRegistry,
+  registerAllTransformations,
+} from './register_all_transformations';

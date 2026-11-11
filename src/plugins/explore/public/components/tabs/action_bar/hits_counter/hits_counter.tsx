@@ -30,11 +30,21 @@
 
 import './hits_counter.scss';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { formatDuration } from './format_duration';
+import { formatStreamingAnnotation } from './format_streaming_annotation';
+import { StreamingQueryStatus } from '../../../../application/utils/state_management/types';
 
 export interface HitsCounterProps {
   /**
@@ -73,6 +83,18 @@ export interface HitsCounterProps {
    * turns the setting off, so the hidden columns come back
    */
   onShowHiddenColumns?: () => void;
+  /**
+   * progress of the streaming query behind these results; absent for a non-streaming query, whose
+   * readout is then unchanged
+   */
+  streaming?: StreamingQueryStatus;
+  /**
+   * when true, the results are non-time-series: the dataset has no time field, or the query's
+   * source lacks the dataset's time field (e.g. a `source=<lookup>` query over a time-based
+   * dataset); renders an informational badge so the user understands why time-dependent
+   * features (histogram, time column, time filter) are quiet
+   */
+  isNonTimeSeries?: boolean;
 }
 
 export function HitsCounter({
@@ -85,15 +107,23 @@ export function HitsCounter({
   rowsCountOverride,
   hiddenColumnCount = 0,
   onShowHiddenColumns,
+  streaming,
+  isNonTimeSeries = false,
 }: HitsCounterProps) {
   const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
+  // elapsedMs is republished on every streaming snapshot, so the duration ticks while polling.
   const duration = formatDuration(elapsedMs);
-  const durationSegment = duration ? (
-    <>
-      {' · '}
-      <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>
-    </>
-  ) : null;
+  const annotation = formatStreamingAnnotation(streaming);
+  const durationSegment =
+    duration || annotation ? (
+      <>
+        {' · '}
+        {duration && <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>}
+        {annotation && (
+          <span data-test-subj="discoverQueryStreamingAnnotation">{` (${annotation})`}</span>
+        )}
+      </>
+    ) : null;
 
   return (
     <I18nProvider>
@@ -157,6 +187,29 @@ export function HitsCounter({
             )}
           </EuiText>
         </EuiFlexItem>
+        {isNonTimeSeries && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('explore.discover.nonTimeSeriesBadgeTooltip', {
+                defaultMessage:
+                  'This query returns non-time-series data. Time-based features (histogram, time column, time filter) are unavailable for these results.',
+              })}
+            >
+              <EuiBadge
+                color="primary"
+                iconType="iInCircle"
+                className="dscResultCount__nonTimeSeries"
+                data-test-subj="exploreNonTimeSeriesBadge"
+              >
+                <FormattedMessage
+                  id="explore.discover.nonTimeSeriesBadge"
+                  defaultMessage="Querying non-time-series data"
+                />
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         {/* Sits in the same sentence as the counts so the table's column set is disclosed where
             the result summary already is, and offers the way back out of the filter. The gap is a
             margin rather than a leading space, since the row's gutterSize="none" collapses one. */}

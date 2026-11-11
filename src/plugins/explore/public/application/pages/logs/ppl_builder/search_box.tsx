@@ -12,6 +12,8 @@ import { compareValueSuggestions } from './value_suggestion_order';
 import { getCommandEnterAction } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/command_enter_action';
 
 export const PPL_SEARCH_LANGUAGE_ID = 'pplSearchExpression';
+// Monaco's built-in language with no tokens or suggestions, for a language without autocomplete.
+const PLAIN_TEXT_LANGUAGE_ID = 'plaintext';
 
 const LINE_HEIGHT = 18;
 const MIN_HEIGHT = 20;
@@ -38,6 +40,11 @@ interface SearchBoxProps {
   onRequestValues: (field: string) => Promise<string[]>;
   onChange: (text: string) => void;
   onRun?: () => void;
+  /**
+   * PPL search syntax: highlighting, and field, value and keyword suggestions. Off for other
+   * languages, whose search box is plain text.
+   */
+  autocomplete?: boolean;
 }
 
 export const SearchBox: React.FC<SearchBoxProps> = ({
@@ -46,6 +53,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
   onRequestValues,
   onChange,
   onRun,
+  autocomplete = true,
 }) => {
   const fieldNamesRef = useRef(fieldNames);
   fieldNamesRef.current = fieldNames;
@@ -79,6 +87,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
 
       editor.addAction(getCommandEnterAction(() => onRunRef.current?.()));
 
+      if (!autocomplete) return;
       const scheduleSuggest = () => {
         window.clearTimeout(suggestTimerRef.current);
         suggestTimerRef.current = window.setTimeout(() => triggerSuggest(editor), 0);
@@ -95,7 +104,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
         scheduleSuggest();
       });
     },
-    [triggerSuggest, syncHeight]
+    [triggerSuggest, syncHeight, autocomplete]
   );
 
   useEffect(() => () => window.clearTimeout(suggestTimerRef.current), []);
@@ -217,9 +226,13 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
     []
   );
 
-  const placeholder = i18n.translate('explore.pplBuilder.searchBox.placeholder', {
-    defaultMessage: 'Search or filter your data — fields and values autosuggest as you type...',
-  });
+  const placeholder = autocomplete
+    ? i18n.translate('explore.pplBuilder.searchBox.placeholder', {
+        defaultMessage: 'Search or filter your data — fields and values autosuggest as you type...',
+      })
+    : i18n.translate('explore.pplBuilder.searchBox.plainPlaceholder', {
+        defaultMessage: 'Search your data...',
+      });
 
   return (
     <div className="plqSearchBoxEditor" data-test-subj="pplBuilderSearchBox">
@@ -230,13 +243,13 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
       ) : null}
       <CodeEditor
         height={editorHeight}
-        languageId={PPL_SEARCH_LANGUAGE_ID}
+        languageId={autocomplete ? PPL_SEARCH_LANGUAGE_ID : PLAIN_TEXT_LANGUAGE_ID}
         value={value}
         onChange={onChange}
         options={options}
-        suggestionProvider={suggestionProvider}
+        suggestionProvider={autocomplete ? suggestionProvider : undefined}
         editorDidMount={handleEditorDidMount}
-        triggerSuggestOnFocus
+        triggerSuggestOnFocus={autocomplete}
         useLatestTheme
       />
     </div>

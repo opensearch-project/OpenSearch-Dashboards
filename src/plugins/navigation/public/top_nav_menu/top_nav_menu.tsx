@@ -33,7 +33,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText, EuiTitle } from '@e
 import classNames from 'classnames';
 import { ReactElement, useRef } from 'react';
 
-import { MountPoint } from '../../../../core/public';
+import { MountPoint, SCREEN_TITLE_ATTRIBUTE } from '../../../../core/public';
 import {
   DataPublicPluginStart,
   QueryStatus,
@@ -216,6 +216,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     );
   }
 
+  // Marks the screen title so the application header doesn't repeat it as the last breadcrumb.
+  const screenTitleAttributes = { [SCREEN_TITLE_ATTRIBUTE]: '' };
+
   function renderLayout() {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
@@ -236,7 +239,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                   <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
-                        <h1>{screenTitle}</h1>
+                        <h1 title={screenTitle} {...screenTitleAttributes}>
+                          {screenTitle}
+                        </h1>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
@@ -257,7 +262,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                     <EuiTitle size="xs">
-                      <h1>{screenTitle}</h1>
+                      <h1 title={screenTitle} {...screenTitleAttributes}>
+                        {screenTitle}
+                      </h1>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem className="osdTopNavMenu">
@@ -293,7 +300,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                   <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
-                        <h1>{screenTitle}</h1>
+                        <h1 title={screenTitle} {...screenTitleAttributes}>
+                          {screenTitle}
+                        </h1>
                       </EuiTitle>
                     </EuiFlexItem>
                     {groupedActionsBeforeDatePicker ? (

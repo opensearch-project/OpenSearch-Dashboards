@@ -110,9 +110,12 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     }
 
     // Only run preload functions for missing sections
-    const finalUIState = appState?.ui || getPreloadedUIState(services);
+    // URL sections may be partial (e.g. a deep link setting only `ui.metricsPageMode`), so they are
+    // merged over the defaults rather than replacing them: an empty `tab` would otherwise leave
+    // `tab.patterns` undefined and crash the patterns selectors.
+    const finalUIState = { ...getPreloadedUIState(services), ...(appState?.ui ?? {}) };
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
-    const finalTabState = appState?.tab || getPreloadedTabState(services);
+    const finalTabState = mergeTabState(getPreloadedTabState(services), appState?.tab);
 
     // Handle legacy state with special logic for columns
     let finalLegacyState = appState?.legacy;
@@ -405,6 +408,17 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 /**
  * Get preloaded tab state
  */
+/**
+ * Tab state from the URL merged over the defaults, one level deep, so a partial or empty `tab`
+ * section keeps every default sub-state (`logs`, `patterns`).
+ */
+const mergeTabState = (defaults: TabState, fromUrl?: Partial<TabState>): TabState => ({
+  ...defaults,
+  ...(fromUrl ?? {}),
+  logs: { ...defaults.logs, ...(fromUrl?.logs ?? {}) },
+  patterns: { ...defaults.patterns, ...(fromUrl?.patterns ?? {}) },
+});
+
 const getPreloadedTabState = (services: ExploreServices): TabState => {
   return {
     logs: {},

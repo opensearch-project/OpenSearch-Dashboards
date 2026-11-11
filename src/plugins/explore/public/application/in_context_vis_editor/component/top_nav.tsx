@@ -27,7 +27,7 @@ export interface TopNavProps {
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryBuilder, datasetView, queryEditorState } = useQueryBuilderState();
-  const { getEditorText } = useEditorOperations();
+  const { getEditorRef } = useEditorOperations();
 
   const {
     navigation: {
@@ -66,13 +66,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         queryBuilder.updateQueryEditorState({ dateRange: payload.dateRange });
       }
 
+      const editor = getEditorRef();
+
       // update current query text only if on Query tab and not in Prompt mode
       if (
         queryEditorState.editorMode !== EditorMode.Prompt &&
         queryEditorState.activeBottomPanelTab === 'QUERY_TAB' &&
-        queryEditorState.languageType !== SupportLanguageType.promQL
+        queryEditorState.languageType !== SupportLanguageType.promQL &&
+        editor
       ) {
-        queryBuilder.updateQueryState({ query: getEditorText() });
+        queryBuilder.updateQueryState({ query: editor.getValue() });
       }
 
       await queryBuilder.onQueryExecutionSubmit();
@@ -81,7 +84,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       queryBuilder,
       queryEditorState.editorMode,
       queryEditorState.activeBottomPanelTab,
-      getEditorText,
+      getEditorRef,
       queryEditorState.languageType,
     ]
   );

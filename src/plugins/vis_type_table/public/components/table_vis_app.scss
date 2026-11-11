@@ -6,6 +6,13 @@
   @include euiScrollBar;
 }
 
+// A percentage width creates an intrinsic sizing cycle inside auto-sized column-split groups.
+// Keep intrinsic sizing automatic, then fill the resolved group when the table is narrower.
+.visTable--splitColumns .tableVisContainer table {
+  width: auto;
+  min-width: 100%;
+}
+
 // Group container for table visualization components
 .visTable__group {
   flex: 0 0 auto;

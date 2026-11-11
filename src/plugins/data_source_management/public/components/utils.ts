@@ -129,6 +129,7 @@ export const mergeDataSourcesWithConnections = (
       title: ds.title,
       description: ds.description,
       relatedConnections,
+      ...(ds.workspaces ? { workspaces: ds.workspaces } : {}),
     });
   });
 
@@ -268,11 +269,17 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
             datasourceversion,
             type,
             installedplugins,
+            ...(source.workspaces ? { workspaces: source.workspaces } : {}),
           };
         }) || []
     );
 }
 
+/**
+ * Loads every `data-connection` saved object with all its attributes. Don't narrow this with a
+ * `fields` projection: the connections table reads `description`, and a registered direct query
+ * connection flow's `ownsConnection` may read any attribute.
+ */
 export async function getDataConnections(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
     .find<DataConnectionSavedObjectAttributes>({

@@ -54,6 +54,8 @@ import { SessionRow } from '../application/pages/sessions/session_utils';
 import { AgentView, isAgentView } from './agent_view_panel';
 import { OpenSearchSearchHit } from '../types/doc_views_types';
 import { prepareAgentSpansQuery, prepareRootSpansQuery } from '../application/tab_queries';
+import { nestedAiRunsAmong, runKey } from '../application/pages/traces/hooks/shadowed_ai_roots';
+import { dropShadowedAiRoots, ensureAiRootFieldChecked } from '../application/utils/ai_root';
 
 export interface SearchProps {
   description?: string;
@@ -431,6 +433,34 @@ export class AgentTracesEmbeddable
     this.updateOutput({ loading: false, error: undefined });
   };
 
+  /** Drops agent runs nested in another run of the rows; keeps every row if the lookup fails. */
+  private dropNestedAiRuns = async <T extends { _source?: Record<string, unknown> }>(
+    hits: T[],
+    savedQuery: Query
+  ): Promise<T[]> => {
+    if (!savedQuery.dataset) return hits;
+    try {
+      const nested = await nestedAiRunsAmong(
+        new PPLService(this.services.data, { signal: this.abortController?.signal }),
+        savedQuery.dataset,
+        defaultPrepareQueryString({ ...savedQuery, query: '' }),
+        hits.map((hit) => ({
+          traceId: String(hit._source?.traceId ?? ''),
+          spanId: String(hit._source?.spanId ?? ''),
+          parentSpanId: String(hit._source?.parentSpanId ?? ''),
+        }))
+      );
+      return nested.size > 0
+        ? hits.filter(
+            (h) =>
+              !nested.has(runKey(String(h._source?.traceId ?? ''), String(h._source?.spanId ?? '')))
+          )
+        : hits;
+    } catch {
+      return hits;
+    }
+  };
+
   private fetch = async () => {
     if (!this.searchProps) return;
     if (this.agentView === 'sessions') {
@@ -456,6 +486,21 @@ export class AgentTracesEmbeddable
     });
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
+    if (this.agentView === 'traces' && this.savedQuery) {
+      // The Traces query names the AI-root marker only once it is known to be mapped.
+      await ensureAiRootFieldChecked(
+        new PPLService(this.services.data),
+        this.savedQuery.dataset,
+        defaultPrepareQueryString({ ...this.savedQuery, query: '' })
+      );
+      const currentQuery = searchSource.getField('query');
+      if (currentQuery) {
+        searchSource.setField('query', {
+          ...currentQuery,
+          query: prepareRootSpansQuery(this.savedQuery),
+        });
+      }
+    }
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
@@ -470,7 +515,10 @@ export class AgentTracesEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
-    const rows = resp.hits.hits;
+    const rows =
+      this.agentView === 'traces' && this.savedQuery
+        ? await this.dropNestedAiRuns(dropShadowedAiRoots(resp.hits.hits), this.savedQuery)
+        : resp.hits.hits;
 
     // Feed data to VisualizationBuilder for visualization tabs
     if (this.visualizationBuilder) {

@@ -527,6 +527,79 @@ describe('Workspace plugin', () => {
     expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
   });
 
+  it('#start should settle application updates when out of a workspace with legacy navigation', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(false);
+    const coreStart = coreMock.createStart();
+    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(false);
+    coreStart.workspaces.currentWorkspace$.next(null);
+
+    const applications$ = new BehaviorSubject(
+      new Map([
+        [
+          'dashboards',
+          {
+            id: 'dashboards',
+            title: 'Dashboards',
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.visible,
+            workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+          },
+        ],
+        [
+          'searchRelevance',
+          {
+            id: 'searchRelevance',
+            title: 'Search Relevance',
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.visible,
+          },
+        ],
+      ])
+    );
+    coreStart.application.applications$ =
+      applications$ as typeof coreStart.application.applications$;
+
+    await workspacePlugin.setup(setupMock, {});
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+    const maximumApplicationUpdates = 10;
+    let applicationUpdateCount = 0;
+    const applicationUpdateSubscription = appUpdater$.subscribe((updater) => {
+      applicationUpdateCount += 1;
+      if (applicationUpdateCount >= maximumApplicationUpdates) {
+        return;
+      }
+
+      applications$.next(
+        new Map(
+          [...applications$.getValue()].map(([id, app]) => {
+            const changes = updater(app as any);
+            const updatedApp = { ...app, ...changes };
+            if (changes?.status === AppStatus.inaccessible) {
+              updatedApp.navLinkStatus = AppNavLinkStatus.hidden;
+            }
+            return [id, updatedApp];
+          })
+        )
+      );
+    });
+
+    workspacePlugin.start(coreStart, getMockDependencies());
+
+    applicationUpdateSubscription.unsubscribe();
+    workspacePlugin.stop();
+
+    expect(applicationUpdateCount).toBeLessThan(maximumApplicationUpdates);
+    expect(applications$.getValue().get('dashboards')).toEqual(
+      expect.objectContaining({
+        status: AppStatus.inaccessible,
+        navLinkStatus: AppNavLinkStatus.hidden,
+      })
+    );
+  });
+
   it('#start should remove non-workspace chrome page search service', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();

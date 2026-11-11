@@ -52,6 +52,7 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
     }),
     stage: 'experimental',
+    isClassic: true,
     visualization: InputControlVisController,
     visConfig: {
       defaults: {

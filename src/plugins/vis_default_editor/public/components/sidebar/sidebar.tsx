@@ -48,6 +48,7 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { Schema } from '../../schemas';
 import { useOptionTabs } from './use_option_tabs';
+import { isImeComposing } from '../../../../../core/public/utils';
 
 interface DefaultEditorSideBarProps {
   embeddableHandler: VisualizeEmbeddableContract;
@@ -131,7 +132,7 @@ function DefaultEditorSideBar({
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {
-      if (event.ctrlKey && event.key === keys.ENTER) {
+      if (event.ctrlKey && event.key === keys.ENTER && !isImeComposing(event)) {
         event.preventDefault();
         event.stopPropagation();
 

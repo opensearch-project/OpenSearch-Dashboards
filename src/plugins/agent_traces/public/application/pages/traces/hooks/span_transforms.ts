@@ -105,6 +105,12 @@ const normalizeMessageValue = (value: unknown): string | undefined => {
 
 const resolveMessageValue = (value: unknown): string => normalizeMessageValue(value) ?? '—';
 
+/** A token count as a number: 0 stays 0; missing, empty or non-numeric values are null. */
+const tokenCount = (value: unknown): number | null => {
+  const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  return typeof n === 'number' && Number.isFinite(n) ? n : null;
+};
+
 export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => {
   const attrs = hit.attributes ? unflattenSource(hit.attributes) : ({} as any);
   return {
@@ -122,9 +128,9 @@ export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => 
     serviceName: hit.serviceName || '',
     genAiSystem: attrs?.gen_ai?.system || '',
     genAiRequestModel: attrs?.gen_ai?.request?.model || '',
-    genAiInputTokens: attrs?.gen_ai?.usage?.input_tokens || null,
-    genAiOutputTokens: attrs?.gen_ai?.usage?.output_tokens || null,
-    genAiTotalTokens: attrs?.gen_ai?.usage?.total_tokens || null,
+    genAiInputTokens: tokenCount(attrs?.gen_ai?.usage?.input_tokens),
+    genAiOutputTokens: tokenCount(attrs?.gen_ai?.usage?.output_tokens),
+    genAiTotalTokens: tokenCount(attrs?.gen_ai?.usage?.total_tokens),
     input: resolveMessageValue(attrs?.gen_ai?.input?.messages),
     output: resolveMessageValue(attrs?.gen_ai?.output?.messages),
     rawDocument: hit as Record<string, unknown>,

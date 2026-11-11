@@ -88,6 +88,10 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
   name: 'Scatter',
   icon: '',
   type: 'scatter',
+  metadata: {
+    description:
+      'Correlation between two numerical variables. Use color or size to add dimensions.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'scatter'>> = [
       {

@@ -15,6 +15,7 @@ import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
+import { useStreamingStatus } from '../../../components/streaming/use_streaming_status';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
@@ -23,19 +24,23 @@ import {
   selectDataset,
   selectQueryLanguage,
   selectQueryProgress,
+  selectOverallQueryStatus,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
-import type { QueryProgress } from '../../../application/utils/state_management/types';
-import { getSourceTypeRegistry } from '../../../services/source_type_registry';
+import {
+  QueryExecutionStatus,
+  QueryProgress,
+} from '../../../application/utils/state_management/types';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
-import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
+import { PPLBuilder, PPLBuilderState } from './ppl_builder';
+import { pplVisualBuilder, resolveVisualBuilder } from './ppl_builder/visual_builder_language';
 import { ModeButtonGroup } from './ppl_builder/mode_button_group';
 import { LogsBuilderMode } from './logs_query_panel_mode';
 import '../../../components/query_panel/query_panel.scss';
 
 // Fold out EOL/whitespace so an untouched Monaco round-trip isn't mistaken for
-// an edit in handleModeChange, which would fall into the lossy parsePPL path.
+// an edit in handleModeChange, which would fall into the lossy parse path.
 const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim();
 
 // Counts a progressive source reports while it is still scanning, as a
@@ -100,18 +105,32 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
+  const { streaming, isPolling: isStreaming } = useStreamingStatus();
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
   const queryProgress = useSelector(selectQueryProgress);
+  // Changes each time a query finishes, so the builder asks its language for fields again (a
+  // source can learn fields from results). Null while a query runs.
+  const overallQueryStatus = useSelector(selectOverallQueryStatus);
+  const fieldsRefreshKey =
+    overallQueryStatus?.status === QueryExecutionStatus.LOADING
+      ? null
+      : `${overallQueryStatus?.status}:${overallQueryStatus?.startTime ?? ''}`;
   const scanProgress = queryProgress ? scanProgressLabel(queryProgress) : null;
-  // Languages the PPL builder can't represent are code-only: the Builder toggle is hidden and
-  // the editor stays in Code mode.
+  // The builder writes the query's language: PPL, or a source's own translation. Languages with
+  // neither are code-only: the Builder toggle is hidden and the editor stays in Code mode.
   const queryLanguage = useSelector(selectQueryLanguage);
   const queryDataset = useSelector(selectDataset);
-  const isCodeOnlyLanguage = !getSourceTypeRegistry().supportsVisualBuilder(
-    queryLanguage,
-    queryDataset
+  const visualBuilder = useMemo(
+    () => resolveVisualBuilder(queryLanguage, queryDataset),
+    [queryLanguage, queryDataset]
   );
+  const isCodeOnlyLanguage = !visualBuilder;
+  // A code-only language never shows the builder, so PPL only stands in for it.
+  const builderLanguage = visualBuilder ?? pplVisualBuilder;
+  // For effects that must parse with the language of the render that triggered them.
+  const builderLanguageRef = useRef(builderLanguage);
+  builderLanguageRef.current = builderLanguage;
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
@@ -122,9 +141,9 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
 
   const { queryString } = services.data.query;
 
-  // parsePPL captures the `source = <index>` clause into state.sourceClause and
-  // buildPPL re-emits it, so it round-trips without being an editable field.
-  const initialParse = useMemo(() => parsePPL(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // PPL's parse captures the `source = <index>` clause into state.sourceClause and its
+  // build re-emits it, so it round-trips without being an editable field.
+  const initialParse = useMemo(() => builderLanguage.parse(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Always open in Code; Builder is opt-in via the mode toggle. Builder-only mode
   // is the exception: the effect below forces a representable query into Builder
@@ -146,7 +165,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   // Builder -> Code toggle without pushing to Redux (which would re-key results).
   const builderQueryRef = useRef(reduxQuery);
   // Snapshot of builder state on a Builder -> Code toggle, keyed by the query it
-  // compiled to. buildPPL is lossy (fieldless metric, `auto` span, stale sort
+  // compiled to. build is lossy (fieldless metric, `auto` span, stale sort
   // don't survive parse(build(state))), so on Code -> Builder we restore this
   // verbatim iff the code is unchanged, else fall back to parsing the new text.
   const preservedBuilderRef = useRef<{ query: string; state: PPLBuilderState } | null>(null);
@@ -176,7 +195,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
     setLiveCodeText(reduxQuery);
 
     if (modeRef.current === 'builder') {
-      const parsed = parsePPL(reduxQuery);
+      const parsed = builderLanguageRef.current.parse(reduxQuery);
       if (parsed.canBuild) {
         reseedBuilder(parsed.state);
       } else {
@@ -186,6 +205,26 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
     // In Code mode we stay in Code; the toggle stays available when canBuild.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduxQuery]);
+
+  // A switch to another language with the same query text (the query change is handled above):
+  // re-read the builder's query in the new language, so the builder never rewrites it into that
+  // language unasked. Code when the new language can't show it.
+  // The builder keeps the language it was seeded with until this has run: given the new one
+  // first, it would build its rows in that language and report that query before the re-read.
+  const [mountedBuilderLanguage, setMountedBuilderLanguage] = useState(builderLanguage);
+  useEffect(() => {
+    if (builderLanguage === mountedBuilderLanguage) return;
+    setMountedBuilderLanguage(builderLanguage);
+    // Rows saved under the old language aren't restored under this one, even for the same text.
+    preservedBuilderRef.current = null;
+    if (modeRef.current !== 'builder') return;
+    const parsed = builderLanguage.parse(builderQueryRef.current);
+    if (parsed.canBuild) {
+      reseedBuilder(parsed.state);
+    } else {
+      setMode('code');
+    }
+  }, [builderLanguage, mountedBuilderLanguage, reseedBuilder]);
 
   // Keep builder output in the QueryStringManager (NOT Redux) so TopNav's submit
   // reads it via queryString.getQuery().query, keeping the results cacheKey stable.
@@ -232,7 +271,10 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
     };
   }, [mode, isPromptMode, editorRef, setEditorText]);
 
-  const canSwitchToBuilder = useMemo(() => parsePPL(liveCodeText).canBuild, [liveCodeText]);
+  const canSwitchToBuilder = useMemo(
+    () => builderLanguage.parse(liveCodeText).canBuild,
+    [builderLanguage, liveCodeText]
+  );
 
   const handleModeChange = useCallback(
     (newMode: LogsBuilderMode) => {
@@ -260,13 +302,13 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
         setMode('builder');
         return;
       }
-      const parsed = parsePPL(text);
+      const parsed = builderLanguage.parse(text);
       if (!parsed.canBuild) return;
       builderQueryRef.current = text;
       reseedBuilder(parsed.state);
       setMode('builder');
     },
-    [mode, getEditorText, liveCodeText, reseedBuilder]
+    [mode, getEditorText, liveCodeText, reseedBuilder, builderLanguage]
   );
 
   const builderDisabled = mode === 'code' && !canSwitchToBuilder;
@@ -355,6 +397,8 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             <PPLBuilder
               key={builderKey}
               initialState={builderState}
+              language={mountedBuilderLanguage}
+              fieldsRefreshKey={fieldsRefreshKey}
               onQueryChange={onBuilderChange}
               onRun={handleRun}
             />
@@ -374,27 +418,41 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
         )}
       </EuiFlexGroup>
 
-      {isLoading && (
-        <>
-          {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
-          <EuiProgress
-            size="xs"
-            color="accent"
-            position="absolute"
-            data-test-subj="exploreQueryPanelIsLoading"
-          />
-          {scanProgress && (
-            <EuiText
+      {isStreaming ? (
+        /* Determinate, because a streaming job reports a fraction; falls back to indeterminate when
+           the engine reports none. */
+        <EuiProgress
+          size="xs"
+          color="primary"
+          position="absolute"
+          {...(typeof streaming?.fractionDone === 'number' && streaming.fractionDone >= 0
+            ? { value: streaming.fractionDone, max: 1 }
+            : {})}
+          data-test-subj="exploreQueryPanelStreamingProgress"
+        />
+      ) : (
+        isLoading && (
+          <>
+            {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
+            <EuiProgress
               size="xs"
-              color="subdued"
-              role="status"
-              aria-live="polite"
-              data-test-subj="exploreQueryPanelScanProgress"
-            >
-              {scanProgress}
-            </EuiText>
-          )}
-        </>
+              color="accent"
+              position="absolute"
+              data-test-subj="exploreQueryPanelIsLoading"
+            />
+            {scanProgress && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                role="status"
+                aria-live="polite"
+                data-test-subj="exploreQueryPanelScanProgress"
+              >
+                {scanProgress}
+              </EuiText>
+            )}
+          </>
+        )
       )}
     </EuiPanel>
   );

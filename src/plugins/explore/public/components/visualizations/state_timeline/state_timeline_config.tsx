@@ -108,6 +108,9 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
   name: 'State timeline',
   type: 'state_timeline',
   icon: 'visBarHorizontal',
+  metadata: {
+    description: 'Discrete status or value changes over time.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'state_timeline'>> = [
       {

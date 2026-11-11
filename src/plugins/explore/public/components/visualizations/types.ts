@@ -64,7 +64,7 @@ export interface ThresholdLine {
 export type ThresholdLines = ThresholdLine[];
 
 export interface TooltipOptions {
-  mode: 'all' | 'hidden';
+  mode: 'all' | 'single' | 'hidden';
 }
 
 export interface StandardOptions {
@@ -121,6 +121,8 @@ export interface ValueAxis {
 export enum AxisRole {
   X = 'x',
   Y = 'y',
+  SOURCE = 'source',
+  TARGET = 'target',
   COLOR = 'color',
   /** @deprecated Use splitField on ChartConfig instead */
   FACET = 'facet',

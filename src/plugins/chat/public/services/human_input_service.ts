@@ -31,12 +31,6 @@ export interface AskUserRequest {
   inputType: AskUserInputType;
   /** Choices for `select` input types. */
   options?: AskUserOption[];
-  /**
-   * For `select`: also offer a free-text field so the user can answer with
-   * something not in `options` (a "None of these / other" escape). Ignored for
-   * `confirm` and `text`.
-   */
-  allowFreeText?: boolean;
   timestamp: number;
 }
 
@@ -112,7 +106,6 @@ export class HumanInputService {
     prompt: string;
     inputType?: AskUserInputType;
     options?: AskUserOption[];
-    allowFreeText?: boolean;
   }): Promise<AskUserResponse> {
     const id = `${request.toolCallId}-${Date.now()}`;
     const entry: AskUserRequest = {
@@ -121,7 +114,6 @@ export class HumanInputService {
       prompt: request.prompt,
       inputType: request.inputType ?? 'text',
       options: request.options,
-      allowFreeText: request.allowFreeText,
       timestamp: Date.now(),
     };
 

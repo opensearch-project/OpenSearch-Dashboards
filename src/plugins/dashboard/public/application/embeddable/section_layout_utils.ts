@@ -117,6 +117,20 @@ export const getClaimedMemberIds = (items: DashboardSection[]): Set<string> => {
 };
 
 /**
+ * Ids of all member panels in a collapsed section, which are not visible to the
+ * user (see the `isVisible` embeddable input). Unclaimed panels render in the
+ * virtual "Ungrouped" section, which is not part of `items`, so they are never
+ * included.
+ */
+export const getCollapsedMemberIds = (items: DashboardSection[]): Set<string> => {
+  const ids = new Set<string>();
+  items.forEach((section) => {
+    if (section.collapsed) section.members.forEach((m) => ids.add(m.idRef));
+  });
+  return ids;
+};
+
+/**
  * Panels not claimed by an explicit section render in the read-only,
  * non-persisted "Ungrouped" section.
  */

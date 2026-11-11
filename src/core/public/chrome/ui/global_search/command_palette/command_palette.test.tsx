@@ -301,6 +301,41 @@ describe('<GlobalSearchCommandPalette />', () => {
     expect(firstExecute).not.toHaveBeenCalled();
   });
 
+  it('ignores Enter, ArrowDown and Escape while an IME composition is in progress', async () => {
+    const firstExecute = jest.fn();
+    const secondExecute = jest.fn();
+    const command = createCommand('pages', [
+      createResult('first-result', firstExecute),
+      createResult('second-result', secondExecute),
+    ]);
+    const commands$ = new BehaviorSubject([command]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByTestId, getByText } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+    const input = getByTestId('global-search-command-palette-input');
+    fireEvent.change(input, { target: { value: '지표' } });
+    await waitFor(() => expect(getByText('second-result')).toBeVisible());
+
+    fireEvent.keyDown(input, { key: 'Escape', keyCode: 229, isComposing: true });
+    expect(getByTestId('global-search-command-palette')).toBeVisible();
+
+    fireEvent.keyDown(input, { key: 'ArrowDown', keyCode: 229, isComposing: true });
+    fireEvent.keyDown(input, { key: 'Enter', keyCode: 229, isComposing: true });
+    expect(firstExecute).not.toHaveBeenCalled();
+    expect(secondExecute).not.toHaveBeenCalled();
+
+    // Positive control: the highlight did not move, and a plain Enter executes the first result.
+    fireEvent.keyDown(input, { key: 'Enter', keyCode: 13 });
+    expect(firstExecute).toHaveBeenCalledTimes(1);
+    expect(secondExecute).not.toHaveBeenCalled();
+  });
+
   it('does not wrap keyboard navigation at the first or last item', async () => {
     const command = createCommand('pages', [
       createResult('first-result'),

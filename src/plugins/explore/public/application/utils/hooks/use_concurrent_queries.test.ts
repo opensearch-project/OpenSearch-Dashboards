@@ -1,0 +1,396 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { renderHook, act } from '@testing-library/react';
+import { useConcurrentQueries } from './use_concurrent_queries';
+
+describe('useConcurrentQueries', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('returns empty results initially', () => {
+    const fetchFn = jest.fn().mockResolvedValue('data');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+    expect(result.current.results.size).toBe(0);
+    expect(typeof result.current.onVisibilityChange).toBe('function');
+    expect(typeof result.current.enqueueAll).toBe('function');
+  });
+
+  it('queues visible keys for fetching', async () => {
+    let resolveFetch: (v: string) => void;
+    const fetchFn = jest.fn().mockImplementation(
+      () =>
+        new Promise<string>((r) => {
+          resolveFetch = r;
+        })
+    );
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+
+    // Mark key as visible
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+
+    // Advance past debounce (200ms) + delayed drain (300ms)
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(fetchFn).toHaveBeenCalledWith('a', expect.any(AbortSignal));
+
+    // Resolve the fetch
+    await act(async () => {
+      resolveFetch!('data-a');
+    });
+
+    expect(result.current.results.get('a')).toBe('data-a');
+  });
+
+  it('invalidate() re-fetches only the given key (leaves the rest cached)', async () => {
+    const fetchFn = jest.fn().mockImplementation((key: string) => Promise.resolve(`v1-${key}`));
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('v1-a');
+    expect(result.current.results.get('b')).toBe('v1-b');
+    const callsAfterInitial = fetchFn.mock.calls.length;
+
+    // Second-round fetches return a new value so we can see WHICH keys re-ran.
+    fetchFn.mockImplementation((key: string) => Promise.resolve(`v2-${key}`));
+
+    act(() => {
+      result.current.invalidate('a');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // 'a' re-fetched (new value); 'b' untouched (still cached, no extra fetch for it).
+    expect(result.current.results.get('a')).toBe('v2-a');
+    expect(result.current.results.get('b')).toBe('v1-b');
+    expect(fetchFn).toHaveBeenCalledTimes(callsAfterInitial + 1);
+    expect(fetchFn.mock.calls[callsAfterInitial][0]).toBe('a');
+  });
+
+  it('cancels pending fetch when key leaves viewport', async () => {
+    const fetchFn = jest.fn().mockResolvedValue('data');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    // Remove before debounce fires
+    act(() => {
+      result.current.onVisibilityChange('a', false);
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // fetchFn should not have been called since key left viewport before debounce
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('lets inflight fetches finish after key leaves viewport', async () => {
+    let resolveFetch: (v: string) => void;
+    let capturedSignal: AbortSignal | undefined;
+    const fetchFn = jest.fn().mockImplementation((_key: string, signal: AbortSignal) => {
+      capturedSignal = signal;
+      return new Promise<string>((r) => {
+        resolveFetch = r;
+      });
+    });
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+
+    // Key leaves viewport while fetch is inflight — signal must not abort
+    act(() => {
+      result.current.onVisibilityChange('a', false);
+    });
+    expect(capturedSignal?.aborted).toBe(false);
+
+    // Fetch resolves; result still lands so scroll-back is instant
+    await act(async () => {
+      resolveFetch!('data-a');
+    });
+    expect(result.current.results.get('a')).toBe('data-a');
+  });
+
+  it('batches concurrent completions into a single render', async () => {
+    const resolvers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn().mockImplementation(
+      () =>
+        new Promise<string>((r) => {
+          resolvers.push(r);
+        })
+    );
+    let renderCount = 0;
+    const { result } = renderHook(() => {
+      renderCount++;
+      return useConcurrentQueries(fetchFn, [1]);
+    });
+    const initialRenders = renderCount;
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+      result.current.onVisibilityChange('c', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+
+    // Resolve all three fetches in the same synchronous block. With batching,
+    // this should cause exactly one additional render, not three.
+    const beforeResolve = renderCount;
+    await act(async () => {
+      resolvers[0]('val-a');
+      resolvers[1]('val-b');
+      resolvers[2]('val-c');
+    });
+
+    expect(result.current.results.get('a')).toBe('val-a');
+    expect(result.current.results.get('b')).toBe('val-b');
+    expect(result.current.results.get('c')).toBe('val-c');
+    expect(renderCount - beforeResolve).toBe(1);
+    expect(initialRenders).toBeGreaterThan(0);
+  });
+
+  it('populates errors map when fetch rejects', async () => {
+    const fetchFn = jest.fn().mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('boom');
+    expect(result.current.results.size).toBe(0);
+  });
+
+  it("prefers the server's message of a failed HTTP call", async () => {
+    // The status text (empty over HTTP/2) is the message; the server's error is the body.
+    const fetchFn = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error(''), { body: { message: 'access denied' } }));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('access denied');
+  });
+
+  it("shows a serialised PromQL error's details, never its type or the JSON", async () => {
+    const message = JSON.stringify({
+      error: { type: 'PromQLQueryError', reason: 'PromQL query failed', details: 'access denied' },
+      status: 403,
+    });
+    const fetchFn = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('Forbidden'), { body: { message } }));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('access denied');
+  });
+
+  it('stringifies non-Error rejections', async () => {
+    const fetchFn = jest.fn().mockRejectedValue('stringly');
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('stringly');
+  });
+
+  it('clears errors on dependency change', async () => {
+    const fetchFn = jest.fn().mockRejectedValue(new Error('boom'));
+    const { result, rerender } = renderHook(
+      ({ dep }: { dep: number }) => useConcurrentQueries<string>(fetchFn, [dep]),
+      { initialProps: { dep: 1 } }
+    );
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.errors.get('a')).toBe('boom');
+
+    rerender({ dep: 2 });
+    expect(result.current.errors.size).toBe(0);
+  });
+
+  it('resets on dependency change', async () => {
+    const fetchFn = jest.fn().mockResolvedValue('data');
+    const { result, rerender } = renderHook(
+      ({ dep }: { dep: number }) => useConcurrentQueries(fetchFn, [dep]),
+      { initialProps: { dep: 1 } }
+    );
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // After dep change, results should be cleared
+    rerender({ dep: 2 });
+    expect(result.current.results.size).toBe(0);
+  });
+
+  it('drops a result that answers after its fetch was aborted by a reset', async () => {
+    const answers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn(
+      // Ignores its signal, like a third-party fetch might.
+      () => new Promise<string>((resolve) => answers.push(resolve))
+    );
+    const { result, rerender } = renderHook(({ dep }) => useConcurrentQueries(fetchFn, [dep]), {
+      initialProps: { dep: 1 },
+    });
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    rerender({ dep: 2 });
+    await act(async () => {
+      answers[0]('stale');
+    });
+    expect(result.current.results.get('a')).toBeUndefined();
+    // The key is fetched again for the new deps, not marked done by the stale answer.
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      answers[1]('fresh');
+    });
+    expect(result.current.results.get('a')).toBe('fresh');
+  });
+
+  it("an old fetch finishing late doesn't clear a newer fetch's in-flight entry", async () => {
+    const answers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn(() => new Promise<string>((resolve) => answers.push(resolve)));
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1], 1));
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    act(() => result.current.invalidate('a'));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    // The aborted first fetch settles; the second must still count as in flight (concurrency 1).
+    await act(async () => {
+      answers[0]('old');
+    });
+    act(() => result.current.onVisibilityChange('b', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      answers[1]('new');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('new');
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("invalidate() clears the key's last error, so a retry shows loading and then its result", async () => {
+    const fetchFn = jest.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce('ok');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+    act(() => result.current.onVisibilityChange('a', true));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.errors.get('a')).toBe('boom');
+    act(() => result.current.invalidate('a'));
+    expect(result.current.errors.has('a')).toBe(false);
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('ok');
+    expect(result.current.errors.has('a')).toBe(false);
+  });
+
+  it('fetches nothing while disabled, then fetches the visible keys once enabled', async () => {
+    const fetchFn = jest.fn().mockImplementation((key: string) => Promise.resolve(`v-${key}`));
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useConcurrentQueries(fetchFn, [enabled], undefined, enabled),
+      { initialProps: { enabled: false } }
+    );
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(fetchFn).not.toHaveBeenCalled();
+    expect(result.current.results.size).toBe(0);
+
+    rerender({ enabled: true });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(result.current.results.get('a')).toBe('v-a');
+    expect(result.current.results.get('b')).toBe('v-b');
+  });
+
+  it('fetches as before when enabled is not passed', async () => {
+    const fetchFn = jest.fn().mockResolvedValue('data');
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+});

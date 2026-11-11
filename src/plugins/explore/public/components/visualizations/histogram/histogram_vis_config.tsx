@@ -89,6 +89,9 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
   name: 'Histogram',
   type: 'histogram',
   icon: 'visBarVertical',
+  metadata: {
+    description: 'Frequency distribution of a numerical field using automatic binning.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'histogram'>> = [
       {

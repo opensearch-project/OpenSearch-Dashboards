@@ -90,6 +90,19 @@ describe('hits counter', () => {
     expect(hits.text()).toBe(props.hits?.toString());
   });
 
+  it('renders the non-time-series badge when isNonTimeSeries is true', () => {
+    component = mountWithIntl(<HitsCounter {...props} isNonTimeSeries={true} />);
+    const badge = findTestSubject(component, 'exploreNonTimeSeriesBadge').hostNodes();
+    expect(badge.length).toBeGreaterThan(0);
+    expect(badge.first().hasClass('dscResultCount__nonTimeSeries')).toBe(true);
+    expect(badge.text()).toBe('Querying non-time-series data');
+  });
+
+  it('does not render the non-time-series badge by default', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    expect(findTestSubject(component, 'exploreNonTimeSeriesBadge').length).toBe(0);
+  });
+
   it('renders a sub-second duration in milliseconds', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedMs = findTestSubject(component, 'discoverQueryElapsedMs');
@@ -133,6 +146,32 @@ describe('hits counter', () => {
       <HitsCounter {...props} showResetButton={false} hits={undefined} elapsedMs={undefined} />
     );
     expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2 hits$/);
+  });
+
+  describe('streaming annotation', () => {
+    it('reports progress while a streaming query is polling', () => {
+      component = mountWithIntl(
+        <HitsCounter {...props} streaming={{ isPolling: true, fractionDone: 0.42 } as any} />
+      );
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').text()).toBe(' (42%)');
+    });
+
+    it('reports where a stopped query got to', () => {
+      component = mountWithIntl(
+        <HitsCounter
+          {...props}
+          streaming={{ isPolling: false, aborted: true, fractionDone: 0.72 } as any}
+        />
+      );
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').text()).toBe(
+        ' (Stopped at 72%)'
+      );
+    });
+
+    it('adds nothing for a non-streaming query', () => {
+      component = mountWithIntl(<HitsCounter {...props} />);
+      expect(findTestSubject(component, 'discoverQueryStreamingAnnotation').length).toBe(0);
+    });
   });
 
   it('expect to render 1,899 hits if 1899 hits given', () => {

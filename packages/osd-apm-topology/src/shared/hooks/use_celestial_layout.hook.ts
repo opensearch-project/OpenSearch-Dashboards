@@ -4,9 +4,10 @@
  */
 
 // src/shared/hooks/use-dagre-layout.hook.ts
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import Dagre from '@dagrejs/dagre';
 import type { CelestialNode, CelestialEdge } from '../../types';
+import { layoutOptionsKey } from '../utils/layout_reuse.utils';
 
 // TB: Top to Bottom, BT: Bottom to Top, LR: Left to Right, RL: Right to Left
 export type Direction = 'TB' | 'BT' | 'LR' | 'RL';
@@ -269,7 +270,12 @@ const arrangeParentNodes = (
  * @param defaultOptions - Default layout options
  * @returns Object containing layout functions
  */
-export const useCelestialLayout = (defaultOptions?: LayoutOptions) => {
+export const useCelestialLayout = (layoutOptions?: LayoutOptions) => {
+  // By value: consumers often pass the options inline (a new object every render), and a new
+  // layout function would make the map lay out and refit again on every parent re-render.
+  const optionsKey = layoutOptionsKey(layoutOptions);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const defaultOptions = useMemo(() => layoutOptions, [optionsKey]);
   /**
    * Applies celestial layout to nodes and edges
    *

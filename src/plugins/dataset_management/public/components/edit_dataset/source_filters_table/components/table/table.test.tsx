@@ -182,6 +182,34 @@ describe('Table', () => {
       // Ensure the state is properly reset
       expect(component.state('editingFilterId')).toBe('');
     });
+
+    test('should not save on an Enter that confirms an IME composition, but save on a plain Enter', () => {
+      saveFilter.mockClear();
+      component.setState({
+        editingFilterId: clientId,
+        editingFilterValue: '지표*',
+      });
+      const instance = component.instance();
+
+      instance.onEditFieldKeyDown({
+        key: 'Enter',
+        keyCode: 229,
+        nativeEvent: { isComposing: true },
+      } as any);
+
+      expect(saveFilter).not.toHaveBeenCalled();
+      expect(component.state('editingFilterId')).toBe(clientId);
+
+      instance.onEditFieldKeyDown({
+        key: 'Enter',
+        keyCode: 13,
+        nativeEvent: { isComposing: false },
+      } as any);
+
+      expect(saveFilter).toHaveBeenCalledTimes(1);
+      expect(saveFilter).toHaveBeenCalledWith({ clientId, value: '지표*' });
+      expect(component.state('editingFilterId')).toBe('');
+    });
   });
 
   test('should allow deletes', () => {

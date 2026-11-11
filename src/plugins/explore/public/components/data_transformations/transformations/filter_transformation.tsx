@@ -7,7 +7,6 @@ import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import {
   TransformationInstance,
   TransformationDefinition,
@@ -18,10 +17,15 @@ import {
   allOperatorOptions,
   TransformationConfigSchema,
 } from '../types';
-import { VisFieldType } from '../../visualizations/types';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  getRowFieldValue,
+  isDateField,
+  isNumericalField,
+} from '../transformation_utils';
 
 const isConfigComplete = (config: FilterConfig): boolean => {
   return !!config.field && !!config.operator && config.value.trim() !== '';
@@ -37,7 +41,6 @@ const FilterEditor = ({
   availableFields: FieldSchema[];
 }) => {
   const selectedField = availableFields.find((field) => field.name === config.field);
-  const fieldType = selectedField?.visFieldType;
 
   const updateConfig = useCallback(
     (newConfig: FilterConfig) => {
@@ -46,16 +49,15 @@ const FilterEditor = ({
     [onChange]
   );
 
-  const getOperatorsForType = (type: VisFieldType | undefined) => {
-    if (type === VisFieldType.Numerical)
-      return [...allOperatorOptions, ...numericalOperatorOptions];
-    if (type === VisFieldType.Date) return [...allOperatorOptions, ...dateOperatorOptions];
+  const getOperatorsForField = (field: FieldSchema | undefined) => {
+    if (isNumericalField(field)) return [...allOperatorOptions, ...numericalOperatorOptions];
+    if (isDateField(field)) return [...allOperatorOptions, ...dateOperatorOptions];
     return allOperatorOptions;
   };
 
   const handleFieldChange = (fieldSchema: FieldSchema | undefined) => {
     const newConfig = { ...config, field: fieldSchema?.name || undefined, value: '' };
-    const validOperators = getOperatorsForType(fieldSchema?.visFieldType);
+    const validOperators = getOperatorsForField(fieldSchema);
     // reset operator if FieldSchema type is changed
     if (!validOperators.some((op) => op.value === newConfig.operator)) {
       newConfig.operator = 'equals';
@@ -63,7 +65,7 @@ const FilterEditor = ({
     updateConfig(newConfig);
   };
 
-  const operatorOptions = getOperatorsForType(fieldType);
+  const operatorOptions = getOperatorsForField(selectedField);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -126,17 +128,14 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
       value: '',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: FilterConfig) => {
+    transformationMethod: (data, config: FilterConfig) => {
       const { field, operator, value } = config;
 
-      // Return original data if config is incomplete
       if (!isConfigComplete({ field, operator, value })) {
-        return data;
+        return createInvalidConfigResult(data, 'Filter configuration is incomplete.');
       }
-
-      return data.filter((row) => {
-        // get value from OpenSearch hit structure (_source.field)
-        const fieldValue = get(row, `_source.${field}`);
+      const filtered = data.filter((row) => {
+        const fieldValue = getRowFieldValue(row, field!);
 
         // Handle null/undefined field values
         if (fieldValue == null) {
@@ -184,7 +183,7 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
           case 'is_earlier_or_equal':
           case 'is_later':
           case 'is_later_or_equal': {
-            const fieldTs = Date.parse(fieldValue);
+            const fieldTs = Date.parse(String(fieldValue));
             const compareTs = Date.parse(value);
             if (isNaN(fieldTs) || isNaN(compareTs)) return false;
             if (operator === 'is_earlier') return fieldTs < compareTs;
@@ -196,13 +195,7 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
             return true;
         }
       });
-    },
-
-    validateConfig: (config: FilterConfig, availableFields: Array<{ name?: string }>) => {
-      if (config.field && !availableFields.find((f) => f.name === config.field)) {
-        return { ...config, field: undefined, value: '' };
-      }
-      return config;
+      return createAppliedResult(filtered);
     },
     Editor: FilterEditor,
   };

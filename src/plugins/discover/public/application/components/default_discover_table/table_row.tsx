@@ -107,21 +107,27 @@ const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
+        const isTimeOrDateField =
+          indexPattern.timeFieldName === colName || fieldInfo?.type === 'date';
+
         if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}
               data-test-subj="docTableField"
               className={`osdDocTableCell ${
-                indexPattern.timeFieldName === colName
-                  ? 'eui-textNoWrap'
-                  : 'eui-textBreakAll eui-textBreakWord'
+                isTimeOrDateField ? 'eui-textNoWrap' : 'eui-textBreakAll eui-textBreakWord'
               }`}
             >
-              <div className="truncate-by-height">
-                {/* eslint-disable-next-line react/no-danger */}
+              {isTimeOrDateField ? (
+                /* eslint-disable-next-line react/no-danger */
                 <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-              </div>
+              ) : (
+                <div className="truncate-by-height">
+                  {/* eslint-disable-next-line react/no-danger */}
+                  <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+                </div>
+              )}
             </td>
           );
         }
@@ -131,7 +137,7 @@ const TableRowUI = ({
             key={colName}
             columnId={colName}
             onFilter={onFilter}
-            isTimeField={indexPattern.timeFieldName === colName}
+            isTimeField={isTimeOrDateField}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
           />

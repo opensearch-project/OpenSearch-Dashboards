@@ -29,6 +29,7 @@ import {
   IPrometheusSearchResult,
 } from '../../../application/utils/state_management/slices';
 import { AgentError, ProhibitedQueryError } from '../../../components/query_panel/utils/error';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 
 export interface RootState {
   query: QueryState;
@@ -57,10 +58,10 @@ export const resolveDatasetByLanguage = async (
     }
   }
 
-  // Determine dataset type based on language
-  const isPromQL = languageType === SupportLanguageType.promQL;
-  // for CORE_SIGNAL_TYPES, rule if languageType, then assume its flavor is METRICS otherwise is logs
-  const requiredSignalType = isPromQL ? CORE_SIGNAL_TYPES.METRICS : undefined;
+  // A metrics language (PromQL, or one a registered Metrics source lists) needs a metrics
+  // dataset; any other language needs a logs or traces one.
+  const isMetrics = getSourceTypeRegistry().isMetricsLanguage(languageType);
+  const requiredSignalType = isMetrics ? CORE_SIGNAL_TYPES.METRICS : undefined;
 
   if (existingDataset) {
     try {
@@ -82,7 +83,7 @@ export const resolveDatasetByLanguage = async (
   }
 
   // Fetch first available dataset of the required type
-  const flavor = isPromQL ? ExploreFlavor.Metrics : null;
+  const flavor = isMetrics ? ExploreFlavor.Metrics : null;
   return await fetchFirstAvailableDataset(services, flavor, requiredSignalType);
 };
 
@@ -115,9 +116,20 @@ export const getPreloadedQueryState = async (
   }
 
   if (minimalDataset) {
+    // The requested (saved) language wins when the dataset's type can run it: a dataset's own
+    // `language` is only its default, and a source can offer another language on the same
+    // dataset (e.g. its own SQL dialect next to PromQL). Otherwise keep the dataset's default.
+    const supportedLanguages = services.data.query.queryString
+      .getDatasetService?.()
+      ?.getType(minimalDataset.type)
+      ?.supportedLanguages(minimalDataset);
+    const language =
+      languageType && supportedLanguages?.includes(languageType)
+        ? languageType
+        : minimalDataset.language || languageType || 'PPL';
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || languageType || 'PPL',
+      language,
     });
 
     // override the initial query to be an empty string
@@ -137,14 +149,10 @@ export const getPreloadedQueryState = async (
   }
 };
 
-export const getRequiredSignalType = (languageType?: SupportLanguageType): string | string[] => {
-  switch (languageType) {
-    case SupportLanguageType.promQL:
-      return CORE_SIGNAL_TYPES.METRICS;
-    default:
-      return [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES];
-  }
-};
+export const getRequiredSignalType = (languageType?: SupportLanguageType): string | string[] =>
+  getSourceTypeRegistry().isMetricsLanguage(languageType)
+    ? CORE_SIGNAL_TYPES.METRICS
+    : [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES];
 
 export const isSignalTypeCompatible = (
   effectiveSignalType: string | undefined,
@@ -295,16 +303,22 @@ export const queryExecution = async ({
     }
 
     let parsedError;
+    let detailsFallback = 'Unknown Error';
     try {
       parsedError = JSON.parse(error.body.message);
     } catch (parseError) {
+      const reason = error.body?.message || error.message || 'Unknown Error';
+      const details = error.body?.error || error.message;
       parsedError = {
         error: {
-          reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          reason,
+          // The reason is the title and the details are shown under it: an error that carries a
+          // single message (e.g. a search strategy start failure) shows it once.
+          details: details && details !== reason ? details : '',
           type: error.name,
         },
       };
+      detailsFallback = '';
     }
 
     updateEditorStateFn({
@@ -315,7 +329,7 @@ export const queryExecution = async ({
         error: {
           error: error.body?.error || 'Unknown Error',
           message: {
-            details: parsedError?.error?.details || 'Unknown Error',
+            details: parsedError?.error?.details || detailsFallback,
             reason: parsedError?.error?.reason || 'Unknown Error',
             type: parsedError?.error?.type,
           },

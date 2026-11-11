@@ -34,6 +34,9 @@ const mockMetrics: TraceMetrics = {
   totalSpans: 2500000,
   filteredTraces: 1500,
   filteredSpans: 2500000,
+  totalAgentRuns: 1500,
+  filteredAgentRuns: 1500,
+  countsMayIncludeDuplicates: false,
   totalTokens: 500,
   latencyP50Nanos: 250_000_000,
   latencyP99Nanos: 3_500_000_000,
@@ -68,6 +71,13 @@ describe('TraceMetricsBar', () => {
     expect(screen.getByText('Total Tokens')).toBeInTheDocument();
     expect(screen.getByText('Latency P50')).toBeInTheDocument();
     expect(screen.getByText('Latency P99')).toBeInTheDocument();
+  });
+
+  it('notes when counts may include duplicate agent runs', () => {
+    const { rerender } = render(<TraceMetricsBar metrics={mockMetrics} />);
+    expect(screen.queryByTestId('agentTracesMetricsDuplicatesNotice')).not.toBeInTheDocument();
+    rerender(<TraceMetricsBar metrics={{ ...mockMetrics, countsMayIncludeDuplicates: true }} />);
+    expect(screen.getByTestId('agentTracesMetricsDuplicatesNotice')).toBeInTheDocument();
   });
 
   it('renders Total Sessions', () => {

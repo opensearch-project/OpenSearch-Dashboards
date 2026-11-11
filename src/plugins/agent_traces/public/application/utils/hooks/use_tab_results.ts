@@ -12,6 +12,7 @@ import { defaultPrepareQueryString } from '../state_management/actions/query_act
 import { selectPatternsField, selectSort } from '../state_management/selectors';
 import { selectQueryStatusMapByKey } from '../state_management/selectors/query_editor/query_editor';
 import { useOwnTabId } from '../../../components/tabs/tabs';
+import { useAiRootFieldVersion } from '../ai_root';
 
 /**
  * Hook for reading tab specific result from result slice.
@@ -32,6 +33,7 @@ export const useTabResults = () => {
   const tabId = useSelector((state: RootState) => ownTabId || state.ui.activeTabId);
   const patternsField = useSelector(selectPatternsField); // for use in updating dependency array of cacheKey
   const sort = useSelector(selectSort);
+  const aiRootFieldVersion = useAiRootFieldVersion();
 
   const cacheKey = useMemo(() => {
     const tab = services.tabRegistry.getTab(tabId);
@@ -39,7 +41,7 @@ export const useTabResults = () => {
     return prepareQuery(query, sort);
     // TODO: redo logic of using patternsField in dependency array when we have a better method to update cacheKey
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, tabId, services, patternsField, sort]);
+  }, [query, tabId, services, patternsField, sort, aiRootFieldVersion]);
 
   // Select only the specific result by cache key instead of the entire results map
   const result = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));

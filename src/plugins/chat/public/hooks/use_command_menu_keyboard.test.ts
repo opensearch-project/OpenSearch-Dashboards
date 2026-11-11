@@ -550,6 +550,43 @@ describe('useCommandMenuKeyboard', () => {
     });
   });
 
+  describe('IME composition', () => {
+    it('should ignore keys that belong to an IME composition', () => {
+      (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([mockCommands[0]]);
+
+      const { result } = renderHook(() =>
+        useCommandMenuKeyboard({
+          input: '/h',
+          onInputChange: mockOnInputChange,
+          onKeyDown: mockOnKeyDown,
+          inputRef,
+        })
+      );
+
+      const enterPreventDefault = jest.fn();
+      const spacePreventDefault = jest.fn();
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Enter',
+          shiftKey: false,
+          nativeEvent: { isComposing: true },
+          preventDefault: enterPreventDefault,
+        } as any);
+        result.current.handleKeyDown({
+          key: ' ',
+          nativeEvent: { isComposing: true },
+          preventDefault: spacePreventDefault,
+        } as any);
+      });
+
+      expect(enterPreventDefault).not.toHaveBeenCalled();
+      expect(spacePreventDefault).not.toHaveBeenCalled();
+      expect(mockOnInputChange).not.toHaveBeenCalled();
+      expect(mockOnKeyDown).not.toHaveBeenCalled();
+      expect(result.current.showCommandMenu).toBe(true);
+    });
+  });
+
   describe('escape key', () => {
     it('should close command menu with Escape key', () => {
       (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([mockCommands[0]]);

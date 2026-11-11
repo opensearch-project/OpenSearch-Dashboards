@@ -6,11 +6,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { TransformationConfigSchema } from '../types';
+import {
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  createAppliedResult,
+  getRowFieldValue,
+  rowHasField,
+} from '../transformation_utils';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 interface SortByConfig {
   field: string | undefined;
@@ -90,19 +95,22 @@ export function createSortByTransformation(): TransformationInstance<SortByConfi
       order: 'asc',
     },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: SortByConfig) => {
+    transformationMethod: (data, config: SortByConfig) => {
       const { field, order } = config;
 
       if (!field) {
-        return data;
+        return createInvalidConfigResult(data, 'Sort By configuration is incomplete.');
+      }
+      const applicableRows = data.filter((row) => rowHasField(row, field)).length;
+      if (applicableRows === 0) {
+        return createMissingFieldsResult(data, [field]);
       }
 
       const sorted = [...data];
 
       sorted.sort((a, b) => {
-        // extract values from OpenSearch hit (_source.field)
-        const valueA = get(a, `_source.${field}`);
-        const valueB = get(b, `_source.${field}`);
+        const valueA = getRowFieldValue(a, field);
+        const valueB = getRowFieldValue(b, field);
 
         // null/undefined values - push to end
         if (valueA == null && valueB == null) return 0;
@@ -120,14 +128,9 @@ export function createSortByTransformation(): TransformationInstance<SortByConfi
         return order === 'asc' ? comparison : -comparison;
       });
 
-      return sorted;
-    },
-
-    validateConfig: (config: SortByConfig, availableFields: Array<{ name?: string }>) => {
-      if (config.field && !availableFields.find((f) => f.name === config.field)) {
-        return { ...config, field: undefined };
-      }
-      return config;
+      return applicableRows === data.length
+        ? createAppliedResult(sorted)
+        : createMissingFieldsResult(sorted, [field], 'partially_applied');
     },
     Editor: SortByEditor,
   };

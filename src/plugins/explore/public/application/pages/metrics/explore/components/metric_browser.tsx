@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiTitle,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -29,7 +30,9 @@ import { MetricCard } from './metric_card';
 import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
 import { MetricsEmptyState } from './metrics_empty_state';
-import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
+import { useConcurrentQueries } from '../../../../utils/hooks/use_concurrent_queries';
+import { MetricsLoadError, toMetricsLoadError } from '../utils/get_error_message';
+import { getNoMetricsBody } from '../utils/exploration_source';
 
 const PAGE_SIZE = 20;
 
@@ -41,7 +44,8 @@ function useSparklines(
   queryGen: ReturnType<typeof useExploration>['queryGen'],
   stepSec: number,
   filters: ReturnType<typeof useExploration>['state']['filters'],
-  refreshCounter: number
+  refreshCounter: number,
+  enabled: boolean
 ) {
   const metadataRef = useRef(metadata);
   metadataRef.current = metadata;
@@ -57,19 +61,31 @@ function useSparklines(
 
   const { results, errors, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(
     fetchFn,
-    [client, filters, refreshCounter, metadata, stepSec]
+    [client, filters, refreshCounter, metadata, stepSec, enabled],
+    undefined,
+    enabled
   );
 
   return { sparklines: results as SparklineMap, sparklineErrors: errors, onVisibilityChange };
 }
 
 export const MetricBrowser: React.FC = () => {
-  const { state, dispatch, client, queryGen, stepSec, executePromQL, refreshCounter } =
-    useExploration();
+  const {
+    state,
+    dispatch,
+    client,
+    queryGen,
+    stepSec,
+    executePromQL,
+    refreshCounter,
+    previewsEnabled = true,
+    requestPreviews,
+    source,
+  } = useExploration();
   const [allMetrics, setAllMetrics] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, MetricMetadata>>({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MetricsLoadError | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [debouncedSearch, setDebouncedSearch] = useState(state.search);
   const [searchResults, setSearchResults] = useState<string[] | null>(null);
@@ -109,7 +125,7 @@ export const MetricBrowser: React.FC = () => {
         if (cancelled) return;
         setAllMetrics(names);
       })
-      .catch((e) => !cancelled && setError(String(e)))
+      .catch((e) => !cancelled && setError(toMetricsLoadError(e)))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -184,7 +200,8 @@ export const MetricBrowser: React.FC = () => {
     queryGen,
     stepSec,
     state.filters,
-    refreshCounter
+    refreshCounter,
+    previewsEnabled
   );
 
   const handleSelectMetric = useCallback(
@@ -223,7 +240,13 @@ export const MetricBrowser: React.FC = () => {
   }
 
   if (error) {
-    return <ErrorCallout error={error} />;
+    return (
+      <ErrorCallout
+        error={error.message}
+        fromServer={error.fromServer}
+        sourceLabel={source?.label}
+      />
+    );
   }
 
   if (!allMetrics.length) {
@@ -232,10 +255,9 @@ export const MetricBrowser: React.FC = () => {
         title={i18n.translate('explore.metricsExplore.emptyTitle', {
           defaultMessage: 'No metrics found',
         })}
-        body={i18n.translate('explore.metricsExplore.emptyBody', {
-          defaultMessage:
-            'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
-        })}
+        body={getNoMetricsBody(source)}
+        sampleQueries={source?.sampleQueries}
+        codeLanguage={source?.codeLanguage}
       />
     );
   }
@@ -365,6 +387,30 @@ export const MetricBrowser: React.FC = () => {
 
       <LabelFilterBadges />
       <EuiSpacer size="s" />
+      {!previewsEnabled && (
+        <>
+          <EuiCallOut
+            size="s"
+            iconType="iInCircle"
+            title={i18n.translate('explore.metricsExplore.previewsDeferredTitle', {
+              defaultMessage: 'Previews load only when you ask for them for this data source.',
+            })}
+            data-test-subj="metricsExplorePreviewsDeferred"
+          >
+            <EuiButton
+              size="s"
+              iconType="play"
+              onClick={() => requestPreviews?.()}
+              data-test-subj="metricsExploreLoadPreviewsButton"
+            >
+              {i18n.translate('explore.metricsExplore.loadPreviews', {
+                defaultMessage: 'Load previews',
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {Object.entries(grouped)
         .sort(([a], [b]) => a.localeCompare(b))
@@ -384,6 +430,7 @@ export const MetricBrowser: React.FC = () => {
                   metadata={metadata[m]}
                   sparkline={sparklines.get(m) ?? null}
                   sparklineError={sparklineErrors.get(m) ?? null}
+                  previewDeferred={!previewsEnabled}
                   isSelected={selected.has(m)}
                   colorIndex={mi}
                   onToggleSelect={() => toggleSelection(m)}

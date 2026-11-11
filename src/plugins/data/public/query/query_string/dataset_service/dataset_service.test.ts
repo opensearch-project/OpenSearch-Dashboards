@@ -6,13 +6,14 @@
 import { DatasetService } from './dataset_service';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { DEFAULT_DATA, DataStorage, Dataset, UI_SETTINGS } from 'src/plugins/data/common';
-import { DataStructure } from '../../../../common';
+import { DataStructure, IndexPatternField } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
 import { waitFor } from '@testing-library/dom';
 import { DuplicateDataViewError } from '../../../../common/data_views/errors/duplicate_data_view';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -175,6 +176,75 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(1);
   });
 
+  test("cacheDataset gives the type's data view the meta fields the type names", async () => {
+    const view = { setMetaFields: jest.fn() };
+    (indexPatterns.create as jest.Mock).mockResolvedValue(view);
+    // A type whose data isn't OpenSearch documents names none.
+    service.registerType({
+      ...mockType,
+      id: 'external-type',
+      meta: { ...mockType.meta, metaFields: [] },
+    });
+    await service.cacheDataset(
+      { id: 'external::1', title: 'External', type: 'external-type' } as Dataset,
+      mockDataPluginServices
+    );
+    expect(view.setMetaFields).toHaveBeenCalledWith([]);
+    expect(indexPatterns.saveToCache).toHaveBeenCalledWith('external::1', view);
+  });
+
+  test('cacheDataset leaves the meta fields of a type that names none as they are', async () => {
+    const view = { setMetaFields: jest.fn() };
+    (indexPatterns.create as jest.Mock).mockResolvedValue(view);
+    service.registerType(mockType);
+    await service.cacheDataset(
+      { id: 'test-dataset', title: 'Test Dataset', type: mockType.id } as Dataset,
+      mockDataPluginServices
+    );
+    expect(view.setMetaFields).not.toHaveBeenCalled();
+  });
+
+  describe('cacheDataset without the default cache (data views)', () => {
+    const buildDataViewServices = (view: { setMetaFields: jest.Mock }) => {
+      const dataViews = { create: jest.fn().mockResolvedValue(view), saveToCache: jest.fn() };
+      const services = {
+        ...mockDataPluginServices,
+        data: { ...dataPluginMock.createStartContract(), dataViews },
+      } as unknown as IDataPluginServices;
+      return { dataViews, services };
+    };
+
+    test("gives the type's data view the meta fields the type names", async () => {
+      const view = { setMetaFields: jest.fn() };
+      const { dataViews, services } = buildDataViewServices(view);
+      service.registerType({
+        ...mockType,
+        id: 'external-type',
+        meta: { ...mockType.meta, metaFields: [] },
+      });
+      await service.cacheDataset(
+        { id: 'external::1', title: 'External', type: 'external-type' } as Dataset,
+        services,
+        false
+      );
+      expect(view.setMetaFields).toHaveBeenCalledWith([]);
+      expect(dataViews.saveToCache).toHaveBeenCalledWith('external::1', view);
+    });
+
+    test('leaves the meta fields of a type that names none as they are', async () => {
+      const view = { setMetaFields: jest.fn() };
+      const { dataViews, services } = buildDataViewServices(view);
+      service.registerType(mockType);
+      await service.cacheDataset(
+        { id: 'test::dataset', title: 'Test Dataset', type: mockType.id } as Dataset,
+        services,
+        false
+      );
+      expect(view.setMetaFields).not.toHaveBeenCalled();
+      expect(dataViews.saveToCache).toHaveBeenCalledWith('test::dataset', view);
+    });
+  });
+
   test('calling cacheDataset on index pattern does not cache it', async () => {
     service.registerType(indexPatternTypeConfig);
     const mockDataset = {
@@ -186,6 +256,206 @@ describe('DatasetService', () => {
     await service.cacheDataset(mockDataset, mockDataPluginServices);
     expect(indexPatterns.create).toHaveBeenCalledTimes(0);
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
+  });
+
+  describe('cacheDataset with a saved dataset', () => {
+    const savedDataset = {
+      id: 'saved-dataset',
+      title: 'logs*',
+      type: mockType.id,
+    } as Dataset;
+
+    const buildServices = (dataViews: Record<string, jest.Mock>) =>
+      ({
+        ...mockDataPluginServices,
+        data: { ...dataPluginMock.createStartContract(), dataViews },
+      }) as unknown as IDataPluginServices;
+
+    // Round-trip specs through the real field serializer so fixtures match what a saved object
+    // stores (e.g. `searchable` is always a boolean, undefined `esTypes` is dropped).
+    const toSavedSpec = (spec: Record<string, unknown>) =>
+      JSON.parse(JSON.stringify(new IndexPatternField(spec as any, spec.name as string)));
+
+    const buildSavedView = (
+      fieldSpecs: Array<Record<string, unknown>> = [
+        { name: 'message', type: 'string', esTypes: ['text'], searchable: true },
+      ],
+      extra: Record<string, unknown> = {}
+    ) => ({
+      id: 'saved-dataset',
+      version: 'v1',
+      fields: {
+        getAll: () => fieldSpecs.map((spec) => ({ scripted: false, spec: toSavedSpec(spec) })),
+      },
+      ...extra,
+    });
+
+    const buildAdHocDataViews = (lookupError: Error) => ({
+      get: jest
+        .fn()
+        .mockImplementation((_id: string, onlyCheckCache?: boolean) =>
+          onlyCheckCache ? Promise.resolve(undefined) : Promise.reject(lookupError)
+        ),
+      clearCache: jest.fn(),
+    });
+
+    beforeEach(() => {
+      mockType.fetchFields.mockClear();
+      service.registerType(mockType);
+    });
+
+    test('loads the saved object instead of caching a temporary view', async () => {
+      const dataViews = {
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(buildSavedView()),
+        clearCache: jest.fn(),
+        refreshFields: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.get).toHaveBeenNthCalledWith(1, 'saved-dataset', true);
+      expect(dataViews.clearCache).toHaveBeenCalledWith('saved-dataset', false);
+      expect(dataViews.get).toHaveBeenNthCalledWith(2, 'saved-dataset');
+      expect(dataViews.refreshFields).not.toHaveBeenCalled();
+      expect(mockType.fetchFields).not.toHaveBeenCalled();
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('keeps an already cached saved-object view without refetching', async () => {
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(buildSavedView()),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.get).toHaveBeenCalledTimes(1);
+      expect(dataViews.clearCache).not.toHaveBeenCalled();
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('refreshes saved fields in memory when they were saved from stripped fetchFields', async () => {
+      // What the INDEXES fetchFields output used to be: no searchable, no esTypes.
+      const savedView = buildSavedView([
+        { name: 'message', type: 'string', aggregatable: false },
+        { name: 'level', type: 'string', aggregatable: true },
+      ]);
+      expect(savedView.fields.getAll()[0].spec).toMatchObject({ searchable: false });
+      const dataViews = {
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(savedView),
+        clearCache: jest.fn(),
+        refreshFields: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.refreshFields).toHaveBeenCalledWith(savedView);
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('does not refresh saved fields that carry real mapping types', async () => {
+      const savedView = buildSavedView([
+        { name: 'payload', type: 'object', esTypes: ['object'], searchable: false },
+      ]);
+      const dataViews = {
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(savedView),
+        clearCache: jest.fn(),
+        refreshFields: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.refreshFields).not.toHaveBeenCalled();
+    });
+
+    test('fills in signalType when the saved object has none', async () => {
+      const savedView = buildSavedView();
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews), true, 'logs');
+
+      expect(savedView).toHaveProperty('signalType', 'logs');
+    });
+
+    test('keeps the saved signalType over the caller value', async () => {
+      const savedView = buildSavedView(undefined, { signalType: 'traces' });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews), true, 'logs');
+
+      expect(savedView).toHaveProperty('signalType', 'traces');
+    });
+
+    test("gives the saved view the meta fields the dataset's type names", async () => {
+      const savedView = buildSavedView(undefined, { setMetaFields: jest.fn() });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+      service.registerType({ ...mockType, meta: { ...mockType.meta, metaFields: [] } });
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(savedView.setMetaFields).toHaveBeenCalledWith([]);
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('leaves the saved view meta fields alone when the type names none', async () => {
+      const savedView = buildSavedView(undefined, { setMetaFields: jest.fn() });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(savedView.setMetaFields).not.toHaveBeenCalled();
+    });
+
+    test('remembers datasets without a saved object and skips the lookup next time', async () => {
+      const dataViews = buildAdHocDataViews(
+        new SavedObjectNotFound('index-pattern', 'saved-dataset')
+      );
+      const services = buildServices(dataViews);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+      expect(dataViews.get).toHaveBeenCalledTimes(2);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(2);
+      expect(dataViews.get).toHaveBeenCalledTimes(2);
+    });
+
+    test('retries the lookup after a transient failure', async () => {
+      const dataViews = buildAdHocDataViews(new Error('Internal Server Error'));
+      const services = buildServices(dataViews);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(2);
+      expect(dataViews.get).toHaveBeenCalledTimes(4);
+    });
+
+    test('skips the lookup for ad-hoc selector ids', async () => {
+      const dataViews = buildAdHocDataViews(new Error('should not be called'));
+
+      await service.cacheDataset(
+        { ...savedDataset, id: 'data-source-id::logs-2026' },
+        buildServices(dataViews)
+      );
+
+      expect(dataViews.get).not.toHaveBeenCalled();
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+    });
   });
 
   test('cacheDataset passes signalType and schemaMappings to index pattern spec', async () => {

@@ -18,7 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { DataView, IndexPatternField, ConfiguratorV2 } from '../../../../data/public';
+import {
+  DataView,
+  IndexPatternField,
+  ConfiguratorV2,
+  isPayloadTooLargeError,
+} from '../../../../data/public';
 import {
   useOpenSearchDashboards,
   toMountPoint,
@@ -114,9 +119,24 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
   const refreshFields = () => {
     overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
       if (isConfirmed) {
-        await data.dataViews.refreshFields(dataset);
-        await data.dataViews.updateSavedObject(dataset);
+        const previousFields = dataset.fields.getAll().map((field) => field.spec);
+        try {
+          await data.dataViews.refreshFields(dataset);
+          await data.dataViews.updateSavedObject(dataset);
+        } catch (err) {
+          // Keep the in-memory (cached) dataset in sync with what is actually saved
+          dataset.fields.replaceAll(previousFields);
+          // The data views service already shows a dedicated toast for HTTP 413
+          if (!isPayloadTooLargeError(err)) {
+            notifications.toasts.addError(err, {
+              title: i18n.translate('datasetManagement.editDataset.refreshFieldsError', {
+                defaultMessage: 'Unable to refresh the field list.',
+              }),
+            });
+          }
+        }
         setFields(dataset.getNonScriptedFields());
+        setConflictedFields(dataset.fields.getAll().filter((field) => field.type === 'conflict'));
       }
     });
   };

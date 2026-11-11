@@ -104,4 +104,19 @@ describe('onExitFullScreenMode', () => {
 
     expect(props.onExitFullScreenMode).toHaveBeenCalledTimes(1);
   });
+
+  it('is not called for an ESC key pressed during IME composition', () => {
+    const props = {
+      ...mockProps(),
+    };
+    shallow(<ExitFullScreenButton {...props} />);
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: keys.ESCAPE, isComposing: true } as any)
+    );
+    expect(props.onExitFullScreenMode).not.toHaveBeenCalled();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: keys.ESCAPE } as any));
+    expect(props.onExitFullScreenMode).toHaveBeenCalledTimes(1);
+  });
 });

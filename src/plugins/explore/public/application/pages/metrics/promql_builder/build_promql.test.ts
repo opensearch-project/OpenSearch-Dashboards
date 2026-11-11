@@ -220,3 +220,117 @@ describe('buildPromQL', () => {
     expect(buildPromQL(state)).toBe('sum by (job)(rate(http_requests_total[5m]))');
   });
 });
+
+describe('metric names PromQL cannot take bare', () => {
+  const state = (
+    metric: string,
+    labelFilters: BuilderState['labelFilters'] = []
+  ): BuilderState => ({
+    metric,
+    labelFilters,
+    operations: [],
+  });
+
+  it('selects them by __name__', () => {
+    expect(buildPromQL(state('2xx'))).toBe('{__name__="2xx"}');
+    expect(buildPromQL(state('ClusterStatus.red'))).toBe('{__name__="ClusterStatus.red"}');
+    expect(
+      buildPromQL(
+        state('ClusterStatus.red', [{ id: 'f', label: 'DomainName', op: '=', value: 'd' }])
+      )
+    ).toBe('{__name__="ClusterStatus.red", DomainName="d"}');
+  });
+
+  it('keeps plain names bare', () => {
+    expect(buildPromQL(state('http_requests_total'))).toBe('http_requests_total');
+  });
+
+  it('quotes label names PromQL cannot take bare, and parses them back', () => {
+    const built = buildPromQL(
+      state('5xx', [{ id: 'f', label: 'k8s.namespace.name', op: '=', value: 'prod' }])
+    );
+    expect(built).toBe('{__name__="5xx", "k8s.namespace.name"="prod"}');
+
+    const parsed = parsePromQL(`sum by ("service.name", job) (${built})`);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.metric).toBe('5xx');
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.value])).toEqual([
+      ['k8s.namespace.name', 'prod'],
+    ]);
+    expect(parsed.state.operations[0].grouping?.labels).toEqual(['service.name', 'job']);
+    expect(buildPromQL(parsed.state)).toBe(
+      'sum by ("service.name", job)({__name__="5xx", "k8s.namespace.name"="prod"})'
+    );
+  });
+
+  it.each([
+    [
+      'up{a="foo", b="=bar"}',
+      [
+        ['a', '=', 'foo'],
+        ['b', '=', '=bar'],
+      ],
+    ],
+    [
+      'up{a="foo", b!="!=bar"}',
+      [
+        ['a', '=', 'foo'],
+        ['b', '!=', '!=bar'],
+      ],
+    ],
+    [
+      'up{a="x,", "k8s.pod"=~"=~y"}',
+      [
+        ['a', '=', 'x,'],
+        ['k8s.pod', '=~', '=~y'],
+      ],
+    ],
+  ])('keeps label values that start with an operator: %s', (query, filters) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.op, f.value])).toEqual(filters);
+    expect(buildPromQL(parsed.state)).toBe(query);
+  });
+
+  it.each([
+    [`foo{a='x,"y"=z'}`, [['a', '=', 'x,"y"=z']], 'foo{a="x,\\"y\\"=z"}'],
+    [`foo{msg='sum by ("x")'}`, [['msg', '=', 'sum by ("x")']], 'foo{msg="sum by (\\"x\\")"}'],
+    ['foo{a="sum by (\\"x\\")"}', [['a', '=', 'sum by ("x")']], 'foo{a="sum by (\\"x\\")"}'],
+    [`foo{'k8s.pod'='p'}`, [['k8s.pod', '=', 'p']], 'foo{"k8s.pod"="p"}'],
+  ])('reads strings whole whatever their quotes: %s', (query, filters, rebuilt) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.op, f.value])).toEqual(filters);
+    expect(buildPromQL(parsed.state)).toBe(rebuilt);
+    expect(buildPromQL(parsePromQL(rebuilt).state)).toBe(rebuilt);
+  });
+
+  it.each([
+    ['foo{a=~"x\\\\.y"}', 'x\\.y'],
+    ['foo{a="say \\"hi\\""}', 'say "hi"'],
+    ['foo{"service.name"=~"api\\\\..*"}', 'api\\..*'],
+    ["foo{a='it\\'s'}", "it's"],
+  ])('decodes escaped values once, so they survive the builder: %s', (query, value) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters[0].value).toBe(value);
+    const rebuilt = buildPromQL(parsed.state);
+    expect(parsePromQL(rebuilt).state.labelFilters[0].value).toBe(value);
+    expect(buildPromQL(parsePromQL(rebuilt).state)).toBe(rebuilt);
+  });
+
+  it.each(['foo{a="bad \\q escape"}', 'foo{a="line\\nbreak"}'])(
+    'keeps a value the builder cannot write back in code mode: %s',
+    (query) => {
+      expect(parsePromQL(query).canBuild).toBe(false);
+    }
+  );
+
+  it('parses the __name__ form back into the builder', () => {
+    const parsed = parsePromQL('avg({__name__="ClusterStatus.red", DomainName="d"})');
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.metric).toBe('ClusterStatus.red');
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.value])).toEqual([['DomainName', 'd']]);
+    expect(buildPromQL(parsed.state)).toBe('avg({__name__="ClusterStatus.red", DomainName="d"})');
+  });
+});

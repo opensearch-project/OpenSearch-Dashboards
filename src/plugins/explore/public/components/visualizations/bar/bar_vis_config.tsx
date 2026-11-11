@@ -140,6 +140,11 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
   name: 'Bar',
   type: 'bar',
   icon: 'visBarVertical',
+  metadata: {
+    description:
+      'Compare values across categories or time buckets. Use for comparisons, rankings, ' +
+      'and distributions across groups.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'bar'>> = [
       {

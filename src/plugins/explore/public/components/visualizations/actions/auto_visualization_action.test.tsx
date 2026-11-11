@@ -26,6 +26,8 @@ jest.mock('../../../components/visualizations/visualization_registry', () => ({
 
 const mockNormalizeResultRows = jest.fn();
 jest.mock('../../../components/visualizations/utils/normalize_result_rows', () => ({
+  normalizeSearchHits: (hits: Array<{ _source?: Record<string, unknown> }>) =>
+    hits.map((hit) => ({ ...(hit._source ?? {}) })),
   normalizeResultRows: (...args: any[]) => mockNormalizeResultRows(...args),
 }));
 
@@ -39,11 +41,11 @@ jest.mock('../../../application/in_context_vis_editor/component/vis_editor_no_re
 
 jest.mock('./utils', () => ({
   AUTO_VISUALIZATION_TOOL_NAME: 'auto_create_visualization',
-  AutoVisMeta: {
+  createAutoVisMeta: jest.fn(() => ({
     name: 'auto_create_visualization',
     description: 'desc',
     parameters: { type: 'object', properties: {}, required: [] },
-  },
+  })),
 }));
 
 const baseArgs = {

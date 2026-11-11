@@ -157,7 +157,10 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      esTypes: field?.esTypes,
+      searchable: field?.searchable,
       aggregatable: field?.aggregatable,
+      readFromDocValues: field?.readFromDocValues,
       subType: field?.subType,
     }));
   },

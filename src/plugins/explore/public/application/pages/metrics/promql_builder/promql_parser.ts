@@ -132,7 +132,10 @@ export function parsePromQL(query: string): ParseResult {
 
   let result: ParseResult;
   try {
-    const lexer = new PromQLLexer(CharStream.fromString(trimmed));
+    const replaced = replaceQuotedLabelNames(trimmed);
+    if (!replaced) throw new Error('Undecodable quoted label name');
+    const { text, names } = replaced;
+    const lexer = new PromQLLexer(CharStream.fromString(text));
     const tokenStream = new CommonTokenStream(lexer);
     const parser = new PromQLParser(tokenStream);
     parser.removeErrorListeners();
@@ -147,12 +150,19 @@ export function parsePromQL(query: string): ParseResult {
       if (!visitor.canBuild || !visitor.metric) {
         result = { canBuild: false, state: emptyState() };
       } else {
+        const restore = (label: string) => names.get(label) ?? label;
+        const labelFilters = visitor.labelFilters.map((f) => ({ ...f, label: restore(f.label) }));
+        const operations = visitor.operations.map((op) =>
+          op.grouping
+            ? { ...op, grouping: { ...op.grouping, labels: op.grouping.labels.map(restore) } }
+            : op
+        );
         result = {
           canBuild: true,
           state: {
             metric: visitor.metric,
-            labelFilters: visitor.labelFilters.length > 0 ? visitor.labelFilters : [emptyFilter()],
-            operations: visitor.operations,
+            labelFilters: labelFilters.length > 0 ? labelFilters : [emptyFilter()],
+            operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },
         };
@@ -169,6 +179,128 @@ export function parsePromQL(query: string): ParseResult {
   parseCache.set(trimmed, result);
   return result;
 }
+
+// PromQL strings: double- or single-quoted with Go escapes, or backtick-quoted raw strings.
+const STRING_LITERAL = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`/g;
+const MATCHER_OPERATOR = /^\s*(?:=~|!~|!=|=)/;
+// `by (...)` / `without (...)` on the text with every string masked, so it can't match inside one.
+const GROUPING = /\b(by|without)(\s*)\(([^()]*)\)/g;
+const MASK = /\u0000(\d+)\u0000/g;
+
+const SIMPLE_ESCAPES: Record<string, string> = {
+  a: '\u0007',
+  b: '\b',
+  f: '\f',
+  n: '\n',
+  r: '\r',
+  t: '\t',
+  v: '\v',
+  '\\': '\\',
+  '"': '"',
+  "'": "'",
+};
+
+/**
+ * The value of a PromQL string literal (its quotes included), or undefined when it can't be
+ * decoded, or decodes to control characters the builder can't write back.
+ */
+export const decodePromQLString = (literal: string): string | undefined => {
+  const quote = literal[0];
+  if (literal.length < 2 || literal[literal.length - 1] !== quote) return undefined;
+  const body = literal.slice(1, -1);
+  let value: string;
+  if (quote === '`') {
+    value = body;
+  } else if (quote === '"' || quote === "'") {
+    let out = '';
+    for (let i = 0; i < body.length; i++) {
+      const ch = body[i];
+      if (ch !== '\\') {
+        out += ch;
+        continue;
+      }
+      const next = body[++i];
+      if (next === undefined) return undefined;
+      if (next in SIMPLE_ESCAPES) {
+        // A quote is escaped only inside its own kind of string.
+        if ((next === '"' || next === "'") && next !== quote) return undefined;
+        out += SIMPLE_ESCAPES[next];
+        continue;
+      }
+      const hexLength = next === 'x' ? 2 : next === 'u' ? 4 : next === 'U' ? 8 : 0;
+      const digits = hexLength
+        ? body.slice(i + 1, i + 1 + hexLength)
+        : /[0-7]/.test(next)
+          ? body.slice(i, i + 3)
+          : '';
+      const valid = hexLength ? /^[0-9a-fA-F]+$/ : /^[0-7]{3}$/;
+      if (!digits || digits.length !== (hexLength || 3) || !valid.test(digits)) return undefined;
+      const code = parseInt(digits, hexLength ? 16 : 8);
+      if (code > 0x10ffff) return undefined;
+      out += String.fromCodePoint(code);
+      i += hexLength ? hexLength : 2;
+    }
+    value = out;
+  } else {
+    return undefined;
+  }
+
+  return /[\u0000-\u001f\u007f]/.test(value) ? undefined : value;
+};
+
+/**
+ * The grammar only takes bare label names, but Prometheus 3 quotes names it can't take bare
+ * (`"k8s.namespace.name"="x"`, `by ("service.name")`). Swap each for a placeholder name
+ * before parsing; `names` maps the placeholders back. Undefined when a quoted name can't be
+ * decoded.
+ */
+const replaceQuotedLabelNames = (query: string) => {
+  // Mask every string first, left to right, so each one is taken whole (whatever its quotes) and
+  // nothing inside one is read as a name or a grouping clause.
+  const strings: string[] = [];
+  const masked = query.replace(STRING_LITERAL, (literal: string) => {
+    strings.push(literal);
+    return `\u0000${strings.length - 1}\u0000`;
+  });
+  const names = new Map<string, string>();
+  const nameIndexes = new Set<number>();
+  let decodable = true;
+  const placeholder = (index: number) => {
+    const name = decodePromQLString(strings[index]);
+    if (name === undefined) decodable = false;
+    const id = `__osd_label_${names.size}__`;
+    names.set(id, name ?? '');
+    nameIndexes.add(index);
+    return id;
+  };
+  const placeholders = new Map<number, string>();
+  const nameAt = (index: number) => {
+    if (!placeholders.has(index)) placeholders.set(index, placeholder(index));
+    return placeholders.get(index)!;
+  };
+  // A string is a label name when it opens a matcher (right after `{` or `,`, and followed by a
+  // matcher operator) or is listed in a grouping clause.
+  masked.replace(MASK, (marker: string, index: string, offset: number, source: string) => {
+    const before = source.slice(0, offset).trimEnd();
+    const after = source.slice(offset + marker.length);
+    if ((before.endsWith('{') || before.endsWith(',')) && MATCHER_OPERATOR.test(after)) {
+      nameAt(Number(index));
+    }
+    return marker;
+  });
+  masked.replace(GROUPING, (clause: string, _mode: string, _space: string, labels: string) => {
+    labels.replace(MASK, (marker: string, index: string) => {
+      nameAt(Number(index));
+      return marker;
+    });
+    return clause;
+  });
+  const text = masked.replace(MASK, (_marker: string, index: string) => {
+    const i = Number(index);
+    return nameIndexes.has(i) ? placeholders.get(i)! : strings[i];
+  });
+  return decodable ? { text, names } : undefined;
+};
 
 /**
  * Visitor that walks the ANTLR parse tree and extracts BuilderState fields.
@@ -282,6 +414,15 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
         this.visitLabelMatcher(matcher);
       }
     }
+
+    // `{__name__="2xx", ...}` is how the builder writes a name PromQL can't take bare.
+    if (!this.metric) {
+      const nameIndex = this.labelFilters.findIndex((f) => f.label === '__name__' && f.op === '=');
+      if (nameIndex !== -1) {
+        this.metric = this.labelFilters[nameIndex].value ?? '';
+        this.labelFilters.splice(nameIndex, 1);
+      }
+    }
   };
 
   visitLabelMatcher = (ctx: LabelMatcherContext) => {
@@ -289,12 +430,12 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     const opCtx = ctx.labelMatcherOperator();
     const opToken = opCtx?.start?.type;
     const op = (opToken !== undefined && OP_MAP[opToken]) || '=';
-    let value = ctx.labelValue()?.getText() || '';
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
+    // The builder holds the value itself and escapes it again when it writes the query, so decode
+    // it here. A value it can't decode keeps the query in code mode.
+    const value = decodePromQLString(ctx.labelValue()?.getText() || '');
+    if (value === undefined) {
+      this.canBuild = false;
+      return;
     }
     this.labelFilters.push({ id: nextFilterId(), label, op, value });
   };

@@ -42,6 +42,7 @@ import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
 import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
+import { isImeComposing } from '../../../../core/public/utils';
 import './chat_window.scss';
 
 export interface ChatWindowInstance {
@@ -101,6 +102,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       Array<{ id: string; title: string }>
     >([]);
     const [isValidating, setIsValidating] = useState(false);
+    const [generatedTitle, setGeneratedTitle] = useState<string>('');
 
     const hasActiveToolCalls = useMemo(() => {
       if (toolCallStates instanceof Map) {
@@ -180,6 +182,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onStreamingStateChange: setIsStreaming,
             onStartResponse: setStartResponse,
             getTimeline: () => timelineRef.current,
+            onConversationTitle: setGeneratedTitle,
           },
         }),
       [service, chatService, confirmationService, telemetryRecorder, setTimelineSynced]
@@ -223,9 +226,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Save conversation to history whenever timeline changes
     useEffect(() => {
       if (timeline.length > 0 && !isLoading) {
-        chatService.saveConversation(timeline);
+        chatService.saveConversation(timeline, generatedTitle || undefined);
       }
-    }, [timeline, chatService, isLoading]);
+    }, [timeline, chatService, isLoading, generatedTitle]);
 
     // Clear thread ID and pending data source selection on unmount
     useUnmount(() => {
@@ -432,6 +435,20 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         if (!isValid) {
           if (compatibleDataSources.length >= 1) {
+            // Explain why the picker appears when a specific data source was rejected.
+            const rejected = chatService.getRejectedDataSources();
+            if (rejected.length > 0) {
+              const noticeMsg: SystemMessage = {
+                id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+                role: 'system',
+                content: i18n.translate('chat.dataSourceRejected', {
+                  defaultMessage:
+                    'The data source {ids} cannot be used. Choose a data source to continue.',
+                  values: { ids: rejected.map((r) => `"${r.id}"`).join(', ') },
+                }),
+              };
+              setTimelineSynced((prev) => [...prev, noticeMsg]);
+            }
             // Compatible data sources exist — prompt user to pick one.
             // User message is already in timeline; handleDataSourceSelect will continue.
             setPendingMessage(userMsg);
@@ -521,7 +538,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     handleSendRef.current = handleSend;
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !isImeComposing(e)) {
         e.preventDefault();
         handleSend();
       }
@@ -623,6 +640,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setPendingAskUser(null);
       setPendingMessage(null);
       setAvailableDataSources([]);
+      setGeneratedTitle('');
       isValidatingRef.current = false;
       setIsValidating(false);
       confirmationService.cleanAll();
@@ -664,6 +682,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
     }, [capturePageContainer]);
 
+    const handleAttachScreenshot = useCallback(
+      (attach: boolean) => {
+        if (attach && screenshotFeatureEnabled) {
+          handleCaptureScreenshot();
+          return;
+        }
+        setScreenshotData(undefined);
+      },
+      [handleCaptureScreenshot, screenshotFeatureEnabled]
+    );
+
     const enhancedProps = useMemo(() => {
       return {
         toolCallStates,
@@ -671,9 +700,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
     }, [toolCallStates, service.getActionRenderer]);
 
-    // Get conversation name from first user message with text content
+    // Get conversation name: prefer the auto-generated title from the agent's
+    // conversation_title CUSTOM event; otherwise fall back to the first user
+    // message text content. The title value comes only from the CUSTOM event
+    // (handleCustomEvent -> onConversationTitle); the inline CONVERSATION_TITLE:
+    // line is still stripped from displayed content but is no longer parsed as a
+    // title source here.
     const conversationName = useMemo(() => {
-      // Find first user message that has text content
+      if (generatedTitle) {
+        return generatedTitle;
+      }
+
+      // Fallback: find first user message that has text content
       for (const msg of timeline) {
         if (msg.role !== 'user') continue;
 
@@ -692,7 +730,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
 
       return '';
-    }, [timeline]);
+    }, [timeline, generatedTitle]);
 
     const handleShowHistory = useCallback(() => {
       setShowHistory(true);
@@ -738,6 +776,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(null);
             setPendingConfirmation(null);
             setPendingAskUser(null);
+            // Restore the saved conversation name (which may be the generated
+            // title or the first-user-message fallback). The name lives on the
+            // SavedConversation object but is not included in the replayed
+            // AG-UI events, so we must set it explicitly here.
+            setGeneratedTitle(conversation.name || '');
             confirmationService.cleanAll();
             humanInputService.cleanAll();
             setShowHistory(false);
@@ -860,6 +903,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                 chatInputRef.current?.focus();
                 telemetryRecorder?.recordEvent({ name: 'suggestion_click', data: {} });
               }}
+              onAttachScreenshot={handleAttachScreenshot}
               inputValue={input}
               onRemoveInput={(content: string) =>
                 setInput((prev) => prev.replace(content, '').trim())

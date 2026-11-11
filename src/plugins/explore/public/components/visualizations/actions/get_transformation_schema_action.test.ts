@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {
+  getAllTransformationDefinitions,
+  getTransformationConfigSchemaRegistry,
+} from '../../data_transformations/register_all_transformations';
 import { registerGetTransformationSchemaAction } from './get_transformation_schema_action';
 
 // The schemas imported from data_transformations are plain objects — no need to mock them.
@@ -30,18 +34,16 @@ describe('registerGetTransformationSchemaAction', () => {
 });
 
 describe('get_transformation_schema handler', () => {
+  it('keeps advertised transformation ids aligned with the schema registry', () => {
+    const advertisedIds = getAllTransformationDefinitions().map(({ id }) => id);
+    const schemaIds = Object.keys(getTransformationConfigSchemaRegistry());
+
+    expect(schemaIds).toEqual(advertisedIds);
+  });
+
   it('returns schemas for all known definition ids', async () => {
     const action = registerAndGetAction();
-    const knownIds = [
-      'limit',
-      'sort_by',
-      'filter',
-      'filter_fields',
-      'convert_field_type',
-      'group_by',
-      'extract_fields',
-      'add_field',
-    ];
+    const knownIds = getAllTransformationDefinitions().map(({ id }) => id);
 
     const result = await action.handler({ definitionIds: knownIds });
 

@@ -41,6 +41,13 @@ import {
 } from 'history';
 
 /**
+ * Whether `pathname` is `basePath` or below it. The match ends at a path segment, so `/app/foo`
+ * does not contain `/app/foobar`.
+ */
+const isInBasePath = (pathname: string, basePath: string) =>
+  pathname === basePath || pathname.startsWith(basePath.endsWith('/') ? basePath : `${basePath}/`);
+
+/**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
  * similarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope
  * of this base path.
@@ -80,7 +87,7 @@ export class ScopedHistory<
     private readonly basePath: string
   ) {
     const parentPath = this.parentHistory.location.pathname;
-    if (!parentPath.startsWith(basePath)) {
+    if (!isInBasePath(parentPath, basePath)) {
       throw new Error(
         `Browser location [${parentPath}] is not currently in expected basePath [${basePath}]`
       );
@@ -313,7 +320,7 @@ export class ScopedHistory<
   private setupHistoryListener() {
     const unlisten = this.parentHistory.listen((location, action) => {
       // If the user navigates outside the scope of this basePath, tear it down.
-      if (!location.pathname.startsWith(this.basePath)) {
+      if (!isInBasePath(location.pathname, this.basePath)) {
         unlisten();
         this.isActive = false;
         return;

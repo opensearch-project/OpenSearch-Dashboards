@@ -27,6 +27,11 @@ export interface QueryEditorSliceState {
   isQueryEditorDirty: boolean;
   hasUserInitiatedQuery: boolean;
   breakdownField?: string;
+  /**
+   * The results shown are from the previous dataset selection: kept on a refinement for a dataset
+   * type that requires an explicit Run, until the next run.
+   */
+  isSelectionStale?: boolean;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -46,6 +51,7 @@ const initialState: QueryEditorSliceState = {
   dateRange: undefined,
   isQueryEditorDirty: false,
   hasUserInitiatedQuery: false,
+  isSelectionStale: false,
 };
 
 const queryEditorSlice = createSlice({
@@ -144,6 +150,9 @@ const queryEditorSlice = createSlice({
     setBreakdownField: (state, action: PayloadAction<string | undefined>) => {
       state.breakdownField = action.payload;
     },
+    setIsSelectionStale: (state, action: PayloadAction<boolean>) => {
+      state.isSelectionStale = action.payload;
+    },
   },
 });
 
@@ -169,6 +178,7 @@ export const {
   setIsQueryEditorDirty,
   setHasUserInitiatedQuery,
   setBreakdownField,
+  setIsSelectionStale,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

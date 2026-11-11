@@ -11,12 +11,14 @@ describe('Facet', () => {
   let facetWithShimEnabled: Facet;
   let facetWithCompression: Facet;
   let mockClient: jest.Mock;
+  let mockAsScoped: jest.Mock;
   let mockLogger: jest.Mocked<Logger>;
   let mockContext: any;
   let mockRequest: any;
 
   beforeEach(() => {
     mockClient = jest.fn();
+    mockAsScoped = jest.fn().mockReturnValue({ callAsCurrentUser: mockClient });
     mockLogger = {
       error: jest.fn(),
       info: jest.fn(),
@@ -25,7 +27,7 @@ describe('Facet', () => {
     } as unknown as jest.Mocked<Logger>;
 
     const props: FacetProps = {
-      client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+      client: { asScoped: mockAsScoped },
       logger: mockLogger,
       endpoint: 'test-endpoint',
     };
@@ -45,6 +47,7 @@ describe('Facet', () => {
     };
 
     mockRequest = {
+      rawRequest: { headers: { authorization: 'Basic test' } },
       body: {
         query: {
           query: 'test query',
@@ -66,6 +69,15 @@ describe('Facet', () => {
   });
 
   describe('describeQuery', () => {
+    it('scopes the default client to the original HTTP request', async () => {
+      mockRequest.body.query.dataset = {};
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      await facet.describeQuery(mockContext, mockRequest);
+
+      expect(mockAsScoped).toHaveBeenCalledWith(mockRequest.rawRequest);
+    });
+
     it('should handle request with complete dataset information', async () => {
       mockClient.mockResolvedValue({ result: 'success' });
 
@@ -315,7 +327,7 @@ describe('Facet', () => {
 
     it('should add accept-encoding header for fetchJobs when requestCompression is true', async () => {
       const facetWithCompressionAndJobs = new Facet({
-        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        client: { asScoped: mockAsScoped },
         logger: mockLogger,
         endpoint: 'test-endpoint',
         useJobs: true,
@@ -323,6 +335,7 @@ describe('Facet', () => {
       });
 
       mockRequest.params = { queryId: 'test-query-id' };
+      mockRequest.body.query.dataset = {};
       mockClient.mockResolvedValue({ result: 'success' });
 
       const result = await facetWithCompressionAndJobs.describeQuery(mockContext, mockRequest);
@@ -332,6 +345,7 @@ describe('Facet', () => {
         queryId: 'test-query-id',
         headers: { 'accept-encoding': 'gzip, deflate' },
       });
+      expect(mockAsScoped).toHaveBeenCalledWith(mockRequest.rawRequest);
     });
   });
 

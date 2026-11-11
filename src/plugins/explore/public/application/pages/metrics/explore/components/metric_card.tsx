@@ -19,6 +19,7 @@ import {
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { MetricMetadata, MetricType, TYPE_COLORS, inferMetricType } from '../types';
+import { isNativeHistogram } from '../services/query_generator';
 import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { useExploration } from '../contexts/exploration_context';
 
@@ -32,6 +33,8 @@ interface MetricCardProps {
   onToggleSelect: () => void;
   onNavigate: () => void;
   onVisibilityChange: (name: string, visible: boolean) => void;
+  /** The preview isn't loaded until the user asks for it (explicit-Run dataset types). */
+  previewDeferred?: boolean;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -44,6 +47,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   onToggleSelect,
   onNavigate,
   onVisibilityChange,
+  previewDeferred = false,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -65,8 +69,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   const { onTimeRangeChange, timeBounds } = useExploration();
 
-  const sparklineLabel =
-    type === MetricType.COUNTER ? 'sum(rate)' : type === MetricType.HISTOGRAM ? 'p95' : 'avg';
+  const sparklineLabel = isNativeHistogram(name, type)
+    ? 'histogram_avg'
+    : type === MetricType.COUNTER
+      ? 'sum(rate)'
+      : type === MetricType.HISTOGRAM
+        ? 'p95'
+        : 'avg';
 
   const chartColor = SERIES_COLORS[colorIndex % SERIES_COLORS.length];
 
@@ -107,6 +116,14 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           timeFrom={timeBounds?.min}
           timeTo={timeBounds?.max}
         />
+      );
+    if (previewDeferred)
+      return (
+        <EuiText size="xs" color="subdued" data-test-subj="metricsExploreCardPreviewDeferred">
+          {i18n.translate('explore.metricsExplore.previewNotLoaded', {
+            defaultMessage: 'Preview not loaded',
+          })}
+        </EuiText>
       );
     return <EuiLoadingChart size="m" />;
   }

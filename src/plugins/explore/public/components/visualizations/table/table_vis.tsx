@@ -10,6 +10,7 @@ import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './tabl
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
+import type { VariableValue } from '../../../../../dashboard/public';
 import { getThresholdByValue } from '../utils/utils';
 import { matchesFilter } from './table_vis_utils';
 
@@ -23,6 +24,7 @@ interface TableVisProps {
   showStyleSelector?: boolean;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
   disableActions?: boolean;
+  variables?: VariableValue[];
 }
 
 export const TableVis = React.memo(
@@ -34,6 +36,7 @@ export const TableVis = React.memo(
     showStyleSelector,
     onStyleChange,
     disableActions,
+    variables,
   }: TableVisProps) => {
     const sortedColumns = useMemo(() => {
       const baseColumns = [...columns].sort((a, b) => a.id - b.id);
@@ -223,9 +226,10 @@ export const TableVis = React.memo(
               ? 'right'
               : 'left'
             : alignment;
-        const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
-          ? filteredRows[rowIndex][columnId]
-          : null;
+        const row = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
+          ? filteredRows[rowIndex]
+          : undefined;
+        const cellValue = row ? row[columnId] : null;
 
         let color: string | undefined;
         if (
@@ -254,6 +258,8 @@ export const TableVis = React.memo(
             }
             setPopoverOpen={(open) => setPopoverOpenCell(open ? { rowIndex, columnId } : null)}
             columnId={columnId}
+            row={row}
+            variables={variables}
           />
         );
       },
@@ -265,6 +271,7 @@ export const TableVis = React.memo(
         styleOptions?.cellTypes,
         styleOptions?.globalAlignment,
         styleOptions?.dataLinks,
+        variables,
         popoverOpenCell,
       ]
     );

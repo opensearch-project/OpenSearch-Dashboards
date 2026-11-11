@@ -718,3 +718,86 @@ describe('#getAllUserProvidedWithScope', () => {
     expect(uiSettingApis.default.getAll).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('browser-stored settings when the storage quota is full', () => {
+  const realLocalStorage = window.localStorage;
+
+  // setBrowserStoredSettings only runs for a preferBrowserSetting key with
+  // theme:enableUserControl on.
+  const browserStoredSetup = () =>
+    setup({
+      defaults: {
+        'theme:enableUserControl': { value: true },
+        'theme:darkMode': { value: false, preferBrowserSetting: true },
+      },
+    });
+
+  const stubLocalStorage = (setItem: () => void) => {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: { getItem: () => null, setItem, removeItem: () => {} },
+    });
+  };
+
+  afterEach(() => {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: realLocalStorage,
+    });
+  });
+
+  it('caches the setting when there is room', async () => {
+    const written: Array<[string, string]> = [];
+    stubLocalStorage(((k: string, v: string) => {
+      written.push([k, v]);
+    }) as any);
+    const { client } = browserStoredSetup();
+
+    await expect(client.set('theme:darkMode', true)).resolves.toBe(true);
+    expect(written.map(([k]) => k)).toContain('uiSettings');
+  });
+
+  it('reports failure rather than claiming the setting was saved', async () => {
+    stubLocalStorage(() => {
+      const err: any = new Error('quota');
+      err.name = 'QuotaExceededError';
+      throw err;
+    });
+    const { client } = browserStoredSetup();
+    const errors: Error[] = [];
+    client.getUpdateErrors$().subscribe((e) => errors.push(e));
+
+    // Resolving true here would tell the caller it saved, and the value would
+    // then vanish on reload.
+    await expect(client.set('theme:darkMode', true)).resolves.toBe(false);
+    expect(errors.map((e) => e.message).join()).toMatch(/storage for this site is full/);
+  });
+
+  it('does not emit saved$ when the write did not persist', async () => {
+    stubLocalStorage(() => {
+      const err: any = new Error('quota');
+      err.name = 'QuotaExceededError';
+      throw err;
+    });
+    const { client } = browserStoredSetup();
+    const saved: unknown[] = [];
+    client.getSaved$().subscribe((v) => saved.push(v));
+
+    await client.set('theme:darkMode', true);
+
+    expect(saved).toHaveLength(0);
+  });
+
+  it('surfaces a non-quota storage failure rather than masking it', async () => {
+    stubLocalStorage(() => {
+      throw new Error('disk on fire');
+    });
+    const { client } = browserStoredSetup();
+    const errors: Error[] = [];
+    client.getUpdateErrors$().subscribe((e) => errors.push(e));
+
+    await client.set('theme:darkMode', true);
+
+    expect(errors.map((e) => e.message)).toContain('disk on fire');
+  });
+});

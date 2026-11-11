@@ -11,3 +11,4 @@ export { MetricsQueryOptions, formatStepSeconds } from './metrics_query_options'
 export type { RowStepReadout } from './metrics_query_options';
 export { useMetricsQuerySettings } from './use_metrics_query_settings';
 export { useExecutedStepResolution } from './use_executed_step_resolution';
+export { SourceQueryEditor } from './source_query_editor';

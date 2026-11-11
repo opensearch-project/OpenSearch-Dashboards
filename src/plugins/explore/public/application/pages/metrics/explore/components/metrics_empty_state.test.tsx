@@ -53,4 +53,26 @@ describe('MetricsEmptyState', () => {
     expect(trigger.tagName).toBe('BUTTON');
     expect(trigger).toHaveAttribute('type', 'button');
   });
+
+  it("shows a language's own description and samples in place of Prometheus's", () => {
+    render(
+      <MetricsEmptyState
+        title="t"
+        body="b"
+        description="Query another store"
+        sampleQueries={[{ label: 'Top CPU', query: 'SELECT AVG(CPUUtilization) FROM x' }]}
+        sampleQueriesTitle="Sample SQL queries"
+        codeLanguage="sql"
+      />
+    );
+    expect(screen.getByText('Query another store')).toBeInTheDocument();
+    expect(screen.getByText('Sample SQL queries')).toBeInTheDocument();
+    expect(screen.getByText('Top CPU')).toBeInTheDocument();
+    expect(screen.queryByText('CPU usage per instance')).not.toBeInTheDocument();
+  });
+
+  it('hides the samples section when there are none', () => {
+    render(<MetricsEmptyState title="t" body="b" sampleQueries={[]} />);
+    expect(screen.queryByText('Sample PromQL queries')).not.toBeInTheDocument();
+  });
 });

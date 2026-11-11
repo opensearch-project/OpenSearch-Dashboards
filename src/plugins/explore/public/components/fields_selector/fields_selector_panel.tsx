@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { UI_SETTINGS } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -29,6 +29,12 @@ export interface IDiscoverPanelProps {
   collapsePanel?: () => void;
 }
 
+// Shared empty values so the sidebar's memoized derivations are not invalidated by a fresh
+// `{}` / `[]` on every render.
+const EMPTY_COLUMNS: string[] = [];
+const EMPTY_FIELD_COUNTS: Record<string, number> = {};
+const EMPTY_HITS: any[] = [];
+
 export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings } = services;
@@ -52,9 +58,26 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
     return processed;
   }, [rawResults, dataset]);
 
+  // Results are cleared when a query is (re)run and repopulated when it returns. Keep showing
+  // the last results for the same dataset in between, so the sidebar does not tear down and
+  // rebuild its field groups twice per query. A dataset change still starts from empty.
+  const lastProcessedRef = useRef<{ datasetId?: string; results: typeof processedResults }>({
+    results: null,
+  });
+  useEffect(() => {
+    if (processedResults) {
+      lastProcessedRef.current = { datasetId: dataset?.id, results: processedResults };
+    }
+  }, [processedResults, dataset?.id]);
+  const effectiveResults =
+    processedResults ??
+    (dataset && lastProcessedRef.current.datasetId === dataset.id
+      ? lastProcessedRef.current.results
+      : null);
+
   // Get fieldCounts and rows from processed results
-  const fieldCounts = processedResults?.fieldCounts || {};
-  const rows = (processedResults as any)?.hits?.hits || [];
+  const fieldCounts = effectiveResults?.fieldCounts || EMPTY_FIELD_COUNTS;
+  const rows = (effectiveResults as any)?.hits?.hits || EMPTY_HITS;
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
 
@@ -80,26 +103,39 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
 
   const isEnhancementsEnabledOverride = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
+  const onAddField = useCallback(
+    (fieldName: string) => {
+      dispatch(addColumn({ column: fieldName }));
+    },
+    [dispatch]
+  );
+  const onRemoveField = useCallback(
+    (fieldName: string) => {
+      dispatch(removeColumn(fieldName));
+    },
+    [dispatch]
+  );
+  const onReorderFields = useCallback(
+    (source: number, destination: number) => {
+      const columnName = columns[source];
+      dispatch(
+        moveColumn({
+          columnName,
+          destination,
+        })
+      );
+    },
+    [dispatch, columns]
+  );
+
   return (
     <DiscoverSidebar
-      columns={columns || []}
-      fieldCounts={(fieldCounts as any) || {}}
-      hits={rows || []}
-      onAddField={(fieldName) => {
-        dispatch(addColumn({ column: fieldName }));
-      }}
-      onRemoveField={(fieldName) => {
-        dispatch(removeColumn(fieldName));
-      }}
-      onReorderFields={(source, destination) => {
-        const columnName = columns[source];
-        dispatch(
-          moveColumn({
-            columnName,
-            destination,
-          })
-        );
-      }}
+      columns={columns || EMPTY_COLUMNS}
+      fieldCounts={fieldCounts as Record<string, number>}
+      hits={rows}
+      onAddField={onAddField}
+      onRemoveField={onRemoveField}
+      onReorderFields={onReorderFields}
       selectedDataSet={dataset}
       onAddFilter={onAddFilter}
       onCollapse={collapsePanel}

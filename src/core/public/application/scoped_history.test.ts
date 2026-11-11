@@ -50,6 +50,12 @@ describe('ScopedHistory', () => {
         `"Browser location [/app/other] is not currently in expected basePath [/app/wow]"`
       );
     });
+
+    it('fails if the current location only shares a prefix with basePath', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wowsers');
+      expect(() => new ScopedHistory(gh, '/app/wow')).toThrow();
+    });
   });
 
   describe('navigation', () => {
@@ -219,6 +225,17 @@ describe('ScopedHistory', () => {
       expect(() => h.replace('/new-page')).toThrow();
       expect(() => h.goBack()).toThrow();
       expect(() => h.goForward()).toThrow();
+    });
+
+    it('falls out of scope on a path that only shares a prefix with basePath', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow');
+      const h = new ScopedHistory(gh, '/app/wow');
+      const listenPaths: string[] = [];
+      h.listen((l) => listenPaths.push(l.pathname));
+      gh.push('/app/wowsers');
+      expect(listenPaths).toEqual([]);
+      expect(() => h.location).toThrow();
     });
   });
 

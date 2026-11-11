@@ -33,6 +33,9 @@ describe('useSwitchDataSourceAction', () => {
 
     mockChatService = {
       setDataSourceId: jest.fn(),
+      getConfirmedDataSourceId: jest.fn().mockReturnValue(undefined),
+      getSessionDataSourceList: jest.fn().mockReturnValue(['ds-a', 'ds-b']),
+      getPinnedPageDataSourceId: jest.fn().mockResolvedValue(undefined),
       validateDataSourceId: jest.fn().mockResolvedValue({
         valid: true,
         dataSource: { id: 'ds-a', title: 'Cluster A' },
@@ -79,6 +82,64 @@ describe('useSwitchDataSourceAction', () => {
           message: 'Confirmed "Cluster A" as the active data source for this conversation.',
         })
       );
+    });
+
+    it('should refuse to switch when the page pins a different data source', async () => {
+      // ds-b is in the available list, so the refusal names its title, not the raw id.
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-b');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      // The agent message carries the instruction and the title.
+      expect(result.message).toContain('"Cluster B"');
+      expect(result.message).not.toContain('ds-b');
+      // The user-facing text is separate, plain, and uses the title but no agent instructions.
+      expect(result.displayMessage).toContain('"Cluster B"');
+      expect(result.displayMessage).not.toContain('Do not retry');
+      expect(result.displayMessage).not.toContain('tell the user');
+    });
+
+    it('should allow switching to the data source the page already pins', async () => {
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue('ds-a');
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(result.success).toBe(true);
+    });
+
+    it('should allow switching when the page pins no usable data source', async () => {
+      // getPinnedPageDataSourceId returns undefined both when the page names no data source and
+      // when the page id is not usable; either way a switch is allowed.
+      mockChatService.getPinnedPageDataSourceId.mockResolvedValue(undefined);
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(result.success).toBe(true);
+    });
+
+    it('should switch even when the session has seen only one data source', async () => {
+      mockChatService.getSessionDataSourceList.mockReturnValue(['ds-a']);
+      (mockChatService.validateDataSourceId as jest.Mock).mockResolvedValue({
+        valid: true,
+        dataSource: { id: 'ds-b', title: 'Cluster B' },
+        availableDataSources: [
+          { id: 'ds-a', title: 'Cluster A' },
+          { id: 'ds-b', title: 'Cluster B' },
+        ],
+      });
+      renderHook();
+
+      const result = await registeredAction.handler({ dataSourceId: 'ds-b' });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-b');
+      expect(result).toEqual(expect.objectContaining({ success: true, dataSourceId: 'ds-b' }));
     });
 
     it('should reject an id that is not a known data source without mutating state', async () => {
@@ -142,6 +203,20 @@ describe('useSwitchDataSourceAction', () => {
 
       expect(screen.getByText('Switched to')).toBeInTheDocument();
       expect(screen.getByText('Cluster A')).toBeInTheDocument();
+    });
+
+    it('should not render switch UI when the tool call was skipped', () => {
+      renderCard({
+        status: 'complete',
+        result: JSON.stringify({
+          success: true,
+          skipped: true,
+          dataSourceId: 'ds-a',
+        }),
+      });
+
+      expect(screen.queryByText('Switched to')).not.toBeInTheDocument();
+      expect(screen.queryByText('ds-a')).not.toBeInTheDocument();
     });
 
     it('should show the failure message when the switch was rejected', () => {

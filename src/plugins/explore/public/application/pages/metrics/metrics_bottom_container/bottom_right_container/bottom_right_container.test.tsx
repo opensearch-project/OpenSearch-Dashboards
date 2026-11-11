@@ -54,7 +54,6 @@ jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('../../../../utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
-  shouldSkipQueryExecution: jest.fn(() => false),
 }));
 
 // Mock onEditorRunActionCreator
@@ -84,6 +83,10 @@ import { useDatasetContext } from '../../../../context';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { useFlavorId } from '../../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../../common';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../../services/source_type_registry';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -116,7 +119,7 @@ describe('BottomRightContainer', () => {
             lastExecutedPrompt: '',
           }
         ) => state,
-        query: (state = {}) => state,
+        query: (state = { query: 'up', language: 'PROMQL' }) => state,
         results: (state = {}) => state,
         tab: (state = {}) => state,
       },
@@ -151,6 +154,75 @@ describe('BottomRightContainer', () => {
       </Provider>
     );
   };
+
+  describe("a registered source's language with no query", () => {
+    const dataset = { id: 'my-1', title: 'My', type: 'MY_METRICS' };
+    const renderEmpty = (sampleQueries?: Array<{ label: string; query: string }>) => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'mine',
+        label: 'Mine',
+        datasetTypes: ['MY_METRICS'],
+        flavors: [ExploreFlavor.Metrics],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: {
+          MyQL: {
+            label: 'My QL',
+            description: 'Query my metrics.',
+            sampleQueries,
+            codeLanguage: 'sql',
+          },
+        },
+      });
+      setSourceTypeRegistry(registry);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: dataset as any,
+        isLoading: false,
+        error: null,
+      });
+      const store = configureStore({
+        reducer: {
+          legacy: (state = {}) => state,
+          ui: (state = {}) => state,
+          queryEditor: (
+            state = {
+              queryStatusMap: {},
+              overallQueryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
+            }
+          ) => state,
+          query: (state = { query: '', language: 'MyQL', dataset }) => state,
+          results: (state = {}) => state,
+          tab: (state = {}) => state,
+        },
+      });
+      return render(
+        <Provider store={store}>
+          <BottomRightContainer />
+        </Provider>
+      );
+    };
+    afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+    it('shows its guide, even though shouldSkipQueryExecution only covers PromQL and SQL', () => {
+      renderEmpty([{ label: 'Everything', query: 'SELECT *' }]);
+      expect(screen.getByText('Write a My QL query to visualize metrics')).toBeInTheDocument();
+      expect(screen.getByTestId('metricsEmptyStateDescription')).toHaveTextContent(
+        'Query my metrics.'
+      );
+      expect(screen.getByText('SELECT *')).toBeInTheDocument();
+      // The source's editor isn't the PromQL builder, so the copy doesn't promise one.
+      expect(
+        screen.getByText(
+          'Write a query in the editor above, or adapt the samples below by replacing their metric and label names with your own.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('drops the samples sentence when the source has none', () => {
+      renderEmpty();
+      expect(screen.getByText('Write a query in the editor above.')).toBeInTheDocument();
+    });
+  });
 
   it('renders data source empty state when dataset is null', () => {
     mockUseDatasetContext.mockReturnValue({
@@ -257,7 +329,7 @@ describe('BottomRightContainer', () => {
             lastExecutedPrompt: '',
           }
         ) => state,
-        query: (state = {}) => state,
+        query: (state = { query: 'up', language: 'PROMQL' }) => state,
         results: (state = {}) => state,
         tab: (state = {}) => state,
       },
@@ -299,7 +371,7 @@ describe('BottomRightContainer', () => {
             lastExecutedPrompt: '',
           }
         ) => state,
-        query: (state = {}) => state,
+        query: (state = { query: 'up', language: 'PROMQL' }) => state,
         results: (state = {}) => state,
         tab: (state = {}) => state,
       },

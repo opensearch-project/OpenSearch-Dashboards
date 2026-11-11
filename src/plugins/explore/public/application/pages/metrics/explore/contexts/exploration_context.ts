@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { PrometheusClient } from '../services/prometheus_client';
 import { MetricQueryGenerator } from '../services/query_generator';
+import type { SourceTypeSampleQuery } from '../../../../../services/source_type_registry';
 
 export const defaultState: ExplorationState = {
   level: ExplorationLevel.BROWSER,
@@ -75,6 +76,18 @@ export function explorationReducer(state: ExplorationState, action: Action): Exp
   }
 }
 
+/** How the tab names and introduces the active dataset's source type (see `MetricsExploreTab`). */
+export interface ExplorationSource {
+  /** The source type's name on the Metrics page, as the source picker shows it. */
+  label?: string;
+  /** The source type's advice when there are no metrics to show (`metricsEmptyHint`). */
+  emptyHint?: string;
+  /** PromQL samples for an empty metric list, as the source type introduces PromQL. */
+  sampleQueries?: SourceTypeSampleQuery[];
+  /** Highlighting for `sampleQueries`. */
+  codeLanguage?: string;
+}
+
 interface ExplorationContextValue {
   state: ExplorationState;
   dispatch: React.Dispatch<Action>;
@@ -85,6 +98,11 @@ interface ExplorationContextValue {
   refreshCounter: number;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
+  /** False while the dataset type requires an explicit Run and the user hasn't asked for previews. */
+  previewsEnabled?: boolean;
+  requestPreviews?: () => void;
+  /** The active dataset's source type, for the error and empty states. */
+  source?: ExplorationSource;
 }
 
 export const ExplorationContext = createContext<ExplorationContextValue | null>(null);

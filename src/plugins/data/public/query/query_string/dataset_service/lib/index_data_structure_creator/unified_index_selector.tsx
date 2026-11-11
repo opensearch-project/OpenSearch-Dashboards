@@ -24,6 +24,7 @@ import { useIndexFetcher } from './use_index_fetcher';
 import { MAX_INITIAL_RESULTS } from './constants';
 import { canAppendWildcard } from './index_data_structure_creator_utils';
 import './unified_index_selector.scss';
+import { isImeComposing } from '../../../../../../../../core/public/utils';
 
 interface UnifiedIndexSelectorProps {
   selectedItems: Array<{ id: string; title: string; isWildcard: boolean }>;
@@ -273,7 +274,12 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchValue.trim() && searchValue.includes('*')) {
+    if (
+      e.key === 'Enter' &&
+      !isImeComposing(e) &&
+      searchValue.trim() &&
+      searchValue.includes('*')
+    ) {
       e.preventDefault();
       handleAddPattern();
       setIsPopoverOpen(false);

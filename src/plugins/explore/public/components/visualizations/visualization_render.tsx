@@ -4,14 +4,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, EMPTY } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
 
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
-import { VisualizationEmptyState } from './visualization_empty_state';
+import { VisualizationEmptyState, VisualizationEmptyStateProps } from './visualization_empty_state';
 import { Positions, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
@@ -22,11 +22,13 @@ import { SplitContainer } from './split_container';
 import { CustomLegend } from './custom_legend';
 import type { VisualizationRenderContext } from './utils/use_visualization_types';
 import { LegendItem, LegendTarget } from './utils/legend';
+import type { VariableValue } from '../../../../dashboard/public';
 
 interface Props {
   data$: Observable<VisData | undefined>;
   config$: Observable<RenderChartConfig | undefined>;
   showRawTable$: Observable<boolean>;
+  variables$?: Observable<VariableValue[]>;
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
@@ -34,9 +36,13 @@ interface Props {
 }
 
 interface CommonProps {
+  /** The query's language and dataset, for the empty state's samples. Defaults to the active query. */
+  query?: VisualizationEmptyStateProps;
   visualizationData: VisData | undefined;
   visConfig: RenderChartConfig | undefined;
   showRawTable: boolean;
+  /** Dashboard variables for table data links. */
+  variables?: VariableValue[];
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
@@ -56,9 +62,11 @@ const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
 const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
 
 export const CommonVisualizationRender = ({
+  query,
   visualizationData,
   visConfig,
   showRawTable,
+  variables,
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
@@ -142,6 +150,7 @@ export const CommonVisualizationRender = ({
         columns={columns}
         onStyleChange={onStyleChange}
         disableActions={false}
+        variables={variables}
       />
     );
   }
@@ -265,13 +274,14 @@ export const CommonVisualizationRender = ({
     );
   }
 
-  return <VisualizationEmptyState />;
+  return <VisualizationEmptyState {...query} />;
 };
 
 export const VisualizationRender = ({
   data$,
   config$,
   showRawTable$,
+  variables$,
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
@@ -280,11 +290,14 @@ export const VisualizationRender = ({
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
   const showRawTable = useObservable(showRawTable$);
+  // Outside a dashboard there are no variables to resolve.
+  const variables = useObservable(variables$ ?? EMPTY, []);
   return (
     <CommonVisualizationRender
       visConfig={visConfig}
       visualizationData={visualizationData}
       showRawTable={!!showRawTable}
+      variables={variables}
       timeRange={inputTimeRange}
       onSelectTimeRange={onSelectTimeRange}
       onStyleChange={onStyleChange}

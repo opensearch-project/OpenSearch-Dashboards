@@ -7,6 +7,7 @@ import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
+import { useStreamingStatus } from '../../streaming/use_streaming_status';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
@@ -21,9 +22,10 @@ import { useHistogramResults } from '../../../application/utils/hooks/use_histog
 import { useBucketCountResults } from '../../../application/utils/hooks/use_bucket_count_results';
 import { RootState } from '../../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
+import { getPatternsDefaultMode } from '../../../application/utils/languages/ppl/aggregation_commands';
 import {
   queryEndsWithHead,
-  queryHasAggregation,
+  queryIsBucketCountable,
 } from '../../../application/utils/state_management/actions/utils';
 
 interface ActionBarProps {
@@ -70,15 +72,35 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const queryString = query.language === 'PPL' ? defaultPrepareQueryString(query) : '';
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
   const hasHead = query.language === 'PPL' && queryEndsWithHead(queryString);
-  const hasAggregation = query.language === 'PPL' && queryHasAggregation(originalQueryString);
+  // Only queries whose rendered rows are countable buckets get a bucket denominator from the
+  // dedicated count query. This covers stats/top/rare/chart/timechart/transpose/xyseries and an
+  // aggregating `patterns`; it excludes `timewrap` (post-plan pivot can't be probed) and
+  // label-mode `patterns`, which fall back to the plain hits format.
+  const isBucketCountable =
+    query.language === 'PPL' &&
+    queryIsBucketCountable(originalQueryString, {
+      patternsDefaultMode: getPatternsDefaultMode(query),
+    });
   const totalHits = hasHead ? undefined : histogramResults?.hits.total;
   // For aggregation queries, use the bucket count from the dedicated count query.
   // Only show bucket format on Statistics/Visualization tabs where rows are actual buckets.
   // On Logs tab, rows are documents (stripStatsFromQuery removes the aggregation clause).
   // When the count query hasn't returned or failed, degrade to the standard hits format.
   const isLogsTab = activeTabId === EXPLORE_LOGS_TAB_ID;
-  const effectiveBucketCount = hasAggregation && !isLogsTab ? bucketCount : undefined;
+  const effectiveBucketCount = isBucketCountable && !isLogsTab ? bucketCount : undefined;
   const elapsedMs = results?.elapsedMs;
+  // Keyed to the active tab's query, not the results query: the Statistics and Visualization tabs show
+  // a different query's counts, and annotating those with the results query's progress would describe
+  // the wrong query. Their queries are not streamed, so this correctly yields no annotation there.
+  const tabCacheKey = useMemo(() => {
+    try {
+      const activeTab = services.tabRegistry?.getTab(activeTabId);
+      return (activeTab?.prepareQuery || defaultPrepareQueryString)(query);
+    } catch {
+      return undefined;
+    }
+  }, [services, activeTabId, query]);
+  const streaming = useStreamingStatus(tabCacheKey).streaming;
 
   return (
     <DiscoverResultsActionBar
@@ -92,6 +114,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
       }}
       rows={rows}
       elapsedMs={elapsedMs}
+      streaming={streaming}
       dataset={dataset}
       inspectionHanlder={openInspector}
       extraActions={compatibleSlotItems}
