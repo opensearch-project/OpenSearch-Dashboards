@@ -47,6 +47,9 @@ export const ModeButtonGroup: React.FC<ModeButtonGroupProps> = ({
         defaultMessage: 'Query editor mode',
       })}
       buttonSize="compressed"
+      // Primary, not the default dark-gray "text" fill, so the selected mode
+      // reads as the active choice.
+      color="primary"
       options={options}
       idSelected={mode === 'builder' ? BUILDER_ID : CODE_ID}
       onChange={(id) => onChange(id === BUILDER_ID ? 'builder' : 'code')}

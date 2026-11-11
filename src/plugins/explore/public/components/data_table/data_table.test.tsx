@@ -126,6 +126,12 @@ describe('DefaultDiscoverTable', () => {
       const callout = screen.getByTestId('discoverDocTableFooter');
       expect(callout).toBeInTheDocument();
     });
+    // A gray info note, not a callout banner.
+    const footer = screen.getByTestId('discoverDocTableFooter');
+    expect(footer.className).toMatch(/euiPanel--subdued/);
+    expect(footer.className).not.toMatch(/euiCallOut/);
+    expect(footer).toHaveTextContent('These are the first');
+    expect(footer).toHaveTextContent('Back to top.');
   });
 
   it('Should restart rendering when new data is available', async () => {

@@ -62,6 +62,38 @@ describe('FlyoutDetailPanel', () => {
     traceRow: mockTraceRow,
   };
 
+  it('shows tool call arguments and result for an execute_tool span that also has messages', () => {
+    const toolRow: TraceRow = {
+      ...mockTraceRow,
+      kind: 'execute_tool',
+      input: JSON.stringify([
+        { role: 'tool', parts: [{ type: 'tool_call', id: 'c1', name: 'drive_application' }] },
+      ]),
+      output: JSON.stringify([
+        { role: 'tool', parts: [{ type: 'tool_call_response', id: 'c1', response: 'ok' }] },
+      ]),
+      rawDocument: {
+        attributes: {
+          'gen_ai.operation.name': 'execute_tool',
+          'gen_ai.tool.call.arguments': '{"selector":"#save"}',
+          'gen_ai.tool.call.result': 'clicked #save',
+        },
+      },
+    };
+
+    render(
+      <FlyoutDetailPanel
+        selectedNode={{ ...mockTreeNode, traceRow: toolRow }}
+        selectedTraceRow={toolRow}
+        onSelectNode={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('agentTracesIo-input')).toHaveTextContent('#save');
+    expect(screen.getByTestId('agentTracesIo-input')).not.toHaveTextContent('tool_call');
+    expect(screen.getByTestId('agentTracesIo-output')).toHaveTextContent('clicked #save');
+  });
+
   it('renders the selected node label', () => {
     render(
       <FlyoutDetailPanel

@@ -151,11 +151,16 @@ export function HeaderBreadcrumbs({
     }
 
     // Case 2b: Page header, simplified breadcrumbs. The page's <h1> title
-    // names the current page, so the bar hides that crumb.
+    // names the current page, so the bar hides that crumb, and no separator
+    // trails the last crumb shown ("Observability Stack", not
+    // "Observability Stack /"). EUI treats the crumb before the hidden one as
+    // the trailing crumb, so only that dangling "/" goes; the crumb keeps its
+    // link (disableTrailingLink stays off).
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
         hideLastBreadCrumb
+        hideTrailingSeparator
         max={5}
         data-test-subj="breadcrumbs"
         truncate={true}

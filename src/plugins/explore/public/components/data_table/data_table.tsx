@@ -6,7 +6,15 @@
 import './data_table.scss';
 
 import React, { useState } from 'react';
-import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiProgress,
+  EuiSmallButtonEmpty,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableHeader } from './table_header/table_header';
@@ -150,18 +158,38 @@ const DataTableUI = ({
         </div>
       )}
       {!showPagination && rows.length === sampleSize && (
-        <EuiCallOut className="exploreTable__footer" data-test-subj="discoverDocTableFooter">
-          <FormattedMessage
-            id="explore.howToSeeOtherMatchingDocumentsDescription"
-            defaultMessage="These are the first {sampleSize} documents matching
+        // A quiet gray info note at the end of the results, not a blue callout
+        // banner: it tells the user how many rows are loaded, it isn't an alert.
+        <EuiPanel
+          color="subdued"
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="s"
+          borderRadius="m"
+          className="exploreTable__footer"
+          data-test-subj="discoverDocTableFooter"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="iInCircle" color="subdued" aria-hidden="true" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="explore.howToSeeOtherMatchingDocumentsDescription"
+                  defaultMessage="These are the first {sampleSize} documents matching
               your search, refine your search to see others."
-            values={{ sampleSize }}
-          />
-
-          <EuiSmallButtonEmpty onClick={scrollToTop}>
-            <FormattedMessage id="explore.backToTopLinkText" defaultMessage="Back to top." />
-          </EuiSmallButtonEmpty>
-        </EuiCallOut>
+                  values={{ sampleSize }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSmallButtonEmpty onClick={scrollToTop} flush="left">
+                <FormattedMessage id="explore.backToTopLinkText" defaultMessage="Back to top." />
+              </EuiSmallButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
       {showPagination ? (
         <Pagination

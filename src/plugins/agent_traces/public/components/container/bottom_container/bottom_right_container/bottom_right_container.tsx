@@ -5,7 +5,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
-import { selectQueryStatusMapByKey } from '../../../../application/utils/state_management/selectors';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 import { CanvasPanel } from '../../../panel/canvas_panel';
@@ -15,10 +14,7 @@ import { LoadingSpinner } from '../../../../application/legacy/discover/applicat
 import { DiscoverNoResults } from '../../../../application/legacy/discover/application/components/no_results/no_results';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../../types';
-import {
-  executeQueries,
-  defaultPrepareQueryString,
-} from '../../../../application/utils/state_management/actions/query_actions';
+import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import './bottom_right_container.scss';
@@ -43,13 +39,9 @@ export const BottomRightContainer = () => {
     }
   };
 
-  const query = useSelector((state: RootState) => state.query);
   const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
-  });
-  const dataTableStatus = useSelector((state: RootState) => {
-    return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
 
   if (dataset == null) {
@@ -68,10 +60,7 @@ export const BottomRightContainer = () => {
     return <ReadyContent />;
   }
 
-  if (
-    status === QueryExecutionStatus.NO_RESULTS ||
-    dataTableStatus === QueryExecutionStatus.NO_RESULTS
-  ) {
+  if (status === QueryExecutionStatus.NO_RESULTS) {
     return (
       <CanvasPanel>
         <DiscoverNoResults
@@ -92,12 +81,7 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (
-    dataTableStatus === QueryExecutionStatus.READY ||
-    dataTableStatus === QueryExecutionStatus.ERROR ||
-    status === QueryExecutionStatus.READY ||
-    status === QueryExecutionStatus.ERROR
-  ) {
+  if (status === QueryExecutionStatus.READY || status === QueryExecutionStatus.ERROR) {
     return <ReadyContent />;
   }
 

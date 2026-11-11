@@ -233,11 +233,14 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    // The title already names the current page, so the bar does not repeat it.
+    // The title already names the current page, so the bar does not repeat it,
+    // and no separator trails the remaining crumb ("test", not "test /").
+    const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+    expect(bar.find('[data-test-subj="breadcrumb last"]').exists()).toBeFalsy();
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(0);
+    // The remaining crumb keeps its link behavior (trailing link is not disabled).
     expect(
-      component
-        .find('nav[data-test-subj="breadcrumbs"] [data-test-subj="breadcrumb last"]')
-        .exists()
+      component.find('EuiSimplifiedBreadcrumbs').first().prop('disableTrailingLink')
     ).toBeFalsy();
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
