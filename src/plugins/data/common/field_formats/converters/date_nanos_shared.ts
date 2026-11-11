@@ -70,9 +70,11 @@ export function formatWithNanos(
     // Extract fractional value of OpenSearch formatted timestamp, zero pad if necessary:
     // 2020-05-18T20:45:05.957Z -> 957000000
     // 2020-05-18T20:45:05.957000123Z -> 957000123
-    // we do not need to take care of the year 10000 bug since max year of date_nanos is 2262
-    const valNanos = valRaw
-      .substr(20, valRaw.length - 21) // remove timezone(Z)
+    // 2020-05-18T20:45:05.957+00:00 -> 957000000 (a numeric offset, not just "Z")
+    // Read the digits after the seconds instead of assuming a one-character "Z"
+    // suffix, so an offset never leaks into the fractional part.
+    const fraction = valRaw.match(/:\d{2}\.(\d+)/);
+    const valNanos = (fraction ? fraction[1] : '')
       .padEnd(9, '0') // pad shorter fractionals
       .substr(0, fracPatternObj.patternNanos.length);
     return valFormatted.replace(fracPatternObj.patternNanos, valNanos);
