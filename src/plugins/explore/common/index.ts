@@ -57,10 +57,3 @@ export enum ExploreFlavor {
   Traces = 'traces',
   Metrics = 'metrics',
 }
-
-/**
- * Span index pattern used when a trace page has no dataset to read from. Matches both
- * Data Prepper span templates: `otel-v1-apm-span-*` (trace-analytics-plain-raw) and
- * `otel-v2-apm-span-*` (trace-analytics-plain-raw-v2), so v2-only clusters still resolve.
- */
-export const DEFAULT_TRACE_SPAN_INDEX_PATTERN = 'otel-v*-apm-span-*';

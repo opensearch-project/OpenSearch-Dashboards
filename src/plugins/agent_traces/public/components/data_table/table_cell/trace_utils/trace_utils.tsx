@@ -35,7 +35,7 @@ import {
   previewSpanOutput,
 } from '../../../../application/pages/traces/hooks/genai_message_preview';
 import { useTraceExpansion } from '../../../../application/pages/traces/trace_expansion_context';
-import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../common';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../../data/common';
 
 export const isOnTracesPage = (): boolean => {
   return window.location.pathname.includes('/agentTraces');

@@ -80,7 +80,7 @@ import { DURATION_MIN_FILTER_FIELD } from './public/traces/span_detail_tables/ut
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { SERVICE_NAME_FILTER_FIELD } from '../../../../utils/trace_field_constants';
-import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../common';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../../data/common';
 
 /*
  * Trace:Details

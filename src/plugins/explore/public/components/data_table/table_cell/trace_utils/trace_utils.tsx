@@ -14,7 +14,7 @@ import { useTraceFlyoutContext } from '../../../../application/pages/traces/trac
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 import { formatSpanDuration } from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
-import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../common';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../../data/common';
 
 export const isOnTracesPage = (): boolean => {
   return (

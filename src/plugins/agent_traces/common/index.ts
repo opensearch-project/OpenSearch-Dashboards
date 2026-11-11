@@ -62,10 +62,3 @@ export const AGENT_TRACES_VIRTUAL_COLUMN_SOURCE_FIELDS: Record<string, string> =
   input: 'attributes.gen_ai.input.messages',
   output: 'attributes.gen_ai.output.messages',
 };
-
-/**
- * Span index pattern used when a trace link has no dataset. Matches both Data Prepper span
- * templates (`otel-v1-apm-span-*` and `otel-v2-apm-span-*`). Mirrors explore's
- * DEFAULT_TRACE_SPAN_INDEX_PATTERN; explore/common can't be imported across plugin bundles.
- */
-export const DEFAULT_TRACE_SPAN_INDEX_PATTERN = 'otel-v*-apm-span-*';

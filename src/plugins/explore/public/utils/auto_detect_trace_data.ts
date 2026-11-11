@@ -4,7 +4,13 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import { isValidTimeField, pickTimeField, TRACE_TIME_FIELD_CANDIDATES } from '../../../data/common';
+import {
+  isMissingIndicesError,
+  isValidTimeField,
+  OTEL_SPAN_INDEX_PATTERNS,
+  pickTimeField,
+  TRACE_TIME_FIELD_CANDIDATES,
+} from '../../../data/common';
 import { IndexPatternsContract } from '../../../data/public';
 import {
   getIndexPatternSignalTypes,
@@ -12,20 +18,6 @@ import {
 } from './get_index_pattern_signal_types';
 
 const TRACES_SIGNAL_TYPE = 'traces';
-
-/** Data Prepper `trace-analytics-plain-raw-v2` span index pattern. */
-export const OTEL_V2_SPAN_INDEX_PATTERN = 'otel-v2-apm-span*';
-/** Data Prepper `trace-analytics-plain-raw` (v1) span index pattern. */
-export const OTEL_V1_SPAN_INDEX_PATTERN = 'otel-v1-apm-span*';
-/**
- * Span index patterns probed in priority order. v2 comes first: when Data Prepper
- * writes to both (e.g. during a v1 → v2 migration), only the v2 pattern is used so
- * spans aren't double-counted. v1 remains the fallback for existing pipelines.
- */
-export const OTEL_SPAN_INDEX_PATTERNS = [
-  OTEL_V2_SPAN_INDEX_PATTERN,
-  OTEL_V1_SPAN_INDEX_PATTERN,
-] as const;
 
 /**
  * Build the set of data source ids that already have at least one trace dataset,
@@ -105,7 +97,9 @@ export async function detectTraceData(
   }
 
   // 2. Check for conventional trace indices, preferring otel-v2-apm-span* over
-  //    otel-v1-apm-span*. The first pattern with the required fields wins.
+  //    otel-v1-apm-span*. The first pattern with the required fields wins. This only runs
+  //    when the data source has no traces dataset yet (see step 1), so an existing v1
+  //    dataset is not switched to v2.
   for (const pattern of OTEL_SPAN_INDEX_PATTERNS) {
     try {
       const traceFields = await indexPatternsService.getFieldsForWildcard({
@@ -134,8 +128,11 @@ export async function detectTraceData(
         result.traceTimeField = traceTimeField;
         break;
       }
-    } catch {
-      // No matching indices for this pattern, try the next one
+    } catch (error) {
+      // Only a "no matching indices" result moves on to the next pattern. Any other failure
+      // (timeout, permissions, server error) stops trace detection, so a transient error on
+      // the v2 probe can't lock in a v1 dataset.
+      if (!isMissingIndicesError(error)) break;
     }
   }
 

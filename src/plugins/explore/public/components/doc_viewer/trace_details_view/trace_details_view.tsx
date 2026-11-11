@@ -21,7 +21,7 @@ import {
 } from '../../../application/pages/traces/trace_details/public/traces/ppl_to_trace_hits';
 import { generateColorMap } from '../../../application/pages/traces/trace_details/public/traces/generate_color_map';
 import { navigateToTraceDetailsWithSpan } from '../../data_table/table_cell/trace_utils/trace_utils';
-import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../common';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../data/common';
 
 const extractTraceIdFromHit = (hit: any): string | null => {
   for (const path of TRACE_ID_FIELD_PATHS) {
