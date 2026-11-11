@@ -8,8 +8,6 @@ import {
   setQueryState,
   setQueryWithHistory,
   clearResults,
-  setPromptModeIsAvailable,
-  setSummaryAgentIsAvailable,
   clearLastExecutedData,
   setPatternsField,
   setUsingRegexPatterns,
@@ -28,6 +26,7 @@ import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
 import * as resetLegacyStateActions from '../actions/reset_legacy_state';
+import { refreshAiAvailability } from './ai_availability_middleware';
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn().mockResolvedValue(true),
@@ -119,8 +118,7 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith(setHideEmptyFields(false));
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
     expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setPromptModeIsAvailable(true));
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
+    expect(mockStore.dispatch).toHaveBeenCalledWith(refreshAiAvailability());
 
     // Verify the executeQueries action was dispatched
     expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
@@ -378,47 +376,39 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockedExecuteQueries).not.toHaveBeenCalled();
   });
 
-  it('should update prompt mode availability only if different from current state', async () => {
-    mockedGetPromptModeIsAvailable.mockResolvedValueOnce(true);
-
+  it('runs the query without waiting for the AI availability probes', async () => {
+    mockedGetPromptModeIsAvailable.mockReturnValue(new Promise(() => {}));
+    mockedGetSummaryAgentIsAvailable.mockReturnValue(new Promise(() => {}));
     mockStore.getState = jest.fn().mockReturnValue({
       query: { dataset: { id: 'new-dataset', type: 'index_pattern' } },
-      queryEditor: {
-        promptModeIsAvailable: true, // Already true
-        summaryAgentIsAvailable: false,
-      },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
     });
 
-    const action = setQueryState({ query: 'source=hello', language: 'PPL' });
-    await middleware(action);
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
 
-    // Should not dispatch action to set prompt mode availability since it's already true
-    expect(mockStore.dispatch).not.toHaveBeenCalledWith(setPromptModeIsAvailable(true));
+    const dispatched = (mockStore.dispatch as jest.Mock).mock.calls.map(([a]) => a);
+    const refreshIndex = dispatched.findIndex((a) => refreshAiAvailability.match(a));
+    const executeIndex = dispatched.findIndex((a) => a?.type === 'mock/executeQueries');
+    expect(refreshIndex).toBeGreaterThanOrEqual(0);
+    expect(executeIndex).toBeGreaterThan(refreshIndex);
+    expect(mockedGetPromptModeIsAvailable).not.toHaveBeenCalled();
+    expect(mockedGetSummaryAgentIsAvailable).not.toHaveBeenCalled();
   });
 
-  it('should update summary agent availability only if different from current state', async () => {
-    mockedGetSummaryAgentIsAvailable.mockResolvedValueOnce(true);
+  it('refreshes AI availability once per dataset change, not on every query update', async () => {
+    const refreshCount = () =>
+      (mockStore.dispatch as jest.Mock).mock.calls.filter(([a]) => refreshAiAvailability.match(a))
+        .length;
+
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
+    await middleware(setQueryState({ query: 'source=other', language: 'PPL' }));
+    expect(refreshCount()).toBe(1);
 
     mockStore.getState = jest.fn().mockReturnValue({
-      query: {
-        dataset: {
-          id: 'new-dataset',
-          type: 'index_pattern',
-          dataSource: { id: 'data-source-id' },
-        },
-      },
-      queryEditor: {
-        promptModeIsAvailable: false,
-        summaryAgentIsAvailable: true, // Already true
-      },
+      query: { dataset: { id: 'another-dataset', type: 'index_pattern' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
     });
-
-    const action = setQueryState({ query: 'source=hello', language: 'PPL' });
-    await middleware(action);
-
-    // Should not dispatch action to set summary agent availability since it's already true
-    expect(mockStore.dispatch).not.toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
-    // But should call getSummaryAgentIsAvailable with the correct data source ID
-    expect(mockedGetSummaryAgentIsAvailable).toHaveBeenCalledWith(mockServices, 'data-source-id');
+    await middleware(setQueryState({ query: 'source=other', language: 'PPL' }));
+    expect(refreshCount()).toBe(2);
   });
 });

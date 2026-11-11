@@ -15,6 +15,7 @@ import {
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { executeQueries } from '../query_actions';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
+import { refreshAiAvailability } from '../../middleware/ai_availability_middleware';
 
 jest.mock('../../utils/redux_persistence');
 jest.mock('../../slices');
@@ -25,6 +26,10 @@ describe('resetExploreStateActionCreator', () => {
   const services = {} as any;
   const mockDispatch = jest.fn();
   const clearEditors = jest.fn();
+
+  const defaultGetState = jest.fn(() => ({
+    queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+  }));
 
   const preloadedState = {
     ui: { theme: 'dark' },
@@ -51,7 +56,10 @@ describe('resetExploreStateActionCreator', () => {
   });
 
   it('dispatches actions in correct order with preloaded state', async () => {
-    await resetExploreStateActionCreator(services, clearEditors)(mockDispatch);
+    await resetExploreStateActionCreator(services, clearEditors)(
+      mockDispatch,
+      defaultGetState as any
+    );
 
     expect(getPreloadedState).toHaveBeenCalledWith(services);
     expect(clearEditors).toHaveBeenCalled();
@@ -83,10 +91,63 @@ describe('resetExploreStateActionCreator', () => {
       query: { query: '', dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } },
     });
 
-    await resetExploreStateActionCreator(explicitServices, clearEditors)(mockDispatch);
+    await resetExploreStateActionCreator(explicitServices, clearEditors)(
+      mockDispatch,
+      defaultGetState as any
+    );
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_QUERY' });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'DETECT_OPTIMAL_TAB' });
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
+  });
+
+  it('keeps the current AI flags and refreshes them in the background after the reset', async () => {
+    (getPreloadedState as jest.Mock).mockResolvedValue({
+      ...preloadedState,
+      query: { query: '', dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' } },
+      queryEditor: {
+        editorMode: 'SingleQuery',
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+    });
+    const getState = jest.fn(() => ({
+      queryEditor: { promptModeIsAvailable: true, summaryAgentIsAvailable: true },
+    }));
+
+    await resetExploreStateActionCreator(services, clearEditors)(mockDispatch, getState as any);
+
+    expect(setQueryEditorState).toHaveBeenCalledWith({
+      editorMode: 'SingleQuery',
+      promptModeIsAvailable: true,
+      summaryAgentIsAvailable: true,
+    });
+    const types = mockDispatch.mock.calls.map(([a]) => a?.type);
+    expect(types.indexOf(refreshAiAvailability.type)).toBeGreaterThan(
+      types.indexOf('SET_QUERY_EDITOR')
+    );
+    expect(types.indexOf(refreshAiAvailability.type)).toBeLessThan(
+      types.indexOf('EXECUTE_QUERIES')
+    );
+  });
+
+  it('turns the AI flags off and does not re-probe when the reset state has no dataset', async () => {
+    (getPreloadedState as jest.Mock).mockResolvedValue({
+      ...preloadedState,
+      query: { query: '', dataset: undefined },
+      queryEditor: { editorMode: 'SingleQuery', promptModeIsAvailable: false },
+    });
+    const getState = jest.fn(() => ({
+      queryEditor: { promptModeIsAvailable: true, summaryAgentIsAvailable: true },
+    }));
+
+    await resetExploreStateActionCreator(services, clearEditors)(mockDispatch, getState as any);
+
+    expect(setQueryEditorState).toHaveBeenCalledWith({
+      editorMode: 'SingleQuery',
+      promptModeIsAvailable: false,
+    });
+    const types = mockDispatch.mock.calls.map(([a]) => a?.type);
+    expect(types).not.toContain(refreshAiAvailability.type);
   });
 });

@@ -11,9 +11,7 @@ import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
 import {
   clearResults,
-  setPromptModeIsAvailable,
   clearLastExecutedData,
-  setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
   setActiveTab,
@@ -26,11 +24,10 @@ import {
   setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
-import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
-import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 import { EXPLORE_NO_TAB_ID } from '../../../../../common';
 import { datasetRequiresExplicitRun, isExplicitRunRefinement } from '../../requires_explicit_run';
+import { refreshAiAvailability } from './ai_availability_middleware';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -52,7 +49,6 @@ export const createDatasetChangeMiddleware = (
 
     if (action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory') {
       const {
-        queryEditor,
         query: { dataset },
       } = store.getState();
 
@@ -85,24 +81,8 @@ export const createDatasetChangeMiddleware = (
         store.dispatch(resetLegacyStateActionCreator(services) as unknown as AnyAction);
       }
 
-      const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
-        getPromptModeIsAvailable(services),
-        getSummaryAgentIsAvailable(services, currentDataset?.dataSource?.id || ''),
-      ]);
-
-      if (
-        newPromptModeIsAvailable.status === 'fulfilled' &&
-        newPromptModeIsAvailable.value !== queryEditor.promptModeIsAvailable
-      ) {
-        store.dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
-      }
-
-      if (
-        newSummaryAgentIsAvailable.status === 'fulfilled' &&
-        newSummaryAgentIsAvailable.value !== queryEditor.summaryAgentIsAvailable
-      ) {
-        store.dispatch(setSummaryAgentIsAvailable(newSummaryAgentIsAvailable.value));
-      }
+      // Only gates the AI entry points, so the query below does not wait for it.
+      store.dispatch(refreshAiAvailability());
 
       if (currentDataset) {
         try {

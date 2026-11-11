@@ -79,7 +79,10 @@ describe.each([
       queryEditor: {},
       query: { query: '', dataset },
     });
-    await resetExploreStateActionCreator(services, jest.fn())(dispatch);
+    await resetExploreStateActionCreator(services, jest.fn())(
+      dispatch,
+      () => ({ queryEditor: {} }) as any
+    );
     expect((executeQueries as unknown as jest.Mock).mock.calls.length > 0).toBe(runs);
   });
 });
