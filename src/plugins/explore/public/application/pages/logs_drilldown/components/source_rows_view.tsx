@@ -127,6 +127,8 @@ export const SourceRowsView: React.FC<Props> = ({
     async (key: string, signal: AbortSignal): Promise<SourceCardResult> => {
       const item = itemsRef.current.get(key);
       if (!item) throw new Error(`Unknown item ${key}`);
+      // An item the source marks unavailable never queries (its card says why instead).
+      if (item.unavailable) throw new Error(item.unavailable.title);
       const bounds = services.data.query.timefilter.timefilter.getBounds();
       return runSourceCard({
         services,
@@ -176,12 +178,17 @@ export const SourceRowsView: React.FC<Props> = ({
   const explicitRef = useRef(explicit);
   explicitRef.current = explicit;
   const onRun = useCallback((itemId: string) => {
+    if (itemsRef.current.get(itemId)?.unavailable) return;
     if (explicitRunRef.current) explicitRef.current.run(itemId);
     else autoRef.current.invalidate(itemId);
   }, []);
   const onStop = useCallback((itemId: string) => explicitRef.current.stop(itemId), []);
+  // An unavailable item counts as out of view, so a source that runs on its own never runs it.
   const onVisibilityChange = useCallback((itemId: string, visible: boolean) => {
-    if (!explicitRunRef.current) autoRef.current.onVisibilityChange(itemId, visible);
+    if (!explicitRunRef.current) {
+      const unavailable = !!itemsRef.current.get(itemId)?.unavailable;
+      autoRef.current.onVisibilityChange(itemId, visible && !unavailable);
+    }
   }, []);
 
   // The ticked items themselves (not only their ids), so a tick a search hides still counts and
@@ -198,6 +205,8 @@ export const SourceRowsView: React.FC<Props> = ({
           next.delete(item.id);
           return next;
         }
+        // An unavailable item can't be newly ticked (one ticked before can still be unticked).
+        if (item.unavailable) return prev;
         if (maxSelection !== undefined && prev.size >= maxSelection) return prev;
         return new Map(prev).set(item.id, item);
       });

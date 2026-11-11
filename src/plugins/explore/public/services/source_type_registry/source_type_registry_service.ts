@@ -312,6 +312,21 @@ export interface SourceTypeLogsDrilldownItem {
   timeFieldName?: string;
   /** The field the item's events keep their level in, if any (colours preview lines). */
   severityField?: string;
+  /**
+   * Set when the item can't be queried now, for example because the source already knows its
+   * queries would be refused. The card shows `title` (and `reason`, if any) instead of running its
+   * preview and histogram queries, has no Run button, and can't be newly ticked for the Logs page.
+   * Omit it for an item that can be queried. Pass translated strings.
+   */
+  unavailable?: SourceTypeLogsDrilldownItemUnavailable;
+}
+
+/** Why an item on the Explore logs page can't be queried now ({@link SourceTypeLogsDrilldownItem}). */
+export interface SourceTypeLogsDrilldownItemUnavailable {
+  /** A short line saying the item can't be queried, shown on its card and on its checkbox. */
+  title: string;
+  /** More about why, or what to do, shown under the title. */
+  reason?: string;
 }
 
 /** One page of a source's items. */

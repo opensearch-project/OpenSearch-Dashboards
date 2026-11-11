@@ -58,7 +58,8 @@ interface Props {
 /**
  * A registered source's item on the Explore logs page: its name and free details, then (once run)
  * a histogram and the latest events, like an OpenSearch index card. On a source that requires an
- * explicit run, nothing is queried until the user presses Run.
+ * explicit run, nothing is queried until the user presses Run. An item the source marks
+ * `unavailable` shows why instead, with no Run button, and can't be newly ticked.
  */
 const SourceItemCardComponent: React.FC<Props> = ({
   services,
@@ -98,7 +99,10 @@ const SourceItemCardComponent: React.FC<Props> = ({
     };
   }, [itemId]);
   const run = () => onRun(itemId);
-  const checkDisabled = !checked && !!checkDisabledReason;
+  const unavailable = item.unavailable;
+  // An unavailable item can't be newly ticked; one already ticked can still be unticked.
+  const uncheckableReason = unavailable ? unavailable.title : checkDisabledReason;
+  const checkDisabled = !checked && !!uncheckableReason;
   const reasonId = `logsDrilldownSourceCardFull-${itemId}`;
 
   const details = (item.details ?? [])
@@ -163,7 +167,7 @@ const SourceItemCardComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         {/* A full selection disables the unticked boxes; the reason is in a tooltip, and read
             out with the box (aria-describedby), not only in a title. */}
-        <EuiToolTip content={checkDisabled ? checkDisabledReason : undefined}>
+        <EuiToolTip content={checkDisabled ? uncheckableReason : undefined}>
           <EuiCheckbox
             id={`logsDrilldownSourceCardCheckbox-${item.id}`}
             checked={checked}
@@ -179,7 +183,7 @@ const SourceItemCardComponent: React.FC<Props> = ({
         </EuiToolTip>
         {checkDisabled && (
           <EuiScreenReaderOnly>
-            <span id={reasonId}>{checkDisabledReason}</span>
+            <span id={reasonId}>{uncheckableReason}</span>
           </EuiScreenReaderOnly>
         )}
       </EuiFlexItem>
@@ -205,12 +209,24 @@ const SourceItemCardComponent: React.FC<Props> = ({
           </EuiText>
         </EuiFlexItem>
       )}
-      {runButton}
+      {!unavailable && runButton}
     </EuiFlexGroup>
   );
 
   let body: React.ReactNode;
-  if (error) {
+  if (unavailable) {
+    body = (
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="alert"
+        title={unavailable.title}
+        data-test-subj={`logsDrilldownSourceCardUnavailable-${item.id}`}
+      >
+        {unavailable.reason && <p>{unavailable.reason}</p>}
+      </EuiCallOut>
+    );
+  } else if (error) {
     body = (
       <EuiCallOut
         size="s"

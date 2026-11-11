@@ -629,4 +629,92 @@ describe('SourceRowsView', () => {
       delete (global as any).IntersectionObserver;
     }
   });
+
+  describe('an item the source marks unavailable', () => {
+    const withUnavailable = (overrides: Record<string, any> = {}) =>
+      makeDrilldown({
+        listItems: jest.fn().mockResolvedValue({
+          items: [
+            { id: 'app/web/a', name: 'app/web/a' },
+            {
+              id: 'app/api/b',
+              name: 'app/api/b',
+              unavailable: { title: "Can't be queried", reason: 'Ask for access to it.' },
+            },
+          ],
+        }),
+        ...overrides,
+      });
+
+    it('shows why on its card, offers no Run, and never queries it', async () => {
+      const drilldown = withUnavailable();
+      renderView(drilldown);
+      expect(
+        await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+      ).toHaveTextContent("Can't be queried");
+      expect(screen.queryByTestId('logsDrilldownSourceCardRun-app/api/b')).not.toBeInTheDocument();
+
+      // The other card still runs, and only it queries.
+      fireEvent.click(screen.getByTestId('logsDrilldownSourceCardRun-app/web/a'));
+      await screen.findByTestId('logsDrilldownSourceCardLogs-app/web/a');
+      expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
+      expect(drilldown.fetchHistogram).toHaveBeenCalledTimes(1);
+      expect(drilldown.toDataset).toHaveBeenCalledTimes(1);
+      expect(drilldown.toDataset).toHaveBeenCalledWith({
+        scope: { zone: 'zone-a' },
+        items: [expect.objectContaining({ id: 'app/web/a' })],
+      });
+    });
+
+    it('is never run as it scrolls into view on a source that runs on its own', async () => {
+      mockRequiresExplicitRun = false;
+      const observers = installIntersectionObserver();
+      jest.useFakeTimers();
+      try {
+        const drilldown = withUnavailable();
+        renderView(drilldown);
+        await act(async () => {
+          await Promise.resolve();
+        });
+        act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
+        expect(drilldown.buildPreviewQuery).toHaveBeenCalledTimes(1);
+        expect(drilldown.buildPreviewQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ item: expect.objectContaining({ id: 'app/web/a' }) })
+        );
+        expect(
+          screen.getByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardError-app/api/b')
+        ).not.toBeInTheDocument();
+      } finally {
+        jest.useRealTimers();
+        delete (global as any).IntersectionObserver;
+      }
+    });
+
+    it("can't be ticked for the Logs page", async () => {
+      const { onBatchActionChange } = renderView(withUnavailable());
+      const box = await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/api/b');
+      expect(box).toBeDisabled();
+      fireEvent.click(box);
+      expect(onBatchActionChange).not.toHaveBeenCalledWith(
+        expect.objectContaining({ label: expect.stringContaining('in Logs') })
+      );
+      expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a')).not.toBeDisabled();
+    });
+
+    it('lists as before without the field (no change for other sources)', async () => {
+      const drilldown = makeDrilldown();
+      renderView(drilldown);
+      await screen.findByTestId('logsDrilldownSourceCard-app/api/b');
+      expect(screen.queryByTestId(/logsDrilldownSourceCardUnavailable-/)).not.toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownSourceCardRun-app/api/b')).toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).not.toBeDisabled();
+    });
+  });
 });
