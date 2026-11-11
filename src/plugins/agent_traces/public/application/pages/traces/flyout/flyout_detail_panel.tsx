@@ -20,7 +20,8 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import { TraceRow } from '../hooks/tree_utils';
+import { TraceRow, formatTimestamp } from '../hooks/tree_utils';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { TreeNode } from './tree_helpers';
 import {
   CopyContentButton,
@@ -86,6 +87,18 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
   const spanLogCount = Object.values(spanDatasetLogs).reduce((sum, l) => sum + l.length, 0);
 
   const row = selectedTraceRow;
+  const { services } = useOpenSearchDashboards<{ uiSettings?: { get: (k: string) => string } }>();
+  const tzSetting = services?.uiSettings?.get('dateFormat:tz');
+  const rawStart = row?.rawDocument?.startTime;
+  const fullStartTime =
+    typeof rawStart === 'string' && rawStart
+      ? formatTimestamp(
+          rawStart,
+          tzSetting && tzSetting !== 'Browser'
+            ? tzSetting
+            : Intl.DateTimeFormat().resolvedOptions().timeZone
+        )
+      : undefined;
 
   // execute_tool spans show gen_ai.tool.call.* (their semconv input and output) when present;
   // other spans show their message attributes, falling back to the tool values.
@@ -239,7 +252,9 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
                   defaultMessage: 'Start time:',
                 })}
               </span>{' '}
-              <strong>{row?.startTime || '—'}</strong>
+              {/* Rows carry the list format (seconds); the detail view shows the
+                  raw start time in full. */}
+              <strong>{fullStartTime || row?.startTime || '—'}</strong>
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -38,7 +38,7 @@ import { getDocViewsRegistry } from '../../legacy/discover/opensearch_dashboards
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useChangeQueryEditor } from '../../hooks';
 import { traceHitToAgentSpan, unflattenSource } from './hooks/span_transforms';
-import { BaseRow, spanToRow, formatTimestamp } from './hooks/tree_utils';
+import { BaseRow, spanToRow, formatListTimestamp } from './hooks/tree_utils';
 import { TraceHit } from './trace_details/traces/ppl_to_trace_hits';
 import { selectIsLoading } from '../../utils/state_management/selectors/query_editor/query_editor';
 import { RootState } from '../../utils/state_management/store';
@@ -272,7 +272,7 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
     return moment.tz.guess() || moment().format('Z');
   }, [uiSettings]);
 
-  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
+  const formatTs = useCallback((ts: string) => formatListTimestamp(ts, timezone), [timezone]);
 
   // Initialize columns to defaults on mount if they don't contain any
   // agent traces virtual columns (e.g., first visit or migrating from old EuiTable columns).

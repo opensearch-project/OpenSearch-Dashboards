@@ -22,6 +22,12 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
    */
 
 .exploreDocTableCell {
+  // A 1% width shrinks an auto-layout table column to its content.
+  &--fitContent {
+    width: 1%;
+    white-space: nowrap;
+  }
+
   &__filter {
     display: flex;
     flex-shrink: 0;

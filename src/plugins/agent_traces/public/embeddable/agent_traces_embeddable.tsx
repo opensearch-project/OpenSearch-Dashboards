@@ -43,7 +43,7 @@ import { VisualizationBuilder } from '../../../explore/public';
 import { ExecutionContextSearch } from '../../../expressions/common';
 import { setStateToOsdUrl } from '../../../opensearch_dashboards_utils/public';
 import { PLUGIN_ID, AGENT_TRACES_SESSION_ID_FIELD } from '../../common';
-import { formatTimestamp, TraceRow } from '../application/pages/traces/hooks/tree_utils';
+import { formatListTimestamp, TraceRow } from '../application/pages/traces/hooks/tree_utils';
 import { hitToBaseRow } from '../application/pages/traces/table_shared';
 import {
   PPLService,
@@ -375,7 +375,8 @@ export class AgentTracesEmbeddable
 
   private formatTs = (ts: string) => {
     const tz = this.services.uiSettings.get('dateFormat:tz');
-    return formatTimestamp(
+    // The embeddable is a list table: to the second, like the app's lists.
+    return formatListTimestamp(
       ts,
       tz && tz !== 'Browser' ? tz : Intl.DateTimeFormat().resolvedOptions().timeZone
     );

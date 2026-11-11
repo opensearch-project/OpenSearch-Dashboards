@@ -11,14 +11,27 @@ import { TraceHit } from '../trace_details/traces/ppl_to_trace_hits';
 // Format timestamp to readable date/time respecting the configured timezone.
 // PPL returns timestamps without timezone indicator (e.g. "2025-05-29 03:11:25.292"),
 // so we parse as UTC first, then convert to the configured timezone.
-export const formatTimestamp = (timestamp: string, timezone: string): string => {
+// The OpenSearch Dashboards default `dateFormat`, as in Explore. Detail views
+// (flyouts) show it in full ("Nov 9, 2026 @ 14:31:20.123"); list tables use the
+// same date to the second ("Nov 9, 2026 @ 14:31:20"), like the Explore Logs and
+// Traces lists.
+export const FULL_TIMESTAMP_PATTERN = 'MMM D, YYYY @ HH:mm:ss.SSS';
+export const LIST_TIMESTAMP_PATTERN = 'MMM D, YYYY @ HH:mm:ss';
+
+export const formatTimestamp = (
+  timestamp: string,
+  timezone: string,
+  pattern: string = FULL_TIMESTAMP_PATTERN
+): string => {
   if (!timestamp) return '—';
   const m = moment.utc(timestamp);
   if (!m.isValid()) return '—';
-  // The OpenSearch Dashboards default `dateFormat`, so Agent Traces timestamps read
-  // the same as the Explore Logs / Traces tables ("Nov 9, 2026 @ 14:31:20.123").
-  return m.tz(timezone).format('MMM D, YYYY @ HH:mm:ss.SSS');
+  return m.tz(timezone).format(pattern);
 };
+
+/** List-table timestamp: the same format, to the second. */
+export const formatListTimestamp = (timestamp: string, timezone: string): string =>
+  formatTimestamp(timestamp, timezone, LIST_TIMESTAMP_PATTERN);
 
 export interface BaseRow {
   id: string;

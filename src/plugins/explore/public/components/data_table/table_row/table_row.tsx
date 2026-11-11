@@ -18,6 +18,7 @@ import {
 } from '../../../types/doc_views_types';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { toListTimePattern } from '../list_time_format';
 import { ExpandedTableRow } from './expanded_table_row/expanded_table_row';
 import { TableRowContent } from './table_row_content';
 import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
@@ -56,6 +57,11 @@ export const TableRowUI = ({
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
+  // List tables show the time field to the second (see list_time_format.ts).
+  const timeColumnPattern = useMemo(
+    () => toListTimePattern(services?.uiSettings?.get('dateFormat')),
+    [services?.uiSettings]
+  );
   const handleExpanding = useCallback(
     () => setIsExpanded((prevState) => !prevState),
     [setIsExpanded]
@@ -96,6 +102,7 @@ export const TableRowUI = ({
         onToggleExpand={handleExpanding}
         isOnTracesPage={onTracesPage}
         wrapCellText={wrapCellText}
+        timeColumnPattern={timeColumnPattern}
       />
       {isExpanded && (
         <ExpandedTableRow

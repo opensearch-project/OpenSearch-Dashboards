@@ -296,4 +296,79 @@ describe('TableRowContent', () => {
 
     expect(screen.getByTestId('table-cell-field1')).toHaveAttribute('data-has-dataset', 'true');
   });
+
+  describe('time field in the list', () => {
+    const timeProps = { ...defaultProps, columns: ['timestamp', 'field1'] };
+    beforeEach(() => {
+      mockDataset.fields.getByName.mockReturnValue({ type: 'date', filterable: true });
+      mockDataset.flattenHit.mockReturnValue({
+        timestamp: '2026-11-09T20:13:07.227+00:00',
+        field1: 'flattened_value1',
+      });
+      mockDataset.formatField.mockImplementation((_row: unknown, col: string) =>
+        col === 'timestamp' ? 'Nov 9, 2026 @ 20:13:07.227000000' : 'test_value'
+      );
+    });
+    afterEach(() => {
+      delete (mockDataset as any).fieldFormatMap;
+    });
+
+    it('shows the time to the second with the list pattern', () => {
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp').textContent).toMatch(
+        /^sanitized_2026-11-\d\d \d\d:13:07$/
+      );
+      expect(screen.getByTestId('table-cell-field1')).toHaveTextContent('sanitized_test_value');
+    });
+
+    it("keeps the field's own format when the time field has a format override", () => {
+      (mockDataset as any).fieldFormatMap = { timestamp: { id: 'date' } };
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+
+    it('keeps the formatted value without a list pattern', () => {
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+  });
+
+  it('shows severityText with one casing and leaves other columns as formatted', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.flattenHit.mockReturnValue({ severityText: 'Information', field1: 'INFO' });
+    mockDataset.formatField.mockImplementation((_row: unknown, col: string) =>
+      col === 'severityText' ? 'Information' : 'INFO'
+    );
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['severityText', 'field1']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('table-cell-severityText')).toHaveTextContent('sanitized_Info');
+    expect(screen.getByTestId('table-cell-field1')).toHaveTextContent('sanitized_INFO');
+  });
 });

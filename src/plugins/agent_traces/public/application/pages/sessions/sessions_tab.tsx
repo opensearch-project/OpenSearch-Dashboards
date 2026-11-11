@@ -10,7 +10,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiEmptyPrompt, EuiSwitch } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../types';
-import { formatTimestamp } from '../traces/hooks/tree_utils';
+import { formatListTimestamp } from '../traces/hooks/tree_utils';
 import { DataTableInfoBar, TableLoadingState } from '../traces/table_shared';
 import '../traces/traces_table.scss';
 import { useSessions } from './hooks/use_sessions';
@@ -28,7 +28,7 @@ export const SessionsTab = () => {
     if (tz && tz !== 'Browser') return tz;
     return moment.tz.guess() || moment().format('Z');
   }, [uiSettings]);
-  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
+  const formatTs = useCallback((ts: string) => formatListTimestamp(ts, timezone), [timezone]);
 
   const [onlyWithErrors, setOnlyWithErrors] = useState(false);
   const {
