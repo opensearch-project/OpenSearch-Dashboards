@@ -42,8 +42,50 @@ import {
   translateTimeRelativeToWeek,
 } from '../lib/translate_timestamp';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { DataSourceEngineType } from '../../../../../data_source/common/data_sources';
 
-const insertDataIntoIndex = (
+// OpenSearch Serverless time series collections can briefly reject writes to an index that was
+// just (re)created. On those collections the rejected documents are resent, for up to about 60
+// seconds.
+const INDEX_NOT_FOUND_MAX_RETRIES = 12;
+const INDEX_NOT_FOUND_RETRY_DELAY_MS = 5000;
+
+// Errors seen while a just (re)created time series index is not yet ready for writes. A generic
+// "Bad Request" without details is included: real document errors explain what is wrong.
+const isTransientIndexItemError = (item: any) => {
+  const error = item.index?.error;
+  return (
+    error?.type === 'index_not_found_exception' ||
+    item.index?.status >= 500 ||
+    (error?.type === 'illegal_argument_exception' && error?.reason === 'Bad Request')
+  );
+};
+
+const isIndexNotFoundError = (err: any) =>
+  err?.body?.error?.type === 'index_not_found_exception' ||
+  /index_not_found_exception/.test(err?.message ?? '');
+
+interface InsertDataOptions {
+  retryIndexNotFound?: boolean;
+  retryDelayMs?: number;
+}
+
+export const isServerlessTimeSeriesIndex = async (
+  caller: (endpoint: string, clientParams?: Record<string, any>) => Promise<any>,
+  index: string
+) => {
+  // Time series collections set index.timestamp_field on every index; other backends don't.
+  try {
+    const settings = await caller('indices.getSettings', { index });
+    return Object.values(settings ?? {}).some(
+      (indexSettings: any) => indexSettings?.settings?.index?.timestamp_field !== undefined
+    );
+  } catch (err) {
+    return false;
+  }
+};
+
+export const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
@@ -52,7 +94,11 @@ const insertDataIntoIndex = (
     clientParams?: Record<string, any>,
     options?: LegacyCallAPIOptions
   ) => Promise<any>,
-  logger: Logger
+  logger: Logger,
+  {
+    retryIndexNotFound = false,
+    retryDelayMs = INDEX_NOT_FOUND_RETRY_DELAY_MS,
+  }: InsertDataOptions = {}
 ) => {
   // Function to update timestamps
   function updateTimestamps(doc: any) {
@@ -84,10 +130,45 @@ const insertDataIntoIndex = (
       bulk.push(updateTimestamps(doc));
     });
 
-    const resp = await caller('bulk', {
-      body: bulk,
-    });
-    if (resp.errors) {
+    let pending = bulk;
+    for (let attempt = 0; ; attempt++) {
+      const canRetry = retryIndexNotFound && attempt < INDEX_NOT_FOUND_MAX_RETRIES;
+      let resp;
+      try {
+        resp = await caller('bulk', {
+          body: pending,
+        });
+      } catch (err) {
+        // The whole request was rejected, so no document was written and it is safe to resend.
+        if (canRetry && isIndexNotFoundError(err)) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+          continue;
+        }
+        throw err;
+      }
+      if (!resp.errors) {
+        return;
+      }
+
+      const failed: any[] = [];
+      let onlyRetryable = true;
+      resp.items.forEach((item: any, i: number) => {
+        const error = item.index?.error;
+        if (!error) {
+          return;
+        }
+        if (!isTransientIndexItemError(item)) {
+          onlyRetryable = false;
+        }
+        failed.push(pending[i * 2], pending[i * 2 + 1]);
+      });
+
+      if (canRetry && onlyRetryable) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        pending = failed;
+        continue;
+      }
+
       const errMsg = `sample_data install errors while bulk inserting. OpenSearch response: ${JSON.stringify(
         resp,
         null,
@@ -141,6 +222,7 @@ export function createInstallRoute(
         : context.core.opensearch.legacy.client.callAsCurrentUser;
 
       let dataSourceTitle;
+      let isServerlessDataSource = false;
       try {
         if (dataSourceId) {
           const dataSource = await context.core.savedObjects.client
@@ -150,10 +232,13 @@ export function createInstallRoute(
               return {
                 id: response.id,
                 title: attributes.title,
+                engineType: attributes.dataSourceEngineType,
               };
             });
 
           dataSourceTitle = dataSource.title;
+          isServerlessDataSource =
+            dataSource.engineType === DataSourceEngineType.OpenSearchServerless;
         }
       } catch (err) {
         return res.internalError({ body: err });
@@ -190,13 +275,17 @@ export function createInstallRoute(
           return res.customError({ body: errMsg, statusCode: err.status });
         }
 
+        const retryIndexNotFound =
+          isServerlessDataSource && (await isServerlessTimeSeriesIndex(caller, index));
+
         try {
           const count = await insertDataIntoIndex(
             dataIndexConfig,
             index,
             nowReference,
             caller,
-            logger
+            logger,
+            { retryIndexNotFound }
           );
           (counts as any)[index] = count;
         } catch (err) {

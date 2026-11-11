@@ -4,6 +4,10 @@
  */
 
 export const servicesFieldMappings = {
+  '@timestamp': {
+    type: 'alias',
+    path: 'timestamp',
+  },
   destination: {
     properties: {
       domain: {
@@ -43,5 +47,8 @@ export const servicesFieldMappings = {
   traceGroupName: {
     type: 'keyword',
     ignore_above: 1024,
+  },
+  timestamp: {
+    type: 'date',
   },
 };

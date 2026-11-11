@@ -5,7 +5,8 @@
 
 export const metricsFieldMappings = {
   '@timestamp': {
-    type: 'date',
+    type: 'alias',
+    path: 'time',
   },
   aggregationTemporality: {
     type: 'keyword',

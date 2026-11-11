@@ -4,6 +4,10 @@
  */
 
 export const logsFieldMappings = {
+  '@timestamp': {
+    type: 'alias',
+    path: 'time',
+  },
   body: {
     type: 'text',
     fields: {

@@ -4,6 +4,10 @@
  */
 
 export const tracesFieldMappings = {
+  '@timestamp': {
+    type: 'alias',
+    path: 'startTime',
+  },
   droppedAttributesCount: {
     type: 'long',
   },
