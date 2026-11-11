@@ -59,8 +59,11 @@ export class ConfigService {
   /**
    * Whenever a config if read at a path, we mark that path as 'handled'. We can
    * then list all unhandled config paths when the startup process is completed.
+   *
+   * Stored as a set of dot-joined paths: config is read on every page render, so
+   * keeping one entry per read would grow without bound for the process lifetime.
    */
-  private readonly handledPaths: ConfigPath[] = [];
+  private readonly handledPaths = new Set<string>();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
 
@@ -192,14 +195,14 @@ export class ConfigService {
 
   public async getUnusedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
-    const handledPaths = this.handledPaths.map(pathToString);
+    const handledPaths = [...this.handledPaths];
 
     return config.getFlattenedPaths().filter((path) => !isPathHandled(path, handledPaths));
   }
 
   public async getUsedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
-    const handledPaths = this.handledPaths.map(pathToString);
+    const handledPaths = [...this.handledPaths];
 
     return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
@@ -247,7 +250,7 @@ export class ConfigService {
 
   private markAsHandled(path: ConfigPath) {
     this.log.debug(`Marking config path as handled: ${path}`);
-    this.handledPaths.push(path);
+    this.handledPaths.add(pathToString(path));
   }
 }
 
