@@ -826,82 +826,18 @@ describe('executeStreamingQuery', () => {
     });
   });
 
-  describe('in a hidden tab', () => {
-    let hidden = false;
-    let hiddenSpy: jest.SpyInstance;
-    const setHidden = (value: boolean) => {
-      hidden = value;
-      document.dispatchEvent(new Event('visibilitychange'));
-    };
-    const start = () => {
-      const dispatch: jest.Mock = jest.fn((action: any) =>
-        typeof action === 'function' ? action(dispatch, () => ({})) : action
-      );
-      const promise = executeStreamingQuery({
-        services,
-        cacheKey: 'ck',
-        queryString: 'source=logs',
-      } as any)(dispatch, () => ({}) as any, undefined);
-      return { promise };
-    };
+  it('keeps polling while the tab is hidden', async () => {
+    const hiddenSpy = jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
 
-    beforeEach(() => {
-      hidden = false;
-      hiddenSpy = jest.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
-    });
-    afterEach(() => hiddenSpy.mockRestore());
+    const { statuses } = await run();
+    hiddenSpy.mockRestore();
 
-    it('stops polling while hidden and resumes as soon as the tab is shown', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-      mockPoll
-        .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
-        .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
-      hidden = true;
-
-      const { promise } = start();
-      await jest.advanceTimersByTimeAsync(60_000);
-      expect(mockPoll).not.toHaveBeenCalled();
-
-      setHidden(false);
-      await jest.advanceTimersByTimeAsync(0);
-      expect(mockPoll).toHaveBeenCalledTimes(1);
-
-      await jest.advanceTimersByTimeAsync(5_000);
-      await promise;
-      expect(mockPoll).toHaveBeenCalledTimes(2);
-    });
-
-    it('stays paused through a visibility event that leaves the tab hidden', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
-      hidden = true;
-
-      const { promise } = start();
-      await jest.advanceTimersByTimeAsync(2_000);
-      setHidden(true);
-      await jest.advanceTimersByTimeAsync(2_000);
-      expect(mockPoll).not.toHaveBeenCalled();
-
-      setHidden(false);
-      await jest.advanceTimersByTimeAsync(1_000);
-      await promise;
-    });
-
-    it('stops at once, and releases the job, when aborted while paused', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-      hidden = true;
-      const removed = jest.spyOn(document, 'removeEventListener');
-
-      const { promise } = start();
-      await jest.advanceTimersByTimeAsync(5_000);
-      promise.abort();
-      await promise;
-
-      expect(mockPoll).not.toHaveBeenCalled();
-      expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
-      expect(removed).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
-      removed.mockRestore();
-    });
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBeFalsy();
   });
 
   // A malformed response or a bug of ours has no status either, but fails the same way on retry.

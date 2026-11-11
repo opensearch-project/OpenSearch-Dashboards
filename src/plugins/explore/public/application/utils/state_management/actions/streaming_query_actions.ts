@@ -92,27 +92,6 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
 
-// Each poll renews the job's lease, so a forgotten hidden tab would keep its result in memory.
-const untilVisible = (signal: AbortSignal): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (typeof document === 'undefined' || !document.hidden) return resolve();
-    const done = () => {
-      document.removeEventListener('visibilitychange', onChange);
-      signal.removeEventListener('abort', onAbort);
-    };
-    const onChange = () => {
-      if (document.hidden) return;
-      done();
-      resolve();
-    };
-    const onAbort = () => {
-      done();
-      reject(new DOMException('Aborted', 'AbortError'));
-    };
-    document.addEventListener('visibilitychange', onChange);
-    signal.addEventListener('abort', onAbort, { once: true });
-  });
-
 const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
 
 // The http client reports a connection that got no response as a TypeError carrying the request.
@@ -382,7 +361,6 @@ export const executeStreamingQuery = createAsyncThunk<
       while (!signal.aborted) {
         const wait = nextPollAt - Date.now();
         if (wait > 0) await sleep(wait, signal);
-        await untilVisible(signal);
         nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
         // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
