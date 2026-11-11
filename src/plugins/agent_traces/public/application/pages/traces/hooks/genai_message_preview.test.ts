@@ -4,6 +4,7 @@
  */
 
 import {
+  isExecuteToolSpan,
   parseGenAiMessages,
   previewInputMessages,
   previewMessage,
@@ -202,6 +203,41 @@ describe('genai_message_preview', () => {
       };
       expect(previewSpanInput(row)).toBe('run it');
       expect(previewSpanOutput(row)).toBe('done');
+    });
+
+    it('uses messages for input and the result for output when a tool span has only a result', () => {
+      const row = {
+        input: JSON.stringify([{ role: 'user', parts: [text('look it up')] }]),
+        output: JSON.stringify([
+          { role: 'tool', parts: [{ type: 'tool_call_response', id: 'c1', response: 'ok' }] },
+        ]),
+        rawDocument: {
+          attributes: {
+            'gen_ai.operation.name': 'execute_tool',
+            'gen_ai.tool.call.result': '22C, sunny',
+          },
+        },
+      };
+      expect(previewSpanInput(row)).toBe('look it up');
+      expect(previewSpanOutput(row)).toBe('22C, sunny');
+    });
+
+    it('detects tool spans like the TOOL badge does: any case, or from the row kind', () => {
+      const tool = { 'gen_ai.tool.call.arguments': '{"x":1}', 'gen_ai.tool.call.result': 'r' };
+      const input = JSON.stringify([{ role: 'user', parts: [text('hello')] }]);
+
+      const mixedCase = {
+        input,
+        rawDocument: { attributes: { ...tool, 'gen_ai.operation.name': 'Execute_Tool' } },
+      };
+      expect(isExecuteToolSpan(mixedCase)).toBe(true);
+      expect(previewSpanInput(mixedCase)).toBe('{"x":1}');
+
+      const fromKind = { kind: 'execute_tool', input, rawDocument: { attributes: tool } };
+      expect(isExecuteToolSpan(fromKind)).toBe(true);
+      expect(previewSpanInput(fromKind)).toBe('{"x":1}');
+
+      expect(isExecuteToolSpan({ kind: 'chat', rawDocument: { attributes: tool } })).toBe(false);
     });
 
     it('keeps messages first on non-tool spans that also carry tool attributes', () => {

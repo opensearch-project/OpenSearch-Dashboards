@@ -14,6 +14,8 @@
  * chat history in send order, so the input preview is the last `user` message.
  */
 
+import { getSpanCategory } from '../../../../services/span_categorization';
+
 export type GenAiRole = 'system' | 'user' | 'assistant' | 'tool' | string;
 
 export interface GenAiMessagePart {
@@ -172,14 +174,21 @@ const previewToolValue = (value: unknown): string => {
 };
 
 interface SpanLike {
+  kind?: string;
   input?: unknown;
   output?: unknown;
   rawDocument?: Record<string, unknown>;
 }
 
-/** Whether the span is a tool execution (`gen_ai.operation.name` is `execute_tool`). */
-export const isExecuteToolSpan = (row: SpanLike): boolean =>
-  readAttribute(row.rawDocument, 'gen_ai.operation.name') === 'execute_tool';
+/**
+ * Whether the span is a tool execution (`gen_ai.operation.name` is `execute_tool`). Uses the same
+ * check as the span's TOOL badge (`getSpanCategory`), so the two never disagree.
+ */
+export const isExecuteToolSpan = (row: SpanLike): boolean => {
+  const operationName = readAttribute(row.rawDocument, 'gen_ai.operation.name');
+  const kind = typeof operationName === 'string' ? operationName : row.kind;
+  return getSpanCategory({ kind }) === 'TOOL';
+};
 
 /** The span's `gen_ai.tool.call.arguments`, as text, or '' when absent. */
 export const spanToolCallArguments = (row: SpanLike): string =>

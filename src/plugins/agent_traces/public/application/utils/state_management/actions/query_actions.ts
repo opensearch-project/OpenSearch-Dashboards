@@ -23,7 +23,7 @@ import { getFieldValueCounts } from '../../../../components/fields_selector/lib/
 import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../interfaces';
 import { defaultPreparePplQuery } from '../../languages';
 import { ensureAiRootFieldChecked } from '../../ai_root';
-import { hasStatsPipe } from './detect_optimal_tab/has_stats_pipe';
+import { isVisualizationTabTarget } from './detect_optimal_tab/has_stats_pipe';
 import { PPLService } from '../../../pages/traces/trace_details/data_fetching/ppl_request_helpers';
 
 // Module-level storage for abort controllers keyed by cacheKey
@@ -229,7 +229,8 @@ export const executeQueries = createAsyncThunk<
     const queryString = typeof query.query === 'string' ? query.query : '';
     const allTabs = services.tabRegistry.getAllTabs();
     for (const tab of allTabs) {
-      if (tab.id === AGENT_TRACES_VISUALIZATION_TAB_ID && !hasStatsPipe(queryString)) continue;
+      if (tab.id === AGENT_TRACES_VISUALIZATION_TAB_ID && !isVisualizationTabTarget(queryString))
+        continue;
       if (tab.prepareQuery) {
         const tabCacheKey = tab.prepareQuery(query, sort);
         if (!results[tabCacheKey]) {

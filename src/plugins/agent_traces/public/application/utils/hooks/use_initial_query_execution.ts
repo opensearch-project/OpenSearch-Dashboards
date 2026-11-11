@@ -16,7 +16,7 @@ import {
 } from '../state_management/slices';
 import {
   detectAndSetOptimalTab,
-  hasStatsPipe,
+  isVisualizationTabTarget,
 } from '../state_management/actions/detect_optimal_tab';
 import { AGENT_TRACES_VISUALIZATION_TAB_ID } from '../../../../common';
 import { selectActiveTabId, selectSort } from '../state_management/selectors';
@@ -87,7 +87,8 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
         // Visualization tab can show.
         const queryString = typeof queryState.query === 'string' ? queryState.query : '';
         const aggregatesOnDataTab =
-          hasStatsPipe(queryString) && activeTabId !== AGENT_TRACES_VISUALIZATION_TAB_ID;
+          isVisualizationTabTarget(queryString) &&
+          activeTabId !== AGENT_TRACES_VISUALIZATION_TAB_ID;
         if (!activeTabId || aggregatesOnDataTab) {
           // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(detectAndSetOptimalTab({ services }));
