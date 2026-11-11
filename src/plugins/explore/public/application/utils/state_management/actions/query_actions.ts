@@ -43,6 +43,7 @@ import { executeStreamingQuery, isStreamUnavailable } from './streaming_query_ac
 import {
   isCurrentStreamingRun,
   registerStreamingAbort,
+  supersedeOtherStreamingQueries,
   unregisterStreamingAbort,
 } from '../../streaming/streaming_abort_registry';
 import { findDateHistogramAggId, isStreamingEligible } from '../../streaming/streaming_config';
@@ -333,6 +334,8 @@ const getStreamingConfig = async (
     ) {
       return undefined;
     }
+    // Metrics shows only the Visualization tab, which would chart a partial table as complete.
+    if ((await getCurrentFlavor(services)) === ExploreFlavor.Metrics) return undefined;
 
     const timeFieldName = query.dataset?.timeFieldName;
     const timeRange = services.data.query.timefilter.timefilter.getTime();
@@ -501,12 +504,24 @@ export const executeQueries = createAsyncThunk<
   }
 
   const tabPromises = [];
+  let tablePromises: Promise<unknown> = Promise.resolve();
   try {
     const promises = [];
     // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
     let streamedHistogram = false;
+    let streamingTable = false;
+    let reportFirstRows: () => void = () => undefined;
+    const firstRows = new Promise<void>((resolve) => (reportFirstRows = resolve));
     // Execute query without aggregations
     if (needsDataTableQuery) {
+      // An earlier query's streams run under other keys, so registering this run replaces nothing.
+      for (const supersededKey of supersedeOtherStreamingQueries([
+        dataTableCacheKey,
+        histogramCacheKey,
+        prepareHistogramCacheKey(query),
+      ])) {
+        dispatch(clearQueryStatusMapByKey(supersededKey));
+      }
       // Streaming replaces the single-shot data-table fetch when enabled.
       const streamingConfig = await getStreamingConfig(state, services, getState);
       if (runController.signal.aborted) {
@@ -521,6 +536,7 @@ export const executeQueries = createAsyncThunk<
         // the thunk returns the promise.
         let abortTable: () => void = () => undefined;
         registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
+        streamingTable = true;
         const run = dispatch(
           executeStreamingQuery({
             services,
@@ -529,6 +545,7 @@ export const executeQueries = createAsyncThunk<
             indexName: query.dataset?.title,
             dataSourceId: query.dataset?.dataSource?.id,
             isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
+            onFirstRows: () => reportFirstRows(),
           })
         );
         abortTable = () => run.abort();
@@ -644,8 +661,9 @@ export const executeQueries = createAsyncThunk<
       }
     }
 
-    // Wait only for data table query to complete (not histogram)
-    await Promise.all(promises);
+    // Traces and tab queries read the table's first rows, not the whole stream.
+    tablePromises = Promise.all(promises);
+    await (streamingTable ? Promise.race([firstRows, tablePromises]) : tablePromises);
     if (runController.signal.aborted) {
       return;
     }
@@ -796,7 +814,7 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Wait for all tab queries to complete
-  await Promise.all(tabPromises);
+  await Promise.all([...tabPromises, tablePromises]);
 });
 
 /**

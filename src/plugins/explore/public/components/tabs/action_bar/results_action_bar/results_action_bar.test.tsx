@@ -188,6 +188,26 @@ describe('ResultsActionBar', () => {
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 
+  test('holds the export back while the rows are still streaming', () => {
+    const { rerender } = render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} streaming={{ isPolling: true } as any} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStreaming: true })
+    );
+
+    rerender(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} streaming={{ isPolling: false } as any} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStreaming: false })
+    );
+  });
+
   test('should not render inspector button as it is commented out', () => {
     render(
       <Provider store={store}>

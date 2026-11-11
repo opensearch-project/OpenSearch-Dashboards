@@ -26,6 +26,10 @@ describe('getStreamingPhase', () => {
     expect(getStreamingPhase(status({ aborted: true }))).toBe('aborted');
   });
 
+  it('reports interrupted for a job whose polling failed', () => {
+    expect(getStreamingPhase(status({ interrupted: true }))).toBe('interrupted');
+  });
+
   it('reports completed for a job that finished on its own', () => {
     expect(getStreamingPhase(status({}))).toBe('completed');
   });
@@ -71,6 +75,13 @@ describe('formatStreamingAnnotation', () => {
 
   it('still reports a stop without reported progress', () => {
     expect(formatStreamingAnnotation(status({ aborted: true }))).toBe('Stopped');
+  });
+
+  it('marks a result whose polling failed as incomplete', () => {
+    expect(formatStreamingAnnotation(status({ interrupted: true, fractionDone: 0.4 }))).toBe(
+      'Incomplete at 40%'
+    );
+    expect(formatStreamingAnnotation(status({ interrupted: true }))).toBe('Incomplete');
   });
 
   it('leaves a completed query unmarked', () => {

@@ -144,6 +144,32 @@ describe('DiscoverDownloadCsv', () => {
     });
   });
 
+  describe('while the rows are still streaming', () => {
+    beforeEach(() => {
+      (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({
+        isLoading: false,
+        downloadCsvForOption: mockDownloadCsvForOption,
+      }));
+    });
+
+    // Max available runs its own search, but offering it for the first second or two of a stream
+    // only made the button flicker between enabled and disabled.
+    it('cannot be opened, by click or shortcut, even when Max would export more', async () => {
+      render(<TestHarness isStreaming />);
+      expect(screen.getByTestId('dscDownloadCsvButton')).toBeDisabled();
+      // Styled as disabled too, not only unclickable.
+      expect(screen.getByTestId('dscDownloadCsvButton')).toHaveClass('euiButtonIcon-isDisabled');
+      fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+
+      const shortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'download_csv'
+      );
+      await act(async () => shortcut[0].execute());
+
+      expect(screen.queryByTestId('dscDownloadCsvPopoverContent')).not.toBeInTheDocument();
+    });
+  });
+
   describe('useDiscoverDownloadCsv().isLoading === true', () => {
     beforeEach(() => {
       (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({

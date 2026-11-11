@@ -19,6 +19,7 @@ import {
 import { ResultStatus } from '../../../../data/public';
 import { defaultPreparePplQuery } from '../../application/utils/languages';
 import { resultsCache } from '../../application/utils/state_management/slices';
+import { useStreamingStatus } from '../streaming/use_streaming_status';
 
 const SUMMARY_REQUEST_SAMPLE_SIZE = 10;
 
@@ -51,6 +52,8 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     return resultsCache.get(cacheKey1)?.hits?.hits || resultsCache.get(cacheKey2)?.hits?.hits;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadata1, metadata2, cacheKey1, cacheKey2]);
+  // Summarising a stream early would describe only the rows that had arrived.
+  const { isPolling } = useStreamingStatus(cacheKey2);
 
   const [loading, setLoading] = useState(false); // track loading state
 
@@ -98,14 +101,14 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   );
 
   useEffect(() => {
-    if (isEmpty(summary) && !isEmpty(queryResults)) {
+    if (isEmpty(summary) && !isEmpty(queryResults) && !isPolling) {
       fetchSummary({
         question: lastExecutedPrompt,
         query: queryState.query,
         queryRes: queryResults,
       });
     }
-  }, [queryResults, queryState.query, lastExecutedPrompt, fetchSummary, summary]);
+  }, [queryResults, queryState.query, lastExecutedPrompt, fetchSummary, summary, isPolling]);
 
-  return <ResultsSummaryContent summary={summary} loading={loading} />;
+  return <ResultsSummaryContent summary={summary} loading={loading || isPolling} />;
 };
