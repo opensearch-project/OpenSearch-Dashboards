@@ -23,6 +23,7 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_t
 import { isSourceColumn } from '../../../helpers/is_source_column';
 import { formatListTime } from '../list_time_format';
 import { normalizeSeverityText, SEVERITY_TEXT_FIELDS } from '../../../helpers/severity_text';
+import { getOsdFieldOverrides } from '../../../../../data/common';
 
 const DATE_FORMATTER_IDS = new Set(['date', 'date_nanos']);
 
@@ -130,7 +131,12 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         // timestamp is broken (timezone-shifted display vs. raw value, and it
         // effectively never matches). Time filtering is owned by the time picker.
         const isDateField = fieldInfo?.type === 'date' || fieldInfo?.type === 'date_nanos';
-        const disableValueFilter = isTimeField || isDateField || fieldInfo?.filterable === false;
+        // A column without field info (e.g. a field only present in the result rows) follows the
+        // query language's field setting, as the dataset's own fields do.
+        const isNonFilterable = fieldInfo
+          ? fieldInfo.filterable === false
+          : getOsdFieldOverrides().filterable === false;
+        const disableValueFilter = isTimeField || isDateField || isNonFilterable;
 
         if (shouldShowEmptyCell(row, null)) {
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
@@ -181,7 +187,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         // and suppresses value-filter buttons via disableValueFilter — rather than
         // the no-link NonFilterableTableCell, so a trace-link column can never be
         // silently stripped of its link when its field resolves non-filterable.
-        if (fieldInfo?.filterable === false && !isOnTracesPage) {
+        if (isNonFilterable && !isOnTracesPage) {
           return (
             <NonFilterableTableCell
               key={colName}
