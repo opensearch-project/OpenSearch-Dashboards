@@ -60,6 +60,7 @@ import {
 } from '../../../../services/source_type_registry';
 import {
   abortAllActiveQueries,
+  supersedeAllActiveQueries,
   defaultPrepareQueryString,
   defaultResultsProcessor,
   histogramResultsProcessor,
@@ -78,10 +79,12 @@ import { queryIsAggregation, queryIsBucketCountable } from './utils';
 import * as streamingQueryActions from './streaming_query_actions';
 import {
   abortAllStreamingQueries,
+  isCurrentStreamingRun,
   registerStreamingAbort,
 } from '../../streaming/streaming_abort_registry';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
+import { RootState } from '../store';
 import {
   SAMPLE_SIZE_SETTING,
   ASYNC_QUERY_POLL_INTERVAL_SETTING,
@@ -351,6 +354,79 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
     it('should be a function', () => {
       expect(typeof abortAllActiveQueries).toBe('function');
+    });
+  });
+
+  // A new run, a new search or a dataset change replaces what is running.
+  describe('supersedeAllActiveQueries', () => {
+    const abortError = () => Object.assign(new Error('Aborted'), { name: 'AbortError' });
+    const statuses = (dispatch: jest.Mock) =>
+      dispatch.mock.calls
+        .map(([action]) => action)
+        .filter((action) => action?.type === 'queryEditor/setIndividualQueryStatus')
+        .map((action) => action.payload.status.status);
+
+    const startDataTableQuery = (dispatch: jest.Mock) => {
+      let reject: (error: Error) => void = () => undefined;
+      mockSearchSource.fetch.mockImplementation(
+        () => new Promise((_resolve, rejectFetch) => (reject = rejectFetch))
+      );
+      const getState = jest.fn(
+        () =>
+          ({
+            query: { query: 'q', language: 'PPL', dataset: { id: 'test', type: 'INDEX_PATTERN' } },
+            queryEditor: { queryStatusMap: {} },
+          }) as unknown as RootState
+      );
+      const run = executeDataTableQuery({
+        services: mockServices,
+        cacheKey: 'table-key',
+        queryString: 'q',
+      })(dispatch, getState, undefined);
+      return { run, reject: (error: Error) => reject(error) };
+    };
+
+    it('stops a running query, which then reports nothing, not even its cancellation', async () => {
+      const dispatch = jest.fn();
+      const { run, reject } = startDataTableQuery(dispatch);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      supersedeAllActiveQueries();
+      expect(mockAbortController.abort).toHaveBeenCalledTimes(1);
+      reject(abortError());
+      await run;
+
+      expect(statuses(dispatch)).toEqual([QueryExecutionStatus.LOADING]);
+    });
+
+    // Contrast with Stop, whose stopped query settles as UNINITIALIZED.
+    it('differs from Stop, after which the query settles as UNINITIALIZED', async () => {
+      const dispatch = jest.fn();
+      const { run, reject } = startDataTableQuery(dispatch);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      abortAllActiveQueries();
+      reject(abortError());
+      await run;
+
+      expect(statuses(dispatch)).toEqual([
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.UNINITIALIZED,
+      ]);
+    });
+
+    it('also supersedes the streaming runs and the RED metrics queries', () => {
+      const supersedeTraceQueries = jest.spyOn(traceQueryActionsModule, 'supersedeAllTraceQueries');
+      const abortStream = jest.fn();
+      const token = {};
+      registerStreamingAbort('stream-key', abortStream, token);
+
+      supersedeAllActiveQueries();
+
+      expect(abortStream).toHaveBeenCalledTimes(1);
+      expect(isCurrentStreamingRun('stream-key', token)).toBe(false);
+      expect(supersedeTraceQueries).toHaveBeenCalledTimes(1);
+      supersedeTraceQueries.mockRestore();
     });
   });
 

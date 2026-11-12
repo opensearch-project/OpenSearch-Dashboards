@@ -20,7 +20,10 @@ import {
   setUsingRegexPatterns,
   setIsQueryEditorDirty,
 } from '../state_management/slices';
-import { executeQueries } from '../state_management/actions/query_actions';
+import {
+  executeQueries,
+  supersedeAllActiveQueries,
+} from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
@@ -130,6 +133,8 @@ export const useInitPage = () => {
 
         dispatch(clearLastExecutedData());
         dispatch(setEditorMode(EditorMode.Query));
+        // The saved search replaces the results and statuses: stop the queries that would write them.
+        supersedeAllActiveQueries();
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));

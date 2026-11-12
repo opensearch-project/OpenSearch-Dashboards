@@ -26,6 +26,7 @@ jest.mock('../../../components/visualizations/visualization_builder', () => ({
 }));
 jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'EXECUTE_QUERIES' })),
+  supersedeAllActiveQueries: jest.fn(),
 }));
 
 const EXPLICIT = { id: 'explicit', title: 'explicit', type: 'EXPLICIT_RUN_TYPE' };

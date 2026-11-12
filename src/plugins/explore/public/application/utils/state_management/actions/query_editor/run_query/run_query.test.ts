@@ -10,7 +10,7 @@ import {
   setQueryExecutionButtonStatus,
 } from '../../../slices';
 import { clearQueryStatusMap } from '../../../slices/query_editor/query_editor_slice';
-import { executeQueries } from '../../query_actions';
+import { executeQueries, supersedeAllActiveQueries } from '../../query_actions';
 import { detectAndSetOptimalTab } from '../../detect_optimal_tab';
 
 jest.mock('../../../slices', () => ({
@@ -39,6 +39,7 @@ jest.mock('../../../slices/query_editor/query_editor_slice', () => ({
 
 jest.mock('../../query_actions', () => ({
   executeQueries: jest.fn((args) => ({ type: 'executeQueries', payload: args })),
+  supersedeAllActiveQueries: jest.fn(),
   shouldSkipQueryExecution: jest.fn((q) => {
     return typeof q.query !== 'string' || !q.query.trim();
   }),
@@ -253,5 +254,20 @@ describe('runQueryActionCreator', () => {
       type: 'executeQueries',
       payload: { services: mockServices },
     });
+  });
+
+  // The run clears every result and status, so a query still running for another text could
+  // neither be shown nor stopped: it is stopped before the clear.
+  it('stops the queries still running before clearing for the new run', async () => {
+    const order: string[] = [];
+    (supersedeAllActiveQueries as jest.Mock).mockImplementation(() => order.push('supersede'));
+    mockDispatch.mockImplementation((action) => order.push(action?.type));
+
+    await runQueryActionCreator(mockServices, query)(mockDispatch, mockGetState);
+
+    expect(supersedeAllActiveQueries).toHaveBeenCalledTimes(1);
+    expect(order.indexOf('supersede')).toBeLessThan(order.indexOf('clearResults'));
+    expect(order.indexOf('supersede')).toBeLessThan(order.indexOf('executeQueries'));
+    mockDispatch.mockReset();
   });
 });
