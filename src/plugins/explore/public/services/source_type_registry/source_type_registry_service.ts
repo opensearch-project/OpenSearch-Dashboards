@@ -316,7 +316,8 @@ export interface SourceTypeLogsDrilldownItem {
    * Set when the item can't be queried now, for example because the source already knows its
    * queries would be refused. The card shows `title` (and `reason`, if any) instead of running its
    * preview and histogram queries, has no Run button, and can't be newly ticked for the Logs page.
-   * Omit it for an item that can be queried. Pass translated strings.
+   * Omit it for an item that can be queried. Pass translated strings. A card whose query fails can
+   * also become unavailable, through the source's `unavailableFor`.
    */
   unavailable?: SourceTypeLogsDrilldownItemUnavailable;
 }
@@ -389,6 +390,18 @@ export interface SourceTypeLogsDrilldown {
   buildHistogramQuery?(
     args: SourceTypeLogsDrilldownQueryArgs & { interval: string; timeFieldName: string }
   ): string | undefined;
+  /**
+   * Called when a card's preview query fails (it rejected, and wasn't stopped). Return why the item
+   * can't be queried now when the error shows that, for example a query refused for it: the card
+   * then shows it as for an item listed with `unavailable` (no Run, can't be newly ticked) until the
+   * items are listed again. Return undefined to show the error as is. Pass translated strings.
+   */
+  unavailableFor?(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    item: SourceTypeLogsDrilldownItem;
+    /** What the query rejected with, as is (status, body…). */
+    error: unknown;
+  }): SourceTypeLogsDrilldownItemUnavailable | undefined;
   /**
    * The most items one dataset can hold (e.g. how many items one query can read). The page stops
    * further ticks at this many. Omit for no limit.

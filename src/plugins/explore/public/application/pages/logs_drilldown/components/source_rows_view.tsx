@@ -23,6 +23,7 @@ import { datasetTypeRequiresExplicitRun } from '../../../../../../data/common';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type {
   SourceTypeLogsDrilldownItem,
+  SourceTypeLogsDrilldownItemUnavailable,
   SourceTypeLogsDrilldownScope,
 } from '../../../../services/source_type_registry';
 import { ExploreServices } from '../../../../types';
@@ -86,7 +87,7 @@ export const SourceRowsView: React.FC<Props> = ({
     }
   }, [sourceType]);
   const {
-    items,
+    items: listedItems,
     nextToken,
     loading,
     loadingMore,
@@ -97,6 +98,27 @@ export const SourceRowsView: React.FC<Props> = ({
     loadMore,
     retry,
   } = useSourceItems(drilldown, scope, search, listRefreshKey);
+  // Key-sorted, like the URL keeps it: a scope read back from `_a` is the same scope.
+  const scopeKey = stableKey(scope);
+
+  // Items a card's failed query showed can't be queried now (the source's `unavailableFor`). They
+  // show and count as listed `unavailable` until the items are listed again.
+  const [learnedUnavailable, setLearnedUnavailable] = useState<
+    ReadonlyMap<string, SourceTypeLogsDrilldownItemUnavailable>
+  >(() => new Map());
+  useEffect(() => {
+    setLearnedUnavailable((prev) => (prev.size ? new Map() : prev));
+  }, [scopeKey, search, listRefreshKey]);
+  const items = useMemo(
+    () =>
+      learnedUnavailable.size === 0
+        ? listedItems
+        : listedItems.map((item) => {
+            const unavailable = item.unavailable ? undefined : learnedUnavailable.get(item.id);
+            return unavailable ? { ...item, unavailable } : item;
+          }),
+    [listedItems, learnedUnavailable]
+  );
 
   // The source's dataset types decide whether its queries wait for the user, as on the Logs page.
   // A type that isn't registered (yet) is read as waiting: its queries may be billed, so the page
@@ -120,8 +142,6 @@ export const SourceRowsView: React.FC<Props> = ({
   itemsRef.current = itemsById;
   const refreshKeyRef = useRef(refreshKey);
   refreshKeyRef.current = refreshKey;
-  // Key-sorted, like the URL keeps it: a scope read back from `_a` is the same scope.
-  const scopeKey = stableKey(scope);
 
   const fetchFn = useCallback(
     async (key: string, signal: AbortSignal): Promise<SourceCardResult> => {
@@ -130,17 +150,35 @@ export const SourceRowsView: React.FC<Props> = ({
       // An item the source marks unavailable never queries (its card says why instead).
       if (item.unavailable) throw new Error(item.unavailable.title);
       const bounds = services.data.query.timefilter.timefilter.getBounds();
-      return runSourceCard({
-        services,
-        drilldown,
-        datasetTypes: sourceType.datasetTypes,
-        scope,
-        item,
-        from: bounds.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
-        to: bounds.max?.valueOf() ?? Date.now(),
-        ranWith: refreshKeyRef.current,
-        signal,
-      });
+      try {
+        return await runSourceCard({
+          services,
+          drilldown,
+          datasetTypes: sourceType.datasetTypes,
+          scope,
+          item,
+          from: bounds.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
+          to: bounds.max?.valueOf() ?? Date.now(),
+          ranWith: refreshKeyRef.current,
+          signal,
+        });
+      } catch (cause) {
+        // The source may say the failure means the item can't be queried now (e.g. its query was
+        // refused): the card then shows that instead of the error. Anything else shows as is.
+        if (!signal.aborted && drilldown.unavailableFor) {
+          let unavailable: SourceTypeLogsDrilldownItemUnavailable | undefined;
+          try {
+            unavailable = drilldown.unavailableFor({ scope, item, error: cause });
+          } catch {
+            unavailable = undefined;
+          }
+          if (unavailable) {
+            const learned = unavailable;
+            setLearnedUnavailable((prev) => new Map(prev).set(key, learned));
+          }
+        }
+        throw cause;
+      }
     },
     // `scopeKey` stands for `scope`.
     // eslint-disable-next-line react-hooks/exhaustive-deps

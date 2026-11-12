@@ -708,6 +708,92 @@ describe('SourceRowsView', () => {
       expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a')).not.toBeDisabled();
     });
 
+    describe("after a card's query fails (`unavailableFor`)", () => {
+      const UNAVAILABLE = { title: "Can't be queried", reason: 'Ask for access to it.' };
+      const refusing = (unavailableFor: jest.Mock) =>
+        makeDrilldown({
+          fetchPreview: jest.fn().mockRejectedValue(new Error('AccessDenied')),
+          unavailableFor,
+        });
+
+      it('shows what the source says instead of the error: no Run, and no new tick', async () => {
+        const unavailableFor = jest.fn(({ error }) =>
+          (error as Error).message === 'AccessDenied' ? UNAVAILABLE : undefined
+        );
+        const drilldown = refusing(unavailableFor);
+        renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        const card = await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b');
+        expect(card).toHaveTextContent("Can't be queried");
+        expect(card).toHaveTextContent('Ask for access to it.');
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardError-app/api/b')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardRun-app/api/b')
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).toBeDisabled();
+        expect(unavailableFor).toHaveBeenCalledTimes(1);
+        expect(unavailableFor).toHaveBeenCalledWith({
+          scope: { zone: 'zone-a' },
+          item: expect.objectContaining({ id: 'app/api/b' }),
+          error: expect.objectContaining({ message: 'AccessDenied' }),
+        });
+        // The other card is untouched.
+        expect(screen.getByTestId('logsDrilldownSourceCardRun-app/web/a')).toBeInTheDocument();
+      });
+
+      it('shows the error as before when the source answers undefined, or throws', async () => {
+        for (const unavailableFor of [
+          jest.fn(() => undefined),
+          jest.fn(() => {
+            throw new Error('source bug');
+          }),
+        ]) {
+          const { unmount } = renderView(refusing(unavailableFor));
+          fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+          expect(
+            await screen.findByTestId('logsDrilldownSourceCardError-app/api/b')
+          ).toHaveTextContent('AccessDenied');
+          expect(
+            screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+          ).not.toBeInTheDocument();
+          unmount();
+        }
+      });
+
+      it('lasts until the items are listed again (Refresh)', async () => {
+        const drilldown = refusing(jest.fn(() => UNAVAILABLE));
+        const { rerender, services, onBatchActionChange } = renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b');
+        rerender(
+          <SourceRowsView
+            services={services}
+            sourceType={{
+              id: 'fake',
+              label: 'Fake Logs',
+              datasetTypes: ['FAKE_LOGS'],
+              resolveDefaultDataset: jest.fn(),
+              logsDrilldown: drilldown,
+            }}
+            scope={{ zone: 'zone-a' }}
+            search=""
+            refreshKey="a"
+            listRefreshKey={1}
+            onBrushTime={jest.fn()}
+            onBatchActionChange={onBatchActionChange}
+          />
+        );
+        expect(
+          await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).not.toBeInTheDocument();
+      });
+    });
+
     it('lists as before without the field (no change for other sources)', async () => {
       const drilldown = makeDrilldown();
       renderView(drilldown);
