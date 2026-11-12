@@ -345,11 +345,7 @@ describe('osd_url_storage', () => {
           '/?_g=()&_a=(columns:!(_source))',
         ],
         ['/app/discover?foo=bar&foo=baz#/x?y=1', '/app/discover?foo=bar,baz#/x?y=1', '/x?y=1'],
-        [
-          'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
-          '/_dashboards/app/home#/',
-          '/',
-        ],
+        ['https://dashboards.example.com/_dashboards/app/home#/', '/_dashboards/app/home#/', '/'],
       ])('%s', (url, expectedBrowser, expectedHash) => {
         expect(getRelativeToHistoryPath(url, browserBase)).toBe(expectedBrowser);
         expect(getRelativeToHistoryPath(url, hashBase)).toBe(expectedHash);

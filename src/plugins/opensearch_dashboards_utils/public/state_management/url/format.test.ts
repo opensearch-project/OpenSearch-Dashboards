@@ -121,12 +121,11 @@ describe('format output is unchanged from the url.parse() implementation', () =>
       },
     ],
     [
-      'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
+      'https://dashboards.example.com/_dashboards/app/home#/',
       {
-        query: 'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home?_z=(a:!t)#/',
-        hashQuery:
-          'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/?_z=(a:!t)',
-        hashIdentity: 'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
+        query: 'https://dashboards.example.com/_dashboards/app/home?_z=(a:!t)#/',
+        hashQuery: 'https://dashboards.example.com/_dashboards/app/home#/?_z=(a:!t)',
+        hashIdentity: 'https://dashboards.example.com/_dashboards/app/home#/',
       },
     ],
   ];
