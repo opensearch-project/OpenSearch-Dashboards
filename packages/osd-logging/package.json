@@ -6,8 +6,8 @@
   "main": "./target/index.js",
   "scripts": {
     "build": "tsc",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "osd:bootstrap": "npm run build",
+    "osd:watch": "npm run build -- --watch"
   },
   "dependencies": {
     "@osd/std": "1.0.0"

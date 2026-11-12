@@ -74,10 +74,14 @@ if (majorVersion) {
   if (process.argv.includes('--install')) {
     console.log(`Installing chromedriver@^${majorVersion}`);
 
-    spawnSync(`yarn add --dev chromedriver@^${majorVersion}`, {
+    const spec = `chromedriver@^${majorVersion}`;
+    const [command, args] = existsSync('package-lock.json')
+      ? ['npm', ['install', '--save-dev', spec]]
+      : ['yarn', ['add', '--dev', spec]];
+    spawnSync(command, args, {
       stdio: 'inherit',
       cwd: process.cwd(),
-      shell: true,
+      shell: process.platform === 'win32',
     });
   } else {
     console.log(`Upgrading to chromedriver@^${majorVersion}`);

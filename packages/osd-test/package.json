@@ -6,8 +6,8 @@
   "main": "./target/index.js",
   "scripts": {
     "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "osd:bootstrap": "npm run build",
+    "osd:watch": "npm run build -- --watch"
   },
   "opensearchDashboards": {
     "devOnly": true

@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "../../scripts/use_node ./scripts/build.js",
-    "osd:bootstrap": "yarn build --dev"
+    "osd:bootstrap": "npm run build -- --dev"
   },
   "dependencies": {
     "regenerator-runtime": "^0.13.3",

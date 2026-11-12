@@ -89,9 +89,9 @@ function run_cypress() {
   echo "SPEC found: $SPEC"
   if [ $SECURITY_ENABLED = "true" ]; then
     echo "run security enabled tests"
-    yarn cypress:run-with-security --browser $CYPRESS_BROWSER --spec $SPEC
+    npm run cypress:run-with-security -- --browser $CYPRESS_BROWSER --spec $SPEC
   else
     echo "run security disabled tests"
-    yarn cypress:run-without-security --browser $CYPRESS_BROWSER --spec $SPEC
+    npm run cypress:run-without-security -- --browser $CYPRESS_BROWSER --spec $SPEC
   fi
 }
