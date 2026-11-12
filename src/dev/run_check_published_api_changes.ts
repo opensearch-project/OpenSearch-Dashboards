@@ -117,7 +117,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
 };
 
 const runBuildTypes = async () => {
-  await execa('npm', ['run', 'build:types']);
+  await execa('yarn', ['run', 'build:types']);
 };
 
 const runApiDocumenter = async (folder: string) => {
