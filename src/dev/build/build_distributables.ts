@@ -36,6 +36,8 @@ import * as Tasks from './tasks';
 export interface BuildOptions {
   isRelease: boolean;
   downloadFreshNode: boolean;
+  /** A Node.js install to bundle instead of downloading and verifying one */
+  nodeDir?: string;
   createArchives: boolean;
   createRpmPackage: boolean;
   createRpmArmPackage: boolean;
@@ -64,8 +66,14 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   await run(Tasks.VerifyEnv);
   await run(Tasks.Clean);
-  await run(options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds);
-  await run(Tasks.ExtractNodeBuilds);
+  if (config.getProvidedNodeDir()) {
+    log.info(`bundling the Node.js ${config.getNodeVersion()} at ${config.getProvidedNodeDir()}`);
+  } else {
+    await run(
+      options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
+    );
+    await run(Tasks.ExtractNodeBuilds);
+  }
 
   /**
    * run platform-generic build tasks

@@ -47,7 +47,8 @@ export async function getNodeDownloadInfo(config: Config, platform: Platform) {
 
   const url = `https://nodejs.org/dist/v${version}/${downloadName}`;
   const downloadPath = config.resolveFromRepo('.node_binaries', version, basename(downloadName));
-  const extractDir = config.resolveFromRepo('.node_binaries', version, arch);
+  const extractDir =
+    config.getProvidedNodeDir() ?? config.resolveFromRepo('.node_binaries', version, arch);
 
   return {
     url,

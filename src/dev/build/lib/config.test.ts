@@ -47,6 +47,11 @@ jest.mock('./version_info', () => ({
 
 const versionInfo = jest.requireMock('./version_info').getVersionInfo();
 
+jest.mock('./provided_node', () => ({
+  getProvidedNodeVersion: jest.fn(async () => '26.1.0'),
+}));
+const { getProvidedNodeVersion } = jest.requireMock('./provided_node');
+
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const setup = async ({
@@ -378,5 +383,64 @@ describe('#resolveFromTarget()', () => {
   it('resolves a relative path, from the target directory', async () => {
     const config = await setup();
     expect(config.resolveFromTarget()).toBe(resolve(REPO_ROOT, 'target'));
+  });
+});
+
+describe('--node-dir', () => {
+  const create = (options: Partial<Parameters<typeof Config.create>[0]> = {}) =>
+    Config.create({
+      isRelease: true,
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        darwinArm: false,
+        linux: false,
+        linuxArm: false,
+        windows: false,
+      },
+      nodeDir: 'some/node',
+      ...options,
+    });
+
+  it('bundles the supplied install and reports its version', async () => {
+    const config = await create();
+    expect(config.getProvidedNodeDir()).toBe(resolve('some/node'));
+    expect(config.getNodeVersion()).toBe('26.1.0');
+    expect(getProvidedNodeVersion).toHaveBeenCalledWith(
+      resolve('some/node'),
+      process.platform === 'win32'
+    );
+  });
+
+  it('is unset without the flag', async () => {
+    const config = await create({ nodeDir: undefined });
+    expect(config.getProvidedNodeDir()).toBeUndefined();
+    expect(config.getNodeVersion()).not.toBe('26.1.0');
+  });
+
+  it("refuses to build for anything but this host's platform", async () => {
+    await expect(create({ targetAllPlatforms: true })).rejects.toThrow(
+      "--node-dir can only be used to build for this host's platform"
+    );
+    const other = process.platform === 'win32' ? { linux: true } : { windows: true };
+    await expect(
+      create({
+        targetPlatforms: {
+          darwin: false,
+          darwinArm: false,
+          linux: false,
+          linuxArm: false,
+          windows: false,
+          ...other,
+        },
+      })
+    ).rejects.toThrow("--node-dir can only be used to build for this host's platform");
+  });
+
+  it('refuses a Node.js outside engines.node', async () => {
+    getProvidedNodeVersion.mockResolvedValueOnce('24.22.3');
+    await expect(create()).rejects.toThrow(
+      `--node-dir has Node.js 24.22.3, which does not satisfy engines.node "${pkg.engines.node}"`
+    );
   });
 });

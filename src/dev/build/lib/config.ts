@@ -33,8 +33,10 @@ import { standardize } from '@osd/cross-platform';
 import os from 'os';
 import loadJsonFile from 'load-json-file';
 import { readFile } from 'fs/promises';
+import semver from 'semver';
 
 import { getVersionInfo, VersionInfo } from './version_info';
+import { getProvidedNodeVersion } from './provided_node';
 import {
   PlatformName,
   PlatformArchitecture,
@@ -48,6 +50,7 @@ interface Options {
   targetAllPlatforms: boolean;
   targetPlatforms: TargetPlatforms;
   versionQualifier?: string;
+  nodeDir?: string;
 }
 
 interface Package {
@@ -65,6 +68,7 @@ export class Config {
     targetAllPlatforms,
     targetPlatforms,
     versionQualifier,
+    nodeDir,
   }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
@@ -72,20 +76,51 @@ export class Config {
     const nodeVersionPath = resolve(__dirname, '../../../../.node-version');
     const nodeVersionContent = (await readFile(nodeVersionPath, 'utf8'))?.trim?.();
 
-    return new Config(
-      targetAllPlatforms,
-      targetPlatforms,
+    const versionInfo = await getVersionInfo({
+      isRelease,
+      versionQualifier,
       pkg,
-      pkg.engines.node,
-      nodeVersionContent,
-      dirname(pkgPath),
-      await getVersionInfo({
-        isRelease,
-        versionQualifier,
+    });
+    const providedNodeDir = nodeDir ? resolve(nodeDir) : undefined;
+    const create = (nodeVersion: string) =>
+      new Config(
+        targetAllPlatforms,
+        targetPlatforms,
         pkg,
-      }),
-      isRelease
-    );
+        pkg.engines.node,
+        nodeVersion,
+        dirname(pkgPath),
+        versionInfo,
+        isRelease,
+        providedNodeDir
+      );
+
+    const config = create(nodeVersionContent);
+    if (!providedNodeDir) {
+      return config;
+    }
+
+    // One install can only be bundled for the platform it was built for, which is this host's
+    // since the build runs it to read its version
+    const platforms = config.getTargetPlatforms();
+    const host = config.getPlatformForThisOs();
+    if (
+      targetAllPlatforms ||
+      platforms.length !== 1 ||
+      platforms[0].getName() !== host.getName() ||
+      platforms[0].getArchitecture() !== host.getArchitecture()
+    ) {
+      throw new Error(
+        `--node-dir can only be used to build for this host's platform (${host.getNodeArch()})`
+      );
+    }
+    const providedVersion = await getProvidedNodeVersion(providedNodeDir, platforms[0].isWindows());
+    if (!semver.satisfies(providedVersion, pkg.engines.node)) {
+      throw new Error(
+        `--node-dir has Node.js ${providedVersion}, which does not satisfy engines.node "${pkg.engines.node}"`
+      );
+    }
+    return create(providedVersion);
   }
 
   constructor(
@@ -96,7 +131,8 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
-    public readonly isRelease: boolean
+    public readonly isRelease: boolean,
+    private readonly providedNodeDir?: string
   ) {}
 
   /**
@@ -118,6 +154,13 @@ export class Config {
    */
   getNodeVersion() {
     return this.nodeVersion;
+  }
+
+  /**
+   * The Node.js install passed with `--node-dir`, bundled instead of a downloaded one
+   */
+  getProvidedNodeDir() {
+    return this.providedNodeDir;
   }
 
   /**
