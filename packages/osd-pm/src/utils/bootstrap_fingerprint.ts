@@ -8,9 +8,10 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { OpenSearchDashboards } from './opensearch_dashboards';
+import { getRunningPackageManagerVersion, NPM_LOCKFILE, YARN_LOCKFILE } from './package_manager';
 import { ProjectMap } from './projects';
 
-const FINGERPRINT_VERSION = 1;
+const FINGERPRINT_VERSION = 2;
 const FINGERPRINT_FILENAME = '.osd-bootstrap-fingerprint';
 
 export interface Fingerprint {
@@ -21,7 +22,7 @@ export interface Fingerprint {
   externalPluginLockfiles: string;
   osdPmDist: string;
   nodeVersion: string;
-  yarnVersion: string;
+  packageManagerVersion: string;
 }
 
 const STRING_FIELDS: Array<keyof Fingerprint> = [
@@ -31,18 +32,8 @@ const STRING_FIELDS: Array<keyof Fingerprint> = [
   'externalPluginLockfiles',
   'osdPmDist',
   'nodeVersion',
-  'yarnVersion',
+  'packageManagerVersion',
 ];
-
-// yarn 1.x exposes its version via npm_config_user_agent when it invokes a
-// script, e.g. "yarn/1.22.19 npm/? node/v22.22.0 darwin arm64". Falls back to
-// empty string when bootstrap is invoked outside a yarn script (e.g. directly
-// via scripts/osd).
-const getYarnVersion = (): string => {
-  const ua = process.env.npm_config_user_agent || '';
-  const m = ua.match(/\byarn\/([^\s,]+)/);
-  return m ? m[1] : '';
-};
 
 const sha1 = (buf: Buffer | string) => Crypto.createHash('sha1').update(buf).digest('hex');
 
@@ -59,6 +50,20 @@ const readOrEmpty = (p: string): Buffer => {
   }
 };
 
+// A directory is owned by at most one lockfile type, so hashing both keeps the
+// fingerprint valid whichever package manager is in use.
+const lockfilesDigest = (dir: string) =>
+  sha1(
+    Buffer.concat([
+      readOrEmpty(Path.join(dir, YARN_LOCKFILE)),
+      Buffer.from('\0'),
+      readOrEmpty(Path.join(dir, NPM_LOCKFILE)),
+    ])
+  );
+
+const hasOwnLockfile = (dir: string) =>
+  Fs.existsSync(Path.join(dir, YARN_LOCKFILE)) || Fs.existsSync(Path.join(dir, NPM_LOCKFILE));
+
 const fingerprintPath = (osd: OpenSearchDashboards) =>
   Path.join(osd.getAbsolute(), FINGERPRINT_FILENAME);
 
@@ -73,29 +78,28 @@ export function computeFingerprint(osd: OpenSearchDashboards, projects: ProjectM
     const rel = normalizeRelativePath(osd.getRelative(project.path));
     manifestParts.push(`${rel}:${sha1(readOrEmpty(project.packageJsonLocation))}`);
     // External plugins (./plugins/*, ../opensearch-dashboards-extra/*) run
-    // their own yarn install against their own yarn.lock, so any change to
-    // that lockfile must invalidate the fingerprint. Workspace projects have
-    // their yarn.lock symlinked to the root lockfile and are already covered
-    // by rootLockfile, so they're skipped here to avoid double-counting.
+    // their own install against their own lockfile, so any change to that
+    // lockfile must invalidate the fingerprint. Workspace projects share the
+    // root lockfile and are already covered by rootLockfile, so they're
+    // skipped here to avoid double-counting.
     // Newly cloned plugins are caught via projectManifests because their
     // package.json is a new entry in the sorted manifest list.
     if (!project.isWorkspaceProject && !project.isWorkspaceRoot) {
-      const lockBuf = readOrEmpty(Path.join(project.path, 'yarn.lock'));
-      if (lockBuf.length > 0) {
-        lockParts.push(`${rel}:${sha1(lockBuf)}`);
+      if (hasOwnLockfile(project.path)) {
+        lockParts.push(`${rel}:${lockfilesDigest(project.path)}`);
       }
     }
   }
 
   return {
     version: FINGERPRINT_VERSION,
-    rootLockfile: sha1(readOrEmpty(Path.join(root, 'yarn.lock'))),
+    rootLockfile: lockfilesDigest(root),
     rootPackageJson: sha1(readOrEmpty(Path.join(root, 'package.json'))),
     projectManifests: sha1(manifestParts.join('\n')),
     externalPluginLockfiles: sha1(lockParts.join('\n')),
     osdPmDist: sha1(readOrEmpty(Path.join(root, 'packages/osd-pm/dist/index.js'))),
     nodeVersion: process.version,
-    yarnVersion: getYarnVersion(),
+    packageManagerVersion: getRunningPackageManagerVersion(),
   };
 }
 
@@ -148,6 +152,6 @@ export function fingerprintsEqual(a: Fingerprint, b: Fingerprint): boolean {
     a.externalPluginLockfiles === b.externalPluginLockfiles &&
     a.osdPmDist === b.osdPmDist &&
     a.nodeVersion === b.nodeVersion &&
-    a.yarnVersion === b.yarnVersion
+    a.packageManagerVersion === b.packageManagerVersion
   );
 }

@@ -29,16 +29,15 @@
  */
 
 // @ts-expect-error published types are useless
-import { stringify as stringifyLockfile, parse as parseLockFile } from '@yarnpkg/lockfile';
+import { stringify as stringifyLockfile } from '@yarnpkg/lockfile';
 import dedent from 'dedent';
 import chalk from 'chalk';
-import path from 'path';
-import { readFileSync } from 'fs';
 import { satisfies, rcompare } from 'semver';
 
 import { writeFile } from './fs';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
-import { YarnLock } from './yarn_lock';
+import { readProjectLockfile, YarnLock } from './yarn_lock';
+import { detectPackageManager } from './package_manager';
 import { log } from './log';
 import { Project } from './project';
 import { ITree, treeToString } from './projects_tree';
@@ -108,6 +107,20 @@ export async function validateDependencies(
   // if we find more than one lodash v4 version installed then delete
   // lodash v4 requests from the yarn.lock file and prompt the user to
   // retry bootstrap so that a single v4 version will be installed
+  if (lodash4Versions.size > 1 && detectPackageManager(osd.getAbsolute()).name === 'npm') {
+    log.error(dedent`
+
+      Multiple version of lodash v4 were detected in package-lock.json. Run
+      \`npm dedupe lodash\` and then rerun osd bootstrap.
+
+      If the versions still don't coalesce, force a single version of lodash via
+      the "overrides" field in package.json.
+
+    `);
+
+    process.exit(1);
+  }
+
   if (lodash4Versions.size > 1) {
     for (const req of lodash4Reqs) {
       delete yarnLock[req];
@@ -216,9 +229,9 @@ export async function validateDependencies(
           cachedManifests.set(
             project.path,
             // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
-            parseLockFile(readFileSync(path.join(project.path, 'yarn.lock'), 'utf8'))
+            readProjectLockfile(project.path)
           );
-        const { object: deps } = cachedManifests.get(project.path);
+        const deps = cachedManifests.get(project.path);
         if (deps?.[`${depName}@${range}`]?.version) {
           installedVersions.add(deps[`${depName}@${range}`].version);
           installedDepVersionsCache.set(

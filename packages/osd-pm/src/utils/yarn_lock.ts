@@ -31,12 +31,15 @@
 // @ts-expect-error published types are worthless
 import { parse as parseLockfile } from '@yarnpkg/lockfile';
 import { standardize } from '@osd/cross-platform';
+import { readFileSync } from 'fs';
 import { resolve, isAbsolute } from 'path';
 
 import { readFile } from '../utils/fs';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { Project } from '../utils/project';
 import { Log } from '../utils/log';
+import { npmLockToYarnLock } from './npm_lock';
+import { findLockfile } from './package_manager';
 
 export interface YarnLock {
   /** a simple map of name@versionrange tags to metadata about a package */
@@ -75,6 +78,31 @@ export async function readYarnLock(osd: OpenSearchDashboards): Promise<YarnLock>
   }
 
   return {};
+}
+
+/**
+ * Read the root lockfile, whichever package manager owns the repository, in
+ * the `name@range` shape used by the rest of osd-pm.
+ */
+export async function readLockfile(osd: OpenSearchDashboards): Promise<YarnLock> {
+  const found = findLockfile(osd.getAbsolute());
+  if (found?.packageManager.name === 'npm') {
+    return npmLockToYarnLock(await readFile(found.path, 'utf8'));
+  }
+  return readYarnLock(osd);
+}
+
+/** Read the lockfile that owns `projectPath` (its own, or the nearest one above it). */
+export function readProjectLockfile(projectPath: string): YarnLock {
+  const found = findLockfile(projectPath);
+  if (!found) throw new Error(`No lockfile found for ${projectPath}`);
+
+  const contents = readFileSync(found.path, 'utf8');
+  if (found.packageManager.name === 'npm') return npmLockToYarnLock(contents);
+
+  const parsed = parseLockfile(contents);
+  if (parsed.type !== 'success') throw new Error(`unable to parse ${found.path}`);
+  return parsed.object;
 }
 
 /**

@@ -171,28 +171,32 @@ describe('bootstrap_fingerprint', () => {
     expect(before.osdPmDist).not.toEqual(after.osdPmDist);
   });
 
-  it('captures the yarn version from npm_config_user_agent when available', () => {
+  it('captures the package manager version from npm_config_user_agent when available', () => {
     const prev = process.env.npm_config_user_agent;
     try {
       process.env.npm_config_user_agent = 'yarn/1.22.19 npm/? node/v22.22.0 darwin arm64';
       const a = computeFingerprint(osd, projects as any);
       process.env.npm_config_user_agent = 'yarn/1.22.22 npm/? node/v22.22.0 darwin arm64';
       const b = computeFingerprint(osd, projects as any);
-      expect(a.yarnVersion).toEqual('1.22.19');
-      expect(b.yarnVersion).toEqual('1.22.22');
+      process.env.npm_config_user_agent = 'npm/10.9.4 node/v22.22.0 linux x64 workspaces/false';
+      const c = computeFingerprint(osd, projects as any);
+      expect(a.packageManagerVersion).toEqual('yarn/1.22.19');
+      expect(b.packageManagerVersion).toEqual('yarn/1.22.22');
+      expect(c.packageManagerVersion).toEqual('npm/10.9.4');
       expect(fingerprintsEqual(a, b)).toBe(false);
+      expect(fingerprintsEqual(b, c)).toBe(false);
     } finally {
       if (prev === undefined) delete process.env.npm_config_user_agent;
       else process.env.npm_config_user_agent = prev;
     }
   });
 
-  it('falls back to an empty yarn version when npm_config_user_agent is unset', () => {
+  it('falls back to an empty package manager version when npm_config_user_agent is unset', () => {
     const prev = process.env.npm_config_user_agent;
     try {
       delete process.env.npm_config_user_agent;
       const fp = computeFingerprint(osd, projects as any);
-      expect(fp.yarnVersion).toEqual('');
+      expect(fp.packageManagerVersion).toEqual('');
     } finally {
       if (prev !== undefined) process.env.npm_config_user_agent = prev;
     }
@@ -242,6 +246,27 @@ describe('bootstrap_fingerprint', () => {
     expect(readFingerprint(osd)).toBeNull();
     // Calling again with the file already gone must not throw.
     expect(() => deleteFingerprint(osd)).not.toThrow();
+  });
+
+  it('detects a root package-lock.json change', () => {
+    Fs.unlinkSync(Path.join(rootPath, 'yarn.lock'));
+    Fs.writeFileSync(Path.join(rootPath, 'package-lock.json'), '{"lockfileVersion":3}');
+    const before = computeFingerprint(osd, projects as any);
+    Fs.writeFileSync(Path.join(rootPath, 'package-lock.json'), '{"lockfileVersion":3,"x":1}');
+    const after = computeFingerprint(osd, projects as any);
+    expect(before.rootLockfile).not.toEqual(after.rootLockfile);
+  });
+
+  it('detects an external plugin package-lock.json change', () => {
+    const pluginPath = projects.get('plugin-one')!.path;
+    Fs.writeFileSync(Path.join(pluginPath, 'package-lock.json'), '{"lockfileVersion":3}');
+    if (Fs.existsSync(Path.join(pluginPath, 'yarn.lock'))) {
+      Fs.unlinkSync(Path.join(pluginPath, 'yarn.lock'));
+    }
+    const before = computeFingerprint(osd, projects as any);
+    Fs.writeFileSync(Path.join(pluginPath, 'package-lock.json'), '{"lockfileVersion":3,"x":1}');
+    const after = computeFingerprint(osd, projects as any);
+    expect(before.externalPluginLockfiles).not.toEqual(after.externalPluginLockfiles);
   });
 
   it('treats a missing root yarn.lock as stable empty (does not throw)', () => {
