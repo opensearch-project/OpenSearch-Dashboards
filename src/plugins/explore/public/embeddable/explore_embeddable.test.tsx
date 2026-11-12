@@ -346,7 +346,6 @@ describe('ExploreEmbeddable', () => {
     expect(searchProps).toBeDefined();
     expect(searchProps?.title).toBe('Test Explore');
     expect(searchProps?.description).toBe('Test description');
-    expect(searchProps?.displayTimeColumn).toBe(false);
   });
 
   test('cleans up when destroy is called', () => {

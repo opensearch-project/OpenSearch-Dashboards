@@ -42,7 +42,7 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import { SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -112,7 +112,6 @@ export interface SearchProps {
   styleOptions?: StyleOptions;
   variables?: VariableValue[];
   axisColumnMappings?: AxisColumnMappings;
-  displayTimeColumn: boolean;
   title: string;
   columns?: string[];
   onSort?: (sort: SortOrder[]) => void;
@@ -398,7 +397,6 @@ export class ExploreEmbeddable
       services: this.services,
       indexPattern,
       isLoading: false,
-      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
       variables: this.interpolationService.getVariables(),
     };
