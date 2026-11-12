@@ -53,6 +53,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
+    copyPanels?: boolean;
   }
 
   class DashboardPage {
@@ -184,6 +185,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async setClonedDashboardTitle(title: string) {
       await testSubjects.setValue('clonedDashboardTitle', title);
+    }
+
+    public async setCloneCopyPanels(checked: boolean) {
+      // The EUI checkbox input is visually hidden, so click its label.
+      if ((await testSubjects.isChecked('cloneCopyPanelsCheckbox')) !== checked) {
+        await find.clickByCssSelector('label[for="dashboardCloneCopyPanels"]');
+      }
     }
 
     /**
@@ -353,6 +361,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
       if (saveOptions.saveAsNew !== undefined) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      }
+
+      // Only shown when "Save as new dashboard" is on.
+      if (saveOptions.copyPanels !== undefined) {
+        await testSubjects.setEuiSwitch(
+          'copyPanelsOnSave',
+          saveOptions.copyPanels ? 'check' : 'uncheck'
+        );
       }
 
       await this.clickSave();

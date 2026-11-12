@@ -15,6 +15,8 @@ import { QueryPanelGeneratedQuery } from './query_panel_generated_query';
 import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
 import { usePPLLintFixAction } from './actions/ppl_lint_fix_action';
 import { useSetEditorTextWithQuery } from '../../application/hooks';
+import { useStreamingStatus } from '../streaming/use_streaming_status';
+import { StreamingAnnouncer, StreamingProgressBar } from '../streaming/streaming_progress';
 import './query_panel.scss';
 
 interface QueryPanelProps {
@@ -27,6 +29,7 @@ const QueryPanel = ({ analyzeIsOpen, onToggleAnalyze, hasAnalyzeResult }: QueryP
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
+  const { streaming, isPolling: isStreaming } = useStreamingStatus();
 
   // Hook for updating editor text with query
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
@@ -46,14 +49,19 @@ const QueryPanel = ({ analyzeIsOpen, onToggleAnalyze, hasAnalyzeResult }: QueryP
         <ExploreQueryPanelEditor />
         <QueryPanelGeneratedQuery />
       </div>
-      {isLoading && (
-        <EuiProgress
-          size="xs"
-          color="accent"
-          position="absolute"
-          data-test-subj="exploreQueryPanelIsLoading"
-        />
+      {isStreaming ? (
+        <StreamingProgressBar streaming={streaming} />
+      ) : (
+        isLoading && (
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            data-test-subj="exploreQueryPanelIsLoading"
+          />
+        )
       )}
+      <StreamingAnnouncer streaming={streaming} />
     </EuiPanel>
   );
 };
