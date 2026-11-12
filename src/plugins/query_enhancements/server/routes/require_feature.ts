@@ -20,6 +20,10 @@ export const FEATURE_DISABLED_MESSAGE = 'Feature is not enabled';
  * takes effect immediately — including for jobs already in flight, whose polls then stop instead of
  * running against a feature that is meant to be off.
  *
+ * The store is built from the request: it carries the headers that scope a dynamic config override.
+ * The ambient async local store is not reliably populated in request handlers, and resolving without
+ * a store silently falls back to the global value.
+ *
  * A resolution failure denies rather than allows: the flags default to off, so an unreadable config
  * must not open a gated route.
  */
@@ -35,7 +39,7 @@ export const requireFeature =
       enabled = await isFeatureEnabled(
         context.core.dynamicConfig.client,
         feature,
-        context.core.dynamicConfig.asyncLocalStore
+        context.core.dynamicConfig.createStoreFromRequest(request)
       );
     } catch (error) {
       logger.error(`Failed to resolve the ${feature} feature flag, denying the request`, error);

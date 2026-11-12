@@ -63,7 +63,7 @@ describe('registerPPLStreamRoutes', () => {
           client: {
             getConfig: jest.fn().mockResolvedValue({ ppl: { streaming: { enabled: true } } }),
           },
-          asyncLocalStore: undefined,
+          createStoreFromRequest: jest.fn(() => undefined),
         },
       },
     }) as any;
