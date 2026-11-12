@@ -41,7 +41,9 @@ export function buildServices(
     chrome: core.chrome,
     overlays: core.overlays,
   };
-  const savedObjectService = createSavedExploreLoader(services);
+  const savedObjectService = createSavedExploreLoader(services, (type) =>
+    plugins.data.query.queryString.getDatasetService().getType(type)
+  );
   const storage = new Storage(localStorage);
 
   return {

@@ -80,6 +80,13 @@ export interface DatasetTypeConfig {
      * the dataset.
      */
     requiresExplicitRun?: boolean;
+    /**
+     * Optional: datasets of this type never have a saved object. A saved search or visualization
+     * on one then keeps the dataset id in its search source instead of an `index-pattern`
+     * reference, which import would reject as a missing index pattern. When unset, the reference
+     * is written as for any other dataset.
+     */
+    noSavedObject?: boolean;
     /** Optional supportsTimeFilter determines if a time field is supported */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
