@@ -24,6 +24,11 @@ describe('list time format', () => {
     expect(toListTimePattern('HH:mm:ss.SSS Z')).toBe('HH:mm:ss Z');
   });
 
+  it("keeps moment's localized LTS token (time with seconds)", () => {
+    expect(toListTimePattern('L LTS')).toBe('L LTS');
+    expect(toListTimePattern('LTS.SSS')).toBe('LTS');
+  });
+
   it('keeps bracketed literals', () => {
     expect(toListTimePattern('HH:mm:ss[.SSS] [at] HH:mm:ss.SSS')).toBe(
       'HH:mm:ss[.SSS] [at] HH:mm:ss'

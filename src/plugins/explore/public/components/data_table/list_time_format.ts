@@ -14,13 +14,13 @@ const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
  *
  * Removes every fractional-seconds token (`S`, `SSS`, `SSSSSSSSS`…) together
  * with the one separator before it, whatever that separator is (`.`, `,`, `:`,
- * a space, or none as in `HHmmssSSS`). Bracketed moment literals (`[...]`) are
- * left as they are.
+ * a space, or none as in `HHmmssSSS`). Bracketed moment literals (`[...]`) and
+ * the `S` of the localized `LTS` token (time with seconds) are left as they are.
  */
 export const toListTimePattern = (dateFormat?: string): string =>
   (dateFormat || DEFAULT_DATE_FORMAT)
     .split(/(\[[^\]]*\])/)
-    .map((part) => (part.startsWith('[') ? part : part.replace(/[^A-Za-z0-9]?S+/g, '')))
+    .map((part) => (part.startsWith('[') ? part : part.replace(/(?<!LT)[^A-Za-z0-9]?S+/g, '')))
     .join('');
 
 /**
