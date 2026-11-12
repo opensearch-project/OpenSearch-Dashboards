@@ -715,21 +715,11 @@ describe('ChatService', () => {
     beforeEach(() => {
       // Initialize a thread first - required for sendToolResult
       chatService.newThread();
-      (global as any).window = {
-        assistantContextStore: {
-          getAllContexts: jest.fn().mockReturnValue([]),
-          getBackendFormattedContexts: jest.fn().mockReturnValue([]),
-        },
-      };
 
       // Mock getConversation to return MESSAGES_SNAPSHOT with toolCalls (for waitForToolCallSync)
       chatService.conversationHistoryService.getConversation = jest
         .fn()
         .mockImplementation(() => Promise.resolve(createMockMessagesSnapshot('tool-call-123')));
-    });
-
-    afterEach(() => {
-      delete (global as any).window;
     });
 
     it('should send tool result and return observable with tool message', async () => {
@@ -1138,21 +1128,11 @@ describe('ChatService', () => {
     beforeEach(() => {
       // Initialize a thread first - required for sendToolResults
       chatService.newThread();
-      (global as any).window = {
-        assistantContextStore: {
-          getAllContexts: jest.fn().mockReturnValue([]),
-          getBackendFormattedContexts: jest.fn().mockReturnValue([]),
-        },
-      };
 
       // Default: includeFullHistory false so the sync-poll path is exercised.
       mockCoreChatService.getMemoryProvider = jest
         .fn()
         .mockReturnValue({ includeFullHistory: false });
-    });
-
-    afterEach(() => {
-      delete (global as any).window;
     });
 
     it('should dispatch a batch of two tool results in a single run', async () => {
@@ -1564,19 +1544,6 @@ describe('ChatService', () => {
   });
 
   describe('sendMessageWithWindow', () => {
-    beforeEach(() => {
-      (global as any).window = {
-        assistantContextStore: {
-          getAllContexts: jest.fn().mockReturnValue([]),
-          getBackendFormattedContexts: jest.fn().mockReturnValue([]),
-        },
-      };
-    });
-
-    afterEach(() => {
-      delete (global as any).window;
-    });
-
     it('should open window before sending message', async () => {
       const mockInstance = {
         sendMessage: jest.fn().mockResolvedValue(undefined),

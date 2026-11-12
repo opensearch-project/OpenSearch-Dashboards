@@ -77,7 +77,7 @@ function findMarkdownFiles(dir, prefix = '', baseDir = '', recursively = true) {
     } else if (
       entry.name.endsWith('.md') &&
       entry.name !== '_sidebar.md' &&
-      isGitTrackedMarkdownFile(path.join(entry.path, entry.name))
+      isGitTrackedMarkdownFile(path.join(dir, entry.name))
     ) {
       const docPath = `${prefix}${entry.name}`;
       // Adjust the path based on its base directory ('docs' or 'src')

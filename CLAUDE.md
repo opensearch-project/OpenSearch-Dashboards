@@ -97,7 +97,7 @@ Use `core.getStartServices()` in application mount handlers rather than storing 
 ### Key Technologies
 
 - **Frontend:** React 18, React Router 5, Redux, RxJS, EUI/OUI component library
-- **Backend:** Node.js 22, Hapi.js
+- **Backend:** Node.js 26, Hapi.js
 - **Build:** Webpack/Rspack, Babel, `@osd/optimizer`
 - **Package manager:** Yarn 1 (workspaces)
 

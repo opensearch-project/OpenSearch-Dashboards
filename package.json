@@ -137,7 +137,7 @@
     "**/istanbul-lib-processinfo/uuid": "^11.1.1",
     "**/node-jose/uuid": "^11.1.1",
     "**/@langchain/core/langsmith": "^0.10.4",
-    "**/@types/node": "~22.19.0",
+    "**/@types/node": "~26.6.0",
     "**/@types/hapi__cookie/joi": "^18.2.9",
     "**/@types/hapi__h2o2/joi": "^18.2.9",
     "**/adm-zip": "^0.6.1",
@@ -303,7 +303,7 @@
     "yauzl": "^3.4.0"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^12.9.0"
+    "better-sqlite3": "^12.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -392,10 +392,9 @@
     "@types/mime": "^3.0.1",
     "@types/minimatch": "^2.0.29",
     "@types/mocha": "^10.0.10",
-    "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
-    "@types/node": "~22.19.0",
+    "@types/node": "~26.6.0",
     "@types/node-forge": "^1.0.1",
     "@types/normalize-path": "^3.0.0",
     "@types/papaparse": "^5.3.15",
@@ -487,7 +486,6 @@
     "luxon": "^3.2.1",
     "markdown-it": "^14.3.2",
     "mocha": "^12.0.3",
-    "mock-fs": "^4.12.0",
     "monaco-editor": "^0.52.0",
     "ms-chromium-edge-driver": "^0.4.3",
     "nock": "12.0.3",
@@ -539,7 +537,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=14.20.1 <23",
+    "node": "^26.0.0",
     "yarn": "^1.22.10"
   }
 }

@@ -74,9 +74,11 @@ The project uses multiple files to manage the Node.js version for different purp
 
 | File | Format | Purpose | When to update |
 |------|--------|---------|----------------|
-| `.node-version` | Exact version (e.g. `22.23.2`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
-| `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
+| `.node-version` | Exact version (e.g. `26.13.1`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
+| `.nvmrc` | Major version only (e.g. `26`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
 | `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
+
+At startup OpenSearch Dashboards only checks `engines.node` (`^26.0.0`), so any Node.js 26.x release can run it. `.node-version` only selects the binary bundled into release artifacts; packagers who provide their own Node.js 26 runtime do not need to match it.
 
 ### Fork and clone OpenSearch Dashboards
 
