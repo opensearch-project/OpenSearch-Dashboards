@@ -99,7 +99,11 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
                     ? 'No authentication'
                     : currentAuthMethod === 'basicauth'
                       ? 'Basic authentication'
-                      : 'AWS Signature Version 4'}
+                      : currentAuthMethod === 'awssigv4'
+                        ? 'AWS Signature Version 4'
+                        : currentAuthMethod === 'oauth2'
+                          ? 'OAuth2 / OIDC'
+                          : currentAuthMethod}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -25,6 +25,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
       usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,
       awsSigV4AuthEnabled: config.authTypes.AWSSigV4.enabled,
+      oauth2AuthEnabled: config.authTypes.OAuth2.enabled,
     };
   }
 
@@ -36,6 +37,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
       usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,
       awsSigV4AuthEnabled: config.authTypes.AWSSigV4.enabled,
+      oauth2AuthEnabled: config.authTypes.OAuth2.enabled,
     };
   }
 

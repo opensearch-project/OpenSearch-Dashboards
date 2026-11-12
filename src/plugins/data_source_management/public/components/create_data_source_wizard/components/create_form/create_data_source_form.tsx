@@ -349,6 +349,21 @@ export class CreateDataSourceForm extends React.Component<
         // @ts-expect-error TS2532 TODO(ts-error): fixme
         service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
+    } else if (authType === AuthType.OAuth2) {
+      credentials = {
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        clientId: this.state.auth.credentials.clientId,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        clientSecret: this.state.auth.credentials.clientSecret,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        tokenUrl: this.state.auth.credentials.tokenUrl,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        scopes: this.state.auth.credentials.scopes,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        audience: this.state.auth.credentials.audience,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
+        grantType: this.state.auth.credentials.grantType || 'client_credentials',
+      };
     } else {
       const currentCredentials = (credentials ?? {}) as { [key: string]: string };
       credentials = extractRegisteredAuthTypeCredentials(
@@ -556,6 +571,8 @@ export class CreateDataSourceForm extends React.Component<
             </EuiCompressedFormRow>
           </>
         );
+      // OAuth2 has no case here: OAuth2CredentialForm is registered in the auth registry and
+      // resolved by getCredentialFormFromRegistry in the default branch below.
 
       default:
         return this.getCredentialFormFromRegistry(type);

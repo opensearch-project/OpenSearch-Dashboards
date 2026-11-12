@@ -38,6 +38,6 @@ export const UrlToDatasourceType: { [key: string]: DatasourceType } = {
   [AmazonS3URL]: 'S3GLUE',
 };
 
-export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
+export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4' | 'oauth2';
 
 export { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../common';

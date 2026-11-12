@@ -17,6 +17,17 @@ import {
   EDIT,
 } from '../../framework/utils/shared';
 
+// OAuth2 helper functions
+import {
+  mapPrometheusProperties,
+  isOAuth2Prometheus,
+  createOAuth2PrometheusDataSource,
+  createOAuth2SavedObject,
+  rollbackBackendCreation,
+  listOAuth2PrometheusConnections,
+  findOAuth2PrometheusConnection,
+} from './oauth2_prometheus_connections';
+
 // Status codes that are expected during normal use (e.g. a read-only user without the
 // `cluster:admin/opensearch/ql/datasources/read` permission) and should not be logged as errors.
 const EXPECTED_ERROR_STATUS_CODES = [401, 403, 404];
@@ -48,8 +59,8 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
     },
     async (context, request, response): Promise<any> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const dataConnectionsresponse =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.getDataConnectionById', {
@@ -79,8 +90,8 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
     },
     async (context, request, response): Promise<any> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const dataConnectionsresponse =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.deleteDataConnection', {
@@ -111,8 +122,8 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
     },
     async (context, request, response): Promise<any> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const dataConnectionsresponse =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.modifyDataConnection', {
@@ -146,8 +157,8 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
     },
     async (context, request, response): Promise<any> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const dataConnectionsresponse =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.modifyDataConnection', {
@@ -176,8 +187,8 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
     },
     async (context, request, response): Promise<any> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const dataConnectionsresponse =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.getDataConnections');
@@ -198,7 +209,10 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logg
 export function registerDataConnectionsRoute(
   router: IRouter,
   dataSourceEnabled: boolean,
-  logger: Logger
+  logger: Logger,
+  // Defaults to true so existing callers and tests keep working; the DSM plugin passes the
+  // real data_source.authTypes.OAuth2.enabled value.
+  oauth2AuthEnabled: boolean = true
 ) {
   router.post(
     {
@@ -218,8 +232,79 @@ export function registerDataConnectionsRoute(
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
+        // Map frontend properties to backend property names for Prometheus
+        let mappedProperties = request.body.properties;
+        if (request.body.connector === 'prometheus') {
+          mappedProperties = mapPrometheusProperties(request.body.properties, logger);
+        }
+        // Check if this is an OAuth2 Prometheus data source and handle it separately
+        if (isOAuth2Prometheus(request.body.connector, request.body.properties, mappedProperties)) {
+          // Enforce the kill switch server side. Hiding the option in the browser is not
+          // enough - this route is a public API and would otherwise still create a working
+          // OAuth2 connection with OAuth2 turned off org-wide.
+          if (!oauth2AuthEnabled) {
+            return response.custom({
+              statusCode: 400,
+              body: {
+                message:
+                  'OAuth2 authentication is disabled. Set data_source.authTypes.OAuth2.enabled to true to create OAuth2 data connections.',
+              },
+            });
+          }
+
+          const client =
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            context.opensearch_data_source_management.dataSourceManagementClient.asScoped(
+              request
+            ).callAsCurrentUser;
+
+          // Create the OAuth2 Prometheus data source
+          const dataConnectionsresponse = await createOAuth2PrometheusDataSource(
+            client,
+            request.body,
+            mappedProperties,
+            logger
+          );
+
+          // Create saved object for OAuth2 configuration storage
+          if (dataSourceEnabled) {
+            try {
+              await createOAuth2SavedObject(
+                context.core.savedObjects.client,
+                request.body,
+                mappedProperties,
+                logger
+              );
+            } catch (savedObjectError) {
+              // Roll back the backend creation to maintain consistency
+              const rollbackResult = await rollbackBackendCreation(
+                client,
+                request.body.name,
+                logger
+              );
+
+              if (!rollbackResult.success) {
+                // Rollback failed - create a compound error message
+                const compoundError = new Error(
+                  `OAuth2 data source creation failed: ${savedObjectError.message}. ` +
+                    `Additionally, rollback of backend data source failed: ${
+                      rollbackResult.error?.message || 'Unknown rollback error'
+                    }. ` +
+                    `Manual cleanup may be required for data source '${request.body.name}'.`
+                );
+                throw compoundError;
+              }
+
+              throw savedObjectError;
+            }
+          }
+
+          return response.ok({ body: dataConnectionsresponse });
+        }
+
+        // For non-OAuth2 data sources, use the normal backend flow
         const client =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           context.opensearch_data_source_management.dataSourceManagementClient.asScoped(
             request
           ).callAsCurrentUser;
@@ -229,7 +314,7 @@ export function registerDataConnectionsRoute(
             name: request.body.name,
             connector: request.body.connector,
             allowedRoles: request.body.allowedRoles,
-            properties: request.body.properties,
+            properties: mappedProperties,
           },
         });
 
@@ -244,7 +329,25 @@ export function registerDataConnectionsRoute(
         return response.ok({ body: dataConnectionsresponse });
       } catch (error: any) {
         logDataConnectionError(logger, 'Issue in creating data source', error);
-        return response.custom({ statusCode: error.statusCode || 500, body: error.response });
+
+        // Ensure we always provide a proper error message
+        const statusCode = error.statusCode || 500;
+        let errorBody = error.response || error.body || error.message || 'Unknown error occurred';
+
+        // If errorBody is a string, wrap it in an object with message property
+        if (typeof errorBody === 'string') {
+          errorBody = { message: errorBody };
+        }
+
+        // Ensure the error object has a message property
+        if (typeof errorBody === 'object' && !errorBody.message) {
+          errorBody.message = error.message || 'Unknown error occurred';
+        }
+
+        return response.custom({
+          statusCode,
+          body: errorBody,
+        });
       }
     }
   );
@@ -261,21 +364,73 @@ export function registerDataConnectionsRoute(
     async (context, request, response): Promise<any> => {
       const dataSourceMDSId = request.params.dataSourceMDSId;
       try {
-        let dataConnectionsresponse;
-        if (dataSourceEnabled && dataSourceMDSId) {
-          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
-          dataConnectionsresponse = await client.callAPI('ppl.getDataConnections', {
-            requestTimeout: 5000, // Enforce timeout to avoid hanging requests
-          });
-        } else {
-          // @ts-expect-error TS2339 TODO(ts-error): fixme
-          dataConnectionsresponse =
-            await context.opensearch_data_source_management.dataSourceManagementClient
-              .asScoped(request)
-              .callAsCurrentUser('ppl.getDataConnections');
+        let dataConnectionsresponse: any;
+        // Only for the local cluster. These connections live in this Dashboards instance's own
+        // saved objects and carry no cluster association, so returning them for a remote
+        // dataSourceMDSId would list the same connection under every data source and repeat the
+        // saved-object scan and the roles lookup once per data source.
+        const oauth2DataSources =
+          dataSourceEnabled && !dataSourceMDSId
+            ? await listOAuth2PrometheusConnections(context, logger)
+            : [];
+
+        // Get regular data sources from backend
+        try {
+          if (dataSourceEnabled && dataSourceMDSId) {
+            const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+            dataConnectionsresponse = await client.callAPI('ppl.getDataConnections', {
+              requestTimeout: 5000, // Enforce timeout to avoid hanging requests
+            });
+          } else {
+            dataConnectionsresponse =
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
+              await context.opensearch_data_source_management.dataSourceManagementClient
+                .asScoped(request)
+                .callAsCurrentUser('ppl.getDataConnections');
+          }
+        } catch (error) {
+          // A permissions failure must not look like "no connections". Anything that says the
+          // caller or the request was rejected is rethrown so the outer handler reports it;
+          // only unavailability is absorbed, which is what lets the OAuth2 connections in
+          // saved objects still render while the backend is down.
+          //
+          // Absorbing only makes sense when there are saved-object connections to fall back on.
+          // When the OAuth2 merge is not in play (data sources disabled, or a remote MDS id) an
+          // empty list would just disguise a backend failure as "no connections", so the error is
+          // rethrown and reported exactly as it would be without this feature.
+          const statusCode = error.statusCode ?? error.body?.statusCode;
+          const mergesSavedObjectConnections = dataSourceEnabled && !dataSourceMDSId;
+          if (!mergesSavedObjectConnections || statusCode === 401 || statusCode === 403) {
+            throw error;
+          }
+          logger.warn(
+            `Backend data sources fetch failed, returning saved-object connections only: ${error.message}`
+          );
+          dataConnectionsresponse = [];
         }
+
+        // Combine backend data sources with OAuth2 data sources, avoiding duplicates
+        let backendDataSources: any[] = [];
+        if (Array.isArray(dataConnectionsresponse)) {
+          backendDataSources = dataConnectionsresponse;
+        } else if (dataConnectionsresponse) {
+          // Dropping a non-array silently would make every backend connection vanish from
+          // the UI with no trace, so say so.
+          logger.warn(
+            `Unexpected ppl.getDataConnections response shape (${typeof dataConnectionsresponse}); ignoring backend connections`
+          );
+        }
+
+        // Filter out OAuth2 data sources from backend response to avoid duplicates
+        // (OAuth2 sources exist in both backend and saved objects)
+        const oauth2Names = new Set(oauth2DataSources.map((ds) => ds.name));
+        const backendOnly = backendDataSources.filter((ds) => !oauth2Names.has(ds.name));
+
+        // Always an array: getDirectQueryConnections rejects any other shape, so switching
+        // to an object on backend failure would surface as "Unexpected response format"
+        // and lose the OAuth2 connections this merge exists to show.
         return response.ok({
-          body: dataConnectionsresponse,
+          body: [...backendOnly, ...oauth2DataSources],
         });
       } catch (error: any) {
         logDataConnectionError(logger, 'Issue in fetching data sources', error);
@@ -308,14 +463,31 @@ export function registerDataConnectionsRoute(
       const dataSourceMDSId = request.params.dataSourceMDSId;
       try {
         let dataConnectionsresponse;
+
+        // OAuth2 connections live in this instance's saved objects and are not scoped to a
+        // cluster, so only the local cluster resolves them; a remote lookup falls through to
+        // that cluster's backend.
+        if (dataSourceEnabled && !dataSourceMDSId) {
+          const oauth2Connection = await findOAuth2PrometheusConnection(
+            context,
+            request.params.name,
+            logger
+          );
+          if (oauth2Connection) {
+            return response.ok({ body: oauth2Connection });
+          }
+        }
+
+        // If not found in saved objects or not OAuth2, try backend
+
         if (dataSourceEnabled && dataSourceMDSId) {
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           dataConnectionsresponse = await client.callAPI('ppl.getDataConnectionById', {
             dataconnection: request.params.name,
           });
         } else {
-          // @ts-expect-error TS2339 TODO(ts-error): fixme
           dataConnectionsresponse =
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             await context.opensearch_data_source_management.dataSourceManagementClient
               .asScoped(request)
               .callAsCurrentUser('ppl.getDataConnectionById', {
@@ -361,8 +533,8 @@ export function registerDataConnectionsRoute(
             dataconnection: request.params.name,
           });
         } else {
-          // @ts-expect-error TS2339 TODO(ts-error): fixme
           const dataConnectionsresponse =
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             await context.opensearch_data_source_management.dataSourceManagementClient
               .asScoped(request)
               .callAsCurrentUser('ppl.deleteDataConnection', {
@@ -398,13 +570,17 @@ export function registerDataConnectionsRoute(
           type: 'data-connection',
           search: request.params.name,
           searchFields: ['connectionId'],
+          perPage: 10000, // Set high limit to avoid silent truncation
         });
 
-        if (savedObjects.total > 0) {
-          await context.core.savedObjects.client.delete(
-            'data-connection',
-            savedObjects.saved_objects[0].id
-          );
+        // Filter for exact match to prevent fuzzy search issues
+        const exactMatch = savedObjects.saved_objects.find((obj) => {
+          const attributes = obj.attributes as any;
+          return attributes.connectionId === request.params.name;
+        });
+
+        if (exactMatch) {
+          await context.core.savedObjects.client.delete('data-connection', exactMatch.id);
         }
 
         return response.ok({
