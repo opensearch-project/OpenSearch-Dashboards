@@ -8,12 +8,21 @@ import { gunzipSync } from 'zlib';
 import { ecommerceSpecProvider, flightsSpecProvider, logsSpecProvider } from './index';
 import { otelSpecProvider } from './otel';
 import { getNestedField } from './util';
+import { TIMESTAMP_FIELD, withTimestampAlias } from '../lib/serverless_time_series';
 
-// Time series backends (for example OpenSearch Serverless time series collections) require
-// every document to contain the `@timestamp` field. Each sample index exposes it, usually as
-// an alias to the dataset's own time field, so the sample data installs on those backends too.
-const getMapping = (fields: any, path: string): any =>
-  path.split('.').reduce((m: any, key) => m?.properties?.[key] ?? m?.[key], { properties: fields });
+// Serverless time series collections require `@timestamp` in every document. On those
+// collections the install adds `@timestamp` as an alias to the first entry of `timeFields`, so
+// that entry must be a date field that every document contains.
+interface FieldMapping {
+  type?: string;
+  path?: string;
+  properties?: Record<string, FieldMapping>;
+}
+
+const getMapping = (fields: Record<string, FieldMapping>, path: string) =>
+  path.split('.').reduce<FieldMapping | undefined>((mapping, key) => mapping?.properties?.[key], {
+    properties: fields,
+  });
 
 const dataIndices = [
   ecommerceSpecProvider(),
@@ -22,15 +31,19 @@ const dataIndices = [
   otelSpecProvider(),
 ].flatMap((dataset) => dataset.dataIndices.map((dataIndex) => [dataIndex.id, dataIndex] as const));
 
-describe('sample data @timestamp field', () => {
-  it.each(dataIndices)('%s maps @timestamp to a date field present in every document', (_, d) => {
-    const mapping = (d.fields as any)['@timestamp'];
-    expect(mapping).toBeDefined();
+describe('sample data @timestamp on Serverless time series collections', () => {
+  it.each(dataIndices)('%s resolves @timestamp to a date in every document', (_, dataIndex) => {
+    const fields = withTimestampAlias(
+      dataIndex.fields as Record<string, FieldMapping>,
+      dataIndex.timeFields
+    ) as Record<string, FieldMapping>;
+    const timestamp = fields[TIMESTAMP_FIELD];
+    expect(timestamp).toBeDefined();
 
-    const timeField = mapping.type === 'alias' ? mapping.path : '@timestamp';
-    expect(['date', 'date_nanos']).toContain(getMapping(d.fields, timeField)?.type);
+    const timeField = timestamp.type === 'alias' ? (timestamp.path as string) : TIMESTAMP_FIELD;
+    expect(['date', 'date_nanos']).toContain(getMapping(fields, timeField)?.type);
 
-    const docs = gunzipSync(fs.readFileSync(d.dataPath))
+    const docs = gunzipSync(fs.readFileSync(dataIndex.dataPath))
       .toString('utf8')
       .split('\n')
       .filter((line) => line.trim().length > 0)

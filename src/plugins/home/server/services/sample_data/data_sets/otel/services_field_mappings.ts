@@ -4,10 +4,6 @@
  */
 
 export const servicesFieldMappings = {
-  '@timestamp': {
-    type: 'alias',
-    path: 'timestamp',
-  },
   destination: {
     properties: {
       domain: {

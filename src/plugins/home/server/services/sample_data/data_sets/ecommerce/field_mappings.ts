@@ -99,10 +99,6 @@ export const fieldMappings = {
   order_date: {
     type: 'date',
   },
-  '@timestamp': {
-    type: 'alias',
-    path: 'order_date',
-  },
   order_id: {
     type: 'keyword',
   },

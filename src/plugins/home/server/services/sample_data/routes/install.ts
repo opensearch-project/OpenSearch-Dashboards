@@ -42,48 +42,29 @@ import {
   translateTimeRelativeToWeek,
 } from '../lib/translate_timestamp';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { DataSourceEngineType } from '../../../../../data_source/common/data_sources';
+import {
+  BulkItem,
+  BulkResponse,
+  DataSourceAttributes,
+  isIndexNotFoundError,
+  isNotReadyRejection,
+  isServerlessDataSource,
+  isTimeSeriesIndex,
+  withTimestampAlias,
+} from '../lib/serverless_time_series';
 
-// OpenSearch Serverless time series collections can briefly reject writes to an index that was
-// just (re)created. On those collections the rejected documents are resent, for up to about 60
-// seconds.
-const INDEX_NOT_FOUND_MAX_RETRIES = 12;
-const INDEX_NOT_FOUND_RETRY_DELAY_MS = 5000;
-
-// Errors seen while a just (re)created time series index is not yet ready for writes. A generic
-// "Bad Request" without details is included: real document errors explain what is wrong.
-const isTransientIndexItemError = (item: any) => {
-  const error = item.index?.error;
-  return (
-    error?.type === 'index_not_found_exception' ||
-    item.index?.status >= 500 ||
-    (error?.type === 'illegal_argument_exception' && error?.reason === 'Bad Request')
-  );
-};
-
-const isIndexNotFoundError = (err: any) =>
-  err?.body?.error?.type === 'index_not_found_exception' ||
-  /index_not_found_exception/.test(err?.message ?? '');
+// On Serverless time series collections, documents rejected because a just (re)created index is
+// not ready yet are sent again until this deadline, which is shared by all batches of an index.
+const NOT_READY_RETRY_TIMEOUT_MS = 60000;
+const NOT_READY_RETRY_DELAY_MS = 5000;
 
 interface InsertDataOptions {
-  retryIndexNotFound?: boolean;
+  retryNotReady?: boolean;
+  retryTimeoutMs?: number;
   retryDelayMs?: number;
 }
 
-export const isServerlessTimeSeriesIndex = async (
-  caller: (endpoint: string, clientParams?: Record<string, any>) => Promise<any>,
-  index: string
-) => {
-  // Time series collections set index.timestamp_field on every index; other backends don't.
-  try {
-    const settings = await caller('indices.getSettings', { index });
-    return Object.values(settings ?? {}).some(
-      (indexSettings: any) => indexSettings?.settings?.index?.timestamp_field !== undefined
-    );
-  } catch (err) {
-    return false;
-  }
-};
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -96,10 +77,14 @@ export const insertDataIntoIndex = (
   ) => Promise<any>,
   logger: Logger,
   {
-    retryIndexNotFound = false,
-    retryDelayMs = INDEX_NOT_FOUND_RETRY_DELAY_MS,
+    retryNotReady = false,
+    retryTimeoutMs = NOT_READY_RETRY_TIMEOUT_MS,
+    retryDelayMs = NOT_READY_RETRY_DELAY_MS,
   }: InsertDataOptions = {}
 ) => {
+  const retryDeadline = Date.now() + retryTimeoutMs;
+  const canRetry = () => retryNotReady && Date.now() < retryDeadline;
+
   // Function to update timestamps
   function updateTimestamps(doc: any) {
     dataIndexConfig.timeFields
@@ -130,18 +115,15 @@ export const insertDataIntoIndex = (
       bulk.push(updateTimestamps(doc));
     });
 
-    let pending = bulk;
-    for (let attempt = 0; ; attempt++) {
-      const canRetry = retryIndexNotFound && attempt < INDEX_NOT_FOUND_MAX_RETRIES;
-      let resp;
+    let pending: unknown[] = bulk;
+    while (true) {
+      let resp: BulkResponse;
       try {
-        resp = await caller('bulk', {
-          body: pending,
-        });
+        resp = (await caller('bulk', { body: pending })) as BulkResponse;
       } catch (err) {
         // The whole request was rejected, so no document was written and it is safe to resend.
-        if (canRetry && isIndexNotFoundError(err)) {
-          await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        if (canRetry() && isIndexNotFoundError(err)) {
+          await sleep(retryDelayMs);
           continue;
         }
         throw err;
@@ -150,22 +132,19 @@ export const insertDataIntoIndex = (
         return;
       }
 
-      const failed: any[] = [];
-      let onlyRetryable = true;
-      resp.items.forEach((item: any, i: number) => {
-        const error = item.index?.error;
-        if (!error) {
+      const rejected: unknown[] = [];
+      let onlyNotReady = true;
+      (resp.items ?? []).forEach((item: BulkItem, i: number) => {
+        if (!item.index?.error) {
           return;
         }
-        if (!isTransientIndexItemError(item)) {
-          onlyRetryable = false;
-        }
-        failed.push(pending[i * 2], pending[i * 2 + 1]);
+        onlyNotReady = onlyNotReady && isNotReadyRejection(item);
+        rejected.push(pending[i * 2], pending[i * 2 + 1]);
       });
 
-      if (canRetry && onlyRetryable) {
-        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
-        pending = failed;
+      if (onlyNotReady && canRetry()) {
+        await sleep(retryDelayMs);
+        pending = rejected;
         continue;
       }
 
@@ -222,7 +201,7 @@ export function createInstallRoute(
         : context.core.opensearch.legacy.client.callAsCurrentUser;
 
       let dataSourceTitle;
-      let isServerlessDataSource = false;
+      let isServerless = false;
       try {
         if (dataSourceId) {
           const dataSource = await context.core.savedObjects.client
@@ -232,13 +211,12 @@ export function createInstallRoute(
               return {
                 id: response.id,
                 title: attributes.title,
-                engineType: attributes.dataSourceEngineType,
+                isServerless: isServerlessDataSource(attributes as DataSourceAttributes),
               };
             });
 
           dataSourceTitle = dataSource.title;
-          isServerlessDataSource =
-            dataSource.engineType === DataSourceEngineType.OpenSearchServerless;
+          isServerless = dataSource.isServerless;
         }
       } catch (err) {
         return res.internalError({ body: err });
@@ -265,7 +243,12 @@ export function createInstallRoute(
               settings: dataSourceId
                 ? { index: { number_of_shards: 1 } }
                 : { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
-              mappings: { properties: dataIndexConfig.fields },
+              // Serverless time series collections need `@timestamp` in every document
+              mappings: {
+                properties: isServerless
+                  ? withTimestampAlias(dataIndexConfig.fields, dataIndexConfig.timeFields)
+                  : dataIndexConfig.fields,
+              },
             },
           };
           await caller('indices.create', createIndexParams);
@@ -275,8 +258,7 @@ export function createInstallRoute(
           return res.customError({ body: errMsg, statusCode: err.status });
         }
 
-        const retryIndexNotFound =
-          isServerlessDataSource && (await isServerlessTimeSeriesIndex(caller, index));
+        const retryNotReady = isServerless && (await isTimeSeriesIndex(caller, index));
 
         try {
           const count = await insertDataIntoIndex(
@@ -285,7 +267,7 @@ export function createInstallRoute(
             nowReference,
             caller,
             logger,
-            { retryIndexNotFound }
+            { retryNotReady }
           );
           (counts as any)[index] = count;
         } catch (err) {
