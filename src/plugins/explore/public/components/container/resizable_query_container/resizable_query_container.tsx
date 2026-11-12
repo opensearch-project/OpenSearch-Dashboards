@@ -132,11 +132,11 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
   // measured widgets bar height plus one editor line.
   useLayoutEffect(() => {
     if (builderActive || !innerRef.current) return;
-    const widgetsEl = innerRef.current.querySelector<HTMLElement>(WIDGETS_ROW_SELECTOR);
-    if (!widgetsEl) return;
+    const inner = innerRef.current;
+    let widgetsEl: HTMLElement | null = null;
 
     const measureAndApply = () => {
-      if (userResizedRef.current) return;
+      if (userResizedRef.current || !widgetsEl) return;
       const widgetsPx = Math.max(widgetsEl.scrollHeight, widgetsEl.getBoundingClientRect().height);
       if (widgetsPx < 1) return;
       const naturalPx = Math.ceil(widgetsPx + QUERY_PANEL_EDITOR_LINE_PX);
@@ -145,10 +145,27 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
       applyPanelHeight(userBasePxRef.current + barPxRef.current);
     };
 
-    measureAndApply();
-    const observer = new ResizeObserver(measureAndApply);
-    observer.observe(widgetsEl);
-    return () => observer.disconnect();
+    const resizeObserver = new ResizeObserver(measureAndApply);
+    // The query panel can be re-mounted without this component re-rendering (e.g. it is keyed by
+    // dataset), which replaces the widgets bar. Follow the current bar, or a wrap of the new one
+    // (as when a source's toolbar is wider) would never grow the panel.
+    const observeWidgetsRow = () => {
+      const current = inner.querySelector<HTMLElement>(WIDGETS_ROW_SELECTOR);
+      if (current === widgetsEl) return;
+      if (widgetsEl) resizeObserver.unobserve(widgetsEl);
+      widgetsEl = current;
+      if (!widgetsEl) return;
+      resizeObserver.observe(widgetsEl);
+      measureAndApply();
+    };
+
+    observeWidgetsRow();
+    const mutationObserver = new MutationObserver(observeWidgetsRow);
+    mutationObserver.observe(inner, { childList: true });
+    return () => {
+      mutationObserver.disconnect();
+      resizeObserver.disconnect();
+    };
   }, [builderActive, applyPanelHeight]);
 
   // Open the panel at the builder's natural height as its default, then keep it
