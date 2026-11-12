@@ -256,4 +256,36 @@ describe('ppl_request_trace', () => {
       await expect(tracePPLService.fetchSpanDetails(defaultParams)).rejects.toThrow(error);
     });
   });
+
+  describe('span dedup', () => {
+    const datasetWithTitle = (title: string): Dataset => ({ ...createMockDataset(), title });
+    const lastQuery = () => mockBuildPPLQueryRequest.mock.calls.slice(-1)[0][1];
+
+    it.each([['otel-v*-apm-span-*'], ['otel-v1-apm-span*,otel-v2-apm-span*'], ['otel-*']])(
+      'adds dedup spanId when %s matches both span templates',
+      async (title) => {
+        await tracePPLService.fetchTraceSpans({ traceId: 't1', dataset: datasetWithTitle(title) });
+        expect(lastQuery()).toBe(
+          `source = ${title} | where traceId = "t1" | dedup spanId | head 100`
+        );
+
+        await tracePPLService.fetchSpanDetails({
+          traceId: 't1',
+          spanId: 's1',
+          dataset: datasetWithTitle(title),
+        });
+        expect(lastQuery()).toBe(
+          `source = ${title} | where traceId = "t1" | where spanId = "s1" | dedup spanId | head 100`
+        );
+      }
+    );
+
+    it.each([['otel-v1-apm-span*'], ['otel-v2-apm-span*'], ['my-spans-*'], ['test-index']])(
+      'leaves single-template dataset %s unchanged',
+      async (title) => {
+        await tracePPLService.fetchTraceSpans({ traceId: 't1', dataset: datasetWithTitle(title) });
+        expect(lastQuery()).toBe(`source = ${title} | where traceId = "t1" | head 100`);
+      }
+    );
+  });
 });
