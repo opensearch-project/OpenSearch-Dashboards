@@ -69,8 +69,9 @@ export interface IVariableInterpolationService {
  * - Braced: ${variableName}
  */
 export class VariableInterpolationService implements IVariableInterpolationService {
-  // Regex to match variable syntax: $variable or ${variable}
-  private static get VARIABLE_PATTERN() {
+  // Regex to match variable syntax: $variable or ${variable}.
+  // A getter so every caller gets a fresh `g` regex with lastIndex 0.
+  public static get VARIABLE_PATTERN() {
     return /\$\{(\w+)\}|\$(\w+)/g;
   }
 

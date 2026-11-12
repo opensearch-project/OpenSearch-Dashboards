@@ -1,0 +1,2 @@
+fix:
+- [Explore] Keep Stop available until every query of a run has finished ([#13067](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13067))

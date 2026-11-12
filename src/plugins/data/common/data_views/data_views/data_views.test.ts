@@ -192,6 +192,36 @@ describe('DataViews', () => {
     expect(dataViews.setDefault).toHaveBeenCalled();
   });
 
+  test('updateSavedObject shows a payload-too-large toast on HTTP 413 and rethrows', async () => {
+    const onNotification = jest.fn();
+    const service = new DataViewsService({
+      patterns: indexPatternsMock,
+      uiSettings: {
+        get: uiSettingsGet,
+        getAll: () => {},
+      } as any as DataViewUiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+      apiClient: createFieldsFetcher(),
+      fieldFormats,
+      onNotification,
+      onError: () => {},
+      onRedirectNoDataView: () => {},
+      onUnsupportedTimePattern: () => {},
+    });
+    setDocsourcePayload(null, { id: 'foo', version: 'foo', attributes: { title: 'big-*' } });
+    const dataView = await service.get('foo');
+    const payloadTooLarge = { res: { status: 413 } };
+    savedObjectsClient.update = jest.fn().mockRejectedValue(payloadTooLarge);
+
+    await expect(service.updateSavedObject(dataView)).rejects.toBe(payloadTooLarge);
+    expect(onNotification).toHaveBeenCalledTimes(1);
+    expect(onNotification.mock.calls[0][0].title).toContain(dataView.title);
+
+    onNotification.mockClear();
+    await expect(service.updateSavedObject(dataView, 0, true)).rejects.toBe(payloadTooLarge);
+    expect(onNotification).not.toHaveBeenCalled();
+  });
+
   test('savedObjectToSpec', () => {
     const savedObject = {
       id: 'id',

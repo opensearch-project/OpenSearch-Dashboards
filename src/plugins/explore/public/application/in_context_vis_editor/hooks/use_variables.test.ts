@@ -13,6 +13,8 @@ jest.mock('../../../../../dashboard/public', () => ({
   VariableService: jest.fn(),
   VariableInterpolationService: jest.fn(),
   createNoOpVariableInterpolationService: jest.fn(),
+  hasLoadingVariables: jest.requireActual('../../../../../dashboard/public/variables/types')
+    .hasLoadingVariables,
 }));
 
 // Mock opensearch_dashboards_react
@@ -30,11 +32,16 @@ jest.mock('../../utils/languages', () => ({
   prepareQueryForLanguage: jest.fn((state) => ({ query: state.query })),
 }));
 
+jest.mock('./use_visualization_builder', () => ({
+  useVisualizationBuilder: jest.fn(),
+}));
+
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { useVariables } from './use_variables';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryBuilderState } from './use_query_builder_state';
+import { useVisualizationBuilder } from './use_visualization_builder';
 import { VARIABLE_VALUES_URL_KEY } from '../types';
 import {
   Variable,
@@ -48,9 +55,12 @@ import {
 describe('useVariables', () => {
   let mockServices: any;
   let mockQueryBuilder: any;
+  let mockVisualizationBuilder: any;
   let mockVariableService: any;
   let mockInterpolationService: any;
   let mockTimeUpdate$: Subject<any>;
+  let mockTime: { from: string; to: string };
+  let mockStopScheduler: jest.Mock;
   let mockVariables$: BehaviorSubject<Variable[]>;
 
   const createMockVariable = (name: string, current: string[]): VariableWithState => ({
@@ -67,13 +77,14 @@ describe('useVariables', () => {
     jest.clearAllMocks();
 
     mockTimeUpdate$ = new Subject();
+    mockTime = { from: 'now-15m', to: 'now' };
+    mockStopScheduler = jest.fn();
     mockVariables$ = new BehaviorSubject<Variable[]>([]);
 
     mockVariableService = {
       initialize: jest.fn(),
       setInterpolationService: jest.fn(),
-      refreshAllVariableOptions: jest.fn(),
-      refreshTimeFilteredVariableOptions: jest.fn(),
+      startRefreshScheduler: jest.fn(() => mockStopScheduler),
       getVariables: jest.fn(() => []),
       getVariables$: jest.fn(() => mockVariables$),
       getVariablesWithState: jest.fn(() => []),
@@ -83,6 +94,11 @@ describe('useVariables', () => {
     mockInterpolationService = {
       interpolate: jest.fn((query) => `interpolated-${query}`),
       hasVariables: jest.fn(() => true),
+      getVariables: jest.fn(() => [{ name: 'region', value: 'us-east' }]),
+    };
+
+    mockVisualizationBuilder = {
+      setVariables: jest.fn(),
     };
 
     mockQueryBuilder = {
@@ -101,6 +117,7 @@ describe('useVariables', () => {
           timefilter: {
             timefilter: {
               getTimeUpdate$: jest.fn(() => mockTimeUpdate$),
+              getTime: jest.fn(() => mockTime),
             },
           },
         },
@@ -113,6 +130,9 @@ describe('useVariables', () => {
 
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: mockServices });
     (useQueryBuilderState as jest.Mock).mockReturnValue({ queryBuilder: mockQueryBuilder });
+    (useVisualizationBuilder as jest.Mock).mockReturnValue({
+      visualizationBuilderForEditor: mockVisualizationBuilder,
+    });
     (VariableService as unknown as jest.Mock).mockImplementation(() => mockVariableService);
     (VariableInterpolationService as unknown as jest.Mock).mockImplementation(
       () => mockInterpolationService
@@ -190,50 +210,63 @@ describe('useVariables', () => {
   });
 
   describe('variable refresh', () => {
-    it('refreshes all variable options on initial mount', () => {
-      const variables = [createMockVariable('region', ['us-west'])];
+    /** The inputs passed to the most recent startRefreshScheduler call. */
+    function schedulerInputs() {
+      const calls = mockVariableService.startRefreshScheduler.mock.calls;
+      return calls[calls.length - 1][0];
+    }
 
-      renderHook(() => useVariables(variables));
-
-      expect(mockVariableService.refreshAllVariableOptions).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not refresh multiple times on re-renders', () => {
+    it('starts the refresh scheduler once on mount', () => {
       const variables = [createMockVariable('region', ['us-west'])];
 
       const { rerender } = renderHook(() => useVariables(variables));
       rerender();
       rerender();
 
-      expect(mockVariableService.refreshAllVariableOptions).toHaveBeenCalledTimes(1);
+      expect(mockVariableService.startRefreshScheduler).toHaveBeenCalledTimes(1);
     });
 
-    it('refreshes variables when time range changes', () => {
+    it('passes the current time range first, then every time update', () => {
       const variables = [createMockVariable('region', ['us-west'])];
-
       renderHook(() => useVariables(variables));
+      const times: unknown[] = [];
+      const sub = schedulerInputs().time$.subscribe((t: unknown) => times.push(t));
 
-      mockVariableService.refreshTimeFilteredVariableOptions.mockClear();
+      mockTime = { from: 'now-30m', to: 'now' };
+      mockTimeUpdate$.next(undefined);
 
-      mockTimeUpdate$.next({ from: 'now-15m', to: 'now' });
-      expect(mockVariableService.refreshTimeFilteredVariableOptions).toHaveBeenCalledTimes(1);
-
-      mockTimeUpdate$.next({ from: 'now-30m', to: 'now' });
-      expect(mockVariableService.refreshTimeFilteredVariableOptions).toHaveBeenCalledTimes(2);
+      expect(times).toEqual([
+        { from: 'now-15m', to: 'now' },
+        { from: 'now-30m', to: 'now' },
+      ]);
+      sub.unsubscribe();
     });
 
-    it('unsubscribes from time updates on unmount', () => {
+    it('does not request reloads', () => {
       const variables = [createMockVariable('region', ['us-west'])];
-      const unsubscribeSpy = jest.spyOn(mockTimeUpdate$, 'subscribe');
+      renderHook(() => useVariables(variables));
+      const onReload = jest.fn();
+      const onComplete = jest.fn();
+
+      schedulerInputs().reload$.subscribe({ next: onReload, complete: onComplete });
+
+      expect(onReload).not.toHaveBeenCalled();
+      expect(onComplete).toHaveBeenCalled();
+    });
+
+    it('stops the refresh scheduler on unmount', () => {
+      const variables = [createMockVariable('region', ['us-west'])];
 
       const { unmount } = renderHook(() => useVariables(variables));
-
-      const subscription = unsubscribeSpy.mock.results[0]?.value;
-      const unsubMock = jest.spyOn(subscription, 'unsubscribe');
-
       unmount();
 
-      expect(unsubMock).toHaveBeenCalled();
+      expect(mockStopScheduler).toHaveBeenCalled();
+    });
+
+    it('does not start the scheduler without variables', () => {
+      renderHook(() => useVariables());
+
+      expect(mockVariableService.startRefreshScheduler).not.toHaveBeenCalled();
     });
   });
 
@@ -300,6 +333,37 @@ describe('useVariables', () => {
       mockVariables$.next([createMockVariable('region', ['us-east'])]);
 
       expect(mockQueryBuilder.executeQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('table data link variables', () => {
+    it('gives the visualization builder the variable values when they change', () => {
+      renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
+      mockVisualizationBuilder.setVariables.mockClear();
+
+      mockInterpolationService.getVariables.mockReturnValue([{ name: 'region', value: 'eu' }]);
+      mockVariables$.next([createMockVariable('region', ['eu'])]);
+
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledTimes(1);
+      expect(mockVisualizationBuilder.setVariables).toHaveBeenCalledWith([
+        { name: 'region', value: 'eu' },
+      ]);
+    });
+
+    it('does not update the builder while variables are loading', () => {
+      renderHook(() => useVariables([createMockVariable('region', ['us-west'])]));
+      mockVisualizationBuilder.setVariables.mockClear();
+
+      const loadingVariable = { ...createMockVariable('region', ['us-east']), loading: true };
+      mockVariables$.next([loadingVariable as any]);
+
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
+    });
+
+    it('does not touch the builder without container variables', () => {
+      renderHook(() => useVariables(undefined));
+
+      expect(mockVisualizationBuilder.setVariables).not.toHaveBeenCalled();
     });
   });
 

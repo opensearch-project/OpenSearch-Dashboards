@@ -48,6 +48,19 @@ export const getTableColumns = (
       }),
       dataType: 'string',
       sortable: true,
+      // One line per row, so a long description doesn't make the row taller;
+      // the native title shows the full text without adding a tab stop per row.
+      truncateText: true,
+      render: (description?: string) =>
+        description ? (
+          <span
+            className="eui-textTruncate"
+            title={description}
+            data-test-subj="dashboardListingDescription"
+          >
+            {description}
+          </span>
+        ) : null,
     },
     {
       field: `updated_at`,

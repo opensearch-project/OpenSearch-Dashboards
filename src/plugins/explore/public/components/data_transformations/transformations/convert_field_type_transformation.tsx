@@ -10,7 +10,6 @@ import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import {
   createAppliedResult,
   createInvalidConfigResult,
@@ -181,7 +180,7 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<C
     definition_id: 'convert_field_type',
     config: { rules: [] },
     hide: false,
-    transformationMethod: (data: OpenSearchSearchHit[], config: ConvertFieldTypeConfig) => {
+    transformationMethod: (data, config: ConvertFieldTypeConfig) => {
       if (!isConfigComplete(config)) {
         return createInvalidConfigResult(data, 'Convert Field Type configuration is incomplete.');
       }
@@ -192,17 +191,17 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<C
       let appliedAnyRule = false;
 
       const transformed = data.map((row) => {
-        const source = { ...(row._source as Record<string, unknown>) };
+        const transformedRow = { ...row };
         for (const rule of rules) {
-          if (!Object.prototype.hasOwnProperty.call(source, rule.field!)) {
+          if (!Object.prototype.hasOwnProperty.call(transformedRow, rule.field!)) {
             missingFields.add(rule.field!);
             continue;
           }
-          source[rule.field!] = convertValue(source[rule.field!], rule.targetType!);
+          transformedRow[rule.field!] = convertValue(transformedRow[rule.field!], rule.targetType!);
           typeOverrides[rule.field!] = rule.targetType!;
           appliedAnyRule = true;
         }
-        return { ...row, _source: source };
+        return transformedRow;
       });
 
       if (data.length === 0) {

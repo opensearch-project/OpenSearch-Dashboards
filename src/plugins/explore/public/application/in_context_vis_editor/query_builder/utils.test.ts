@@ -465,4 +465,52 @@ describe('queryExecution', () => {
       })
     );
   });
+
+  const runFailingQuery = async (queryError: Error) => {
+    const services = buildServices();
+    const mockSearchSource = {
+      fetch: jest.fn().mockRejectedValue(queryError),
+      getSearchRequestBody: jest.fn().mockResolvedValue({}),
+      getDataFrame: jest.fn().mockReturnValue(null),
+    };
+    (createSearchSourceWithQuery as jest.Mock).mockResolvedValue(mockSearchSource);
+    services.data.query.queryString.getLanguageService = jest
+      .fn()
+      .mockReturnValue({ getLanguage: jest.fn().mockReturnValue({}) });
+    await queryExecution({
+      services,
+      queryString: 'source=logs',
+      updateEditorStateFn,
+      updateResultFn,
+      activeQueryAbortControllers,
+    }).catch(() => {});
+    const errorCall = [...updateEditorStateFn.mock.calls]
+      .reverse()
+      .find(([state]: [any]) => state.queryStatus?.status === QueryExecutionStatus.ERROR);
+    return errorCall[0].queryStatus.error.message;
+  };
+
+  it('shows the message of an error without a body once, as the reason', async () => {
+    const message = await runFailingQuery(new Error('The data source rejected the query'));
+    expect(message.reason).toBe('The data source rejected the query');
+    expect(message.details).toBe('');
+  });
+
+  it('keeps the details of an error whose body has them', async () => {
+    const queryError = Object.assign(new Error('Bad Request'), {
+      body: { message: 'Query failed', error: 'Syntax error at line 1' },
+    });
+    const message = await runFailingQuery(queryError);
+    expect(message.reason).toBe('Query failed');
+    expect(message.details).toBe('Syntax error at line 1');
+  });
+
+  it('shows a message that differs from the reason as the details', async () => {
+    const queryError = Object.assign(new Error('Bad Request'), {
+      body: { message: 'Query failed' },
+    });
+    const message = await runFailingQuery(queryError);
+    expect(message.reason).toBe('Query failed');
+    expect(message.details).toBe('Bad Request');
+  });
 });

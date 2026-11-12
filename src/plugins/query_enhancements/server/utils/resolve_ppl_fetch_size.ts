@@ -17,13 +17,19 @@ export const AGGREGATION_SAMPLE_SIZE_SETTING = 'discover:aggregationSampleSize';
  * size: a document-sized cap would silently drop whole buckets, and with a `span()` key the bucket
  * count grows with the time range. Document searches keep `discover:sampleSize`, mirroring DQL where
  * that setting bounds only the doc table.
+ *
+ * A size requested by the caller (CSV export) replaces the settings, but a trailing `head` still wins.
  */
 export const resolvePPLFetchSize = async (
   uiSettings: Pick<IUiSettingsClient, 'get'>,
-  query: string
+  query: string,
+  requestedSize?: number
 ): Promise<number | undefined> => {
   if (queryEndsWithHead(query)) {
     return undefined;
+  }
+  if (Number.isInteger(requestedSize) && (requestedSize as number) > 0) {
+    return requestedSize;
   }
   const setting = isPPLAggregationQuery(query)
     ? AGGREGATION_SAMPLE_SIZE_SETTING

@@ -33,25 +33,27 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCompressedFormRow, EuiCompressedTextArea, EuiCompressedSwitch } from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
+import {
+  CopyPanelsOptionState,
+  PanelTitleTemplateField,
+  getCopyPanels,
+  initialCopyPanelsOptionState,
+  isCopyPanelsOptionValid,
+} from './copy_panels_option';
 
 interface SaveOptions {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
+  newCopyPanels?: { titleTemplate: string };
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
+  signal: AbortSignal;
 }
 
 interface Props {
-  onSave: ({
-    newTitle,
-    newDescription,
-    newCopyOnSave,
-    newTimeRestore,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
-  }: SaveOptions) => void;
+  onSave: (options: SaveOptions) => void | Promise<unknown>;
   onClose: () => void;
   title: string;
   description: string;
@@ -59,20 +61,19 @@ interface Props {
   showCopyOnSave: boolean;
 }
 
-interface State {
+interface State extends CopyPanelsOptionState {
   description: string;
   timeRestore: boolean;
 }
 
 export class DashboardSaveModal extends React.Component<Props, State> {
+  private abortController = new AbortController();
+
   state: State = {
     description: this.props.description,
     timeRestore: this.props.timeRestore,
+    ...initialCopyPanelsOptionState,
   };
-
-  constructor(props: Props) {
-    super(props);
-  }
 
   saveDashboard = ({
     newTitle,
@@ -85,14 +86,22 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
-    this.props.onSave({
+    return this.props.onSave({
       newTitle,
       newDescription: this.state.description,
       newCopyOnSave,
       newTimeRestore: this.state.timeRestore,
+      newCopyPanels: newCopyOnSave ? getCopyPanels(this.state) : undefined,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
+      signal: this.abortController.signal,
     });
+  };
+
+  // Cancel, X, Esc and backdrop: stop an in-flight save as new, then close.
+  onClose = () => {
+    this.abortController.abort();
+    this.props.onClose();
   };
 
   onDescriptionChange = (event: any) => {
@@ -107,7 +116,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     });
   };
 
-  renderDashboardSaveOptions() {
+  renderDashboardSaveOptions(copyOnSave: boolean) {
     return (
       <Fragment>
         <EuiCompressedFormRow
@@ -145,6 +154,37 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             }
           />
         </EuiCompressedFormRow>
+
+        {copyOnSave && (
+          <EuiCompressedFormRow
+            helpText={
+              <FormattedMessage
+                id="dashboard.topNav.saveModal.copyPanelsFormRowHelpText"
+                defaultMessage="Copy panels so edits in the new dashboard do not affect the original."
+              />
+            }
+          >
+            <EuiCompressedSwitch
+              data-test-subj="copyPanelsOnSave"
+              checked={this.state.copyPanels}
+              onChange={(e) => this.setState({ copyPanels: e.target.checked })}
+              label={
+                <FormattedMessage
+                  id="dashboard.topNav.saveModal.copyPanelsFormRowLabel"
+                  defaultMessage="Copy panels"
+                />
+              }
+            />
+          </EuiCompressedFormRow>
+        )}
+
+        {copyOnSave && this.state.copyPanels && (
+          <PanelTitleTemplateField
+            data-test-subj="copyPanelsTitleTemplate"
+            value={this.state.panelTitleTemplate}
+            onChange={(panelTitleTemplate) => this.setState({ panelTitleTemplate })}
+          />
+        )}
       </Fragment>
     );
   }
@@ -153,11 +193,12 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     return (
       <SavedObjectSaveModal
         onSave={this.saveDashboard}
-        onClose={this.props.onClose}
+        onClose={this.onClose}
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
         objectType="dashboard"
-        options={this.renderDashboardSaveOptions()}
+        options={({ copyOnSave }) => this.renderDashboardSaveOptions(copyOnSave)}
+        isValid={({ copyOnSave }) => !copyOnSave || isCopyPanelsOptionValid(this.state)}
         showDescription={false}
       />
     );

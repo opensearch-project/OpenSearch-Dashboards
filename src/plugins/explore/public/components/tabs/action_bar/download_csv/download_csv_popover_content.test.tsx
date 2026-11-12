@@ -81,6 +81,12 @@ describe('DiscoverDownloadCsvPopoverContent', () => {
       expect(screen.queryByTestId('dscDownloadCsvOptionMax')).not.toBeInTheDocument();
     });
 
+    it('hides the max option and callout when showMax is false', () => {
+      render(<TestHarness hitsCount={501} rowsCount={500} shouldShowMaxExport={false} />);
+      expect(screen.queryByTestId('dscDownloadCsvOptionMax')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscDownloadCsvCallout')).not.toBeInTheDocument();
+    });
+
     it('renders max as hitsCount if hitsCount < MAX_DOWNLOAD_CSV_COUNT', () => {
       const hitsCount = MAX_DOWNLOAD_CSV_COUNT - 10;
       render(<TestHarness hitsCount={hitsCount} rowsCount={500} />);

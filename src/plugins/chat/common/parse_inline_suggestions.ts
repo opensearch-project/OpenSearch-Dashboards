@@ -38,15 +38,16 @@ export function parseInlineSuggestions(content: string): {
 }
 
 /**
- * Strip the SUGGESTIONS: line from content for display purposes.
- * Also strips incomplete SUGGESTIONS: suffixes during streaming
- * (where the JSON array hasn't fully arrived yet).
+ * Strip the SUGGESTIONS: line from content for display. Also strips an
+ * incomplete SUGGESTIONS:[ suffix during streaming (where the JSON array hasn't
+ * fully arrived yet).
  */
 export function stripInlineSuggestions(content: string): string {
   const { cleanContent, suggestions } = parseInlineSuggestions(content);
   if (suggestions.length > 0) {
     return cleanContent;
   }
+
   // Strip incomplete SUGGESTIONS:[ suffix during streaming
   const incompletePattern = /\n?SUGGESTIONS:\s*\[[\s\S]*$/;
   if (incompletePattern.test(content)) {

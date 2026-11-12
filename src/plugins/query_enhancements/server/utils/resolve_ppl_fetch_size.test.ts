@@ -65,4 +65,34 @@ describe('resolvePPLFetchSize', () => {
   it('uses discover:sampleSize for an empty query', async () => {
     await expect(resolvePPLFetchSize(uiSettings(), '')).resolves.toBe(500);
   });
+
+  describe('requested size', () => {
+    it('uses the requested size for a document search without reading settings', async () => {
+      const settings = uiSettings();
+      await expect(resolvePPLFetchSize(settings, 'source=logs', 1000)).resolves.toBe(1000);
+      expect(settings.get).not.toHaveBeenCalled();
+    });
+
+    it('uses the requested size for an aggregating query', async () => {
+      await expect(
+        resolvePPLFetchSize(uiSettings(), 'source=logs | stats count() by service', 1000)
+      ).resolves.toBe(1000);
+    });
+
+    it.each(['source=logs | head 20', 'source=logs | head'])(
+      'lets a trailing head win over the requested size: %s',
+      async (query) => {
+        await expect(resolvePPLFetchSize(uiSettings(), query, 1000)).resolves.toBeUndefined();
+      }
+    );
+
+    it.each([0, -1, 1.5, NaN, undefined])(
+      'falls back to the settings when the requested size is %s',
+      async (requested) => {
+        await expect(resolvePPLFetchSize(uiSettings(), 'source=logs', requested)).resolves.toBe(
+          500
+        );
+      }
+    );
+  });
 });

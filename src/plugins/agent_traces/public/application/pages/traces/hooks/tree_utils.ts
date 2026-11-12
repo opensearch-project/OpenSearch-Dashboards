@@ -15,7 +15,9 @@ export const formatTimestamp = (timestamp: string, timezone: string): string => 
   if (!timestamp) return '—';
   const m = moment.utc(timestamp);
   if (!m.isValid()) return '—';
-  return m.tz(timezone).format('MM/DD/YYYY, h:mm:ss.SSS A');
+  // The OpenSearch Dashboards default `dateFormat`, so Agent Traces timestamps read
+  // the same as the Explore Logs / Traces tables ("Nov 9, 2026 @ 14:31:20.123").
+  return m.tz(timezone).format('MMM D, YYYY @ HH:mm:ss.SSS');
 };
 
 export interface BaseRow {

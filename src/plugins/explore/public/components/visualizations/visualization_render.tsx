@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, EMPTY } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
 
@@ -22,11 +22,13 @@ import { SplitContainer } from './split_container';
 import { CustomLegend } from './custom_legend';
 import type { VisualizationRenderContext } from './utils/use_visualization_types';
 import { LegendItem, LegendTarget } from './utils/legend';
+import type { VariableValue } from '../../../../dashboard/public';
 
 interface Props {
   data$: Observable<VisData | undefined>;
   config$: Observable<RenderChartConfig | undefined>;
   showRawTable$: Observable<boolean>;
+  variables$?: Observable<VariableValue[]>;
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
@@ -39,6 +41,8 @@ interface CommonProps {
   visualizationData: VisData | undefined;
   visConfig: RenderChartConfig | undefined;
   showRawTable: boolean;
+  /** Dashboard variables for table data links. */
+  variables?: VariableValue[];
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
@@ -62,6 +66,7 @@ export const CommonVisualizationRender = ({
   visualizationData,
   visConfig,
   showRawTable,
+  variables,
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
@@ -145,6 +150,7 @@ export const CommonVisualizationRender = ({
         columns={columns}
         onStyleChange={onStyleChange}
         disableActions={false}
+        variables={variables}
       />
     );
   }
@@ -275,6 +281,7 @@ export const VisualizationRender = ({
   data$,
   config$,
   showRawTable$,
+  variables$,
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
@@ -283,11 +290,14 @@ export const VisualizationRender = ({
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
   const showRawTable = useObservable(showRawTable$);
+  // Outside a dashboard there are no variables to resolve.
+  const variables = useObservable(variables$ ?? EMPTY, []);
   return (
     <CommonVisualizationRender
       visConfig={visConfig}
       visualizationData={visualizationData}
       showRawTable={!!showRawTable}
+      variables={variables}
       timeRange={inputTimeRange}
       onSelectTimeRange={onSelectTimeRange}
       onStyleChange={onStyleChange}

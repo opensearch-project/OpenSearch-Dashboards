@@ -232,4 +232,45 @@ describe('ResultsSummary', () => {
       expect(mockServices.http.post).not.toHaveBeenCalled();
     });
   });
+
+  describe('while the results are still streaming', () => {
+    const streamedKey = 'source=opensearch_dashboards_sample_data_logs test query';
+
+    // queryEditor follows a test-only action, so the run can be finished mid-test.
+    const renderStreaming = () => {
+      const base = createMockStore().getState() as any;
+      const status = (isPolling: boolean) => ({
+        ...base.queryEditor,
+        queryStatusMap: { [streamedKey]: { streaming: { isPolling } } },
+      });
+      const store = configureStore({
+        reducer: {
+          query: (state = base.query) => state,
+          results: (state = base.results) => state,
+          queryEditor: (state = status(true), action: { type: string }) =>
+            action.type === 'test/finished' ? status(false) : state,
+        },
+      });
+      render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={mockServices}>
+            <TestResultsSummary />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+      return store;
+    };
+
+    it('waits for the query to finish before summarising', async () => {
+      resultsCache.set(streamedKey, { hits: { hits: defaultHits } } as any);
+      mockServices.http.post.mockResolvedValue('Summary');
+      const store = renderStreaming();
+
+      expect(screen.getByText('Generating summary')).toBeInTheDocument();
+      expect(mockServices.http.post).not.toHaveBeenCalled();
+
+      store.dispatch({ type: 'test/finished' });
+      await waitFor(() => expect(mockServices.http.post).toHaveBeenCalledTimes(1));
+    });
+  });
 });

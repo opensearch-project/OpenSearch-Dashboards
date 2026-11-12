@@ -37,4 +37,11 @@ describe('ModeButtonGroup', () => {
     expect(screen.getByTestId('pplBuilderModeToggle-builder')).toBeDisabled();
     expect(screen.getByTestId('pplBuilderModeToggle-code')).not.toBeDisabled();
   });
+
+  it('fills the selected mode with the primary color, not the dark-gray default', () => {
+    render(<ModeButtonGroup mode="code" onChange={jest.fn()} />);
+    const selected = screen.getByTestId('pplBuilderModeToggle-code');
+    expect(selected.className).toMatch(/primary/);
+    expect(selected.className).not.toMatch(/--text/);
+  });
 });

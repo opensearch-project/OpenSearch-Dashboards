@@ -27,6 +27,7 @@ import { MetricsPage } from './metrics_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
+import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_metrics_dataset';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -55,12 +56,6 @@ jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
 
 jest.mock('./metrics_page_tabs', () => ({
   MetricsPageTabs: () => <div data-test-subj="metrics-page-tabs">Metrics Page Tabs</div>,
-}));
-
-jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
-  NewExperienceBanner: () => (
-    <div data-test-subj="new-experience-banner">New Experience Banner</div>
-  ),
 }));
 
 jest.mock('../../../components/top_nav/top_nav', () => ({
@@ -161,10 +156,14 @@ describe('MetricsPage', () => {
     });
   };
 
-  // @ts-expect-error TS2339 TODO(ts-error): fixme
-  const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
+  const TestHarness: FC<{ store: ReturnType<typeof createTestStore>; hash?: string }> = ({
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    children,
+    store,
+    hash,
+  }) => {
     return (
-      <MemoryRouter>
+      <MemoryRouter initialEntries={hash ? [{ pathname: '/', hash }] : undefined}>
         <Provider store={store}>{children}</Provider>
       </MemoryRouter>
     );
@@ -186,6 +185,42 @@ describe('MetricsPage', () => {
     jest.clearAllMocks();
   });
 
+  it('tells the dataset initializer which saved explore the URL opens, before it has loaded', () => {
+    (useInitPage as jest.Mock).mockReturnValueOnce({ savedExplore: undefined });
+    const store = createTestStore();
+    render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
+      <TestHarness store={store} hash="#/view/saved-sql-search">
+        <MetricsPage />
+      </TestHarness>
+    );
+
+    expect(useInitializeMetricsDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ savedExplore: undefined, savedExploreId: 'saved-sql-search' })
+    );
+  });
+
+  it('passes the saved explore load error to the dataset initializer', () => {
+    (useInitPage as jest.Mock).mockReturnValueOnce({
+      savedExplore: undefined,
+      savedExploreError: 'Failed to load saved explore: Not found',
+    });
+    const store = createTestStore();
+    render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
+      <TestHarness store={store} hash="#/view/missing-search">
+        <MetricsPage />
+      </TestHarness>
+    );
+
+    expect(useInitializeMetricsDataset).toHaveBeenCalledWith(
+      expect.objectContaining({
+        savedExploreId: 'missing-search',
+        savedExploreError: 'Failed to load saved explore: Not found',
+      })
+    );
+  });
+
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
@@ -196,7 +231,7 @@ describe('MetricsPage', () => {
     );
 
     expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
-    expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
+    expect(screen.queryByTestId('exploreNewExperienceBanner')).not.toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 

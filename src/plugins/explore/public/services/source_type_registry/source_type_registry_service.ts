@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { Dataset } from '../../../../data/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import {
@@ -15,8 +15,10 @@ import {
 import { getServices } from '../services';
 import { openSearchSourceType, OPENSEARCH_SOURCE_TYPE_ID } from './opensearch_source_type';
 import { BUILT_IN_LANGUAGE_GUIDES } from './built_in_language_guides';
+import type { SourceTypeVisualBuilder } from './visual_builder';
 
 export { OPENSEARCH_SOURCE_TYPE_ID };
+export { HISTOGRAM_RESULT_COLUMNS, SourceTypeHistogramColumns } from './histogram_columns';
 
 /** Languages Explore supports itself; their default behavior applies unless a source lists them. */
 const BUILT_IN_LANGUAGES = ['PPL', 'SQL', 'PROMQL'];
@@ -88,16 +90,41 @@ export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
    * page shows: the Logs tab on Logs and Traces, the Table and Visualization tabs on Metrics.
    */
   tabs?: string[];
-  /** Run Explore's histogram query. Off by default: that query is built in PPL. */
+  /**
+   * Run Explore's built-in histogram query. Off by default. It is built in PPL or SQL, so it only
+   * applies to those languages; any other language provides `buildHistogramQuery` instead.
+   */
   supportsHistogram?: boolean;
+  /**
+   * Builds the histogram query for a query as typed, or returns undefined to show no histogram for
+   * it (for example when the query already aggregates). The query returns the columns named by
+   * {@link SourceTypeHistogramColumns}. Setting it enables the histogram for this language on this
+   * source's datasets and replaces Explore's built-in one, also for a built-in language id.
+   */
+  buildHistogramQuery?: (query: string, config: SourceTypeHistogramConfig) => string | undefined;
   /** Offer the Logs page's visual query builder. Off by default: the builder emits PPL. */
   supportsVisualBuilder?: boolean;
+  /**
+   * Translates the Logs page's visual query builder to and from this language. Setting it enables
+   * the builder for this language on this source's datasets, in place of the PPL translation.
+   */
+  visualBuilder?: SourceTypeVisualBuilder;
   /**
    * Replaces the Metrics page's query rows while this language is active on one of this source's
    * datasets, for example a builder of the source's own. Without it, PromQL keeps the PromQL rows
    * and any other language gets a single code editor.
    */
   metricsQueryEditor?: ComponentType<SourceTypeQueryEditorProps>;
+}
+
+/** What a source's `buildHistogramQuery` receives. */
+export interface SourceTypeHistogramConfig {
+  /** The bucket interval Explore resolved for the time range, e.g. `30s`, `5m`, `1d`, `1M`. */
+  interval: string;
+  /** The dataset's time field. */
+  timeFieldName: string;
+  /** The field the user broke the histogram down by, if any. */
+  breakdownField?: string;
 }
 
 /** Where the last run of the query stands, for a source's own query editor. */
@@ -130,6 +157,28 @@ export interface SourceTypeQueryEditorProps {
   onQueryOptionsChange: (options: Record<string, unknown>) => void;
   /** The last run's status. */
   status: SourceTypeQueryStatus;
+}
+
+/**
+ * Where Explore asks a source for an empty state of its own:
+ * - `logsResults`: the results area of the Logs and Traces pages (`flavor` says which), in place
+ *   of everything Explore shows there (the "Start searching" prompt, no results, the results).
+ * - `metricsExplore`: the Metrics page's Explore tab (the metric browser, or a metric's detail).
+ * More may be added: render `children` for any location the source doesn't handle.
+ */
+export type SourceTypeEmptyStateLocation = 'logsResults' | 'metricsExplore';
+
+/** Props Explore passes to a source type's empty state. */
+export interface SourceTypeEmptyStateProps {
+  location: SourceTypeEmptyStateLocation;
+  /** The active dataset (one of this source's). */
+  dataset: Dataset;
+  data: DataPublicPluginStart;
+  flavor?: ExploreFlavor | null;
+  /** Does what the page's Refresh does: reruns the query, or reloads the Explore tab. */
+  onRefresh: () => void;
+  /** What Explore shows here otherwise. Render it to keep Explore's own content. */
+  children: ReactNode;
 }
 
 /**
@@ -177,6 +226,13 @@ export interface SourceTypeDefinition {
    */
   languageSettings?: Record<string, SourceTypeLanguageSettings>;
   /**
+   * Shows the source's own empty state while one of its datasets is active, for example when the
+   * dataset has nothing to query and the source can say why. Explore renders it at each
+   * {@link SourceTypeEmptyStateLocation} with its own content as `children`; render `children`
+   * wherever the source has nothing to add. If it throws, Explore shows its own content there.
+   */
+  emptyState?: ComponentType<SourceTypeEmptyStateProps>;
+  /**
    * Metrics page: the id of the data plugin resource client (`resourceClientFactory`) that the
    * Explore tab's metric browser and the PromQL builder use for this source's datasets. The client
    * implements {@link SourceTypeMetricsResourceClient} (metric metadata, labels, label values,
@@ -190,6 +246,157 @@ export interface SourceTypeDefinition {
    * PromQL autocomplete in the code editors lists metrics and labels through this client too.
    */
   metricsResourceClientId?: string;
+  /**
+   * Metrics page: the advice Explore gives when this source has no metrics to show for the time
+   * range (the Explore tab's metric list, or a PromQL query that returns nothing), after a
+   * sentence that names the source. For example, which of the source's metrics PromQL reaches.
+   * Defaults to "Try adjusting the time range." Pass a translated string: it is placed into a
+   * translated sentence.
+   */
+  metricsEmptyHint?: string;
+  /**
+   * Offers this source on the Explore logs page (the logs drilldown), next to OpenSearch's indexes.
+   * Omit it to keep the source off that page. Applies to sources offered on the Logs flavor.
+   */
+  logsDrilldown?: SourceTypeLogsDrilldown;
+}
+
+/**
+ * Where the Explore logs page lists a source's items, such as a zone or an account. JSON-safe: the page keeps it
+ * in its URL (`_a`) and the tab's session, so it survives a reload and can be shared. That also
+ * makes it user input: validate it before use, as any value from a URL.
+ */
+export type SourceTypeLogsDrilldownScope = Record<string, unknown>;
+
+/** Props the Explore logs page passes to a source's scope picker. */
+export interface SourceTypeLogsDrilldownScopeSelectorProps {
+  /** The scope in use; undefined until the picker reports one. */
+  scope?: SourceTypeLogsDrilldownScope;
+  /**
+   * Call with the scope to list. When `scope` is undefined on mount, call it once with a default
+   * (as the data source picker auto-selects one), or the page waits for the user to pick one. Keep
+   * a valid `scope` the page passed in as is: it may come from a shared link. A scope that's no
+   * longer valid (e.g. it names something that was removed) may be replaced with a valid one.
+   */
+  onChange: (scope: SourceTypeLogsDrilldownScope) => void;
+  data: DataPublicPluginStart;
+}
+
+/**
+ * Props the Explore logs page passes to a source's empty state: shown when a scope lists nothing,
+ * or its listing failed with nothing listed yet.
+ */
+export interface SourceTypeLogsDrilldownEmptyStateProps {
+  scope: SourceTypeLogsDrilldownScope;
+  /** The search the listing ran with; empty for none. */
+  search: string;
+  /** What `listItems` rejected with, as is (status, body…); undefined when it listed nothing. */
+  error?: unknown;
+  /** Lists the scope again, like the page's Retry. */
+  onRefresh: () => void;
+  /** What the page shows here otherwise. Render it for any case the source doesn't handle. */
+  children: ReactNode;
+}
+
+/** One item the Explore logs page shows as a card, such as a stream. */
+export interface SourceTypeLogsDrilldownItem {
+  /** Unique within the scope; the page keys cards and selection on it. */
+  id: string;
+  name: string;
+  /**
+   * Free metadata shown on the card before anything runs, e.g. size or retention. Pass translated
+   * strings.
+   */
+  details?: Array<{ label: string; value: string }>;
+  /** The time field of the item's events, shown on the card and used to read preview rows. */
+  timeFieldName?: string;
+  /** The field the item's events keep their level in, if any (colours preview lines). */
+  severityField?: string;
+}
+
+/** One page of a source's items. */
+export interface SourceTypeLogsDrilldownItemPage {
+  items: SourceTypeLogsDrilldownItem[];
+  /** Pass back to list the next page; undefined on the last page. */
+  nextToken?: string;
+}
+
+/** What the page passes to a source's preview and histogram query builders. */
+export interface SourceTypeLogsDrilldownQueryArgs {
+  scope: SourceTypeLogsDrilldownScope;
+  item: SourceTypeLogsDrilldownItem;
+  /** The item's own dataset (`toDataset` with this item alone), which the query runs on. */
+  dataset: Dataset;
+}
+
+/**
+ * How the Explore logs page lists and previews a source's items. Listing must not run billed
+ * queries: the page lists on every scope and search change, on "Load more", and on its Refresh
+ * button (not on a time range change). Previews and histograms may: when the source's dataset
+ * type sets `meta.requiresExplicitRun` (or isn't registered), the page runs them only when the user
+ * presses a card's Run button, and a later time range change or Refresh marks the card stale
+ * instead of running it again. Otherwise cards run as they scroll into view, like OpenSearch's.
+ */
+export interface SourceTypeLogsDrilldown {
+  /** The page-level picker that sets the scope (replaces the data source picker). */
+  ScopeSelector: ComponentType<SourceTypeLogsDrilldownScopeSelectorProps>;
+  /**
+   * Placeholder (and accessible name) for the page's search box, e.g. "Search streams…". Pass a
+   * translated string.
+   */
+  searchPlaceholder?: string;
+  /**
+   * One page of items for a scope, filtered by the search text (the page doesn't filter them
+   * again). Reject on failure: the page shows the error and a Retry.
+   */
+  listItems(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    search: string;
+    nextToken?: string;
+    /** At most this many items per page; the page keeps only this many of a longer page. */
+    pageSize: number;
+    signal: AbortSignal;
+  }): Promise<SourceTypeLogsDrilldownItemPage>;
+  /**
+   * A card's preview query, in the dataset's language: at most `size` events in the page's time
+   * range, newest first. A source may ask for a sample rather than the newest events where reading
+   * the newest would cost more (e.g. a scan of the whole range). The page runs it through the data
+   * plugin's search service on `dataset` (the language's search interceptor, as on the Logs page),
+   * keeps at most `size` rows, and shows them in the order returned.
+   */
+  buildPreviewQuery(args: SourceTypeLogsDrilldownQueryArgs & { size: number }): string;
+  /**
+   * A card's histogram query, in the dataset's language: event counts per `interval` bucket over
+   * the page's time range, returning the columns named by {@link SourceTypeHistogramColumns}. The
+   * page picks `interval` (in the form Explore's histogram uses, e.g. `30s`, `5m`, `1d`) for about
+   * 20 bars, and runs it like the preview. Return undefined (or omit this) for no histogram.
+   */
+  buildHistogramQuery?(
+    args: SourceTypeLogsDrilldownQueryArgs & { interval: string; timeFieldName: string }
+  ): string | undefined;
+  /**
+   * The most items one dataset can hold (e.g. how many items one query can read). The page stops
+   * further ticks at this many. Omit for no limit.
+   */
+  maxSelection?: number;
+  /**
+   * The dataset the selected items open as on the Logs page. Set `language` on it: the Logs page
+   * switches to it. Its type must be one of the source's `datasetTypes`.
+   */
+  toDataset(args: {
+    scope: SourceTypeLogsDrilldownScope;
+    items: SourceTypeLogsDrilldownItem[];
+  }): Promise<Dataset>;
+  /**
+   * The group an item belongs to for the page's Prefix grouping, e.g. `app/web/`. Omit to
+   * offer A–Z only.
+   */
+  groupOf?(item: SourceTypeLogsDrilldownItem): string;
+  /**
+   * Replaces the page's empty and listing-failed states with the source's own, e.g. why a scope
+   * lists nothing and what to do. It gets the page's own state as `children`.
+   */
+  EmptyState?: ComponentType<SourceTypeLogsDrilldownEmptyStateProps>;
 }
 
 /** A time range as the metric browser passes it (date math, e.g. `now-15m`). */
@@ -428,16 +635,38 @@ export class SourceTypeRegistryService {
     );
   }
 
-  /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */
+  /**
+   * Whether Explore should run a histogram query: the source's own, or for a built-in language
+   * Explore's. Built-in languages no source lists keep their behavior.
+   */
   public supportsHistogram(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);
-    return settings ? !!settings.supportsHistogram : languageId !== 'PROMQL';
+    if (!settings) return languageId !== 'PROMQL';
+    if (settings.buildHistogramQuery) return true;
+    // Explore's own histogram query is PPL or SQL, which no other language can run.
+    return !!settings.supportsHistogram && ['PPL', 'SQL'].includes(languageId ?? '');
+  }
+
+  /** The source's own histogram query builder for a language, if it has one. */
+  public getHistogramQueryBuilder(
+    languageId?: string,
+    dataset?: { type?: string }
+  ): SourceTypeLanguageSettings['buildHistogramQuery'] {
+    return this.settingsFor(languageId, dataset)?.buildHistogramQuery;
   }
 
   /** Whether the Logs page may show its visual builder. Built-in languages keep their behavior. */
   public supportsVisualBuilder(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);
-    return settings ? !!settings.supportsVisualBuilder : true;
+    return settings ? !!(settings.supportsVisualBuilder || settings.visualBuilder) : true;
+  }
+
+  /** The source's own visual builder translation for a language; undefined means PPL's. */
+  public getVisualBuilder(
+    languageId?: string,
+    dataset?: { type?: string }
+  ): SourceTypeVisualBuilder | undefined {
+    return this.settingsFor(languageId, dataset)?.visualBuilder;
   }
 
   /** Whether Explore can run a language: a built-in one, or one a registered source lists. */
@@ -451,7 +680,9 @@ export class SourceTypeRegistryService {
   /** Whether any of a source's languages can use the visual builder (OpenSearch's can). */
   public hasVisualBuilder(sourceType: SourceTypeDefinition): boolean {
     const settings = Object.values(sourceType.languageSettings ?? {});
-    return settings.length === 0 || settings.some((s) => s.supportsVisualBuilder);
+    return (
+      settings.length === 0 || settings.some((s) => s.supportsVisualBuilder || s.visualBuilder)
+    );
   }
 
   // The active source's settings. For a non-built-in language seen briefly on another source's

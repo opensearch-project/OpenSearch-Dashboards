@@ -35,11 +35,14 @@ export const TIME_FIELD_CANDIDATES = DEFAULT_TIME_FIELD_CANDIDATES;
 
 /**
  * Choose the default time field from an index's date-typed field names, preferring the canonical
- * OTel/PPL order (from data/common); falls back to the first date field.
- * Delegates to the shared `pickTimeField` in data/common.
+ * OTel/PPL order (from data/common) unless a `preferred` field is given; falls back to the first
+ * date field. Delegates to the shared `pickTimeField` in data/common.
  */
-export const pickTimeField = (dateFields: string[]): string | undefined =>
-  pickTimeFieldFromCommon(dateFields, DEFAULT_TIME_FIELD_CANDIDATES);
+export const pickTimeField = (dateFields: string[], preferred?: string): string | undefined =>
+  pickTimeFieldFromCommon(
+    dateFields,
+    preferred ? [preferred, ...DEFAULT_TIME_FIELD_CANDIDATES] : DEFAULT_TIME_FIELD_CANDIDATES
+  );
 
 /**
  * Pick the severity field for an index from its available field names, or undefined if none is

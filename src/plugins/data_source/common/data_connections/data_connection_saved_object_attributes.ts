@@ -12,11 +12,13 @@ export const DATA_CONNECTION_SAVED_OBJECT_TYPE = 'data-connection';
  * @property connectionId: The name of the data connection.
  * @property type: The type of the data connection based on enum DataConnectionType
  * @property meta: Additional metadata associated with the data connection.
+ * @property description: Optional description, shown in the data sources app's connections table.
  */
 export interface DataConnectionSavedObjectAttributes extends SavedObjectAttributes {
   connectionId: string;
   type: DataConnectionType;
   meta?: string;
+  description?: string;
 }
 
 export enum DataConnectionType {

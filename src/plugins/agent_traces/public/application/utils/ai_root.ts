@@ -58,9 +58,44 @@ export const isGenAiSpanDocument = (source: Record<string, unknown> | undefined)
 };
 
 interface SpanRowLike {
+  spanId?: string;
   parentSpanId?: string | null;
   rawDocument?: Record<string, unknown>;
 }
+
+/**
+ * Whether `spanId` has an ancestor in `winners`, walking `parentOf` (span id to parent span id,
+ * within one trace). A malformed chain (a span that is its own parent, or a cycle) never counts:
+ * hiding on it could hide every span of the cycle.
+ */
+export const hasAncestorIn = (
+  spanId: string,
+  parentOf: (id: string) => string | null | undefined,
+  winners: Set<string>
+): boolean => {
+  const seen = new Set<string>([spanId]);
+  let found = false;
+  let parentId = parentOf(spanId);
+  while (parentId) {
+    if (seen.has(parentId)) return false;
+    seen.add(parentId);
+    if (winners.has(parentId)) found = true;
+    parentId = parentOf(parentId);
+  }
+  return found;
+};
+
+/**
+ * Drops marked spans that have a marked ancestor among `rows`. Data Prepper can mark a span and,
+ * once a late parent arrives, its outermost GenAI ancestor too; only the outermost one counts.
+ */
+const outermostMarked = <T extends SpanRowLike>(rows: T[], marked: T[]): T[] => {
+  const parents = new Map(rows.filter((r) => r.spanId).map((r) => [r.spanId, r.parentSpanId]));
+  const markedIds = new Set(marked.map((r) => r.spanId).filter((id): id is string => !!id));
+  return marked.filter(
+    (r) => !r.spanId || !hasAncestorIn(r.spanId, (id) => parents.get(id), markedIds)
+  );
+};
 
 const rawStartOf = (row: SpanRowLike) => String(row.rawDocument?.startTime ?? '');
 
@@ -74,9 +109,10 @@ export const aiRootsOf = <T extends SpanRowLike>(rows: T[]): T[] => {
     (r) => !r.parentSpanId && (isMarkedAiRoot(r.rawDocument) || isGenAiSpanDocument(r.rawDocument))
   );
   if (roots.length > 0) return roots;
-  return rows
-    .filter((r) => isMarkedAiRoot(r.rawDocument))
-    .sort((a, b) => rawStartOf(a).localeCompare(rawStartOf(b)));
+  return outermostMarked(
+    rows,
+    rows.filter((r) => isMarkedAiRoot(r.rawDocument))
+  ).sort((a, b) => rawStartOf(a).localeCompare(rawStartOf(b)));
 };
 
 /** Whether this span is one that represents its trace (see `aiRootsOf`). */

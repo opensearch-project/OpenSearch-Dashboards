@@ -10,6 +10,7 @@ import { i18n } from '@osd/i18n';
 import { DataViewField } from '../../../../data/common';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { RootState } from '../../application/utils/state_management/store';
+import { supersedeStreamingQuery } from '../../application/utils/streaming/streaming_abort_registry';
 import { setBreakdownField } from '../../application/utils/state_management/slices/query_editor';
 import {
   clearResultsByKey,
@@ -66,6 +67,11 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
 
   const handleFieldChange = (selected: Array<{ label: string; value?: string }>) => {
     const newField = selected.length > 0 && selected[0].value ? selected[0].value : undefined;
+    // Otherwise a streamed histogram for the old setting keeps writing into the chart.
+    const streamedHistogramKey = prepareHistogramCacheKey(query);
+    if (supersedeStreamingQuery(streamedHistogramKey)) {
+      dispatch(clearQueryStatusMapByKey(streamedHistogramKey));
+    }
     dispatch(setBreakdownField(newField));
 
     const histogramCacheKey = prepareHistogramCacheKey(query, !!newField);

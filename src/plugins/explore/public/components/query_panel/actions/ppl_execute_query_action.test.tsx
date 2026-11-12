@@ -129,7 +129,9 @@ describe('usePPLExecuteQueryAction', () => {
     expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
       expect.anything(),
       mockSetEditorTextWithQuery,
-      'source=logs | head 10'
+      'source=logs | head 10',
+      undefined,
+      { userInitiated: true }
     );
     expect(result).toEqual({
       success: true,
@@ -299,8 +301,27 @@ describe('usePPLExecuteQueryAction', () => {
     expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.anything() }),
       mockSetEditorTextWithQuery,
-      'source=logs'
+      'source=logs',
+      undefined,
+      // The user asked the assistant to run it, so it runs even when the dataset type requires
+      // an explicit Run.
+      { userInitiated: true }
     );
+  });
+
+  it('returns a "press Run" result instead of throwing when the query did not run', async () => {
+    mockGetState.mockReturnValue({
+      query: { language: 'PPL', query: 'source=logs | head 10' },
+      queryEditor: { queryStatusMap: {} },
+    });
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs' });
+
+    expect(result).toEqual(
+      expect.objectContaining({ success: false, executed: false, error: 'Query did not run' })
+    );
+    expect(result.message).toContain('Press Run');
   });
 
   it('should return failure when query is still LOADING', async () => {

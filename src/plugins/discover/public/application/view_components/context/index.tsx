@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { merge } from 'rxjs';
+import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { DataExplorerServices, ViewProps } from '../../../../../data_explorer/public';
 import {
   OpenSearchDashboardsContextProvider,
@@ -12,13 +13,18 @@ import {
 } from '../../../../../opensearch_dashboards_react/public';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig } from '../../../../../data/common';
 import { getServices } from '../../../opensearch_dashboards_services';
+import { DISCOVER_PAGE_CONTEXT_ID } from '../../../../common';
 import { useSearch, SearchContextValue } from '../utils/use_search';
+import { SearchData } from '../utils';
+import { readQueryOutcome } from '../utils/read_query_outcome';
 import { useApplyQueryAction } from '../actions/apply_query_action';
 
 const SearchContext = React.createContext<SearchContextValue>({} as SearchContextValue);
-const DISCOVER_PAGE_CONTEXT_ID = 'discover-page-context';
 
-function buildDiscoverPageContextValue(services: ReturnType<typeof getServices>) {
+function buildDiscoverPageContextValue(
+  services: ReturnType<typeof getServices>,
+  searchData: SearchData
+) {
   const { filterManager, timefilter, queryString } = services.data.query;
   const currentQuery = queryString.getQuery();
   const language = currentQuery.language || 'kuery';
@@ -59,6 +65,7 @@ function buildDiscoverPageContextValue(services: ReturnType<typeof getServices>)
       query: currentQuery.query || '',
       language,
       ...(languageConfig?.title ? { languageDisplayName: languageConfig.title } : {}),
+      ...readQueryOutcome(searchData),
     },
     dataset: currentQuery.dataset,
     ...filtersContext,
@@ -73,6 +80,7 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
     ...deServices,
     ...services,
   });
+  const { data$ } = searchParams;
 
   useEffect(() => {
     const contextStore = services.contextProvider?.getAssistantContextStore?.();
@@ -86,7 +94,7 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
       contextStore.addContext({
         id: DISCOVER_PAGE_CONTEXT_ID,
         description: 'Discover application page context',
-        value: buildDiscoverPageContextValue(services),
+        value: buildDiscoverPageContextValue(services, data$.getValue()),
         label: 'Page: Discover',
         categories: ['page', 'static'],
       });
@@ -97,7 +105,12 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
     const subscription = merge(
       filterManager.getUpdates$(),
       timefilter.timefilter.getTimeUpdate$(),
-      queryString.getUpdates$()
+      queryString.getUpdates$(),
+      data$.pipe(
+        map((searchData) => JSON.stringify(readQueryOutcome(searchData))),
+        distinctUntilChanged(),
+        skip(1)
+      )
     ).subscribe(registerContext);
 
     return () => {

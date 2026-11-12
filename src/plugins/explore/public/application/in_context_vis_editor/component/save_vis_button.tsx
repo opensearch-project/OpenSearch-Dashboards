@@ -139,12 +139,7 @@ export const SaveVisButton = () => {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }: OnSaveProps) => {
-      const pipeline = transformationService.pipeline$.getValue();
-      const serializedPipeline = pipeline.map((instance) => ({
-        definitionId: instance.definition_id,
-        config: instance.config,
-        hide: instance.hide,
-      }));
+      const serializedPipeline = transformationService.serializePipeline();
 
       const axesMapping = visConfig?.axesMapping;
       const currentTitle = savedExploreToSave.title;

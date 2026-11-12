@@ -16,12 +16,13 @@ import {
 } from '../state_management/slices';
 import {
   detectAndSetOptimalTab,
-  hasStatsPipe,
+  isVisualizationTabTarget,
 } from '../state_management/actions/detect_optimal_tab';
 import { AGENT_TRACES_VISUALIZATION_TAB_ID } from '../../../../common';
 import { selectActiveTabId, selectSort } from '../state_management/selectors';
 import { useCurrentAgentTracesId } from './use_current_agent_traces_id';
 import { useDatasetContext } from '../../context';
+import { datasetTypeRequiresExplicitRun } from '../../../../../data/public';
 
 /**
  * Hook to handle initial query execution on page load
@@ -40,6 +41,10 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
     if (queryState.dataset && services?.data?.query?.queryString) {
       const datasetService = services.data.query.queryString.getDatasetService();
       const typeConfig = datasetService.getType(queryState.dataset.type);
+      // A dataset type that requires an explicit Run never searches on page load.
+      if (datasetTypeRequiresExplicitRun(typeConfig, queryState.dataset)) {
+        return false;
+      }
       const datasetSearchOnLoad = typeConfig?.meta?.searchOnLoad;
       if (datasetSearchOnLoad !== undefined) {
         return datasetSearchOnLoad;
@@ -82,7 +87,8 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
         // Visualization tab can show.
         const queryString = typeof queryState.query === 'string' ? queryState.query : '';
         const aggregatesOnDataTab =
-          hasStatsPipe(queryString) && activeTabId !== AGENT_TRACES_VISUALIZATION_TAB_ID;
+          isVisualizationTabTarget(queryString) &&
+          activeTabId !== AGENT_TRACES_VISUALIZATION_TAB_ID;
         if (!activeTabId || aggregatesOnDataTab) {
           // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(detectAndSetOptimalTab({ services }));

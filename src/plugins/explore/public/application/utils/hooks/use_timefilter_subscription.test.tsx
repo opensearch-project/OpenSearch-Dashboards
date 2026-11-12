@@ -12,6 +12,8 @@ import { ExploreServices } from '../../../types';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults, clearQueryStatusMap } from '../state_management/slices';
 import {
+  queryEditorInitialState,
+  queryEditorReducer,
   queryInitialState,
   queryReducer,
   uiInitialState,
@@ -25,6 +27,16 @@ import { Subject, Subscription } from 'rxjs';
 // Mock the query actions
 jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
+  defaultPrepareQueryString: jest.fn(() => 'results-key'),
+}));
+
+jest.mock('../state_management/actions/streaming_query_actions', () => ({
+  STREAMING_MAX_HELD_ROWS: 100,
+}));
+
+let mockStreamingKeys: string[] = [];
+jest.mock('../streaming/streaming_abort_registry', () => ({
+  isStreamingQueryAbortable: (cacheKey: string) => mockStreamingKeys.includes(cacheKey),
 }));
 
 jest.mock('../state_management/slices', () => ({
@@ -44,6 +56,7 @@ interface MockRootState {
   query: QueryState;
   ui: any;
   results: any;
+  queryEditor?: any;
 }
 
 describe('useTimefilterSubscription', () => {
@@ -91,6 +104,7 @@ describe('useTimefilterSubscription', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
+        queryEditor: (state = initialState.queryEditor ?? { queryStatusMap: {} }) => state,
       },
       preloadedState,
     });
@@ -161,6 +175,96 @@ describe('useTimefilterSubscription', () => {
       expect(mockClearQueryStatusMap).toHaveBeenCalledTimes(3);
       expect(mockExecuteQueries).toHaveBeenCalledTimes(3);
       expect(mockDispatch).toHaveBeenCalledTimes(9); // 3 actions × 3 events
+    });
+  });
+
+  // A refresh interval shorter than the query would otherwise supersede every run before it renders.
+  describe('while the results query is still streaming', () => {
+    const withStreaming = (streaming: Record<string, unknown>) =>
+      ({
+        query: {
+          ...queryInitialState,
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+        },
+        queryEditor: { queryStatusMap: { 'results-key': { streaming } } },
+      }) as any;
+
+    beforeEach(() => {
+      mockStreamingKeys = ['results-key'];
+    });
+
+    afterEach(() => {
+      mockStreamingKeys = [];
+    });
+
+    it('skips the refresh while rows are still arriving, and resumes once the run ends', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 500 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+
+      mockStreamingKeys = [];
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips while nothing has rendered yet, before the total is known', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 0, total: 0 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    // A slow query: the client has read every row produced so far, but more are coming.
+    it('skips while the client has caught up with a query that is still producing rows', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 40 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    it('refreshes once a run below the cap has finished', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: false, rowsFetched: 40, total: 40 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    // Past the cap the run only polls for status, which could hold refreshes back for minutes.
+    it('refreshes once the table reaches the row cap', () => {
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    it('still refreshes while some other query streams', () => {
+      mockStreamingKeys = ['another-key'];
+      renderHookWithProvider(
+        mockServices,
+        withStreaming({ isPolling: true, rowsFetched: 40, total: 500 })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -287,6 +391,60 @@ describe('useTimefilterSubscription', () => {
       autoRefreshSubject.next({});
 
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+    });
+  });
+
+  describe('for a dataset type that requires an explicit Run', () => {
+    const EXPLICIT = { id: 'explicit', title: 'Explicit', type: 'EXPLICIT_RUN_TYPE' };
+
+    const renderExplicit = (queryEditor: Record<string, unknown>) => {
+      const services = {
+        data: {
+          query: {
+            ...mockServices.data.query,
+            queryString: {
+              getDatasetService: () => ({
+                getType: (type: string) =>
+                  type === EXPLICIT.type ? { meta: { requiresExplicitRun: true } } : { meta: {} },
+              }),
+            },
+          },
+        },
+      } as any;
+      const store = configureStore({
+        reducer: { query: queryReducer, queryEditor: queryEditorReducer },
+        preloadedState: {
+          query: { ...queryInitialState, query: 'q', dataset: EXPLICIT },
+          queryEditor: { ...queryEditorInitialState, ...queryEditor },
+        } as any,
+      });
+      jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
+      renderHook(() => useTimefilterSubscription(services), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      return services;
+    };
+
+    it('does not run on a tick before the user has run the query (e.g. a restored interval)', () => {
+      renderExplicit({ queryStatusMap: {} });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+    });
+
+    it('does not run on a tick after the query was edited', () => {
+      renderExplicit({
+        queryStatusMap: { someCacheKey: { status: 'READY' } },
+        isQueryEditorDirty: true,
+      });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+    });
+
+    it('refreshes a query the user has run', () => {
+      const services = renderExplicit({ queryStatusMap: { someCacheKey: { status: 'READY' } } });
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledWith({ services });
     });
   });
 });

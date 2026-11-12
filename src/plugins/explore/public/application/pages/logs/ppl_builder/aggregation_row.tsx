@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFieldNumber, EuiToolTip } from '@elastic/eui';
 import { BuilderAction } from './build_ppl';
 import { Aggregation, ScalarCall } from './types';
-import { AGG_FN_MAP, SCALAR_FN_MAP } from './operations';
+import { AGG_FN_MAP, ScalarFnDef } from './operations';
+import { useVisualBuilder } from './visual_builder_language';
 import { FunctionMenu } from './function_menu';
 import { AggregationMenu } from './aggregation_menu';
 import { FieldMenu } from './field_menu';
@@ -24,11 +25,11 @@ interface AggregationRowProps {
 
 const FunctionPill: React.FC<{
   fn: ScalarCall;
+  def?: ScalarFnDef;
   aggIdx: number;
   fnIdx: number;
   dispatch: React.Dispatch<BuilderAction>;
-}> = ({ fn, aggIdx, fnIdx, dispatch }) => {
-  const def = SCALAR_FN_MAP[fn.id];
+}> = ({ fn, def, aggIdx, fnIdx, dispatch }) => {
   return (
     <span className="plqFn" data-test-subj={`pplBuilderFn-${aggIdx}-${fnIdx}`}>
       <EuiToolTip content={def?.description || fn.name}>
@@ -77,6 +78,11 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
   anyFieldOptions,
   dispatch,
 }) => {
+  const { functions } = useVisualBuilder();
+  const functionDefs = useMemo(
+    () => new Map((functions ?? []).flatMap((cat) => cat.items).map((item) => [item.id, item])),
+    [functions]
+  );
   const def = AGG_FN_MAP[agg.fn];
   const fieldOptions = def?.numericOnly ? numericFieldOptions : anyFieldOptions;
   return (
@@ -99,7 +105,14 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
             dataTestSubj={`pplBuilderAggField-${idx}`}
           />
           {(agg.functions ?? []).map((fn, fnIdx) => (
-            <FunctionPill key={fnIdx} fn={fn} aggIdx={idx} fnIdx={fnIdx} dispatch={dispatch} />
+            <FunctionPill
+              key={fnIdx}
+              fn={fn}
+              def={functionDefs.get(fn.id)}
+              aggIdx={idx}
+              fnIdx={fnIdx}
+              dispatch={dispatch}
+            />
           ))}
         </>
       )}
@@ -123,7 +136,7 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
           data-test-subj={`pplBuilderAggPercentile-${idx}`}
         />
       )}
-      {def?.needsField && (
+      {def?.needsField && functionDefs.size > 0 && (
         <FunctionMenu
           onAddFunction={(fn) => dispatch({ type: 'ADD_FUNCTION', index: idx, fn })}
           dataTestSubj={`pplBuilderAddFn-${idx}`}

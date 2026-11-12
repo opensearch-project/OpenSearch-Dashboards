@@ -33,6 +33,7 @@ import {
   WORKSPACE_DETAIL_APP_ID,
 } from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
+import type { DataSourceAssociationContext } from './services/data_source_association_filters';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { DataSourceEngineType } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -214,23 +215,31 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   return visibleApplications;
 };
 
+/**
+ * Lists the data sources and data connections.
+ * @param requestedFields extra saved object attributes to load, returned in `attributes` (the
+ * fields requested by the data source association filters)
+ */
 export const getDataSourcesList = (
   client: SavedObjectsStart['client'],
-  targetWorkspaces?: string[]
+  targetWorkspaces?: string[],
+  requestedFields: string[] = []
 ) => {
+  const builtInFields = [
+    'id',
+    'title',
+    'auth',
+    'description',
+    'dataSourceEngineType',
+    'type',
+    'connectionId',
+  ];
+  const extraFields = [...new Set(requestedFields)];
   return client
     .find(
       {
         type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-        fields: [
-          'id',
-          'title',
-          'auth',
-          'description',
-          'dataSourceEngineType',
-          'type',
-          'connectionId',
-        ],
+        fields: [...new Set([...builtInFields, ...extraFields])],
         perPage: 10000,
         workspaces: targetWorkspaces,
       },
@@ -250,6 +259,9 @@ export const getDataSourcesList = (
           const type = source.type;
           // This is a field only for detail type of data connection in order not to mix with saved object type.
           const connectionType = source.get('type');
+          const attributes = extraFields.length
+            ? Object.fromEntries(extraFields.map((field) => [field, source.get(field)]))
+            : undefined;
           return {
             id,
             title,
@@ -259,6 +271,7 @@ export const getDataSourcesList = (
             workspaces,
             type,
             connectionType,
+            ...(attributes ? { attributes } : {}),
           };
         });
       } else {
@@ -313,6 +326,7 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
         name: ds.title,
         description: ds.description,
         relatedConnections: [],
+        ...(ds.attributes ? { attributes: ds.attributes } : {}),
       };
     });
   const dataConnections = dataSources
@@ -324,6 +338,7 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
         connectionType: DataSourceConnectionType.DataConnection,
         name: ds.title,
         description: ds.description,
+        ...(ds.attributes ? { attributes: ds.attributes } : {}),
       };
     });
   return {
@@ -449,6 +464,25 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
+
+/**
+ * The context the data source association filters get for a workspace with these feature configs
+ * (stored on the workspace, or chosen in the creator form), so every entry point builds it the
+ * same way. Undefined features mean the workspace is unknown.
+ */
+export const getDataSourceAssociationContext = (
+  features: string[] | undefined
+): DataSourceAssociationContext => ({
+  useCaseId: features ? getFirstUseCaseOfFeatureConfigs(features) : undefined,
+  features: features ? [...features] : undefined,
+});
+
+/**
+ * A stable memo key for a feature list: two arrays with the same features (in any order) give the
+ * same key, and no feature id can collide with another.
+ */
+export const getWorkspaceFeaturesKey = (features: string[] | undefined) =>
+  features ? JSON.stringify([...features].sort()) : undefined;
 
 export function enrichBreadcrumbsWithWorkspace(
   core: CoreStart,

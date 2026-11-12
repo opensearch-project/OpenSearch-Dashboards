@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
+import { EXPLORE_VISUALIZATION_TAB_ID, ExploreFlavor } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
@@ -35,8 +35,12 @@ import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
 import { switchToPromQL } from './utils/switch_to_promql';
+import { getExplorationSource } from './utils/exploration_source';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
+import { usePreviewGate } from './hooks/use_preview_gate';
+import { SourceEmptyState } from '../../../../components/source_empty_state/source_empty_state';
+import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 
 export const MetricsExploreTab = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -62,11 +66,20 @@ export const MetricsExploreTab = () => {
   const queryGenRef = useRef(new MetricQueryGenerator());
 
   // The Metrics page only shows this tab for sources with a metrics resource client.
+  const sourceTypeRegistry = getSourceTypeRegistry();
   const resourceClientId =
-    getSourceTypeRegistry().getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
+    sourceTypeRegistry.getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
+  // How the error and empty states name and introduce the source.
+  const source = getExplorationSource(queryState.dataset);
   const client = useMemo(() => {
     return new PrometheusClient(services, dataConnectionId, resourceClientId);
   }, [services, dataConnectionId, resourceClientId]);
+
+  // A dataset type that requires an explicit Run loads no sparklines until the user asks.
+  const { previewsEnabled, requestPreviews } = usePreviewGate(
+    datasetRequiresExplicitRun(services.data?.query?.queryString, queryState.dataset),
+    `${queryState.dataset?.type}::${queryState.dataset?.id}`
+  );
 
   const maxDataPoints = (queryState.queryOptions as PromQLQueryOptions | undefined)?.maxDataPoints;
 
@@ -159,12 +172,14 @@ export const MetricsExploreTab = () => {
         }
       }
       client.clearCache();
+      requestPreviews();
       setRefreshCounter((c) => c + 1);
       reduxDispatch(setHasUserInitiatedQuery(false));
     }
   }, [
     hasUserInitiatedQuery,
     client,
+    requestPreviews,
     reduxDispatch,
     dateRange,
     services.data?.query?.timefilter?.timefilter,
@@ -211,6 +226,13 @@ export const MetricsExploreTab = () => {
 
   const cursorBus = useMemo(() => createCursorBus(), []);
 
+  // A registered source may replace the tab with an empty state of its own. Its Refresh is the
+  // query bar's (the effect on hasUserInitiatedQuery above).
+  const onRefresh = useCallback(
+    () => reduxDispatch(setHasUserInitiatedQuery(true)),
+    [reduxDispatch]
+  );
+
   const handleTimeRangeChange = useCallback(
     (from: string, to: string) => {
       const timefilter = services.data?.query?.timefilter?.timefilter;
@@ -235,10 +257,23 @@ export const MetricsExploreTab = () => {
         refreshCounter,
         onTimeRangeChange: handleTimeRangeChange,
         timeBounds,
+        previewsEnabled,
+        requestPreviews,
+        source,
       }}
     >
       <CursorContext.Provider value={cursorBus}>
-        <div className="metricsExploreTab">{renderContent()}</div>
+        <div className="metricsExploreTab">
+          <SourceEmptyState
+            location="metricsExplore"
+            dataset={queryState.dataset}
+            data={services.data}
+            flavor={ExploreFlavor.Metrics}
+            onRefresh={onRefresh}
+          >
+            {renderContent()}
+          </SourceEmptyState>
+        </div>
       </CursorContext.Provider>
     </ExplorationContext.Provider>
   );

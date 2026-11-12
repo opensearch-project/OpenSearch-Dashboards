@@ -5,26 +5,21 @@
 
 import { createGroupByTransformation } from './group_by_transformation';
 
-const createHit = (source: Record<string, unknown>) => ({
-  _index: 'test',
-  _id: '1',
-  _score: 1,
-  _source: source,
-});
+const createRow = (source: Record<string, unknown>) => source;
 
 describe('group_by_transformation', () => {
   const instance = createGroupByTransformation();
-  type TestHit = ReturnType<typeof createHit>;
+  type TestRow = ReturnType<typeof createRow>;
   type TestConfig = Parameters<typeof instance.transformationMethod>[1];
-  const transform = (data: TestHit[], config: TestConfig) =>
+  const transform = (data: TestRow[], config: TestConfig) =>
     instance.transformationMethod(data, config).rows;
 
   describe('transformationMethod', () => {
     const data = [
-      createHit({ category: 'A', value: 10, name: 'x' }),
-      createHit({ category: 'B', value: 20, name: 'y' }),
-      createHit({ category: 'A', value: 30, name: 'z' }),
-      createHit({ category: 'B', value: 40, name: 'w' }),
+      createRow({ category: 'A', value: 10, name: 'x' }),
+      createRow({ category: 'B', value: 20, name: 'y' }),
+      createRow({ category: 'A', value: 30, name: 'z' }),
+      createRow({ category: 'B', value: 40, name: 'w' }),
     ];
 
     it('groups by field and applies a count aggregation', () => {
@@ -34,8 +29,8 @@ describe('group_by_transformation', () => {
       });
       expect(result).toEqual({
         rows: [
-          createHit({ category: 'A', count_value: 2 }),
-          createHit({ category: 'B', count_value: 2 }),
+          createRow({ category: 'A', count_value: 2 }),
+          createRow({ category: 'B', count_value: 2 }),
         ],
         status: 'applied',
         issues: [],
@@ -48,10 +43,8 @@ describe('group_by_transformation', () => {
         aggregations: [{ field: 'value', method: 'total' }],
       });
       expect(result).toHaveLength(2);
-      const sourceA = result[0]._source as Record<string, unknown>;
-      const sourceB = result[1]._source as Record<string, unknown>;
-      expect(sourceA.total_value).toBe(40);
-      expect(sourceB.total_value).toBe(60);
+      expect(result[0].total_value).toBe(40);
+      expect(result[1].total_value).toBe(60);
     });
 
     it('skips hidden aggregations without reporting missing hidden fields', () => {
@@ -64,8 +57,8 @@ describe('group_by_transformation', () => {
       });
       expect(result).toEqual({
         rows: [
-          createHit({ category: 'A', count_name: 2 }),
-          createHit({ category: 'B', count_name: 2 }),
+          createRow({ category: 'A', count_name: 2 }),
+          createRow({ category: 'B', count_name: 2 }),
         ],
         status: 'applied',
         issues: [],
@@ -80,14 +73,13 @@ describe('group_by_transformation', () => {
           { field: 'value', method: 'count' },
         ],
       });
-      const sourceA = result[0]._source as Record<string, unknown>;
-      expect(sourceA.total_value).toBe(40);
-      expect(sourceA.count_value).toBe(2);
+      expect(result[0].total_value).toBe(40);
+      expect(result[0].count_value).toBe(2);
     });
   });
 
   describe('execution diagnostics', () => {
-    const data = [createHit({ category: 'A', value: 10 }), createHit({ category: 'A', value: 20 })];
+    const data = [createRow({ category: 'A', value: 10 }), createRow({ category: 'A', value: 20 })];
 
     it('skips when groupByField no longer exists', () => {
       const config = {
@@ -120,7 +112,7 @@ describe('group_by_transformation', () => {
 
         expect(result).toEqual({
           rows: [
-            createHit({
+            createRow({
               category: 'A',
               total_value: 30,
               [`${method}_removed`]: expectedValue,
@@ -137,10 +129,10 @@ describe('group_by_transformation', () => {
         groupByField: 'category',
         aggregations: [{ field: 'value', method: 'total' as const }],
       };
-      const mixedData = [createHit({ category: 'A', value: 10 }), createHit({ category: 'A' })];
+      const mixedData = [createRow({ category: 'A', value: 10 }), createRow({ category: 'A' })];
 
       expect(instance.transformationMethod(mixedData, config)).toEqual({
-        rows: [createHit({ category: 'A', total_value: 10 })],
+        rows: [createRow({ category: 'A', total_value: 10 })],
         status: 'applied',
         issues: [],
       });
@@ -151,10 +143,10 @@ describe('group_by_transformation', () => {
         groupByField: 'category',
         aggregations: [{ field: 'value', method: 'total' as const }],
       };
-      const mixedData = [createHit({ category: 'A', value: 10 }), createHit({ value: 20 })];
+      const mixedData = [createRow({ category: 'A', value: 10 }), createRow({ value: 20 })];
 
       expect(instance.transformationMethod(mixedData, config)).toMatchObject({
-        rows: [createHit({ category: 'A', total_value: 10 })],
+        rows: [createRow({ category: 'A', total_value: 10 })],
         status: 'partially_applied',
         issues: [{ code: 'missing_fields', fields: ['category'] }],
       });

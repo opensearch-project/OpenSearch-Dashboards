@@ -21,11 +21,15 @@ import {
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { TableActionsPopoverButton } from '../table_actions/table_actions_popover_button';
 import { setHideEmptyFields } from '../../../../application/utils/state_management/slices';
-import { useHiddenColumnCount } from '../../../../helpers/use_displayed_columns';
+import {
+  useHiddenColumnCount,
+  useIsNonTimeSeries,
+} from '../../../../helpers/use_displayed_columns';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { SlotItemsForType } from '../../../../services/slot_registry';
 
@@ -59,6 +63,7 @@ export const DiscoverResultsActionBar = ({
   const dispatch = useDispatch();
   const currentTab = useSelector(selectActiveTabId);
   const hiddenColumnCount = useHiddenColumnCount();
+  const isNonTimeSeries = useIsNonTimeSeries();
   // A dataset change resets the active tab to EXPLORE_NO_TAB_ID while the logs table stays on
   // screen, so an empty id means logs here just as it does in detectAndSetOptimalTab.
   const isLogsTab = (currentTab || EXPLORE_LOGS_TAB_ID) === EXPLORE_LOGS_TAB_ID;
@@ -66,10 +71,17 @@ export const DiscoverResultsActionBar = ({
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
   const shouldShowExportButton =
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
+  const shouldShowMaxExport = currentTab !== EXPLORE_VISUALIZATION_TAB_ID;
   const showTabSpecificSettings = currentTab === EXPLORE_PATTERNS_TAB_ID;
   const visualizationBuilder = getVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const showRawTable = useObservable(visualizationBuilder.showRawTable$);
+
+  // visualization tab exports its own table, read count from it.
+  // This is for visualization using transfromationn such as limit
+  const visData = useObservable(visualizationBuilder.data$);
+  const visibleRowsCount =
+    currentTab === EXPLORE_VISUALIZATION_TAB_ID ? visData?.transformedData.length : undefined;
   const isNonTableChart = !!visConfig?.type && visConfig.type !== 'table';
 
   return (
@@ -101,6 +113,7 @@ export const DiscoverResultsActionBar = ({
               rowsCountOverride={rowsCountOverride}
               hiddenColumnCount={isLogsTab ? hiddenColumnCount : 0}
               onShowHiddenColumns={() => dispatch(setHideEmptyFields(false))}
+              isNonTimeSeries={isNonTimeSeries}
             />
           </EuiFlexItem>
           {/* TODO: Fix data consistency issue with inspection panel */}
@@ -144,7 +157,14 @@ export const DiscoverResultsActionBar = ({
                   )}
                   {shouldShowExportButton && (
                     <EuiFlexItem grow={false}>
-                      <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                      <DiscoverDownloadCsv
+                        indexPattern={dataset}
+                        rows={rows}
+                        hits={hits}
+                        shouldShowMaxExport={shouldShowMaxExport}
+                        visibleRowsCount={visibleRowsCount}
+                        isStreaming={!!streaming?.isPolling}
+                      />
                     </EuiFlexItem>
                   )}
                   {shouldShowAddToDashboardButton && (

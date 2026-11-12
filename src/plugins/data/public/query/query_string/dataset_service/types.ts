@@ -64,10 +64,34 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
+    /**
+     * Optional. When true, Explore never runs a query for a dataset of this type on its own: not on
+     * page load, when the dataset is selected or switched (including a source type or query
+     * language switch), on a new search, when a saved search or saved query is opened, when a
+     * field's "filter for value" or "filter out value" is clicked, or for the Metrics page's
+     * previews. Queries run only when the user asks (Run, a time range update, a tab switch, or
+     * "filter for pattern"). Use it for engines where every query has a cost. Defaults to false.
+     *
+     * It overrides `searchOnLoad` and the `discover:searchOnPageLoad` advanced setting: a type with
+     * both set to true still never runs on page load, in Explore, Discover and Agent Traces. In
+     * Explore an auto-refresh tick refreshes only a query the user has run, picking a recent query
+     * stages it, and the Metrics page's previews, metric charts and breakdowns load on request.
+     * Read it through `datasetTypeRequiresExplicitRun`, not this field, so it can later depend on
+     * the dataset.
+     */
+    requiresExplicitRun?: boolean;
     /** Optional supportsTimeFilter determines if a time field is supported */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;
+    /**
+     * Optional. The meta fields (`_id`, `_index`, `_score`, ...) of the data views the dataset
+     * service caches for datasets of this type, both the temporary views it builds and saved
+     * data views it loads; defaults to the `metaFields` advanced setting. A type whose data
+     * doesn't come from OpenSearch documents sets `[]`, so its results show no OpenSearch meta
+     * fields (in the field list, the document views and their field counts).
+     */
+    metaFields?: string[];
     /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
     cacheOptions?: boolean;
     /** Optional list of supported apps. If undefined, it will show up in all apps */

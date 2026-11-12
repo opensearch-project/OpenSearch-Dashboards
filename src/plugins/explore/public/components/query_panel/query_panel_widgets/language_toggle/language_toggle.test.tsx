@@ -144,6 +144,9 @@ jest.mock('../../../../application/hooks/editor_hooks/use_switch_language', () =
 jest.mock('../../../../application/utils/state_management/slices', () => ({
   setEditorMode: jest.fn((mode) => ({ type: 'SET_EDITOR_MODE', payload: mode })),
   setQueryWithHistory: jest.fn((payload) => ({ type: 'SET_QUERY_WITH_HISTORY', payload })),
+  clearResults: jest.fn(() => ({ type: 'CLEAR_RESULTS' })),
+  clearQueryStatusMap: jest.fn(() => ({ type: 'CLEAR_QUERY_STATUS_MAP' })),
+  setIsQueryEditorDirty: jest.fn((dirty) => ({ type: 'SET_DIRTY', payload: dirty })),
 }));
 
 // Mock the selectors directly
@@ -1102,6 +1105,62 @@ describe('LanguageToggle', () => {
       // The editor and the stored user language follow the switch, as a dataset pick does.
       expect(mockClearEditors).toHaveBeenCalled();
       expect(mockSetUserQueryLanguage).toHaveBeenCalledWith('FakeQL');
+    });
+
+    const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 10)));
+    const explicitRunType = (type?: string) =>
+      type === 'FAKE' ? { meta: { requiresExplicitRun: true } } : undefined;
+
+    it("runs the source's default dataset after a switch", async () => {
+      registerFakeSource(async () => fakeDataset);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
+      await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith({ type: 'ON_EDITOR_RUN' }));
+    });
+
+    it('does not run the default dataset when its type requires an explicit Run', async () => {
+      mockGetType = jest.fn(explicitRunType);
+      registerFakeSource(async () => fakeDataset);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
+
+      await waitFor(() =>
+        expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ dataset: fakeDataset }))
+      );
+      await flush();
+      expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'ON_EDITOR_RUN' });
+    });
+
+    it('does not run after a language switch when the dataset requires an explicit Run', async () => {
+      mockGetType = jest.fn(explicitRunType);
+      mockGetQuery.mockReturnValue({ dataset: fakeDataset });
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(await screen.findByTestId('queryPanelFooterLanguageToggle-SQL'));
+
+      await waitFor(() =>
+        expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ language: 'SQL' }))
+      );
+      await flush();
+      expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'ON_EDITOR_RUN' });
+      // The same dataset's previous results are cleared and the SQL query is staged for Run.
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_RESULTS' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_QUERY_STATUS_MAP' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_DIRTY', payload: true });
+    });
+
+    it('runs after a language switch otherwise', async () => {
+      mockGetQuery.mockReturnValue({ dataset: fakeDataset });
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(await screen.findByTestId('queryPanelFooterLanguageToggle-SQL'));
+      await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith({ type: 'ON_EDITOR_RUN' }));
     });
 
     it('offers only sources with visual builder support in a builder-only workspace', () => {

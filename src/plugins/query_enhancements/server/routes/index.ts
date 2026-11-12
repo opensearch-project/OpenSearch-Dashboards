@@ -22,6 +22,7 @@ import { registerPPLCancelRoute } from './ppl_cancel';
 import { registerPPLStreamRoutes } from './ppl_stream';
 import { registerPPLAnalyzeRoute } from './ppl_analyze';
 import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
+import { definePPLPatternModeSettingsRoute } from './ppl_pattern_mode_settings';
 import { definePPLExplainRoute } from './ppl_explain';
 
 /**
@@ -137,6 +138,14 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             queryId: schema.maybe(schema.string()),
+            // Caller-requested row limit, honored by the ppl strategy.
+            fetchSize: schema.maybe(
+              schema.number({
+                min: 1,
+                validate: (value) =>
+                  Number.isInteger(value) ? undefined : 'fetchSize must be an integer',
+              })
+            ),
           }),
         },
       },
@@ -240,5 +249,6 @@ export function defineRoutes(
 
   definePPLBundleRoute(logger, router);
   definePPLCalciteSettingsRoute(logger, router);
+  definePPLPatternModeSettingsRoute(logger, router);
   definePPLExplainRoute(logger, router);
 }

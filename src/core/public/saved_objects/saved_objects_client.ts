@@ -39,6 +39,7 @@ import {
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
+  SavedObjectsBulkResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -190,6 +191,7 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
+  private inFlightReads = new Map<string, Promise<unknown>>();
   /**
    * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
@@ -527,10 +529,10 @@ export class SavedObjectsClient {
       version,
     };
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => this.createSavedObject(resp));
+    }).then((resp) => this.createSavedObject(resp));
   }
 
   /**
@@ -542,7 +544,7 @@ export class SavedObjectsClient {
   public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObjectsBulkResponse<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
@@ -567,16 +569,45 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(
+  private savedObjectsFetch<T = unknown>(
     path: string,
     { method, query, body, prependOptions }: HttpFetchOptions
-  ) {
-    return this.http.fetch(path, {
+  ): Promise<T> {
+    const fetch = () =>
+      this.http.fetch<T>(path, {
+        method,
+        query,
+        body,
+        ...(prependOptions && { prependOptions }),
+      });
+
+    const isRead = method === 'GET' || (method === 'POST' && path === this.getPath(['_bulk_get']));
+    if (!isRead) {
+      // A read started before or during a mutation must not serve a later reader.
+      this.inFlightReads.clear();
+      return fetch().finally(() => this.inFlightReads.clear());
+    }
+
+    const key = JSON.stringify({
+      path: this.http.basePath.prepend(path, prependOptions),
       method,
       query,
       body,
-      ...(prependOptions && { prependOptions }),
+      workspace: this.currentWorkspaceId,
     });
+    let request = this.inFlightReads.get(key);
+    if (!request) {
+      request = fetch().finally(() => {
+        // An older request may finish after a mutation has replaced its entry.
+        if (this.inFlightReads.get(key) === request) {
+          this.inFlightReads.delete(key);
+        }
+      });
+      this.inFlightReads.set(key, request);
+    }
+
+    // Each caller owns mutable saved-object attributes and response wrappers.
+    return request.then((response) => cloneDeep(response as T));
   }
 }
 

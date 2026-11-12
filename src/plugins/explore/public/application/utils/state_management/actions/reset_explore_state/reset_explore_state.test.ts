@@ -64,4 +64,29 @@ describe('resetExploreStateActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'DETECT_OPTIMAL_TAB' });
     expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'EXECUTE_QUERIES' });
   });
+
+  it('does not run the reset query when its dataset type requires an explicit Run', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getDatasetService: () => ({
+              getType: (type: string) =>
+                type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined,
+            }),
+          },
+        },
+      },
+    } as any;
+    (getPreloadedState as jest.Mock).mockResolvedValue({
+      ...preloadedState,
+      query: { query: '', dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } },
+    });
+
+    await resetExploreStateActionCreator(explicitServices, clearEditors)(mockDispatch);
+
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_QUERY' });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'DETECT_OPTIMAL_TAB' });
+    expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
+  });
 });

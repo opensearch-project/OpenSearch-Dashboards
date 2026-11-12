@@ -15,8 +15,9 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
-import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
+import { HISTOGRAM_RESULT_COLUMNS } from '../../../../services/source_type_registry/histogram_columns';
+import { maskedPPLQueryHasTrait, PPLTraitOptions } from '../../languages/ppl/aggregation_commands';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -47,6 +48,16 @@ function parseTimestampToMs(timestampStr: string): number {
     ? new Date(timestampStr).getTime()
     : new Date(timestampStr + 'Z').getTime();
 }
+
+/**
+ * A histogram bucket's start in epoch milliseconds. Accepts a number or a digit-only string
+ * (epoch milliseconds), or a timestamp string as {@link parseTimestampToMs} reads it.
+ */
+const parseBucketKeyToMs = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  const text = String(value).trim();
+  return /^\d+$/.test(text) ? Number(text) : parseTimestampToMs(text);
+};
 
 /**
  * Fills in missing timestamps in a time series map with zero values
@@ -115,16 +126,43 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
- * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
- * brackets and quoted strings are masked so that a command inside them is ignored.
- *
- * Used to detect queries where the hit counter should show bucket count separately from document
- * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
+ * Checks whether a PPL query's output rows are aggregation values rather than documents (any command
+ * with the `isAggregation` trait, including `timewrap` and an aggregating `patterns`). Used to
+ * keep async partial results from streaming, since running aggregate values change as the scan
+ * proceeds. `options.patternsDefaultMode` decides whether a `patterns` without `mode=` aggregates.
+ * Subquery brackets and quoted strings are masked so a command inside them is ignored.
  */
-export const queryHasAggregation = (queryString: string): boolean => {
+export const queryIsAggregation = (queryString: string, options: PPLTraitOptions = {}): boolean =>
+  maskedPPLQueryHasTrait(
+    maskPPLSubqueriesAndStrings(queryString),
+    (traits) => traits.isAggregation,
+    options
+  );
+
+/**
+ * Checks whether a PPL query's rendered rows are buckets that can be counted with a separate
+ * `... | stats count() as bucket_count` probe, so the hit counter shows a `N / M buckets` denominator
+ * instead of plain hits.
+ *
+ * This is a narrower question than {@link queryIsAggregation}: one aggregation whose count can't be
+ * probed (`timewrap`, whose pivot runs after the query plan) disqualifies the whole query, even
+ * though the `timechart` it follows is countable on its own. `table` is not an aggregation (its row
+ * count equals the hit count) and label-mode `patterns` returns documents, so neither counts.
+ * Subquery brackets and quoted strings are masked so a command inside them is ignored.
+ */
+export const queryIsBucketCountable = (
+  queryString: string,
+  options: PPLTraitOptions = {}
+): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
+  return (
+    maskedPPLQueryHasTrait(masked, (traits) => traits.isAggregation, options) &&
+    !maskedPPLQueryHasTrait(
+      masked,
+      (traits) => traits.isAggregation && !traits.isBucketCountable,
+      options
+    )
+  );
 };
 
 /** Commands that reshape rows such that the time field may no longer exist downstream. */
@@ -290,6 +328,67 @@ export const buildSQLHistogramQuery = (
   );
 };
 
+const PPL_COUNT_COLUMN_REGEX = /^count(\(\s*\*?\s*\))?$/i;
+const PPL_BUCKET_COLUMN_REGEX = /^span\s*\(/i;
+const NUMERIC_FIELD_TYPES = new Set([
+  'byte',
+  'short',
+  'integer',
+  'long',
+  'unsigned_long',
+  'float',
+  'half_float',
+  'scaled_float',
+  'double',
+  'number',
+]);
+const TIME_FIELD_TYPES = new Set(['date', 'date_nanos', 'timestamp']);
+
+/**
+ * The count and time-bucket columns of a single-series histogram response. OpenSearch PPL returns
+ * `[count(), span(...)]`, but a source's own histogram query (`buildHistogramQuery`) returns
+ * {@link HISTOGRAM_RESULT_COLUMNS} in whatever order its engine uses. Columns are matched by name,
+ * then by type, falling back to OpenSearch's positional order.
+ */
+export const resolvePPLHistogramColumns = (
+  fieldSchema?: Array<{ name?: string; type?: string }>
+): { countField: string; bucketField: string } | undefined => {
+  if (!fieldSchema || fieldSchema.length < 2) return undefined;
+  const nameOf = (idx: number) => fieldSchema[idx]?.name ?? '';
+  const typeOf = (idx: number) => String(fieldSchema[idx]?.type ?? '').toLowerCase();
+
+  // `count` (HISTOGRAM_RESULT_COLUMNS.count), `count()` or `count(*)`.
+  let countIdx = fieldSchema.findIndex((_c, i) => PPL_COUNT_COLUMN_REGEX.test(nameOf(i)));
+  let bucketIdx = fieldSchema.findIndex(
+    (_c, i) =>
+      i !== countIdx &&
+      (nameOf(i) === HISTOGRAM_RESULT_COLUMNS.time ||
+        PPL_BUCKET_COLUMN_REGEX.test(nameOf(i)) ||
+        TIME_FIELD_TYPES.has(typeOf(i)))
+  );
+  if (countIdx === -1) {
+    countIdx = fieldSchema.findIndex(
+      (_c, i) => i !== bucketIdx && NUMERIC_FIELD_TYPES.has(typeOf(i))
+    );
+  }
+  if (fieldSchema.length === 2) {
+    if (countIdx === -1 && bucketIdx !== -1) countIdx = bucketIdx === 0 ? 1 : 0;
+    if (bucketIdx === -1 && countIdx !== -1) bucketIdx = countIdx === 0 ? 1 : 0;
+  }
+  if (countIdx === -1 || bucketIdx === -1 || countIdx === bucketIdx) {
+    // OpenSearch PPL order.
+    countIdx = 0;
+    bucketIdx = 1;
+  }
+  return { countField: nameOf(countIdx), bucketField: nameOf(bucketIdx) };
+};
+
+/** A count as a number: engines may return counts as numeric strings. */
+const toHistogramCount = (value: unknown): number => {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
 export const processRawResultsForHistogram = (
   queryString: string,
   rawResults: ISearchResult,
@@ -439,11 +538,10 @@ export const processRawResultsForHistogram = (
 
     const timestampIdx = fieldSchema.findIndex((col: any) => col.name === '@timestamp');
     const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === breakdownField);
-    // Support both 'count' and 'count()' column names from PPL
-    let countIdx = fieldSchema.findIndex((col: any) => col.name === 'count()');
-    if (countIdx === -1) {
-      countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
-    }
+    // Support 'count', 'count()' and 'count(*)' column names from PPL
+    const countIdx = fieldSchema.findIndex((col: any) =>
+      PPL_COUNT_COLUMN_REGEX.test(col.name ?? '')
+    );
 
     if (breakdownIdx === -1 || countIdx === -1) {
       return rawResults;
@@ -452,11 +550,10 @@ export const processRawResultsForHistogram = (
     let totalHits = 0;
     rawResults.hits.hits.forEach((hit) => {
       const sourceValues = Object.values(hit._source);
-      const timestampStr = String(sourceValues[timestampIdx]);
       const breakdownValue = String(sourceValues[breakdownIdx]);
       const count = Number(sourceValues[countIdx]) || 0;
 
-      const timestamp = parseTimestampToMs(timestampStr);
+      const timestamp = parseBucketKeyToMs(sourceValues[timestampIdx]);
 
       totalHits += count;
 
@@ -485,20 +582,19 @@ export const processRawResultsForHistogram = (
   } else {
     const responseAggs: any = {};
 
+    const columns = resolvePPLHistogramColumns(rawResults?.fieldSchema as any);
     for (const [key, _aggQueryString] of Object.entries(aggsConfig.qs)) {
       responseAggs[key] = rawResults?.hits.hits.map((hit) => {
-        if (rawResults?.fieldSchema && rawResults.fieldSchema.length >= 2) {
-          const valueField = rawResults.fieldSchema[0].name!;
-          const keyField = rawResults.fieldSchema[1].name!;
+        if (columns) {
           return {
-            key: hit._source[keyField],
-            value: hit._source[valueField],
+            key: hit._source[columns.bucketField],
+            value: toHistogramCount(hit._source[columns.countField]),
           };
         }
         const sourceValues = Object.values(hit._source);
         return {
           key: sourceValues[1],
-          value: sourceValues[0],
+          value: toHistogramCount(sourceValues[0]),
         };
       });
     }
@@ -508,13 +604,13 @@ export const processRawResultsForHistogram = (
     Object.entries(responseAggs).forEach(([id, value]) => {
       if (aggsConfig && aggsConfig.date_histogram) {
         let totalHits = 0;
-        const buckets = value as Array<{ key: string; value: number }>;
+        const buckets = value as Array<{ key: string | number; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp = parseTimestampToMs(bucket.key);
+            const timestamp = parseBucketKeyToMs(bucket.key);
             totalHits += bucket.value;
             return {
-              key_as_string: bucket.key,
+              key_as_string: String(bucket.key),
               key: timestamp,
               doc_count: bucket.value,
             };

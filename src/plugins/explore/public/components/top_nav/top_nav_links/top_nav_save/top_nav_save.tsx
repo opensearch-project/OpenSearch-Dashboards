@@ -29,7 +29,6 @@ import { TabState } from '../../../../application/utils/state_management/slices'
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
-import { UrlTransformationState } from '../../../data_transformations';
 
 // One label for both the tooltip and the aria-label: "Save" alone was too easily confused with
 // the query panel's "Save query" control, which persists something different.
@@ -89,12 +88,7 @@ export const getSaveButtonRun =
     }: OnSaveProps): Promise<SaveResult | undefined> => {
       const visualizationBuilder = getVisualizationBuilder();
       const transformationService = visualizationBuilder.getTransformationService();
-      const pipeline = transformationService.pipeline$.getValue();
-      const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
-        definitionId: instance.definition_id,
-        config: instance.config,
-        hide: instance.hide,
-      }));
+      const serializedPipeline = transformationService.serializePipeline();
       const visConfig = visualizationBuilder.visConfig$.value;
       const axesMapping = visConfig?.axesMapping;
       const savedExploreWithState = saveStateToSavedObject(

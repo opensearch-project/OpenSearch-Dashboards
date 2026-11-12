@@ -25,4 +25,76 @@ describe('ErrorCallout', () => {
     expect(screen.getByText('Bad Request')).toBeInTheDocument();
     expect(screen.queryByText('Error: Bad Request')).not.toBeInTheDocument();
   });
+
+  it('names the source it was given', () => {
+    render(<ErrorCallout error="access denied" sourceLabel="My Metrics" />);
+    expect(screen.getByTestId('metricsExploreErrorCallout')).toHaveTextContent(
+      'We encountered a problem fetching data from the My Metrics data source. Check your connection and try again.'
+    );
+    expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent('access denied');
+  });
+
+  it('leads with the source, without the generic sentence, when the server wrote the message', () => {
+    render(
+      <ErrorCallout
+        error="You can't list these metrics. Ask for access."
+        sourceLabel="My Metrics"
+        fromServer
+      />
+    );
+    expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent(
+      'Check your connection'
+    );
+    expect(screen.getByText('The My Metrics data source returned an error:')).toBeInTheDocument();
+    expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent(
+      "You can't list these metrics. Ask for access."
+    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Unable to load metrics');
+  });
+
+  it.each([undefined, '', '   '])(
+    'leads with "the data source" for a server message without a label (%p)',
+    (sourceLabel?: string) => {
+      render(<ErrorCallout error="Response Error" sourceLabel={sourceLabel} fromServer />);
+      expect(screen.getByText('The data source returned an error:')).toBeInTheDocument();
+      expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveTextContent('Response Error');
+      expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent(
+        'Check your connection'
+      );
+    }
+  );
+
+  it("shows the server's sentence as text, and other messages as code", () => {
+    const { unmount } = render(<ErrorCallout error="Ask for access." fromServer />);
+    expect(screen.getByTestId('metricsExploreErrorMessage')).not.toHaveStyle({
+      fontFamily: 'monospace',
+    });
+    unmount();
+    render(<ErrorCallout error="Bad Gateway" />);
+    expect(screen.getByTestId('metricsExploreErrorMessage')).toHaveStyle({
+      fontFamily: 'monospace',
+    });
+  });
+
+  it('reads as before for Prometheus', () => {
+    render(<ErrorCallout error="Bad Request" sourceLabel="Prometheus" />);
+    expect(
+      screen.getByText(
+        'We encountered a problem fetching data from the Prometheus data source. Check your connection and try again.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it.each([undefined, '', '   '])(
+    'names no source type without a label (%p)',
+    (sourceLabel?: string) => {
+      render(<ErrorCallout error="access denied" sourceLabel={sourceLabel} />);
+      expect(
+        screen.getByText(
+          'We encountered a problem fetching data from the data source. Check your connection and try again.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('metricsExploreErrorCallout')).not.toHaveTextContent('Prometheus');
+    }
+  );
 });

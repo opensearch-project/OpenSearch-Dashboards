@@ -46,6 +46,8 @@ import {
 } from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
+import { Variable, VariableType } from '../../variables/types';
+import { VariableService } from '../../variables/variable_service';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
@@ -74,6 +76,11 @@ beforeEach(() => {
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
   options.embeddable = doStart();
+});
+
+// Restore spies even when a test fails; some spy on VariableService.prototype.
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 class TestDashboardContainer extends DashboardContainer {
@@ -659,45 +666,82 @@ test('constructor initializes with variables when provided', () => {
   container.destroy();
 });
 
-test('initVariableRefreshSubscription refreshes on timeRange change when query variables exist', async () => {
-  const variables = [
-    { id: 'qv1', name: 'queryVar', type: 'query' as const, value: '', options: [] },
-  ];
-  const initialInput = getSampleDashboardInput({ variables } as any);
-
+test('passes the time range and reload requests to the variable refresh scheduler', () => {
+  const startSpy = jest.spyOn(VariableService.prototype, 'startRefreshScheduler');
+  const initialInput = getSampleDashboardInput({ timeRange: { from: 'now-15m', to: 'now' } });
   const container = new DashboardContainer(initialInput, options);
 
-  const refreshSpy = jest.spyOn(container.variableService, 'refreshTimeFilteredVariableOptions');
-  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
+  expect(startSpy).toHaveBeenCalledTimes(1);
+  const { time$, reload$ } = startSpy.mock.calls[0][0];
+  const times: unknown[] = [];
+  let reloads = 0;
+  const subscriptions = [
+    time$.subscribe((time) => times.push(time)),
+    reload$.subscribe(() => reloads++),
+  ];
 
-  container.updateInput({
-    timeRange: { from: 'now-1h', to: 'now' },
-  });
+  // The first value is the initial time range; an unchanged range is not re-emitted.
+  container.updateInput({ timeRange: { from: 'now-15m', to: 'now' } });
+  container.updateInput({ timeRange: { from: 'now-1h', to: 'now' } });
+  container.updateInput({ lastReloadRequestTime: 12345 });
+  // The Refresh button calls reload() directly, without lastReloadRequestTime.
+  container.reload();
 
-  await new Promise((r) => setTimeout(r, 10));
+  expect(times).toEqual([
+    { from: 'now-15m', to: 'now' },
+    { from: 'now-1h', to: 'now' },
+  ]);
+  expect(reloads).toBe(2);
 
-  expect(refreshSpy).toHaveBeenCalled();
+  subscriptions.forEach((s) => s.unsubscribe());
   container.destroy();
 });
 
-test('initVariableRefreshSubscription refreshes all on reload when query variables exist', async () => {
-  const variables = [
-    { id: 'qv2', name: 'queryVar2', type: 'query' as const, value: '', options: [] },
+test('stops the variable refresh scheduler on destroy', () => {
+  const stop = jest.fn();
+  jest.spyOn(VariableService.prototype, 'startRefreshScheduler').mockReturnValue(stop);
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
+
+  container.destroy();
+
+  expect(stop).toHaveBeenCalled();
+});
+
+test('variable values changed in container input are applied to variableService', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
   ];
-  const initialInput = getSampleDashboardInput({ variables } as any);
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
 
-  const container = new DashboardContainer(initialInput, options);
+  container.updateInput({ variables: [{ ...variables[0], current: ['prod'] }] });
 
-  const refreshAllSpy = jest.spyOn(container.variableService, 'refreshAllVariableOptions');
-  jest.spyOn(container.variableService, 'getVariables').mockReturnValue(variables as any);
+  expect(container.variableService.getVariables()[0].current).toEqual(['prod']);
+  container.destroy();
+});
 
-  container.updateInput({
-    lastReloadRequestTime: new Date().getTime(),
-  });
+test('unchanged variables in container input are not re-applied to variableService', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
+  ];
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
+  const applySpy = jest.spyOn(container.variableService, 'applyCurrentValues');
 
-  await new Promise((r) => setTimeout(r, 10));
+  container.updateInput({ timeRange: { from: 'now-1h', to: 'now' } });
 
-  expect(refreshAllSpy).toHaveBeenCalled();
+  expect(applySpy).not.toHaveBeenCalled();
+  container.destroy();
+});
+
+test('variable value changes in variableService still update container input', () => {
+  const variables: Variable[] = [
+    { id: 'env', name: 'env', type: VariableType.Custom, current: ['dev'], customOptions: [] },
+  ];
+  const container = new DashboardContainer(getSampleDashboardInput({ variables }), options);
+
+  container.variableService.updateVariableValue('env', ['prod']);
+
+  expect(container.getInput().variables?.[0].current).toEqual(['prod']);
+  expect(container.variableService.getVariables()[0].current).toEqual(['prod']);
   container.destroy();
 });
 
@@ -778,4 +822,82 @@ test('getStateTransferContainerInfoData is inert when the sections flag is off',
   expect(container.getStateTransferContainerInfoData()).toBeUndefined();
 
   container.destroy();
+});
+
+test('getInheritedInput tolerates options being unset (base-constructor emission)', () => {
+  // The base Container constructor emits input (creating children, which calls
+  // getInputForChild -> getInheritedInput) before DashboardContainer assigns
+  // this.options. Reading this.options.allowDashboardSections there throws, so
+  // getInheritedInput must tolerate an undefined options.
+  const stub = {
+    input: {
+      viewMode: ViewMode.VIEW,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      timeRange: { from: 'now-15m', to: 'now' },
+      layout: undefined,
+    },
+    // options intentionally left unset.
+  };
+  const getInheritedInput = (DashboardContainer.prototype as any).getInheritedInput;
+
+  let result: any;
+  expect(() => {
+    result = getInheritedInput.call(stub, 'panel-1');
+  }).not.toThrow();
+  expect(result.isVisible).toBe(true);
+  expect(result.id).toBe('panel-1');
+});
+
+describe('getInheritedInput isVisible', () => {
+  const getInheritedInput = (DashboardContainer.prototype as any).getInheritedInput;
+  const member = (idRef: string) => ({
+    idRef,
+    type: 'panel' as const,
+    gridData: { x: 0, y: 0, w: 24, h: 10 },
+  });
+  // s1 is collapsed (a, b), s2 is expanded (c); d is unclaimed (Ungrouped).
+  const sectionLayout = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 's1',
+        type: 'section',
+        name: 'S1',
+        collapsed: true,
+        members: [member('a'), member('b')],
+      },
+      { id: 's2', type: 'section', name: 'S2', collapsed: false, members: [member('c')] },
+    ],
+  };
+  const makeStub = (layout: unknown, allowDashboardSections: boolean) => ({
+    input: {
+      viewMode: ViewMode.VIEW,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      timeRange: { from: 'now-15m', to: 'now' },
+      layout,
+    },
+    options: { allowDashboardSections },
+  });
+  const visibility = (stub: unknown, id: string) => getInheritedInput.call(stub, id).isVisible;
+
+  test('marks members of a collapsed section not visible and everything else visible', () => {
+    const stub = makeStub(sectionLayout, true);
+    expect(visibility(stub, 'a')).toBe(false);
+    expect(visibility(stub, 'b')).toBe(false);
+    expect(visibility(stub, 'c')).toBe(true);
+    expect(visibility(stub, 'd')).toBe(true);
+  });
+
+  test('treats every panel as visible when dashboard sections are disabled', () => {
+    const stub = makeStub(sectionLayout, false);
+    expect(visibility(stub, 'a')).toBe(true);
+    expect(visibility(stub, 'c')).toBe(true);
+  });
+
+  test('treats every panel as visible in a GridLayout', () => {
+    const stub = makeStub({ type: 'GridLayout', items: [] }, true);
+    expect(visibility(stub, 'a')).toBe(true);
+  });
 });

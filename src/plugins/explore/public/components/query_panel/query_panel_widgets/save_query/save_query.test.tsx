@@ -94,6 +94,11 @@ jest.doMock('../../../../application/utils/state_management/actions/query_action
 
 jest.doMock('../../../../application/utils/state_management/slices', () => ({
   clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
+  clearQueryStatusMap: jest.fn(() => ({ type: 'queryEditor/clearQueryStatusMap' })),
+  setIsQueryEditorDirty: jest.fn((dirty: boolean) => ({
+    type: 'queryEditor/setIsQueryEditorDirty',
+    payload: dirty,
+  })),
   setSavedQuery: jest.fn(() => ({ type: 'legacy/setSavedQuery' })),
   setQueryState: jest.fn(() => ({ type: 'query/setQueryState' })),
   setDateRange: jest.fn(() => ({ type: 'query/setDateRange' })),
@@ -154,6 +159,23 @@ jest.doMock('../../../../../../data/public', () => {
           }
         >
           Load Query
+        </button>
+        <button
+          data-test-subj="mock-load-explicit-run-button"
+          onClick={() =>
+            onLoad({
+              id: 'explicit-query-id',
+              attributes: {
+                query: {
+                  query: 'fields @message',
+                  language: 'FakeQL',
+                  dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' },
+                },
+              },
+            })
+          }
+        >
+          Load Explicit Run Query
         </button>
         <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
           Clear Query
@@ -324,13 +346,51 @@ describe('SaveQueryButton', () => {
           }),
         }),
         mockSetEditorTextWithQuery,
-        'SELECT * FROM test'
+        'SELECT * FROM test',
+        // The saved query has no dataset of its own here.
+        undefined
       );
       expect(mockTimeFilter.setRefreshInterval).toHaveBeenCalledWith({
         pause: false,
         value: 5000,
       });
     });
+  });
+
+  it('loads a saved query without running it when its dataset type requires an explicit Run', async () => {
+    (mockQueryStringManager as any).getDatasetService = jest.fn(() => ({
+      getType: (type: string) =>
+        type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined,
+    }));
+    renderWithStore();
+    fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+    fireEvent.click(screen.getByTestId('mock-load-explicit-run-button'));
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/setQueryState' });
+      expect(mockLoadQueryActionCreator).toHaveBeenCalled();
+    });
+    // The saved query's own dataset decides, not the current one.
+    expect(
+      mockLoadQueryActionCreator.mock.calls[mockLoadQueryActionCreator.mock.calls.length - 1][3]
+    ).toEqual(expect.objectContaining({ type: 'EXPLICIT_RUN_TYPE' }));
+    expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'query/executeQueries/pending' });
+    // The previous results are cleared and the query is staged for Run.
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'queryEditor/clearQueryStatusMap' });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setIsQueryEditorDirty',
+      payload: true,
+    });
+    delete (mockQueryStringManager as any).getDatasetService;
+  });
+
+  it('runs a loaded saved query of any other dataset type', async () => {
+    renderWithStore();
+    fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+    fireEvent.click(screen.getByTestId('mock-load-button'));
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/executeQueries/pending' })
+    );
   });
 
   it('clears saved query when clear is triggered', async () => {
