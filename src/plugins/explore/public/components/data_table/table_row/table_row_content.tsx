@@ -18,6 +18,8 @@ import { TableCell } from '../table_cell/table_cell';
 import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
+import { useFormatJson } from '../table_cell/json_tree/format_json_setting';
+import { tryParseJson } from '../table_cell/json_tree/json_utils';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { isSourceColumn } from '../../../helpers/is_source_column';
 
