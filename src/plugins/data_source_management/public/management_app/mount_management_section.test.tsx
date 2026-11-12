@@ -22,9 +22,13 @@ import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_q
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { act } from 'react';
 import { DirectQueryConnectionFlowRegistry } from '../direct_query_connection_flow_registry';
+import { DataConnectionsExperience } from '../components/data_connections_experience';
 
 jest.mock('../components/data_source_creation_panel/create_data_source_panel', () => ({
   CreateDataSourcePanel: () => <div>CreateDataSourcePanel</div>,
+}));
+jest.mock('../components/create_data_connection_panel/create_data_connection_panel', () => ({
+  CreateDataConnectionPanel: () => <div>CreateDataConnectionPanel</div>,
 }));
 jest.mock('../components/create_data_source_wizard', () => ({
   CreateDataSourceWizardWithRouter: () => <div>CreateDataSourceWizardWithRouter</div>,
@@ -34,6 +38,9 @@ jest.mock('../components/edit_data_source', () => ({
 }));
 jest.mock('../components/data_source_home_panel/data_source_home_panel', () => ({
   DataSourceHomePanel: () => <div>DataSourceHomePanel</div>,
+}));
+jest.mock('../components/data_connections_home_panel/data_connections_home_panel', () => ({
+  DataConnectionsHomePanel: () => <div>DataConnectionsHomePanel</div>,
 }));
 jest.mock(
   '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources',
@@ -266,6 +273,52 @@ describe('mountManagementSection', () => {
       act(() => unmount());
     });
 
+    describe('with a flow that does not require data source management', () => {
+      const createRegistryWithOpenFlow = () => {
+        const { registry, flow } = createRegistryWithFlow();
+        const openFlow = {
+          id: 'open-flow',
+          title: 'Open connection',
+          buttonLabel: 'Connect open data source',
+          requiresDataSourceManagement: false,
+          mount: jest.fn(({ element }: { element: HTMLElement }) => {
+            element.textContent = 'OpenFlow';
+            return () => {};
+          }),
+        };
+        registry.registerDirectQueryConnectionFlow(openFlow);
+        return { registry, flow, openFlow };
+      };
+
+      it('mounts that flow for a user who cannot manage data sources', async () => {
+        const { registry, openFlow } = createRegistryWithOpenFlow();
+        const { element, unmount } = await mountAt('/flows/open-flow/manage/so-1', false, registry);
+        expect(openFlow.mount).toHaveBeenCalledTimes(1);
+        expect(openFlow.mount.mock.calls[0][0]).toEqual(
+          expect.objectContaining({ path: '/manage/so-1' })
+        );
+        expect(element.textContent).toContain('OpenFlow');
+        act(() => unmount());
+      });
+
+      it('shows "not available" for the other flows there', async () => {
+        const { registry, flow } = createRegistryWithOpenFlow();
+        const { element, unmount } = await mountAt('/flows/example-flow', false, registry);
+        expect(flow.mount).not.toHaveBeenCalled();
+        expect(element.textContent).toContain('This connection flow is not available.');
+        expect(element.textContent).not.toContain('EditDataSourceWithRouter');
+        act(() => unmount());
+      });
+
+      it('still has no Create page without the data connections experience', async () => {
+        const { registry } = createRegistryWithOpenFlow();
+        const { element, unmount } = await mountAt('/create', false, registry);
+        expect(element.textContent).not.toContain('CreateDataSourcePanel');
+        expect(element.textContent).not.toContain('CreateDataConnectionPanel');
+        act(() => unmount());
+      });
+    });
+
     it.each([
       ['an empty registry', () => new DirectQueryConnectionFlowRegistry()],
       ['no registry', () => undefined],
@@ -279,4 +332,158 @@ describe('mountManagementSection', () => {
       }
     );
   });
+});
+
+describe('data connections experience', () => {
+  // A plugin registers the experience; here it is on when a made-up capability says so.
+  const experience: DataConnectionsExperience = {
+    isEnabled: (capabilities) => (capabilities as any).exampleFlags?.connectionsTable === true,
+  };
+  const mountPage = async (
+    path: string,
+    capabilities: Record<string, unknown>,
+    // null: no plugin registered an experience.
+    registered: DataConnectionsExperience | null = experience
+  ) => {
+    const history = new ScopedHistory(
+      createMemoryHistory({ initialEntries: [`/app/dataSources${path}`] }),
+      '/app/dataSources'
+    );
+    const element = document.createElement('div');
+    let unmount: () => void = () => {};
+    await act(async () => {
+      unmount = await mountManagementSection(
+        jest.fn().mockResolvedValue([
+          {
+            chrome: { docTitle: { reset: jest.fn() } },
+            application: { capabilities },
+            savedObjects: {},
+            uiSettings: { get: jest.fn(() => false) },
+            notifications: { toasts: { addDanger: jest.fn() } },
+            overlays: {},
+            http: {},
+            docLinks: {},
+          },
+          { navigation: {} },
+        ]) as unknown as StartServicesAccessor<DataSourceManagementStartDependencies>,
+        { ...mockParams, element, history },
+        mockAuthMethodsRegistry,
+        true,
+        undefined,
+        registered ?? undefined
+      );
+    });
+    return { element, unmount };
+  };
+
+  it('lists every connection in one table when the registered experience is on', async () => {
+    const { element, unmount } = await mountPage('/', {
+      dataSource: { canManage: true },
+      exampleFlags: { connectionsTable: true },
+    });
+    expect(element.textContent).toContain('DataConnectionsHomePanel');
+    expect(element.textContent).not.toContain('DataSourceHomePanel');
+    act(() => unmount());
+  });
+
+  it.each([
+    ['the experience is off for the session', { connectionsTable: false }, experience],
+    ['no plugin registered an experience', { connectionsTable: true }, null],
+    [
+      'isEnabled throws',
+      { connectionsTable: true },
+      {
+        isEnabled: () => {
+          throw new Error('broken');
+        },
+      },
+    ],
+  ])('keeps the tabbed list when %s', async (_, exampleFlags, registered) => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { element, unmount } = await mountPage(
+      '/',
+      { dataSource: { canManage: true }, exampleFlags },
+      registered
+    );
+    error.mockRestore();
+    expect(element.textContent).toContain('DataSourceHomePanel');
+    expect(element.textContent).not.toContain('DataConnectionsHomePanel');
+    act(() => unmount());
+  });
+
+  it('shows the type cards on the Create page when the experience is on', async () => {
+    const { element, unmount } = await mountPage('/create', {
+      dataSource: { canManage: true },
+      exampleFlags: { connectionsTable: true },
+    });
+    expect(element.textContent).toContain('CreateDataConnectionPanel');
+    expect(element.textContent).not.toContain('CreateDataSourcePanel');
+    act(() => unmount());
+  });
+
+  it("keeps today's Create page when the experience is off", async () => {
+    const { element, unmount } = await mountPage('/create', {
+      dataSource: { canManage: true },
+      exampleFlags: { connectionsTable: false },
+    });
+    expect(element.textContent).toContain('CreateDataSourcePanel');
+    expect(element.textContent).not.toContain('CreateDataConnectionPanel');
+    act(() => unmount());
+  });
+
+  // The page lists only the types the user may connect (a flow may not require data source
+  // management); see CreateDataConnectionPanel.
+  it('opens the Create page for a user who cannot manage data sources when the experience is on', async () => {
+    const { element, unmount } = await mountPage('/create', {
+      dataSource: { canManage: false },
+      exampleFlags: { connectionsTable: true },
+    });
+    expect(element.textContent).toContain('CreateDataConnectionPanel');
+    act(() => unmount());
+  });
+
+  it('has no Create page for a user who cannot manage data sources when the experience is off', async () => {
+    const { element, unmount } = await mountPage('/create', {
+      dataSource: { canManage: false },
+      exampleFlags: { connectionsTable: false },
+    });
+    expect(element.textContent).not.toContain('CreateDataSourcePanel');
+    expect(element.textContent).not.toContain('CreateDataConnectionPanel');
+    act(() => unmount());
+  });
+
+  const flagOn = {
+    dataSource: { canManage: true },
+    exampleFlags: { connectionsTable: true },
+  };
+  const flagOff = {
+    dataSource: { canManage: true },
+    exampleFlags: { connectionsTable: false },
+  };
+
+  // The Create page lists the types; a type's setup page is a page of its own, with or without the
+  // flag, so it never shows the type page's cards.
+  it.each([
+    ['/configure/Prometheus', 'ConfigureDirectQueryDataSourceWithRouter', flagOn],
+    ['/configure/OpenSearch', 'CreateDataSourceWizardWithRouter', flagOn],
+    ['/configure/Prometheus', 'ConfigureDirectQueryDataSourceWithRouter', flagOff],
+    ['/configure/OpenSearch', 'CreateDataSourceWizardWithRouter', flagOff],
+  ])('opens the setup page at %s on a page of its own', async (path, page, capabilities) => {
+    const { element, unmount } = await mountPage(path, capabilities);
+    expect(element.textContent).toBe(page);
+    act(() => unmount());
+  });
+
+  it.each([
+    ['on', flagOn],
+    ['off', flagOff],
+  ])(
+    'opens a flow page without the Create page when the flag is %s',
+    async (_label, capabilities) => {
+      const { element, unmount } = await mountPage('/flows/example-flow', capabilities);
+      expect(element.textContent).not.toContain('CreateDataConnectionPanel');
+      expect(element.textContent).not.toContain('CreateDataSourcePanel');
+      act(() => unmount());
+    }
+  );
 });
