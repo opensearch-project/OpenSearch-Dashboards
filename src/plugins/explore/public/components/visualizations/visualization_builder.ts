@@ -16,7 +16,7 @@ import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows, hitsToSeriesResult } from './utils/normalize_result_rows';
-import { SeriesResult } from '../../application/in_context_vis_editor/multi_query_builder/utils';
+import type { SeriesResult } from '../../application/in_context_vis_editor/multi_query_builder/types';
 import { ChartConfig, SplitConfig, SplitLayout, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
@@ -28,6 +28,10 @@ import { TransformationService } from '../data_transformations/transformation_se
 import { registerAllTransformations } from '../data_transformations/register_all_transformations';
 import type { VariableValue } from '../../../../dashboard/public';
 import { toVisSnapshot, VisSnapshot } from './vis_snapshot';
+import type { FinalPipelineSeriesResult } from '../data_transformations/types';
+
+// The raw table's view of one query: its own result, or results after transformation
+export type RawTableStage = 'before' | 'after';
 
 interface VisState {
   title?: string;
@@ -70,6 +74,10 @@ export class VisualizationBuilder {
   showRawTable$ = new BehaviorSubject<boolean>(false);
   // which query's result the raw table shows (multi-query editor)
   rawTableRefId$ = new BehaviorSubject<string | undefined>(undefined);
+  // whether the raw table shows that query's data before or after the transformations
+  rawTableStage$ = new BehaviorSubject<RawTableStage>('before');
+  // the last pipeline run over the series: the raw table's After and Final views
+  pipelineResult$ = new BehaviorSubject<FinalPipelineSeriesResult | undefined>(undefined);
   /** The dashboard's current variable values, when editing a dashboard panel. */
   variables$ = new BehaviorSubject<VariableValue[]>([]);
   // The vis as saved; the vis is dirty when its current snapshot differs
@@ -258,12 +266,22 @@ export class VisualizationBuilder {
 
   setShowRawTable(on: boolean) {
     this.showRawTable$.next(on);
+    // A toggle starts the raw table over: the first query's data, before transformations.
+    this.rawTableRefId$.next(undefined);
+    this.rawTableStage$.next('before');
   }
 
   setRawTableRefId(refId?: string) {
     this.rawTableRefId$.next(refId);
   }
 
+  setRawTableStage(stage: RawTableStage) {
+    this.rawTableStage$.next(stage);
+  }
+
+  resetRawTableStage() {
+    this.rawTableStage$.next('before');
+  }
   setIsInitialized(isInitialized: boolean) {
     this.isInitialized = isInitialized;
   }
@@ -501,13 +519,10 @@ export class VisualizationBuilder {
     // A pipeline change re-runs the last series through it (watchPipeline).
     this.lastSeries = series;
 
-    // TODO multi query: draw every series; for now the first one.
-    const [first] = series;
-    if (!first) return;
-    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      first.rows,
-      first.fieldSchema
-    );
+    if (series.length === 0) return;
+    const pipelineResult = this.transformationService.applyPipelineToSeries(series);
+    this.pipelineResult$.next(pipelineResult);
+    const { rows: transformedRows, finalSchema, seriesDisplayNames } = pipelineResult;
     const { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
       normalizeResultRows(transformedRows, finalSchema);
 
@@ -517,7 +532,7 @@ export class VisualizationBuilder {
       categoricalColumns,
       dateColumns,
       unknownColumns,
-      seriesDisplayNames: first.seriesDisplayNames,
+      seriesDisplayNames,
     });
   }
 
@@ -616,6 +631,8 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.rawTableRefId$.complete();
+    this.rawTableStage$.complete();
+    this.pipelineResult$.complete();
     this.variables$.complete();
     this.savedVisSnapshot$.complete();
   }
@@ -627,6 +644,8 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.rawTableRefId$ = new BehaviorSubject<string | undefined>(undefined);
+    this.rawTableStage$ = new BehaviorSubject<RawTableStage>('before');
+    this.pipelineResult$ = new BehaviorSubject<FinalPipelineSeriesResult | undefined>(undefined);
     this.variables$ = new BehaviorSubject<VariableValue[]>([]);
     this.transformationService.reset();
     this.savedVisSnapshot$ = new BehaviorSubject<VisSnapshot | undefined>(undefined);

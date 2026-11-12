@@ -7,7 +7,7 @@ import { Logger, RequestHandlerContext, SharedGlobalConfig } from 'opensearch-da
 import { Observable, of } from 'rxjs';
 import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { SearchUsage } from '../../../data/server';
-import { promqlSearchStrategyProvider } from './promql_search_strategy';
+import { promqlSearchStrategyProvider, seriesPrefix } from './promql_search_strategy';
 import { prometheusManager } from '../connections/managers/prometheus_manager';
 import { queryManagerService } from '../connections/query_manager_service';
 
@@ -321,6 +321,39 @@ describe('promqlSearchStrategy', () => {
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.seriesDisplayNames).toEqual({
         [identity as string]: 'prometheus-localhost:9090',
+      });
+    });
+
+    it("prefixes Series and the display-name keys with the row's refId", async () => {
+      mockPrometheusManagerQuery({
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [{ metric: { job: 'prometheus' }, values: [[1638316800, 1]] }],
+          },
+        },
+      });
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'up', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+            options: { refId: 'B', perQueryOptions: [{ legendFormat: '{{job}}' }] },
+            timeRange: { from: '2021-12-01T00:00:00.000Z', to: '2021-12-01T01:00:00.000Z' },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values[0]).toBe('B: {job="prometheus"}');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toEqual({
+        'B: {job="prometheus"}': 'prometheus',
       });
     });
 
@@ -1817,5 +1850,18 @@ describe('promqlSearchStrategy', () => {
       expect(prometheusManager.query).toHaveBeenCalledTimes(2);
       expect(myManager.query).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('seriesPrefix', () => {
+  it("uses the row's refId, then the expression's label for several expressions", () => {
+    expect(seriesPrefix('A', 'A', true)).toBe('A');
+    expect(seriesPrefix('A', 'A', false)).toBe('A-A');
+    expect(seriesPrefix('A', 'B', false)).toBe('A-B');
+  });
+
+  it('keeps the old names without a refId (Metrics page)', () => {
+    expect(seriesPrefix(undefined, 'A', true)).toBeUndefined();
+    expect(seriesPrefix(undefined, 'B', false)).toBe('B');
   });
 });

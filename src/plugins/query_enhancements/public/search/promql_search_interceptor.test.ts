@@ -89,6 +89,22 @@ describe('PromQLSearchInterceptor', () => {
     expect(context.body?.timeRange).toEqual({ from: 'now-1h', to: 'now' });
   });
 
+  it("forwards the row's refId", () => {
+    const request = {
+      params: {
+        body: {
+          query: {
+            queries: [{ query: 'up', language: 'PROMQL', queryOptions: { refId: 'B' } }],
+          },
+        },
+      },
+    } as unknown as IOpenSearchDashboardsSearchRequest;
+    interceptor.search(request, options);
+
+    const [context] = mockFetch.mock.calls[0];
+    expect(context.body?.options?.refId).toBe('B');
+  });
+
   it('reads the options off the requested query rather than the global query state', () => {
     // A dashboard embeddable executes its own saved query while the global query state belongs
     // to the dashboard's query bar.

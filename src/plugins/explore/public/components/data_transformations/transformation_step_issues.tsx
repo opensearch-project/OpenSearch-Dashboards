@@ -32,6 +32,9 @@ const issueCodeLabels: Record<TransformationIssueCode, string> = {
   execution_error: i18n.translate('explore.transformations.stepIssues.executionErrorLabel', {
     defaultMessage: 'Execution error',
   }),
+  missing_series: i18n.translate('explore.transformations.stepIssues.missingSeriesLabel', {
+    defaultMessage: 'Missing series',
+  }),
 };
 
 /**

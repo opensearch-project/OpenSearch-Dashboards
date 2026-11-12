@@ -4,7 +4,11 @@
  */
 
 import { TransformationService } from './transformation_service';
-import { TransformationDefinition, TransformationInstance } from './types';
+import {
+  MultiSeriesTransformationInstance,
+  TransformationDefinition,
+  TransformationInstance,
+} from './types';
 const createRow = (source: Record<string, unknown>) => source;
 
 const createMockDefinition = (
@@ -511,6 +515,267 @@ describe('TransformationService', () => {
       service.applyPipeline([createRow({ a: 1 })]);
 
       expect(service.stepResults$.getValue().size).toBe(0);
+    });
+  });
+});
+
+describe('TransformationService.applyPipelineToSeries', () => {
+  let service: TransformationService;
+  const num = (name: string) => ({ name, type: 'number' });
+  const str = (name: string) => ({ name, type: 'string' });
+  const oneSeries = (refId: string, rows: Array<Record<string, unknown>>, schema: any[]) => ({
+    refId,
+    rows,
+    fieldSchema: schema,
+  });
+  const seriesA = () => oneSeries('A', [{ size: 'S', value: 1 }], [str('size'), num('value')]);
+  const seriesB = () => oneSeries('B', [{ cate: 'X', value: 2 }], [str('cate'), num('value')]);
+
+  // A single-series step that keeps the rows where `field` is present, like a field-based step.
+  const fieldStep = (field: string): TransformationInstance => ({
+    instance_id: `step_${field}`,
+    definition_id: 'field_step',
+    config: { field },
+    hide: false,
+    transformationMethod: (rows, config: any) =>
+      rows.some((row) => config.field in row)
+        ? { rows: rows.map((row) => ({ ...row, seen: true })), status: 'applied', issues: [] }
+        : {
+            rows,
+            status: 'skipped',
+            issues: [{ code: 'missing_fields', fields: [config.field], message: 'missing' }],
+          },
+    Editor: (() => null) as any,
+  });
+
+  const seriesStep = (
+    seriesMethod: MultiSeriesTransformationInstance['seriesMethod']
+  ): MultiSeriesTransformationInstance => ({
+    instance_id: 'multi',
+    definition_id: 'multi_step',
+    config: {},
+    hide: false,
+    seriesMethod,
+    Editor: (() => null) as any,
+  });
+
+  beforeEach(() => {
+    service = new TransformationService();
+  });
+
+  afterEach(() => {
+    service.destroy();
+  });
+
+  it('gives one series the same result as applyPipeline, without a Query column', () => {
+    service.setPipeline([fieldStep('size')]);
+    const fromSeries = service.applyPipelineToSeries([seriesA()]);
+    const fromRows = service.applyPipeline(seriesA().rows, seriesA().fieldSchema);
+
+    expect(fromSeries.rows).toEqual(fromRows.rows);
+    expect(fromSeries.finalSchema).toEqual(fromRows.finalSchema);
+    expect(fromSeries.steps).toEqual(fromRows.steps);
+    expect(fromSeries.finalSchema.map(({ name }) => name)).not.toContain('Query');
+  });
+
+  it('merges several series at the end, tagging each row with its query', () => {
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(result.series).toHaveLength(2);
+    expect(result.rows).toEqual([
+      { size: 'S', value: 1, Query: 'A' },
+      { cate: 'X', value: 2, Query: 'B' },
+    ]);
+    expect(result.finalSchema).toEqual([str('size'), num('value'), str('cate'), str('Query')]);
+  });
+
+  it('runs a single-series step without applyTo on the only series', () => {
+    service.setPipeline([fieldStep('value')]);
+    const result = service.applyPipelineToSeries([seriesA()]);
+
+    expect(result.series[0].rows[0].seen).toBe(true);
+    expect(result.steps[0]).toMatchObject({ status: 'applied', issues: [] });
+  });
+
+  it('waits for a query to be picked with several series and no applyTo', () => {
+    service.setPipeline([fieldStep('value')]);
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(result.series.map(({ rows }) => rows[0].seen)).toEqual([undefined, undefined]);
+    expect(result.steps[0]).toMatchObject({
+      status: 'skipped',
+      issues: [{ code: 'invalid_config' }],
+    });
+  });
+
+  it('reports the picked series missing the field, though another series has it', () => {
+    service.setPipeline([{ ...fieldStep('cate'), applyTo: 'A' }]);
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(result.series.map(({ rows }) => rows[0].seen)).toEqual([undefined, undefined]);
+    expect(result.steps[0].status).toBe('skipped');
+  });
+
+  it('reports missing fields when the series has none of them', () => {
+    service.setPipeline([fieldStep('nowhere')]);
+    const result = service.applyPipelineToSeries([seriesA()]);
+
+    expect(result.steps[0].status).toBe('skipped');
+    expect(result.steps[0].issues).toEqual([
+      { code: 'missing_fields', fields: ['nowhere'], message: 'missing' },
+    ]);
+  });
+
+  it('gives a multi-series step every series, and merges no further once it returns one', () => {
+    const seriesMethod = jest.fn((series: any[]) => ({
+      series: [
+        { refId: 'AB', rows: series.flatMap(({ rows }) => rows), fieldSchema: [num('value')] },
+      ],
+      status: 'applied' as const,
+      issues: [],
+    }));
+    service.setPipeline([seriesStep(seriesMethod)]);
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(seriesMethod.mock.calls[0][0].map(({ refId }: any) => refId)).toEqual(['A', 'B']);
+    expect(result.series).toHaveLength(1);
+    expect(result.finalSchema.map(({ name }) => name)).not.toContain('Query');
+  });
+
+  it('skips a hidden multi-series step', () => {
+    const seriesMethod = jest.fn();
+    service.setPipeline([{ ...seriesStep(seriesMethod as any), hide: true }]);
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(seriesMethod).not.toHaveBeenCalled();
+    expect(result.steps[0].status).toBe('skipped');
+  });
+
+  it('keeps the series when a multi-series step throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    service.setPipeline([
+      seriesStep(() => {
+        throw new Error('boom');
+      }),
+    ]);
+    const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(result.series.map(({ refId }) => refId)).toEqual(['A', 'B']);
+    expect(result.steps[0]).toMatchObject({
+      status: 'failed',
+      issues: [{ code: 'execution_error', message: 'boom' }],
+    });
+  });
+
+  it("offers a single-series step the only series' fields without applyTo", () => {
+    service.setPipeline([fieldStep('value')]);
+    service.applyPipelineToSeries([seriesA()]);
+
+    expect(service.stageFields$.getValue().get('step_value')).toEqual([str('size'), num('value')]);
+  });
+
+  it('offers no fields until a query is picked with several series', () => {
+    service.setPipeline([fieldStep('value')]);
+    service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(service.stageFields$.getValue().get('step_value')).toEqual([]);
+    expect(service.stageRefIds$.getValue().get('step_value')).toEqual(['A', 'B']);
+  });
+
+  it("keeps a step on its picked query: hiding that query doesn't move it to another", () => {
+    service.setPipeline([{ ...fieldStep('value'), applyTo: 'A' }]);
+    const result = service.applyPipelineToSeries([
+      seriesB(),
+      oneSeries('C', [{ value: 3 }], [num('value')]),
+    ]);
+
+    expect(result.series.map(({ rows }) => rows[0].seen)).toEqual([undefined, undefined]);
+    expect(result.steps[0].issues[0].code).toBe('missing_series');
+    expect(service.stageFields$.getValue().get('step_value')).toEqual([]);
+  });
+
+  it("offers a multi-series step the union of its series' fields", () => {
+    const step = seriesStep(
+      jest.fn((series: any[]) => ({ series, status: 'applied', issues: [] }))
+    );
+    service.setPipeline([step]);
+    service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+    expect(service.stageFields$.getValue().get(step.instance_id)).toEqual([
+      str('size'),
+      num('value'),
+      str('cate'),
+    ]);
+  });
+
+  describe('applyTo', () => {
+    it('runs a single-series step only on the picked series', () => {
+      service.setPipeline([{ ...fieldStep('value'), applyTo: 'B' }]);
+      const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+      expect(result.series[0].rows).toEqual([{ size: 'S', value: 1 }]);
+      expect(result.series[1].rows).toEqual([{ cate: 'X', value: 2, seen: true }]);
+      expect(result.steps[0].status).toBe('applied');
+    });
+
+    it("offers the picked series' fields and every series's refIds", () => {
+      service.setPipeline([{ ...fieldStep('value'), applyTo: 'B' }]);
+      service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+      expect(service.stageFields$.getValue().get('step_value')).toEqual([
+        str('cate'),
+        num('value'),
+      ]);
+      expect(service.stageRefIds$.getValue().get('step_value')).toEqual(['A', 'B']);
+    });
+
+    it("is skipped with missing_series when the picked series isn't in the input", () => {
+      service.setPipeline([{ ...fieldStep('value'), applyTo: 'C' }]);
+      const result = service.applyPipelineToSeries([seriesA(), seriesB()]);
+
+      expect(result.steps[0]).toMatchObject({
+        status: 'skipped',
+        issues: [{ code: 'missing_series' }],
+      });
+      expect(result.series.map(({ rows }) => rows[0].seen)).toEqual([undefined, undefined]);
+    });
+
+    it('is set by updateInstanceApplyTo and survives serialize / restore', () => {
+      service.registerDefinition({
+        id: 'field_step',
+        type: 'filter',
+        label: 'Field step',
+        description: '',
+        iconType: 'filter',
+        createInstance: () => fieldStep('value'),
+      });
+      service.setPipeline([fieldStep('value')]);
+      service.updateInstanceApplyTo('step_value', 'A');
+
+      const serialized = service.serializePipeline();
+      expect(serialized[0].applyTo).toBe('A');
+
+      service.setPipeline([]);
+      service.restoreFromState(serialized);
+      expect(service.pipeline$.getValue()[0].applyTo).toBe('A');
+
+      service.updateInstanceApplyTo(service.pipeline$.getValue()[0].instance_id, undefined);
+      expect(service.serializePipeline()[0]).not.toHaveProperty('applyTo');
+    });
+
+    it('drops a non-string applyTo restored from the URL', () => {
+      service.registerDefinition({
+        id: 'field_step',
+        type: 'filter',
+        label: 'Field step',
+        description: '',
+        iconType: 'filter',
+        createInstance: () => fieldStep('value'),
+      });
+      service.restoreFromState([
+        { definitionId: 'field_step', config: {}, hide: false, applyTo: { x: 1 } as never },
+      ]);
+      expect(service.pipeline$.getValue()[0]).not.toHaveProperty('applyTo');
     });
   });
 });

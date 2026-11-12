@@ -543,6 +543,64 @@ describe('VisualizationBuilder', () => {
     });
   });
 
+  describe('handleSeries()', () => {
+    // Series rows are flattened (toSeriesResult).
+    const fieldSchema = [{ type: 'int', name: 'age' }];
+    const names = (builder: VisualizationBuilder) =>
+      [
+        ...(builder.data$.value?.numericalColumns ?? []),
+        ...(builder.data$.value?.categoricalColumns ?? []),
+      ].map(({ name }) => name);
+
+    test('draws one query as before, without a Query column', () => {
+      const builder = new VisualizationBuilder({});
+      builder.handleSeries([{ refId: 'A', rows: [{ age: 1 }], fieldSchema }]);
+
+      expect(names(builder)).toEqual(['age']);
+      expect(builder.data$.value?.transformedData).toEqual([{ age: 1 }]);
+    });
+
+    test('merges several queries, tagging each row with its query', () => {
+      const builder = new VisualizationBuilder({});
+      builder.handleSeries([
+        { refId: 'A', rows: [{ age: 1 }], fieldSchema },
+        { refId: 'B', rows: [{ age: 2 }], fieldSchema },
+      ]);
+
+      expect(names(builder)).toEqual(['age', 'Query']);
+      expect(builder.data$.value?.transformedData).toEqual([
+        { age: 1, Query: 'A' },
+        { age: 2, Query: 'B' },
+      ]);
+    });
+
+    test('draws nothing before a result', () => {
+      const builder = new VisualizationBuilder({});
+      builder.handleSeries([]);
+      expect(builder.data$.value).toBeUndefined();
+    });
+
+    test('re-runs the last queries when the pipeline changes', () => {
+      jest.useFakeTimers();
+      const builder = new VisualizationBuilder({});
+      builder.handleSeries([
+        { refId: 'A', rows: [{ age: 1 }], fieldSchema },
+        { refId: 'B', rows: [{ age: 2 }], fieldSchema },
+      ]);
+
+      // A new step re-runs the last series.
+      const service = builder.getTransformationService();
+      service.addInstance('limit');
+      const [limit] = service.pipeline$.value;
+      service.updateInstanceConfig(limit.instance_id, { limit: 0 });
+      service.updateInstanceApplyTo(limit.instance_id, 'A');
+      // getPipeline$ is debounced.
+      jest.runOnlyPendingTimers();
+      expect(builder.data$.value?.transformedData).toEqual([{ age: 2, Query: 'B' }]);
+      jest.useRealTimers();
+    });
+  });
+
   test('should update with normalized data', () => {
     const builder = new VisualizationBuilder({});
     builder.handleData(

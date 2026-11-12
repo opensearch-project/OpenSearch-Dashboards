@@ -112,6 +112,9 @@ beforeEach(() => {
       renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
       showRawTable$: new BehaviorSubject(false),
       rawTableRefId$: new BehaviorSubject(undefined),
+      rawTableStage$: new BehaviorSubject('before'),
+      pipelineResult$: new BehaviorSubject(undefined),
+      data$: new BehaviorSubject(undefined),
       setQueryField: jest.fn(),
     },
   });
@@ -191,6 +194,9 @@ describe('ResizableQueryPanelAndVisualization', () => {
         renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
         showRawTable$: new BehaviorSubject(true),
         rawTableRefId$: new BehaviorSubject('B'),
+        rawTableStage$: new BehaviorSubject('before'),
+        pipelineResult$: new BehaviorSubject(undefined),
+        data$: new BehaviorSubject(undefined),
         setQueryField: jest.fn(),
       },
     });
@@ -225,6 +231,9 @@ describe('ResizableQueryPanelAndVisualization', () => {
         renderVisualization: jest.fn().mockReturnValue(<div data-test-subj="visualization" />),
         showRawTable$: new BehaviorSubject(false),
         rawTableRefId$: new BehaviorSubject(undefined),
+        rawTableStage$: new BehaviorSubject('before'),
+        pipelineResult$: new BehaviorSubject(undefined),
+        data$: new BehaviorSubject(undefined),
       },
     });
     (useQueryBuilderState as jest.Mock).mockReturnValue(

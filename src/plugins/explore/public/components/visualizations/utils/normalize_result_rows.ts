@@ -6,7 +6,7 @@
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { NormalizedRow } from '../../data_transformations/types';
 import { isCompleteFieldSchema } from '../../data_transformations/transformation_utils';
-import { SeriesResult } from '../../../application/in_context_vis_editor/multi_query_builder/utils';
+import type { SeriesResult } from '../../../application/in_context_vis_editor/multi_query_builder/types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
 

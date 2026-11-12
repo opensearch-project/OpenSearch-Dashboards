@@ -160,6 +160,8 @@ export const pivot =
         let groupValue: string | Date;
 
         if (isTimeBased && effectiveTimeUnit) {
+          // Skip rows with missing time field
+          if (!row[groupBy]) return acc;
           // Time-based grouping
           const timestamp = parseUTCDate(row[groupBy]);
 

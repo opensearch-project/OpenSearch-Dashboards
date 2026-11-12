@@ -36,6 +36,10 @@ import {
   extractFieldsConfigSchema,
   extractFieldsTransformationDefinition,
 } from './transformations/extract_fields_transformation';
+import {
+  mergeSeriesConfigSchema,
+  mergeSeriesTransformationDefinition,
+} from './transformations/merge_series_transformation';
 import { TransformationConfigSchema, TransformationDefinition } from './types';
 
 function createTransformationDefinitionEntry<T>(
@@ -67,6 +71,7 @@ const transformationDefinitionEntries = [
     extractFieldsTransformationDefinition,
     extractFieldsConfigSchema
   ),
+  createTransformationDefinitionEntry(mergeSeriesTransformationDefinition, mergeSeriesConfigSchema),
 ];
 
 export function getAllTransformationDefinitions() {

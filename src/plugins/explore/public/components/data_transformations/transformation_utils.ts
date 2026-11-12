@@ -7,7 +7,7 @@ import { get, has } from 'lodash';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES, PPL_FIELD_TYPES } from '../../../../data/common';
 import {
   FieldSchema,
-  TransformationInstance,
+  AllTransformationInstance,
   TransformationPipeline,
   TransformationExecutionResult,
   TransformationExecutionStatus,
@@ -51,9 +51,12 @@ export const isNumericalField = (field?: FieldSchema): boolean =>
 export const isDateField = (field?: FieldSchema): boolean =>
   !!field?.type && DATE_FIELD_TYPES.has(field.type);
 
+// The definition type of the steps that combine several queries' series (grouped in the Add menu).
+export const COMBINE_TRANSFORMATION_TYPE = 'combine';
+
 export function addTransformation(
   currentPipe: TransformationPipeline,
-  instance: TransformationInstance
+  instance: AllTransformationInstance
 ): TransformationPipeline {
   return [...currentPipe, instance];
 }
