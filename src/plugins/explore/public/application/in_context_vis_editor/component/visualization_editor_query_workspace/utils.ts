@@ -6,7 +6,7 @@
 import { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  TransformationInstance,
+  TransformationPipeline,
   TransformationService,
   TransformationStepResult,
 } from '../../../../components/data_transformations';
@@ -80,7 +80,7 @@ export const buildQuerySection = (
 });
 
 export const buildTransformSection = (
-  transformPipeline: TransformationInstance[],
+  transformPipeline: TransformationPipeline,
   transformationService: TransformationService,
   transformStepResults?: Map<string, TransformationStepResult>
 ): Section => ({

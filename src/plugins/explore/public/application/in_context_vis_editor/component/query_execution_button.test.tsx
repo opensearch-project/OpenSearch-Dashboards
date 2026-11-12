@@ -24,7 +24,13 @@ jest.mock('../../../../../data/public', () => ({
 
 // dateRange is the shared range of all queries (top-level), not part of the row's editor state.
 // isStale is the container's "rows changed since the last run" flag.
-const buildState = ({ dateRange, isStale = false, ...overrides }: Record<string, any> = {}) => ({
+// isExecuting is the container's "a batch of rows is running" flag (what Stop follows).
+const buildState = ({
+  dateRange,
+  isStale = false,
+  isExecuting = false,
+  ...overrides
+}: Record<string, any> = {}) => ({
   queryEditorState: {
     userInitiatedQuery: false,
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
@@ -32,7 +38,11 @@ const buildState = ({ dateRange, isStale = false, ...overrides }: Record<string,
   },
   dateRange,
   // container: { getIsStale$: () => of(isStale) },
-  container: { isStale$: new BehaviorSubject(isStale) },
+  // container: { isStale$: new BehaviorSubject(isStale) },
+  container: {
+    isStale$: new BehaviorSubject(isStale),
+    isExecuting$: new BehaviorSubject(isExecuting),
+  },
 });
 
 beforeEach(() => {
@@ -87,10 +97,7 @@ describe('QueryExecutionButton', () => {
   });
 
   describe('Run and Stop', () => {
-    const running = buildState({
-      queryStatus: { status: QueryExecutionStatus.LOADING },
-      userInitiatedQuery: true,
-    });
+    const running = buildState({ isExecuting: true });
 
     it('reads Refresh when no query is running', () => {
       render(<QueryExecutionButton onCancel={jest.fn()} />);
@@ -98,11 +105,20 @@ describe('QueryExecutionButton', () => {
       expect(screen.queryByTestId('exploreQueryStopButton')).not.toBeInTheDocument();
     });
 
-    it('does not offer Stop for a query the user did not start', () => {
+    it('offers Stop while another row runs, though the selected row is done', () => {
+      (useQueryBuilderState as jest.Mock).mockReturnValue(
+        buildState({ isExecuting: true, queryStatus: { status: QueryExecutionStatus.READY } })
+      );
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.getByTestId('exploreQueryStopButton')).toBeInTheDocument();
+    });
+
+    it('does not offer Stop while the selected row loads outside a batch', () => {
       (useQueryBuilderState as jest.Mock).mockReturnValue(
         buildState({
+          isExecuting: false,
           queryStatus: { status: QueryExecutionStatus.LOADING },
-          userInitiatedQuery: false,
+          userInitiatedQuery: true,
         })
       );
       render(<QueryExecutionButton onCancel={jest.fn()} />);
@@ -130,11 +146,7 @@ describe('QueryExecutionButton', () => {
     it('offers Stop even when the time range is invalid', () => {
       (isTimeRangeInvalid as jest.Mock).mockReturnValue(true);
       (useQueryBuilderState as jest.Mock).mockReturnValue(
-        buildState({
-          queryStatus: { status: QueryExecutionStatus.LOADING },
-          userInitiatedQuery: true,
-          dateRange: { from: 'now', to: 'now' },
-        })
+        buildState({ isExecuting: true, dateRange: { from: 'now', to: 'now' } })
       );
       render(<QueryExecutionButton onCancel={jest.fn()} />);
       expect(screen.getByTestId('exploreQueryStopButton')).toBeEnabled();

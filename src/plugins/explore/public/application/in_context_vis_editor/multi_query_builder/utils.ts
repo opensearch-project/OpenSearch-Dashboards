@@ -3,67 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  QueryBuilder,
-  QueryEditorState,
-  QueryResultState,
-  QueryState,
-} from '../query_builder/query_builder';
-import {
-  QueryExecutionStatus,
-  QueryResultStatus,
-} from '../../../application/utils/state_management/types';
-import { ContainerState } from './container_state_utils';
+import type { QueryEditorState, QueryState } from '../query_builder/query_builder';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import type { ContainerState } from './container_state_utils';
 import { hitsToSeriesResult } from '../../../components/visualizations/utils/normalize_result_rows';
-import { FieldSchema, NormalizedRow } from '../../../components/data_transformations/types';
-
-export type QueryRows = QueryBuilder[];
-export type UrlRowEntry<T> = [refId: string, state: T];
-export type UrlRowEditorState = Partial<Pick<QueryEditorState, 'isHidden'>>;
-
-// `_e`: container-level editor state plus each row's editor state.
-export interface UrlMultiEditorState {
-  selectedRowRefId?: string;
-  maxDataPoints?: number;
-  rows: Array<UrlRowEntry<UrlRowEditorState>>;
-}
+import type {
+  AggregateStatus,
+  QueriesSnapshot,
+  RowExecutionState,
+  RowListItem,
+  SavedQueryRow,
+  SeriesResult,
+  UrlMultiEditorState,
+  UrlRowEditorState,
+  UrlRowEntry,
+} from './types';
 
 // default refId of the single query (for previous single query builder adoption)
 const SINGLE_QUERY_REF_ID = 'A';
-
-// One visible row's execution status and results
-export interface RowExecutionState {
-  refId: string;
-  status: QueryResultStatus;
-  result: QueryResultState;
-}
-
-// One row's result in the shape for Visualization
-export interface SeriesResult {
-  refId: string;
-  rows: NormalizedRow[];
-  fieldSchema: FieldSchema[];
-  seriesDisplayNames?: Record<string, string>;
-}
-
-// One row as a list item: hidden / valid per row. for UI display
-export interface RowListItem {
-  refId: string;
-  isHidden: boolean;
-  isValid: boolean;
-}
 
 export const toRowListItem = (refId: string, editorState: QueryEditorState): RowListItem => ({
   refId,
   isHidden: !!editorState.isHidden,
   isValid: editorState.queryStatus?.status !== QueryExecutionStatus.ERROR,
 });
-
-export interface AggregateStatus {
-  status: QueryExecutionStatus;
-  /** Rows that errored; with a READY status the vis still renders the others. */
-  failedQueries: Array<{ refId: string; error?: QueryResultStatus['error'] }>;
-}
 
 /**
  * The visible rows' combined status.
@@ -156,21 +119,18 @@ export const getQueryLabelIndex = (label: string): number => {
   return -1;
 };
 
+// The raw table's "Final" choice: the data the vis draws (after the pipeline and the merge).
+export const RAW_TABLE_FINAL = '__final__';
+
 // The raw table's query: the chosen one while it's still among the results, else the first.
 export const resolveRawTableRefId = (
   series: SeriesResult[],
   rawTableRefId?: string
-): string | undefined =>
-  series.some((s) => s.refId === rawTableRefId) ? rawTableRefId : series[0]?.refId;
-
-/**
- * A saved row: its query plus whether it's hidden. The saved explore's `queries` attribute is a list of these.
- */
-export interface SavedQueryRow {
-  refId: string;
-  query: QueryState;
-  isHidden?: boolean;
-}
+): string | undefined => {
+  // "Final" is kept while there's more than one query (with one, it's that query's After view).
+  if (rawTableRefId === RAW_TABLE_FINAL && series.length > 1) return RAW_TABLE_FINAL;
+  return series.some((s) => s.refId === rawTableRefId) ? rawTableRefId : series[0]?.refId;
+};
 
 const isSavedQueryRow = (value: unknown): value is SavedQueryRow => {
   if (typeof value !== 'object' || value === null) return false;
@@ -241,12 +201,6 @@ export const getRowsMaxDataPoints = (queries: Array<UrlRowEntry<QueryState>>) =>
     .map(([_, query]) => query.queryOptions?.maxDataPoints)
     .find((value) => value !== undefined);
 };
-
-/**
- * The rows and editor state as saved, reduced so two snapshots compare equal exactly when there's
- * nothing new to save. The vis has its own (see components/visualizations/vis_snapshot).
- */
-export type QueriesSnapshot = Record<string, unknown>;
 
 // Drops undefined values (and keys), so a missing field and an undefined one compare equal.
 const plain = <T>(value: T): T =>

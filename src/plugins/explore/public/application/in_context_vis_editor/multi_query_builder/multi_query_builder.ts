@@ -14,24 +14,27 @@ import {
   QueryResultState,
   QueryEditorState,
 } from '../query_builder/query_builder';
+import { shouldPrefixSeriesWithRefId } from '../query_builder/utils';
 import { getQueryLabel, splitMultiQueries } from '../../../../../data/common';
 
 import {
+  computeAggregateStatus,
+  toRowListItem,
+  toSeriesResult,
+  getQueryLabelIndex,
+  toQueriesSnapshot,
+} from './utils';
+import type {
   AggregateStatus,
   QueryRows,
   RowExecutionState,
   RowListItem,
   SeriesResult,
-  computeAggregateStatus,
-  toRowListItem,
-  toSeriesResult,
   UrlMultiEditorState,
   UrlRowEditorState,
   UrlRowEntry,
-  getQueryLabelIndex,
   QueriesSnapshot,
-  toQueriesSnapshot,
-} from './utils';
+} from './types';
 import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
 import { ContainerState, SaveableRow, toSavedContainerState } from './container_state_utils';
 
@@ -272,7 +275,17 @@ export class MultiQueryBuilder {
       this.getServices,
       refId ?? this.nextRefId(),
       () => this.interpolationService,
-      () => ({ maxDataPoints: this.multiQueryEditorState$.getValue().maxDataPoints })
+      // () => ({ maxDataPoints: this.multiQueryEditorState$.getValue().maxDataPoints })
+      () => ({
+        maxDataPoints: this.multiQueryEditorState$.getValue().maxDataPoints,
+        // Read at execution: the visible rows of the batch decide.
+        prefixSeriesWithRefId: shouldPrefixSeriesWithRefId(
+          this.queryRows$
+            .getValue()
+            .filter((r) => !r.queryEditorState$.getValue().isHidden)
+            .map((r) => r.queryState$.getValue())
+        ),
+      })
     );
     if (!refId) {
       this.refIdCounter += 1;

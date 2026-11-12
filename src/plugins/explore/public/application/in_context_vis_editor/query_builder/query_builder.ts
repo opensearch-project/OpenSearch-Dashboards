@@ -42,6 +42,8 @@ import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 // Query options shared by every row (the panel's Query options), applied at execution time.
 export interface SharedQueryOptions {
   maxDataPoints?: number;
+  // Run PromQL with the row's refId (see shouldPrefixSeriesWithRefId): two or more PromQL rows.
+  prefixSeriesWithRefId?: boolean;
 }
 
 export enum SupportLanguageType {
@@ -497,8 +499,17 @@ export class QueryBuilder {
   // A metrics row runs with the panel's max data points (undefined = auto) instead of its own.
   private withSharedQueryOptions(query: QueryState): QueryState {
     if (!getSourceTypeRegistry().isMetricsLanguage(query.language)) return query;
-    const { maxDataPoints } = this.getSharedQueryOptions();
-    return { ...query, queryOptions: { ...query.queryOptions, maxDataPoints } };
+
+    const { maxDataPoints, prefixSeriesWithRefId } = this.getSharedQueryOptions();
+    return {
+      ...query,
+      queryOptions: {
+        ...query.queryOptions,
+        maxDataPoints,
+        // The refId only with two or more PromQL rows, so a single query keeps its series names.
+        ...(prefixSeriesWithRefId ? { refId: this.refId } : {}),
+      },
+    };
   }
 
   abortActiveQueries() {

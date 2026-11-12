@@ -4,7 +4,9 @@
  */
 
 import { MultiQueryBuilder } from './multi_query_builder';
-import { RowListItem, buildSingleQueryToList } from './utils';
+// import { RowListItem, buildSingleQueryToList } from './utils';
+import { buildSingleQueryToList } from './utils';
+import type { RowListItem } from './types';
 import {
   EditorMode,
   QueryExecutionStatus,
@@ -743,5 +745,29 @@ describe('MultiQueryBuilder saved state and dirty baseline', () => {
       .subscribe((value) => (dirty = value))
       .unsubscribe();
     expect(dirty).toBe(false);
+  });
+
+  describe('shared query options: prefixSeriesWithRefId', () => {
+    const shared = (row: unknown) => (row as any).getSharedQueryOptions();
+    const promql = { query: 'up', language: 'PROMQL' } as any;
+
+    it('is set only while two or more visible rows are PromQL', () => {
+      const rowA = container.addRow({ refId: 'A', savedQueryState: promql });
+      expect(shared(rowA).prefixSeriesWithRefId).toBe(false);
+
+      const rowB = container.addRow({
+        refId: 'B',
+        savedQueryState: { query: 'source = logs', language: 'PPL' } as any,
+      });
+      expect(shared(rowA).prefixSeriesWithRefId).toBe(false);
+
+      const rowC = container.addRow({ refId: 'C', savedQueryState: promql });
+      expect(shared(rowA).prefixSeriesWithRefId).toBe(true);
+      expect(shared(rowB).prefixSeriesWithRefId).toBe(true);
+
+      // Hiding a PromQL row leaves one: back to plain series names.
+      rowC.updateQueryEditorState({ isHidden: true });
+      expect(shared(rowA).prefixSeriesWithRefId).toBe(false);
+    });
   });
 });

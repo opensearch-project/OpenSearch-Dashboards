@@ -187,7 +187,13 @@ export const promqlSearchStrategyProvider = (
               })),
             };
 
-        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery, stepResolution);
+        const dataFrame = createDataFrame(
+          queryResults,
+          datasetId,
+          isSingleQuery,
+          stepResolution,
+          requestOptions?.refId
+        );
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -341,43 +347,31 @@ function formatMetricLabels(metric: Record<string, string>): string {
   return `{${labelParts.join(', ')}}`;
 }
 
-function distinguishingLabelKeysByTemplatedName(
-  series: MetricResult[],
-  legendTemplate: string
-): Map<string, string[]> {
-  const groups = new Map<string, Array<Record<string, string>>>();
-  series.forEach((metricResult, seriesIndex) => {
-    if (seriesIndex >= MAX_SERIES_TABLE) return;
-    const name = interpolateLegendFormat(legendTemplate, metricResult.metric).trim();
-    if (!name) return;
-    const group = groups.get(name);
-    if (group) group.push(metricResult.metric);
-    else groups.set(name, [metricResult.metric]);
-  });
-
-  const distinguishing = new Map<string, string[]>();
-  groups.forEach((members, name) => {
-    if (members.length < 2) return;
-    const keys = new Set<string>();
-    members.forEach((labels) => Object.keys(labels).forEach((key) => keys.add(key)));
-    distinguishing.set(
-      name,
-      Array.from(keys).filter((key) => new Set(members.map((labels) => labels[key] ?? '')).size > 1)
-    );
-  });
-  return distinguishing;
-}
-
 /**
  * Unified DataFrame creation for single and multi-query results.
  * - Single query: uses `Value` column, simpler series names
  * - Multi-query: uses `Value #A`, `Value #B` columns, prefixed series names
  */
+
+/**
+ * A series name's prefix: the row's refId (multi-query editor), then the expression's label when
+ * the row has several expressions. With refId: `A` / `A-A`, `A-B`; without: none / `A`, `B`.
+ */
+export const seriesPrefix = (
+  refId: string | undefined,
+  label: string,
+  isSingleQuery: boolean
+): string | undefined => {
+  if (refId) return isSingleQuery ? refId : `${refId}-${label}`;
+  return isSingleQuery ? undefined : label;
+};
+
 function createDataFrame(
   queryResults: LabeledQueryResult[],
   datasetId: string,
   isSingleQuery: boolean,
-  stepResolution?: PromQLStepResolution
+  stepResolution?: PromQLStepResolution,
+  refId?: string
 ): IDataFrame {
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
@@ -426,10 +420,6 @@ function createDataFrame(
     const series = normalizeResult(queryResult?.resultType, queryResult?.result);
     const legendTemplate = result.legendFormat?.trim() ? result.legendFormat : undefined;
 
-    const distinguishingKeys = legendTemplate
-      ? distinguishingLabelKeysByTemplatedName(series, legendTemplate)
-      : new Map<string, string[]>();
-
     series.forEach((metricResult, seriesIndex) => {
       if (seriesIndex >= MAX_SERIES_TABLE) return;
 
@@ -442,8 +432,8 @@ function createDataFrame(
       const templatedName = legendTemplate
         ? interpolateLegendFormat(legendTemplate, metricResult.metric).trim()
         : '';
-
-      const seriesName = isSingleQuery ? fallbackName : `${result.label}: ${fallbackName}`;
+      const prefix = seriesPrefix(refId, result.label, isSingleQuery);
+      const seriesName = prefix ? `${prefix}: ${fallbackName}` : fallbackName;
       // TODO: remove escaping if not using vega
       // Escape brackets in series name to prevent Vega's splitAccessPath from
       // interpreting them as array index notation when used as field names

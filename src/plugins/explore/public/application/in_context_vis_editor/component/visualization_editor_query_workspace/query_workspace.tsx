@@ -5,7 +5,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
-import { EuiEmptyPrompt, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiResizableContainer, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SectionList } from './section_list';
 import { SectionPanel } from './section_panel';
@@ -21,6 +21,8 @@ import { useQueryBuilderState } from '../../hooks/use_query_builder_state';
 import { QueryPanel } from '../visualization_editor_query_panel';
 import { DatasetSelectWidget } from '../dataset_select';
 import {
+  ApplyToSelector,
+  showApplyToSelector,
   TransformationService,
   TransformationStepIssues,
 } from '../../../../components/data_transformations';
@@ -46,6 +48,10 @@ export const QueryWorkspace = ({ transformServices }: QueryWorkspaceProps) => {
   const transformStepResults = useObservable(
     transformServices.stepResults$,
     transformServices.stepResults$.getValue()
+  );
+  const stageRefIdsMap = useObservable(
+    transformServices.stageRefIds$,
+    transformServices.stageRefIds$.getValue()
   );
 
   // Every row of the container, each with its own hidden / valid flags.
@@ -262,17 +268,28 @@ export const QueryWorkspace = ({ transformServices }: QueryWorkspaceProps) => {
       const instance = transformPipeline.find((t) => t.instance_id === active.activeItemId);
       if (!instance) return null;
       const { Editor } = instance;
+      const refIds = stageRefIdsMap.get(instance.instance_id) ?? [];
       return (
-        <>
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} borderRadius="none">
           <TransformationStepIssues step={transformStepResults.get(instance.instance_id)} />
+          {showApplyToSelector(instance, refIds) && (
+            <ApplyToSelector
+              applyTo={instance.applyTo}
+              refIds={refIds}
+              onChange={(refId) =>
+                transformServices.updateInstanceApplyTo(instance.instance_id, refId)
+              }
+            />
+          )}
           <Editor
             config={instance.config}
             onChange={(newConfig) =>
               transformServices.updateInstanceConfig(instance.instance_id, newConfig)
             }
             availableFields={stageFieldsMap.get(instance.instance_id) ?? []}
+            availableRefIds={refIds}
           />
-        </>
+        </EuiPanel>
       );
     }
 

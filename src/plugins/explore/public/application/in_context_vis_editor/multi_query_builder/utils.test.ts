@@ -4,14 +4,27 @@
  */
 
 import { getQueryLabel } from '../../../../../data/common';
+// import {
+//   computeAggregateStatus,
+//   getQueryLabelIndex,
+//   normalizeUrlEditorState,
+//   normalizeUrlQueries,
+//   resolveRawTableRefId,
+//   RowExecutionState,
+//   SeriesResult,
+//   toRowListItem,
+//   toSeriesResult,
+//   buildSingleQueryToList,
+//   toSavedQueries,
+//   parseSavedContainerState,
+//   getRowsMaxDataPoints,
+// } from './utils';
 import {
   computeAggregateStatus,
   getQueryLabelIndex,
   normalizeUrlEditorState,
   normalizeUrlQueries,
   resolveRawTableRefId,
-  RowExecutionState,
-  SeriesResult,
   toRowListItem,
   toSeriesResult,
   buildSingleQueryToList,
@@ -19,6 +32,7 @@ import {
   parseSavedContainerState,
   getRowsMaxDataPoints,
 } from './utils';
+import type { RowExecutionState, SeriesResult } from './types';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 
 const pplQuery = { query: 'source = logs', language: 'PPL' };

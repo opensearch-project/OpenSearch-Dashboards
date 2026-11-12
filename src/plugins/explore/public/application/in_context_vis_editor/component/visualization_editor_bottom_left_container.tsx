@@ -8,6 +8,7 @@ import { useObservable } from 'react-use';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiResizableContainer,
   EuiTitle,
@@ -33,9 +34,10 @@ import {
   defaultTableChartStyles,
   TableChartStyle,
 } from '../../../components/visualizations/table/table_vis_config';
-import { normalizeResultRows } from '../../../components/visualizations/utils/normalize_result_rows';
 import { useMultiQueryBuilder } from '../multi_query_builder/multi_query_builder_context';
-import { resolveRawTableRefId, SeriesResult } from '../multi_query_builder/utils';
+import { resolveRawTableRefId } from '../multi_query_builder/utils';
+import type { SeriesResult } from '../multi_query_builder/types';
+import { resolveRawTable } from './raw_table_utils';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
   defaultMessage: 'An error occurred while executing the query',
@@ -177,27 +179,25 @@ export const VisualizationContainer = React.memo(() => {
     visualizationBuilder.handleSeries(series);
   }, [visualizationBuilder, series]);
 
-  // The raw table shows one query's own result (before transformations), picked in the action bar.
+  // The raw table: Final (what the vis draws), or one query's result before or after the
+  // transformations, picked in the action bar.
   const showRawTable = useObservable(visualizationBuilder.showRawTable$, false);
   const rawTableRefId = useObservable(visualizationBuilder.rawTableRefId$);
-  const rawTableSeries = useMemo(() => {
-    const refId = resolveRawTableRefId(series, rawTableRefId);
-    return series.find((s) => s.refId === refId);
-  }, [series, rawTableRefId]);
-  const rawTable = useMemo(() => {
-    if (!rawTableSeries) return undefined;
-
-    const normalized = normalizeResultRows(rawTableSeries.rows, rawTableSeries.fieldSchema);
-    return {
-      rows: normalized.transformedData,
-      columns: [
-        ...normalized.numericalColumns,
-        ...normalized.categoricalColumns,
-        ...normalized.dateColumns,
-        ...normalized.unknownColumns,
-      ],
-    };
-  }, [rawTableSeries]);
+  const rawTableStage = useObservable(visualizationBuilder.rawTableStage$, 'before');
+  const pipelineResult = useObservable(visualizationBuilder.pipelineResult$);
+  const visData = useObservable(visualizationBuilder.data$);
+  const rawTableKey = `${resolveRawTableRefId(series, rawTableRefId)}-${rawTableStage}`;
+  const rawTable = useMemo(
+    () =>
+      resolveRawTable({
+        series,
+        refId: resolveRawTableRefId(series, rawTableRefId),
+        stage: rawTableStage,
+        pipelineResult,
+        visData,
+      }),
+    [series, rawTableRefId, rawTableStage, pipelineResult, visData]
+  );
 
   const onSelectTimeRange = useCallback(
     (timeRange?: TimeRange) => {
@@ -217,9 +217,27 @@ export const VisualizationContainer = React.memo(() => {
 
   return (
     <EditorPanel>
-      {showRawTable && rawTable ? (
+      {showRawTable && !rawTable && rawTableStage === 'after' ? (
+        // A step merged the query with others or filtered it out: no transformed data of its own.
+        <EuiEmptyPrompt
+          iconType="merge"
+          titleSize="xs"
+          title={
+            <h3>
+              {i18n.translate('explore.visEditor.rawTableNoAfterTitle', {
+                defaultMessage: 'Query {refId} has no data after the transformations',
+                values: { refId: resolveRawTableRefId(series, rawTableRefId) },
+              })}
+            </h3>
+          }
+          body={i18n.translate('explore.visEditor.rawTableNoAfterBody', {
+            defaultMessage: 'A step merged it with other queries or filtered it out.',
+          })}
+          data-test-subj="exploreRawTableMerged"
+        />
+      ) : showRawTable && rawTable ? (
         <TableVis
-          key={`raw-table-${rawTableSeries?.refId}`}
+          key={`raw-table-${rawTableKey}`}
           rows={rawTable.rows}
           columns={rawTable.columns}
           styleOptions={rawTableStyleOptions}

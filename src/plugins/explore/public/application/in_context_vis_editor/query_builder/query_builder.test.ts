@@ -709,14 +709,18 @@ describe('QueryBuilder', () => {
   });
 
   describe('shared query options', () => {
-    const runWith = async (language: string, maxDataPoints?: number) => {
+    const runWith = async (
+      language: string,
+      maxDataPoints?: number,
+      prefixSeriesWithRefId?: boolean
+    ) => {
       (queryExecution as jest.Mock).mockClear();
       (prepareQueryForLanguage as jest.Mock).mockReturnValue({ query: 'q' });
       const row = new QueryBuilder(
         () => services,
         'A',
         undefined,
-        () => ({ maxDataPoints })
+        () => ({ maxDataPoints, prefixSeriesWithRefId })
       );
       row.init({
         savedQueryState: {
@@ -737,6 +741,14 @@ describe('QueryBuilder', () => {
       expect((await runWith('PROMQL', 300)).queryOptions.maxDataPoints).toBe(300);
       // Undefined = auto, even when the row still carries an old value.
       expect((await runWith('PROMQL', undefined)).queryOptions.maxDataPoints).toBeUndefined();
+    });
+
+    // it('runs a metrics row with its refId (the server prefixes its series names)', async () => {
+    //   expect((await runWith('PROMQL', 300)).queryOptions.refId).toBe('A');
+    // });
+    it('runs a metrics row with its refId only with two or more PromQL rows', async () => {
+      expect((await runWith('PROMQL', 300, true)).queryOptions.refId).toBe('A');
+      expect((await runWith('PROMQL', 300, false)).queryOptions).not.toHaveProperty('refId');
     });
 
     it('leaves a logs row as it is', async () => {

@@ -17,12 +17,8 @@ import {
   VerificationWarning,
 } from '../query_builder/utils';
 import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
-import {
-  normalizeUrlEditorState,
-  normalizeUrlQueries,
-  UrlMultiEditorState,
-  UrlRowEntry,
-} from './utils';
+import { normalizeUrlEditorState, normalizeUrlQueries } from './utils';
+import type { UrlMultiEditorState, UrlRowEntry } from './types';
 import { withLanguageQueryOptions } from '../query_builder/utils';
 import { EditorMode } from '../../../application/utils/state_management/types';
 import { getRowsMaxDataPoints } from './utils';

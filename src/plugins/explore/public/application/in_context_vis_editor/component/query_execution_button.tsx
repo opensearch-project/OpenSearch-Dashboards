@@ -8,7 +8,7 @@ import { QueryExecutionButtonStatus } from '../../../application/utils/state_man
 import { isTimeRangeInvalid } from '../../../components/top_nav/utils/validate_time_range';
 import { QueryRunStopButton } from '../../../components/top_nav/query_execution_button';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { QueryExecutionStatus } from '../../utils/state_management/types';
+// import { QueryExecutionStatus } from '../../utils/state_management/types';
 
 export interface QueryExecutionButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -22,12 +22,11 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   onClick,
   onCancel,
 }) => {
-  const { queryEditorState, dateRange, container } = useQueryBuilderState();
+  const { dateRange, container } = useQueryBuilderState();
   const isStale = useObservable(container.isStale$, container.isStale$.getValue());
 
-  const isRunning =
-    queryEditorState.userInitiatedQuery &&
-    queryEditorState.queryStatus.status === QueryExecutionStatus.LOADING;
+  // Running while any row of the batch runs (not just the selected one); Stop cancels them all.
+  const isRunning = useObservable(container.isExecuting$, container.isExecuting$.getValue());
 
   const status: QueryExecutionButtonStatus =
     dateRange && isTimeRangeInvalid(dateRange) ? 'DISABLED' : isStale ? 'UPDATE' : 'REFRESH';
