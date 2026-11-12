@@ -11,12 +11,10 @@ import {
   addColumn,
   removeColumn,
   moveColumn,
-  setColumns,
 } from '../../application/utils/state_management/slices';
 import { selectColumns, selectQuery } from '../../application/utils/state_management/selectors';
 import { DiscoverSidebar } from '.';
 import { ExploreServices } from '../../types';
-import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 import { useDatasetContext } from '../../application/context';
 import {
   defaultResultsProcessor,
@@ -78,28 +76,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   // Get fieldCounts and rows from processed results
   const fieldCounts = effectiveResults?.fieldCounts || EMPTY_FIELD_COUNTS;
   const rows = (effectiveResults as any)?.hits?.hits || EMPTY_HITS;
-  const prevColumns = useRef(columns);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const timeFieldname = dataset?.timeFieldName;
-
-    if (columns !== prevColumns.current) {
-      let updatedColumns = buildColumns(columns);
-      if (
-        columns &&
-        timeFieldname &&
-        !prevColumns.current.includes(timeFieldname) &&
-        columns.includes(timeFieldname)
-      ) {
-        // Remove timeFieldname from columns if previously chosen columns does not include time field
-        updatedColumns = columns.filter((column: string) => column !== timeFieldname);
-      }
-      // Update the ref with the new columns
-      dispatch(setColumns(updatedColumns));
-      prevColumns.current = columns;
-    }
-  }, [columns, dispatch, dataset?.timeFieldName]);
 
   const isEnhancementsEnabledOverride = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 

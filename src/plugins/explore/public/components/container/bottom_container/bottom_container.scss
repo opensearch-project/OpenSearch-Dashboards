@@ -1,0 +1,113 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.expBottomContainer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.expBottomContainer .expBottomContainer__panels {
+  flex: 1;
+  min-height: 0;
+  gap: 4px;
+}
+
+.expBottomContainer .expBottomContainer__panels--fieldsClosed {
+  gap: 0;
+}
+
+.expBottomContainer .expBottomContainer__fieldsPanel {
+  flex-shrink: 0;
+}
+
+.expBottomContainer .expBottomContainer__resultsPanel {
+  flex: 1;
+  min-width: 0;
+}
+
+// Keep OUI's expanded sizes registered so reopening preserves the user's resized width.
+.expBottomContainer .expBottomContainer__panels--fieldsClosed .expBottomContainer__fieldsPanel {
+  flex: 0 0 40px;
+}
+
+.expBottomContainer .expBottomContainer__panels--fieldsClosed .expBottomContainer__fieldsResizer {
+  display: none;
+}
+
+.expBottomContainer .expBottomContainer__fieldsRail {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.expBottomContainer .expBottomContainer__fieldsRail .expBottomContainer__fieldsToggle {
+  width: 100%;
+  height: auto;
+  min-height: 96px;
+}
+
+.expBottomContainer .expBottomContainer__fieldsToggle .expBottomContainer__fieldsToggleContent {
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.expBottomContainer .expBottomContainer__fieldsToggle .expBottomContainer__fieldsToggleLabel {
+  writing-mode: vertical-rl;
+}
+
+.expBottomContainer .expBottomContainer__results {
+  overflow-x: hidden;
+}
+
+.expBottomContainer .expBottomContainer__canvas {
+  height: 100%;
+}
+
+// The flyout is anchored below the query bar, inside the results container.
+.expBottomContainer .expBottomContainer__panels--narrow {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+}
+
+.expBottomContainer .expBottomContainer__panels--narrow .expBottomContainer__canvas {
+  flex: 1;
+  min-width: 0;
+}
+
+.expBottomContainer .expBottomContainer__fieldsFlyoutMask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.expBottomContainer .expBottomContainer__fieldsFlyout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 320px;
+  max-width: 85%;
+  display: flex;
+  flex-direction: column;
+}
+
+.expBottomContainer .expBottomContainer__fieldsFlyout[hidden] {
+  display: none;
+}
+
+.expBottomContainer .expBottomContainer__fieldsFlyoutBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}

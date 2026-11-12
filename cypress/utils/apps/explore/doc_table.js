@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ensureSidebarOpen, selectFieldFromSidebar } from './sidebar';
+
 /**
  * Get specific row of DocTable.
  * @param {number} rowNumber Integer starts from 0 for the first row
@@ -186,11 +188,12 @@ export const verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntend
       cy.getElementByTestId('docTableHeader-' + fieldText).should('not.exist');
       cy.getElementByTestId('toggleColumnButton').click();
     });
+    cy.getElementByTestId('docTableHeader-' + fieldText).should('exist');
+    ensureSidebarOpen();
     cy.getElementByTestId('fieldList-selected').within(() => {
       cy.getElementByTestId('field-' + fieldText).should('exist');
     });
-    cy.getElementByTestId('docTableHeader-' + fieldText).should('exist');
-    cy.getElementByTestId('fieldToggle-' + fieldText).click();
+    selectFieldFromSidebar(fieldText);
     cy.getElementByTestId('fieldList-selected').within(() => {
       cy.getElementByTestId('field-' + fieldText).should('not.exist');
     });
