@@ -23,7 +23,12 @@ import {
   setIsQueryEditorDirty,
   setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
-import { executeQueries } from '../actions/query_actions';
+import {
+  abortAllActiveQueries,
+  executeQueries,
+  supersedeAllActiveQueries,
+} from '../actions/query_actions';
+import { abortAllStreamingQueries } from '../../streaming/streaming_abort_registry';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 import { EXPLORE_NO_TAB_ID } from '../../../../../common';
 import { datasetRequiresExplicitRun, isExplicitRunRefinement } from '../../requires_explicit_run';
@@ -64,9 +69,16 @@ export const createDatasetChangeMiddleware = (
         // The picker refined the selection (same type, explicit Run): keep the results and the
         // view (columns, sort, breakdown, patterns) they're shown with until the user runs the
         // query on the new selection, as for an edited query, and mark them as stale meanwhile.
+        // A query still running is for the previous selection: stop it, as Stop does (it keeps
+        // what has finished, and the user runs the query on the new selection).
+        abortAllActiveQueries();
+        abortAllStreamingQueries();
         store.dispatch(setIsQueryEditorDirty(true));
         store.dispatch(setIsSelectionStale(true));
       } else {
+        // The results and statuses below are cleared, so the queries for the previous dataset
+        // must stop too: their rows would otherwise land under this one when they finish.
+        supersedeAllActiveQueries();
         store.dispatch(setIsSelectionStale(false));
         store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
         store.dispatch(clearResults());

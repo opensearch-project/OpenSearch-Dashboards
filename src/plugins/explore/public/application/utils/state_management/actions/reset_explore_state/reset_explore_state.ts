@@ -13,7 +13,7 @@ import {
 } from '../../slices';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
-import { executeQueries } from '../query_actions';
+import { executeQueries, supersedeAllActiveQueries } from '../query_actions';
 import { AppDispatch, RootState } from '../../store';
 import { useClearEditors } from '../../../../hooks';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
@@ -43,6 +43,8 @@ export const resetExploreStateActionCreator =
         }
       : state.queryEditor;
 
+    // A new search replaces the results and statuses, so stop the queries that would write them.
+    supersedeAllActiveQueries();
     clearEditors();
     dispatch(setUiState(state.ui));
     dispatch(clearResults());

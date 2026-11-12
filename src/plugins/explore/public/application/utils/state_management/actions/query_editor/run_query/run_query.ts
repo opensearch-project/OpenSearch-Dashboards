@@ -13,7 +13,11 @@ import {
   clearQueryStatusMap,
   setIsQueryEditorDirty,
 } from '../../../slices/query_editor/query_editor_slice';
-import { executeQueries, shouldSkipQueryExecution } from '../../query_actions';
+import {
+  executeQueries,
+  shouldSkipQueryExecution,
+  supersedeAllActiveQueries,
+} from '../../query_actions';
 import { ExploreServices } from '../../../../../../types';
 import { detectAndSetOptimalTab } from '../../detect_optimal_tab';
 
@@ -32,6 +36,10 @@ export const runQueryActionCreator =
     if (typeof query === 'string') {
       dispatch(setQueryStringWithHistory(query));
     }
+    // The results and statuses are cleared for this run, so a query still running could neither
+    // be shown nor stopped any more: stop it. This run only replaces runs of its own keys, and an
+    // edited query's keys differ.
+    supersedeAllActiveQueries();
     dispatch(clearResults());
     dispatch(clearQueryStatusMap());
     dispatch(setIsQueryEditorDirty(false));
