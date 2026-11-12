@@ -328,6 +328,34 @@ describe('osd_url_storage', () => {
   });
 
   describe('getRelativeToHistoryPath', () => {
+    // Expected values were produced by the `url.parse()`-based implementation on Node 22.23.4
+    describe('is unchanged from the url.parse() implementation', () => {
+      const browserBase = { createHref: () => '/base/app/x' } as unknown as History;
+      const hashBase = { createHref: () => '/base/app/x#/' } as unknown as History;
+      it.each([
+        ['http://localhost:5601/app/home?x=1#y', '/app/home?x=1#y', 'y'],
+        [
+          'http://localhost/app/dashboards#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:%27%27))',
+          "/app/dashboards#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:''))",
+          "/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:''))",
+        ],
+        [
+          'http://localhost:5601/base/app/discover#/?_g=()&_a=(columns:!(_source))',
+          '/base/app/discover#/?_g=()&_a=(columns:!(_source))',
+          '/?_g=()&_a=(columns:!(_source))',
+        ],
+        ['/app/discover?foo=bar&foo=baz#/x?y=1', '/app/discover?foo=bar,baz#/x?y=1', '/x?y=1'],
+        [
+          'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
+          '/_dashboards/app/home#/',
+          '/',
+        ],
+      ])('%s', (url, expectedBrowser, expectedHash) => {
+        expect(getRelativeToHistoryPath(url, browserBase)).toBe(expectedBrowser);
+        expect(getRelativeToHistoryPath(url, hashBase)).toBe(expectedHash);
+      });
+    });
+
     it('should extract path relative to browser history without basename', () => {
       const history = createBrowserHistory();
       const url =

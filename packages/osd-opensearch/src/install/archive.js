@@ -33,11 +33,19 @@ const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
-const url = require('url');
 const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, OPENSEARCH_CONFIG, OPENSEARCH_KEYSTORE_BIN } = require('../paths');
 const { Artifact } = require('../artifact');
 const { parseSettings, SettingsFilter } = require('../settings');
+
+const isHttpUrl = (value) => {
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol);
+  } catch {
+    return false; // local paths (including `C:\...`) are not URLs
+  }
+};
+exports.isHttpUrl = isHttpUrl;
 
 /**
  * Extracts an OpenSearch archive and optionally installs plugins
@@ -61,7 +69,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   } = options;
 
   let dest = archive;
-  if (['http:', 'https:'].includes(url.parse(archive).protocol)) {
+  if (isHttpUrl(archive)) {
     const artifact = await Artifact.getArchive(archive, log);
     dest = path.resolve(basePath, 'cache', artifact.getFilename());
     await artifact.download(dest);

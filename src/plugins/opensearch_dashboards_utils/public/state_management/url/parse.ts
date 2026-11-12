@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { parse as _parseUrl } from 'url';
+import { parseUrl as _parseUrl } from '@osd/std';
 import { History } from 'history';
 
 export const parseUrl = (url: string) => _parseUrl(url, true);

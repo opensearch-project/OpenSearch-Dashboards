@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { replaceUrlHashQuery } from './format';
+import type { ParsedQuery } from 'query-string';
+import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 
 describe('format', () => {
   describe('replaceUrlHashQuery', () => {
@@ -67,5 +68,72 @@ describe('format', () => {
         }))
       ).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#?test=test&test1=test1"`);
     });
+  });
+});
+
+// Expected values were produced by the `url.parse()`-based implementation on Node 22.23.4,
+// so these pin the WHATWG-based parser to the old output for real Dashboards URLs.
+describe('format output is unchanged from the url.parse() implementation', () => {
+  const addQuery = (query: ParsedQuery) => ({ ...query, _z: '(a:!t)' });
+  const cases: Array<[string, { query: string; hashQuery: string; hashIdentity: string }]> = [
+    [
+      'http://localhost:5601/app/home?x=1#y',
+      {
+        query: 'http://localhost:5601/app/home?x=1&_z=(a:!t)#y',
+        hashQuery: 'http://localhost:5601/app/home?x=1#y?_z=(a:!t)',
+        hashIdentity: 'http://localhost:5601/app/home?x=1#y',
+      },
+    ],
+    [
+      'http://localhost/app/dashboards#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:%27%27))',
+      {
+        query:
+          'http://localhost/app/dashboards?_z=(a:!t)#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:%27%27))',
+        hashQuery:
+          "http://localhost/app/dashboards#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:''))&_z=(a:!t)",
+        hashIdentity:
+          "http://localhost/app/dashboards#/view/abc?_g=(filters:!(),refreshInterval:(pause:!t,value:0))&_a=(query:(language:kuery,query:''))",
+      },
+    ],
+    [
+      'http://localhost:5601/base/app/discover#/?_g=()&_a=(columns:!(_source))',
+      {
+        query: 'http://localhost:5601/base/app/discover?_z=(a:!t)#/?_g=()&_a=(columns:!(_source))',
+        hashQuery:
+          'http://localhost:5601/base/app/discover#/?_g=()&_a=(columns:!(_source))&_z=(a:!t)',
+        hashIdentity: 'http://localhost:5601/base/app/discover#/?_g=()&_a=(columns:!(_source))',
+      },
+    ],
+    [
+      '/app/discover?foo=bar&foo=baz#/x?y=1',
+      {
+        query: '/app/discover?foo=bar,baz&_z=(a:!t)#/x?y=1',
+        hashQuery: '/app/discover?foo=bar&foo=baz#/x?y=1&_z=(a:!t)',
+        hashIdentity: '/app/discover?foo=bar&foo=baz#/x?y=1',
+      },
+    ],
+    [
+      '/app/x?q=a+b&r=%20c&s=%E2%9C%93&t=&u',
+      {
+        query: '/app/x?q=a%20b&r=%20c&s=%E2%9C%93&t=&u=&_z=(a:!t)',
+        hashQuery: '/app/x?q=a+b&r=%20c&s=%E2%9C%93&t=&u#?_z=(a:!t)',
+        hashIdentity: '/app/x?q=a+b&r=%20c&s=%E2%9C%93&t=&u',
+      },
+    ],
+    [
+      'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
+      {
+        query: 'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home?_z=(a:!t)#/',
+        hashQuery:
+          'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/?_z=(a:!t)',
+        hashIdentity: 'https://search-domain.us-east-1.es.amazonaws.com/_dashboards/app/home#/',
+      },
+    ],
+  ];
+
+  it.each(cases)('%s', (url, expected) => {
+    expect(replaceUrlQuery(url, addQuery)).toBe(expected.query);
+    expect(replaceUrlHashQuery(url, addQuery)).toBe(expected.hashQuery);
+    expect(replaceUrlHashQuery(url, (query) => query)).toBe(expected.hashIdentity);
   });
 });

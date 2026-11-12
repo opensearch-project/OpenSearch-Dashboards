@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
+import { modifyUrl, isRelativeUrl, getUrlOrigin, parseUrl } from './url';
+import legacyUrlParse from './__fixtures__/legacy_url_parse.json';
 
 describe('modifyUrl()', () => {
   test('supports returning a new url spec', () => {
@@ -126,5 +127,276 @@ describe('getOrigin', () => {
     it('returns null for empty url', () => {
       expect(getUrlOrigin('')).toBeNull();
     });
+  });
+});
+
+describe('parseUrl', () => {
+  // `__fixtures__/legacy_url_parse.json` holds Node's deprecated `url.parse()` output, captured
+  // on Node 22.23.4, for every input below in the three ways OSD called it. Rows are
+  // `[input, mode, fieldsThatAreNotNull]`; a mode is only stored when it differs from `default`.
+  const MODES: Record<string, [boolean, boolean]> = {
+    default: [false, false],
+    parseQueryString: [true, false],
+    slashesDenoteHost: [false, true],
+  };
+  const ALL = Object.keys(MODES);
+  const HOST_CHECKS = ['slashesDenoteHost'];
+
+  // Every input/mode where `parseUrl` deliberately differs from `url.parse()`; each one has
+  // its own test under "differs from url.parse()".
+  const DIFFERENCES: Record<string, string[]> = {
+    '//': HOST_CHECKS,
+    '///': HOST_CHECKS,
+    "/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))": ALL,
+    "/app/it's": HOST_CHECKS,
+    '/app/a|b^c`d{e}': ALL,
+    '/app/caf\u00e9': ALL,
+    '/app/<script>': ['default', 'parseQueryString'],
+    '/app/x\ty': HOST_CHECKS,
+    '/app/x\ny': HOST_CHECKS,
+    '\\\\evil.com': HOST_CHECKS,
+    '/\\evil.com': HOST_CHECKS,
+    '\\/evil.com': HOST_CHECKS,
+    '//evil.com': HOST_CHECKS,
+    '///evil.com': HOST_CHECKS,
+    '////evil.com': HOST_CHECKS,
+    ' //evil.com': HOST_CHECKS,
+    '/\t/evil.com': HOST_CHECKS,
+    'java\tscript:alert(1)': HOST_CHECKS,
+    'http:///evil.com': ALL,
+    'data:text/html,<b>x</b>': ALL,
+    'mailto:a@b.com': ALL,
+    'localhost:5601/app': ALL,
+    'http://h/a/../b': ALL,
+    "http://h/x#/view?q='a'": ALL,
+    'http://h:abc/x': ALL,
+    'http://h:99999/x': ALL,
+    'HTTP:/Evil.com/A?B#C': ALL,
+  };
+
+  const legacy: Record<string, Record<string, Record<string, unknown>>> = {};
+  for (const [input, mode, fields] of legacyUrlParse as Array<[string, string, any]>) {
+    (legacy[input] = legacy[input] || {})[mode] = fields;
+  }
+
+  const nonNull = (parsed: Record<string, unknown>) =>
+    Object.fromEntries(
+      Object.entries(parsed)
+        .filter(([, value]) => value !== null)
+        .map(([key, value]) => [
+          key,
+          key === 'query' && typeof value === 'object' ? { ...value } : value,
+        ])
+    );
+
+  const sameAsLegacy = Object.entries(legacy).flatMap(([input, modes]) =>
+    ALL.filter((mode) => !DIFFERENCES[input]?.includes(mode)).map(
+      (mode) => [JSON.stringify(input), mode, input, modes[mode] ?? modes.default] as const
+    )
+  );
+
+  it.each(sameAsLegacy)('matches url.parse() for %s (%s)', (_, mode, input, expected) => {
+    expect(nonNull(parseUrl(input, ...MODES[mode]) as any)).toEqual(expected);
+  });
+
+  it('documents differences only for inputs in the fixture', () => {
+    expect(Object.keys(DIFFERENCES).filter((input) => !legacy[input])).toEqual([]);
+  });
+
+  describe('differs from url.parse()', () => {
+    it('percent-encodes path characters the way browsers do', () => {
+      expect(parseUrl('/app/a|b^c`d{e}').pathname).toBe('/app/a|b%5Ec%60d%7Be%7D');
+      expect(parseUrl('/app/caf\u00e9').pathname).toBe('/app/caf%C3%A9');
+      expect(parseUrl('/app/<script>').pathname).toBe('/app/%3Cscript%3E');
+      expect(parseUrl("/app/it's", false, true).pathname).toBe("/app/it's");
+    });
+
+    it("keeps ' in the hash, which decodes to the same value", () => {
+      expect(parseUrl("http://h/x#/view?q='a'").hash).toBe("#/view?q='a'");
+      expect(
+        parseUrl("/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))")
+          .hash
+      ).toBe("#/?_a=(query:(language:kuery,query:'a%20b'))&_g=(time:(from:now-1h))");
+    });
+
+    it('resolves dot segments in absolute URLs but keeps them in relative ones', () => {
+      expect(parseUrl('http://h/a/../b').pathname).toBe('/b');
+      expect(parseUrl('/a/./b/../c').pathname).toBe('/a/./b/../c');
+      expect(parseUrl('../foo').pathname).toBe('../foo');
+      expect(parseUrl('%2e%2e/foo').pathname).toBe('%2e%2e/foo');
+    });
+
+    it('reads an empty authority the way browsers do', () => {
+      expect(parseUrl('http:///evil.com')).toMatchObject({ hostname: 'evil.com', pathname: '/' });
+    });
+
+    it('gives non-hierarchical URLs no host', () => {
+      expect(parseUrl('mailto:a@b.com')).toMatchObject({
+        protocol: 'mailto:',
+        auth: null,
+        hostname: null,
+        pathname: 'a@b.com',
+      });
+      expect(parseUrl('data:text/html,<b>x</b>')).toMatchObject({
+        hostname: null,
+        pathname: 'text/html,<b>x</b>',
+      });
+      expect(parseUrl('localhost:5601/app')).toMatchObject({
+        protocol: 'localhost:',
+        hostname: null,
+        pathname: '5601/app',
+      });
+      expect(parseUrl('HTTP:/Evil.com/A?B#C')).toMatchObject({
+        protocol: 'http:',
+        hostname: null,
+        pathname: '/Evil.com/A',
+      });
+    });
+
+    it('throws for an invalid port instead of reinterpreting it', () => {
+      expect(() => parseUrl('http://h:abc/x')).toThrow('Invalid URL');
+      expect(() => parseUrl('http://h:99999/x')).toThrow('Invalid URL');
+    });
+
+    it('reads hosts the way browsers do when slashesDenoteHost is set', () => {
+      // Browsers drop tabs and newlines and treat `\` as `/`, so these all point at evil.com
+      for (const input of [
+        '//evil.com',
+        ' //evil.com',
+        '\\\\evil.com',
+        '/\\evil.com',
+        '\\/evil.com',
+        '///evil.com',
+        '////evil.com',
+        '/\t/evil.com',
+      ]) {
+        expect(parseUrl(input, false, true)).toMatchObject({
+          protocol: null,
+          hostname: 'evil.com',
+        });
+      }
+      expect(parseUrl('java\tscript:alert(1)', false, true).protocol).toBe('javascript:'); // eslint-disable-line no-script-url
+      expect(parseUrl('/app/x\ty', false, true).pathname).toBe('/app/xy');
+      expect(() => parseUrl('//', false, true)).toThrow('Invalid URL');
+      expect(() => parseUrl('///', false, true)).toThrow('Invalid URL');
+    });
+
+    it('percent-encodes tabs and newlines otherwise, as url.parse() did', () => {
+      expect(parseUrl('/\t/evil.com')).toMatchObject({ hostname: null, pathname: '/%09/evil.com' });
+      expect(parseUrl('/app/x\ny').pathname).toBe('/app/x%0Ay');
+    });
+  });
+
+  it('keeps an explicit default port', () => {
+    expect(parseUrl('http://localhost:80/x')).toMatchObject({ host: 'localhost:80', port: '80' });
+    expect(parseUrl('https://[::1]:443/x')).toMatchObject({ hostname: '::1', port: '443' });
+  });
+
+  it('decodes credentials and throws on malformed ones, as url.parse() did', () => {
+    expect(parseUrl('http://user%40corp:p%3Ass@h/x').auth).toBe('user@corp:p:ss');
+    expect(() => parseUrl('http://user:%E0%A4@example.com')).toThrow('URI malformed');
+    expect(() => parseUrl('http://%E0%A4:pass@example.com')).toThrow('URI malformed');
+  });
+
+  it('returns a query object without a prototype', () => {
+    const { query } = parseUrl('/x?__proto__=a&constructor=b', true);
+    expect(Object.getPrototypeOf(query)).toBe(null);
+    expect(Object.entries(query as object)).toEqual([
+      ['__proto__', 'a'],
+      ['constructor', 'b'],
+    ]);
+  });
+});
+
+describe('isRelativeUrl() over the parseUrl fixture', () => {
+  // Inputs `isRelativeUrl()` accepted when it was built on `url.parse()` (Node 22.23.4)
+  const RELATIVE_BEFORE = [
+    '',
+    ' ',
+    '/',
+    '/app/home',
+    '/app/home/',
+    'app/home',
+    'foo',
+    './foo',
+    '../foo',
+    '/a/./b/../c',
+    '/a/b/..',
+    '/app/dashboards#/view/abc',
+    '/app/dashboards#/view/abc?_g=(filters:!(),time:(from:now-15m,to:now))',
+    "/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))",
+    '/app/discover?foo=bar&foo=baz#/x?y=1',
+    '/app/x?q=a+b&r=%20c&s=%E2%9C%93&t=&u',
+    '/app/x?=a&b=1=2&&c',
+    '/app/x?a[]=1&a[]=2',
+    '/app/x?bad=%E0%A4%A&ok=1',
+    '/app/x?#',
+    '/app/x?',
+    '/app/x#',
+    '?a=1',
+    '#hash',
+    '#/view/a?b=c',
+    '/w/abc123/app/dashboards#/view/1',
+    '/s/space/app/kibana',
+    '/app/x y',
+    "/app/it's",
+    '/app/a|b^c`d{e}',
+    '/app/%2Fencoded%20path',
+    '/app/caf\u00e9',
+    '/app/<script>',
+    '/app/x\ty',
+    '/app/x\ny',
+    '/\t/evil.com',
+    '/%2F/evil.com',
+    'java\tscript:alert(1)',
+    ':5601/app',
+    '/../x',
+    '/base/../../x',
+    'a/../../b',
+    '%2e%2e/foo',
+    '.%2e/x',
+    '/a/%2E/b',
+    '\\..\\x',
+    'foo/./bar?x=1#y',
+  ];
+  // A browser drops the tab, turning these into `//evil.com` and a `javascript:` URL
+  const NO_LONGER_RELATIVE = ['/\t/evil.com', 'java\tscript:alert(1)'];
+
+  it.each(
+    (legacyUrlParse as Array<[string, string]>)
+      .filter(([, mode]) => mode === 'default')
+      .map(([input]) => [JSON.stringify(input), input] as const)
+  )('decides %s as before, apart from tab smuggling', (_, input) => {
+    const expected = RELATIVE_BEFORE.includes(input) && !NO_LONGER_RELATIVE.includes(input);
+    expect(isRelativeUrl(input)).toBe(expected);
+  });
+});
+
+describe('modifyUrl() with a base path', () => {
+  const prepend = (url: string) =>
+    modifyUrl(url, (parts) => {
+      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+        parts.pathname = `/base${parts.pathname}`;
+      }
+    });
+
+  it('keeps dot segments, so the base path is not collapsed', () => {
+    expect(prepend('/../x')).toBe('/base/../x');
+    expect(prepend('/a/./b/../c?x=1#y')).toBe('/base/a/./b/../c?x=1#y');
+  });
+
+  it('keeps an explicit default port', () => {
+    expect(prepend('http://localhost:80/x')).toBe('http://localhost:80/x');
+  });
+
+  it('returns the url unchanged when it cannot be parsed', () => {
+    expect(prepend('http://h:abc/x')).toBe('http://h:abc/x');
+    expect(prepend('http://user:%E0%A4@example.com')).toBe('http://user:%E0%A4@example.com');
+  });
+
+  it('round-trips state URLs', () => {
+    const url =
+      '/app/data-explorer/discover#?_a=(discover:(columns:!(_source)),metadata:(indexPattern:%27ff95%27,view:discover))&_g=(time:(from:now-15m,to:now))';
+    expect(prepend(url)).toBe(`/base${url}`);
   });
 });
