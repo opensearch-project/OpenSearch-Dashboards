@@ -207,6 +207,31 @@ describe('createDatasetChangeMiddleware', () => {
       );
     });
 
+    // A page opened from a URL or reloaded has dispatched no query state action yet: the dataset
+    // it loaded with is the one the picker refines.
+    it('keeps the results on the first refinement after a page load', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValueOnce(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }))
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsSelectionStale(true));
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
+    });
+
+    it('does nothing when the first refinement after a page load re-applies its selection', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
+
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+      expect(queryActions.abortAllActiveQueries).not.toHaveBeenCalled();
+    });
+
     // The running query is for the previous selection; Stop's semantics, so what finished stays.
     it('stops the running queries as Stop does when the picker refines the selection', async () => {
       mockStore.getState = jest

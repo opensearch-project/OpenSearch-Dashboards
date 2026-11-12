@@ -410,6 +410,54 @@ describe('queries still running when what they were run for is replaced', () => 
     });
   });
 
+  describe('the first log group change after a page load', () => {
+    // The page opened from a URL: no query state action has run yet.
+    it('keeps the results as stale instead of clearing them', async () => {
+      const store = createStore({ query: QUERY, dataset: GROUP_A });
+      run(store);
+      await flush();
+      fetches[0].resolve(rows('group-a'));
+      await flush();
+      expect(resultsFor(store)?.hasResults).toBe(true);
+
+      pick(store, GROUP_B);
+      await flush();
+
+      expect(resultsFor(store)?.hasResults).toBe(true);
+      expect(store.getState().queryEditor.isSelectionStale).toBe(true);
+      expect(store.getState().queryEditor.isQueryEditorDirty).toBe(true);
+    });
+
+    it('stops a running query, which settles as stopped', async () => {
+      const store = createStore({ query: QUERY, dataset: GROUP_A });
+      run(store);
+      await flush();
+
+      pick(store, GROUP_B);
+      expect(fetches[0].signal.aborted).toBe(true);
+      fetches[0].reject(abortError());
+      await flush();
+
+      expect(resultsFor(store)).toBeUndefined();
+      expect(store.getState().queryEditor.isSelectionStale).toBe(true);
+      expect(overallStatus(store)).toBe(QueryExecutionStatus.UNINITIALIZED);
+    });
+
+    it('changes nothing when the picker re-applies the selection the page shows', async () => {
+      const store = createStore({ query: QUERY, dataset: GROUP_A });
+      run(store);
+      await flush();
+      fetches[0].resolve(rows('group-a'));
+      await flush();
+
+      pick(store, GROUP_A);
+      await flush();
+
+      expect(resultsFor(store)?.hasResults).toBe(true);
+      expect(store.getState().queryEditor.isSelectionStale).toBe(false);
+    });
+  });
+
   describe('a new run or a new search', () => {
     it('stops the queries of the query it replaces', async () => {
       const store = createStore({ query: QUERY, dataset: GROUP_A });

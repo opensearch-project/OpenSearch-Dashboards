@@ -53,9 +53,13 @@ export const createDatasetChangeMiddleware = (
   let currentDataset: Dataset | undefined;
 
   return (store) => (next) => async (action) => {
+    const isQueryStateAction =
+      action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory';
+    // The dataset the page showed before this action.
+    const datasetBefore = isQueryStateAction ? store.getState().query?.dataset : undefined;
     const result = next(action);
 
-    if (action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory') {
+    if (isQueryStateAction) {
       const {
         queryEditor,
         query: { dataset },
@@ -63,8 +67,13 @@ export const createDatasetChangeMiddleware = (
 
       if (isEqual(currentDataset, dataset)) return result;
 
-      const previousDataset = currentDataset;
+      // Until the first of these actions (a page opened from a URL or reloaded has dispatched
+      // none), the dataset the page loaded with is the previous one.
+      const previousDataset = currentDataset ?? datasetBefore;
       currentDataset = dataset;
+
+      // The picker re-applied the selection the page already shows: nothing changed.
+      if (action.meta?.refineSelection && isEqual(previousDataset, dataset)) return result;
 
       if (
         action.meta?.refineSelection &&
