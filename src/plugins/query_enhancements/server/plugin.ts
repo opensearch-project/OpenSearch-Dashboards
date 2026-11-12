@@ -71,7 +71,9 @@ export class QueryEnhancementsPlugin implements Plugin<
       try {
         const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
         const client = dynamicConfigServiceStart.getClient();
-        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+        // From the request rather than getAsyncLocalStore(), which is not reliably populated in
+        // request handlers and then falls back to the global value, losing scoped overrides.
+        const store = dynamicConfigServiceStart.createStoreFromRequest(request);
 
         // Return only the changed subtree; recursiveApplyChanges merges it onto
         // the resolved capabilities.
