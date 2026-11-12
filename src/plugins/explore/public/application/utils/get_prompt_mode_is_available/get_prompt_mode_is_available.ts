@@ -6,8 +6,12 @@
 import { firstValueFrom } from '@osd/std';
 import { ExploreServices } from '../../../types';
 import { QueryEditorExtensionDependencies } from '../../../../../data/public';
+import { Query } from '../../../../../data/common';
 
-export const getPromptModeIsAvailable = async (services: ExploreServices): Promise<boolean> => {
+export const getPromptModeIsAvailable = async (
+  services: ExploreServices,
+  userProvidedQuery?: Query
+): Promise<boolean> => {
   try {
     const extensions = services.data.query.queryString
       .getLanguageService()
@@ -20,7 +24,9 @@ export const getPromptModeIsAvailable = async (services: ExploreServices): Promi
     }
 
     return await firstValueFrom(
-      queryAssistExtension.isEnabled$({} as QueryEditorExtensionDependencies)
+      queryAssistExtension.isEnabled$({
+        userProvidedQuery,
+      } as QueryEditorExtensionDependencies)
     );
   } catch (error) {
     return false;
