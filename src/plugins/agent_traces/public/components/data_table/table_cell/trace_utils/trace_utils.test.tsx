@@ -320,7 +320,7 @@ describe('trace_utils', () => {
       const result = buildTraceDetailsUrl('span-123', 'trace-456', null as any);
 
       expect(result).toBe(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
       );
     });
 
@@ -329,7 +329,7 @@ describe('trace_utils', () => {
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
       );
     });
 
@@ -515,7 +515,7 @@ describe('trace_utils', () => {
       handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
         '_blank'
       );
     });
@@ -650,7 +650,7 @@ describe('trace_utils', () => {
       fireEvent.click(link);
 
       expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
         '_blank'
       );
     });

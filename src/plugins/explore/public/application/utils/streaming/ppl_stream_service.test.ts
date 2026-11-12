@@ -76,6 +76,17 @@ describe('PPLStreamService', () => {
       );
     });
 
+    // Sequences start at 0, so the first long poll must not drop it as falsy.
+    it('forwards waitForSequence 0 rather than dropping it as falsy', async () => {
+      const http = createHttp();
+      await new PPLStreamService(http as any).poll({ id: 'job-1', waitForSequence: 0 });
+
+      expect(http.get).toHaveBeenCalledWith(
+        `${PPL_STREAM_API.JOB}/job-1`,
+        expect.objectContaining({ query: { waitForSequence: 0 } })
+      );
+    });
+
     it('percent-encodes the opaque job id', async () => {
       const http = createHttp();
       await new PPLStreamService(http as any).poll({ id: 'a/b+c=' });

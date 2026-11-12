@@ -61,6 +61,20 @@ describe('useIncrementalRender', () => {
     expect(result.current.count).toBe(150);
   });
 
+  // A screen tall enough to fit every rendered item: the sentinel is visible whenever observed.
+  it('keeps growing while the sentinel stays visible, with nothing to scroll', () => {
+    window.IntersectionObserver = jest.fn().mockImplementation((cb) => ({
+      observe: () => cb([{ isIntersecting: true }]),
+      unobserve,
+      disconnect: jest.fn(),
+    }));
+    const { result, attachSentinel } = setup({ total: 300, pageSize: 50 });
+    attachSentinel();
+
+    expect(result.current.count).toBe(300);
+    expect(result.current.hasMore).toBe(false);
+  });
+
   it('stops scroll-driven growth at the cap and only grows further through showMore', () => {
     const { result, attachSentinel, scrollSentinelIntoView } = setup({
       total: 1000,

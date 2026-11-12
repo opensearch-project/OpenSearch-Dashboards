@@ -16,6 +16,10 @@ import { usePPLExecuteQueryAction } from '../../../components/query_panel/action
 import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useStreamingStatus } from '../../../components/streaming/use_streaming_status';
+import {
+  StreamingAnnouncer,
+  StreamingProgressBar,
+} from '../../../components/streaming/streaming_progress';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
@@ -419,17 +423,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
       </EuiFlexGroup>
 
       {isStreaming ? (
-        /* Determinate, because a streaming job reports a fraction; falls back to indeterminate when
-           the engine reports none. */
-        <EuiProgress
-          size="xs"
-          color="primary"
-          position="absolute"
-          {...(typeof streaming?.fractionDone === 'number' && streaming.fractionDone >= 0
-            ? { value: streaming.fractionDone, max: 1 }
-            : {})}
-          data-test-subj="exploreQueryPanelStreamingProgress"
-        />
+        <StreamingProgressBar streaming={streaming} />
       ) : (
         isLoading && (
           <>
@@ -454,6 +448,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
           </>
         )
       )}
+      <StreamingAnnouncer streaming={streaming} />
     </EuiPanel>
   );
 };

@@ -39,7 +39,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
   const stubConfig = (
     core: any,
     getConfig: Record<string, any>,
-    asyncLocalStore?: Map<string, any>
+    requestStore?: Map<string, any>
   ) => {
     const startContract = dynamicConfigServiceMock.createStartContract(
       {
@@ -47,8 +47,10 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
         bulkGetConfigs: new Map(),
         listConfigs: new Map(),
       },
-      asyncLocalStore
+      // A different store, so a lookup through the ambient one is detectable.
+      new Map([['ambient', true]])
     );
+    (startContract.createStoreFromRequest as jest.Mock).mockReturnValue(requestStore);
     core.dynamicConfigService.getStartService.mockResolvedValue(startContract);
     return startContract;
   };
@@ -104,21 +106,22 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
     expect(getConfigMock.mock.calls[0][0]).toEqual({ pluginConfigPath: ['queryEnhancements'] });
   });
 
-  it('passes the async local store as context when one is present', async () => {
+  it('resolves the flags with a store built from the request', async () => {
     const { core, switcher } = setupPlugin();
     const store = new Map<string, any>([['k', 'v']]);
     const startContract = stubConfig(core, { ppl: { lint: { enabled: true } } }, store);
+    const request = { headers: {} } as any;
 
-    await switcher({} as any, baseCapabilities());
+    await switcher(request, baseCapabilities());
 
+    expect(startContract.createStoreFromRequest).toHaveBeenCalledWith(request);
     const getConfigMock = startContract.getClient().getConfig as jest.Mock;
     expect(getConfigMock.mock.calls[0][1]).toEqual({ asyncLocalStorageContext: store });
   });
 
-  it('omits the options object when no async local store is present', async () => {
+  it('omits the options object when the request yields no store', async () => {
     const { core, switcher } = setupPlugin();
-    // No store passed → getAsyncLocalStore() returns undefined. The switcher
-    // must pass `undefined` rather than { asyncLocalStorageContext: undefined }.
+    // The switcher must pass `undefined` rather than { asyncLocalStorageContext: undefined }.
     const startContract = stubConfig(core, { ppl: { lint: { enabled: true } } });
 
     await switcher({} as any, baseCapabilities());

@@ -17,6 +17,12 @@ interface StreamingRun {
 
 const runs = new Map<string, StreamingRun>();
 
+/** Runs a newer query replaced; they must not publish, not even their cancellation. */
+const superseded = new WeakSet<object>();
+
+const isWeakKey = (value: unknown): value is object =>
+  (typeof value === 'object' && value !== null) || typeof value === 'function';
+
 /**
  * Registers a run, superseding any already in flight for the same key. Without this a re-run leaves
  * the previous job polling, so two jobs publish to one `cacheKey` and counts jump backwards.
@@ -42,8 +48,31 @@ export const unregisterStreamingAbort = (cacheKey: string, token?: unknown): voi
  * removed on completion, and suppressing a terminal update would strand the UI mid-flight.
  */
 export const isCurrentStreamingRun = (cacheKey: string, token: unknown): boolean => {
+  if (isWeakKey(token) && superseded.has(token)) return false;
   const current = runs.get(cacheKey);
   return !current || current.token === token;
+};
+
+/**
+ * Aborts the runs for every key not in `keep`. Returns the keys aborted: their last status is still
+ * loading, and the caller must clear it.
+ */
+export const supersedeOtherStreamingQueries = (keep: readonly string[]): string[] =>
+  [...runs.keys()].filter(
+    (cacheKey) => !keep.includes(cacheKey) && supersedeStreamingQuery(cacheKey)
+  );
+
+/**
+ * Unlike `abortStreamingQuery` (Stop), the run does not report how far it got, which would land on
+ * its replacement's status. Returns whether there was a run, whose status the caller must clear.
+ */
+export const supersedeStreamingQuery = (cacheKey: string): boolean => {
+  const run = runs.get(cacheKey);
+  if (!run) return false;
+  runs.delete(cacheKey);
+  if (isWeakKey(run.token)) superseded.add(run.token);
+  run.abort();
+  return true;
 };
 
 /** Returns true when there was a query to abort, so callers can avoid a redundant state update. */
