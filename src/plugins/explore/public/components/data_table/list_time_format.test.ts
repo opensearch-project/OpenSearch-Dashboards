@@ -17,6 +17,19 @@ describe('list time format', () => {
     expect(toListTimePattern(undefined)).toBe('MMM D, YYYY @ HH:mm:ss');
   });
 
+  it('drops fractional seconds after any separator, or none', () => {
+    expect(toListTimePattern('HH:mm:ss SSS')).toBe('HH:mm:ss');
+    expect(toListTimePattern('HH:mm:ss:SSS')).toBe('HH:mm:ss');
+    expect(toListTimePattern('YYYYMMDD HHmmssSSS')).toBe('YYYYMMDD HHmmss');
+    expect(toListTimePattern('HH:mm:ss.SSS Z')).toBe('HH:mm:ss Z');
+  });
+
+  it('keeps bracketed literals', () => {
+    expect(toListTimePattern('HH:mm:ss[.SSS] [at] HH:mm:ss.SSS')).toBe(
+      'HH:mm:ss[.SSS] [at] HH:mm:ss'
+    );
+  });
+
   it('formats date and date_nanos values to the second with no offset suffix', () => {
     const pattern = 'MMM D, YYYY @ HH:mm:ss';
     expect(formatListTime('2026-11-09T20:13:07.227+00:00', pattern)).toBe('Nov 9, 2026 @ 20:13:07');

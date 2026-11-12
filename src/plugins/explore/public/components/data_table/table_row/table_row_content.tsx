@@ -24,6 +24,19 @@ import { isSourceColumn } from '../../../helpers/is_source_column';
 import { formatListTime } from '../list_time_format';
 import { normalizeSeverityText, SEVERITY_TEXT_FIELDS } from '../../../helpers/severity_text';
 
+const DATE_FORMATTER_IDS = new Set(['date', 'date_nanos']);
+
+/** Whether the field's effective formatter is still a date / date_nanos one. */
+const usesDateFormatter = (
+  dataset: IndexPattern | Dataset,
+  fieldInfo: ReturnType<(IndexPattern | Dataset)['fields']['getByName']>
+): boolean => {
+  if (!fieldInfo || typeof dataset.getFormatterForField !== 'function') return false;
+  const formatterId = (dataset.getFormatterForField(fieldInfo)?.type as { id?: string } | undefined)
+    ?.id;
+  return formatterId ? DATE_FORMATTER_IDS.has(formatterId) : false;
+};
+
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
   index?: number;
@@ -136,13 +149,22 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           );
         }
 
+        // Display-only overrides apply only where the field uses its default
+        // formatter: a per-field format in the index pattern always wins. For the
+        // time field, so does an admin's `format:defaultTypeMap` choice: the list
+        // pattern is used only while the field still formats as date/date_nanos.
+        const hasFieldFormat = Boolean(dataset.fieldFormatMap?.[colName]);
         const listTime =
-          isTimeField && timeColumnPattern && !dataset.fieldFormatMap?.[colName]
+          isTimeField &&
+          timeColumnPattern &&
+          !hasFieldFormat &&
+          usesDateFormatter(dataset, fieldInfo)
             ? formatListTime(fieldMapping, timeColumnPattern)
             : undefined;
-        const severityLabel = SEVERITY_TEXT_FIELDS.has(colName)
-          ? normalizeSeverityText(fieldMapping)
-          : undefined;
+        const severityLabel =
+          SEVERITY_TEXT_FIELDS.has(colName) && !hasFieldFormat
+            ? normalizeSeverityText(fieldMapping)
+            : undefined;
         const formattedValue =
           listTime ??
           (severityLabel ? escape(severityLabel) : formatFieldValue(dataset, row, colName));

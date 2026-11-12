@@ -11,12 +11,10 @@ import { TraceHit } from '../trace_details/traces/ppl_to_trace_hits';
 // Format timestamp to readable date/time respecting the configured timezone.
 // PPL returns timestamps without timezone indicator (e.g. "2025-05-29 03:11:25.292"),
 // so we parse as UTC first, then convert to the configured timezone.
-// The OpenSearch Dashboards default `dateFormat`, as in Explore. Detail views
-// (flyouts) show it in full ("Nov 9, 2026 @ 14:31:20.123"); list tables use the
-// same date to the second ("Nov 9, 2026 @ 14:31:20"), like the Explore Logs and
-// Traces lists.
+// The OpenSearch Dashboards default `dateFormat`, used when the setting is unset.
+// See timestamp_formatters.ts for the user's `dateFormat` (full precision) and
+// its list variant (to the second).
 export const FULL_TIMESTAMP_PATTERN = 'MMM D, YYYY @ HH:mm:ss.SSS';
-export const LIST_TIMESTAMP_PATTERN = 'MMM D, YYYY @ HH:mm:ss';
 
 export const formatTimestamp = (
   timestamp: string,
@@ -29,9 +27,15 @@ export const formatTimestamp = (
   return m.tz(timezone).format(pattern);
 };
 
-/** List-table timestamp: the same format, to the second. */
-export const formatListTimestamp = (timestamp: string, timezone: string): string =>
-  formatTimestamp(timestamp, timezone, LIST_TIMESTAMP_PATTERN);
+/**
+ * The display timezone: the `dateFormat:tz` advanced setting, or the browser's
+ * zone when it is "Browser" (the default) or unset.
+ */
+export const resolveTimezone = (uiSettings?: { get: (key: string) => unknown }): string => {
+  const tz = uiSettings?.get('dateFormat:tz');
+  if (typeof tz === 'string' && tz && tz !== 'Browser') return tz;
+  return moment.tz.guess() || moment().format('Z');
+};
 
 export interface BaseRow {
   id: string;
@@ -45,6 +49,8 @@ export interface BaseRow {
   input: string;
   output: string;
   startTime: string;
+  /** The unformatted start time, so a list cell can format it differently. */
+  rawStartTime?: string;
   endTime: string;
   latency: string;
   durationNanos: number;
@@ -96,6 +102,7 @@ export const spanToRow = (
   input: span.input || '—',
   output: span.output || '—',
   startTime: formatTs(span.startTime),
+  rawStartTime: span.startTime,
   endTime: formatTs(span.endTime),
   latency: formatDuration(span.durationNanos),
   durationNanos: span.durationNanos,

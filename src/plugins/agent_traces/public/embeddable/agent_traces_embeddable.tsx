@@ -43,7 +43,8 @@ import { VisualizationBuilder } from '../../../explore/public';
 import { ExecutionContextSearch } from '../../../expressions/common';
 import { setStateToOsdUrl } from '../../../opensearch_dashboards_utils/public';
 import { PLUGIN_ID, AGENT_TRACES_SESSION_ID_FIELD } from '../../common';
-import { formatListTimestamp, TraceRow } from '../application/pages/traces/hooks/tree_utils';
+import { TraceRow } from '../application/pages/traces/hooks/tree_utils';
+import { getTimestampFormatters } from '../application/pages/traces/hooks/timestamp_formatters';
 import { hitToBaseRow } from '../application/pages/traces/table_shared';
 import {
   PPLService,
@@ -373,14 +374,10 @@ export class AgentTracesEmbeddable
     }
   }
 
-  private formatTs = (ts: string) => {
-    const tz = this.services.uiSettings.get('dateFormat:tz');
-    // The embeddable is a list table: to the second, like the app's lists.
-    return formatListTimestamp(
-      ts,
-      tz && tz !== 'Browser' ? tz : Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
-  };
+  // The embeddable only shows list tables (opening a row goes to the app), so
+  // its rows use the list format: to the second, like the app's lists.
+  private formatTs = (ts: string) =>
+    getTimestampFormatters(this.services.uiSettings).formatListTs(ts);
 
   /** Open a trace or session in the Agent Traces app, with the dashboard's time range. */
   private openInAgentTraces(tab: AgentView, filter: string) {

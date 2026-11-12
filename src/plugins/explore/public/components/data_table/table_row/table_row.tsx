@@ -18,7 +18,6 @@ import {
 } from '../../../types/doc_views_types';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { toListTimePattern } from '../list_time_format';
 import { ExpandedTableRow } from './expanded_table_row/expanded_table_row';
 import { TableRowContent } from './table_row_content';
 import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
@@ -39,6 +38,8 @@ export interface TableRowProps {
   docViewsRegistry: DocViewsRegistry;
   expandedTableHeader?: string;
   wrapCellText?: boolean;
+  /** Time column pattern for the list (see list_time_format.ts), computed once per table. */
+  timeColumnPattern?: string;
 }
 
 export const TableRowUI = ({
@@ -54,14 +55,10 @@ export const TableRowUI = ({
   docViewsRegistry,
   expandedTableHeader,
   wrapCellText,
+  timeColumnPattern,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
-  // List tables show the time field to the second (see list_time_format.ts).
-  const timeColumnPattern = useMemo(
-    () => toListTimePattern(services?.uiSettings?.get('dateFormat')),
-    [services?.uiSettings]
-  );
   const handleExpanding = useCallback(
     () => setIsExpanded((prevState) => !prevState),
     [setIsExpanded]

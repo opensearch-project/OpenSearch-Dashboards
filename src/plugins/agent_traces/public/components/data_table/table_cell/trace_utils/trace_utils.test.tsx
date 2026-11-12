@@ -15,7 +15,13 @@ import {
   navigateToTraceDetailsWithSpan,
   getStatusCodeColor,
   DurationTableCell,
+  AgentTracesTimeCell,
 } from './trace_utils';
+import {
+  TraceExpansionProvider,
+  TraceExpansionState,
+} from '../../../../application/pages/traces/trace_expansion_context';
+import { BaseRow } from '../../../../application/pages/traces/hooks/tree_utils';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
 const mockOpen = jest.fn();
@@ -724,6 +730,49 @@ describe('trace_utils', () => {
       expect(getStatusCodeColor(300)).toBe('primary');
       expect(getStatusCodeColor(400)).toBe('warning');
       expect(getStatusCodeColor(500)).toBe('danger');
+    });
+  });
+
+  describe('AgentTracesTimeCell', () => {
+    const traceRow = {
+      startTime: 'Nov 11, 2026 @ 12:18:50.793',
+      rawStartTime: '2026-11-11 12:18:50.793',
+    } as unknown as BaseRow;
+    const renderCell = (extra: Partial<TraceExpansionState>) =>
+      render(
+        <TraceExpansionProvider
+          value={{
+            expandedRows: new Set(),
+            toggleExpansion: jest.fn(),
+            traceLoadingState: new Map(),
+            getRowMeta: () => ({ level: 0, isExpandable: false, traceRow }),
+            ...extra,
+          }}
+        >
+          <table>
+            <tbody>
+              <tr>
+                <AgentTracesTimeCell hitId="h1" />
+              </tr>
+            </tbody>
+          </table>
+        </TraceExpansionProvider>
+      );
+
+    it('formats the raw start time with the list formatter', () => {
+      const formatListTs = jest.fn(() => 'Nov 11, 2026 @ 12:18:50');
+      renderCell({ formatListTs });
+      expect(formatListTs).toHaveBeenCalledWith('2026-11-11 12:18:50.793');
+      expect(screen.getByTestId('agentTracesTimeLink')).toHaveTextContent(
+        'Nov 11, 2026 @ 12:18:50'
+      );
+    });
+
+    it("falls back to the row's start time without a list formatter", () => {
+      renderCell({});
+      expect(screen.getByTestId('agentTracesTimeLink')).toHaveTextContent(
+        'Nov 11, 2026 @ 12:18:50.793'
+      );
     });
   });
 });

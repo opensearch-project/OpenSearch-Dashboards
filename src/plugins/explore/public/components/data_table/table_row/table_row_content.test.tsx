@@ -308,9 +308,11 @@ describe('TableRowContent', () => {
       mockDataset.formatField.mockImplementation((_row: unknown, col: string) =>
         col === 'timestamp' ? 'Nov 9, 2026 @ 20:13:07.227000000' : 'test_value'
       );
+      (mockDataset as any).getFormatterForField = jest.fn(() => ({ type: { id: 'date_nanos' } }));
     });
     afterEach(() => {
       delete (mockDataset as any).fieldFormatMap;
+      delete (mockDataset as any).getFormatterForField;
     });
 
     it('shows the time to the second with the list pattern', () => {
@@ -329,6 +331,22 @@ describe('TableRowContent', () => {
 
     it("keeps the field's own format when the time field has a format override", () => {
       (mockDataset as any).fieldFormatMap = { timestamp: { id: 'date' } };
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+
+    it('keeps the formatted value when format:defaultTypeMap uses another formatter for dates', () => {
+      (mockDataset as any).getFormatterForField = jest.fn(() => ({
+        type: { id: 'relative_date' },
+      }));
       render(
         <table>
           <tbody>
@@ -370,5 +388,22 @@ describe('TableRowContent', () => {
     );
     expect(screen.getByTestId('table-cell-severityText')).toHaveTextContent('sanitized_Info');
     expect(screen.getByTestId('table-cell-field1')).toHaveTextContent('sanitized_INFO');
+  });
+
+  it('keeps a field format set on severityText in the index pattern', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.flattenHit.mockReturnValue({ severityText: 'INFO' });
+    mockDataset.formatField.mockImplementation(() => '<span style="color:red">INFO</span>');
+    (mockDataset as any).fieldFormatMap = { severityText: { id: 'color' } };
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['severityText']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('table-cell-severityText')).toHaveTextContent('INFO');
+    expect(screen.getByTestId('table-cell-severityText')).not.toHaveTextContent('sanitized_Info');
+    delete (mockDataset as any).fieldFormatMap;
   });
 });

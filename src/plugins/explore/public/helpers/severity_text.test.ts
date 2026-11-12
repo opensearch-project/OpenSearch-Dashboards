@@ -32,6 +32,12 @@ describe('normalizeSeverityText', () => {
     expect(normalizeSeverityText(9)).toBeUndefined();
   });
 
+  it("doesn't match Object.prototype members", () => {
+    expect(normalizeSeverityText('constructor')).toBe('Constructor');
+    expect(normalizeSeverityText('__proto__')).toBe('__proto__');
+    expect(normalizeSeverityText('toString')).toBe('Tostring');
+  });
+
   it('covers the OpenTelemetry severity text field names', () => {
     expect(SEVERITY_TEXT_FIELDS.has('severityText')).toBe(true);
     expect(SEVERITY_TEXT_FIELDS.has('severity.text')).toBe(true);
