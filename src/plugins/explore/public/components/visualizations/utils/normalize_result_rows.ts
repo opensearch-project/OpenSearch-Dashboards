@@ -5,6 +5,8 @@
 
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { NormalizedRow } from '../../data_transformations/types';
+import { isCompleteFieldSchema } from '../../data_transformations/transformation_utils';
+import type { SeriesResult } from '../../../application/in_context_vis_editor/multi_query_builder/types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
 
@@ -12,6 +14,21 @@ export const normalizeSearchHits = <T = unknown>(
   hits: Array<OpenSearchSearchHit<T>>
 ): NormalizedRow[] =>
   hits.map((hit) => ({ ...((hit._source as NormalizedRow | undefined) ?? {}) }));
+
+// Map a query's search result hits to seriesResult that transformation pipeline and vis read.
+export const hitsToSeriesResult = <T = unknown>(
+  refId: string,
+  hits: Array<OpenSearchSearchHit<T>>,
+  fieldSchema: Array<{ name?: string; type?: string }>,
+  seriesDisplayNames?: Record<string, string>
+): SeriesResult => {
+  return {
+    refId,
+    rows: normalizeSearchHits(hits),
+    fieldSchema: fieldSchema.filter(isCompleteFieldSchema),
+    seriesDisplayNames,
+  };
+};
 
 export const normalizeResultRows = (
   rows: NormalizedRow[],

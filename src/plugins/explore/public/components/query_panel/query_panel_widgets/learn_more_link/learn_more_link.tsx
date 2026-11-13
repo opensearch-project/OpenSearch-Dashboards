@@ -6,6 +6,8 @@
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
+import type { Dataset } from '../../../../../../data/common';
+import type { ExploreServices } from '../../../../types';
 import {
   selectDataset,
   selectIsPromptEditorMode,
@@ -18,7 +20,30 @@ export const LearnMoreLink = () => {
   const queryLanguage = useSelector(selectQueryLanguage);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dataset = useSelector(selectDataset);
-  const { data, docLinks } = getServices();
+  const services = getServices();
+
+  return (
+    <LearnMoreButton
+      services={services}
+      queryLanguage={queryLanguage}
+      dataset={dataset}
+      isPromptMode={isPromptMode}
+    />
+  );
+};
+
+export const LearnMoreButton = ({
+  queryLanguage,
+  isPromptMode,
+  dataset,
+  services,
+}: {
+  queryLanguage: string;
+  isPromptMode: boolean;
+  dataset: Dataset | undefined;
+  services: ExploreServices;
+}) => {
+  const { data, docLinks } = services;
   const langConfig = data.query.queryString.getLanguageService().getLanguage(queryLanguage);
 
   // In prompt mode no language chip is selected, so naming one points at an inactive chip.

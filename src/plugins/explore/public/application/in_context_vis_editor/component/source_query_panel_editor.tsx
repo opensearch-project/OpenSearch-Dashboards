@@ -23,7 +23,7 @@ export const SourceQueryPanelEditor: React.FC<{
   editor: ComponentType<SourceTypeQueryEditorProps>;
 }> = ({ editor }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryState, queryEditorState, queryBuilder } = useQueryBuilderState();
+  const { queryState, queryEditorState, queryBuilder, container } = useQueryBuilderState();
   const { language, dataset } = queryState;
 
   const languageTitle = useMemo(
@@ -34,22 +34,22 @@ export const SourceQueryPanelEditor: React.FC<{
   const onQueryChange = useCallback(
     (query: string) => {
       queryBuilder.updateQueryState({ query });
-      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+      container.markStale();
     },
-    [queryBuilder]
+    [queryBuilder, container]
   );
 
   const onRun = useCallback(
     (query?: string) => {
       if (query !== undefined) queryBuilder.updateQueryState({ query });
-      queryBuilder.onQueryExecutionSubmit().catch((error) => {
+      container.executeAll().catch((error) => {
         services.notifications?.toasts.addError(error, {
           title: 'Query execution failed',
           toastLifeTimeMs: 2000,
         });
       });
     },
-    [queryBuilder, services.notifications]
+    [queryBuilder, container, services.notifications]
   );
 
   const onQueryOptionsChange = useCallback(
@@ -75,7 +75,8 @@ export const SourceQueryPanelEditor: React.FC<{
     <SourceQueryEditor
       editor={editor}
       reduxQuery={String(queryState.query ?? '')}
-      isDirty={queryEditorState.isQueryEditorDirty}
+      // the row's query is written on every edit, so the draft never diverges from it
+      isDirty={false}
       onQueryChange={onQueryChange}
       onRun={onRun}
       languageId={language}

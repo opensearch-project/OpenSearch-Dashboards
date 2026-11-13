@@ -9,10 +9,11 @@ import { QueryExecutionStatus } from '../../../application/utils/state_managemen
 import * as reactUse from 'react-use';
 
 import { useQueryBuilderState } from './use_query_builder_state';
-import { getQueryBuilder } from '../query_builder/query_builder';
+import { useMultiQueryBuilder } from '../multi_query_builder/multi_query_builder_context';
 
-jest.mock('../query_builder/query_builder', () => ({
-  getQueryBuilder: jest.fn(),
+// The session's builder comes from MultiQueryBuilderProvider's context.
+jest.mock('../multi_query_builder/multi_query_builder_context', () => ({
+  useMultiQueryBuilder: jest.fn(),
 }));
 
 jest.spyOn(reactUse, 'useObservable').mockImplementation((observable: any, initialValue: any) => {
@@ -21,6 +22,7 @@ jest.spyOn(reactUse, 'useObservable').mockImplementation((observable: any, initi
 
 describe('useQueryBuilderState', () => {
   let mockQueryBuilder: any;
+  let mockContainer: any;
   let queryState$: BehaviorSubject<any>;
   let queryEditorState$: BehaviorSubject<any>;
   let resultState$: BehaviorSubject<any>;
@@ -41,7 +43,6 @@ describe('useQueryBuilderState', () => {
       promptModeIsAvailable: false,
       promptToQueryIsLoading: false,
       summaryAgentIsAvailable: false,
-      isQueryEditorDirty: false,
       userInitiatedQuery: false,
       languageType: 'PPL',
     });
@@ -67,7 +68,13 @@ describe('useQueryBuilderState', () => {
       updateQueryEditorState: jest.fn(),
     };
 
-    (getQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+    mockContainer = {
+      getSelectedRow: jest.fn().mockReturnValue(mockQueryBuilder),
+      getSelectedRow$: jest.fn().mockReturnValue(new BehaviorSubject(mockQueryBuilder)),
+      multiQueryEditorState$: new BehaviorSubject({ dateRange: { from: 'now-15m', to: 'now' } }),
+      getHasTimeBasedRow$: jest.fn().mockReturnValue(new BehaviorSubject(true)),
+    };
+    (useMultiQueryBuilder as jest.Mock).mockReturnValue(mockContainer);
   });
 
   afterEach(() => {
@@ -115,7 +122,6 @@ describe('useQueryBuilderState', () => {
         promptModeIsAvailable: false,
         promptToQueryIsLoading: false,
         summaryAgentIsAvailable: false,
-        isQueryEditorDirty: false,
         userInitiatedQuery: false,
         languageType: 'PPL',
       });
@@ -145,6 +151,21 @@ describe('useQueryBuilderState', () => {
       expect(result.current).toHaveProperty('resultState');
       expect(result.current).toHaveProperty('datasetView');
       expect(result.current).toHaveProperty('queryBuilder');
+      expect(result.current).toHaveProperty('container');
+    });
+
+    it('returns the selected row as queryBuilder and the container', () => {
+      const { result } = renderHook(() => useQueryBuilderState());
+
+      expect(result.current.queryBuilder).toBe(mockQueryBuilder);
+      expect(result.current.container).toBe(mockContainer);
+    });
+
+    it('returns the shared date range and whether any query is time based', () => {
+      const { result } = renderHook(() => useQueryBuilderState());
+
+      expect(result.current.dateRange).toEqual({ from: 'now-15m', to: 'now' });
+      expect(result.current.hasTimeBasedRow).toBe(true);
     });
   });
 

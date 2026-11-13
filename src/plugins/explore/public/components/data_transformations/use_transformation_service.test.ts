@@ -5,13 +5,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useTransformationService } from './use_transformation_service';
-import { TransformationService } from './transformation_service';
-import * as registerModule from './register_all_transformations';
 import { getServices } from '../../services/services';
-
-jest.mock('./register_all_transformations', () => ({
-  registerAllTransformations: jest.fn(),
-}));
 
 jest.mock('../../services/services', () => ({
   getServices: jest.fn(() => ({
@@ -21,76 +15,66 @@ jest.mock('../../services/services', () => ({
 
 const mockGetServices = getServices as jest.MockedFunction<typeof getServices>;
 
-const mockVisualizationBuilder = {
-  setTransformationService: jest.fn(),
+// The builder owns the service; the hook starts and stops it for the editor.
+const createBuilder = () => {
+  const service = {
+    pipeline$: { subscribe: jest.fn((cb) => ({ unsubscribe: jest.fn(), cb })) },
+  };
+  return {
+    service,
+    getTransformationService: jest.fn(() => service),
+    startTransformations: jest.fn(),
+    stopTransformations: jest.fn(),
+  };
 };
 
 describe('useTransformationService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetServices.mockReturnValue({ osdUrlStateStorage: undefined } as any);
   });
 
-  it('returns a TransformationService instance', () => {
-    const { result } = renderHook(() => useTransformationService(mockVisualizationBuilder as any));
-    expect(result.current).toBeInstanceOf(TransformationService);
-  });
-
-  it('returns the same instance across re-renders', () => {
-    const { result, rerender } = renderHook(() =>
-      useTransformationService(mockVisualizationBuilder as any)
-    );
-    const firstInstance = result.current;
+  it("returns the builder's own service, the same across re-renders", () => {
+    const builder = createBuilder();
+    const { result, rerender } = renderHook(() => useTransformationService(builder as any));
+    expect(result.current).toBe(builder.service);
     rerender();
-    expect(result.current).toBe(firstInstance);
+    expect(result.current).toBe(builder.service);
   });
 
-  it('calls setTransformationService on visualizationBuilder', () => {
-    renderHook(() => useTransformationService(mockVisualizationBuilder as any));
-    expect(mockVisualizationBuilder.setTransformationService).toHaveBeenCalledTimes(1);
-    expect(mockVisualizationBuilder.setTransformationService).toHaveBeenCalledWith(
-      expect.any(TransformationService)
-    );
+  it('starts the transformations once, with the URL state storage', () => {
+    const urlStateStorage = { get: jest.fn(), set: jest.fn() };
+    mockGetServices.mockReturnValue({ osdUrlStateStorage: urlStateStorage } as any);
+    const builder = createBuilder();
+
+    const { rerender } = renderHook(() => useTransformationService(builder as any));
+    rerender();
+
+    expect(builder.startTransformations).toHaveBeenCalledTimes(1);
+    expect(builder.startTransformations).toHaveBeenCalledWith(urlStateStorage);
   });
 
-  it('calls registerAllTransformations', () => {
-    const spy = jest.spyOn(registerModule, 'registerAllTransformations');
-    renderHook(() => useTransformationService(mockVisualizationBuilder as any));
-    expect(spy).toHaveBeenCalledWith(expect.any(TransformationService));
-  });
+  it('stops them on unmount, without destroying the builder-owned service', () => {
+    const builder = createBuilder();
+    const { unmount } = renderHook(() => useTransformationService(builder as any));
+    expect(builder.stopTransformations).not.toHaveBeenCalled();
 
-  it('destroys service on unmount', () => {
-    const { result, unmount } = renderHook(() =>
-      useTransformationService(mockVisualizationBuilder as any)
-    );
-    const destroySpy = jest.spyOn(result.current, 'destroy');
     unmount();
-    expect(destroySpy).toHaveBeenCalled();
+    expect(builder.stopTransformations).toHaveBeenCalledTimes(1);
   });
 
-  it('subscribes to pipeline$ when onPipelineChange is provided', () => {
-    const onPipelineChange = jest.fn();
-    const { result } = renderHook(() =>
-      useTransformationService(mockVisualizationBuilder as any, { onPipelineChange })
-    );
-    result.current.pipeline$.next([]);
-    expect(onPipelineChange).toHaveBeenCalled();
-  });
+  // The hook no longer follows the pipeline (the builder's getIsDirty$ does):
+  // it('follows the pipeline while onPipelineChange is given, until unmount', () => {
+  //   const builder = createBuilder();
+  //   const onPipelineChange = jest.fn();
+  //   const { unmount } = renderHook(() =>
+  //     useTransformationService(builder as any, { onPipelineChange })
+  //   );
 
-  it('unsubscribes from pipeline$ on unmount', () => {
-    const onPipelineChange = jest.fn();
-    const { result, unmount } = renderHook(() =>
-      useTransformationService(mockVisualizationBuilder as any, { onPipelineChange })
-    );
-    unmount();
-    result.current.pipeline$.next([]);
-    expect(onPipelineChange).toHaveBeenCalledTimes(1);
-  });
-
-  it('initializes URL sync when osdUrlStateStorage is available', () => {
-    const mockUrlStateStorage = { get: jest.fn(), set: jest.fn() };
-    mockGetServices.mockReturnValue({ osdUrlStateStorage: mockUrlStateStorage } as any);
-
-    const { result } = renderHook(() => useTransformationService(mockVisualizationBuilder as any));
-    expect(result.current).toBeInstanceOf(TransformationService);
-  });
+  //   const [[callback]] = builder.service.pipeline$.subscribe.mock.calls;
+  //   expect(callback).toBe(onPipelineChange);
+  //   const subscription = builder.service.pipeline$.subscribe.mock.results[0].value;
+  //   unmount();
+  //   expect(subscription.unsubscribe).toHaveBeenCalled();
+  // });
 });

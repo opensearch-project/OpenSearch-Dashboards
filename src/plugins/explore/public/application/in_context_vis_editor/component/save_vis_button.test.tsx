@@ -15,6 +15,40 @@ import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ChartConfig } from '../../../components/visualizations/visualization_builder.types';
 
+// Panel-level query options read when saving.
+// const mockContainer = { multiQueryEditorState$: new BehaviorSubject({ maxDataPoints: undefined }) };
+// Two rows, the first hidden: `queries` keeps both, searchSourceJSON the first visible one.
+const mockSavedContainerState = {
+  queries: [
+    ['A', { query: 'source=hidden', language: 'PPL' }],
+    // The container puts the panel's max data points on each metrics row.
+    ['B', { query: 'up', language: 'PROMQL', queryOptions: { step: '30s', maxDataPoints: 500 } }],
+  ],
+  editorState: {
+    rows: [
+      ['A', { isHidden: true }],
+      ['B', { isHidden: false }],
+    ],
+  },
+};
+const mockRowDataView = { id: 'row-b-dataview' };
+const mockContainer = {
+  multiQueryEditorState$: new BehaviorSubject({ maxDataPoints: undefined }),
+  getContainerState: jest.fn(() => mockSavedContainerState),
+  // The first visible row's dataset backs searchSourceJSON's index.
+  getRow: jest.fn((refId: string) =>
+    refId === 'B' ? { datasetView$: new BehaviorSubject({ dataView: mockRowDataView }) } : undefined
+  ),
+};
+
+// const mockCommitSaved = jest.fn();
+// const mockBeginSave = jest.fn(() => mockCommitSaved);
+// useEditorDirty's confirmSave takes the new baseline; the button calls it once saved.
+const mockConfirmSave = jest.fn();
+const mockBeginSave = mockConfirmSave;
+const mockUseEditorDirty = jest.fn(() => ({ isDirty: false, confirmSave: mockBeginSave }));
+jest.mock('../hooks/use_editor_dirty', () => ({ useEditorDirty: () => mockUseEditorDirty() }));
+
 jest.mock('../hooks/use_query_builder_state', () => ({
   useQueryBuilderState: jest.fn(),
 }));
@@ -95,6 +129,13 @@ const buildServices = () => ({
   },
   osdUrlStateStorage: { get: mockOsdUrlStateStorageGet },
   scopedHistory: { push: mockScopedHistoryPush },
+  // Saving reads the shared filters at save time.
+  data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+});
+
+// Saving reads the selected row's query state (no global query mirror).
+const buildQueryBuilder = () => ({
+  queryState$: new BehaviorSubject({ query: 'source=logs', language: 'PPL' }),
 });
 
 const mockSavedExplore = {
@@ -113,7 +154,6 @@ const buildVisualizationBuilder = (
 ) => ({
   visualizationBuilderForEditor: {
     visConfig$: new BehaviorSubject(visConfig),
-    isVisDirty$: new BehaviorSubject(false),
     getTransformationService: jest.fn().mockReturnValue({
       serializePipeline: jest.fn().mockReturnValue([]),
     }),
@@ -122,15 +162,17 @@ const buildVisualizationBuilder = (
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseEditorDirty.mockReturnValue({ isDirty: false, confirmSave: mockBeginSave });
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: buildServices() });
   (useVisualizationBuilder as jest.Mock).mockReturnValue(buildVisualizationBuilder());
   (useQueryBuilderState as jest.Mock).mockReturnValue({
     queryEditorState: {
-      isQueryEditorDirty: false,
       editorMode: EditorMode.Query,
       lastExecutedTranslatedQuery: undefined,
     },
     datasetView: { dataView: undefined },
+    queryBuilder: buildQueryBuilder(),
+    container: mockContainer,
   });
   (useCurrentExploreId as jest.Mock).mockReturnValue(undefined);
   (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: { id: undefined } });
@@ -208,6 +250,7 @@ describe('SaveVisButton', () => {
     };
     (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
     (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore });
+    mockUseEditorDirty.mockReturnValue({ isDirty: true, confirmSave: mockBeginSave });
     (useVisualizationBuilder as jest.Mock).mockReturnValue(
       buildVisualizationBuilder({
         type: 'bar',
@@ -219,11 +262,12 @@ describe('SaveVisButton', () => {
     );
     (useQueryBuilderState as jest.Mock).mockReturnValue({
       queryEditorState: {
-        isQueryEditorDirty: true,
         editorMode: EditorMode.Query,
         lastExecutedTranslatedQuery: undefined,
       },
       datasetView: { dataView: undefined },
+      queryBuilder: buildQueryBuilder(),
+      container: mockContainer,
     });
 
     render(<SaveVisButton />);
@@ -238,6 +282,70 @@ describe('SaveVisButton', () => {
         description: 'Panel description',
       })
     );
+  });
+
+  describe('saving every row', () => {
+    const saveExisting = async () => {
+      const savedExplore: Record<string, any> = {
+        ...mockSavedExplore,
+        save: jest.fn().mockResolvedValue('explore-1'),
+      };
+      (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
+      (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore });
+      mockUseEditorDirty.mockReturnValue({ isDirty: true, confirmSave: mockBeginSave });
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+      await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+      return savedExplore;
+    };
+
+    it('saves every row in `queries`, each with its hidden state', async () => {
+      const savedExplore = await saveExisting();
+      expect(JSON.parse(savedExplore.queries)).toEqual([
+        // { refId: 'A', query: { query: 'source=hidden', language: 'PPL', isHidden: true } },
+        { refId: 'A', query: { query: 'source=hidden', language: 'PPL' }, isHidden: true },
+        {
+          refId: 'B',
+          query: {
+            query: 'up',
+            language: 'PROMQL',
+            queryOptions: { step: '30s', maxDataPoints: 500 },
+          },
+        },
+      ]);
+    });
+
+    it("takes searchSourceJSON's index from the first visible row", async () => {
+      const savedExplore = await saveExisting();
+      expect(savedExplore.searchSourceFields.index).toBe(mockRowDataView);
+    });
+
+    it('keeps the first visible row in searchSourceJSON, with max data points', async () => {
+      const savedExplore = await saveExisting();
+      expect(savedExplore.searchSourceFields.query).toEqual({
+        query: 'up',
+        language: 'PROMQL',
+        queryOptions: { step: '30s', maxDataPoints: 500 },
+      });
+    });
+
+    // it('takes the snapshot when saving starts and commits it once saved', async () => {
+    it('takes the new dirty-check baseline once saved', async () => {
+      await saveExisting();
+      // expect(mockBeginSave).toHaveBeenCalled();
+      // expect(mockCommitSaved).toHaveBeenCalled();
+      expect(mockConfirmSave).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('shows discard as a warning only when there are changes', () => {
+    const { rerender } = render(<SaveVisButton />);
+    const discard = () => screen.getByTestId('discardVisualizationEditorButton');
+    expect(discard().className).not.toContain('danger');
+
+    mockUseEditorDirty.mockReturnValue({ isDirty: true, confirmSave: mockBeginSave });
+    rerender(<SaveVisButton />);
+    expect(discard().className).toContain('danger');
   });
 
   it('discards and navigates to originatingApp when originatingApp is set', () => {

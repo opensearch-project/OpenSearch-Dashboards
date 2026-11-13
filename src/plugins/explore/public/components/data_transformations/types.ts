@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
+import type { SeriesResult } from '../../application/in_context_vis_editor/multi_query_builder/types';
 
 export interface FieldSchema {
   name: string;
@@ -23,9 +24,12 @@ export interface UrlTransformationState {
   definitionId: string;
   config: Record<string, unknown>;
   hide: boolean;
+  // A single-series step limited to one query's series (see TransformationInstanceBase.applyTo).
+  applyTo?: string;
 }
 
-export type TransformationIssueCode = 'invalid_config' | 'missing_fields' | 'execution_error';
+export type TransformationIssueCode =
+  'invalid_config' | 'missing_fields' | 'missing_series' | 'execution_error';
 
 export interface TransformationIssue {
   code: TransformationIssueCode;
@@ -35,6 +39,28 @@ export interface TransformationIssue {
 
 export type TransformationExecutionStatus = 'applied' | 'partially_applied' | 'skipped';
 
+// A transformation step's execution outcome for multi-series
+// return by seriesMethod
+export interface SeriesExecutionResult {
+  series: SeriesResult[];
+  status: TransformationExecutionStatus;
+  issues: TransformationIssue[];
+}
+
+// The pipeline's overall output: the series it ended with, one series the vis reads.
+export interface FinalPipelineSeriesResult {
+  // The series after the last step, before the implicit merge.
+  series: SeriesResult[];
+  rows: NormalizedRow[];
+  finalSchema: FieldSchema[];
+  seriesDisplayNames?: Record<string, string>;
+  // The merged series' Query column (each row's refId); only when more than one series was merged.
+  queryField?: string;
+  steps: TransformationStepResult[];
+}
+
+// A transformation step's execution outcome for single series
+// return by transformationMethod
 export interface TransformationExecutionResult {
   rows: NormalizedRow[];
   status: TransformationExecutionStatus;
@@ -43,6 +69,7 @@ export interface TransformationExecutionResult {
   typeOverrides?: Record<string, string>;
 }
 
+// Diagnose for single transformation step
 export interface TransformationStepResult {
   instanceId: string;
   definitionId: string;
@@ -50,7 +77,7 @@ export interface TransformationStepResult {
   issues: TransformationIssue[];
 }
 
-export interface TransformationInstance<TConfig = Record<string, unknown>> {
+interface TransformationInstanceBase<TConfig> {
   // Unique runtime UUID — allows multiple instances of the same definition in the pipeline
   instance_id: string;
   definition_id: string;
@@ -58,17 +85,40 @@ export interface TransformationInstance<TConfig = Record<string, unknown>> {
   config: TConfig;
   // set true to skip transformation during pipeline execution
   hide: boolean;
-  // Execute against the current rows and report the outcome without changing config.
-  transformationMethod: (data: NormalizedRow[], config: TConfig) => TransformationExecutionResult;
+
+  // for single-scope transformation, only apply this on one series.
+  applyTo?: string;
   // config editor
-  Editor: React.ComponentType<{
-    config: TConfig;
-    onChange: (newConfig: TConfig) => void;
-    availableFields: FieldSchema[];
-  }>;
+  Editor: React.ComponentType<TransformationEditorProps<TConfig>>;
 }
 
-export type TransformationPipeline = TransformationInstance[];
+export interface TransformationEditorProps<TConfig> {
+  config: TConfig;
+  onChange: (newConfig: TConfig) => void;
+  // The step's input fields.
+  availableFields: FieldSchema[];
+  // The refIds of the series entering the step (one per query until a merge step).
+  availableRefIds?: string[];
+}
+
+/** A single-series step: the pipeline runs it on one series. */
+export interface TransformationInstance<
+  TConfig = Record<string, unknown>,
+> extends TransformationInstanceBase<TConfig> {
+  transformationMethod: (data: NormalizedRow[], config: TConfig) => TransformationExecutionResult;
+}
+
+/** A multi-series step: is applied on multi-series and returns one series when it merges them. */
+export interface MultiSeriesTransformationInstance<
+  TConfig = Record<string, unknown>,
+> extends TransformationInstanceBase<TConfig> {
+  seriesMethod: (series: SeriesResult[], config: TConfig) => SeriesExecutionResult;
+}
+
+export type AllTransformationInstance<TConfig = Record<string, unknown>> =
+  TransformationInstance<TConfig> | MultiSeriesTransformationInstance<TConfig>;
+
+export type TransformationPipeline = AllTransformationInstance[];
 
 export interface TransformationDefinition<TConfig = Record<string, unknown>> {
   // name of this transformation
@@ -79,7 +129,7 @@ export interface TransformationDefinition<TConfig = Record<string, unknown>> {
   label: string;
   description: string;
   iconType: string;
-  createInstance: () => TransformationInstance<TConfig>;
+  createInstance: () => AllTransformationInstance<TConfig>;
 }
 
 export interface ITransformationService {
@@ -92,11 +142,14 @@ export interface ITransformationService {
   //  Pipeline instance management --
   readonly pipeline$: BehaviorSubject<TransformationPipeline>;
   readonly stageFields$: BehaviorSubject<Map<string, FieldSchema[]>>;
+  readonly stepResults$: BehaviorSubject<Map<string, TransformationStepResult>>;
+  readonly stageRefIds$: BehaviorSubject<Map<string, string[]>>;
   getPipeline$(): Observable<TransformationPipeline>;
   addInstance(id: string): void;
   removeInstance(id: string): void;
   updateInstanceConfig(id: string, newConfig: Record<string, any>): void;
   toggleInstanceHide(id: string): void;
+  updateInstanceApplyTo(id: string, refId: string | undefined): void;
   setPipeline(instances: TransformationPipeline): void;
   clearPipeline(): void;
   serializePipeline(pipeline?: TransformationPipeline): UrlTransformationState[];
@@ -110,9 +163,13 @@ export interface ITransformationService {
     finalSchema: FieldSchema[];
     steps: TransformationStepResult[];
   };
+  // Runs the pipeline over several series (one per query) and merges what remains into one series.
+  applyPipelineToSeries(series: SeriesResult[]): FinalPipelineSeriesResult;
 
   // URL persistence
   initUrlSync(urlStateStorage: IOsdUrlStateStorage): void;
+  stopUrlSync(): void;
+  reset(): void;
 
   destroy(): void;
   restoreFromState(states: UrlTransformationState[]): void;
@@ -279,6 +336,7 @@ export interface ConfigEnumOption {
 export type ConfigFieldKind =
   | 'number' // numeric input
   | 'string' // free-text input
+  | 'string[]' // array of strings (e.g. query refIds)
   | 'enum' // fixed set of string values
   | 'boolean' // true / false
   | 'field_name' // references a column name from the result schema

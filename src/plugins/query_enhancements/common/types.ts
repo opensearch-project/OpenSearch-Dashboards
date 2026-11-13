@@ -14,6 +14,9 @@ export interface PerQueryOptions {
 export interface PromQLQueryOptions {
   maxDataPoints?: number;
   perQueryOptions?: PerQueryOptions[];
+  // The running row's refId (multi-query editor): series names get it as a prefix, so the same
+  // series from two rows stays apart. Not saved; set at execution only.
+  refId?: string;
 }
 
 export interface PromQLQuery extends Query {

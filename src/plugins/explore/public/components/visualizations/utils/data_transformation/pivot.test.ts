@@ -29,6 +29,18 @@ describe('pivot', () => {
       ]);
     });
 
+    // The missing-time-field skip is for time grouping only: a falsy category (0) is a real group.
+    it('keeps a falsy category value such as 0', () => {
+      const result = pivot({
+        groupBy: 'product',
+        pivot: 'type',
+        field: 'sales',
+        aggregationType: AggregationType.SUM,
+      })([{ product: 0, type: 'online', sales: 100 }]);
+
+      expect(result).toEqual([{ product: 0, online: 100 }]);
+    });
+
     it('pivots with MEAN aggregation', () => {
       const result = pivot({
         groupBy: 'product',
@@ -229,6 +241,28 @@ describe('pivot', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].A).toBe(150);
+    });
+
+    // Merged multi-query rows: query B has no time field of query A, so its rows lack it.
+    it('skips rows missing the time field instead of throwing', () => {
+      const mergedData = [
+        { timestamp: '2024-01-01T00:00:00Z', Query: 'A', sales: 100 },
+        { Query: 'B', sales: 200 },
+        { timestamp: null, Query: 'B', sales: 300 },
+      ];
+
+      const result = pivot({
+        groupBy: 'timestamp',
+        pivot: 'Query',
+        field: 'sales',
+        timeUnit: TimeUnit.DATE,
+        aggregationType: AggregationType.SUM,
+      })(mergedData);
+
+      // B's rows are skipped; B stays a column (pivot columns come from every row), with no value.
+      expect(result).toEqual([
+        { timestamp: new Date('2024-01-01T00:00:00.000Z'), A: 100, B: null },
+      ]);
     });
 
     it('preserves timestamp as Date object when input is Unix timestamp number', () => {

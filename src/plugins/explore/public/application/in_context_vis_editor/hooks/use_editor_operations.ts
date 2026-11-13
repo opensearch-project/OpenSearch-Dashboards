@@ -81,6 +81,7 @@ export const useEditorOperations = () => {
     getEditorText,
     setEditorText,
     switchEditorMode,
+    resetEditorMode,
     clearEditor,
   };
 };

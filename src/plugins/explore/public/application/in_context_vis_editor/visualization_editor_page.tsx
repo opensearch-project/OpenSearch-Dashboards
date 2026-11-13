@@ -22,7 +22,11 @@ import { useHeaderVariants } from '../utils/hooks/use_header_variants';
 import './visualization_editor.scss';
 
 import { RightStyleOptionsPanel } from './component/visualization_editor_right_container';
-import { useQueryBuilderState } from './hooks/use_query_builder_state';
+import { useMultiQueryBuilder } from './multi_query_builder/multi_query_builder_context';
+import {
+  loadContainerState,
+  showContainerStateWarnings,
+} from './multi_query_builder/container_state_utils';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
@@ -47,7 +51,7 @@ export const VisualizationEditorPage = ({
     dashboard,
   } = services;
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const { queryBuilder } = useQueryBuilderState();
+  const container = useMultiQueryBuilder();
   const { visualizationBuilderForEditor } = useVisualizationBuilder();
 
   const {
@@ -64,78 +68,106 @@ export const VisualizationEditorPage = ({
 
   const [initialized, setInitialized] = useState(false);
 
-  const { savedExplore, savedQueryState, savedVisConfig, error, isLoading } =
+  const { savedExplore, savedContainerState, savedVisConfig, error, isLoading } =
     useInitialSaveExplore();
 
+  // update breadcrumbs
   useEffect(() => {
+    if (error) {
+      scopedHistory?.push('/#');
+      return;
+    }
+    if (!savedExplore) return;
+    if (savedExplore.id) {
+      chrome.docTitle.change(savedExplore.title);
+      chrome.recentlyAccessed.add(
+        `/app/${VISUALIZATION_EDITOR_APP_ID}/#/edit/${savedExplore.id}`,
+        savedExplore.title,
+        savedExplore.id,
+        { type: 'explore' }
+      );
+    }
+    chrome.setBreadcrumbs([
+      ...getBreadcrumbs(application.navigateToApp, embeddable, originatingApp, containerInfo),
+      { text: savedExplore.title },
+    ]);
+  }, [
+    error,
+    savedExplore,
+    scopedHistory,
+    chrome,
+    application.navigateToApp,
+    embeddable,
+    originatingApp,
+    containerInfo,
+  ]);
+
+  // Load vis config and queries states
+  useEffect(() => {
+    let cancelled = false;
     const init = async () => {
       if (!savedExplore) return;
-
       // Wait for dashboard selection if needed
       if (needsDashboardSelection) return;
 
-      if (error) {
-        // return to default path
-        scopedHistory?.push('/#');
-      }
-      if (savedExplore?.id) {
-        chrome.docTitle.change(savedExplore.title);
-
-        chrome.recentlyAccessed.add(
-          `/app/${VISUALIZATION_EDITOR_APP_ID}/#/edit/${savedExplore.id}`,
-          savedExplore.title,
-          savedExplore.id,
-          { type: 'explore' }
+      if (!container.isLoaded()) {
+        // merge url states and saved states and validate query and dataset
+        // return merged state and warnings when query and dataset are incompatible
+        const { state: containerState, warnings } = await loadContainerState(
+          services,
+          savedContainerState
         );
-      }
+        if (cancelled) return;
 
-      chrome.setBreadcrumbs([
-        ...getBreadcrumbs(application.navigateToApp, embeddable, originatingApp, containerInfo),
-        { text: savedExplore?.title },
-      ]);
+        // Show toasts for invalid datasets
+        const toasts = services.notifications?.toasts;
+        if (toasts) showContainerStateWarnings(toasts, warnings);
 
-      if (savedVisConfig) {
-        visualizationBuilderForEditor.setVisConfig({
-          type: savedVisConfig.chartType,
-          title: savedVisConfig.title,
-          description: savedVisConfig.description,
-          styles: savedVisConfig.params,
-          axesMapping: savedVisConfig.axesMapping,
-          splitField: savedVisConfig.splitField,
-          splitLayout: savedVisConfig.splitLayout,
-          showSplitLabel: savedVisConfig.showSplitLabel,
-          dataTransformations: savedVisConfig.dataTransformations,
-        });
-      }
+        if (savedVisConfig) {
+          visualizationBuilderForEditor.setVisConfig({
+            type: savedVisConfig.chartType,
+            title: savedVisConfig.title,
+            description: savedVisConfig.description,
+            styles: savedVisConfig.params,
+            axesMapping: savedVisConfig.axesMapping,
+            splitField: savedVisConfig.splitField,
+            splitLayout: savedVisConfig.splitLayout,
+            showSplitLabel: savedVisConfig.showSplitLabel,
+            dataTransformations: savedVisConfig.dataTransformations,
+          });
+        }
 
-      visualizationBuilderForEditor.init();
-      await queryBuilder.init({ savedQueryState });
+        // set baseline for visualization states and query states, used in dirty editor check
+        // set baseline before init() to include URL's states.
+        visualizationBuilderForEditor.setSavedBaseline();
+        visualizationBuilderForEditor.init();
+        container.load(containerState);
+        container.setSavedBaseline(savedExplore.id ? savedContainerState : undefined);
 
-      if (savedExplore.id || queryBuilder.queryState$.getValue().query !== '') {
-        // For an existing saved explore, execute the query on page load.
-        // For a new saved explore, execute the query only when it is not empty.
-        // This avoids fixing the visualization persisted as a table for an empty query.
-        queryBuilder.executeQuery();
+        // For an existing saved explore, execute the query on page load. For a new saved explore,
+        // execute only when it is not empty, which avoids fixing the visualization persisted as a
+        // table for an empty query.
+        if (
+          savedExplore.id ||
+          container.getAllRows().some((row) => row.queryState$.getValue().query !== '')
+        ) {
+          container.executeAll({ userInitiated: false });
+        }
       }
       setInitialized(true);
     };
     init();
+    return () => {
+      cancelled = true;
+    };
   }, [
-    embeddable,
-    containerInfo,
-    originatingApp,
-    application?.navigateToApp,
-    scopedHistory,
-    error,
-    chrome,
-    isLoading,
     savedExplore,
-    queryBuilder,
-    savedVisConfig,
-    savedQueryState,
-    osdUrlStateStorage,
-    visualizationBuilderForEditor,
     needsDashboardSelection,
+    savedContainerState,
+    savedVisConfig,
+    visualizationBuilderForEditor,
+    container,
+    services,
   ]);
 
   useEffect(() => {
@@ -150,23 +182,23 @@ export const VisualizationEditorPage = ({
 
   useEffect(() => {
     return () => {
-      queryBuilder.reset();
       visualizationBuilderForEditor.reset();
     };
-  }, [queryBuilder, visualizationBuilderForEditor]);
+  }, [visualizationBuilderForEditor]);
 
   // Update variable names in queryBuilder when variables change
   useEffect(() => {
+    // Variable names are shared by every query row.
     if (!variableService) {
-      queryBuilder.setVariableNames([]);
+      container.setVariableNames([]);
       return;
     }
     const subscription = variableService.getVariables$().subscribe((variables) => {
       const variableNames = variables.map((v) => v.name);
-      queryBuilder.setVariableNames(variableNames);
+      container.setVariableNames(variableNames);
     });
     return () => subscription.unsubscribe();
-  }, [variableService, queryBuilder]);
+  }, [variableService, container]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
