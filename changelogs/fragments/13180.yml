@@ -1,0 +1,2 @@
+fix:
+- [Sample data] Install sample data on OpenSearch Serverless time series collections ([#13180](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13180))

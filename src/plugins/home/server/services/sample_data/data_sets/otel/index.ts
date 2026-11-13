@@ -72,7 +72,7 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         id: 'opensearch_dashboards_sample_data_otel_service_map',
         dataPath: path.join(__dirname, './sample_service_map.json.gz'),
         fields: servicesFieldMappings,
-        timeFields: [],
+        timeFields: ['timestamp'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         indexName: 'opensearch_dashboards_sample_data_otel_service_map',
@@ -81,7 +81,8 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         id: 'ss4o_metrics-otel-opensearch_dashboards-sample',
         dataPath: path.join(__dirname, './sample_metrics.json.gz'),
         fields: metricsFieldMappings,
-        timeFields: ['@timestamp', 'exemplar.time', 'startTime', 'time', 'observedTimestamp'],
+        // The first entry is the primary time field. Documents don't carry `@timestamp`.
+        timeFields: ['time', 'exemplar.time', 'startTime', 'observedTimestamp'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         indexName: 'ss4o_metrics-otel-opensearch_dashboards-sample',
