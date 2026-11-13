@@ -147,28 +147,15 @@ describe('parseUrl', () => {
   const DIFFERENCES: Record<string, string[]> = {
     '//': HOST_CHECKS,
     '///': HOST_CHECKS,
-    "/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))": ALL,
-    "/app/it's": HOST_CHECKS,
-    '/app/a|b^c`d{e}': ALL,
-    '/app/caf\u00e9': ALL,
-    '/app/<script>': ['default', 'parseQueryString'],
     '/app/x\ty': HOST_CHECKS,
     '/app/x\ny': HOST_CHECKS,
-    '\\\\evil.com': HOST_CHECKS,
-    '/\\evil.com': HOST_CHECKS,
-    '\\/evil.com': HOST_CHECKS,
-    '//evil.com': HOST_CHECKS,
     '///evil.com': HOST_CHECKS,
     '////evil.com': HOST_CHECKS,
-    ' //evil.com': HOST_CHECKS,
     '/\t/evil.com': HOST_CHECKS,
     'java\tscript:alert(1)': HOST_CHECKS,
-    'http:///evil.com': ALL,
     'data:text/html,<b>x</b>': ALL,
     'mailto:a@b.com': ALL,
     'localhost:5601/app': ALL,
-    'http://h/a/../b': ALL,
-    "http://h/x#/view?q='a'": ALL,
     'http://h:abc/x': ALL,
     'http://h:99999/x': ALL,
     'HTTP:/Evil.com/A?B#C': ALL,
@@ -203,33 +190,32 @@ describe('parseUrl', () => {
     expect(Object.keys(DIFFERENCES).filter((input) => !legacy[input])).toEqual([]);
   });
 
+  it('percent-encodes the path, query and hash as url.parse() did', () => {
+    // State URLs are matched and rewritten in their encoded form, so `'` must stay `%27`
+    expect(parseUrl("http://h/x#/view?q='a'").hash).toBe('#/view?q=%27a%27');
+    expect(
+      parseUrl("/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))")
+        .hash
+    ).toBe('#/?_a=(query:(language:kuery,query:%27a%20b%27))&_g=(time:(from:now-1h))');
+    expect(parseUrl('http://h/a|b^c`d{e}?x="y"').path).toBe('/a%7Cb%5Ec%60d%7Be%7D?x=%22y%22');
+    // A plain path and query with no whitespace is returned as written, like url.parse()
+    expect(parseUrl('/app/<script>?x="y"').path).toBe('/app/<script>?x="y"');
+    expect(parseUrl('/app/caf\u00e9').pathname).toBe('/app/caf\u00e9');
+    expect(parseUrl('/app/x?q=a b').search).toBe('?q=a%20b');
+  });
+
+  it('keeps dot segments, as url.parse() did', () => {
+    expect(parseUrl('http://h/a/../b').pathname).toBe('/a/../b');
+    expect(parseUrl('/a/./b/../c').pathname).toBe('/a/./b/../c');
+    expect(parseUrl('%2e%2e/foo').pathname).toBe('%2e%2e/foo');
+  });
+
+  it('percent-encodes tabs and newlines without slashesDenoteHost, as url.parse() did', () => {
+    expect(parseUrl('/\t/evil.com')).toMatchObject({ hostname: null, pathname: '/%09/evil.com' });
+    expect(parseUrl('/app/x\ny').pathname).toBe('/app/x%0Ay');
+  });
+
   describe('differs from url.parse()', () => {
-    it('percent-encodes path characters the way browsers do', () => {
-      expect(parseUrl('/app/a|b^c`d{e}').pathname).toBe('/app/a|b%5Ec%60d%7Be%7D');
-      expect(parseUrl('/app/caf\u00e9').pathname).toBe('/app/caf%C3%A9');
-      expect(parseUrl('/app/<script>').pathname).toBe('/app/%3Cscript%3E');
-      expect(parseUrl("/app/it's", false, true).pathname).toBe("/app/it's");
-    });
-
-    it("keeps ' in the hash, which decodes to the same value", () => {
-      expect(parseUrl("http://h/x#/view?q='a'").hash).toBe("#/view?q='a'");
-      expect(
-        parseUrl("/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))")
-          .hash
-      ).toBe("#/?_a=(query:(language:kuery,query:'a%20b'))&_g=(time:(from:now-1h))");
-    });
-
-    it('resolves dot segments in absolute URLs but keeps them in relative ones', () => {
-      expect(parseUrl('http://h/a/../b').pathname).toBe('/b');
-      expect(parseUrl('/a/./b/../c').pathname).toBe('/a/./b/../c');
-      expect(parseUrl('../foo').pathname).toBe('../foo');
-      expect(parseUrl('%2e%2e/foo').pathname).toBe('%2e%2e/foo');
-    });
-
-    it('reads an empty authority the way browsers do', () => {
-      expect(parseUrl('http:///evil.com')).toMatchObject({ hostname: 'evil.com', pathname: '/' });
-    });
-
     it('gives non-hierarchical URLs no host', () => {
       expect(parseUrl('mailto:a@b.com')).toMatchObject({
         protocol: 'mailto:',
@@ -239,7 +225,7 @@ describe('parseUrl', () => {
       });
       expect(parseUrl('data:text/html,<b>x</b>')).toMatchObject({
         hostname: null,
-        pathname: 'text/html,<b>x</b>',
+        pathname: 'text/html,%3Cb%3Ex%3C/b%3E',
       });
       expect(parseUrl('localhost:5601/app')).toMatchObject({
         protocol: 'localhost:',
@@ -277,13 +263,9 @@ describe('parseUrl', () => {
       }
       expect(parseUrl('java\tscript:alert(1)', false, true).protocol).toBe('javascript:'); // eslint-disable-line no-script-url
       expect(parseUrl('/app/x\ty', false, true).pathname).toBe('/app/xy');
+      expect(parseUrl('/app/x\ny', false, true).pathname).toBe('/app/xy');
       expect(() => parseUrl('//', false, true)).toThrow('Invalid URL');
       expect(() => parseUrl('///', false, true)).toThrow('Invalid URL');
-    });
-
-    it('percent-encodes tabs and newlines otherwise, as url.parse() did', () => {
-      expect(parseUrl('/\t/evil.com')).toMatchObject({ hostname: null, pathname: '/%09/evil.com' });
-      expect(parseUrl('/app/x\ny').pathname).toBe('/app/x%0Ay');
     });
   });
 

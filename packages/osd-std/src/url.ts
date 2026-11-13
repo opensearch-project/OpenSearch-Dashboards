@@ -52,15 +52,33 @@ export interface ParsedUrl {
   href: string;
 }
 
-// Relative inputs are resolved against this origin and it is then stripped again.
+// `//host` inputs are parsed against this origin, then only the authority is kept.
 // `.invalid` is reserved (RFC 2606), so it can never collide with a real host.
 const PLACEHOLDER_ORIGIN = 'http://osd-placeholder.invalid';
 const SCHEME_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
-const SPECIAL_SCHEME_RE = /^(?:https?|wss?|ftp|file):/i;
-// WHATWG treats `.`, `..` and their `%2e` spellings as dot segments
-const DOT_SEGMENT_RE = /^(?:\.|%2e)(?:\.|%2e)?$/i;
-// Stand-in for dot segments the parser must not resolve; ASCII so it passes through unencoded
-const DOT_SENTINEL = 'osd-dot-segment-a7f3-';
+// Same pattern `url.parse()` uses for its fast path: a plain path and query, nothing to escape
+const SIMPLE_PATH_RE = /^(\/\/?(?!\/)[^?\s]*)(\?[^\s]*)?$/;
+// Characters `url.parse()` percent-encodes in the path, query and hash
+const AUTO_ESCAPE: Record<string, string> = {
+  '\t': '%09',
+  '\n': '%0A',
+  '\r': '%0D',
+  ' ': '%20',
+  '"': '%22',
+  "'": '%27',
+  '<': '%3C',
+  '>': '%3E',
+  '\\': '%5C',
+  '^': '%5E',
+  '`': '%60',
+  '{': '%7B',
+  '|': '%7C',
+  '}': '%7D',
+};
+const AUTO_ESCAPE_RE = /[\t\n\r "'<>\\^`{|}]/g;
+// `url.parse()` leaves `javascript:` URLs unescaped
+const NO_ESCAPE_SCHEMES = new Set(['javascript:']); // eslint-disable-line no-script-url
+const SLASHED_SCHEMES = new Set(['http:', 'https:', 'ftp:', 'gopher:', 'file:', 'ws:', 'wss:']);
 
 const parseQuery = (search: string): ParsedUrlQuery => {
   const query: ParsedUrlQuery = Object.create(null);
@@ -78,14 +96,14 @@ const parseQuery = (search: string): ParsedUrlQuery => {
 };
 
 /**
- * Parses `url` with the WHATWG URL parser and returns it in the shape of Node's
- * deprecated `url.parse(url, parseQueryString, slashesDenoteHost)`.
+ * Parses `url` and returns it in the shape of Node's deprecated
+ * `url.parse(url, parseQueryString, slashesDenoteHost)`.
  *
- * Relative URLs come back as `url.parse()` returned them. Absolute URLs follow the WHATWG
- * standard, as browsers do: their dot segments are resolved and the path is percent-encoded.
- * With `slashesDenoteHost`, tabs and newlines are dropped as browsers drop them, so
- * `/\t/evil.com` reads as host `evil.com`. An invalid host or port throws instead of being
- * reinterpreted.
+ * The authority (credentials, host and port) is parsed by the WHATWG URL parser, as browsers
+ * do: hosts are normalized and an invalid host or port throws instead of being reinterpreted.
+ * The path, query and hash are split and percent-encoded exactly as `url.parse()` did, so
+ * URLs built from the result keep their previous form. With `slashesDenoteHost`, tabs and
+ * newlines are dropped as browsers drop them, so `/\t/evil.com` reads as host `evil.com`.
  *
  * @public
  */
@@ -94,123 +112,115 @@ export function parseUrl(
   parseQueryString = false,
   slashesDenoteHost = false
 ): ParsedUrl {
-  return parse(url, parseQueryString, slashesDenoteHost, false);
-}
-
-function parse(
-  url: string,
-  parseQueryString: boolean,
-  slashesDenoteHost: boolean,
-  forceRelative: boolean
-): ParsedUrl {
-  // The WHATWG parser trims leading/trailing C0 controls and spaces and drops tabs/newlines
-  // anywhere. Host checks (`slashesDenoteHost`) must see the URL the way a browser does, but
-  // elsewhere a dropped tab could turn `/\t/evil.com` into the network path `//evil.com`, so
-  // they are percent-encoded instead, as `url.parse()` did.
-  const trimmed = url.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '');
-  const input = slashesDenoteHost
-    ? trimmed.replace(/[\t\n\r]/g, '')
-    : trimmed.replace(/[\t\n\r]/g, encodeURIComponent);
-  const hasScheme = !forceRelative && SCHEME_RE.test(input);
-  const isNetworkPath = !hasScheme && slashesDenoteHost && /^[\\/]{2}/.test(input);
-  const isRelative = !hasScheme && !isNetworkPath;
-  const hasAuthority = !isRelative && /^(?:[a-zA-Z][a-zA-Z\d+.-]*:)?[\\/]{2}/.test(input);
-
-  // `http:evil.com` is a path on the current host to a browser resolving it inside a page,
-  // but a host to a standalone parser. Like `url.parse()`, keep the scheme and treat the
-  // rest as a path rather than guess a host.
-  if (hasScheme && !hasAuthority && SPECIAL_SCHEME_RE.test(input)) {
-    const protocol = SCHEME_RE.exec(input)![0].toLowerCase();
-    const rest = parse(input.slice(protocol.length), parseQueryString, false, true);
-    const result = { ...rest, protocol, href: '' };
-    result.href = formatUrl(result as UrlObject);
-    return result;
+  // Trim like `url.parse()`; host checks also drop tabs and newlines the way browsers do
+  let input = url.replace(/^[\u0000-\u0020\u00a0\ufeff]+|[\u0000-\u0020\u00a0\ufeff]+$/g, '');
+  if (slashesDenoteHost) {
+    input = input.replace(/[\t\n\r]/g, '');
   }
-
-  // Relative paths keep their dot segments, as with `url.parse()`: resolving `../foo` against
-  // the placeholder root would turn it into `foo`, and `BasePath.prepend('/../x')` must stay
-  // `/base/../x` rather than become `/base/x`.
-  const rootRelative = /^[\\/]/.test(input);
-  const dotSegments: string[] = [];
-  const protectedInput = isRelative
-    ? input.replace(/^[^?#]*/, (path) =>
-        path
-          .split(/([\\/])/)
-          .map((seg) => {
-            if (!DOT_SEGMENT_RE.test(seg)) return seg;
-            dotSegments.push(seg);
-            return `${DOT_SENTINEL}${dotSegments.length - 1}x`;
-          })
-          .join('')
-      )
-    : input;
-
-  let parsed: URL;
-  if (hasScheme) {
-    parsed = new URL(input);
-  } else if (isNetworkPath) {
-    parsed = new URL(input, PLACEHOLDER_ORIGIN);
-  } else {
-    // Concatenate rather than resolve so a leading `//` stays part of the path.
-    parsed = new URL(`${PLACEHOLDER_ORIGIN}${rootRelative ? '' : '/'}${protectedInput}`);
-  }
-
-  const beforeHash = input.split('#')[0];
-  const hasHash = input.includes('#');
-  const hasSearch = beforeHash.includes('?');
-
-  let pathname: string | null = parsed.pathname;
-  if (isRelative && !rootRelative) {
-    pathname = pathname.slice(1);
-  }
-  if (dotSegments.length) {
-    pathname = pathname.replace(
-      new RegExp(`${DOT_SENTINEL}(\\d+)x`, 'g'),
-      (_, i) => dotSegments[Number(i)]
-    );
-  }
-  if (pathname === '' || (isRelative && !rootRelative && /^[?#]|^$/.test(input))) {
-    pathname = null;
-  }
-
-  const hasHost = !isRelative && (parsed.host !== '' || hasAuthority);
-  const hostname = hasHost ? parsed.hostname.replace(/^\[(.*)\]$/, '$1') : null;
-  // WHATWG drops a default port (`:80` for http); keep it when the input spelled it out.
-  const rawHostPort = hasAuthority
-    ? /^(?:[a-zA-Z][a-zA-Z\d+.-]*:)?[\\/]{2}([^\\/?#]*)/.exec(input)![1].replace(/^.*@/, '')
-    : '';
-  const explicitPort = /^(?:\[[^\]]*\]|[^:]*):(\d+)$/.exec(rawHostPort)?.[1];
-  const port = hasHost ? (explicitPort ?? (parsed.port || null)) : null;
-  // Malformed percent-encoding in the credentials throws, as with `url.parse()`.
-  const auth =
-    hasHost && (parsed.username || parsed.password)
-      ? `${decodeURIComponent(parsed.username)}${
-          parsed.password ? `:${decodeURIComponent(parsed.password)}` : ''
-        }`
-      : null;
-  const search = hasSearch ? parsed.search || '?' : null;
-  const query = parseQueryString
-    ? parseQuery(search ?? '')
-    : hasSearch
-      ? (search as string).slice(1)
-      : null;
+  // Backslashes before the query or hash become slashes, as in browsers and `url.parse()`
+  const split = input.search(/[?#]/);
+  const head = split === -1 ? input : input.slice(0, split);
+  input = head.replace(/\\/g, '/') + (split === -1 ? '' : input.slice(split));
 
   const result: ParsedUrl = {
-    protocol: hasScheme ? parsed.protocol : null,
-    slashes: hasAuthority || null,
-    auth,
-    host: hasHost ? `${parsed.hostname}${port ? `:${port}` : ''}` : null,
-    port,
-    hostname,
-    hash: hasHash ? parsed.hash || '#' : null,
-    search,
-    query,
-    pathname,
-    path: pathname === null && !search ? null : `${pathname ?? ''}${search ?? ''}`,
+    protocol: null,
+    slashes: null,
+    auth: null,
+    host: null,
+    port: null,
+    hostname: null,
+    hash: null,
+    search: null,
+    query: null,
+    pathname: null,
+    path: null,
     href: '',
   };
-  result.href = formatUrl(result as UrlObject);
-  return result;
+
+  const finish = (rest: string) => {
+    const hashIdx = rest.indexOf('#');
+    if (hashIdx !== -1) {
+      result.hash = rest.slice(hashIdx);
+      rest = rest.slice(0, hashIdx);
+    }
+    const questionIdx = rest.indexOf('?');
+    if (questionIdx !== -1) {
+      result.search = rest.slice(questionIdx);
+      rest = rest.slice(0, questionIdx);
+    }
+    if (rest) {
+      result.pathname = rest;
+    } else if (result.hostname !== null && SLASHED_SCHEMES.has(result.protocol ?? '')) {
+      result.pathname = '/';
+    }
+    result.query = parseQueryString
+      ? parseQuery(result.search ?? '')
+      : result.search === null
+        ? null
+        : result.search.slice(1);
+    if (result.pathname !== null || result.search !== null) {
+      result.path = `${result.pathname ?? ''}${result.search ?? ''}`;
+    }
+    result.href = formatUrl(result as UrlObject);
+    return result;
+  };
+
+  // A plain path with no hash or credentials is returned as written, like `url.parse()`
+  if (!slashesDenoteHost && !input.includes('#') && !input.includes('@')) {
+    const simple = SIMPLE_PATH_RE.exec(input);
+    if (simple) {
+      return finish(input);
+    }
+  }
+
+  let rest = input;
+  const scheme = SCHEME_RE.exec(rest)?.[0];
+  if (scheme) {
+    result.protocol = scheme.toLowerCase();
+    rest = rest.slice(scheme.length);
+  }
+
+  // Only `//authority` (or `scheme://authority`) has a host; `http:evil.com` is a path on the
+  // current host to a browser resolving it inside a page, so like `url.parse()` it gets none
+  if (rest.startsWith('//') && (scheme || slashesDenoteHost)) {
+    const authorityEnd = rest.slice(2).search(/[/?#]/);
+    let authority = authorityEnd === -1 ? rest.slice(2) : rest.slice(2, authorityEnd + 2);
+    rest = authorityEnd === -1 ? '' : rest.slice(authorityEnd + 2);
+    result.slashes = true;
+
+    if (!authority && !scheme) {
+      // `///evil.com` is host evil.com to a browser; host checks must see it that way
+      const resolved = new URL(`//${rest.replace(/^\/+/, '')}`, PLACEHOLDER_ORIGIN);
+      authority = resolved.host;
+      rest = rest.replace(/^\/+[^/?#]*/, '');
+    }
+    if (!authority) {
+      result.hostname = '';
+      result.host = '';
+      return finish(rest.replace(AUTO_ESCAPE_RE, (char) => AUTO_ESCAPE[char]));
+    }
+
+    const parsed = scheme
+      ? new URL(`${result.protocol}//${authority}/`)
+      : new URL(`//${authority}/`, PLACEHOLDER_ORIGIN);
+    // WHATWG drops a default port (`:80` for http); keep it when the input spelled it out
+    const explicitPort = /^(?:\[[^\]]*\]|[^:]*):(\d+)$/.exec(authority.replace(/^.*@/, ''))?.[1];
+    const port = explicitPort ?? (parsed.port || null);
+    result.hostname = parsed.hostname.replace(/^\[(.*)\]$/, '$1');
+    result.port = port;
+    result.host = `${parsed.hostname}${port ? `:${port}` : ''}`;
+    // Malformed percent-encoding in the credentials throws, as with `url.parse()`
+    if (parsed.username || parsed.password) {
+      result.auth = `${decodeURIComponent(parsed.username)}${
+        parsed.password ? `:${decodeURIComponent(parsed.password)}` : ''
+      }`;
+    }
+  }
+
+  if (!NO_ESCAPE_SCHEMES.has(result.protocol ?? '')) {
+    rest = rest.replace(AUTO_ESCAPE_RE, (char) => AUTO_ESCAPE[char]);
+  }
+  return finish(rest);
 }
 
 /**
