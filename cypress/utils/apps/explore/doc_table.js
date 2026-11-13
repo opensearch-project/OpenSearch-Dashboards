@@ -72,14 +72,40 @@ export const getExpandedDocTableRowFieldName = (docTableRowNumber, expandedDocum
 };
 
 /**
- * Get the value for the row with the expandedDocumentField from the expanded document.
+ * Get a field value from the expanded document, navigating pages when necessary.
  * @param {string} expandedDocumentField Field name
  * @example
  * // returns the value of the 'AvgTicketPrice' field from the expanded document.
- * getExpandedDocTableRowFieldName(1, 'AvgTicketPrice');
+ * getExpandedDocTableRowFieldValue('AvgTicketPrice');
  */
 export const getExpandedDocTableRowFieldValue = (expandedDocumentField) => {
-  return cy.getElementByTestId(`tableDocViewRow-${expandedDocumentField}-value`);
+  const fieldSelector = `[data-test-subj="tableDocViewRow-${expandedDocumentField}-value"]`;
+  const findFieldOnPage = () => {
+    return cy
+      .getElementByTestId('osdDocViewerTable')
+      .closest('[data-test-subj="osdDocViewer"]')
+      .then(($viewer) => {
+        if (!$viewer.find(fieldSelector).length) {
+          const nextPage = $viewer.find('[data-test-subj="pagination-button-next"]:enabled');
+          if (nextPage.length) {
+            return cy.wrap(nextPage).click().then(findFieldOnPage);
+          }
+        }
+        return cy.getElementByTestId('osdDocViewerTable').find(fieldSelector);
+      });
+  };
+
+  return cy
+    .getElementByTestId('osdDocViewerTable')
+    .closest('[data-test-subj="osdDocViewer"]')
+    .then(($viewer) => {
+      // Inspect checks fields in response order, which can revisit an earlier page.
+      const firstPage = $viewer.find('[data-test-subj="pagination-button-0"]:enabled');
+      if (!$viewer.find(fieldSelector).length && firstPage.length) {
+        return cy.wrap(firstPage).click().then(findFieldOnPage);
+      }
+      return findFieldOnPage();
+    });
 };
 
 /**
