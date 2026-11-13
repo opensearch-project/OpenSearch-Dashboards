@@ -93,6 +93,21 @@ describe('DefaultDiscoverTable', () => {
     });
   });
 
+  // A screen tall enough to fit every rendered row: the sentinel is visible whenever observed.
+  it('keeps loading rows while the sentinel stays visible, with nothing to scroll', async () => {
+    mockIntersectionObserver.mockImplementation((callback) => ({
+      observe: (target: Element) =>
+        callback([{ isIntersecting: target.isConnected, target }] as IntersectionObserverEntry[]),
+      unobserve: () => null,
+      disconnect: () => null,
+    }));
+    const { container } = render(getDataTable());
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('tbody tr').length).toBe(mockRows.length);
+    });
+  });
+
   it('should display the sample size callout when all rows are rendered', async () => {
     const { container } = render(getDataTable());
 
@@ -111,6 +126,12 @@ describe('DefaultDiscoverTable', () => {
       const callout = screen.getByTestId('discoverDocTableFooter');
       expect(callout).toBeInTheDocument();
     });
+    // A gray info note, not a callout banner.
+    const footer = screen.getByTestId('discoverDocTableFooter');
+    expect(footer.className).toMatch(/euiPanel--subdued/);
+    expect(footer.className).not.toMatch(/euiCallOut/);
+    expect(footer).toHaveTextContent('These are the first');
+    expect(footer).toHaveTextContent('Back to top.');
   });
 
   it('Should restart rendering when new data is available', async () => {

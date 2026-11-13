@@ -11471,7 +11471,6 @@ exports[`Header renders application header without title 1`] = `
                         }
                         data-test-subj="breadcrumbs"
                         disableTrailingLink={true}
-                        hideLastBreadCrumb={false}
                         hideTrailingSeparator={true}
                         max={5}
                         responsive={
@@ -21590,9 +21589,8 @@ exports[`Header renders page header with application title 1`] = `
                   ]
                 }
                 data-test-subj="breadcrumbs"
-                disableTrailingLink={false}
                 hideLastBreadCrumb={true}
-                hideTrailingSeparator={false}
+                hideTrailingSeparator={true}
                 max={5}
                 responsive={
                   Object {
@@ -21623,19 +21621,6 @@ exports[`Header renders page header with application title 1`] = `
                       </span>
                     </EuiInnerText>
                   </div>
-                  <EuiBreadcrumbSeparator>
-                    <svg
-                      className="euiBreadcrumbSeparator"
-                      preserveAspectRatio="none"
-                      viewBox="0 0 8 12"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M2 12H0L6 0h2z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </EuiBreadcrumbSeparator>
                 </nav>
               </EuiSimplifiedBreadcrumbs>
             </HeaderBreadcrumbs>

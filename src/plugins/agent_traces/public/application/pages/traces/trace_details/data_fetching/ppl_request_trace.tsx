@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { Dataset } from '../../../../../../../data/common';
+import { Dataset, spanPatternMatchesMultipleTemplates } from '../../../../../../../data/common';
 import {
   PPLService,
   PPLQueryParams,
@@ -11,6 +11,15 @@ import {
   buildPPLQueryRequest,
   executePPLQuery,
 } from './ppl_request_helpers';
+
+/**
+ * `| dedup spanId` when the dataset's pattern matches both the v1 and v2 span indices (e.g. the
+ * `otel-v*-apm-span-*` fallback), where Data Prepper writing to both returns each span twice. A
+ * spanId is unique within a trace. Other datasets get no clause: dedup would stop `head` from
+ * being pushed down on the v2 PPL engine and would fail on schemas without a `spanId` field.
+ */
+export const spanDedupClause = (title: string | undefined): string =>
+  spanPatternMatchesMultipleTemplates(title) ? ' | dedup spanId' : '';
 
 export interface PPLQueryParamsWithFilters extends PPLQueryParams {
   filters?: Array<{ field: string; value: any }>;
@@ -41,7 +50,7 @@ export class TracePPLService extends PPLService {
       query += ` | where ${filter.field} = ${escapedValue}`;
     });
 
-    query += ` | head ${limit}`;
+    query += `${spanDedupClause(dataset.title)} | head ${limit}`;
     return query;
   }
 
@@ -80,7 +89,7 @@ export class TracePPLService extends PPLService {
     }
 
     try {
-      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
+      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}"${spanDedupClause(dataset.title)} | head ${limit}`;
 
       const queryRequest = buildPPLQueryRequest(dataset, pplQuery);
       return await executePPLQuery(this.dataService, queryRequest);

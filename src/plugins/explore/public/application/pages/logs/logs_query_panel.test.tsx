@@ -307,7 +307,9 @@ describe('LogsQueryPanel', () => {
 
     expect(screen.getByTestId('exploreQueryPanelScanProgress')).toHaveTextContent(label);
     // Announced to screen readers as it updates.
-    expect(screen.getByRole('status')).toBe(screen.getByTestId('exploreQueryPanelScanProgress'));
+    const scan = screen.getByTestId('exploreQueryPanelScanProgress');
+    expect(screen.getAllByRole('status')).toContain(scan);
+    expect(scan).toHaveAttribute('aria-live', 'polite');
   });
 
   it.each([
@@ -579,6 +581,9 @@ describe('LogsQueryPanel', () => {
 
       expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
       expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('exploreStreamingAnnouncer')).toHaveTextContent(
+        'Query running, 25% done'
+      );
     });
 
     it('keeps the streaming bar when the engine reports no fraction', () => {

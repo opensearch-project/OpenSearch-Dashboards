@@ -16,13 +16,14 @@ import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { AgentTracesServices } from '../../../../types';
 import { indexPatterns as indexPatternUtils } from '../../../../../../data/public';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { AGENT_TRACES_VISUALIZATION_TAB_ID, SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
 import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../interfaces';
 import { defaultPreparePplQuery } from '../../languages';
 import { ensureAiRootFieldChecked } from '../../ai_root';
+import { isVisualizationTabTarget } from './detect_optimal_tab/has_stats_pipe';
 import { PPLService } from '../../../pages/traces/trace_details/data_fetching/ppl_request_helpers';
 
 // Module-level storage for abort controllers keyed by cacheKey
@@ -221,9 +222,15 @@ export const executeQueries = createAsyncThunk<
     }
   } else {
     // No active tab yet (initial load) — execute queries for all registered tabs
-    // so results are ready when the active tab is determined
+    // so results are ready when the active tab is determined. The Visualization tab is only
+    // picked for an aggregating query (see detectAndSetOptimalTab); otherwise its query is the
+    // unfiltered base query over every span in the range, the most expensive one this page
+    // sends, so it waits until that tab is opened.
+    const queryString = typeof query.query === 'string' ? query.query : '';
     const allTabs = services.tabRegistry.getAllTabs();
     for (const tab of allTabs) {
+      if (tab.id === AGENT_TRACES_VISUALIZATION_TAB_ID && !isVisualizationTabTarget(queryString))
+        continue;
       if (tab.prepareQuery) {
         const tabCacheKey = tab.prepareQuery(query, sort);
         if (!results[tabCacheKey]) {

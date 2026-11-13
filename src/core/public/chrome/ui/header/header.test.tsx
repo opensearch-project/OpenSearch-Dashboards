@@ -42,7 +42,8 @@ import {
 } from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
-import { HeaderVariant } from '../../constants';
+import { HeaderVariant, SCREEN_TITLE_ATTRIBUTE } from '../../constants';
+import { MountPoint } from '../../../types';
 import { Header } from './header';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -232,11 +233,14 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    // The title already names the current page, so the bar does not repeat it.
+    // The title already names the current page, so the bar does not repeat it,
+    // and no separator trails the remaining crumb ("test", not "test /").
+    const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+    expect(bar.find('[data-test-subj="breadcrumb last"]').exists()).toBeFalsy();
+    expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(0);
+    // The remaining crumb keeps its link behavior (trailing link is not disabled).
     expect(
-      component
-        .find('nav[data-test-subj="breadcrumbs"] [data-test-subj="breadcrumb last"]')
-        .exists()
+      component.find('EuiSimplifiedBreadcrumbs').first().prop('disableTrailingLink')
     ).toBeFalsy();
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
@@ -267,10 +271,13 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    // No page title in this layout, so the current page is the last crumb, as
-    // plain text, and the only separator sits between the two crumbs.
+    // No screen title next to the crumbs, so the current page is the last
+    // crumb, as plain text, with one separator before it and none after.
     const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
-    expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('testTitle');
+    const last = bar.find('span[data-test-subj="breadcrumb last"]');
+    expect(last.text()).toBe('testTitle');
+    expect(last.prop('aria-current')).toBe('page');
+    expect(last.hasClass('euiScreenReaderOnly')).toBe(false);
     expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(1);
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
@@ -298,6 +305,79 @@ describe('Header', () => {
     expect(bar.find('a[title="Section"]').exists()).toBeTruthy();
     expect(bar.find('span[data-test-subj="breadcrumb last"]').text()).toBe('Page');
     expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(2);
+  });
+
+  describe('application header with an app screen title', () => {
+    // Mounts an action menu that renders a screen title the way TopNavMenu does.
+    const mountScreenTitle = (title: string) => (element: HTMLElement) => {
+      const h1 = document.createElement('h1');
+      h1.setAttribute(SCREEN_TITLE_ATTRIBUTE, '');
+      h1.textContent = title;
+      element.appendChild(h1);
+      return () => h1.remove();
+    };
+    const renderWith = async (crumbs: Array<{ text: string }>, title: string) => {
+      const props = {
+        ...mockProps(),
+        breadcrumbs$: new BehaviorSubject(crumbs),
+        branding: { useExpandedHeader: false },
+        useUpdatedHeader: true,
+        headerVariant$: new BehaviorSubject(HeaderVariant.APPLICATION),
+      };
+      (props.application.currentActionMenu$ as BehaviorSubject<MountPoint | undefined>).next(
+        mountScreenTitle(title)
+      );
+      const component = mountWithIntl(<Header {...props} />);
+      // The header reads the mounted title through a MutationObserver.
+      await act(async () => {
+        await new Promise((resolve) => setImmediate(resolve));
+      });
+      component.update();
+      return component;
+    };
+
+    it('shows the page name once: the title is visible and the crumb is for screen readers', async () => {
+      const component = await renderWith(
+        [{ text: 'Dashboards' }, { text: 'My dashboard' }],
+        'My dashboard'
+      );
+      const bar = component.find('nav[data-test-subj="breadcrumbs"]').first();
+      const last = bar.find('span[data-test-subj="breadcrumb last"]');
+      // Kept in the trail with aria-current, hidden visually.
+      expect(last.text()).toBe('My dashboard');
+      expect(last.prop('aria-current')).toBe('page');
+      expect(last.hasClass('euiScreenReaderOnly')).toBe(true);
+      // The separator after the parent crumb leads into the title; none trails it.
+      expect(bar.find('svg.euiBreadcrumbSeparator')).toHaveLength(1);
+      const titles = component
+        .find('[data-test-subj="headerAppActionMenu"]')
+        .getDOMNode()
+        .querySelectorAll('h1');
+      expect(Array.from(titles, (h: HTMLHeadingElement) => h.textContent)).toEqual([
+        'My dashboard',
+      ]);
+    });
+
+    it('keeps the current page visible when the screen title names something else', async () => {
+      // e.g. Explore sets [Explore, Error] while its screen title still says "Logs".
+      const component = await renderWith([{ text: 'Explore' }, { text: 'Error' }], 'Logs');
+      const last = component
+        .find('nav[data-test-subj="breadcrumbs"]')
+        .first()
+        .find('span[data-test-subj="breadcrumb last"]');
+      expect(last.text()).toBe('Error');
+      expect(last.hasClass('euiScreenReaderOnly')).toBe(false);
+    });
+
+    it('keeps the current page visible while the screen title is still empty', async () => {
+      const component = await renderWith([{ text: 'Discover' }, { text: 'Logs' }], '');
+      const last = component
+        .find('nav[data-test-subj="breadcrumbs"]')
+        .first()
+        .find('span[data-test-subj="breadcrumb last"]');
+      expect(last.text()).toBe('Logs');
+      expect(last.hasClass('euiScreenReaderOnly')).toBe(false);
+    });
   });
 
   it('should remember the collapse state when new nav is enabled', () => {

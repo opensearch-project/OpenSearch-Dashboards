@@ -34,6 +34,7 @@ export type {
   SourceTypeLogsDrilldown,
   SourceTypeLogsDrilldownEmptyStateProps,
   SourceTypeLogsDrilldownItem,
+  SourceTypeLogsDrilldownItemUnavailable,
   SourceTypeLogsDrilldownItemPage,
   SourceTypeLogsDrilldownQueryArgs,
   SourceTypeLogsDrilldownScope,
@@ -83,6 +84,7 @@ export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create
 
 // Visualization system for use by other plugins
 export { VisualizationBuilder } from './components/visualizations/visualization_builder';
+export { toListTimePattern } from './components/data_table/list_time_format';
 export type { AxisColumnMappings } from './components/visualizations/types';
 
 // Trace-to-logs correlation (correlations saved objects) and its log views, for Agent Traces

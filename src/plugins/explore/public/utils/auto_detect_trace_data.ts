@@ -4,7 +4,13 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import { isValidTimeField, pickTimeField, TRACE_TIME_FIELD_CANDIDATES } from '../../../data/common';
+import {
+  isMissingIndicesError,
+  isValidTimeField,
+  OTEL_SPAN_INDEX_PATTERNS,
+  pickTimeField,
+  TRACE_TIME_FIELD_CANDIDATES,
+} from '../../../data/common';
 import { IndexPatternsContract } from '../../../data/public';
 import {
   getIndexPatternSignalTypes,
@@ -42,7 +48,7 @@ export interface DetectionResult {
 
 /**
  * Auto-detect trace data following OpenTelemetry conventions
- * Checks for otel-v1-apm-span* (traces) and logs-otel-v1* (logs)
+ * Checks for otel-v2-apm-span* then otel-v1-apm-span* (traces) and logs-otel-v1* (logs)
  */
 export async function detectTraceData(
   savedObjectsClient: SavedObjectsClientContract,
@@ -90,35 +96,44 @@ export async function detectTraceData(
     return result;
   }
 
-  // 2. Check for conventional trace indices: otel-v1-apm-span*
-  try {
-    const traceFields = await indexPatternsService.getFieldsForWildcard({
-      pattern: 'otel-v1-apm-span*',
-      dataSourceId,
-    });
+  // 2. Check for conventional trace indices, preferring otel-v2-apm-span* over
+  //    otel-v1-apm-span*. The first pattern with the required fields wins. This only runs
+  //    when the data source has no traces dataset yet (see step 1), so an existing v1
+  //    dataset is not switched to v2.
+  for (const pattern of OTEL_SPAN_INDEX_PATTERNS) {
+    try {
+      const traceFields = await indexPatternsService.getFieldsForWildcard({
+        pattern,
+        dataSourceId,
+      });
 
-    // Verify required trace fields exist
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    const hasSpanId = traceFields.some((f) => f.name === 'spanId');
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    const hasTraceId = traceFields.some((f) => f.name === 'traceId');
-
-    // Filter to date fields actually valid for a Date Histogram (aggregatable, non-nested),
-    // then apply trace-specific precedence (startTime → endTime).
-    const validDateFieldNames = traceFields
+      // Verify required trace fields exist
       // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .filter((f) => isValidTimeField(f))
+      const hasSpanId = traceFields.some((f) => f.name === 'spanId');
       // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .map((f) => f.name);
-    const traceTimeField = pickTimeField(validDateFieldNames, TRACE_TIME_FIELD_CANDIDATES);
+      const hasTraceId = traceFields.some((f) => f.name === 'traceId');
 
-    if (hasSpanId && hasTraceId && traceTimeField) {
-      result.tracesDetected = true;
-      result.tracePattern = 'otel-v1-apm-span*';
-      result.traceTimeField = traceTimeField;
+      // Filter to date fields actually valid for a Date Histogram (aggregatable, non-nested),
+      // then apply trace-specific precedence (startTime → endTime).
+      const validDateFieldNames = traceFields
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
+        .filter((f) => isValidTimeField(f))
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
+        .map((f) => f.name);
+      const traceTimeField = pickTimeField(validDateFieldNames, TRACE_TIME_FIELD_CANDIDATES);
+
+      if (hasSpanId && hasTraceId && traceTimeField) {
+        result.tracesDetected = true;
+        result.tracePattern = pattern;
+        result.traceTimeField = traceTimeField;
+        break;
+      }
+    } catch (error) {
+      // Only a "no matching indices" result moves on to the next pattern. Any other failure
+      // (timeout, permissions, server error) stops trace detection, so a transient error on
+      // the v2 probe can't lock in a v1 dataset.
+      if (!isMissingIndicesError(error)) break;
     }
-  } catch {
-    // No matching indices found, continue
   }
 
   // 3. Check for conventional log indices: logs-otel-v1*

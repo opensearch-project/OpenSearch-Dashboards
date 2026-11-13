@@ -11,6 +11,7 @@ import {
   executeStreamingQuery,
   isStreamUnavailable,
   streamingPollCount,
+  STREAMING_LONG_POLL_WAIT,
   STREAMING_POLL_INTERVAL_MS,
 } from './streaming_query_actions';
 
@@ -95,6 +96,10 @@ const run = async (args: Record<string, unknown> = {}) => {
     .map((a) => a.payload);
   return { action, results, statuses };
 };
+
+/** How the http client reports a connection that never got a response. */
+const networkError = () =>
+  Object.assign(new TypeError('Failed to fetch'), { request: { url: '/api/job' } });
 
 const exhausted = (total: number) =>
   snapshot({
@@ -310,7 +315,17 @@ describe('executeStreamingQuery', () => {
         .mockResolvedValueOnce(snapshot({ id: 'job-1', status: 'RUNNING' }))
         .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0, size: 0 }));
 
-      await run();
+      const dispatch: jest.Mock = jest.fn((action: any) =>
+        typeof action === 'function' ? action(dispatch, () => ({})) : action
+      );
+      const promise = executeStreamingQuery({
+        services,
+        cacheKey: 'ck',
+        queryString: 'source=logs',
+      } as any)(dispatch, () => ({}) as any, undefined);
+      // Async advance settles each poll before the next timer, so every iteration sleeps.
+      await jest.advanceTimersByTimeAsync(10 * STREAMING_POLL_INTERVAL_MS);
+      await promise;
 
       // At least a few sleeps ran, and every listener they added was also removed.
       expect(added.length).toBeGreaterThan(1);
@@ -425,13 +440,16 @@ describe('executeStreamingQuery', () => {
     expect(results[results.length - 1].results.aggregations).toBeUndefined();
   });
 
-  it('stops without error when the job has expired', async () => {
+  it('marks the result incomplete when the job has expired, rather than finished', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
     mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
 
     const { statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
 
-    expect(statuses[statuses.length - 1].status.status).toBe('ready');
+    expect(final.status).toBe('ready');
+    expect(final.streaming).toMatchObject({ isPolling: false, interrupted: true });
+    expect(final.streaming?.aborted).toBe(false);
   });
 
   it('stays LOADING while polling and marks isPolling so partial rows are still rendered', async () => {
@@ -610,16 +628,277 @@ describe('executeStreamingQuery', () => {
     expect(final.streaming?.total).toBe(7);
   });
 
-  it('reports ERROR and stops polling when a request fails unexpectedly', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockRejectedValue(new Error('network exploded'));
+  it('keeps the rendered rows and marks the result incomplete when polling keeps failing', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', total: 1, datarows: [['2026-09-15 10:00:00', 1]] })
+    );
+    mockPoll.mockRejectedValue(networkError());
 
-    const { statuses } = await run().catch(() => ({ statuses: [] as any[] }));
+    const { action, results, statuses } = await run();
     const final = statuses[statuses.length - 1]?.status;
 
-    expect(final?.status).toBe('error');
-    expect(final?.streaming?.isPolling).toBe(false);
-    expect(final?.error?.originalErrorMessage).toBe('network exploded');
+    // Re-running on the non-streaming path would replace the rows already shown.
+    expect(isStreamUnavailable(action)).toBe(false);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming).toMatchObject({ isPolling: false, interrupted: true });
+    expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(1);
+    // The first poll plus one per retry delay.
+    expect(mockPoll).toHaveBeenCalledTimes(4);
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+  });
+
+  it.each([
+    ['a dropped connection', networkError()],
+    ['a 5xx', { body: { statusCode: 503 } }],
+  ])('retries %s and carries on', async (_, failure) => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0 }));
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming?.interrupted).toBeUndefined();
+  });
+
+  it('waits longer before each retry', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(networkError());
+    const dispatch: jest.Mock = jest.fn((action: any) =>
+      typeof action === 'function' ? action(dispatch, () => ({})) : action
+    );
+    const promise = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+    } as any)(dispatch, () => ({}) as any, undefined);
+
+    await jest.advanceTimersByTimeAsync(STREAMING_POLL_INTERVAL_MS);
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    for (const [delay, polls] of [
+      [1_000, 2],
+      [2_000, 3],
+      [4_000, 4],
+    ]) {
+      await jest.advanceTimersByTimeAsync(delay - 1);
+      expect(mockPoll).toHaveBeenCalledTimes(polls - 1);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(mockPoll).toHaveBeenCalledTimes(polls);
+    }
+    await promise;
+  });
+
+  describe('onFirstRows', () => {
+    const rowsSnap = (overrides: Record<string, unknown>) =>
+      snapshot({ datarows: [['2026-09-15 10:00:00', 1]], total: 1, size: 1, ...overrides });
+
+    it('fires once, when the first rows are published', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
+        .mockResolvedValue(rowsSnap({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows });
+
+      expect(onFirstRows).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fire for a run that returns no rows', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows });
+
+      expect(onFirstRows).not.toHaveBeenCalled();
+    });
+
+    // A job that finishes in the first poll still has its tail paged in afterwards, and that can
+    // take seconds the dependent queries should not wait out.
+    it('fires before the tail of a completed job is paged in', async () => {
+      let pollsWhenFired: number | undefined;
+      const onFirstRows = jest.fn(() => (pollsWhenFired = mockPoll.mock.calls.length));
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll
+        .mockResolvedValueOnce(
+          snapshot({
+            id: 'job-1',
+            status: 'SUCCEEDED',
+            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
+            total: 25,
+          })
+        )
+        .mockResolvedValue(exhausted(25));
+
+      await run({ onFirstRows });
+
+      expect(pollsWhenFired).toBe(1);
+      expect(mockPoll.mock.calls.length).toBeGreaterThan(1);
+    });
+
+    it('does not fire for a histogram job', async () => {
+      const onFirstRows = jest.fn();
+      mockSubmit.mockResolvedValue(rowsSnap({ status: 'SUCCEEDED' }));
+
+      await run({ onFirstRows, asHistogram: { aggId: '2' } });
+
+      expect(onFirstRows).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('long polling', () => {
+    it('waits on the server for a snapshot newer than the last one seen', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 3 }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', sequence: 4 }));
+
+      await run();
+
+      expect(mockPoll.mock.calls[0][0]).toMatchObject({
+        waitForSequence: 3,
+        waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
+      });
+    });
+
+    it('polls without waiting when the backend reports no sequence', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run();
+
+      expect(mockPoll.mock.calls[0][0].waitForSequence).toBeUndefined();
+      expect(mockPoll.mock.calls[0][0].waitForCompletionTimeout).toBeUndefined();
+    });
+
+    // A newer sequence may never come once the engine has committed everything, so waiting here
+    // would stall paging until the wait lapses.
+    it('does not wait while committed rows are still unread', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
+      mockPoll
+        .mockResolvedValueOnce(
+          snapshot({
+            id: 'job-1',
+            sequence: 2,
+            update_mode: 'APPEND',
+            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
+            total: 25,
+          })
+        )
+        .mockResolvedValue(exhausted(25));
+
+      await run();
+
+      expect(mockPoll.mock.calls[1][0]).toMatchObject({ offset: 10 });
+      expect(mockPoll.mock.calls[1][0].waitForSequence).toBeUndefined();
+    });
+
+    it('follows a long poll at once but never starts two polls within the interval', async () => {
+      const starts: number[] = [];
+      const t0 = Date.now();
+      const respond = (ms: number, snap: object) => () => {
+        starts.push(Date.now() - t0);
+        return new Promise((resolve) => setTimeout(() => resolve(snap), ms));
+      };
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
+      mockPoll
+        .mockImplementationOnce(respond(5_000, snapshot({ id: 'job-1', sequence: 2 })))
+        .mockImplementationOnce(respond(0, snapshot({ id: 'job-1', sequence: 3 })))
+        .mockImplementation(respond(0, snapshot({ id: 'job-1', status: 'SUCCEEDED' })));
+      const dispatch: jest.Mock = jest.fn((action: any) =>
+        typeof action === 'function' ? action(dispatch, () => ({})) : action
+      );
+
+      const promise = executeStreamingQuery({
+        services,
+        cacheKey: 'ck',
+        queryString: 'source=logs',
+      } as any)(dispatch, () => ({}) as any, undefined);
+      await jest.advanceTimersByTimeAsync(10_000);
+      await promise;
+
+      // The 5s long poll is followed immediately; the instant one after it still waits the interval.
+      expect(starts).toEqual([1_000, 6_000, 7_000]);
+    });
+  });
+
+  it('keeps polling while the tab is hidden', async () => {
+    const hiddenSpy = jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+    const { statuses } = await run();
+    hiddenSpy.mockRestore();
+
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBeFalsy();
+  });
+
+  // A malformed response or a bug of ours has no status either, but fails the same way on retry.
+  it('does not retry an error that never reached the network layer', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
+
+    const { statuses } = await run();
+
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBe(true);
+  });
+
+  it('does not retry a client error, which would fail again', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue({ response: { status: 400 } });
+
+    const { statuses } = await run();
+
+    expect(mockPoll).toHaveBeenCalledTimes(1);
+    expect(statuses[statuses.length - 1]?.status?.streaming?.interrupted).toBe(true);
+  });
+
+  // Unlike other 4xx it says nothing about the request, only that the cluster wants fewer of them.
+  it('backs off and retries a 429 rather than giving up on the job', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockRejectedValueOnce({ response: { status: 429 } })
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.status).toBe('ready');
+    expect(final?.streaming?.interrupted).toBeUndefined();
+  });
+
+  it('treats an abort during a retry as a stop, not a failure', async () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValueOnce(networkError()).mockRejectedValue(abortError);
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    // Retrying the abort would hold Stop for the whole backoff.
+    expect(mockPoll).toHaveBeenCalledTimes(2);
+    expect(final?.streaming).toMatchObject({ aborted: true });
+    expect(final?.streaming?.interrupted).toBeUndefined();
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+  });
+
+  it('releases the job when the engine reports it failed', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'FAILED' }));
+
+    await run();
+
+    expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
   });
 
   describe('when nothing was ever rendered', () => {
@@ -645,6 +924,16 @@ describe('executeStreamingQuery', () => {
       expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
     });
 
+    // The cluster is at its job limit; the standard path needs no job, so it still answers.
+    it('falls back when the cluster refuses a new job', async () => {
+      mockSubmit.mockRejectedValue({ response: { status: 429 }, body: { statusCode: 429 } });
+
+      const { action, statuses } = await run();
+
+      expect(isStreamUnavailable(action)).toBe(true);
+      expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    });
+
     // A superseded run must stay silent: its successor owns the cache key.
     it('does not claim unavailability when the run is no longer current', async () => {
       mockSubmit.mockRejectedValue(new Error('no handler'));
@@ -653,17 +942,6 @@ describe('executeStreamingQuery', () => {
 
       expect(isStreamUnavailable(action)).toBe(false);
     });
-  });
-
-  // Once rows are on screen, re-running would replace them, so the failure is surfaced instead.
-  it('reports an error rather than unavailability when a poll fails after rows arrived', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', total: 2 }));
-    mockPoll.mockRejectedValue(new Error('network exploded'));
-
-    const { statuses } = await run();
-    const final = statuses[statuses.length - 1]?.status;
-
-    expect(final?.status).toBe('error');
   });
 
   describe('engine request fields', () => {
@@ -816,13 +1094,45 @@ describe('executeStreamingQuery', () => {
       total: 25,
     });
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(new Error('tail poll exploded'));
+    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(networkError());
 
     const { results, statuses } = await run();
 
     expect(statuses[statuses.length - 1].status.status).toBe('ready');
     expect(results[results.length - 1].results.hits.hits).toHaveLength(10);
     expect(statuses.some((s) => s.status.status === 'error')).toBe(false);
+    // 10 of 25 rows: the query finished, but the result shown is not all of it.
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
+  });
+
+  it('marks the result incomplete when the job expires while its tail is paged', async () => {
+    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockResolvedValueOnce(
+        snapshot({
+          id: 'job-1',
+          status: 'SUCCEEDED',
+          update_mode: 'REPLACE',
+          datarows: [...Array(10).keys()].map(row),
+          size: 10,
+          total: 25,
+        })
+      )
+      .mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
+
+    const { statuses } = await run();
+
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
+  });
+
+  it('leaves a result that was paged in full unmarked', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0 }));
+
+    const { statuses } = await run();
+
+    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBeUndefined();
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {

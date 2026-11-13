@@ -17,7 +17,7 @@ import {
   PPLStreamJobNotFoundError,
   PPLStreamUnavailableError,
 } from '../../streaming/ppl_stream_errors';
-import { PPLStreamService } from '../../streaming/ppl_stream_service';
+import { PollStreamingQueryArgs, PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
 
 /** Core setting controlling whether integers too large for a JS number keep their precision. */
@@ -29,10 +29,13 @@ import { setResults } from '../slices';
 import { snapshotToHistogramBuckets } from '../../streaming/snapshot_to_histogram';
 import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
-import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
+import { streamJobError } from '../../streaming/stream_error_status';
 
-/** Interval between polls. A snapshot older than this is simply re-read, so no work is lost. */
+/** Minimum time between the starts of two polls. */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
+
+/** Under the 30s OpenSearch client request timeout. */
+export const STREAMING_LONG_POLL_WAIT = '10s';
 
 /**
  * Rows held client-side; `total` still reports the real size. Must stay well above ROWS_PER_POLL,
@@ -70,6 +73,7 @@ export interface ExecuteStreamingQueryArgs {
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
+  onFirstRows?: () => void;
 }
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -88,6 +92,23 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
 
+const POLL_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
+
+// The http client reports a connection that got no response as a TypeError carrying the request.
+// Other status-less errors, such as an unparseable body, would fail the same way again.
+const isTransientPollError = (error: unknown): boolean => {
+  if (isAbort(error) || error instanceof PPLStreamJobNotFoundError) return false;
+  const e = error as {
+    name?: string;
+    request?: unknown;
+    response?: { status?: number };
+    body?: { statusCode?: number };
+  };
+  const status = e?.response?.status ?? e?.body?.statusCode;
+  if (status === undefined) return e?.name === 'TypeError' && e.request !== undefined;
+  return status === 429 || status >= 500;
+};
+
 /**
  * Runs a PPL query on the streaming path, publishing each snapshot into the results slice under
  * `cacheKey` so the existing table re-renders as rows arrive.
@@ -101,7 +122,16 @@ export const executeStreamingQuery = createAsyncThunk<
 >(
   'query/executeStreamingQuery',
   async (
-    { services, cacheKey, queryString, indexName, asHistogram, dataSourceId, isCurrent },
+    {
+      services,
+      cacheKey,
+      queryString,
+      indexName,
+      asHistogram,
+      dataSourceId,
+      isCurrent,
+      onFirstRows,
+    },
     { dispatch, signal }
   ) => {
     const stream = new PPLStreamService(services.http);
@@ -112,6 +142,7 @@ export const executeStreamingQuery = createAsyncThunk<
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;
+    let firstRowsReported = false;
 
     const publish = (snapshot: PPLStreamSnapshot, isPolling: boolean) => {
       if (isCurrent && !isCurrent()) return;
@@ -150,6 +181,10 @@ export const executeStreamingQuery = createAsyncThunk<
             }),
           })
         );
+        if (onFirstRows && !firstRowsReported && rows.heldRows.length > 0) {
+          firstRowsReported = true;
+          onFirstRows();
+        }
       }
 
       if (typeof snapshot.progress?.fraction_done === 'number') {
@@ -190,7 +225,7 @@ export const executeStreamingQuery = createAsyncThunk<
      * Marks the query as no longer in flight, preserving the counts already shown. Every exit path
      * must call this: `isPolling` drives the elapsed timer, progress bar and Stop button.
      */
-    const finalise = (aborted = false) => {
+    const finalise = (aborted = false, interrupted = false) => {
       if (isCurrent && !isCurrent()) return;
       dispatch(
         setIndividualQueryStatus({
@@ -199,10 +234,27 @@ export const executeStreamingQuery = createAsyncThunk<
             status: QueryExecutionStatus.READY,
             elapsedMs: Date.now() - startedAt,
             startTime: startedAt,
-            streaming: lastStreaming ? { ...lastStreaming, isPolling: false, aborted } : undefined,
+            streaming: lastStreaming
+              ? { ...lastStreaming, isPolling: false, aborted, ...(interrupted && { interrupted }) }
+              : undefined,
           },
         })
       );
+    };
+
+    const release = () => {
+      if (jobId) stream.cancel(jobId, dataSourceId).catch(() => undefined);
+    };
+
+    const pollWithRetry = async (args: PollStreamingQueryArgs): Promise<PPLStreamSnapshot> => {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          return await stream.poll(args);
+        } catch (error) {
+          if (attempt >= POLL_RETRY_DELAYS_MS.length || !isTransientPollError(error)) throw error;
+          await sleep(POLL_RETRY_DELAYS_MS[attempt], signal);
+        }
+      }
     };
 
     /**
@@ -234,7 +286,7 @@ export const executeStreamingQuery = createAsyncThunk<
       // `wanted` alone bounds this only if windows come back the size asked for.
       const maxRequests = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
       for (let n = 0; n < maxRequests && !signal.aborted && rows.nextOffset < wanted; n++) {
-        const snap = await stream.poll({
+        const snap = await pollWithRetry({
           id: jobId!,
           withLongNumeralsSupport: longNumerals,
           offset: rows.nextOffset,
@@ -303,25 +355,39 @@ export const executeStreamingQuery = createAsyncThunk<
       // pick up revisions; committed rows are continued from. REPLACE until the engine classifies
       // the job, since re-reading is always safe.
       let updateMode: PPLStreamUpdateMode = 'REPLACE';
+      let last: PPLStreamSnapshot = submitted;
+      let nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
       while (!signal.aborted) {
-        await sleep(STREAMING_POLL_INTERVAL_MS, signal);
+        const wait = nextPollAt - Date.now();
+        if (wait > 0) await sleep(wait, signal);
+        nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
         // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
         // just transfers and parses rows to discard them every interval. Drop to the smallest
         // window the route allows and keep polling only to observe progress and terminal status.
         const pollCount = streamingPollCount(ROWS_PER_POLL, !asHistogram && rows.isFull);
 
+        // Only a caught-up client waits for a newer snapshot; unread committed rows are fetched now.
+        const canWait =
+          last.sequence !== undefined &&
+          (asHistogram || updateMode === 'REPLACE' || rows.isFull || rows.nextOffset >= last.total);
+
         // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
         // advancing would ask for a later slice of one.
-        const snapshot = await stream.poll({
+        const snapshot = await pollWithRetry({
           id: jobId,
           withLongNumeralsSupport,
           offset: asHistogram || updateMode === 'REPLACE' ? 0 : rows.nextOffset,
           count: pollCount,
           dataSourceId,
           signal,
+          ...(canWait && {
+            waitForSequence: last.sequence,
+            waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
+          }),
         });
+        last = snapshot;
 
         if (snapshot.update_mode) {
           updateMode = snapshot.update_mode as PPLStreamUpdateMode;
@@ -332,6 +398,7 @@ export const executeStreamingQuery = createAsyncThunk<
         if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
+          release();
           failWith(streamJobError(snapshot.error));
           return;
         }
@@ -342,24 +409,25 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
+        let drainFailed = false;
         if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
+          publish(snapshot, true);
           // A failure paging the tail of an already-completed query must not discard the rows
-          // already held; publish the terminal snapshot with what we have, as the expired-job path
-          // does. An abort still propagates, to be handled as a cancellation below.
+          // already held; publish the terminal snapshot with what we have, marked incomplete. An
+          // abort still propagates, to be handled as a cancellation below.
           try {
             await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
           } catch (drainError) {
             if (isAbort(drainError)) throw drainError;
+            drainFailed = true;
           }
         }
 
         publish(snapshot, !terminal);
         if (terminal) {
-          // Rows are held client-side from here, so the job is never read again. Releasing it now
-          // frees its retained result immediately instead of after `keep_alive` lapses.
-          if (jobId) {
-            stream.cancel(jobId, dataSourceId).catch(() => undefined);
-          }
+          // Rows are held client-side from here, so the job is never read again.
+          release();
+          if (drainFailed) finalise(false, true);
           return;
         }
       }
@@ -368,24 +436,25 @@ export const executeStreamingQuery = createAsyncThunk<
       finalise(signal.aborted);
     } catch (error) {
       if (isAbort(error)) {
-        if (jobId) {
-          stream.cancel(jobId, dataSourceId).catch(() => undefined);
-        }
+        release();
         finalise(true);
         return;
       }
       if (error instanceof PPLStreamJobNotFoundError) {
-        // Expired or already released. Keep whatever was rendered and stop.
-        finalise();
+        // Expired or lost with its node: the query did not finish.
+        finalise(false, true);
         return;
       }
+      release();
       // Nothing reached the screen, so the caller can re-run on the non-streaming path instead of
       // showing a failure. `lastStreaming` is only set by `publish`, so it doubles as "rendered".
       if (!lastStreaming && (!isCurrent || isCurrent())) {
         throw new PPLStreamUnavailableError(error);
       }
-      failWith(streamRequestError(error));
-      throw error;
+      // Re-running would replace the rows on screen, so keep them and mark the result incomplete.
+      // eslint-disable-next-line no-console
+      console.warn('[STREAMING] Polling failed; keeping the rows already shown:', error);
+      finalise(false, true);
     }
   }
 );

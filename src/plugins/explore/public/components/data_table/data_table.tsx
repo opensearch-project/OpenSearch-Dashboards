@@ -5,8 +5,16 @@
 
 import './data_table.scss';
 
-import React, { useState } from 'react';
-import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiProgress,
+  EuiSmallButtonEmpty,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableHeader } from './table_header/table_header';
@@ -19,6 +27,9 @@ import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
 import { useIncrementalRender } from '../../helpers/use_incremental_render';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import { toListTimePattern } from './list_time_format';
 
 export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
@@ -62,6 +73,13 @@ const DataTableUI = ({
   wrapCellText,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  // The list shows the time field to the second (see list_time_format.ts);
+  // computed once for the table rather than per row.
+  const timeColumnPattern = useMemo(
+    () => toListTimePattern(services?.uiSettings?.get('dateFormat')),
+    [services?.uiSettings]
+  );
 
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
@@ -129,6 +147,7 @@ const DataTableUI = ({
                   docViewsRegistry={docViewsRegistry}
                   expandedTableHeader={expandedTableHeader}
                   wrapCellText={wrapCellText}
+                  timeColumnPattern={timeColumnPattern}
                 />
               );
             }
@@ -150,18 +169,38 @@ const DataTableUI = ({
         </div>
       )}
       {!showPagination && rows.length === sampleSize && (
-        <EuiCallOut className="exploreTable__footer" data-test-subj="discoverDocTableFooter">
-          <FormattedMessage
-            id="explore.howToSeeOtherMatchingDocumentsDescription"
-            defaultMessage="These are the first {sampleSize} documents matching
+        // A quiet gray info note at the end of the results, not a blue callout
+        // banner: it tells the user how many rows are loaded, it isn't an alert.
+        <EuiPanel
+          color="subdued"
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="s"
+          borderRadius="m"
+          className="exploreTable__footer"
+          data-test-subj="discoverDocTableFooter"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="iInCircle" color="subdued" aria-hidden="true" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="explore.howToSeeOtherMatchingDocumentsDescription"
+                  defaultMessage="These are the first {sampleSize} documents matching
               your search, refine your search to see others."
-            values={{ sampleSize }}
-          />
-
-          <EuiSmallButtonEmpty onClick={scrollToTop}>
-            <FormattedMessage id="explore.backToTopLinkText" defaultMessage="Back to top." />
-          </EuiSmallButtonEmpty>
-        </EuiCallOut>
+                  values={{ sampleSize }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSmallButtonEmpty onClick={scrollToTop} flush="left">
+                <FormattedMessage id="explore.backToTopLinkText" defaultMessage="Back to top." />
+              </EuiSmallButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
       {showPagination ? (
         <Pagination

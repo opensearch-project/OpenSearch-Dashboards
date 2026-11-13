@@ -40,6 +40,7 @@ export const SpansDataTable: React.FC = () => {
     isInitialized,
     traceMetrics,
     formatTs,
+    formatListTs,
     sortOrder,
     handleSortChange,
     displayedColumns,
@@ -127,8 +128,9 @@ export const SpansDataTable: React.FC = () => {
       getRowMeta,
       onRowClick: handleRowClick,
       wrapCellText,
+      formatListTs,
     }),
-    [getRowMeta, handleRowClick, wrapCellText]
+    [getRowMeta, handleRowClick, wrapCellText, formatListTs]
   );
 
   // Loading state — show during active query or before initial query has completed

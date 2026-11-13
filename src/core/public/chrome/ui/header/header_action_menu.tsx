@@ -31,12 +31,18 @@
 import { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
+import { SCREEN_TITLE_ATTRIBUTE } from '../../constants';
 
 interface HeaderActionMenuProps {
   actionMenu$: Observable<MountPoint | undefined>;
+  /** Called with the mounted screen title's text, or undefined when there is none. */
+  onScreenTitleChange?: (screenTitle: string | undefined) => void;
 }
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => {
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({
+  actionMenu$,
+  onScreenTitleChange,
+}) => {
   // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
   // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
   // therefore executing the mount method, causing everything to crash.
@@ -70,6 +76,44 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
       }
     }
   }, [mounter]);
+
+  // Report the app's screen title. Apps often fill it in after mount (an
+  // effect sets it once data loads), so keep watching. The menu root is
+  // watched only for added and removed nodes, which is how the title element
+  // appears, disappears or is replaced; its text is watched on the title
+  // element alone, so text changes elsewhere in the menu (the date picker,
+  // a refresh countdown) don't trigger a read.
+  useLayoutEffect(() => {
+    const root = elementRef.current;
+    if (!onScreenTitleChange || !root) return;
+    let last: string | undefined;
+    let titleElement: Element | null = null;
+    // `report` is defined below; the observers only call it after this effect has run.
+    const titleObserver = new MutationObserver(() => report());
+    const report = () => {
+      const element = root.querySelector(`[${SCREEN_TITLE_ATTRIBUTE}]`);
+      if (element !== titleElement) {
+        titleObserver.disconnect();
+        titleElement = element;
+        if (element) {
+          titleObserver.observe(element, { childList: true, subtree: true, characterData: true });
+        }
+      }
+      const next = element?.textContent?.trim() || undefined;
+      if (next !== last) {
+        last = next;
+        onScreenTitleChange(next);
+      }
+    };
+    const rootObserver = new MutationObserver(report);
+    rootObserver.observe(root, { childList: true, subtree: true });
+    report();
+    return () => {
+      rootObserver.disconnect();
+      titleObserver.disconnect();
+      onScreenTitleChange(undefined);
+    };
+  }, [onScreenTitleChange]);
 
   return (
     <div data-test-subj="headerAppActionMenu" className="headerAppActionMenu" ref={elementRef} />
