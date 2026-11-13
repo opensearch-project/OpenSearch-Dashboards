@@ -309,6 +309,34 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     []
   );
 
+  // For the "no OpenSearch data sources" state: are other source types offered in the Source
+  // picker, and may the user associate a data source (the capability the data sources page checks;
+  // unset means no access control, as the data plugin treats it)?
+  const hasOtherSourceTypes = drilldownSourceTypes.some(
+    (sourceType) => sourceType.id !== OPENSEARCH_SOURCE_TYPE_ID
+  );
+  const canAssociateDataSource =
+    services.core?.application?.capabilities?.dashboards?.isDashboardAdmin !== false;
+  const noDataSourceBody = hasOtherSourceTypes
+    ? canAssociateDataSource
+      ? i18n.translate('explore.logsDrilldown.noDataSource.openSearchBody', {
+          defaultMessage:
+            'This workspace has no OpenSearch data sources. Choose another type in the Source picker, or associate an OpenSearch data source.',
+        })
+      : i18n.translate('explore.logsDrilldown.noDataSource.openSearchAskAdminBody', {
+          defaultMessage:
+            'This workspace has no OpenSearch data sources. Choose another type in the Source picker, or ask a workspace administrator to associate an OpenSearch data source.',
+        })
+    : canAssociateDataSource
+      ? i18n.translate('explore.logsDrilldown.noDataSource.body', {
+          defaultMessage:
+            'This workspace has no data sources associated with it. Associate a data source to explore its indexes and logs.',
+        })
+      : i18n.translate('explore.logsDrilldown.noDataSource.askAdminBody', {
+          defaultMessage:
+            'This workspace has no data sources associated with it. Ask a workspace administrator to associate one.',
+        });
+
   const dataSourcePickerKey = state.dataSourcePickerKey;
   const setSearchInput = useCallback(
     (value: string) => dispatch({ type: 'setSearchInput', value }),
@@ -533,38 +561,45 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
           onBatchActionChange={setBatchAction}
         />
       ) : hasAnyDataSource === false ? (
-        // No data sources exist in this workspace at all → nothing to select; guide the user to
-        // associate one. (We deliberately don't fall back to the local cluster.)
+        // No OpenSearch data sources in this workspace → nothing to select. (We deliberately don't
+        // fall back to the local cluster.) When other source types are registered, say it's
+        // OpenSearch that has none and point to the Source picker: those sources show their own
+        // empty states (e.g. no connection, or no permission). Only admins can associate one.
         <EuiEmptyPrompt
           iconType="database"
           data-test-subj="logsDrilldownNoDataSource"
           title={
             <h2>
-              {i18n.translate('explore.logsDrilldown.noDataSource.title', {
-                defaultMessage: 'No data sources available',
-              })}
+              {hasOtherSourceTypes
+                ? i18n.translate('explore.logsDrilldown.noDataSource.openSearchTitle', {
+                    defaultMessage: 'No OpenSearch data sources available',
+                  })
+                : i18n.translate('explore.logsDrilldown.noDataSource.title', {
+                    defaultMessage: 'No data sources available',
+                  })}
             </h2>
           }
-          body={
-            <p>
-              {i18n.translate('explore.logsDrilldown.noDataSource.body', {
-                defaultMessage:
-                  'This workspace has no data sources associated with it. Associate a data source to explore its indexes and logs.',
-              })}
-            </p>
+          body={<p>{noDataSourceBody}</p>}
+          actions={
+            canAssociateDataSource
+              ? [
+                  <EuiButton
+                    key="associate"
+                    fill
+                    onClick={() => services.core.application.navigateToApp('dataSources')}
+                    data-test-subj="logsDrilldownAssociateDataSource"
+                  >
+                    {hasOtherSourceTypes
+                      ? i18n.translate('explore.logsDrilldown.noDataSource.associateOpenSearch', {
+                          defaultMessage: 'Associate an OpenSearch data source',
+                        })
+                      : i18n.translate('explore.logsDrilldown.noDataSource.associate', {
+                          defaultMessage: 'Associate a data source',
+                        })}
+                  </EuiButton>,
+                ]
+              : undefined
           }
-          actions={[
-            <EuiButton
-              key="associate"
-              fill
-              onClick={() => services.core.application.navigateToApp('dataSources')}
-              data-test-subj="logsDrilldownAssociateDataSource"
-            >
-              {i18n.translate('explore.logsDrilldown.noDataSource.associate', {
-                defaultMessage: 'Associate a data source',
-              })}
-            </EuiButton>,
-          ]}
         />
       ) : (
         // Data sources exist but none is selected yet → prompt the user to pick one from the toolbar
