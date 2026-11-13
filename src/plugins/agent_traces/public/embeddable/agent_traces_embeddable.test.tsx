@@ -162,6 +162,25 @@ describe('AgentTracesEmbeddable', () => {
     );
   });
 
+  test('formats list timestamps to the second, building the formatters once', () => {
+    // @ts-ignore - accessing private property for testing
+    const uiSettings = embeddable.services.uiSettings;
+    uiSettings.get = jest.fn((key: string) => {
+      if (key === 'dateFormat') return 'MMM D, YYYY @ HH:mm:ss.SSS';
+      if (key === 'dateFormat:tz') return 'UTC';
+      return undefined;
+    });
+    // @ts-ignore - accessing private method for testing
+    const formatTs = embeddable.formatTs;
+
+    expect(formatTs('2026-11-09 20:13:07.227')).toBe('Nov 9, 2026 @ 20:13:07');
+    expect(formatTs('2026-11-09 20:13:08.500')).toBe('Nov 9, 2026 @ 20:13:08');
+    const dateFormatReads = (uiSettings.get as jest.Mock).mock.calls.filter(
+      ([key]) => key === 'dateFormat'
+    );
+    expect(dateFormatReads).toHaveLength(1);
+  });
+
   test('has the correct type', () => {
     expect(embeddable.type).toBe(AGENT_TRACES_EMBEDDABLE_TYPE);
   });

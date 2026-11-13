@@ -19,8 +19,14 @@ const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
  */
 export const toListTimePattern = (dateFormat?: string): string =>
   (dateFormat || DEFAULT_DATE_FORMAT)
-    .split(/(\[[^\]]*\])/)
-    .map((part) => (part.startsWith('[') ? part : part.replace(/(?<!LT)[^A-Za-z0-9]?S+/g, '')))
+    // Split out bracketed literals and the LT / LTS tokens so they are kept as
+    // they are. No RegExp lookbehind: older Safari (< 16.4) cannot parse one.
+    .split(/(\[[^\]]*\]|LTS?)/)
+    .map((part) =>
+      part.startsWith('[') || part === 'LT' || part === 'LTS'
+        ? part
+        : part.replace(/[^A-Za-z0-9]?S+/g, '')
+    )
     .join('');
 
 /**
