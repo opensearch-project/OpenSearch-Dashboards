@@ -48,7 +48,7 @@ jest.mock('./version_info', () => ({
 const versionInfo = jest.requireMock('./version_info').getVersionInfo();
 
 jest.mock('./provided_node', () => ({
-  getProvidedNodeVersion: jest.fn(async () => '26.1.0'),
+  getProvidedNodeVersion: jest.fn(async () => '26.14.0'),
 }));
 const { getProvidedNodeVersion } = jest.requireMock('./provided_node');
 
@@ -405,7 +405,7 @@ describe('--node-dir', () => {
   it('bundles the supplied install and reports its version', async () => {
     const config = await create();
     expect(config.getProvidedNodeDir()).toBe(resolve('some/node'));
-    expect(config.getNodeVersion()).toBe('26.1.0');
+    expect(config.getNodeVersion()).toBe('26.14.0');
     expect(getProvidedNodeVersion).toHaveBeenCalledWith(
       resolve('some/node'),
       process.platform === 'win32'
@@ -415,7 +415,7 @@ describe('--node-dir', () => {
   it('is unset without the flag', async () => {
     const config = await create({ nodeDir: undefined });
     expect(config.getProvidedNodeDir()).toBeUndefined();
-    expect(config.getNodeVersion()).not.toBe('26.1.0');
+    expect(config.getNodeVersion()).not.toBe('26.14.0');
   });
 
   it("refuses to build for anything but this host's platform", async () => {
