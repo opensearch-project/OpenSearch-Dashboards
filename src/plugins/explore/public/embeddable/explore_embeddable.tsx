@@ -169,6 +169,8 @@ export class ExploreEmbeddable
   implements IEmbeddable<ExploreInput, ExploreOutput>
 {
   private abortController?: AbortController;
+  // The fetch still running, if any; a superseded one doesn't clear its successor's.
+  private runningFetch?: Promise<void>;
   // A data fetch was requested while not visible and must run once visible again.
   private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
@@ -259,7 +261,10 @@ export class ExploreEmbeddable
     this.autoRefreshFetchSubscription = getServices()
       .timefilter.getAutoRefreshFetch$()
       .subscribe(() => {
-        if (this.searchProps) {
+        // A tick while the panel's query runs would restart it, and with an interval shorter than
+        // the query the panel would never show a result. The next tick after it settles refreshes;
+        // the dashboard's Refresh (reload) still replaces a running query.
+        if (this.searchProps && !this.runningFetch) {
           this.updateHandler(this.searchProps, true);
         }
       });
@@ -569,8 +574,10 @@ export class ExploreEmbeddable
         this.filtersSearchSource.setField('filter', filters || []);
       }
 
+      const run = this.fetch();
+      this.runningFetch = run;
       try {
-        await this.fetch();
+        await run;
       } catch (error: any) {
         if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
           return;
@@ -584,6 +591,8 @@ export class ExploreEmbeddable
           loading: false,
           error: this.searchProps.error,
         });
+      } finally {
+        if (this.runningFetch === run) this.runningFetch = undefined;
       }
     } else if (searchProps) {
       this.searchProps = searchProps;

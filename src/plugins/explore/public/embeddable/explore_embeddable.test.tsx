@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
@@ -17,6 +17,7 @@ import { visualizationRegistry } from '../components/visualizations/visualizatio
 import { VisFieldType } from '../components/visualizations/types';
 import { Container, ContainerInput, EmbeddableInput } from '../../../embeddable/public';
 import { IVariableInterpolationService } from '../../../dashboard/public';
+import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 
 // Mock react-dom/client
 const mockUnmount = jest.fn();
@@ -458,6 +459,120 @@ describe('ExploreEmbeddable', () => {
       const malformed = '{"error":{"reason":"Fake query failed","details":"cut';
       const error = await failWith(httpError(malformed));
       expect(error.message).toBe(malformed);
+    });
+  });
+
+  // With an interval shorter than the query, a tick that restarted the running query meant the
+  // panel never showed a result, and each restart started the scan over on the source.
+  describe('auto-refresh', () => {
+    const response = (id: string) => ({
+      hits: { hits: [{ _id: id, _source: { field1: id } }], total: 1 },
+    });
+    const flush = async () => {
+      for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0));
+    };
+
+    let ticks: Subject<void>;
+    let panel: ExploreEmbeddable;
+    let pending: Array<{ signal: AbortSignal; resolve: (value: unknown) => void }>;
+
+    beforeEach(() => {
+      ticks = new Subject<void>();
+      (getServices().timefilter.getAutoRefreshFetch$ as jest.Mock).mockReturnValueOnce(ticks);
+      pending = [];
+      mockSavedExplore.searchSource.fetch.mockImplementation(
+        ({ abortSignal }: { abortSignal: AbortSignal }) =>
+          new Promise((resolve) => pending.push({ signal: abortSignal, resolve }))
+      );
+      const services = createMockServices();
+      panel = new ExploreEmbeddable(
+        {
+          savedExplore: mockSavedExplore,
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: services.filterManager,
+          services,
+          editApp: 'explore/logs',
+        },
+        mockInput,
+        mockExecuteTriggerActions,
+        container
+      );
+      // @ts-ignore
+      panel.node = mockNode;
+    });
+
+    afterEach(() => panel.destroy());
+
+    test('a tick while the query runs neither starts another nor stops it', async () => {
+      panel.reload();
+      await flush();
+      expect(pending).toHaveLength(1);
+
+      ticks.next();
+      ticks.next();
+      await flush();
+      expect(pending).toHaveLength(1);
+      expect(pending[0].signal.aborted).toBe(false);
+
+      pending[0].resolve(response('first'));
+      await flush();
+      // @ts-ignore
+      expect(panel.searchProps.rows).toEqual(response('first').hits.hits);
+    });
+
+    test('the next tick after the query settles runs it again', async () => {
+      panel.reload();
+      await flush();
+      pending[0].resolve(response('first'));
+      await flush();
+
+      ticks.next();
+      await flush();
+      expect(pending).toHaveLength(2);
+    });
+
+    test('a tick after a failed query runs it again', async () => {
+      mockSavedExplore.searchSource.fetch.mockRejectedValueOnce(new Error('failed'));
+      panel.reload();
+      await flush();
+      expect(panel.getOutput().error).toBeDefined();
+
+      ticks.next();
+      await flush();
+      expect(pending).toHaveLength(1);
+    });
+
+    test("the dashboard's Refresh still replaces the running query", async () => {
+      panel.reload();
+      await flush();
+      panel.reload();
+      await flush();
+      expect(pending).toHaveLength(2);
+      expect(pending[0].signal.aborted).toBe(true);
+
+      // The replaced query no longer holds the ticks back once its successor settles.
+      pending[1].resolve(response('second'));
+      await flush();
+      ticks.next();
+      await flush();
+      expect(pending).toHaveLength(3);
+    });
+
+    test('is loading, with no rows, until the first run settles', async () => {
+      panel.reload();
+      await flush();
+      // @ts-ignore
+      expect(panel.searchProps.isLoading).toBe(true);
+      // @ts-ignore
+      expect(panel.searchProps.rows).toEqual([]);
+
+      pending[0].resolve(response('first'));
+      await flush();
+      // @ts-ignore
+      expect(panel.searchProps.isLoading).toBe(false);
     });
   });
 
