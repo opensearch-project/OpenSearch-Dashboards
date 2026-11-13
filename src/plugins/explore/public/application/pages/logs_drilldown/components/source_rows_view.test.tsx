@@ -629,4 +629,277 @@ describe('SourceRowsView', () => {
       delete (global as any).IntersectionObserver;
     }
   });
+
+  describe('an item the source marks unavailable', () => {
+    const withUnavailable = (overrides: Record<string, any> = {}) =>
+      makeDrilldown({
+        listItems: jest.fn().mockResolvedValue({
+          items: [
+            { id: 'app/web/a', name: 'app/web/a' },
+            {
+              id: 'app/api/b',
+              name: 'app/api/b',
+              unavailable: { title: "Can't be queried", reason: 'Ask for access to it.' },
+            },
+          ],
+        }),
+        ...overrides,
+      });
+
+    it('shows why on its card, offers no Run, and never queries it', async () => {
+      const drilldown = withUnavailable();
+      renderView(drilldown);
+      expect(
+        await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+      ).toHaveTextContent("Can't be queried");
+      expect(screen.queryByTestId('logsDrilldownSourceCardRun-app/api/b')).not.toBeInTheDocument();
+
+      // The other card still runs, and only it queries.
+      fireEvent.click(screen.getByTestId('logsDrilldownSourceCardRun-app/web/a'));
+      await screen.findByTestId('logsDrilldownSourceCardLogs-app/web/a');
+      expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
+      expect(drilldown.fetchHistogram).toHaveBeenCalledTimes(1);
+      expect(drilldown.toDataset).toHaveBeenCalledTimes(1);
+      expect(drilldown.toDataset).toHaveBeenCalledWith({
+        scope: { zone: 'zone-a' },
+        items: [expect.objectContaining({ id: 'app/web/a' })],
+      });
+    });
+
+    it('is never run as it scrolls into view on a source that runs on its own', async () => {
+      mockRequiresExplicitRun = false;
+      const observers = installIntersectionObserver();
+      jest.useFakeTimers();
+      try {
+        const drilldown = withUnavailable();
+        renderView(drilldown);
+        await act(async () => {
+          await Promise.resolve();
+        });
+        act(() => observers.forEach((callback) => callback([{ isIntersecting: true }])));
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(drilldown.fetchPreview).toHaveBeenCalledTimes(1);
+        expect(drilldown.buildPreviewQuery).toHaveBeenCalledTimes(1);
+        expect(drilldown.buildPreviewQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ item: expect.objectContaining({ id: 'app/web/a' }) })
+        );
+        expect(
+          screen.getByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardError-app/api/b')
+        ).not.toBeInTheDocument();
+      } finally {
+        jest.useRealTimers();
+        delete (global as any).IntersectionObserver;
+      }
+    });
+
+    it("can't be ticked for the Logs page", async () => {
+      const { onBatchActionChange } = renderView(withUnavailable());
+      const box = await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/api/b');
+      expect(box).toBeDisabled();
+      fireEvent.click(box);
+      expect(onBatchActionChange).not.toHaveBeenCalledWith(
+        expect.objectContaining({ label: expect.stringContaining('in Logs') })
+      );
+      expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a')).not.toBeDisabled();
+    });
+
+    describe("after a card's query fails (`unavailableFor`)", () => {
+      const UNAVAILABLE = { title: "Can't be queried", reason: 'Ask for access to it.' };
+      const refusing = (unavailableFor: jest.Mock) =>
+        makeDrilldown({
+          fetchPreview: jest.fn().mockRejectedValue(new Error('AccessDenied')),
+          unavailableFor,
+        });
+
+      it('shows what the source says instead of the error: no Run, and no new tick', async () => {
+        const unavailableFor = jest.fn(({ error }) =>
+          (error as Error).message === 'AccessDenied' ? UNAVAILABLE : undefined
+        );
+        const drilldown = refusing(unavailableFor);
+        renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        const card = await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b');
+        expect(card).toHaveTextContent("Can't be queried");
+        expect(card).toHaveTextContent('Ask for access to it.');
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardError-app/api/b')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardRun-app/api/b')
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).toBeDisabled();
+        expect(unavailableFor).toHaveBeenCalledTimes(1);
+        expect(unavailableFor).toHaveBeenCalledWith({
+          scope: { zone: 'zone-a' },
+          item: expect.objectContaining({ id: 'app/api/b' }),
+          error: expect.objectContaining({ message: 'AccessDenied' }),
+        });
+        // The other card is untouched.
+        expect(screen.getByTestId('logsDrilldownSourceCardRun-app/web/a')).toBeInTheDocument();
+      });
+
+      it('shows the error as before when the source answers undefined, or throws (and says so)', async () => {
+        const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+          for (const [unavailableFor, logged] of [
+            [jest.fn(() => undefined), false],
+            [
+              jest.fn(() => {
+                throw new Error('source bug');
+              }),
+              true,
+            ],
+          ] as Array<[jest.Mock, boolean]>) {
+            consoleError.mockClear();
+            const { unmount } = renderView(refusing(unavailableFor));
+            fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+            expect(
+              await screen.findByTestId('logsDrilldownSourceCardError-app/api/b')
+            ).toHaveTextContent('AccessDenied');
+            expect(
+              screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+            ).not.toBeInTheDocument();
+            const sourceFailures = consoleError.mock.calls.filter(([message]) =>
+              String(message).includes('unavailableFor failed')
+            );
+            expect(sourceFailures).toHaveLength(logged ? 1 : 0);
+            if (logged) expect(sourceFailures[0][1]).toEqual(new Error('source bug'));
+            unmount();
+          }
+        } finally {
+          consoleError.mockRestore();
+        }
+      });
+
+      it("isn't asked about a query that was stopped, and marks nothing", async () => {
+        let reject: (error: Error) => void = () => {};
+        const unavailableFor = jest.fn(() => UNAVAILABLE);
+        renderView(
+          makeDrilldown({
+            fetchPreview: jest.fn(
+              () => new Promise((_resolve, rejectPreview) => (reject = rejectPreview))
+            ),
+            unavailableFor,
+          })
+        );
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardStop-app/api/b'));
+        await act(async () => reject(new Error('AccessDenied')));
+        await flush();
+        expect(unavailableFor).not.toHaveBeenCalled();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId('logsDrilldownSourceCardRun-app/api/b')).toBeInTheDocument();
+      });
+
+      it('marks nothing when the failure lands after the list changed', async () => {
+        let reject: (error: Error) => void = () => {};
+        const unavailableFor = jest.fn(() => UNAVAILABLE);
+        const drilldown = makeDrilldown({
+          fetchPreview: jest.fn(
+            () => new Promise((_resolve, rejectPreview) => (reject = rejectPreview))
+          ),
+          unavailableFor,
+        });
+        const { rerender, services, onBatchActionChange } = renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        // The search changes while the query runs (a run is kept for its scope, so it isn't
+        // stopped); the new list has an item with the same id.
+        rerender(
+          <SourceRowsView
+            services={services}
+            sourceType={{
+              id: 'fake',
+              label: 'Fake Logs',
+              datasetTypes: ['FAKE_LOGS'],
+              resolveDefaultDataset: jest.fn(),
+              logsDrilldown: drilldown,
+            }}
+            scope={{ zone: 'zone-a' }}
+            search="app"
+            refreshKey="a"
+            onBrushTime={jest.fn()}
+            onBatchActionChange={onBatchActionChange}
+          />
+        );
+        await screen.findByTestId('logsDrilldownSourceCard-app/api/b');
+        await act(async () => reject(new Error('AccessDenied')));
+        await flush();
+        expect(unavailableFor).not.toHaveBeenCalled();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).not.toBeInTheDocument();
+      });
+
+      it('leaves a ticked item that becomes unavailable out of Open in Logs; none left: no action', async () => {
+        const drilldown = refusing(jest.fn(() => UNAVAILABLE));
+        const { onBatchActionChange } = renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardCheckbox-app/web/a'));
+        fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b'));
+        const lastAction = () =>
+          onBatchActionChange.mock.calls[onBatchActionChange.mock.calls.length - 1][0];
+        expect(lastAction()).not.toBeNull();
+
+        fireEvent.click(screen.getByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b');
+        // Still ticked, so it can be unticked; not opened.
+        expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).toBeChecked();
+        expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).not.toBeDisabled();
+        await act(async () => lastAction().onClick());
+        expect(drilldown.toDataset).toHaveBeenCalledWith({
+          scope: { zone: 'zone-a' },
+          items: [expect.objectContaining({ id: 'app/web/a' })],
+        });
+
+        fireEvent.click(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/web/a'));
+        expect(lastAction()).toBeNull();
+      });
+
+      it('lasts until the items are listed again (Refresh)', async () => {
+        const drilldown = refusing(jest.fn(() => UNAVAILABLE));
+        const { rerender, services, onBatchActionChange } = renderView(drilldown);
+        fireEvent.click(await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b'));
+        await screen.findByTestId('logsDrilldownSourceCardUnavailable-app/api/b');
+        rerender(
+          <SourceRowsView
+            services={services}
+            sourceType={{
+              id: 'fake',
+              label: 'Fake Logs',
+              datasetTypes: ['FAKE_LOGS'],
+              resolveDefaultDataset: jest.fn(),
+              logsDrilldown: drilldown,
+            }}
+            scope={{ zone: 'zone-a' }}
+            search=""
+            refreshKey="a"
+            listRefreshKey={1}
+            onBrushTime={jest.fn()}
+            onBatchActionChange={onBatchActionChange}
+          />
+        );
+        expect(
+          await screen.findByTestId('logsDrilldownSourceCardRun-app/api/b')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('logsDrilldownSourceCardUnavailable-app/api/b')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('lists as before without the field (no change for other sources)', async () => {
+      const drilldown = makeDrilldown();
+      renderView(drilldown);
+      await screen.findByTestId('logsDrilldownSourceCard-app/api/b');
+      expect(screen.queryByTestId(/logsDrilldownSourceCardUnavailable-/)).not.toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownSourceCardRun-app/api/b')).toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-app/api/b')).not.toBeDisabled();
+    });
+  });
 });

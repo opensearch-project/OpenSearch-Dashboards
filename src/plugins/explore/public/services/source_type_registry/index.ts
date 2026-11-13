@@ -18,6 +18,7 @@ export {
   SourceTypeLogsDrilldown,
   SourceTypeLogsDrilldownEmptyStateProps,
   SourceTypeLogsDrilldownItem,
+  SourceTypeLogsDrilldownItemUnavailable,
   SourceTypeLogsDrilldownItemPage,
   SourceTypeLogsDrilldownQueryArgs,
   SourceTypeLogsDrilldownScope,
