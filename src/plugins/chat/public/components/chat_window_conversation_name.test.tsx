@@ -109,7 +109,15 @@ describe('ChatWindow - Conversation Name', () => {
           includeFullHistory: true,
         }),
       },
-      loadConversation: jest.fn(),
+      getConversationSignal: jest.fn(() => new AbortController().signal),
+      openConversation: jest.fn(() => ({
+        signal: new AbortController().signal,
+        events: Promise.resolve(null),
+      })),
+      closeConversation: jest.fn(),
+      resolveSendDataSource: jest
+        .fn()
+        .mockResolvedValue({ status: 'ok', dataSourceId: 'mock-ds-id' }),
       abort: jest.fn(),
     } as any;
     mockSuggestedActionsService = {} as any;
