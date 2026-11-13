@@ -9,6 +9,7 @@ import configureMockStore from 'redux-mock-store';
 import { findTestSubject } from 'test_utils/helpers';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { JsonTreeSettingsContext } from '../../json_tree/json_tree';
 
 const mockStore = configureMockStore([]);
 
@@ -233,6 +234,49 @@ describe('DocViewTable hide empty fields', () => {
       <DocViewTable hit={hit} indexPattern={indexPattern} columns={['extension']} />
     );
     expect(findTestSubject(component, 'tableDocViewRow-extension').length).toBe(1);
+  });
+});
+
+describe('DocViewTable JSON values', () => {
+  const hit = {
+    _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: 1,
+    _source: { message: '{"level":"error","code":42}' },
+  };
+
+  const mountWithJsonFormatOn = (pattern: IndexPattern) =>
+    mount(
+      <JsonTreeSettingsContext.Provider value={{ showJsonFormat: true, expandAllJson: false }}>
+        <DocViewTable hit={hit} indexPattern={pattern} columns={['message']} />
+      </JsonTreeSettingsContext.Provider>
+    );
+
+  it('draws a JSON string field as a tree', () => {
+    const component = mountWithJsonFormatOn(indexPattern);
+    expect(component.find('div.exploreJsonTree').length).toBe(1);
+  });
+
+  const withFieldFormatMap = (fieldFormatMap: Record<string, unknown>) =>
+    ({ ...indexPattern, fieldFormatMap }) as unknown as IndexPattern;
+
+  it('keeps the formatted value for a field with a per-field format', () => {
+    const component = mountWithJsonFormatOn(withFieldFormatMap({ message: {} }));
+    expect(component.find('div.exploreJsonTree').length).toBe(0);
+    expect(findTestSubject(component, 'tableDocViewRow-message-value').text()).toBe(
+      '{"level":"error","code":42}'
+    );
+  });
+
+  it('draws the tree when only another field has a per-field format', () => {
+    const component = mountWithJsonFormatOn(withFieldFormatMap({ extension: {} }));
+    expect(component.find('div.exploreJsonTree').length).toBe(1);
+  });
+
+  it('draws the tree when the per-field format entry has no format', () => {
+    const component = mountWithJsonFormatOn(withFieldFormatMap({ message: undefined }));
+    expect(component.find('div.exploreJsonTree').length).toBe(1);
   });
 });
 
