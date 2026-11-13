@@ -24,12 +24,11 @@ import {
   selectWrapCellText,
 } from '../../../../application/utils/state_management/selectors';
 import {
-  setFormatJson,
   setHideEmptyFields,
   setWrapCellText,
 } from '../../../../application/utils/state_management/slices';
 import {
-  storeFormatJson,
+  setFormatJson,
   useFormatJson,
 } from '../../../data_table/table_cell/json_tree/format_json_setting';
 import {
@@ -165,11 +164,8 @@ export const TableActionsPopoverButton = () => {
               defaultMessage: 'Format JSON values',
             })}
             checked={formatJson}
-            onChange={(e) => {
-              // Remembered in the browser so it also applies to later sessions.
-              storeFormatJson(e.target.checked);
-              dispatch(setFormatJson(e.target.checked));
-            }}
+            // Per user, remembered in the browser; not part of the URL state.
+            onChange={(e) => setFormatJson(e.target.checked)}
             data-test-subj="exploreFormatJsonSwitch"
           />
         </EuiFlexItem>

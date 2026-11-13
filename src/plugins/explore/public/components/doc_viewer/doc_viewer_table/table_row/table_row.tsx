@@ -46,6 +46,8 @@ export interface Props {
   getLeafFilter?: GetLeafFilter;
   // Identifies the document + field so the tree's expanded nodes are remembered.
   jsonStateKey?: string;
+  // The field has a format of its own in the index pattern, so it is never shown as a tree.
+  hasFieldFormat?: boolean;
 }
 
 export function DocViewTableRow({
@@ -65,13 +67,17 @@ export function DocViewTableRow({
   valueRaw,
   getLeafFilter,
   jsonStateKey,
+  hasFieldFormat,
 }: Props) {
   // A string value holding JSON is shown as a collapsible tree instead of one long string,
-  // unless turned off in the table settings.
+  // unless turned off in the table settings or the field has a format of its own.
   const formatJson = useFormatJson();
   const parsedJson = useMemo(
-    () => (formatJson && typeof valueRaw === 'string' ? tryParseJson(valueRaw) : undefined),
-    [formatJson, valueRaw]
+    () =>
+      formatJson && !hasFieldFormat && typeof valueRaw === 'string'
+        ? tryParseJson(valueRaw)
+        : undefined,
+    [formatJson, hasFieldFormat, valueRaw]
   );
   // Highlight what was searched for in the tree: the matches marked in the formatted value
   // (DSL results) plus the string literals of the query (PPL/SQL results carry no highlights).

@@ -68,6 +68,21 @@ describe('TableRowContent date/time split', () => {
     expect(screen.getByTestId('cell-@timestamp')).toHaveAttribute('data-split', 'false');
   });
 
+  it('keeps the time on one line when the JSON field has its own format', () => {
+    const props = makeProps('{"a":{"b":1}}');
+    render(
+      <table>
+        <tbody>
+          <TableRowContent
+            {...props}
+            dataset={{ ...props.dataset, fieldFormatMap: { payload: { id: 'url' } } } as any}
+          />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('cell-@timestamp')).toHaveAttribute('data-split', 'false');
+  });
+
   it('ignores JSON in fields that are not displayed columns', () => {
     const props = makeProps('{"a":1}');
     render(

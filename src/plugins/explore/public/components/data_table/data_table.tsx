@@ -26,8 +26,6 @@ import {
 import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
-import { ROW_SEPARATORS_SETTING } from '../../../common';
-import { useExploreUiSetting } from './use_explore_ui_setting';
 import { useIncrementalRender } from '../../helpers/use_incremental_render';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
@@ -75,7 +73,6 @@ const DataTableUI = ({
   wrapCellText,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
-  const showRowSeparators = useExploreUiSetting(ROW_SEPARATORS_SETTING, false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   // The list shows the time field to the second (see list_time_format.ts);
   // computed once for the table rather than per row.
@@ -127,9 +124,7 @@ const DataTableUI = ({
       ) : null}
       <table
         data-test-subj="docTable"
-        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}${
-          showRowSeparators ? ' explore-table--separators' : ''
-        }`}
+        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}`}
       >
         <thead>
           <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />

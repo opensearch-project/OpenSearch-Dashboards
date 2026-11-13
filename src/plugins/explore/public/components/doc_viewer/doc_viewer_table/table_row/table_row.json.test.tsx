@@ -47,6 +47,18 @@ describe('DocViewTableRow JSON values', () => {
     expect(screen.queryByTestId('collapseTableRowBtn')).not.toBeInTheDocument();
   });
 
+  it('keeps the formatted value of a field that has its own format', () => {
+    render(
+      <table>
+        <tbody>
+          <DocViewTableRow {...props} hasFieldFormat />
+        </tbody>
+      </table>
+    );
+    const value = screen.getByTestId('tableDocViewRow-payload_raw-value');
+    expect(value.querySelector('[data-test-subj="exploreJsonTree"]')).toBeNull();
+  });
+
   it('offers leaf filters through getLeafFilter', () => {
     const apply = jest.fn();
     render(

@@ -8,7 +8,10 @@ import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
 import { DocViewRenderProps } from '../../../../types/doc_views_types';
 import { GetLeafFilter } from '../../../data_table/table_cell/json_tree/json_tree';
-import { findFieldForLeaf } from '../../../data_table/table_cell/json_tree/json_utils';
+import {
+  findFieldForLeaf,
+  hasOwnFieldFormat,
+} from '../../../data_table/table_cell/json_tree/json_utils';
 import { jsonTreeStateKey } from '../../../data_table/table_cell/json_tree/json_tree_state';
 
 export interface IDocViewTableRowContainer extends DocViewRenderProps {
@@ -140,6 +143,7 @@ export function DocViewTableRowContainer({
       getLeafFilter={getLeafFilter}
       // Separate from the data table cell's key: the two views are expanded independently.
       jsonStateKey={jsonStateKey}
+      hasFieldFormat={hasOwnFieldFormat(indexPattern, field)}
     />
   );
 }

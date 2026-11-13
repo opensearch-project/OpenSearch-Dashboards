@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { containsTerm, extractHighlightTerms, findFieldForLeaf, tryParseJson } from './json_utils';
+import {
+  containsTerm,
+  extractHighlightTerms,
+  findFieldForLeaf,
+  hasOwnFieldFormat,
+  tryParseJson,
+} from './json_utils';
 
 describe('tryParseJson', () => {
   it('parses JSON object and array strings', () => {
@@ -152,5 +158,15 @@ describe('long integers', () => {
     expect(
       findFieldForLeaf({ 'payload.id': 1234567890123456800 }, 'payload', ['id'], id)
     ).toBeUndefined();
+  });
+});
+
+describe('hasOwnFieldFormat', () => {
+  it('is true only for a field with an entry in the index pattern field format map', () => {
+    const dataset = { fieldFormatMap: { payload: { id: 'truncate' } } };
+    expect(hasOwnFieldFormat(dataset, 'payload')).toBe(true);
+    expect(hasOwnFieldFormat(dataset, 'message')).toBe(false);
+    expect(hasOwnFieldFormat({}, 'payload')).toBe(false);
+    expect(hasOwnFieldFormat(undefined, 'payload')).toBe(false);
   });
 });

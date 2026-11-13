@@ -41,6 +41,16 @@ export const tryParseJson = (value: unknown): JsonContainer | undefined => {
 };
 
 /**
+ * True when the index pattern sets a format of its own on `field` (Truncate, URL, Static lookup,
+ * ...). Such a field keeps that format and is never shown as a tree: the same rule the list uses
+ * for its display-only overrides of the time and severity columns.
+ */
+export const hasOwnFieldFormat = (
+  dataset: { fieldFormatMap?: Record<string, unknown> } | undefined,
+  field: string
+): boolean => Boolean(dataset?.fieldFormatMap?.[field]);
+
+/**
  * Finds the indexed field that holds the same data as a leaf of a JSON string column, so the
  * leaf can be filtered on.
  *

@@ -112,6 +112,17 @@ describe('TableCell JSON and date rendering', () => {
     expect(onFilter).toHaveBeenLastCalledWith('payload.error.code', 502, '-');
   });
 
+  it('keeps the format of a field that has its own format in the index pattern', () => {
+    render(
+      <TableCell
+        {...props}
+        dataset={{ ...dataset, fieldFormatMap: { payload_raw: { id: 'truncate' } } }}
+      />
+    );
+    expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
+    expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
+  });
+
   it('does not carry tree state to a different value under the same document id', () => {
     // Streaming PPL numbers its rows from 0 for every query, so two queries' row 0 share an id.
     const first = render(<TableCell {...props} rowData={{ ...rowData, _id: '0:0' }} />);

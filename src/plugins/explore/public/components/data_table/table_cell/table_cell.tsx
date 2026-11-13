@@ -22,7 +22,12 @@ import {
 } from './trace_utils/trace_utils';
 import { LogActionMenu } from '../../log_action_menu';
 import { JsonTree, GetLeafFilter } from './json_tree/json_tree';
-import { tryParseJson, findFieldForLeaf, extractHighlightTerms } from './json_tree/json_utils';
+import {
+  tryParseJson,
+  findFieldForLeaf,
+  extractHighlightTerms,
+  hasOwnFieldFormat,
+} from './json_tree/json_utils';
 import { useFormatJson } from './json_tree/format_json_setting';
 import { jsonTreeStateKey } from './json_tree/json_tree_state';
 import { mergeHighlightTerms, useQueryHighlightTerms } from './json_tree/query_highlight_terms';
@@ -90,14 +95,16 @@ export const TableCellUI = ({
 
   // A string value that holds a JSON object or array is rendered as a collapsible tree instead
   // of one long string, regardless of the wrap setting. Object values are left alone: they keep
-  // the dataset's own formatting. Users can turn this off in the table settings.
+  // the dataset's own formatting, and so does a field with a format set in the index pattern.
+  // Users can turn this off in the table settings.
   const formatJson = useFormatJson();
+  const keepsFormat = hasOwnFieldFormat(dataset, columnId);
   const parsedJson = useMemo(
     () =>
-      formatJson && !isTimeField && typeof rawValue === 'string'
+      formatJson && !isTimeField && !keepsFormat && typeof rawValue === 'string'
         ? tryParseJson(rawValue)
         : undefined,
-    [formatJson, isTimeField, rawValue]
+    [formatJson, isTimeField, keepsFormat, rawValue]
   );
 
   // Highlight what was searched for in the tree: the matches marked in the formatted value

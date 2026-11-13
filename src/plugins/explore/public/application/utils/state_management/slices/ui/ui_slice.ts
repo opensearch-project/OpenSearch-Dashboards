@@ -15,12 +15,6 @@ export interface UIState {
    * for until the user opts in.
    */
   hideEmptyFields: boolean;
-  /**
-   * Shows string values that hold JSON as a collapsible tree. Set when the user flips the switch
-   * in the table settings. While unset, the choice remembered in the browser applies, and
-   * failing that the `explore:formatJsonValues` advanced setting (see `useFormatJson`).
-   */
-  formatJson?: boolean;
   metricsPageMode?: 'explore' | 'query';
 }
 
@@ -50,9 +44,6 @@ const uiSlice = createSlice({
     setHideEmptyFields: (state, action: PayloadAction<boolean>) => {
       state.hideEmptyFields = action.payload;
     },
-    setFormatJson: (state, action: PayloadAction<boolean>) => {
-      state.formatJson = action.payload;
-    },
     setMetricsPageMode: (state, action: PayloadAction<'explore' | 'query'>) => {
       state.metricsPageMode = action.payload;
     },
@@ -65,7 +56,6 @@ export const {
   setShowHistogram,
   setWrapCellText,
   setHideEmptyFields,
-  setFormatJson,
   setMetricsPageMode,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;

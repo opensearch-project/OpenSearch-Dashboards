@@ -3,19 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext, useSyncExternalStore } from 'react';
-import { ReactReduxContext } from 'react-redux';
-import { FORMAT_JSON_SETTING } from '../../../../../common';
-import { useExploreUiSetting } from '../../use_explore_ui_setting';
-
-const STORAGE_KEY = 'explore:formatJson';
+import { useSyncExternalStore } from 'react';
 
 /**
- * The user's own choice for showing JSON values as a tree, remembered in the browser.
- * Undefined until they change it from the table settings, and for any stored value other than
- * the two `storeFormatJson` writes.
+ * Whether string values that hold JSON are shown as a tree: a per-user choice from the table
+ * settings, on by default and remembered in the browser.
+ *
+ * Kept out of the Redux UI state on purpose: that state is written to the URL (`_a`), and a
+ * shared link must not replace the recipient's own choice. Storage is read once, on first use,
+ * and every table cell then reads the value from memory.
  */
-export const getStoredFormatJson = (): boolean | undefined => {
+
+const STORAGE_KEY = 'explore:formatJson';
+const DEFAULT_FORMAT_JSON = true;
+
+let current: boolean | undefined;
+const listeners = new Set<() => void>();
+
+/** The stored choice; undefined when none was stored or storage is unavailable. */
+const readStored = (): boolean | undefined => {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === 'true') return true;
@@ -26,28 +32,33 @@ export const getStoredFormatJson = (): boolean | undefined => {
   }
 };
 
-export const storeFormatJson = (enabled: boolean) => {
+export const getFormatJson = (): boolean => {
+  if (current === undefined) current = readStored() ?? DEFAULT_FORMAT_JSON;
+  return current;
+};
+
+/** Sets the choice for this user, remembers it in the browser and re-renders the tables. */
+export const setFormatJson = (enabled: boolean) => {
+  current = enabled;
   try {
     window.localStorage.setItem(STORAGE_KEY, String(enabled));
   } catch (e) {
     // Storage can be unavailable (private mode, blocked site data); the choice then lasts
-    // for the session only.
+    // until the page is reloaded.
   }
+  listeners.forEach((listener) => listener());
 };
 
-const noopSubscribe = () => () => {};
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
-/**
- * Whether JSON values should be shown as a tree. In order of precedence: the explore UI state
- * (when a Redux store is available), the choice remembered in the browser, then the
- * `explore:formatJsonValues` advanced setting.
- */
-export const useFormatJson = (): boolean => {
-  const settingDefault = useExploreUiSetting(FORMAT_JSON_SETTING, true);
-  const store = useContext(ReactReduxContext)?.store;
-  const userChoice = useSyncExternalStore(store ? store.subscribe : noopSubscribe, () => {
-    const formatJson = store?.getState()?.ui?.formatJson;
-    return typeof formatJson === 'boolean' ? formatJson : getStoredFormatJson();
-  });
-  return userChoice ?? settingDefault;
+export const useFormatJson = (): boolean => useSyncExternalStore(subscribe, getFormatJson);
+
+/** Forgets the value read from storage, so the next read reads it again. For tests. */
+export const resetFormatJsonForTests = () => {
+  current = undefined;
 };

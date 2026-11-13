@@ -20,7 +20,7 @@ import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { useFormatJson } from '../table_cell/json_tree/format_json_setting';
-import { tryParseJson } from '../table_cell/json_tree/json_utils';
+import { hasOwnFieldFormat, tryParseJson } from '../table_cell/json_tree/json_utils';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { isSourceColumn } from '../../../helpers/is_source_column';
 import { formatListTime } from '../list_time_format';
@@ -110,10 +110,11 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
       columns.some(
         (colName) =>
           colName !== timeFieldName &&
+          !hasOwnFieldFormat(dataset, colName) &&
           typeof flattened[colName] === 'string' &&
           tryParseJson(flattened[colName]) !== undefined
       ),
-    [formatJson, columns, timeFieldName, flattened]
+    [formatJson, columns, timeFieldName, dataset, flattened]
   );
   return (
     <tr
