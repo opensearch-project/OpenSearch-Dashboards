@@ -39,6 +39,7 @@ import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
+import { DocViewTableRowBtnCopy } from './table_row_btn_copy';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from '../field_name/field_name';
@@ -59,6 +60,21 @@ export interface Props {
   valueRaw: unknown;
 }
 
+function getTextToCopy(valueRaw: unknown): string {
+  if (valueRaw === null || valueRaw === undefined) {
+    return '';
+  }
+  try {
+    return typeof valueRaw === 'string'
+      ? valueRaw
+      : typeof valueRaw === 'object'
+        ? JSON.stringify(valueRaw, null, 2)
+        : String(valueRaw);
+  } catch {
+    return String(valueRaw);
+  }
+}
+
 export function DocViewTableRow({
   field,
   fieldMapping,
@@ -74,6 +90,8 @@ export function DocViewTableRow({
   value,
   valueRaw,
 }: Props) {
+  const textToCopy = getTextToCopy(valueRaw);
+
   const valueClassName = classNames({
     osdDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
@@ -91,6 +109,7 @@ export function DocViewTableRow({
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '-')}
           />
+          <DocViewTableRowBtnCopy textToCopy={textToCopy} />
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
