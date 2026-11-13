@@ -9,6 +9,7 @@ import { DocViewTableRow } from './table_row';
 import { DocViewRenderProps } from '../../../../types/doc_views_types';
 import { GetLeafFilter } from '../../../data_table/table_cell/json_tree/json_tree';
 import {
+  canFilterLeafOn,
   findFieldForLeaf,
   hasOwnFieldFormat,
 } from '../../../data_table/table_cell/json_tree/json_utils';
@@ -94,12 +95,12 @@ export function DocViewTableRowContainer({
   };
 
   // A leaf of a JSON string value can be filtered on when the same data is also indexed as a
-  // real, filterable field of this document.
+  // real, filterable field of this document (not a date field, see `canFilterLeafOn`).
   const getLeafFilter: GetLeafFilter | undefined = filter
     ? (path, leafValue) => {
         const leafField = findFieldForLeaf(flattened, field, path, leafValue);
         const leafMapping = leafField ? indexPattern.fields.getByName(leafField) : undefined;
-        if (!leafMapping || leafMapping.filterable === false) return undefined;
+        if (!leafMapping || !canFilterLeafOn(leafMapping)) return undefined;
         return (mode) => filter(leafMapping, leafValue, mode);
       }
     : undefined;

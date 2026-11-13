@@ -12,9 +12,9 @@ describe('extractQueryLiterals', () => {
         "source = `json-parsed*` | WHERE `payload_parsed.error.detail` = 'upstream timeout'"
       )
     ).toEqual(['upstream timeout']);
-    expect(extractQueryLiterals('source = t | where a = "x y" and b = \'z\'')).toEqual([
+    expect(extractQueryLiterals('source = t | where a = "x y" and b = \'zz\'')).toEqual([
       'x y',
-      'z',
+      'zz',
     ]);
   });
 
@@ -40,8 +40,58 @@ describe('extractQueryLiterals', () => {
 
   it('still separates adjacent literals and skips empty ones', () => {
     expect(
-      extractQueryLiterals("source = t | where a = '' and b = 'x' and c in ('y', 'z')")
-    ).toEqual(['x', 'y', 'z']);
+      extractQueryLiterals("source = t | where a = '' and b = 'xx' and c in ('yy', 'zz')")
+    ).toEqual(['xx', 'yy', 'zz']);
+  });
+
+  it('skips one-character literals', () => {
+    expect(extractQueryLiterals("source = t | where a = 'a' or b = 'ok'")).toEqual(['ok']);
+  });
+
+  it('only takes literals of positive conditions', () => {
+    const literalsOf = (condition: string) =>
+      extractQueryLiterals(`source = t | where ${condition}`);
+    expect(literalsOf("level != 'debug'")).toEqual([]);
+    expect(literalsOf("level <> 'debug'")).toEqual([]);
+    expect(literalsOf("level > 'debug'")).toEqual([]);
+    expect(literalsOf("not level = 'debug'")).toEqual([]);
+    expect(literalsOf("a = 'keep' and not (b = 'debug')")).toEqual(['keep']);
+    expect(literalsOf("not like(a, '%debug%')")).toEqual([]);
+    expect(literalsOf("level not in ('debug', 'trace')")).toEqual([]);
+    expect(literalsOf("length(a) = 3 and concat(a, 'xx') = b")).toEqual([]);
+    expect(literalsOf("(a = 'one' or b == 'two') and match(c, 'three')")).toEqual([
+      'one',
+      'two',
+      'three',
+    ]);
+  });
+
+  it('ignores literals of commands other than where and search', () => {
+    expect(
+      extractQueryLiterals(
+        "source = t | eval x = 'constant' | where a = 'wanted' | fields a | stats count() by b"
+      )
+    ).toEqual(['wanted']);
+    expect(extractQueryLiterals("source = 'my-index' | where a = 'wanted'")).toEqual(['wanted']);
+  });
+
+  it('takes the terms of a search expression', () => {
+    expect(extractQueryLiterals('search source = t "upstream timeout" AND NOT "debug"')).toEqual([
+      'upstream timeout',
+    ]);
+    expect(extractQueryLiterals("source = t level = 'error'")).toEqual(['error']);
+  });
+
+  it('only takes the WHERE conditions of an SQL query', () => {
+    expect(
+      extractQueryLiterals(
+        "SELECT 'label' AS l FROM t WHERE a = 'wanted' AND b NOT LIKE '%skip%' AND c LIKE '%also%' ORDER BY 'zz'"
+      )
+    ).toEqual(['wanted', 'also']);
+    expect(extractQueryLiterals("SELECT * FROM t WHERE a IN ('one', 'two')")).toEqual([
+      'one',
+      'two',
+    ]);
   });
 
   it('returns nothing for a missing query', () => {

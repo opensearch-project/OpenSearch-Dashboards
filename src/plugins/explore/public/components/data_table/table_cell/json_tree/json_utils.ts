@@ -51,6 +51,16 @@ export const hasOwnFieldFormat = (
 ): boolean => Boolean(dataset?.fieldFormatMap?.[field]);
 
 /**
+ * Whether a leaf of the JSON may get filter-for/out buttons on the indexed field it matched
+ * (see `findFieldForLeaf`). Not on a field marked non-filterable, and not on a date field: the
+ * table and the document viewer offer no value filters on dates either, because PPL equality on
+ * a timestamp effectively never matches.
+ */
+export const canFilterLeafOn = (
+  field: { type?: string; filterable?: boolean } | undefined
+): boolean => field?.filterable !== false && field?.type !== 'date' && field?.type !== 'date_nanos';
+
+/**
  * Finds the indexed field that holds the same data as a leaf of a JSON string column, so the
  * leaf can be filtered on.
  *

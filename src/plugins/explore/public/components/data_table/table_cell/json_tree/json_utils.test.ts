@@ -4,6 +4,7 @@
  */
 
 import {
+  canFilterLeafOn,
   containsTerm,
   extractHighlightTerms,
   findFieldForLeaf,
@@ -81,6 +82,20 @@ describe('findFieldForLeaf', () => {
   it('returns undefined for the root and for non-primitive values', () => {
     expect(findFieldForLeaf(flattened, 'payload', [], 1001)).toBeUndefined();
     expect(findFieldForLeaf(flattened, 'payload', ['customer'], { name: 'Ada' })).toBeUndefined();
+  });
+});
+
+describe('canFilterLeafOn', () => {
+  it('allows filterable fields, and fields without a mapping', () => {
+    expect(canFilterLeafOn({ type: 'string', filterable: true })).toBe(true);
+    expect(canFilterLeafOn({ type: 'number' })).toBe(true);
+    expect(canFilterLeafOn(undefined)).toBe(true);
+  });
+
+  it('refuses non-filterable and date fields', () => {
+    expect(canFilterLeafOn({ type: 'string', filterable: false })).toBe(false);
+    expect(canFilterLeafOn({ type: 'date', filterable: true })).toBe(false);
+    expect(canFilterLeafOn({ type: 'date_nanos', filterable: true })).toBe(false);
   });
 });
 

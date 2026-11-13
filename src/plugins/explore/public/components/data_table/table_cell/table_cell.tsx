@@ -23,12 +23,11 @@ import {
 import { LogActionMenu } from '../../log_action_menu';
 import { JsonTree, GetLeafFilter } from './json_tree/json_tree';
 import {
-  tryParseJson,
-  findFieldForLeaf,
+  JsonContainer,
+  canFilterLeafOn,
   extractHighlightTerms,
-  hasOwnFieldFormat,
+  findFieldForLeaf,
 } from './json_tree/json_utils';
-import { useFormatJson } from './json_tree/format_json_setting';
 import { jsonTreeStateKey } from './json_tree/json_tree_state';
 import { mergeHighlightTerms, useQueryHighlightTerms } from './json_tree/query_highlight_terms';
 import { formatDateAndTime, formatListDateAndTime } from './split_date_time';
@@ -64,6 +63,9 @@ export interface ITableCellProps {
   // used one. A split time column then splits this pattern, so it shows the same precision as
   // the rows that are not split.
   listTimePattern?: string;
+  // The parsed value when this cell shows a JSON tree. The row works it out once for all its
+  // cells (see `getJsonTreeValues` in table_row_content.tsx), since it also needs it for `splitDateTime`.
+  jsonValue?: JsonContainer;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -83,6 +85,7 @@ export const TableCellUI = ({
   splitDateTime,
   listTimePattern,
   fitContent,
+  jsonValue: parsedJson,
 }: ITableCellProps) => {
   const { dataset: contextDataset } = useDatasetContext();
   // Prefer the explicitly-passed dataset; fall back to context for callers that
@@ -93,19 +96,8 @@ export const TableCellUI = ({
   // callers pass `flattened[columnId]`. `sanitizedCellValue` is the same value formatted as HTML.
   const rawValue: unknown = fieldMapping;
 
-  // A string value that holds a JSON object or array is rendered as a collapsible tree instead
-  // of one long string, regardless of the wrap setting. Object values are left alone: they keep
-  // the dataset's own formatting, and so does a field with a format set in the index pattern.
-  // Users can turn this off in the table settings.
-  const formatJson = useFormatJson();
-  const keepsFormat = hasOwnFieldFormat(dataset, columnId);
-  const parsedJson = useMemo(
-    () =>
-      formatJson && !isTimeField && !keepsFormat && typeof rawValue === 'string'
-        ? tryParseJson(rawValue)
-        : undefined,
-    [formatJson, isTimeField, keepsFormat, rawValue]
-  );
+  // A string value that holds a JSON object or array (`parsedJson`, set by the row) is rendered
+  // as a collapsible tree instead of one long string, regardless of the wrap setting.
 
   // Highlight what was searched for in the tree: the matches marked in the formatted value
   // (DSL results) plus the string literals of the query (PPL/SQL results carry no highlights).
@@ -128,15 +120,14 @@ export const TableCellUI = ({
   );
 
   // A leaf of the JSON can be filtered on when the same data is also indexed as a real,
-  // filterable field of this document (e.g. the output of an ingest `json` processor).
+  // filterable field of this document (e.g. the output of an ingest `json` processor), unless
+  // that field is a date (see `canFilterLeafOn`).
   const getLeafFilter = useMemo<GetLeafFilter | undefined>(() => {
     if (!parsedJson || !onFilter || !rowData || !dataset) return undefined;
     const flattened = dataset.flattenHit(rowData);
     return (path, value) => {
       const fieldName = findFieldForLeaf(flattened, columnId, path, value);
-      if (!fieldName || dataset.fields.getByName(fieldName)?.filterable === false) {
-        return undefined;
-      }
+      if (!fieldName || !canFilterLeafOn(dataset.fields.getByName(fieldName))) return undefined;
       return (mode) => onFilter(fieldName, value, mode);
     };
   }, [parsedJson, onFilter, rowData, dataset, columnId]);

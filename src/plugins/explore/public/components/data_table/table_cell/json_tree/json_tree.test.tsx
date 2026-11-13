@@ -195,12 +195,52 @@ describe('JsonTree accessibility', () => {
     expect(item('user object, 1 keys')).toHaveAttribute('tabindex', '0');
   });
 
+  it('falls back to the root as tab stop when "collapse all" hides the focused item', () => {
+    render(<JsonTree value={value} rawText="" />);
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]); // expand `user`
+    act(() => item(/^name: "Ada"/).focus());
+    act(() => collapseAllJsonTrees());
+    expect(screen.queryByRole('treeitem', { name: /^name: "Ada"/ })).not.toBeInTheDocument();
+    const tabStops = screen
+      .getAllByRole('treeitem')
+      .filter((el) => el.getAttribute('tabindex') === '0');
+    expect(tabStops).toEqual([item('object, 3 keys')]);
+  });
+
+  it('falls back to the root as tab stop when new highlight terms collapse a branch', () => {
+    const { rerender } = render(<JsonTree value={value} rawText="" highlightTerms={['Ada']} />);
+    act(() => item(/^name: "Ada"/).focus());
+    rerender(<JsonTree value={value} rawText="" highlightTerms={[]} />);
+    expect(item('object, 3 keys')).toHaveAttribute('tabindex', '0');
+  });
+
   it('leaves keys pressed on a button inside an item alone', () => {
     render(<JsonTree value={value} rawText="" />);
     const copy = screen.getAllByTestId('jsonTreeCopyPath')[0];
     act(() => copy.focus());
     fireEvent.keyDown(copy, { key: 'ArrowDown' });
     expect(copy).toHaveFocus();
+  });
+});
+
+describe('JsonTree node identity', () => {
+  it('expands a key containing a dot separately from the nested key of the same path', () => {
+    render(<JsonTree value={{ 'a.b': { x: 'dotted' }, a: { b: { y: 'nested' } } }} rawText="" />);
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]); // expand `a.b` (0 is the root)
+    expect(screen.getByText('"dotted"')).toBeInTheDocument();
+    // `a` stays collapsed; expanding it does not open its child `b`
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[2]);
+    expect(screen.queryByText('"nested"')).not.toBeInTheDocument();
+  });
+
+  it("gives a child under the empty key its own state and actions, not the root's", () => {
+    render(<JsonTree value={{ '': { x: 1 } }} rawText="" />);
+    // the root is open and the child collapsed: they do not share their state
+    expect(screen.getAllByTestId('jsonTreeToggle')).toHaveLength(2);
+    expect(screen.queryByText('1')).not.toBeInTheDocument();
+    // the child gets a copy-path action; only the root copies the JSON
+    expect(screen.getAllByTestId('jsonTreeCopyJson')).toHaveLength(1);
+    expect(screen.getAllByTestId('jsonTreeCopyPath')).toHaveLength(1);
   });
 });
 

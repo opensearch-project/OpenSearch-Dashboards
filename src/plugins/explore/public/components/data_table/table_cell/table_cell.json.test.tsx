@@ -8,6 +8,7 @@ import moment from 'moment';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
+import { tryParseJson } from './json_tree/json_utils';
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
@@ -17,11 +18,6 @@ jest.mock('../../../application/pages/traces/trace_flyout/trace_flyout_context')
 
 jest.mock('../../log_action_menu', () => ({
   LogActionMenu: () => <div data-test-subj="logActionMenu" />,
-}));
-
-let mockFormatJson = true;
-jest.mock('./json_tree/format_json_setting', () => ({
-  useFormatJson: () => mockFormatJson,
 }));
 
 describe('TableCell JSON and date rendering', () => {
@@ -51,7 +47,13 @@ describe('TableCell JSON and date rendering', () => {
     id: 'ds',
     title: 'idx*',
     flattenHit: () => flattened,
-    fields: { getByName: (name: string) => ({ name, filterable: name !== 'payload.order_id' }) },
+    fields: {
+      getByName: (name: string) => ({
+        name,
+        type: name === 'payload.error.detail' ? 'string' : 'number',
+        filterable: name !== 'payload.order_id',
+      }),
+    },
     getFormatterForField: () => new FakeDateFormat({ pattern: 'MMM D, YYYY @ HH:mm:ss' }),
   } as any;
 
@@ -66,11 +68,12 @@ describe('TableCell JSON and date rendering', () => {
     isTimeField: false,
     isOnTracesPage: false,
     setIsRowSelected: jest.fn(),
+    // The row parses the value and passes it down
+    jsonValue: tryParseJson(payload),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFormatJson = true;
     (useDatasetContext as jest.Mock).mockReturnValue({ dataset, isLoading: false, error: null });
   });
 
@@ -82,22 +85,11 @@ describe('TableCell JSON and date rendering', () => {
     expect(screen.queryByTestId('filterOutValue')).not.toBeInTheDocument();
   });
 
-  it('renders the plain value when JSON formatting is turned off', () => {
-    mockFormatJson = false;
-    render(<TableCell {...props} />);
+  it('renders the plain value, with the value filters, when the row passes no JSON', () => {
+    render(<TableCell {...props} jsonValue={undefined} />);
     expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
     expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
     expect(screen.getByTestId('filterForValue')).toBeInTheDocument();
-  });
-
-  it('does not render a tree for non-JSON strings or object values', () => {
-    const { unmount } = render(
-      <TableCell {...props} fieldMapping="plain text" sanitizedCellValue="plain text" />
-    );
-    expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
-    unmount();
-    render(<TableCell {...props} fieldMapping={{ a: 1 }} sanitizedCellValue="{}" />);
-    expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
   });
 
   it('filters a leaf on the indexed field that holds the same value', () => {
@@ -112,15 +104,36 @@ describe('TableCell JSON and date rendering', () => {
     expect(onFilter).toHaveBeenLastCalledWith('payload.error.code', 502, '-');
   });
 
-  it('keeps the format of a field that has its own format in the index pattern', () => {
+  it('offers no leaf filter on a date field', () => {
+    const withDate = '{"created_at":"2026-10-10T10:05:00.000Z","status":"ok"}';
+    const dateDataset = {
+      ...dataset,
+      flattenHit: () => ({
+        payload_raw: withDate,
+        'payload.created_at': '2026-10-10T10:05:00.000Z',
+        'payload.status': 'ok',
+      }),
+      fields: {
+        getByName: (name: string) => ({
+          name,
+          type: name === 'payload.created_at' ? 'date' : 'string',
+          filterable: true,
+        }),
+      },
+    };
     render(
       <TableCell
         {...props}
-        dataset={{ ...dataset, fieldFormatMap: { payload_raw: { id: 'truncate' } } }}
+        dataset={dateDataset}
+        fieldMapping={withDate}
+        sanitizedCellValue={withDate}
+        jsonValue={tryParseJson(withDate)}
       />
     );
-    expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
-    expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
+    // only `status` gets buttons
+    expect(screen.getAllByTestId('jsonTreeLeafFilter')).toHaveLength(1);
+    fireEvent.click(screen.getByTestId('jsonTreeFilterFor'));
+    expect(onFilter).toHaveBeenLastCalledWith('payload.status', 'ok', '+');
   });
 
   it('does not carry tree state to a different value under the same document id', () => {
@@ -137,6 +150,7 @@ describe('TableCell JSON and date rendering', () => {
         rowData={{ ...rowData, _id: '0:0' }}
         fieldMapping={other}
         sanitizedCellValue={other}
+        jsonValue={tryParseJson(other)}
       />
     );
     expect(screen.queryByTestId('exploreJsonTreeRaw')).not.toBeInTheDocument();
@@ -154,6 +168,7 @@ describe('TableCell JSON and date rendering', () => {
       isTimeField: true,
       fieldMapping: '2026-10-10T10:05:00.000Z',
       sanitizedCellValue: 'Oct 10, 2026 @ 10:05:00',
+      jsonValue: undefined,
     };
 
     it('keeps the formatted value on one line by default', () => {

@@ -9,6 +9,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -50,6 +51,24 @@ const MAX_CHILDREN = 50;
 const COPIED_FEEDBACK_MS = 1500;
 
 /**
+ * The keys and array indices leading to a node, e.g. `['tracking', 'events', 0, 'status']`.
+ * Its JSON text identifies the node within its tree (`nodeIdOf`): unlike the displayed path,
+ * it cannot be the same for two nodes, e.g. the key `"a.b"` and the key `"b"` inside `"a"`.
+ */
+type NodePath = Array<string | number>;
+
+const nodeIdOf = (fullPath: NodePath) => JSON.stringify(fullPath);
+const ROOT_ID = nodeIdOf([]);
+
+/** The path as shown and copied, e.g. `tracking.events[0].status`. */
+const displayPathOf = (fullPath: NodePath) =>
+  fullPath.reduce<string>(
+    (text, step) =>
+      typeof step === 'number' ? `${text}[${step}]` : text ? `${text}.${step}` : step,
+    ''
+  );
+
+/**
  * Given the key path of a leaf (array indices omitted) and its value, returns a callback that
  * filters for ('+') or out ('-') that value, or undefined when the leaf cannot be filtered.
  */
@@ -67,7 +86,7 @@ interface TreeContextValue {
   // How many children of a node are rendered
   getShown: (nodeId: string) => number;
   showMore: (nodeId: string, shown: number) => void;
-  // The one tree item in the tab order (roving tab stop); '' is the root
+  // The one tree item in the tab order (roving tab stop); ROOT_ID is the root
   activeNodeId: string;
   setActiveNodeId: (nodeId: string) => void;
 }
@@ -78,14 +97,17 @@ const TreeContext = createContext<TreeContextValue>({
   setCollapsed: () => {},
   getShown: () => MAX_CHILDREN,
   showMore: () => {},
-  activeNodeId: '',
+  activeNodeId: ROOT_ID,
   setActiveNodeId: () => {},
 });
 
-/** True when `nodeId` is below `ancestorId` in the tree ('' is the root). */
+/**
+ * True when `nodeId` is below `ancestorId` in the tree. Both are JSON arrays (see `nodeIdOf`),
+ * so a descendant's id is the ancestor's with more elements: `["a",0]` is below `["a"]`.
+ */
 const isDescendant = (nodeId: string, ancestorId: string) =>
   nodeId !== ancestorId &&
-  (ancestorId === '' || nodeId.startsWith(`${ancestorId}.`) || nodeId.startsWith(`${ancestorId}[`));
+  (ancestorId === ROOT_ID || nodeId.startsWith(`${ancestorId.slice(0, -1)},`));
 
 /** Renders `text` with the tree's highlight terms wrapped in <mark>. */
 const Highlighted = ({ text }: { text: string }) => {
@@ -149,8 +171,8 @@ const useCopiedFeedback = (): [boolean, () => void] => {
 interface LineActionsProps {
   // Key path without array indices, used to find a field to filter on.
   path: string[];
-  // Full path including array indices, e.g. `tracking.events[0].status`.
-  nodeId: string;
+  // Keys and array indices leading to the node; empty for the root.
+  fullPath: NodePath;
   value: unknown;
 }
 
@@ -158,12 +180,12 @@ interface LineActionsProps {
  * Hover actions of a line: copy its path and, for a filterable leaf, filter for/out. The root
  * line has no path; its copy action copies the whole value as pretty-printed JSON.
  */
-const LineActions = ({ path, nodeId, value }: LineActionsProps) => {
+const LineActions = ({ path, fullPath, value }: LineActionsProps) => {
   const { getLeafFilter } = useContext(TreeContext);
   const [copied, markCopied] = useCopiedFeedback();
   const applyFilter = isContainer(value) ? undefined : getLeafFilter?.(path, value);
 
-  if (!nodeId) {
+  if (fullPath.length === 0) {
     const copyJson = i18n.translate('explore.jsonTree.copyJson', { defaultMessage: 'Copy JSON' });
     return (
       <span className="exploreJsonTree__actions">
@@ -183,9 +205,10 @@ const LineActions = ({ path, nodeId, value }: LineActionsProps) => {
     );
   }
 
+  const displayPath = displayPathOf(fullPath);
   const copyPath = i18n.translate('explore.jsonTree.copyPath', {
     defaultMessage: 'Copy path: {path}',
-    values: { path: nodeId },
+    values: { path: displayPath },
   });
   const filterFor = i18n.translate('explore.jsonTree.filterForValue', {
     defaultMessage: 'Filter for value',
@@ -220,7 +243,7 @@ const LineActions = ({ path, nodeId, value }: LineActionsProps) => {
         size="xs"
         iconType={copied ? 'check' : 'copy'}
         onClick={() => {
-          copyToClipboard(nodeId);
+          copyToClipboard(displayPath);
           markCopied();
         }}
         aria-label={copyPath}
@@ -238,8 +261,8 @@ interface NodeProps {
   depth: number;
   // Object keys leading to this node; array indices are not part of the path.
   path: string[];
-  // Full path including array indices; also identifies the node within its tree.
-  nodeId: string;
+  // Keys and array indices leading to this node; identifies it within its tree.
+  fullPath: NodePath;
 }
 
 /**
@@ -247,9 +270,10 @@ interface NodeProps {
  * (`key: value`), an empty container (`key: {}`), a collapsed container (`key: { [+] }`) or an
  * expanded container (opening line, indented children, closing line).
  */
-const JsonNode = ({ name, value, isLast, depth, path, nodeId }: NodeProps) => {
+const JsonNode = ({ name, value, isLast, depth, path, fullPath }: NodeProps) => {
   const { isCollapsed, setCollapsed, getShown, showMore, activeNodeId, setActiveNodeId } =
     useContext(TreeContext);
+  const nodeId = nodeIdOf(fullPath);
   const comma = isLast ? '' : ',';
   const key =
     name !== undefined ? (
@@ -260,7 +284,7 @@ const JsonNode = ({ name, value, isLast, depth, path, nodeId }: NodeProps) => {
         {': '}
       </>
     ) : null;
-  const actions = <LineActions path={path} nodeId={nodeId} value={value} />;
+  const actions = <LineActions path={path} fullPath={fullPath} value={value} />;
   // ARIA tree item with a roving tab stop: only the active item is in the tab order, the
   // arrow keys move between items (handled on the tree).
   const itemProps = {
@@ -381,9 +405,7 @@ const JsonNode = ({ name, value, isLast, depth, path, nodeId }: NodeProps) => {
             isLast={i === entries.length - 1 && hidden <= 0}
             depth={depth + 1}
             path={isArray ? path : [...path, childName]}
-            nodeId={
-              isArray ? `${nodeId}[${childName}]` : nodeId ? `${nodeId}.${childName}` : childName
-            }
+            fullPath={[...fullPath, isArray ? i : childName]}
           />
         ))}
         {hidden > 0 && (
@@ -450,13 +472,23 @@ export const JsonTree = ({
   // through `update`, which looks the state up again (so a change never lands on an evicted
   // entry) and re-renders.
   const state = stateKey ? getJsonTreeState(stateKey) : local.current.state;
-  const [, rerender] = useReducer((count: number) => count + 1, 0);
+  const [changeCount, rerender] = useReducer((count: number) => count + 1, 0);
   const update = (change: (s: JsonTreeState) => void) => {
     if (stateKey) updateJsonTreeState(stateKey, change);
     else if (local.current) change(local.current.state);
     rerender();
   };
-  const [activeNodeId, setActiveNodeId] = useState('');
+  const [activeNodeId, setActiveNodeId] = useState(ROOT_ID);
+  const treeRef = useRef<HTMLDivElement>(null);
+  // `setCollapsed` moves the tab stop off a branch it collapses, but "Collapse all JSON"
+  // (`version`), new highlight terms, another key's state or a new value can also hide the
+  // active item. Then no item is in the tab order, so fall back to the root.
+  useLayoutEffect(() => {
+    if (activeNodeId === ROOT_ID || !treeRef.current) return;
+    if (!treeRef.current.querySelector('[role="treeitem"][tabindex="0"]')) {
+      setActiveNodeId(ROOT_ID);
+    }
+  }, [activeNodeId, version, highlightTerms, state, changeCount, value]);
 
   const context = useMemo<TreeContextValue>(
     () => ({
@@ -496,7 +528,7 @@ export const JsonTree = ({
     );
     const index = items.indexOf(item);
     const expanded = item.getAttribute('aria-expanded');
-    const nodeId = item.dataset.nodeId ?? '';
+    const nodeId = item.dataset.nodeId ?? ROOT_ID;
     let next: HTMLElement | null | undefined;
     switch (event.key) {
       case 'ArrowDown':
@@ -552,8 +584,9 @@ export const JsonTree = ({
               defaultMessage: 'JSON value',
             })}
             onKeyDown={onTreeKeyDown}
+            ref={treeRef}
           >
-            <JsonNode value={value} isLast depth={0} path={[]} nodeId="" />
+            <JsonNode value={value} isLast depth={0} path={[]} fullPath={[]} />
           </div>
         </TreeContext.Provider>
       )}
