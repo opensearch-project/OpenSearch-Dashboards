@@ -7,6 +7,9 @@ import { configurePreloadedStore, getPreloadedStore, RootState } from './store';
 import { ExploreServices } from '../../../types';
 import { loadReduxState } from './utils/redux_persistence';
 import { normalizeStateForComparison } from './utils/state_comparison';
+import { setPromptModeIsAvailable, setSummaryAgentIsAvailable } from './slices';
+import { getPromptModeIsAvailable } from '../get_prompt_mode_is_available';
+import { getSummaryAgentIsAvailable } from '../get_summary_agent_is_available';
 
 // Mock dependencies
 jest.mock('./utils/redux_persistence', () => ({
@@ -40,6 +43,14 @@ jest.mock('./middleware/timefilter_sync_middleware', () => ({
 
 jest.mock('./middleware/overall_status_middleware', () => ({
   createOverallStatusMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
+}));
+
+jest.mock('../get_prompt_mode_is_available', () => ({
+  getPromptModeIsAvailable: jest.fn(() => new Promise(() => {})),
+}));
+
+jest.mock('../get_summary_agent_is_available', () => ({
+  getSummaryAgentIsAvailable: jest.fn(() => new Promise(() => {})),
 }));
 
 // Import the mocked functions to verify they're called
@@ -195,6 +206,82 @@ describe('store', () => {
       expect(createQuerySyncMiddleware).not.toHaveBeenCalled();
       expect(createTimefilterSyncMiddleware).not.toHaveBeenCalled();
       expect(createOverallStatusMiddleware).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('AI availability', () => {
+    const dataset = { id: 'logs', title: 'logs-*', type: 'INDEX_PATTERN' };
+    const withDataset = (query = '') => ({
+      ...mockPreloadedState,
+      query: { ...mockPreloadedState.query, query, dataset },
+    });
+
+    it('resolves with the flags off while the probes hang, and starts them in the background', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(withDataset());
+
+      const { store } = await getPreloadedStore(mockServices);
+
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(false);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(false);
+      expect(getPromptModeIsAvailable).toHaveBeenCalledTimes(1);
+      expect(getSummaryAgentIsAvailable).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets the flags when the probes resolve after the store was created', async () => {
+      (getPromptModeIsAvailable as jest.Mock).mockResolvedValueOnce(true);
+      (getSummaryAgentIsAvailable as jest.Mock).mockResolvedValueOnce(true);
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(withDataset());
+
+      const { store } = await getPreloadedStore(mockServices);
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(false);
+      await new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(true);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(true);
+    });
+
+    it('does not start the probes when there is no dataset', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      await getPreloadedStore(mockServices);
+
+      expect(getPromptModeIsAvailable).not.toHaveBeenCalled();
+      expect(getSummaryAgentIsAvailable).not.toHaveBeenCalled();
+    });
+
+    it('keeps the current flags and re-probes after hydrating URL state', async () => {
+      (loadReduxState as jest.MockedFunction<any>)
+        .mockResolvedValueOnce(withDataset())
+        .mockResolvedValueOnce(withDataset('source=other'));
+
+      const { store } = await getPreloadedStore(mockServices);
+      store.dispatch(setPromptModeIsAvailable(true));
+      store.dispatch(setSummaryAgentIsAvailable(true));
+
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      expect(store.getState().query.query).toBe('source=other');
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(true);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(true);
+      expect(getPromptModeIsAvailable).toHaveBeenCalledTimes(2);
+    });
+
+    it('turns the flags off when hydrating URL state that has no dataset', async () => {
+      (loadReduxState as jest.MockedFunction<any>)
+        .mockResolvedValueOnce(withDataset())
+        .mockResolvedValueOnce({ ...mockPreloadedState, query: { query: 'x', language: 'PPL' } });
+
+      const { store } = await getPreloadedStore(mockServices);
+      store.dispatch(setPromptModeIsAvailable(true));
+      store.dispatch(setSummaryAgentIsAvailable(true));
+
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(false);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(false);
+      expect(getPromptModeIsAvailable).toHaveBeenCalledTimes(1);
     });
   });
 

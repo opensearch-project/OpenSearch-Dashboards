@@ -16,6 +16,16 @@ import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
 import { CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { of } from 'rxjs';
+import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
+import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
+
+jest.mock('../../get_prompt_mode_is_available', () => ({
+  getPromptModeIsAvailable: jest.fn(() => new Promise(() => {})),
+}));
+
+jest.mock('../../get_summary_agent_is_available', () => ({
+  getSummaryAgentIsAvailable: jest.fn(() => new Promise(() => {})),
+}));
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
@@ -313,6 +323,44 @@ describe('redux_persistence', () => {
 
       expect(result).toBeDefined();
       expect(result.ui.activeTabId).toBe(''); // Should fallback to preloaded state
+    });
+  });
+
+  describe('AI availability probes', () => {
+    const dataset = {
+      id: 'logs-dataset',
+      title: 'logs-*',
+      type: 'INDEX_PATTERN',
+      dataSource: { id: 'ds-1' },
+    };
+
+    beforeEach(() => {
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({ dataset });
+    });
+
+    it('getPreloadedState resolves with the flags off without waiting for the probes', async () => {
+      const result = await getPreloadedState(mockServices);
+
+      expect(result.query.dataset?.id).toBe('logs-dataset');
+      expect(result.queryEditor.promptModeIsAvailable).toBe(false);
+      expect(result.queryEditor.summaryAgentIsAvailable).toBe(false);
+      expect(result.queryEditor.editorMode).toBe(EditorMode.Query);
+      expect(getPromptModeIsAvailable).not.toHaveBeenCalled();
+      expect(getSummaryAgentIsAvailable).not.toHaveBeenCalled();
+    });
+
+    it('loadReduxState resolves from URL state without waiting for the probes', async () => {
+      (mockServices.osdUrlStateStorage!.get as jest.Mock).mockImplementation((key: string) =>
+        key === '_q' ? { query: 'source=logs', language: 'PPL', dataset } : null
+      );
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.query.dataset?.id).toBe('logs-dataset');
+      expect(result.queryEditor.promptModeIsAvailable).toBe(false);
+      expect(result.queryEditor.summaryAgentIsAvailable).toBe(false);
+      expect(getPromptModeIsAvailable).not.toHaveBeenCalled();
+      expect(getSummaryAgentIsAvailable).not.toHaveBeenCalled();
     });
   });
 

@@ -44,6 +44,17 @@ describe('getSummaryAgentIsAvailable', () => {
     expect(result).toBe(false);
   });
 
+  it('passes an optional abort signal to the request', async () => {
+    (services.http.fetch as jest.Mock).mockResolvedValue({ exists: true });
+    const controller = new AbortController();
+
+    await getSummaryAgentIsAvailable(services, dataSourceId, { signal: controller.signal });
+
+    expect(services.http.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({ signal: controller.signal })
+    );
+  });
+
   it('returns false when API call throws an error', async () => {
     (services.http.fetch as jest.Mock).mockRejectedValue(new Error('API error'));
 

@@ -9,7 +9,8 @@ const AGENT_EXISTS_API = '/api/assistant/agent_config/_exists';
 
 export const getSummaryAgentIsAvailable = async (
   services: ExploreServices,
-  dataSourceId: string
+  dataSourceId: string,
+  options?: { signal?: AbortSignal }
 ) => {
   try {
     // TODO: OSD core should not rely on plugin APIs, refactor this once this RFC is
@@ -21,6 +22,7 @@ export const getSummaryAgentIsAvailable = async (
         dataSourceId,
         agentConfigName: 'os_data2summary',
       },
+      ...(options?.signal ? { signal: options.signal } : {}),
     });
     return res.exists;
   } catch {
