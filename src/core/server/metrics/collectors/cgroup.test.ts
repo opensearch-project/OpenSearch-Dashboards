@@ -36,9 +36,10 @@ const fsError = (code: string, syscallMessage: string, path: string) =>
   Object.assign(new Error(`${code}: ${syscallMessage}, open '${path}'`), { code, path });
 
 // The collector reads fixed absolute paths, so stub readFile instead of touching the real FS.
+// Paths are compared with `/` separators because the collector builds them with path.join.
 const mockFiles = (files: Record<string, string>, deniedPrefix?: string) => {
   jest.spyOn(fs.promises, 'readFile').mockImplementation(async (path: any) => {
-    const p = String(path);
+    const p = String(path).replace(/\\/g, '/');
     if (deniedPrefix && p.startsWith(deniedPrefix)) {
       throw fsError('EACCES', 'permission denied', p);
     }
