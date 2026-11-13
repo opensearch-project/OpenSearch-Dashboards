@@ -1,0 +1,213 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import moment from 'moment';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { TableCell, ITableCellProps } from './table_cell';
+import { useDatasetContext } from '../../../application/context';
+import { tryParseJson } from './json_tree/json_utils';
+
+jest.mock('../../../application/context', () => ({
+  useDatasetContext: jest.fn(),
+}));
+
+jest.mock('../../../application/pages/traces/trace_flyout/trace_flyout_context');
+
+jest.mock('../../log_action_menu', () => ({
+  LogActionMenu: () => <div data-test-subj="logActionMenu" />,
+}));
+
+describe('TableCell JSON and date rendering', () => {
+  const payload = '{"order_id":1002,"error":{"code":502,"detail":"upstream timeout"}}';
+  const rowData = {
+    _index: 'idx',
+    _id: 'doc-1',
+    _source: { payload_raw: payload },
+  } as any;
+  const flattened = {
+    payload_raw: payload,
+    'payload.order_id': 1002,
+    'payload.error.code': 502,
+    'payload.error.detail': 'upstream timeout',
+  };
+
+  class FakeDateFormat {
+    type = FakeDateFormat;
+    constructor(private readonly formatParams: Record<string, unknown>) {}
+    param = (name: string) => this.formatParams[name];
+    params = () => ({ ...this.formatParams });
+    convert = (value: unknown) =>
+      moment.utc(value as string).format(this.formatParams.pattern as string);
+  }
+
+  const dataset = {
+    id: 'ds',
+    title: 'idx*',
+    flattenHit: () => flattened,
+    fields: {
+      getByName: (name: string) => ({
+        name,
+        type: name === 'payload.error.detail' ? 'string' : 'number',
+        filterable: name !== 'payload.order_id',
+      }),
+    },
+    getFormatterForField: () => new FakeDateFormat({ pattern: 'MMM D, YYYY @ HH:mm:ss' }),
+  } as any;
+
+  const onFilter = jest.fn();
+  const props: ITableCellProps = {
+    columnId: 'payload_raw',
+    sanitizedCellValue: payload,
+    fieldMapping: payload,
+    rowData,
+    dataset,
+    onFilter,
+    isTimeField: false,
+    isOnTracesPage: false,
+    setIsRowSelected: jest.fn(),
+    // The row parses the value and passes it down
+    jsonValue: tryParseJson(payload),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useDatasetContext as jest.Mock).mockReturnValue({ dataset, isLoading: false, error: null });
+  });
+
+  it('renders a JSON string value as a tree, without the whole-cell value filters', () => {
+    render(<TableCell {...props} />);
+    expect(screen.getByTestId('exploreJsonTree')).toBeInTheDocument();
+    expect(screen.queryByTestId('osdDocTableCellDataField')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterForValue')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterOutValue')).not.toBeInTheDocument();
+  });
+
+  it('renders the plain value, with the value filters, when the row passes no JSON', () => {
+    render(<TableCell {...props} jsonValue={undefined} />);
+    expect(screen.queryByTestId('exploreJsonTree')).not.toBeInTheDocument();
+    expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
+    expect(screen.getByTestId('filterForValue')).toBeInTheDocument();
+  });
+
+  it('filters a leaf on the indexed field that holds the same value', () => {
+    render(<TableCell {...props} />);
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]); // expand `error`
+    // `order_id` maps to a non-filterable field, so only `code` and `detail` get buttons
+    expect(screen.getAllByTestId('jsonTreeLeafFilter')).toHaveLength(2);
+
+    fireEvent.click(screen.getAllByTestId('jsonTreeFilterFor')[1]);
+    expect(onFilter).toHaveBeenLastCalledWith('payload.error.detail', 'upstream timeout', '+');
+    fireEvent.click(screen.getAllByTestId('jsonTreeFilterOut')[0]);
+    expect(onFilter).toHaveBeenLastCalledWith('payload.error.code', 502, '-');
+  });
+
+  it('offers no leaf filter on a date field', () => {
+    const withDate = '{"created_at":"2026-10-10T10:05:00.000Z","status":"ok"}';
+    const dateDataset = {
+      ...dataset,
+      flattenHit: () => ({
+        payload_raw: withDate,
+        'payload.created_at': '2026-10-10T10:05:00.000Z',
+        'payload.status': 'ok',
+      }),
+      fields: {
+        getByName: (name: string) => ({
+          name,
+          type: name === 'payload.created_at' ? 'date' : 'string',
+          filterable: true,
+        }),
+      },
+    };
+    render(
+      <TableCell
+        {...props}
+        dataset={dateDataset}
+        fieldMapping={withDate}
+        sanitizedCellValue={withDate}
+        jsonValue={tryParseJson(withDate)}
+      />
+    );
+    // only `status` gets buttons
+    expect(screen.getAllByTestId('jsonTreeLeafFilter')).toHaveLength(1);
+    fireEvent.click(screen.getByTestId('jsonTreeFilterFor'));
+    expect(onFilter).toHaveBeenLastCalledWith('payload.status', 'ok', '+');
+  });
+
+  it('does not carry tree state to a different value under the same document id', () => {
+    // Streaming PPL numbers its rows from 0 for every query, so two queries' row 0 share an id.
+    const first = render(<TableCell {...props} rowData={{ ...rowData, _id: '0:0' }} />);
+    fireEvent.click(screen.getByTestId('jsonTreeRawToggle'));
+    expect(screen.getByTestId('exploreJsonTreeRaw')).toBeInTheDocument();
+    first.unmount();
+
+    const other = '{"order_id":7}';
+    const second = render(
+      <TableCell
+        {...props}
+        rowData={{ ...rowData, _id: '0:0' }}
+        fieldMapping={other}
+        sanitizedCellValue={other}
+        jsonValue={tryParseJson(other)}
+      />
+    );
+    expect(screen.queryByTestId('exploreJsonTreeRaw')).not.toBeInTheDocument();
+    second.unmount();
+
+    // The same document shown again keeps the choice.
+    render(<TableCell {...props} rowData={{ ...rowData, _id: '0:0' }} />);
+    expect(screen.getByTestId('exploreJsonTreeRaw')).toBeInTheDocument();
+  });
+
+  describe('time column', () => {
+    const timeProps: ITableCellProps = {
+      ...props,
+      columnId: '@timestamp',
+      isTimeField: true,
+      fieldMapping: '2026-10-10T10:05:00.000Z',
+      sanitizedCellValue: 'Oct 10, 2026 @ 10:05:00',
+      jsonValue: undefined,
+    };
+
+    it('keeps the formatted value on one line by default', () => {
+      render(<TableCell {...timeProps} />);
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        'Oct 10, 2026 @ 10:05:00'
+      );
+    });
+
+    it('shows the date and the time on separate lines when asked to split', () => {
+      render(<TableCell {...timeProps} splitDateTime />);
+      const spans = screen.getByTestId('osdDocTableCellDataField').querySelectorAll('span');
+      expect(Array.from(spans).map((span) => span.textContent)).toEqual([
+        'Oct 10, 2026',
+        '10:05:00',
+      ]);
+    });
+
+    it('splits the list pattern when the row used one, so the time keeps its precision', () => {
+      render(
+        <TableCell
+          {...timeProps}
+          fieldMapping="2026-10-10T10:05:00.123Z"
+          splitDateTime
+          listTimePattern="MMM D, YYYY @ HH:mm:ss"
+        />
+      );
+      const spans = screen.getByTestId('osdDocTableCellDataField').querySelectorAll('span');
+      expect(Array.from(spans).map((span) => span.textContent)).toEqual([
+        'Oct 10, 2026',
+        moment('2026-10-10T10:05:00.123Z').format('HH:mm:ss'),
+      ]);
+    });
+
+    it('falls back to one line when the value cannot be split', () => {
+      render(<TableCell {...timeProps} splitDateTime fieldMapping={['a', 'b']} />);
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        'Oct 10, 2026 @ 10:05:00'
+      );
+    });
+  });
+});

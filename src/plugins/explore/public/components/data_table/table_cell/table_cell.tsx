@@ -5,7 +5,7 @@
 
 import './table_cell.scss';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
@@ -21,6 +21,16 @@ import {
   isDurationColumn,
 } from './trace_utils/trace_utils';
 import { LogActionMenu } from '../../log_action_menu';
+import { JsonTree, GetLeafFilter } from './json_tree/json_tree';
+import {
+  JsonContainer,
+  canFilterLeafOn,
+  extractHighlightTerms,
+  findFieldForLeaf,
+} from './json_tree/json_utils';
+import { jsonTreeStateKey } from './json_tree/json_tree_state';
+import { mergeHighlightTerms, useQueryHighlightTerms } from './json_tree/query_highlight_terms';
+import { formatDateAndTime, formatListDateAndTime } from './split_date_time';
 
 export interface ITableCellProps {
   /**
@@ -46,6 +56,16 @@ export interface ITableCellProps {
   isOnTracesPage: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
   wrapCellText?: boolean;
+  // Set on the time column of a row that shows a JSON tree: the row is several lines tall
+  // anyway, so the date and the time go on separate lines to keep the column narrow.
+  splitDateTime?: boolean;
+  // The list pattern the row used for the time column (seconds, no fractional part), when it
+  // used one. A split time column then splits this pattern, so it shows the same precision as
+  // the rows that are not split.
+  listTimePattern?: string;
+  // The parsed value when this cell shows a JSON tree. The row works it out once for all its
+  // cells (see `getJsonTreeValues` in table_row_content.tsx), since it also needs it for `splitDateTime`.
+  jsonValue?: JsonContainer;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -62,12 +82,65 @@ export const TableCellUI = ({
   isOnTracesPage,
   setIsRowSelected,
   wrapCellText,
+  splitDateTime,
+  listTimePattern,
   fitContent,
+  jsonValue: parsedJson,
 }: ITableCellProps) => {
   const { dataset: contextDataset } = useDatasetContext();
   // Prefer the explicitly-passed dataset; fall back to context for callers that
   // don't supply it.
   const dataset = datasetProp ?? contextDataset;
+
+  // Despite its name, the `fieldMapping` prop is the raw (unformatted) value of this cell:
+  // callers pass `flattened[columnId]`. `sanitizedCellValue` is the same value formatted as HTML.
+  const rawValue: unknown = fieldMapping;
+
+  // A string value that holds a JSON object or array (`parsedJson`, set by the row) is rendered
+  // as a collapsible tree instead of one long string, regardless of the wrap setting.
+
+  // Highlight what was searched for in the tree: the matches marked in the formatted value
+  // (DSL results) plus the string literals of the query (PPL/SQL results carry no highlights).
+  const queryTerms = useQueryHighlightTerms();
+  const highlightTerms = useMemo(
+    () =>
+      parsedJson
+        ? mergeHighlightTerms(extractHighlightTerms(sanitizedCellValue), queryTerms)
+        : undefined,
+    [parsedJson, sanitizedCellValue, queryTerms]
+  );
+
+  // Lets the tree remember what was expanded when the row is re-mounted (e.g. paging back).
+  // Rows without a document id (e.g. aggregated PPL results) get no key and keep their state
+  // only while mounted. The key includes a fingerprint of the value, see `jsonTreeStateKey`.
+  const jsonStateKey = useMemo(
+    () =>
+      parsedJson ? jsonTreeStateKey('cell', rowData, columnId, rawValue as string) : undefined,
+    [parsedJson, rowData, columnId, rawValue]
+  );
+
+  // A leaf of the JSON can be filtered on when the same data is also indexed as a real,
+  // filterable field of this document (e.g. the output of an ingest `json` processor), unless
+  // that field is a date (see `canFilterLeafOn`).
+  const getLeafFilter = useMemo<GetLeafFilter | undefined>(() => {
+    if (!parsedJson || !onFilter || !rowData || !dataset) return undefined;
+    const flattened = dataset.flattenHit(rowData);
+    return (path, value) => {
+      const fieldName = findFieldForLeaf(flattened, columnId, path, value);
+      if (!fieldName || !canFilterLeafOn(dataset.fields.getByName(fieldName))) return undefined;
+      return (mode) => onFilter(fieldName, value, mode);
+    };
+  }, [parsedJson, onFilter, rowData, dataset, columnId]);
+
+  // When the row is already several lines tall (`splitDateTime`), show the date and the time of
+  // the time column on separate lines. Both are formatted from the raw value, with the list
+  // pattern when the row used one and otherwise with the field's own formatter.
+  const dateAndTime = useMemo(() => {
+    if (!splitDateTime || !isTimeField || isOnTracesPage || !dataset) return undefined;
+    if (listTimePattern) return formatListDateAndTime(rawValue, listTimePattern);
+    const field = dataset.fields.getByName(columnId);
+    return field ? formatDateAndTime(dataset.getFormatterForField(field), rawValue) : undefined;
+  }, [splitDateTime, listTimePattern, isTimeField, isOnTracesPage, dataset, columnId, rawValue]);
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
@@ -83,6 +156,23 @@ export const TableCellUI = ({
       />
     ) : isOnTracesPage && isDurationColumn(columnId) ? (
       <DurationTableCell sanitizedCellValue={sanitizedCellValue} />
+    ) : parsedJson ? (
+      <JsonTree
+        value={parsedJson}
+        // `parsedJson` is only set for string values
+        rawText={rawValue as string}
+        getLeafFilter={getLeafFilter}
+        stateKey={jsonStateKey}
+        highlightTerms={highlightTerms}
+      />
+    ) : dateAndTime ? (
+      <span
+        className="exploreDocTableCell__dataField exploreDocTableCell__dateTime"
+        data-test-subj="osdDocTableCellDataField"
+      >
+        <span>{dateAndTime[0]}</span>
+        <span>{dateAndTime[1]}</span>
+      </span>
     ) : (
       <span
         className="exploreDocTableCell__dataField"
@@ -95,7 +185,12 @@ export const TableCellUI = ({
   const content = (
     <>
       {dataFieldContent}
-      <span className="exploreDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
+      <span
+        className={`exploreDocTableCell__filter${
+          parsedJson ? ' exploreDocTableCell__filter--top' : ''
+        }`}
+        data-test-subj="osdDocTableCellFilter"
+      >
         {/* Add AI icon before filter buttons - show for all cells except _source */}
         {rowData?._source && columnId !== '_source' && (
           <LogActionMenu
@@ -110,8 +205,10 @@ export const TableCellUI = ({
         {/* No value filters on time/date fields. Exact-equality on a high-precision
             timestamp is both misleading (the raw UTC value differs from the
             timezone-formatted display) and effectively never matches, so time
-            filtering is owned by the time picker. */}
-        {!disableValueFilter && (
+            filtering is owned by the time picker. Also none on a JSON tree: its leaves
+            carry their own filter buttons, and matching the whole JSON string is rarely
+            what is wanted. */}
+        {!disableValueFilter && !parsedJson && (
           <>
             <EuiToolTip
               content={i18n.translate('explore.filterForValue', {
@@ -155,7 +252,7 @@ export const TableCellUI = ({
     <td
       data-test-subj="docTableField"
       className={`exploreDocTableCell ${
-        isTimeField ? 'eui-textNoWrap' : wrapCellText ? '' : 'eui-textTruncate'
+        isTimeField ? 'eui-textNoWrap' : wrapCellText || parsedJson ? '' : 'eui-textTruncate'
       }${fitContent ? ' exploreDocTableCell--fitContent' : ''}`}
     >
       <div className="exploreDocTableCell__content">{content}</div>
