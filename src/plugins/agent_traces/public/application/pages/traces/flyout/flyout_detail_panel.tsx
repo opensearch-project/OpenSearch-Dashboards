@@ -30,7 +30,11 @@ import {
   copyTextFor,
   toDisplayMessages,
 } from './message_content_view';
-import { previewSpanInput, previewSpanOutput } from '../hooks/genai_message_preview';
+import {
+  isExecuteToolSpan,
+  spanToolCallArguments,
+  spanToolCallResult,
+} from '../hooks/genai_message_preview';
 import './message_content_view.scss';
 import { GenAiAttributes } from './genai_attributes';
 import { SpanLogsTab } from '../../../../../../explore/public';
@@ -83,13 +87,15 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
 
   const row = selectedTraceRow;
 
-  // Message attributes first; execute_tool spans fall back to gen_ai.tool.call.* (semconv).
-  const ioSection = (value: unknown, toolPreview: string) =>
-    toDisplayMessages(value).length > 0 || !toolPreview
-      ? { value, formattedText: undefined }
-      : { value: toolPreview, formattedText: toolPreview };
-  const ioInput = ioSection(row?.input, row ? previewSpanInput(row) : '');
-  const ioOutput = ioSection(row?.output, row ? previewSpanOutput(row) : '');
+  // execute_tool spans show gen_ai.tool.call.* (their semconv input and output) when present;
+  // other spans show their message attributes, falling back to the tool values.
+  const preferTool = !!row && isExecuteToolSpan(row);
+  const ioSection = (value: unknown, toolValue: string) =>
+    toolValue && (preferTool || toDisplayMessages(value).length === 0)
+      ? { value: toolValue, formattedText: toolValue }
+      : { value, formattedText: undefined };
+  const ioInput = ioSection(row?.input, row ? spanToolCallArguments(row) : '');
+  const ioOutput = ioSection(row?.output, row ? spanToolCallResult(row) : '');
 
   return (
     <EuiPanel

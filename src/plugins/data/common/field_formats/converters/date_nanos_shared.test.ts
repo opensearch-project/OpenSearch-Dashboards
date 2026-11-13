@@ -78,6 +78,22 @@ describe('Date Nanos Format', () => {
         pattern: 'SSSSSSSSS',
         expected: '201900001',
       },
+      {
+        // A numeric offset instead of "Z" must not leak into the fraction.
+        input: '2026-11-09T20:13:07.227+00:00',
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        expected: 'Nov 9, 2026 @ 20:13:07.227000000',
+      },
+      {
+        input: '2026-11-09T20:13:07.227001234-05:00',
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        expected: 'Nov 10, 2026 @ 01:13:07.227001234',
+      },
+      {
+        input: '2026-11-09T20:13:07+02:00',
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        expected: 'Nov 9, 2026 @ 18:13:07.000000000',
+      },
     ].forEach((fixture) => {
       const fracPattern = analysePatternForFract(fixture.pattern);
       const momentDate = moment(fixture.input).utc();

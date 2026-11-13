@@ -202,6 +202,8 @@ export function Header({
   const navControlsRight = useObservable(observables.navControlsRight$);
 
   const currentActionMenu = useObservableValue(application.currentActionMenu$);
+  // The screen title the app renders in the action menu, if any.
+  const [screenTitle, setScreenTitle] = useState<string | undefined>(undefined);
 
   const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
   const observableBadge = useObservable(observables.badge$);
@@ -330,6 +332,7 @@ export function Header({
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
       hideTrailingSeparator={hideTrailingSeparator}
+      screenTitle={screenTitle}
     />
   );
 
@@ -521,7 +524,13 @@ export function Header({
 
     return (
       <EuiHeaderSectionItem border="none" className="headerAppActionMenuSection">
-        <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+        <HeaderActionMenu
+          actionMenu$={application.currentActionMenu$}
+          // Only the application header reads the screen title.
+          onScreenTitleChange={
+            useUpdatedHeader && useApplicationHeader ? setScreenTitle : undefined
+          }
+        />
       </EuiHeaderSectionItem>
     );
   };
@@ -706,9 +715,8 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
-          {/* This layout has no page title, so show the current page as the last
-              crumb (plain text) with no separator after it, keeping the
-              updated header's crumb limits. */}
+          {/* No page title in this layout: the current page is the last crumb,
+              unless the app's screen title next to the crumbs already shows it. */}
           <EuiFlexItem grow={false}>{renderBreadcrumbs(true, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>

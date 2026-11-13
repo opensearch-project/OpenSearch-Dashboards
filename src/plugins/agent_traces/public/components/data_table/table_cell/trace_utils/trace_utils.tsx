@@ -35,6 +35,7 @@ import {
   previewSpanOutput,
 } from '../../../../application/pages/traces/hooks/genai_message_preview';
 import { useTraceExpansion } from '../../../../application/pages/traces/trace_expansion_context';
+import { DEFAULT_TRACE_SPAN_INDEX_PATTERN } from '../../../../../../data/common';
 
 export const isOnTracesPage = (): boolean => {
   return window.location.pathname.includes('/agentTraces');
@@ -61,7 +62,7 @@ export const buildTraceDetailsUrl = (
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
   let datasetParams = `dataset:(id:'${dataset?.id || 'default-dataset-id'}',title:'${
-    dataset?.title || 'otel-v1-apm-span-*'
+    dataset?.title || DEFAULT_TRACE_SPAN_INDEX_PATTERN
   }',type:'${dataset?.type || 'INDEX_PATTERN'}'`;
 
   // Add timeFieldName if present
@@ -99,7 +100,7 @@ export const getTraceDetailsUrlParams = (
     ...(traceIdValue && { traceId: traceIdValue }),
     dataset: {
       id: dataset?.id || 'default-dataset-id',
-      title: dataset?.title || 'otel-v1-apm-span-*',
+      title: dataset?.title || DEFAULT_TRACE_SPAN_INDEX_PATTERN,
       type: dataset?.type || 'INDEX_PATTERN',
       timeFieldName: dataset?.timeFieldName || 'timestamp',
       ...(dataSourceInfo && {
@@ -342,7 +343,10 @@ const AgentTracesTokensCell: React.FC<{
   );
 };
 
-/** Time cell that shows the formatted startTime from the TraceRow as a clickable link. */
+/**
+ * Time cell: the row's start time as a clickable link, in the list format (to
+ * the second) when the table provides one. The row itself keeps full precision.
+ */
 export const AgentTracesTimeCell: React.FC<{
   hitId: string;
 }> = ({ hitId }) => {
@@ -364,7 +368,9 @@ export const AgentTracesTimeCell: React.FC<{
         data-test-subj="osdDocTableCellDataField"
       >
         <EuiLink color="primary" onClick={handleClick} data-test-subj="agentTracesTimeLink">
-          {meta.traceRow.startTime}
+          {meta.traceRow.rawStartTime && ctx.formatListTs
+            ? ctx.formatListTs(meta.traceRow.rawStartTime)
+            : meta.traceRow.startTime}
         </EuiLink>
       </span>
     </td>

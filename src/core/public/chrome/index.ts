@@ -58,7 +58,7 @@ export {
 } from './recently_accessed';
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
-export { RightNavigationOrder, HeaderVariant } from './constants';
+export { RightNavigationOrder, HeaderVariant, SCREEN_TITLE_ATTRIBUTE } from './constants';
 export {
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,

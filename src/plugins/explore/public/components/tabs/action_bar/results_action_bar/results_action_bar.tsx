@@ -173,6 +173,7 @@ export const DiscoverResultsActionBar = ({
                         shouldShowMaxExport={shouldShowMaxExport}
                         visibleRowsCount={visibleRowsCount}
                         columnNamesOverride={statisticsColumnNames}
+                        isStreaming={!!streaming?.isPolling}
                       />
                     </EuiFlexItem>
                   )}

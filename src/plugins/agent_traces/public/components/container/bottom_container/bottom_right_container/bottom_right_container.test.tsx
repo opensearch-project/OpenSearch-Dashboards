@@ -76,7 +76,6 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 // Mock query actions to prevent slice import issues
 jest.mock('../../../../application/utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
-  defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
 }));
 
 // Mock useFlavorId hook
@@ -100,18 +99,13 @@ const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('BottomRightContainer', () => {
   const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
-    const queryStatusMap =
-      status === QueryExecutionStatus.LOADING
-        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
-        : {};
-
     return configureStore({
       reducer: {
         legacy: (state = {}) => state,
         ui: (state = {}) => state,
         queryEditor: (
           state = {
-            queryStatusMap,
+            queryStatusMap: {},
             overallQueryStatus: {
               status,
               elapsedMs: undefined,

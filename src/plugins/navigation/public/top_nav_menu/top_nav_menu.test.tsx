@@ -39,6 +39,7 @@ import {
   uiSettingsServiceMock,
   coreMock,
 } from '../../../../core/public/mocks';
+import { SCREEN_TITLE_ATTRIBUTE } from '../../../../core/public';
 import * as testUtils from '../../../data_source_management/public/components/utils';
 import { DataSourceSelectionService } from '../../../data_source_management/public/service/data_source_selection_service';
 
@@ -232,6 +233,37 @@ describe('TopNavMenu', () => {
 
       // menu is rendered outside of the component
       expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
+    });
+
+    describe.each([
+      ['search bar in the portal', TopNavMenuItemRenderType.IN_PORTAL],
+      ['search bar in place', TopNavMenuItemRenderType.IN_PLACE],
+      ['search bar omitted', TopNavMenuItemRenderType.OMITTED],
+    ])('with group actions and the %s', (_name, showSearchBar) => {
+      it('marks the screen title for the application header', async () => {
+        mountWithIntl(
+          <TopNavMenu
+            appName={'test'}
+            config={menuItems}
+            data={dataShim as any}
+            showSearchBar={showSearchBar}
+            groupActions={true}
+            screenTitle="My dashboard"
+            setMenuMountPoint={setMountPoint}
+          />
+        );
+
+        await act(async () => {
+          mountPoint(portalTarget);
+          await new Promise((resolve) => setImmediate(resolve));
+        });
+
+        // The header reads the title from the DOM it is mounted into.
+        const titles = portalTarget.querySelectorAll(`[${SCREEN_TITLE_ATTRIBUTE}]`);
+        expect(titles).toHaveLength(1);
+        expect(titles[0].tagName).toBe('H1');
+        expect(titles[0].textContent).toBe('My dashboard');
+      });
     });
 
     it('mounts the data source menu with group actions enabled', async () => {
