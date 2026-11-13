@@ -42,6 +42,30 @@ const LINE_HEIGHT = 10;
 const MAX_PREVIEW_LINES = Math.floor(PREVIEW_MAX_HEIGHT / LINE_HEIGHT);
 
 /**
+ * Approximate number of content rows/lines that fit in a height-capped
+ * preview (MarkdownBlock or CodeBlock) before the CSS cap clips the rest.
+ * Used to decide whether to show the "more rows available" tip. This is a
+ * cheap row/line count of the source text — not a live DOM measurement — so
+ * it never triggers layout reads or re-renders; the tradeoff is that it
+ * approximates the pixel clip (rows with wrapped/multiline cells take more
+ * vertical space than the count implies), which is acceptable for a hint
+ * that just points at fullscreen. Kept slightly conservative so it prefers
+ * over-hinting (harmless) to hiding rows with no hint.
+ */
+const MAX_PREVIEW_ROWS = 10;
+
+/**
+ * Counts the visible content rows in a markdown string: every non-empty
+ * line, minus GFM table separator rows (e.g. `|---|---|`) which render as a
+ * border rather than a data row. Used only to gate the clip tip.
+ */
+const countMarkdownRows = (markdown: string): number => {
+  const lines = markdown.split('\n').filter((l) => l.trim().length > 0);
+  const separatorRows = lines.filter(isSeparatorRow).length;
+  return lines.length - separatorRows;
+};
+
+/**
  * Result of a wrapper-pattern parse: `matched` is true iff the text matched
  * the wrapper's shape (regardless of whether the captured content parsed as
  * JSON), so callers can distinguish "didn't look like this wrapper" from
@@ -181,11 +205,19 @@ interface ToolResultRendererProps {
  * `overflow: hidden` visual clip (no tokenizer cost to bound, since the
  * markdown renderer has no equivalent perf cliff to EuiCodeBlock's
  * refractor highlighter). The fullscreen button is always available since
- * there's no truncation signal to gate it on.
+ * there's no truncation signal to gate it on. When the source markdown has
+ * more content rows than fit the cap (a cheap row count, not a DOM
+ * measurement), a "more rows available" tip is shown below the preview
+ * pointing the user at the fullscreen control.
  */
 const MarkdownBlock: React.FC<{ markdown: string }> = ({ markdown }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const content = <Markdown markdown={markdown} openLinksInNewTab={true} />;
+
+  // Show the "more rows available" tip when the source has more content rows
+  // than fit in the capped preview. This is a cheap string count computed on
+  // render — no DOM measurement, refs, effects, or ResizeObserver needed.
+  const isClipped = countMarkdownRows(markdown) > MAX_PREVIEW_ROWS;
 
   return (
     <div className="toolResultMarkdown">
@@ -202,6 +234,14 @@ const MarkdownBlock: React.FC<{ markdown: string }> = ({ markdown }) => {
       <div className="toolResultMarkdown__preview" style={{ maxHeight: PREVIEW_MAX_HEIGHT }}>
         {content}
       </div>
+      {isClipped && (
+        <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
+          {i18n.translate('chat.toolResult.markdownClippedNoticeFullscreen', {
+            defaultMessage:
+              'More rows available. Use the fullscreen button above to view the full result.',
+          })}
+        </EuiText>
+      )}
       {isFullScreen && (
         <EuiModal
           onClose={() => setIsFullScreen(false)}
@@ -354,6 +394,11 @@ function renderExtractedText(text: string): JSX.Element {
  * parsed `json` value (parse is skipped, language is forced to `'json'`).
  * Does no shape-guessing beyond JSON detection — it never unwraps `.text`
  * or inspects object keys; all extraction decisions happen upstream.
+ *
+ * Two notices, mutually exclusive: a char-truncation notice (when content
+ * exceeds MAX_DISPLAY_LENGTH and is sliced for perf) and a "more rows
+ * available" tip (when the untruncated content still has more lines than
+ * fit the height cap and is only CSS-clipped). Both point at fullscreen.
  */
 const CodeBlock: React.FC<{
   text?: string;
@@ -390,6 +435,13 @@ const CodeBlock: React.FC<{
         ? linePreview.slice(0, MAX_DISPLAY_LENGTH)
         : linePreview;
   }
+
+  // Even when NOT char-truncated, a block with more lines than fit the height
+  // cap is clipped by CSS with no other signal. Show the same "more rows
+  // available" tip in that case (mutually exclusive with the char-truncation
+  // notice below, which already points at fullscreen). A cheap line count, not
+  // a DOM measurement.
+  const isRowClipped = !isTruncated && formatted.split('\n').length > MAX_PREVIEW_ROWS;
 
   return (
     <div className="toolResultCodeBlock__wrapper">
@@ -437,6 +489,14 @@ const CodeBlock: React.FC<{
             values: {
               truncatedCount: (formatted.length - preview.length).toLocaleString(),
             },
+          })}
+        </EuiText>
+      )}
+      {isRowClipped && (
+        <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
+          {i18n.translate('chat.toolResult.codeBlockClippedNoticeFullscreen', {
+            defaultMessage:
+              'More rows available. Use the fullscreen button above to view the full result.',
           })}
         </EuiText>
       )}
