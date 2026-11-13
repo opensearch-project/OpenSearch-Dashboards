@@ -76,4 +76,28 @@ describe('shortUrlAssertValid()', () => {
       shortUrlAssertValid(url);
     });
   });
+
+  // A browser drops tabs and newlines, so these are protocol-relative or javascript: URLs
+  it.each([
+    ['/\t/evil.com', HOSTNAME_ERROR],
+    ['/\n/evil.com/app/x', HOSTNAME_ERROR],
+    ['java\tscript:alert(1)', PROTOCOL_ERROR],
+    ['\\\\evil.com/app/x', HOSTNAME_ERROR],
+    ['/\\evil.com/app/x', HOSTNAME_ERROR],
+  ])('rejects %j, which a browser reads as another host or scheme', (url, error) => {
+    expect(() => shortUrlAssertValid(url)).toThrow(error);
+  });
+
+  it.each(['//', '///', 'http://h:abc/x', 'http://h:99999/app/x'])(
+    'rejects the unparseable %j with a 406 rather than a 500',
+    (url) => {
+      try {
+        shortUrlAssertValid(url);
+        throw new Error('expected shortUrlAssertValid to throw');
+      } catch (error) {
+        expect(error.isBoom).toBe(true);
+        expect(error.output.statusCode).toBe(406);
+      }
+    }
+  );
 });

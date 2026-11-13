@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { createGzip, constants as zlibConstants } from 'zlib';
 import { PassThrough } from 'stream';
 import stringify from 'json-stable-stringify';
 
@@ -39,6 +39,6 @@ export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } 
   return [
     createMapStream((record) => stringify(record, { space: '  ' })),
     createIntersperseStream(RECORD_SEPARATOR),
-    gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
+    gzip ? createGzip({ level: zlibConstants.Z_BEST_COMPRESSION }) : new PassThrough(),
   ];
 }

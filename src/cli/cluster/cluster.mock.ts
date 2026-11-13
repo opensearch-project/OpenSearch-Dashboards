@@ -76,7 +76,6 @@ class MockClusterFork extends EventEmitter {
 
 export class MockCluster extends EventEmitter {
   fork = jest.fn(() => new MockClusterFork(this));
-  /** @deprecated use setupClusterManager */
-  setupMaster = jest.fn();
+  setupPrimary = jest.fn();
   setupClusterManager = jest.fn();
 }

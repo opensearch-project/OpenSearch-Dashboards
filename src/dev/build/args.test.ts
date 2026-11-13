@@ -355,3 +355,9 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     }
   `);
 });
+
+it('passes --node-dir through as nodeDir', () => {
+  const { buildOptions } = readCliArgs(['node', 'scripts/build', '--node-dir', '/opt/node']);
+  expect(buildOptions).toHaveProperty('nodeDir', '/opt/node');
+  expect(readCliArgs(['node', 'scripts/build']).buildOptions).not.toHaveProperty('nodeDir');
+});

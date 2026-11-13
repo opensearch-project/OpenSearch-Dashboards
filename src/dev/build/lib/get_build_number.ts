@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import os from 'os';
 import execa from 'execa';
 
 export async function getBuildNumber() {
@@ -36,14 +35,8 @@ export async function getBuildNumber() {
     return parseFloat(process.env.BUILD_NUMBER as string);
   }
 
-  if (/^win/.test(os.platform())) {
-    // Windows does not have the wc process and `find /C /V ""` does not consistently work
-    const log = await execa('git', ['log', '--format="%h"']);
-    return log.stdout.split('\n').length;
-  }
-
-  const wc = await execa.command('git log --format="%h" | wc -l', {
-    shell: true,
-  });
-  return parseFloat(wc.stdout.trim());
+  // `rev-list --count` avoids a shell pipeline: spawning with `shell: true` and args is
+  // deprecated (DEP0190), and exit_on_warning turns that into a fatal error.
+  const { stdout } = await execa('git', ['rev-list', '--count', 'HEAD']);
+  return parseFloat(stdout.trim());
 }

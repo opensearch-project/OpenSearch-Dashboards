@@ -30,7 +30,7 @@
 
 import { resolve, relative } from 'path';
 import Fs from 'fs';
-import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { createGunzip, createGzip, constants as zlibConstants } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
 import { ToolingLog } from '@osd/dev-utils';
@@ -84,7 +84,7 @@ export async function editAction({
     archives.map(async (archive) => {
       await createPromiseFromStreams([
         Fs.createReadStream(archive.rawPath),
-        createGzip({ level: Z_BEST_COMPRESSION }),
+        createGzip({ level: zlibConstants.Z_BEST_COMPRESSION }),
         Fs.createWriteStream(archive.path),
       ]);
 

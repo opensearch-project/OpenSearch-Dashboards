@@ -33,11 +33,10 @@ import fn from './quandl';
 import moment from 'moment';
 import fetchMock from 'node-fetch';
 
-const parseURL = require('url').parse;
 const tlConfig = require('./fixtures/tl_config')();
 
 function parseUrlParams(url) {
-  return qs.parse(parseURL(url).query, { sort: false });
+  return qs.parse(new URL(url).search, { sort: false });
 }
 
 jest.mock('node-fetch', () =>

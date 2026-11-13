@@ -204,6 +204,24 @@ describe('SavedObjectsClient', () => {
         ]
       `);
     });
+
+    // Expected paths were produced by the `url.resolve()`-based implementation on Node 22.23.4
+    test.each([
+      ['logstash-*', '/api/saved_objects/dashboard/logstash-*'],
+      ['a b', '/api/saved_objects/dashboard/a%20b'],
+      ["it's", '/api/saved_objects/dashboard/it%27s'],
+      ['a/b?c#d', '/api/saved_objects/dashboard/a%2Fb%3Fc%23d'],
+      ['..', '/api/saved_objects/'],
+      ['.', '/api/saved_objects/dashboard/'],
+      ['%2e%2e', '/api/saved_objects/dashboard/%252e%252e'],
+      ['caf\u00e9', '/api/saved_objects/dashboard/caf%C3%A9'],
+      ['<>"`{}|\\^', '/api/saved_objects/dashboard/%3C%3E%22%60%7B%7D%7C%5C%5E'],
+      ['!*()~-_.', '/api/saved_objects/dashboard/!*()~-_.'],
+      ['id:with:colons', '/api/saved_objects/dashboard/id%3Awith%3Acolons'],
+    ])('requests the same path as before for id %j', async (id, expectedPath) => {
+      await savedObjectsClient.delete('dashboard', id);
+      expect(http.fetch.mock.calls[0][0]).toBe(expectedPath);
+    });
   });
 
   describe('#update', () => {

@@ -90,6 +90,10 @@ export async function runFpm(
     '--license',
     pickLicense(),
 
+    // The bundled Node.js links libatomic, which minimal installs don't always have
+    '--depends',
+    type === 'rpm' ? 'libatomic' : 'libatomic1',
+
     // prevent installing opensearch-dashboards if installing opensearch-dashboards-oss and vice versa
     '--conflicts',
     'opensearch-dashboards',
