@@ -34,7 +34,7 @@ import { shallow } from 'enzyme';
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @osd/eslint/module_migration */
-import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
+import 'monaco-editor/languages/definitions/html/register.js';
 
 // A sample language definition with a few example tokens
 const simpleLogLang: monaco.languages.IMonarchLanguage = {
