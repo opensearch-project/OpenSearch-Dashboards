@@ -105,6 +105,7 @@ export function DocViewTableRowContainer({
       fieldMapping={mapping(field)}
       fieldType={String(fieldType)}
       isTimeField={indexPattern.timeFieldName === field}
+      hasFieldFormat={Boolean(indexPattern.fieldFormatMap?.[field])}
       displayUnderscoreWarning={displayUnderscoreWarning}
       displayNoMappingWarning={displayNoMappingWarning}
       isCollapsed={isCollapsible && isCollapsed}

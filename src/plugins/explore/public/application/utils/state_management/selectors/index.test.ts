@@ -17,6 +17,8 @@ import {
   selectColumns,
   selectSort,
   selectSavedSearch,
+  selectShowJsonFormat,
+  selectExpandAllJson,
 } from './index';
 import { RootState } from '../store';
 
@@ -272,6 +274,27 @@ describe('selectors/index', () => {
       const result2 = selectQueryString(modifiedState);
 
       expect(result1).toBe(result2);
+    });
+  });
+
+  describe('JSON Table settings', () => {
+    it('reads Show as JSON format as on and Expand all as off when the UI state has neither', () => {
+      expect(selectShowJsonFormat(mockState)).toBe(true);
+      expect(selectExpandAllJson(mockState)).toBe(false);
+    });
+
+    it('keeps Show as JSON format off once it is turned off', () => {
+      const state = { ...mockState, ui: { ...mockState.ui, showJsonFormat: false } };
+      expect(selectShowJsonFormat(state)).toBe(false);
+    });
+
+    it('reads both once they are set', () => {
+      const state = {
+        ...mockState,
+        ui: { ...mockState.ui, showJsonFormat: true, expandAllJson: true },
+      };
+      expect(selectShowJsonFormat(state)).toBe(true);
+      expect(selectExpandAllJson(state)).toBe(true);
     });
   });
 });

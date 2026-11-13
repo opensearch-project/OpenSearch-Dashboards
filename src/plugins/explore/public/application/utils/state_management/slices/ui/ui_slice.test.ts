@@ -10,6 +10,8 @@ import {
   setShowHistogram,
   setWrapCellText,
   setHideEmptyFields,
+  setShowJsonFormat,
+  setExpandAllJson,
   UIState,
 } from './ui_slice';
 
@@ -86,6 +88,18 @@ describe('UI Slice', () => {
 
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.wrapCellText).toBe(initialState.wrapCellText);
+    });
+  });
+
+  describe('JSON format settings', () => {
+    it('sets Show as JSON format and Expand all', () => {
+      let state = uiReducer(initialState, setShowJsonFormat(true));
+      expect(state.showJsonFormat).toBe(true);
+      state = uiReducer(state, setExpandAllJson(true));
+      expect(state.expandAllJson).toBe(true);
+      expect(state.wrapCellText).toBe(initialState.wrapCellText);
+      state = uiReducer(state, setShowJsonFormat(false));
+      expect(state.showJsonFormat).toBe(false);
     });
   });
 

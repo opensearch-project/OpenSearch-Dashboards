@@ -6,6 +6,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import DOMPurify from 'dompurify';
 import { DocViewTableRow } from './table_row';
+import { JsonTreeSettingsContext } from '../../../json_tree/json_tree';
 
 jest.mock('dompurify', () => ({
   __esModule: true,
@@ -215,5 +216,105 @@ describe('DocViewTableRow', () => {
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('alert("xss")');
     expect(html).toContain('Safe content');
+  });
+
+  describe('JSON values', () => {
+    const jsonValue = '{"level":"error","code":42}';
+    const renderWithJsonFormatOn = (ui: React.ReactElement) =>
+      render(ui, {
+        wrapper: ({ children }) => (
+          <JsonTreeSettingsContext.Provider value={{ showJsonFormat: true, expandAllJson: false }}>
+            {children}
+          </JsonTreeSettingsContext.Provider>
+        ),
+      });
+
+    it('keeps the formatted value while Show as JSON format is off', () => {
+      render(<DocViewTableRow {...defaultProps} valueRaw={jsonValue} isCollapsible={true} />);
+
+      const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+      expect(valueElement).not.toHaveClass('exploreJsonTree');
+      expect(screen.getByTestId('collapseButton')).toBeInTheDocument();
+    });
+
+    it('renders a JSON string value as a tree under the value test subject', () => {
+      renderWithJsonFormatOn(<DocViewTableRow {...defaultProps} valueRaw={jsonValue} />);
+
+      const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+      expect(valueElement).toHaveClass('exploreJsonTree');
+      expect(screen.getByText('"error"')).toBeInTheDocument();
+      expect(DOMPurify.sanitize).not.toHaveBeenCalled();
+    });
+
+    it('marks the search terms the formatter highlighted', () => {
+      const { container } = renderWithJsonFormatOn(
+        <DocViewTableRow
+          {...defaultProps}
+          valueRaw={jsonValue}
+          value={'{"level":"<mark>error</mark>","code":42}'}
+        />
+      );
+
+      expect(
+        Array.from(container.querySelectorAll('.exploreJsonTree mark'), (m) => m.textContent)
+      ).toEqual(['error']);
+    });
+
+    it('shows the raw value in the raw view', () => {
+      const { container } = renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={jsonValue} />
+      );
+      fireEvent.click(screen.getByText('Show as raw text'));
+      expect(container.querySelector('.exploreJsonTree__raw')?.textContent).toBe(jsonValue);
+    });
+
+    it('starts over when the row gets a new value', () => {
+      const { rerender } = renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={jsonValue} />
+      );
+      fireEvent.click(screen.getByText('Show as raw text'));
+
+      rerender(<DocViewTableRow {...defaultProps} valueRaw='{"level":"warn"}' />);
+
+      expect(screen.getByText('"warn"')).toBeInTheDocument();
+      expect(screen.getByText('Show as raw text')).toBeInTheDocument();
+    });
+
+    it('opens each level of a tree of up to 15 levels by default', () => {
+      const { container } = renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={'{"a":{"b":{"c":1}}}'} />
+      );
+      expect(Array.from(container.querySelectorAll('details'), (d) => d.open)).toEqual([
+        true,
+        true,
+        true,
+      ]);
+    });
+
+    it('hides the height collapse button for a JSON value', () => {
+      renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={jsonValue} isCollapsible={true} />
+      );
+
+      expect(screen.queryByTestId('collapseButton')).not.toBeInTheDocument();
+    });
+
+    it('keeps the formatted value for a value that is not a JSON string', () => {
+      renderWithJsonFormatOn(<DocViewTableRow {...defaultProps} valueRaw={{ level: 'error' }} />);
+
+      const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+      expect(valueElement).not.toHaveClass('exploreJsonTree');
+      expect(valueElement.innerHTML).toBe('<strong>test value</strong>');
+    });
+
+    it('keeps the formatted value for a field with a per-field format', () => {
+      renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={jsonValue} hasFieldFormat={true} />
+      );
+
+      const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+      expect(valueElement).not.toHaveClass('exploreJsonTree');
+      expect(valueElement.innerHTML).toBe('<strong>test value</strong>');
+    });
   });
 });
