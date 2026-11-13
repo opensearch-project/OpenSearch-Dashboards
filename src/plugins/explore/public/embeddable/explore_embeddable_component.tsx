@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
@@ -20,6 +21,48 @@ import { SAMPLE_SIZE_SETTING } from '../../common';
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
+}
+
+interface ChartErrorBoundaryProps {
+  /** A new chart (a new fetch) clears an earlier render error. */
+  chart: unknown;
+  children: React.ReactNode;
+}
+
+/**
+ * Shows a chart that throws while rendering as the panel's request error, so the panel never goes
+ * blank.
+ */
+class ChartErrorBoundary extends React.Component<ChartErrorBoundaryProps, { error?: Error }> {
+  public state: { error?: Error } = {};
+
+  public static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  public componentDidUpdate(prevProps: ChartErrorBoundaryProps) {
+    if (prevProps.chart !== this.props.chart && this.state.error) {
+      this.setState({ error: undefined });
+    }
+  }
+
+  public render() {
+    if (this.state.error) {
+      return (
+        <EuiFlexItem>
+          <VisualizationRequestError
+            error={
+              this.state.error.message ||
+              i18n.translate('explore.embeddable.chartRenderErrorMessage', {
+                defaultMessage: 'The chart could not be displayed.',
+              })
+            }
+          />
+        </EuiFlexItem>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddableProps) => {
@@ -126,7 +169,11 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
     }
 
     if (searchProps.chartRender) {
-      return searchProps.chartRender();
+      return (
+        <ChartErrorBoundary chart={searchProps.chartRender}>
+          {searchProps.chartRender()}
+        </ChartErrorBoundary>
+      );
     }
 
     return null;

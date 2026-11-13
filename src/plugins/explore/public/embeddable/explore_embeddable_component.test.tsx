@@ -169,6 +169,53 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
   });
 
+  test('shows a chart that throws while rendering as the request error, not a blank panel', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const ThrowingChart = () => {
+      throw new Error('Fake chart failed');
+    };
+    render(
+      <ExploreEmbeddableComponent
+        searchProps={{
+          ...mockSearchProps,
+          activeTab: 'explore_visualization_tab',
+          chartType: 'line',
+          chartRender: () => <ThrowingChart />,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('mockRequestError')).toHaveTextContent('Fake chart failed');
+    consoleError.mockRestore();
+  });
+
+  test('clears a chart render error when a new chart arrives', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const ThrowingChart = () => {
+      throw new Error('Fake chart failed');
+    };
+    const props: SearchProps = {
+      ...mockSearchProps,
+      activeTab: 'explore_visualization_tab',
+      chartType: 'line',
+    };
+    const { rerender } = render(
+      <ExploreEmbeddableComponent
+        searchProps={{ ...props, chartRender: () => <ThrowingChart /> }}
+      />
+    );
+    expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
+
+    rerender(
+      <ExploreEmbeddableComponent
+        searchProps={{ ...props, chartRender: () => <div data-test-subj="mockChart">Chart</div> }}
+      />
+    );
+    expect(screen.getByTestId('mockChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockRequestError')).not.toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
   test('renders error message when searchProps.error is present', () => {
     const errorProps: SearchProps = {
       ...mockSearchProps,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
 import { createRoot, Root } from 'react-dom/client';
@@ -42,7 +42,11 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  EXPLORE_STATISTICS_TAB_ID,
+  SAMPLE_SIZE_SETTING,
+} from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -650,15 +654,16 @@ export class ExploreEmbeddable
       seriesDisplayNames: dataFrame?.meta?.seriesDisplayNames as Record<string, string>,
     };
 
-    // TODO: Confirm if tab is in visualization but visualization is null, what to display?
-    // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
-    const selectedChartType = visualization.chartType ?? 'line';
-    const vis = visualizationRegistry.getVisualization(selectedChartType);
-    this.searchProps.chartType = selectedChartType;
+    // A search saved without a chart of its own stores no axes (and a chart type such as 'line'
+    // by default). There is nothing to draw, so the panel shows the results as a table.
+    const hasSavedChart = !!visualization.chartType && !isEmpty(visualization.axesMapping);
+    let selectedChartType: ChartType = hasSavedChart ? visualization.chartType : 'table';
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
+    this.searchProps.tableData = undefined;
+    this.searchProps.chartRender = undefined;
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
         visualizationData;
@@ -668,15 +673,20 @@ export class ExploreEmbeddable
         ...(dateColumns ?? []),
         ...(unknownColumns ?? []),
       ];
+      const showAsTable = () => {
+        selectedChartType = 'table';
+        this.searchProps!.tableData = {
+          columns: allColumns,
+          rows: visualizationData.transformedData ?? [],
+        };
+      };
 
       // Check if there's data to visualize
       if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
         if (selectedChartType === 'table') {
-          this.searchProps.tableData = {
-            columns: allColumns,
-            rows: visualizationData.transformedData ?? [],
-          };
+          showAsTable();
         } else {
+          const vis = visualizationRegistry.getVisualization(selectedChartType);
           const savedAxesMapping = visualization.axesMapping ?? {};
           const styleOptions = visualization.params;
 
@@ -709,55 +719,63 @@ export class ExploreEmbeddable
             effectiveAxesMapping,
             allColumns
           );
-          if (!matchedRule) {
+          // The Statistics tab shows its results as a table, so a saved chart that no longer
+          // fits the result columns falls back to that table. On any other tab, the saved chart
+          // is what the panel is for, so it fails visibly.
+          if (!matchedRule && uiState.activeTab !== EXPLORE_STATISTICS_TAB_ID) {
             throw new Error(
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
           }
-          const searchContext = {
-            query: this.input.query,
-            filters: this.input.filters,
-            timeRange: this.input.timeRange,
-          };
+          if (!matchedRule) {
+            showAsTable();
+          } else {
+            const searchContext = {
+              query: this.input.query,
+              filters: this.input.filters,
+              timeRange: this.input.timeRange,
+            };
 
-          if (vis) {
-            styles = mergeStyles(vis.ui.style.defaults, styles);
+            if (vis) {
+              styles = mergeStyles(vis.ui.style.defaults, styles);
+            }
+            this.searchProps.styleOptions = styles;
+
+            const splitField =
+              (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
+            const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
+            const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
+
+            const visConfig: RenderChartConfig = {
+              type: selectedChartType,
+              axesMapping: effectiveAxesMapping,
+              styles: styles || styleOptions,
+              splitField,
+              splitLayout,
+              showSplitLabel,
+            };
+
+            const chartRender = () => (
+              <CommonVisualizationRender
+                // The panel's saved query, not the dashboard's, picks the empty state's samples.
+                query={{ language: query?.language, dataset: query?.dataset }}
+                visualizationData={visualizationData}
+                visConfig={visConfig}
+                showRawTable={false}
+                timeRange={searchContext.timeRange}
+                onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+                crosshairGroup={getCrosshairGroup(
+                  this.input.useSharedCrosshair,
+                  this.parent?.getInput().id
+                )}
+              />
+            );
+            this.searchProps.chartRender = chartRender;
           }
-          this.searchProps.styleOptions = styles;
-
-          const splitField =
-            (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
-          const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
-          const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
-
-          const visConfig: RenderChartConfig = {
-            type: selectedChartType,
-            axesMapping: effectiveAxesMapping,
-            styles: styles || styleOptions,
-            splitField,
-            splitLayout,
-            showSplitLabel,
-          };
-
-          const chartRender = () => (
-            <CommonVisualizationRender
-              // The panel's saved query, not the dashboard's, picks the empty state's samples.
-              query={{ language: query?.language, dataset: query?.dataset }}
-              visualizationData={visualizationData}
-              visConfig={visConfig}
-              showRawTable={false}
-              timeRange={searchContext.timeRange}
-              onSelectTimeRange={this.searchProps?.onSelectTimeRange}
-              crosshairGroup={getCrosshairGroup(
-                this.input.useSharedCrosshair,
-                this.parent?.getInput().id
-              )}
-            />
-          );
-          this.searchProps.chartRender = chartRender;
         }
       }
     }
+    this.searchProps.chartType = selectedChartType;
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
