@@ -109,18 +109,28 @@ export const pplSearchStrategyProvider = (
           const aggFetchSize = await context.core.uiSettings.client.get<number>(
             AGGREGATION_SAMPLE_SIZE_SETTING
           );
-          const aggRequest = { ...request, body: { ...request.body, fetchSize: aggFetchSize } };
+          const aggs: IDataFrameWithAggs['aggs'] = {};
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            aggRequest.body.query = { ...aggRequest.body.query, query: aggQueryString };
-            const rawAggs: any = await pplFacet.describeQuery(context, aggRequest);
+            const iterRequest = {
+              ...request,
+              rawRequest: request.rawRequest ?? request,
+              body: {
+                ...request.body,
+                fetchSize: aggFetchSize,
+                query: { ...request.body.query, query: aggQueryString },
+              },
+            };
+            const rawAggs: any = await pplFacet.describeQuery(context, iterRequest);
             if (!rawAggs.success) continue;
-            (dataFrame as IDataFrameWithAggs).aggs = {};
-            (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
+            aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
               return {
                 key: hit[1],
                 value: hit[0],
               };
             });
+          }
+          if (Object.keys(aggs).length > 0) {
+            (dataFrame as IDataFrameWithAggs).aggs = aggs;
           }
         }
 
