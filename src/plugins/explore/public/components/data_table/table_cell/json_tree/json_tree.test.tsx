@@ -366,6 +366,22 @@ describe('JsonTree state store bounds', () => {
   });
 });
 
+describe('JsonTree stateKey changes', () => {
+  const value = { user: { name: 'Ada' } };
+
+  it('applies a click to the new key when a mounted tree is given another key', () => {
+    // Both keys are untouched, so both read the same default state object.
+    const { rerender } = render(<JsonTree value={value} rawText="" stateKey="row0/query1" />);
+    rerender(<JsonTree value={value} rawText="" stateKey="row0/query2" />);
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]);
+    expect(screen.getByText('"Ada"')).toBeInTheDocument();
+
+    // The choice belongs to the new key only.
+    rerender(<JsonTree value={value} rawText="" stateKey="row0/query1" />);
+    expect(screen.queryByText('"Ada"')).not.toBeInTheDocument();
+  });
+});
+
 describe('JsonTree long integers', () => {
   const raw = '{"trace_id":1234567890123456789,"n":5}';
 

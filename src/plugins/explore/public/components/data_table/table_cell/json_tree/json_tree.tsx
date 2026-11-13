@@ -477,9 +477,11 @@ export const JsonTree = ({
       activeNodeId,
       setActiveNodeId,
     }),
-    // `version` is listed because it changes what isExpandAllJsonTrees() returns
+    // `version` is listed because it changes what isExpandAllJsonTrees() returns. `stateKey` is
+    // listed because `update` writes to it: untouched trees share one default state object, so a
+    // new key does not always change `state`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getLeafFilter, highlightTerms, state, version, activeNodeId]
+    [getLeafFilter, highlightTerms, state, stateKey, version, activeNodeId]
   );
 
   // Keyboard navigation of the ARIA tree pattern
