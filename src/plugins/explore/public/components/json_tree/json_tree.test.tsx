@@ -32,11 +32,12 @@ const summaryFor = (container: HTMLElement, key: string) =>
   ) as HTMLElement;
 
 // An object nested `levels` deep, the root as level 1, where key `levelN` holds the branch at
-// level N and `bottom` sits in the deepest one.
+// level N and `bottom` sits in the deepest one. Built as text, since JSON.stringify recurses once
+// per level and can overflow a small call stack.
 const chain = (levels: number) => {
-  let value: Record<string, unknown> = { bottom: 'deep' };
-  for (let level = levels; level > 1; level--) value = { [`level${level}`]: value };
-  return JSON.stringify(value);
+  let raw = '{"bottom":"deep"}';
+  for (let level = levels; level > 1; level--) raw = `{"level${level}":${raw}}`;
+  return raw;
 };
 
 describe('parseJsonObjectOrArray', () => {
