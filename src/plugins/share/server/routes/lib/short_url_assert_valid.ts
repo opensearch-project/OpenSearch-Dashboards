@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { parseUrl as parse } from '@osd/std';
+import { parseLegacyUrl as parse } from '@osd/std';
 import { trim } from 'lodash';
 import Boom from '@hapi/boom';
 import { WORKSPACE_PATH_PREFIX } from '../../../../../core/server';

@@ -626,7 +626,7 @@ module.exports = defineConfig([
               name,
               importNames: ['parse', 'resolve'],
               message:
-                'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseUrl from @osd/std or the WHATWG URL API.',
+                'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseLegacyUrl from @osd/std or the WHATWG URL API.',
             })),
           ],
         },
@@ -670,7 +670,7 @@ module.exports = defineConfig([
           object: 'url',
           property,
           message:
-            'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseUrl from @osd/std or the WHATWG URL API.',
+            'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseLegacyUrl from @osd/std or the WHATWG URL API.',
         })),
         {
           object: 'lodash',

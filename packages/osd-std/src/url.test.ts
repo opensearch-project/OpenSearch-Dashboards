@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { modifyUrl, isRelativeUrl, getUrlOrigin, parseUrl } from './url';
+import { modifyUrl, isRelativeUrl, getUrlOrigin, parseLegacyUrl } from './url';
 import legacyUrlParse from './__fixtures__/legacy_url_parse.json';
 
 describe('modifyUrl()', () => {
@@ -130,7 +130,7 @@ describe('getOrigin', () => {
   });
 });
 
-describe('parseUrl', () => {
+describe('parseLegacyUrl', () => {
   // `__fixtures__/legacy_url_parse.json` holds Node's deprecated `url.parse()` output, captured
   // on Node 22.23.4, for every input below in the three ways OSD called it. Rows are
   // `[input, mode, fieldsThatAreNotNull]`; a mode is only stored when it differs from `default`.
@@ -142,7 +142,7 @@ describe('parseUrl', () => {
   const ALL = Object.keys(MODES);
   const HOST_CHECKS = ['slashesDenoteHost'];
 
-  // Every input/mode where `parseUrl` deliberately differs from `url.parse()`; each one has
+  // Every input/mode where `parseLegacyUrl` deliberately differs from `url.parse()`; each one has
   // its own test under "differs from url.parse()".
   const DIFFERENCES: Record<string, string[]> = {
     '//': HOST_CHECKS,
@@ -183,7 +183,7 @@ describe('parseUrl', () => {
   );
 
   it.each(sameAsLegacy)('matches url.parse() for %s (%s)', (_, mode, input, expected) => {
-    expect(nonNull(parseUrl(input, ...MODES[mode]) as any)).toEqual(expected);
+    expect(nonNull(parseLegacyUrl(input, ...MODES[mode]) as any)).toEqual(expected);
   });
 
   it('documents differences only for inputs in the fixture', () => {
@@ -192,47 +192,53 @@ describe('parseUrl', () => {
 
   it('percent-encodes the path, query and hash as url.parse() did', () => {
     // State URLs are matched and rewritten in their encoded form, so `'` must stay `%27`
-    expect(parseUrl("http://h/x#/view?q='a'").hash).toBe('#/view?q=%27a%27');
+    expect(parseLegacyUrl("http://h/x#/view?q='a'").hash).toBe('#/view?q=%27a%27');
     expect(
-      parseUrl("/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))")
-        .hash
+      parseLegacyUrl(
+        "/app/discover#/?_a=(query:(language:kuery,query:'a b'))&_g=(time:(from:now-1h))"
+      ).hash
     ).toBe('#/?_a=(query:(language:kuery,query:%27a%20b%27))&_g=(time:(from:now-1h))');
-    expect(parseUrl('http://h/a|b^c`d{e}?x="y"').path).toBe('/a%7Cb%5Ec%60d%7Be%7D?x=%22y%22');
+    expect(parseLegacyUrl('http://h/a|b^c`d{e}?x="y"').path).toBe(
+      '/a%7Cb%5Ec%60d%7Be%7D?x=%22y%22'
+    );
     // A plain path and query with no whitespace is returned as written, like url.parse()
-    expect(parseUrl('/app/<script>?x="y"').path).toBe('/app/<script>?x="y"');
-    expect(parseUrl('/app/caf\u00e9').pathname).toBe('/app/caf\u00e9');
-    expect(parseUrl('/app/x?q=a b').search).toBe('?q=a%20b');
+    expect(parseLegacyUrl('/app/<script>?x="y"').path).toBe('/app/<script>?x="y"');
+    expect(parseLegacyUrl('/app/caf\u00e9').pathname).toBe('/app/caf\u00e9');
+    expect(parseLegacyUrl('/app/x?q=a b').search).toBe('?q=a%20b');
   });
 
   it('keeps dot segments, as url.parse() did', () => {
-    expect(parseUrl('http://h/a/../b').pathname).toBe('/a/../b');
-    expect(parseUrl('/a/./b/../c').pathname).toBe('/a/./b/../c');
-    expect(parseUrl('%2e%2e/foo').pathname).toBe('%2e%2e/foo');
+    expect(parseLegacyUrl('http://h/a/../b').pathname).toBe('/a/../b');
+    expect(parseLegacyUrl('/a/./b/../c').pathname).toBe('/a/./b/../c');
+    expect(parseLegacyUrl('%2e%2e/foo').pathname).toBe('%2e%2e/foo');
   });
 
   it('percent-encodes tabs and newlines without slashesDenoteHost, as url.parse() did', () => {
-    expect(parseUrl('/\t/evil.com')).toMatchObject({ hostname: null, pathname: '/%09/evil.com' });
-    expect(parseUrl('/app/x\ny').pathname).toBe('/app/x%0Ay');
+    expect(parseLegacyUrl('/\t/evil.com')).toMatchObject({
+      hostname: null,
+      pathname: '/%09/evil.com',
+    });
+    expect(parseLegacyUrl('/app/x\ny').pathname).toBe('/app/x%0Ay');
   });
 
   describe('differs from url.parse()', () => {
     it('gives non-hierarchical URLs no host', () => {
-      expect(parseUrl('mailto:a@b.com')).toMatchObject({
+      expect(parseLegacyUrl('mailto:a@b.com')).toMatchObject({
         protocol: 'mailto:',
         auth: null,
         hostname: null,
         pathname: 'a@b.com',
       });
-      expect(parseUrl('data:text/html,<b>x</b>')).toMatchObject({
+      expect(parseLegacyUrl('data:text/html,<b>x</b>')).toMatchObject({
         hostname: null,
         pathname: 'text/html,%3Cb%3Ex%3C/b%3E',
       });
-      expect(parseUrl('localhost:5601/app')).toMatchObject({
+      expect(parseLegacyUrl('localhost:5601/app')).toMatchObject({
         protocol: 'localhost:',
         hostname: null,
         pathname: '5601/app',
       });
-      expect(parseUrl('HTTP:/Evil.com/A?B#C')).toMatchObject({
+      expect(parseLegacyUrl('HTTP:/Evil.com/A?B#C')).toMatchObject({
         protocol: 'http:',
         hostname: null,
         pathname: '/Evil.com/A',
@@ -240,8 +246,8 @@ describe('parseUrl', () => {
     });
 
     it('throws for an invalid port instead of reinterpreting it', () => {
-      expect(() => parseUrl('http://h:abc/x')).toThrow('Invalid URL');
-      expect(() => parseUrl('http://h:99999/x')).toThrow('Invalid URL');
+      expect(() => parseLegacyUrl('http://h:abc/x')).toThrow('Invalid URL');
+      expect(() => parseLegacyUrl('http://h:99999/x')).toThrow('Invalid URL');
     });
 
     it('reads hosts the way browsers do when slashesDenoteHost is set', () => {
@@ -256,32 +262,86 @@ describe('parseUrl', () => {
         '////evil.com',
         '/\t/evil.com',
       ]) {
-        expect(parseUrl(input, false, true)).toMatchObject({
+        expect(parseLegacyUrl(input, false, true)).toMatchObject({
           protocol: null,
           hostname: 'evil.com',
         });
       }
-      expect(parseUrl('java\tscript:alert(1)', false, true).protocol).toBe('javascript:'); // eslint-disable-line no-script-url
-      expect(parseUrl('/app/x\ty', false, true).pathname).toBe('/app/xy');
-      expect(parseUrl('/app/x\ny', false, true).pathname).toBe('/app/xy');
-      expect(() => parseUrl('//', false, true)).toThrow('Invalid URL');
-      expect(() => parseUrl('///', false, true)).toThrow('Invalid URL');
+      expect(parseLegacyUrl('java\tscript:alert(1)', false, true).protocol).toBe('javascript:'); // eslint-disable-line no-script-url
+      expect(parseLegacyUrl('/app/x\ty', false, true).pathname).toBe('/app/xy');
+      expect(parseLegacyUrl('/app/x\ny', false, true).pathname).toBe('/app/xy');
+      expect(() => parseLegacyUrl('//', false, true)).toThrow('Invalid URL');
+      expect(() => parseLegacyUrl('///', false, true)).toThrow('Invalid URL');
     });
   });
 
   it('keeps an explicit default port', () => {
-    expect(parseUrl('http://localhost:80/x')).toMatchObject({ host: 'localhost:80', port: '80' });
-    expect(parseUrl('https://[::1]:443/x')).toMatchObject({ hostname: '::1', port: '443' });
+    expect(parseLegacyUrl('http://localhost:80/x')).toMatchObject({
+      host: 'localhost:80',
+      port: '80',
+    });
+    expect(parseLegacyUrl('https://[::1]:443/x')).toMatchObject({ hostname: '::1', port: '443' });
+  });
+
+  // Each of these was a difference from url.parse() that the generated-URL comparison in
+  // url_fuzz.test.ts found
+  it('reads //user@host as a host without a scheme, as url.parse() did', () => {
+    expect(parseLegacyUrl('//user@evil.com/x')).toMatchObject({
+      auth: 'user',
+      hostname: 'evil.com',
+      pathname: '/x',
+    });
+    expect(parseLegacyUrl('//evil.com/x').hostname).toBe(null);
+  });
+
+  it('keeps an empty password, as url.parse() did', () => {
+    expect(parseLegacyUrl('http://user:@h/x')).toMatchObject({
+      auth: 'user:',
+      href: 'http://user:@h/x',
+    });
+  });
+
+  it('gives an IPv6 host a / path before the query, as url.parse() did', () => {
+    expect(parseLegacyUrl('//[::1]:80?x', false, true)).toMatchObject({
+      pathname: '/',
+      path: '/?x',
+    });
+  });
+
+  it('keeps localhost in file: URLs, as url.parse() did', () => {
+    expect(parseLegacyUrl('file://localhost/x').hostname).toBe('localhost');
+  });
+
+  it('returns a plain path with @ in the query as written, as url.parse() did', () => {
+    expect(parseLegacyUrl("/app/it's?a@b").path).toBe("/app/it's?a@b");
+  });
+
+  describe('reads hosts the way browsers do', () => {
+    it('normalizes IPv4 and IPv6 hosts', () => {
+      expect(parseLegacyUrl('http://[::FFFF:127.0.0.1]/x').hostname).toBe('::ffff:7f00:1');
+      expect(parseLegacyUrl('http://0x7f.1/x').hostname).toBe('127.0.0.1');
+    });
+
+    it('rejects a host that ends in a number but is not an IPv4 address', () => {
+      expect(() => parseLegacyUrl('http://example.127/x')).toThrow('Invalid URL');
+    });
+
+    it("keeps characters url.parse() cut the host short at, such as '", () => {
+      expect(parseLegacyUrl("//it's/x", false, true)).toMatchObject({
+        hostname: "it's",
+        pathname: '/x',
+      });
+    });
   });
 
   it('decodes credentials and throws on malformed ones, as url.parse() did', () => {
-    expect(parseUrl('http://user%40corp:p%3Ass@h/x').auth).toBe('user@corp:p:ss');
-    expect(() => parseUrl('http://user:%E0%A4@example.com')).toThrow('URI malformed');
-    expect(() => parseUrl('http://%E0%A4:pass@example.com')).toThrow('URI malformed');
+    expect(parseLegacyUrl('http://user%40corp:p%3Ass@h/x').auth).toBe('user@corp:p:ss');
+    expect(() => parseLegacyUrl('http://user:%E0%A4@example.com')).toThrow('URI malformed');
+    expect(() => parseLegacyUrl('http://%E0%A4:pass@example.com')).toThrow('URI malformed');
   });
 
   it('returns a query object without a prototype', () => {
-    const { query } = parseUrl('/x?__proto__=a&constructor=b', true);
+    const { query } = parseLegacyUrl('/x?__proto__=a&constructor=b', true);
     expect(Object.getPrototypeOf(query)).toBe(null);
     expect(Object.entries(query as object)).toEqual([
       ['__proto__', 'a'],
@@ -290,7 +350,7 @@ describe('parseUrl', () => {
   });
 });
 
-describe('isRelativeUrl() over the parseUrl fixture', () => {
+describe('isRelativeUrl() over the parseLegacyUrl fixture', () => {
   // Inputs `isRelativeUrl()` accepted when it was built on `url.parse()` (Node 22.23.4)
   const RELATIVE_BEFORE = [
     '',

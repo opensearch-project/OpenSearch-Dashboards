@@ -28,10 +28,10 @@
  * under the License.
  */
 
-import { parseUrl as _parseUrl } from '@osd/std';
+import { parseLegacyUrl } from '@osd/std';
 import { History } from 'history';
 
-export const parseUrl = (url: string) => _parseUrl(url, true);
+export const parseUrl = (url: string) => parseLegacyUrl(url, true);
 export const parseUrlHash = (url: string) => {
   const hash = parseUrl(url).hash;
   return hash ? parseUrl(hash.slice(1)) : null;

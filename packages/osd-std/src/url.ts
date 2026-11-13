@@ -58,6 +58,8 @@ const PLACEHOLDER_ORIGIN = 'http://osd-placeholder.invalid';
 const SCHEME_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
 // Same pattern `url.parse()` uses for its fast path: a plain path and query, nothing to escape
 const SIMPLE_PATH_RE = /^(\/\/?(?!\/)[^?\s]*)(\?[^\s]*)?$/;
+// `//user@host` has a host even without a scheme or `slashesDenoteHost`, as with `url.parse()`
+const USER_AT_HOST_RE = /^\/\/[^@/]+@[^@/]+/;
 // Characters `url.parse()` percent-encodes in the path, query and hash
 const AUTO_ESCAPE: Record<string, string> = {
   '\t': '%09',
@@ -107,7 +109,7 @@ const parseQuery = (search: string): ParsedUrlQuery => {
  *
  * @public
  */
-export function parseUrl(
+export function parseLegacyUrl(
   url: string,
   parseQueryString = false,
   slashesDenoteHost = false
@@ -165,8 +167,9 @@ export function parseUrl(
     return result;
   };
 
-  // A plain path with no hash or credentials is returned as written, like `url.parse()`
-  if (!slashesDenoteHost && !input.includes('#') && !input.includes('@')) {
+  // A plain path with no hash, and no `@` before the query, is returned as written, like `url.parse()`
+  const beforeQuery = split === -1 ? input : input.slice(0, split);
+  if (!slashesDenoteHost && !input.includes('#') && !beforeQuery.includes('@')) {
     const simple = SIMPLE_PATH_RE.exec(input);
     if (simple) {
       return finish(input);
@@ -181,14 +184,15 @@ export function parseUrl(
   }
 
   // Only `//authority` (or `scheme://authority`) has a host; `http:evil.com` is a path on the
-  // current host to a browser resolving it inside a page, so like `url.parse()` it gets none
-  if (rest.startsWith('//') && (scheme || slashesDenoteHost)) {
+  // current host to a browser resolving it inside a page, so like `url.parse()` it gets none.
+  // `//user@host` always has one, as with `url.parse()`.
+  if (rest.startsWith('//') && (scheme || slashesDenoteHost || USER_AT_HOST_RE.test(rest))) {
     const authorityEnd = rest.slice(2).search(/[/?#]/);
     let authority = authorityEnd === -1 ? rest.slice(2) : rest.slice(2, authorityEnd + 2);
     rest = authorityEnd === -1 ? '' : rest.slice(authorityEnd + 2);
     result.slashes = true;
 
-    if (!authority && !scheme) {
+    if (!authority && !scheme && slashesDenoteHost) {
       // `///evil.com` is host evil.com to a browser; host checks must see it that way
       const resolved = new URL(`//${rest.replace(/^\/+/, '')}`, PLACEHOLDER_ORIGIN);
       authority = resolved.host;
@@ -200,20 +204,25 @@ export function parseUrl(
       return finish(rest.replace(AUTO_ESCAPE_RE, (char) => AUTO_ESCAPE[char]));
     }
 
-    const parsed = scheme
-      ? new URL(`${result.protocol}//${authority}/`)
-      : new URL(`//${authority}/`, PLACEHOLDER_ORIGIN);
+    // Every scheme's host is read like an http host, as `url.parse()` did; WHATWG would
+    // otherwise drop `localhost` from `file:` URLs and leave other schemes' hosts opaque
+    const parsed = new URL(`http://${authority}/`);
+    const atSign = authority.lastIndexOf('@');
+    const hostPort = authority.slice(atSign + 1);
     // WHATWG drops a default port (`:80` for http); keep it when the input spelled it out
-    const explicitPort = /^(?:\[[^\]]*\]|[^:]*):(\d+)$/.exec(authority.replace(/^.*@/, ''))?.[1];
+    const explicitPort = /^(?:\[[^\]]*\]|[^:]*):(\d+)$/.exec(hostPort)?.[1];
     const port = explicitPort ?? (parsed.port || null);
     result.hostname = parsed.hostname.replace(/^\[(.*)\]$/, '$1');
     result.port = port;
     result.host = `${parsed.hostname}${port ? `:${port}` : ''}`;
-    // Malformed percent-encoding in the credentials throws, as with `url.parse()`
-    if (parsed.username || parsed.password) {
-      result.auth = `${decodeURIComponent(parsed.username)}${
-        parsed.password ? `:${decodeURIComponent(parsed.password)}` : ''
-      }`;
+    // Credentials are decoded as written, so `user:@host` keeps its colon; malformed
+    // percent-encoding throws, as with `url.parse()`
+    if (atSign !== -1) {
+      result.auth = decodeURIComponent(authority.slice(0, atSign).replace(/[\t\n\r]/g, ''));
+    }
+    // `url.parse()` gives an IPv6 host a `/` path even before a query
+    if (parsed.hostname.startsWith('[') && !rest.startsWith('/')) {
+      rest = `/${rest}`;
     }
   }
 
@@ -276,7 +285,7 @@ export function modifyUrl(
   urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void
 ) {
   try {
-    const parsed = parseUrl(url, true) as URLMeaningfulParts;
+    const parsed = parseLegacyUrl(url, true) as URLMeaningfulParts;
 
     // Copy over the most specific version of each property. By default, the parsed url includes several
     // conflicting properties (like path and pathname + search, or search and query) and keeping track
@@ -321,7 +330,11 @@ export function isRelativeUrl(candidatePath: string) {
   try {
     // validate that `candidatePath` is not attempting a redirect to somewhere
     // outside of this OpenSearch Dashboards install
-    const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
+    const all = parseLegacyUrl(
+      candidatePath,
+      false /* parseQueryString */,
+      true /* slashesDenoteHost */
+    );
     const { protocol, hostname, port } = all;
     // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
     // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
@@ -342,7 +355,7 @@ export function isRelativeUrl(candidatePath: string) {
  */
 export function getUrlOrigin(url: string): string | null {
   try {
-    const obj = parseUrl(url);
+    const obj = parseLegacyUrl(url);
     if (!obj.protocol && !obj.hostname) {
       return null;
     }
