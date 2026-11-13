@@ -112,6 +112,30 @@ describe('TableCell JSON and date rendering', () => {
     expect(onFilter).toHaveBeenLastCalledWith('payload.error.code', 502, '-');
   });
 
+  it('does not carry tree state to a different value under the same document id', () => {
+    // Streaming PPL numbers its rows from 0 for every query, so two queries' row 0 share an id.
+    const first = render(<TableCell {...props} rowData={{ ...rowData, _id: '0:0' }} />);
+    fireEvent.click(screen.getByTestId('jsonTreeRawToggle'));
+    expect(screen.getByTestId('exploreJsonTreeRaw')).toBeInTheDocument();
+    first.unmount();
+
+    const other = '{"order_id":7}';
+    const second = render(
+      <TableCell
+        {...props}
+        rowData={{ ...rowData, _id: '0:0' }}
+        fieldMapping={other}
+        sanitizedCellValue={other}
+      />
+    );
+    expect(screen.queryByTestId('exploreJsonTreeRaw')).not.toBeInTheDocument();
+    second.unmount();
+
+    // The same document shown again keeps the choice.
+    render(<TableCell {...props} rowData={{ ...rowData, _id: '0:0' }} />);
+    expect(screen.getByTestId('exploreJsonTreeRaw')).toBeInTheDocument();
+  });
+
   describe('time column', () => {
     const timeProps: ITableCellProps = {
       ...props,
@@ -134,6 +158,22 @@ describe('TableCell JSON and date rendering', () => {
       expect(Array.from(spans).map((span) => span.textContent)).toEqual([
         'Oct 10, 2026',
         '10:05:00',
+      ]);
+    });
+
+    it('splits the list pattern when the row used one, so the time keeps its precision', () => {
+      render(
+        <TableCell
+          {...timeProps}
+          fieldMapping="2026-10-10T10:05:00.123Z"
+          splitDateTime
+          listTimePattern="MMM D, YYYY @ HH:mm:ss"
+        />
+      );
+      const spans = screen.getByTestId('osdDocTableCellDataField').querySelectorAll('span');
+      expect(Array.from(spans).map((span) => span.textContent)).toEqual([
+        'Oct 10, 2026',
+        moment('2026-10-10T10:05:00.123Z').format('HH:mm:ss'),
       ]);
     });
 

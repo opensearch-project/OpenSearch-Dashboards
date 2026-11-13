@@ -7,7 +7,13 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { copyToClipboard } from '@elastic/eui';
 import { JsonTree } from './json_tree';
-import { collapseAllJsonTrees, expandAllJsonTrees } from './json_tree_state';
+import {
+  MAX_TREES,
+  collapseAllJsonTrees,
+  expandAllJsonTrees,
+  updateJsonTreeState,
+} from './json_tree_state';
+import { tryParseJson } from './json_utils';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -298,5 +304,80 @@ describe('JsonTree', () => {
     render(<JsonTree value={[{ sku: 'A1' }]} rawText="" getLeafFilter={getLeafFilter} />);
     fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]); // expand the array item
     expect(getLeafFilter).toHaveBeenCalledWith(['sku'], 'A1');
+  });
+});
+
+describe('JsonTree keys named like Object.prototype members', () => {
+  const value = { constructor: { a: 1, b: 2 }, toString: { c: 3 } };
+
+  it('expands them on click and shows their children', () => {
+    render(<JsonTree value={value} rawText="" stateKey="doc1/payload" />);
+    const toggles = screen.getAllByTestId('jsonTreeToggle');
+    fireEvent.click(toggles[1]); // `constructor`
+    fireEvent.click(toggles[2]); // `toString`
+    expect(screen.getByText('a')).toBeInTheDocument();
+    expect(screen.getByText('b')).toBeInTheDocument();
+    expect(screen.getByText('c')).toBeInTheDocument();
+    expect(screen.queryByTestId('jsonTreeShowMore')).not.toBeInTheDocument();
+  });
+
+  it('expands them on expand all, with and without a stateKey', () => {
+    render(<JsonTree value={value} rawText="" stateKey="doc1/payload" />);
+    render(<JsonTree value={value} rawText="" />);
+    act(() => expandAllJsonTrees());
+    expect(screen.getAllByText('a')).toHaveLength(2);
+    expect(screen.getAllByText('c')).toHaveLength(2);
+  });
+});
+
+describe('JsonTree state store bounds', () => {
+  const value = { user: { name: 'Ada' } };
+
+  it('keeps a click on a mounted tree after many other trees were changed', () => {
+    render(<JsonTree value={value} rawText="" stateKey="mounted" />);
+    // More changed trees than the store keeps: the mounted tree's entry (if any) is evicted.
+    for (let i = 0; i <= MAX_TREES; i++) {
+      updateJsonTreeState(`other${i}`, (s) => s.collapsed.set('x', true));
+    }
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]);
+    expect(screen.getByText('"Ada"')).toBeInTheDocument();
+  });
+
+  it('does not reset trees that are only rendered, and evicts the least recently changed', () => {
+    const first = render(<JsonTree value={value} rawText="" stateKey="kept" />);
+    fireEvent.click(screen.getAllByTestId('jsonTreeToggle')[1]);
+    first.unmount();
+    // Rendering many untouched trees creates no entries, so it cannot push `kept` out.
+    for (let i = 0; i < MAX_TREES + 10; i++) {
+      render(<JsonTree value={value} rawText="" stateKey={`untouched${i}`} />).unmount();
+    }
+    render(<JsonTree value={value} rawText="" stateKey="kept" />).unmount();
+    expect(screen.queryByText('"Ada"')).not.toBeInTheDocument();
+    const again = render(<JsonTree value={value} rawText="" stateKey="kept" />);
+    expect(screen.getByText('"Ada"')).toBeInTheDocument();
+    again.unmount();
+
+    // MAX_TREES newer changes evict `kept`, the oldest one.
+    for (let i = 0; i < MAX_TREES; i++) {
+      updateJsonTreeState(`newer${i}`, (s) => s.collapsed.set('x', true));
+    }
+    render(<JsonTree value={value} rawText="" stateKey="kept" />);
+    expect(screen.queryByText('"Ada"')).not.toBeInTheDocument();
+  });
+});
+
+describe('JsonTree long integers', () => {
+  const raw = '{"trace_id":1234567890123456789,"n":5}';
+
+  it('displays and copies integers beyond 2^53 exactly', () => {
+    const parsed = tryParseJson(raw);
+    if (!parsed) throw new Error('expected JSON');
+    render(<JsonTree value={parsed} rawText={raw} />);
+    expect(screen.getByText('1234567890123456789')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('jsonTreeCopyJson'));
+    expect(copyToClipboard).toHaveBeenCalledWith(
+      '{\n  "trace_id": 1234567890123456789,\n  "n": 5\n}'
+    );
   });
 });

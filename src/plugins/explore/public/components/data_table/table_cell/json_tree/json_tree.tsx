@@ -18,12 +18,15 @@ import React, {
 import { EuiButtonIcon, copyToClipboard } from '@elastic/eui';
 import { escapeRegExp } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { stringify } from '@osd/std';
 import {
   JsonTreeState,
+  createJsonTreeState,
   getJsonTreeState,
   getJsonTreesVersion,
   isExpandAllJsonTrees,
   subscribeJsonTrees,
+  updateJsonTreeState,
 } from './json_tree_state';
 import { JsonContainer, containsTerm, isContainer } from './json_utils';
 
@@ -116,6 +119,8 @@ const Primitive = ({ value }: { value: unknown }) => {
         </span>
       );
     case 'number':
+    // Integers beyond 2^53, kept exact by `tryParseJson`
+    case 'bigint':
       return (
         <span className="exploreJsonTree__number">
           <Highlighted text={String(value)} />
@@ -166,7 +171,8 @@ const LineActions = ({ path, nodeId, value }: LineActionsProps) => {
           size="xs"
           iconType={copied ? 'check' : 'copy'}
           onClick={() => {
-            copyToClipboard(JSON.stringify(value, null, 2));
+            // @osd/std's stringify writes BigInt values back as exact numerals
+            copyToClipboard(stringify(value, null, 2));
             markCopied();
           }}
           aria-label={copyJson}
@@ -437,13 +443,19 @@ export const JsonTree = ({
   const version = useSyncExternalStore(subscribeJsonTrees, getJsonTreesVersion);
   const local = useRef<{ version: number; state: JsonTreeState }>();
   if (!local.current || local.current.version !== version) {
-    local.current = { version, state: { showRaw: false, collapsed: {}, shown: {} } };
+    local.current = { version, state: createJsonTreeState() };
   }
   // The view state lives in the shared store when the tree has a key, so it outlives this
-  // component; otherwise in a ref. Either way it is a plain object that is mutated in place,
-  // so every change is followed by `rerender()`.
+  // component; otherwise in a ref. It is read fresh on every render, and every change goes
+  // through `update`, which looks the state up again (so a change never lands on an evicted
+  // entry) and re-renders.
   const state = stateKey ? getJsonTreeState(stateKey) : local.current.state;
   const [, rerender] = useReducer((count: number) => count + 1, 0);
+  const update = (change: (s: JsonTreeState) => void) => {
+    if (stateKey) updateJsonTreeState(stateKey, change);
+    else if (local.current) change(local.current.state);
+    rerender();
+  };
   const [activeNodeId, setActiveNodeId] = useState('');
 
   const context = useMemo<TreeContextValue>(
@@ -453,19 +465,15 @@ export const JsonTree = ({
       // The user's own toggle wins. Otherwise only the root is open, plus the branches that
       // contain a search match, unless "expand all" is in effect.
       isCollapsed: (nodeId, depth, nodeValue) =>
-        state.collapsed[nodeId] ??
+        state.collapsed.get(nodeId) ??
         (!isExpandAllJsonTrees() && depth > 0 && !containsTerm(nodeValue, highlightTerms)),
       setCollapsed: (nodeId, collapsed) => {
-        state.collapsed[nodeId] = collapsed;
         // Keep a tab stop: the active item is removed when one of its ancestors collapses.
         if (collapsed && isDescendant(activeNodeId, nodeId)) setActiveNodeId(nodeId);
-        rerender();
+        update((s) => s.collapsed.set(nodeId, collapsed));
       },
-      getShown: (nodeId) => state.shown[nodeId] ?? MAX_CHILDREN,
-      showMore: (nodeId, shown) => {
-        state.shown[nodeId] = shown;
-        rerender();
-      },
+      getShown: (nodeId) => state.shown.get(nodeId) ?? MAX_CHILDREN,
+      showMore: (nodeId, shown) => update((s) => s.shown.set(nodeId, shown)),
       activeNodeId,
       setActiveNodeId,
     }),
@@ -521,10 +529,10 @@ export const JsonTree = ({
     next?.focus();
   };
 
-  const setShowRaw = (showRaw: boolean) => {
-    state.showRaw = showRaw;
-    rerender();
-  };
+  const setShowRaw = (showRaw: boolean) =>
+    update((s) => {
+      s.showRaw = showRaw;
+    });
 
   return (
     <div className="exploreJsonTree" data-test-subj="exploreJsonTree">

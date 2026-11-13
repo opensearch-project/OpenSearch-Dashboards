@@ -135,3 +135,22 @@ describe('containsTerm', () => {
     expect(readLater).toBe(false);
   });
 });
+
+describe('long integers', () => {
+  it('parses integers beyond 2^53 as exact BigInt values and leaves the others numbers', () => {
+    expect(tryParseJson('{"id":1234567890123456789,"n":5,"f":1.5}')).toEqual({
+      id: BigInt('1234567890123456789'),
+      n: 5,
+      f: 1.5,
+    });
+  });
+
+  it('matches a BigInt leaf only to a field holding the exact same value', () => {
+    const id = BigInt('1234567890123456789');
+    expect(findFieldForLeaf({ 'payload.id': id }, 'payload', ['id'], id)).toBe('payload.id');
+    // A field parsed without long numerals holds the rounded number: no filter on it.
+    expect(
+      findFieldForLeaf({ 'payload.id': 1234567890123456800 }, 'payload', ['id'], id)
+    ).toBeUndefined();
+  });
+});

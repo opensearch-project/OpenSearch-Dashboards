@@ -9,6 +9,7 @@ import { DocViewTableRow } from './table_row';
 import { DocViewRenderProps } from '../../../../types/doc_views_types';
 import { GetLeafFilter } from '../../../data_table/table_cell/json_tree/json_tree';
 import { findFieldForLeaf } from '../../../data_table/table_cell/json_tree/json_utils';
+import { jsonTreeStateKey } from '../../../data_table/table_cell/json_tree/json_tree_state';
 
 export interface IDocViewTableRowContainer extends DocViewRenderProps {
   field: string;
@@ -100,6 +101,14 @@ export function DocViewTableRowContainer({
       }
     : undefined;
 
+  // Only string values are shown as a tree. The key includes a fingerprint of the value, see
+  // `jsonTreeStateKey`.
+  const jsonStateKey = useMemo(
+    () =>
+      typeof valueRaw === 'string' ? jsonTreeStateKey('doc', hit, field, valueRaw) : undefined,
+    [hit, field, valueRaw]
+  );
+
   const toggleColumn =
     onRemoveColumn && onAddColumn && Array.isArray(columns)
       ? () => {
@@ -130,7 +139,7 @@ export function DocViewTableRowContainer({
       valueRaw={valueRaw}
       getLeafFilter={getLeafFilter}
       // Separate from the data table cell's key: the two views are expanded independently.
-      jsonStateKey={hit._id !== undefined ? `doc/${hit._index}/${hit._id}/${field}` : undefined}
+      jsonStateKey={jsonStateKey}
     />
   );
 }

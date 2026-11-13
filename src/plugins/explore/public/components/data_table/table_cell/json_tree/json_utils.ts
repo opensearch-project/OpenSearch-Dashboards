@@ -8,6 +8,8 @@
  * indexed field, and working out which texts to highlight. No React in here.
  */
 
+import { parse } from '@osd/std';
+
 // Strings longer than this are left as plain text to keep rendering cheap.
 const MAX_JSON_LENGTH = 100000;
 
@@ -29,7 +31,9 @@ export const tryParseJson = (value: unknown): JsonContainer | undefined => {
   // Cheap rejection of the common case (plain text) before attempting to parse.
   if ((first !== '{' && first !== '[') || trimmed.length < 2) return undefined;
   try {
-    const parsed = JSON.parse(trimmed);
+    // @osd/std's parse returns integers beyond 2^53 as BigInt instead of rounding them, so long
+    // ids display, copy and filter exactly. Values without such numbers parse as with JSON.parse.
+    const parsed = parse(trimmed);
     return isContainer(parsed) ? parsed : undefined;
   } catch (e) {
     return undefined;

@@ -24,6 +24,7 @@ import { LogActionMenu } from '../../log_action_menu';
 import { JsonTree, GetLeafFilter } from './json_tree/json_tree';
 import { tryParseJson, findFieldForLeaf, extractHighlightTerms } from './json_tree/json_utils';
 import { useFormatJson } from './json_tree/format_json_setting';
+import { jsonTreeStateKey } from './json_tree/json_tree_state';
 import { mergeHighlightTerms, useQueryHighlightTerms } from './json_tree/query_highlight_terms';
 import { formatDateAndTime, formatListDateAndTime } from './split_date_time';
 
@@ -112,9 +113,12 @@ export const TableCellUI = ({
 
   // Lets the tree remember what was expanded when the row is re-mounted (e.g. paging back).
   // Rows without a document id (e.g. aggregated PPL results) get no key and keep their state
-  // only while mounted.
-  const jsonStateKey =
-    rowData?._id !== undefined ? `${rowData._index}/${rowData._id}/${columnId}` : undefined;
+  // only while mounted. The key includes a fingerprint of the value, see `jsonTreeStateKey`.
+  const jsonStateKey = useMemo(
+    () =>
+      parsedJson ? jsonTreeStateKey('cell', rowData, columnId, rawValue as string) : undefined,
+    [parsedJson, rowData, columnId, rawValue]
+  );
 
   // A leaf of the JSON can be filtered on when the same data is also indexed as a real,
   // filterable field of this document (e.g. the output of an ingest `json` processor).
