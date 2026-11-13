@@ -43,7 +43,9 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private customApiSchemaRegistry = new CustomApiSchemaRegistry();
-  private internalSavedObjects: ISavedObjectsRepository | undefined;
+  private scopedSavedObjectsRepositoryFactory:
+    | ((request: OpenSearchDashboardsRequest) => ISavedObjectsRepository)
+    | undefined;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
     this.logger = this.initializerContext.logger.get();
@@ -150,7 +152,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       this.logger.get('test-connection'),
       endpointDeniedIPs,
       config.endpointAllowlistedSuffixes,
-      () => this.internalSavedObjects
+      (request) => this.scopedSavedObjectsRepositoryFactory?.(request)
     );
     registerFetchDataSourceMetaDataRoute(
       router,
@@ -161,7 +163,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       this.logger.get('fetch-data-source-metadata'),
       endpointDeniedIPs,
       config.endpointAllowlistedSuffixes,
-      () => this.internalSavedObjects
+      (request) => this.scopedSavedObjectsRepositoryFactory?.(request)
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
@@ -183,12 +185,10 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   public start(core: CoreStart) {
     this.logger.debug('dataSource: Started');
     this.started = true;
-    // Create an internal repository that bypasses the credential-stripping SavedObjects wrapper.
-    // Used exclusively by getClient / getLegacyClient to read encrypted credentials after the
-    // scoped client has already confirmed the calling user has access to the data source.
-    this.internalSavedObjects = core.savedObjects.createInternalRepository([
-      DATA_SOURCE_SAVED_OBJECT_TYPE,
-    ]);
+    // Create a request-scoped raw repository that bypasses the credential-stripping SavedObjects
+    // wrapper while preserving the active security tenant.
+    this.scopedSavedObjectsRepositoryFactory = (request) =>
+      core.savedObjects.createScopedRepository(request, [DATA_SOURCE_SAVED_OBJECT_TYPE]);
     // backendCompatibility (when enabled) registers a custom Transport on core's client.
     // Apply the same Transport to modern data-source clients so legacy ES (6.x/7.x)
     // connections get identical request/response interception (e.g. /_resolve/index
@@ -225,7 +225,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
             return dataSourceService.getDataSourceClient({
               dataSourceId,
               savedObjects: context.core.savedObjects.client,
-              internalSavedObjects: this.internalSavedObjects,
+              internalSavedObjects: this.scopedSavedObjectsRepositoryFactory?.(req),
               cryptography,
               customApiSchemaRegistryPromise,
               request: req,
@@ -237,7 +237,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
               return dataSourceService.getDataSourceLegacyClient({
                 dataSourceId,
                 savedObjects: context.core.savedObjects.client,
-                internalSavedObjects: this.internalSavedObjects,
+                internalSavedObjects: this.scopedSavedObjectsRepositoryFactory?.(req),
                 cryptography,
                 customApiSchemaRegistryPromise,
                 request: req,

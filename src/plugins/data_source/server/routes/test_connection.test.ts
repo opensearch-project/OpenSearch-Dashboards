@@ -493,7 +493,9 @@ describe(`Test connection ${URL} — internalSavedObjects forwarding`, () => {
   };
 
   const setupRoute = async (
-    getInternalSavedObjects?: () => ReturnType<typeof savedObjectsRepositoryMock.create> | undefined
+    getInternalSavedObjects?: (
+      request: unknown
+    ) => ReturnType<typeof savedObjectsRepositoryMock.create> | undefined
   ) => {
     ({ server, httpSetup } = await setupServer());
     dataSourceClient = opensearchClientMock.createInternalClient();
@@ -530,7 +532,8 @@ describe(`Test connection ${URL} — internalSavedObjects forwarding`, () => {
 
   it('forwards internalSavedObjects when editing non-credential fields with stored password (username_password reuse flow)', async () => {
     const internalRepo = savedObjectsRepositoryMock.create();
-    await setupRoute(() => internalRepo);
+    const getInternalSavedObjects = jest.fn(() => internalRepo);
+    await setupRoute(getInternalSavedObjects);
 
     await supertest(httpSetup.server.listener)
       .post(URL)
@@ -545,6 +548,7 @@ describe(`Test connection ${URL} — internalSavedObjects forwarding`, () => {
         internalSavedObjects: internalRepo,
       })
     );
+    expect(getInternalSavedObjects).toHaveBeenCalledWith(expect.anything());
   });
 
   it('forwards internalSavedObjects when editing non-credential fields with stored SigV4 keys (sigv4 reuse flow)', async () => {
