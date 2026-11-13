@@ -36,9 +36,10 @@ import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { UI_SETTINGS } from '../../../../common';
 
 interface Props extends PhraseSuggestorProps {
-  value?: string;
+  value?: string | number;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
 }
@@ -65,6 +66,9 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             value={this.props.value}
             onChange={this.props.onChange}
             type={this.props.field ? this.props.field.type : 'string'}
+            dateFormat={this.props.opensearchDashboards.services.uiSettings.get(
+              UI_SETTINGS.DATE_FORMAT
+            )}
           />
         )}
       </EuiCompressedFormRow>

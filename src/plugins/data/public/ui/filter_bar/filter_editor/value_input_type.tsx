@@ -32,9 +32,13 @@ import {
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
   EuiCompressedSelect,
+  EuiDatePicker,
+  EuiPortal,
 } from '@elastic/eui';
+import dateMath from '@elastic/datemath';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
+import moment, { Moment } from 'moment';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
 
@@ -48,9 +52,24 @@ interface Props {
   intl: InjectedIntl;
   controlOnly?: boolean;
   className?: string;
+  dateFormat?: string;
 }
 
-class ValueInputTypeUI extends Component<Props> {
+interface State {
+  isEditingDateInput: boolean;
+}
+
+const DatePickerPortal = ({ children }: { children: React.ReactNode[] }) => (
+  <EuiPortal>
+    <div className="euiDatePicker euiDatePicker--shadow">{children}</div>
+  </EuiPortal>
+);
+
+class ValueInputTypeUI extends Component<Props, State> {
+  public state = {
+    isEditingDateInput: false,
+  };
+
   public render() {
     const value = this.props.value;
     let inputElement: React.ReactNode;
@@ -85,20 +104,27 @@ class ValueInputTypeUI extends Component<Props> {
           />
         );
         break;
-      case 'date':
+      case 'date': {
+        const selectedDate = this.getSelectedDate(value);
         inputElement = (
-          <EuiCompressedFieldText
+          <EuiDatePicker
+            compressed
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={value}
-            onChange={this.onChange}
+            value={this.getDateInputValue(value, selectedDate)}
+            selected={selectedDate}
+            onChange={this.onDatePickerChange}
+            onChangeRaw={this.onDateInputChange}
             onBlur={this.onBlur}
+            showTimeSelect
+            popperContainer={DatePickerPortal}
+            dateFormat={this.props.dateFormat}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
-            controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
         );
         break;
+      }
       case 'ip':
         inputElement = (
           <EuiCompressedFieldText
@@ -167,10 +193,50 @@ class ValueInputTypeUI extends Component<Props> {
     this.props.onChange(params);
   };
 
-  private onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onDateInputChange = (event: React.FocusEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    this.setState({ isEditingDateInput: true });
+    this.props.onChange(event.target.value);
+  };
+
+  private onDatePickerChange = (date: Moment | null) => {
+    if (date) {
+      this.setState({ isEditingDateInput: false });
+      this.props.onChange(date.toISOString());
+    }
+  };
+
+  private getDateInputValue = (value: string | number | undefined, selectedDate?: Moment) => {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+
+    return this.state.isEditingDateInput || value.startsWith('now') || !selectedDate
+      ? value
+      : undefined;
+  };
+
+  private getSelectedDate = (value?: string | number) => {
+    if (typeof value === 'number') {
+      const selectedDate = moment(value);
+      return selectedDate.isValid() ? selectedDate : undefined;
+    }
+
+    if (value) {
+      const selectedDate = dateMath.parse(value);
+      return selectedDate?.isValid() ? selectedDate : undefined;
+    }
+  };
+
+  private onBlur = (event?: React.FocusEvent<HTMLInputElement>) => {
+    const params = this.state.isEditingDateInput
+      ? (event?.target.value ?? this.props.value)
+      : (this.props.value ?? event?.target.value);
+    this.setState({ isEditingDateInput: false });
     if (this.props.onBlur) {
-      const params = event.target.value;
-      this.props.onBlur(params);
+      if (params !== undefined) {
+        this.props.onBlur(params);
+      }
     }
   };
 }
