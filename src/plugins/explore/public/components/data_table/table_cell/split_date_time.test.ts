@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment';
-import { formatDateAndTime, splitDateTimePattern } from './split_date_time';
+import moment from 'moment-timezone';
+import { formatDateAndTime, formatListDateAndTime, splitDateTimePattern } from './split_date_time';
+import { toListTimePattern } from '../list_time_format';
 
 describe('splitDateTimePattern', () => {
   it('splits a date part followed by a time part, dropping the separator', () => {
@@ -73,5 +74,22 @@ describe('formatDateAndTime', () => {
     expect(formatDateAndTime(formatter, null)).toBeUndefined();
     expect(formatDateAndTime(undefined, '2026-10-10')).toBeUndefined();
     expect(formatDateAndTime({}, '2026-10-10')).toBeUndefined();
+  });
+});
+
+describe('formatListDateAndTime', () => {
+  beforeAll(() => moment.tz.setDefault('UTC'));
+  afterAll(() => moment.tz.setDefault());
+
+  it('splits the list pattern, so the time keeps the list precision (no fractional seconds)', () => {
+    expect(formatListDateAndTime('2026-11-11T12:27:30.123Z', toListTimePattern(undefined))).toEqual(
+      ['Nov 11, 2026', '12:27:30']
+    );
+  });
+
+  it('returns undefined for a pattern it cannot split or a value that is not a date', () => {
+    expect(formatListDateAndTime('2026-11-11T12:27:30Z', 'HH:mm DD/MM')).toBeUndefined();
+    expect(formatListDateAndTime('not a date', 'YYYY-MM-DD HH:mm:ss')).toBeUndefined();
+    expect(formatListDateAndTime(null, 'YYYY-MM-DD HH:mm:ss')).toBeUndefined();
   });
 });

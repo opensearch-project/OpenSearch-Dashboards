@@ -13,6 +13,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
 import React, { useMemo, useState } from 'react';
+import { escape } from 'lodash';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableCell } from '../table_cell/table_cell';
 import { EmptyTableCell } from '../table_cell/empty_table_cell';
@@ -22,6 +23,21 @@ import { useFormatJson } from '../table_cell/json_tree/format_json_setting';
 import { tryParseJson } from '../table_cell/json_tree/json_utils';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { isSourceColumn } from '../../../helpers/is_source_column';
+import { formatListTime } from '../list_time_format';
+import { normalizeSeverityText, SEVERITY_TEXT_FIELDS } from '../../../helpers/severity_text';
+
+const DATE_FORMATTER_IDS = new Set(['date', 'date_nanos']);
+
+/** Whether the field's effective formatter is still a date / date_nanos one. */
+const usesDateFormatter = (
+  dataset: IndexPattern | Dataset,
+  fieldInfo: ReturnType<(IndexPattern | Dataset)['fields']['getByName']>
+): boolean => {
+  if (!fieldInfo || typeof dataset.getFormatterForField !== 'function') return false;
+  const formatterId = (dataset.getFormatterForField(fieldInfo)?.type as { id?: string } | undefined)
+    ?.id;
+  return formatterId ? DATE_FORMATTER_IDS.has(formatterId) : false;
+};
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -34,6 +50,12 @@ export interface TableRowContentProps {
   onToggleExpand: () => void;
   isOnTracesPage: boolean;
   wrapCellText?: boolean;
+  /**
+   * Pattern for the time field in the list (seconds, no fractional part).
+   * Without it, or when the time field has its own field format, the field's
+   * formatted value is shown.
+   */
+  timeColumnPattern?: string;
 }
 
 // Helper functions
@@ -72,6 +94,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   onToggleExpand,
   isOnTracesPage,
   wrapCellText,
+  timeColumnPattern,
 }) => {
   const [isRowSelected, setIsRowSelected] = useState(false);
 
@@ -144,7 +167,25 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           );
         }
 
-        const formattedValue = formatFieldValue(dataset, row, colName);
+        // Display-only overrides apply only where the field uses its default
+        // formatter: a per-field format in the index pattern always wins. For the
+        // time field, so does an admin's `format:defaultTypeMap` choice: the list
+        // pattern is used only while the field still formats as date/date_nanos.
+        const hasFieldFormat = Boolean(dataset.fieldFormatMap?.[colName]);
+        const listTime =
+          isTimeField &&
+          timeColumnPattern &&
+          !hasFieldFormat &&
+          usesDateFormatter(dataset, fieldInfo)
+            ? formatListTime(fieldMapping, timeColumnPattern)
+            : undefined;
+        const severityLabel =
+          SEVERITY_TEXT_FIELDS.has(colName) && !hasFieldFormat
+            ? normalizeSeverityText(fieldMapping)
+            : undefined;
+        const formattedValue =
+          listTime ??
+          (severityLabel ? escape(severityLabel) : formatFieldValue(dataset, row, colName));
 
         if (shouldShowEmptyCell(row, formattedValue)) {
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
@@ -189,6 +230,8 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             setIsRowSelected={setIsRowSelected}
             wrapCellText={wrapCellText}
             splitDateTime={isTimeField && hasJsonTree}
+            listTimePattern={listTime ? timeColumnPattern : undefined}
+            fitContent={SEVERITY_TEXT_FIELDS.has(colName)}
           />
         );
       })}

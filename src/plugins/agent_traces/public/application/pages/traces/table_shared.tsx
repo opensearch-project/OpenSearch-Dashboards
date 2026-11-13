@@ -15,7 +15,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import moment from 'moment-timezone';
 import { useTabResults } from '../../utils/hooks/use_tab_results';
 import { useDatasetContext } from '../../context/dataset_context/dataset_context';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -38,7 +37,8 @@ import { getDocViewsRegistry } from '../../legacy/discover/opensearch_dashboards
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useChangeQueryEditor } from '../../hooks';
 import { traceHitToAgentSpan, unflattenSource } from './hooks/span_transforms';
-import { BaseRow, spanToRow, formatTimestamp } from './hooks/tree_utils';
+import { BaseRow, spanToRow } from './hooks/tree_utils';
+import { getTimestampFormatters } from './hooks/timestamp_formatters';
 import { TraceHit } from './trace_details/traces/ppl_to_trace_hits';
 import { selectIsLoading } from '../../utils/state_management/selectors/query_editor/query_editor';
 import { RootState } from '../../utils/state_management/store';
@@ -266,13 +266,12 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
   const sampleSize = uiSettings.get(SAMPLE_SIZE_SETTING);
 
-  const timezone = useMemo(() => {
-    const tz = uiSettings?.get('dateFormat:tz');
-    if (tz && tz !== 'Browser') return tz;
-    return moment.tz.guess() || moment().format('Z');
-  }, [uiSettings]);
-
-  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
+  // Rows keep full precision (the flyout reads them); only the Time column
+  // uses the list format, through the expansion context.
+  const { formatTs, formatListTs } = useMemo(
+    () => getTimestampFormatters(uiSettings),
+    [uiSettings]
+  );
 
   // Initialize columns to defaults on mount if they don't contain any
   // agent traces virtual columns (e.g., first visit or migrating from old EuiTable columns).
@@ -341,6 +340,7 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
     isInitialized,
     traceMetrics,
     formatTs,
+    formatListTs,
     sortOrder,
     handleSortChange,
     displayedColumns,

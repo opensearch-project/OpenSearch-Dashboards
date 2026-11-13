@@ -28,9 +28,12 @@
  * under the License.
  */
 
+import expect from '@osd/expect';
+
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
+  const retry = getService('retry');
 
   describe('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -130,6 +133,31 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardNameEnterKey, 1);
+    });
+
+    it('Save as new with Copy panels shows the copied panels and keeps the source', async function () {
+      const sourceName = 'Dashboard Save Copy Panels Source';
+      const [vizName] = PageObjects.dashboard.getTestVisualizationNames();
+
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.addVisualizations([vizName]);
+      await PageObjects.dashboard.saveDashboard(sourceName);
+
+      await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.dashboard.saveDashboard(sourceName + ' Copy', {
+        saveAsNew: true,
+        copyPanels: true,
+        waitDialogIsClosed: true,
+      });
+      await retry.try(async () => {
+        expect(await PageObjects.dashboard.getPanelTitles()).to.eql([`${vizName} (copy)`]);
+      });
+
+      await PageObjects.dashboard.loadSavedDashboard(sourceName);
+      await retry.try(async () => {
+        expect(await PageObjects.dashboard.getPanelTitles()).to.eql([vizName]);
+      });
     });
   });
 }

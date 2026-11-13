@@ -5,6 +5,7 @@
 
 import {
   formatTimestamp,
+  resolveTimezone,
   setLevels,
   spanToRow,
   buildFullSpanTree,
@@ -41,6 +42,19 @@ describe('tree_utils', () => {
     it('formats UTC timestamp in the given timezone', () => {
       const result = formatTimestamp('2025-01-01 12:00:00', 'America/New_York');
       expect(result).toBe('Jan 1, 2025 @ 07:00:00.000');
+    });
+
+    it('formats with a given pattern', () => {
+      expect(formatTimestamp('2025-01-01 12:00:00.123', 'America/New_York', 'HH:mm:ss')).toBe(
+        '07:00:00'
+      );
+    });
+
+    it('resolves the timezone from dateFormat:tz, else the browser zone', () => {
+      expect(resolveTimezone({ get: () => 'Asia/Tokyo' })).toBe('Asia/Tokyo');
+      const guessed = resolveTimezone({ get: () => 'Browser' });
+      expect(guessed).toBeTruthy();
+      expect(resolveTimezone(undefined)).toBe(guessed);
     });
 
     it('returns dash for empty timestamp', () => {

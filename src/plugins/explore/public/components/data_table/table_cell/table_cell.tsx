@@ -25,9 +25,14 @@ import { JsonTree, GetLeafFilter } from './json_tree/json_tree';
 import { tryParseJson, findFieldForLeaf, extractHighlightTerms } from './json_tree/json_utils';
 import { useFormatJson } from './json_tree/format_json_setting';
 import { mergeHighlightTerms, useQueryHighlightTerms } from './json_tree/query_highlight_terms';
-import { formatDateAndTime } from './split_date_time';
+import { formatDateAndTime, formatListDateAndTime } from './split_date_time';
 
 export interface ITableCellProps {
+  /**
+   * Shrink the column to its content (short categorical values such as a log
+   * severity), so the free width goes to wide columns like the message body.
+   */
+  fitContent?: boolean;
   columnId: string;
   index?: number;
   isTimeField?: boolean;
@@ -49,6 +54,10 @@ export interface ITableCellProps {
   // Set on the time column of a row that shows a JSON tree: the row is several lines tall
   // anyway, so the date and the time go on separate lines to keep the column narrow.
   splitDateTime?: boolean;
+  // The list pattern the row used for the time column (seconds, no fractional part), when it
+  // used one. A split time column then splits this pattern, so it shows the same precision as
+  // the rows that are not split.
+  listTimePattern?: string;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -66,6 +75,8 @@ export const TableCellUI = ({
   setIsRowSelected,
   wrapCellText,
   splitDateTime,
+  listTimePattern,
+  fitContent,
 }: ITableCellProps) => {
   const { dataset: contextDataset } = useDatasetContext();
   // Prefer the explicitly-passed dataset; fall back to context for callers that
@@ -120,13 +131,14 @@ export const TableCellUI = ({
   }, [parsedJson, onFilter, rowData, dataset, columnId]);
 
   // When the row is already several lines tall (`splitDateTime`), show the date and the time of
-  // the time column on separate lines. Both are formatted from the raw value with the field's
-  // own formatter.
+  // the time column on separate lines. Both are formatted from the raw value, with the list
+  // pattern when the row used one and otherwise with the field's own formatter.
   const dateAndTime = useMemo(() => {
     if (!splitDateTime || !isTimeField || isOnTracesPage || !dataset) return undefined;
+    if (listTimePattern) return formatListDateAndTime(rawValue, listTimePattern);
     const field = dataset.fields.getByName(columnId);
     return field ? formatDateAndTime(dataset.getFormatterForField(field), rawValue) : undefined;
-  }, [splitDateTime, isTimeField, isOnTracesPage, dataset, columnId, rawValue]);
+  }, [splitDateTime, listTimePattern, isTimeField, isOnTracesPage, dataset, columnId, rawValue]);
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
@@ -239,7 +251,7 @@ export const TableCellUI = ({
       data-test-subj="docTableField"
       className={`exploreDocTableCell ${
         isTimeField ? 'eui-textNoWrap' : wrapCellText || parsedJson ? '' : 'eui-textTruncate'
-      }`}
+      }${fitContent ? ' exploreDocTableCell--fitContent' : ''}`}
     >
       <div className="exploreDocTableCell__content">{content}</div>
     </td>

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { formatListTime } from '../list_time_format';
+
 // moment tokens that print a part of the time of day (or its offset)
 const TIME_TOKEN = /[HhkmsSaAZzXx]/;
 // Separators left dangling at the end of the date part, e.g. the " @ " of "MMM D, YYYY @ HH:mm"
@@ -38,6 +40,22 @@ export const splitDateTimePattern = (pattern: unknown): [string, string] | undef
     return undefined;
   }
   return [datePattern, timePattern];
+};
+
+/**
+ * Formats a time-field value as separate date and time texts with the list pattern (see
+ * `list_time_format.ts`), split in two. Returns undefined when the pattern cannot be split or
+ * the value is not a valid date.
+ */
+export const formatListDateAndTime = (
+  value: unknown,
+  pattern: string
+): [string, string] | undefined => {
+  const parts = splitDateTimePattern(pattern);
+  if (!parts) return undefined;
+  const date = formatListTime(value, parts[0]);
+  const time = formatListTime(value, parts[1]);
+  return date !== undefined && time !== undefined ? [date, time] : undefined;
 };
 
 /**

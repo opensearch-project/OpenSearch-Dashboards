@@ -46,6 +46,7 @@ export const TracesDataTable: React.FC = () => {
     isInitialized,
     traceMetrics,
     formatTs,
+    formatListTs,
     sortOrder,
     handleSortChange,
     displayedColumns,
@@ -391,8 +392,17 @@ export const TracesDataTable: React.FC = () => {
       onRowClick: handleRowClick,
       wrapCellText,
       hasExpandableRows: true,
+      formatListTs,
     }),
-    [expandedRows, toggleExpansion, traceLoadingState, getRowMeta, handleRowClick, wrapCellText]
+    [
+      expandedRows,
+      toggleExpansion,
+      traceLoadingState,
+      getRowMeta,
+      handleRowClick,
+      wrapCellText,
+      formatListTs,
+    ]
   );
 
   // Loading state — show during active query or before initial query has completed
