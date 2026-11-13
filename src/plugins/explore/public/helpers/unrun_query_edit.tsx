@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiCallOut, EuiCode, EuiText } from '@elastic/eui';
 
@@ -40,9 +39,52 @@ const emptyQueryText = i18n.translate('explore.unrunQueryEdit.emptyQuery', {
 });
 
 /**
- * Says that a save stores the last-run query, not the editor's unrun edits, with both queries.
- * Shown in the save dialogs; the save itself goes ahead when the user confirms it.
+ * What a save of the last-run query stores, and that the editor's unrun edits aren't part of it,
+ * with both queries.
  */
+export const UnrunQueryEditDetails = ({
+  edit,
+  objectType,
+}: {
+  edit: UnrunQueryEdit;
+  objectType: 'search' | 'visualization';
+}) => (
+  <EuiText size="s">
+    <p>
+      {objectType === 'search'
+        ? i18n.translate('explore.unrunQueryEdit.searchDescription', {
+            defaultMessage:
+              'The search is saved with the last query that ran. Your edits stay in the editor. To save them, run the query, then save again.',
+          })
+        : i18n.translate('explore.unrunQueryEdit.visualizationDescription', {
+            defaultMessage:
+              'The visualization is saved with the last query that ran. To save your edits, run the query first.',
+          })}
+    </p>
+    <p>
+      {i18n.translate('explore.unrunQueryEdit.savedQueryLabel', {
+        defaultMessage: 'Saved query:',
+      })}{' '}
+      <EuiCode data-test-subj="unrunQueryEditSavedQuery">
+        {preview(edit.savedQuery) || emptyQueryText}
+      </EuiCode>
+    </p>
+    <p>
+      {i18n.translate('explore.unrunQueryEdit.editorQueryLabel', {
+        defaultMessage: 'In the editor, not run:',
+      })}{' '}
+      <EuiCode data-test-subj="unrunQueryEditEditorQuery">
+        {preview(edit.editorQuery) || emptyQueryText}
+      </EuiCode>
+    </p>
+  </EuiText>
+);
+
+export const unrunQueryEditTitle = i18n.translate('explore.unrunQueryEdit.title', {
+  defaultMessage: "Your query edits haven't been run and won't be saved",
+});
+
+/** The same, as a warning in a save dialog; the save goes ahead when the user confirms it. */
 export const UnrunQueryEditCallout = ({
   edit,
   objectType,
@@ -51,42 +93,12 @@ export const UnrunQueryEditCallout = ({
   objectType: 'search' | 'visualization';
 }) => (
   <EuiCallOut
-    title={i18n.translate('explore.unrunQueryEdit.title', {
-      defaultMessage: "Your query edits haven't been run and won't be saved",
-    })}
+    title={unrunQueryEditTitle}
     color="warning"
     iconType="alert"
     size="s"
     data-test-subj="unrunQueryEditCallout"
   >
-    <EuiText size="s">
-      <p>
-        {objectType === 'search'
-          ? i18n.translate('explore.unrunQueryEdit.searchDescription', {
-              defaultMessage:
-                'The search is saved with the last query that ran. Your edits stay in the editor. To save them, run the query, then save again.',
-            })
-          : i18n.translate('explore.unrunQueryEdit.visualizationDescription', {
-              defaultMessage:
-                'The visualization is saved with the last query that ran. To save your edits, run the query, then save again.',
-            })}
-      </p>
-      <p>
-        {i18n.translate('explore.unrunQueryEdit.savedQueryLabel', {
-          defaultMessage: 'Saved query:',
-        })}{' '}
-        <EuiCode data-test-subj="unrunQueryEditSavedQuery">
-          {preview(edit.savedQuery) || emptyQueryText}
-        </EuiCode>
-      </p>
-      <p>
-        {i18n.translate('explore.unrunQueryEdit.editorQueryLabel', {
-          defaultMessage: 'In the editor, not run:',
-        })}{' '}
-        <EuiCode data-test-subj="unrunQueryEditEditorQuery">
-          {preview(edit.editorQuery) || emptyQueryText}
-        </EuiCode>
-      </p>
-    </EuiText>
+    <UnrunQueryEditDetails edit={edit} objectType={objectType} />
   </EuiCallOut>
 );
