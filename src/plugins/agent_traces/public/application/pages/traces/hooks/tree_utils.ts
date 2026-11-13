@@ -11,13 +11,30 @@ import { TraceHit } from '../trace_details/traces/ppl_to_trace_hits';
 // Format timestamp to readable date/time respecting the configured timezone.
 // PPL returns timestamps without timezone indicator (e.g. "2025-05-29 03:11:25.292"),
 // so we parse as UTC first, then convert to the configured timezone.
-export const formatTimestamp = (timestamp: string, timezone: string): string => {
+// The OpenSearch Dashboards default `dateFormat`, used when the setting is unset.
+// See timestamp_formatters.ts for the user's `dateFormat` (full precision) and
+// its list variant (to the second).
+export const FULL_TIMESTAMP_PATTERN = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
+export const formatTimestamp = (
+  timestamp: string,
+  timezone: string,
+  pattern: string = FULL_TIMESTAMP_PATTERN
+): string => {
   if (!timestamp) return '—';
   const m = moment.utc(timestamp);
   if (!m.isValid()) return '—';
-  // The OpenSearch Dashboards default `dateFormat`, so Agent Traces timestamps read
-  // the same as the Explore Logs / Traces tables ("Nov 9, 2026 @ 14:31:20.123").
-  return m.tz(timezone).format('MMM D, YYYY @ HH:mm:ss.SSS');
+  return m.tz(timezone).format(pattern);
+};
+
+/**
+ * The display timezone: the `dateFormat:tz` advanced setting, or the browser's
+ * zone when it is "Browser" (the default) or unset.
+ */
+export const resolveTimezone = (uiSettings?: { get: (key: string) => unknown }): string => {
+  const tz = uiSettings?.get('dateFormat:tz');
+  if (typeof tz === 'string' && tz && tz !== 'Browser') return tz;
+  return moment.tz.guess() || moment().format('Z');
 };
 
 export interface BaseRow {
@@ -32,6 +49,8 @@ export interface BaseRow {
   input: string;
   output: string;
   startTime: string;
+  /** The unformatted start time, so a list cell can format it differently. */
+  rawStartTime?: string;
   endTime: string;
   latency: string;
   durationNanos: number;
@@ -83,6 +102,7 @@ export const spanToRow = (
   input: span.input || '—',
   output: span.output || '—',
   startTime: formatTs(span.startTime),
+  rawStartTime: span.startTime,
   endTime: formatTs(span.endTime),
   latency: formatDuration(span.durationNanos),
   durationNanos: span.durationNanos,

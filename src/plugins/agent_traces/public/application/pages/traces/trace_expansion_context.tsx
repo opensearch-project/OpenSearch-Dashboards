@@ -20,6 +20,8 @@ export interface TraceExpansionState {
   onRowClick?: (hitId: string) => void;
   wrapCellText?: boolean;
   hasExpandableRows?: boolean;
+  /** Formats a raw start time for the list's Time column (to the second). */
+  formatListTs?: (ts: string) => string;
 }
 
 const TraceExpansionContext = createContext<TraceExpansionState | null>(null);

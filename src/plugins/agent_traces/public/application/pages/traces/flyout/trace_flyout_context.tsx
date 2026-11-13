@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useCallback, useMemo } from 'react';
-import moment from 'moment-timezone';
 import { TraceDetailsFlyout } from './trace_details_flyout';
-import { TraceRow, formatTimestamp } from '../hooks/tree_utils';
+import { TraceRow } from '../hooks/tree_utils';
+import { getTimestampFormatters } from '../hooks/timestamp_formatters';
 import { useSidebarPanel } from '../../../../components/container/bottom_container/sidebar_panel_context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../../types';
@@ -43,12 +43,10 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const { collapseSidebar } = useSidebarPanel();
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
 
-  const timezone = useMemo(() => {
-    const tz = services?.uiSettings?.get('dateFormat:tz');
-    if (tz && tz !== 'Browser') return tz;
-    return moment.tz.guess() || moment().format('Z');
-  }, [services?.uiSettings]);
-  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
+  const { formatTs } = useMemo(
+    () => getTimestampFormatters(services?.uiSettings),
+    [services?.uiSettings]
+  );
 
   const openFlyout = useCallback(
     (trace: TraceRow, options?: OpenTraceOptions) => {
