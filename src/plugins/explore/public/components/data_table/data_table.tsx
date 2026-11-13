@@ -5,7 +5,7 @@
 
 import './data_table.scss';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +27,9 @@ import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
 import { useIncrementalRender } from '../../helpers/use_incremental_render';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import { toListTimePattern } from './list_time_format';
 
 export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
@@ -70,6 +73,13 @@ const DataTableUI = ({
   wrapCellText,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  // The list shows the time field to the second (see list_time_format.ts);
+  // computed once for the table rather than per row.
+  const timeColumnPattern = useMemo(
+    () => toListTimePattern(services?.uiSettings?.get('dateFormat')),
+    [services?.uiSettings]
+  );
 
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
@@ -137,6 +147,7 @@ const DataTableUI = ({
                   docViewsRegistry={docViewsRegistry}
                   expandedTableHeader={expandedTableHeader}
                   wrapCellText={wrapCellText}
+                  timeColumnPattern={timeColumnPattern}
                 />
               );
             }

@@ -343,7 +343,10 @@ const AgentTracesTokensCell: React.FC<{
   );
 };
 
-/** Time cell that shows the formatted startTime from the TraceRow as a clickable link. */
+/**
+ * Time cell: the row's start time as a clickable link, in the list format (to
+ * the second) when the table provides one. The row itself keeps full precision.
+ */
 export const AgentTracesTimeCell: React.FC<{
   hitId: string;
 }> = ({ hitId }) => {
@@ -365,7 +368,9 @@ export const AgentTracesTimeCell: React.FC<{
         data-test-subj="osdDocTableCellDataField"
       >
         <EuiLink color="primary" onClick={handleClick} data-test-subj="agentTracesTimeLink">
-          {meta.traceRow.startTime}
+          {meta.traceRow.rawStartTime && ctx.formatListTs
+            ? ctx.formatListTs(meta.traceRow.rawStartTime)
+            : meta.traceRow.startTime}
         </EuiLink>
       </span>
     </td>

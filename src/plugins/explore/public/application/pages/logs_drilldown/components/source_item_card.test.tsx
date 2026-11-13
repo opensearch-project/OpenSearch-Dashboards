@@ -120,4 +120,58 @@ describe('SourceItemCard', () => {
     renderCard({ checkDisabledReason: 'full', checked: true });
     expect(screen.getByTestId('logsDrilldownSourceCardCheckbox-g')).not.toBeDisabled();
   });
+
+  describe('an item the source marks unavailable', () => {
+    const unavailableItem = {
+      ...item,
+      unavailable: { title: "Can't be queried", reason: 'Ask for access to it.' },
+    };
+
+    it('says why instead of an idle state, with no Run button, and keeps its details', () => {
+      renderCard({ item: unavailableItem });
+      const callout = screen.getByTestId('logsDrilldownSourceCardUnavailable-g');
+      expect(callout).toHaveTextContent("Can't be queried");
+      expect(callout).toHaveTextContent('Ask for access to it.');
+      expect(screen.queryByTestId('logsDrilldownSourceCardRun-g')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownSourceCardIdle-g')).not.toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownSourceCardDetails-g')).toHaveTextContent(
+        'Stored: 1 KB'
+      );
+    });
+
+    it('shows neither a result, an error nor a Stop button it may still have', () => {
+      renderCard({
+        item: unavailableItem,
+        loading: true,
+        error: 'denied',
+        result: { preview: { rows: [{ msg: 'hello' }], columns: [] }, ranWith: 'k' },
+      });
+      expect(screen.getByTestId('logsDrilldownSourceCardUnavailable-g')).toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownSourceCardError-g')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownSourceCardLogs-g')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownSourceCardStop-g')).not.toBeInTheDocument();
+    });
+
+    it('has no reason line without a reason', () => {
+      renderCard({ item: { ...item, unavailable: { title: "Can't be queried" } } });
+      expect(screen.getByTestId('logsDrilldownSourceCardUnavailable-g')).toHaveTextContent(
+        /^Can't be queried$/
+      );
+    });
+
+    it("can't be newly ticked, and says why to screen readers", () => {
+      renderCard({ item: unavailableItem });
+      const box = screen.getByTestId('logsDrilldownSourceCardCheckbox-g');
+      expect(box).toBeDisabled();
+      expect(box).toHaveAccessibleDescription("Can't be queried");
+    });
+
+    it('stays enabled when already ticked, so it can be unticked', () => {
+      const { onToggleCheck } = renderCard({ item: unavailableItem, checked: true });
+      const box = screen.getByTestId('logsDrilldownSourceCardCheckbox-g');
+      expect(box).not.toBeDisabled();
+      fireEvent.click(box);
+      expect(onToggleCheck).toHaveBeenCalledWith(unavailableItem);
+    });
+  });
 });

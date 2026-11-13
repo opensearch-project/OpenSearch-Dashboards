@@ -23,6 +23,7 @@ import { datasetTypeRequiresExplicitRun } from '../../../../../../data/common';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type {
   SourceTypeLogsDrilldownItem,
+  SourceTypeLogsDrilldownItemUnavailable,
   SourceTypeLogsDrilldownScope,
 } from '../../../../services/source_type_registry';
 import { ExploreServices } from '../../../../types';
@@ -34,6 +35,10 @@ import { useSourceItems } from '../hooks/use_source_items';
 import { stableKey } from '../stable_key';
 import { DrilldownSourceType, SourceBatchAction, SourceGrouping } from '../types';
 import { SourceItemCard } from './source_item_card';
+
+/** No marks learned from failed queries (a stable empty map). */
+const NO_LEARNED_UNAVAILABLE: ReadonlyMap<string, SourceTypeLogsDrilldownItemUnavailable> =
+  new Map();
 
 interface Props {
   services: ExploreServices;
@@ -86,7 +91,7 @@ export const SourceRowsView: React.FC<Props> = ({
     }
   }, [sourceType]);
   const {
-    items,
+    items: listedItems,
     nextToken,
     loading,
     loadingMore,
@@ -97,6 +102,31 @@ export const SourceRowsView: React.FC<Props> = ({
     loadMore,
     retry,
   } = useSourceItems(drilldown, scope, search, listRefreshKey);
+  // Key-sorted, like the URL keeps it: a scope read back from `_a` is the same scope.
+  const scopeKey = stableKey(scope);
+  // The list on the page: its scope, search and Refresh count.
+  const listKey = `${scopeKey}\n${search}\n${listRefreshKey}`;
+  const listKeyRef = useRef(listKey);
+  listKeyRef.current = listKey;
+
+  // Items a card's failed query showed can't be queried now (the source's `unavailableFor`). They
+  // show and count as listed `unavailable` until the items are listed again: the marks keep the
+  // list they were learned for, and any other list ignores them from its first render.
+  const [learned, setLearned] = useState<{
+    listKey: string;
+    items: ReadonlyMap<string, SourceTypeLogsDrilldownItemUnavailable>;
+  }>(() => ({ listKey, items: NO_LEARNED_UNAVAILABLE }));
+  const learnedUnavailable = learned.listKey === listKey ? learned.items : NO_LEARNED_UNAVAILABLE;
+  const items = useMemo(
+    () =>
+      learnedUnavailable.size === 0
+        ? listedItems
+        : listedItems.map((item) => {
+            const unavailable = item.unavailable ? undefined : learnedUnavailable.get(item.id);
+            return unavailable ? { ...item, unavailable } : item;
+          }),
+    [listedItems, learnedUnavailable]
+  );
 
   // The source's dataset types decide whether its queries wait for the user, as on the Logs page.
   // A type that isn't registered (yet) is read as waiting: its queries may be billed, so the page
@@ -120,25 +150,55 @@ export const SourceRowsView: React.FC<Props> = ({
   itemsRef.current = itemsById;
   const refreshKeyRef = useRef(refreshKey);
   refreshKeyRef.current = refreshKey;
-  // Key-sorted, like the URL keeps it: a scope read back from `_a` is the same scope.
-  const scopeKey = stableKey(scope);
 
   const fetchFn = useCallback(
     async (key: string, signal: AbortSignal): Promise<SourceCardResult> => {
       const item = itemsRef.current.get(key);
       if (!item) throw new Error(`Unknown item ${key}`);
+      // An item the source marks unavailable never queries (its card says why instead).
+      if (item.unavailable) throw new Error(item.unavailable.title);
       const bounds = services.data.query.timefilter.timefilter.getBounds();
-      return runSourceCard({
-        services,
-        drilldown,
-        datasetTypes: sourceType.datasetTypes,
-        scope,
-        item,
-        from: bounds.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
-        to: bounds.max?.valueOf() ?? Date.now(),
-        ranWith: refreshKeyRef.current,
-        signal,
-      });
+      const startedFor = listKeyRef.current;
+      try {
+        return await runSourceCard({
+          services,
+          drilldown,
+          datasetTypes: sourceType.datasetTypes,
+          scope,
+          item,
+          from: bounds.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
+          to: bounds.max?.valueOf() ?? Date.now(),
+          ranWith: refreshKeyRef.current,
+          signal,
+        });
+      } catch (cause) {
+        // The source may say the failure means the item can't be queried now (e.g. its query was
+        // refused): the card then shows that instead of the error. Anything else shows as is. Not
+        // for a stopped query, nor for one that started on another list (the scope, the search or
+        // a Refresh changed since): its item may not be this list's.
+        if (!signal.aborted && drilldown.unavailableFor && listKeyRef.current === startedFor) {
+          let unavailable: SourceTypeLogsDrilldownItemUnavailable | undefined;
+          try {
+            unavailable = drilldown.unavailableFor({ scope, item, error: cause });
+          } catch (sourceError) {
+            // The card shows the query's error; say why the source's answer is missing.
+            // eslint-disable-next-line no-console
+            console.error(
+              "Explore logs page: a source's unavailableFor failed; showing the query's error",
+              sourceError
+            );
+            unavailable = undefined;
+          }
+          if (unavailable) {
+            const marked = unavailable;
+            setLearned((prev) => ({
+              listKey: startedFor,
+              items: new Map(prev.listKey === startedFor ? prev.items : []).set(key, marked),
+            }));
+          }
+        }
+        throw cause;
+      }
     },
     // `scopeKey` stands for `scope`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,17 +236,22 @@ export const SourceRowsView: React.FC<Props> = ({
   const explicitRef = useRef(explicit);
   explicitRef.current = explicit;
   const onRun = useCallback((itemId: string) => {
+    if (itemsRef.current.get(itemId)?.unavailable) return;
     if (explicitRunRef.current) explicitRef.current.run(itemId);
     else autoRef.current.invalidate(itemId);
   }, []);
   const onStop = useCallback((itemId: string) => explicitRef.current.stop(itemId), []);
+  // An unavailable item counts as out of view, so a source that runs on its own never runs it.
   const onVisibilityChange = useCallback((itemId: string, visible: boolean) => {
-    if (!explicitRunRef.current) autoRef.current.onVisibilityChange(itemId, visible);
+    if (!explicitRunRef.current) {
+      const unavailable = !!itemsRef.current.get(itemId)?.unavailable;
+      autoRef.current.onVisibilityChange(itemId, visible && !unavailable);
+    }
   }, []);
 
   // The ticked items themselves (not only their ids), so a tick a search hides still counts and
-  // still opens: the button and the handoff always mean every ticked item. Cleared on a scope
-  // change. Never more than the source's `maxSelection`, whatever the checkboxes allow.
+  // still opens: the button and the handoff mean every ticked item that can be opened. Cleared on
+  // a scope change. Never more than the source's `maxSelection`, whatever the checkboxes allow.
   const [checked, setChecked] = useState<Map<string, SourceTypeLogsDrilldownItem>>(new Map());
   useEffect(() => setChecked(new Map()), [scopeKey]);
   const maxSelection = drilldown.maxSelection;
@@ -198,6 +263,8 @@ export const SourceRowsView: React.FC<Props> = ({
           next.delete(item.id);
           return next;
         }
+        // An unavailable item can't be newly ticked (one ticked before can still be unticked).
+        if (item.unavailable) return prev;
         if (maxSelection !== undefined && prev.size >= maxSelection) return prev;
         return new Map(prev).set(item.id, item);
       });
@@ -288,24 +355,29 @@ export const SourceRowsView: React.FC<Props> = ({
         })
       : undefined;
 
-  // The toolbar button: open the selected items in Logs.
+  // The toolbar button: open the selected items in Logs. A ticked item that has since become
+  // unavailable (a Refresh listed it so, or its query failed and the source said so) stays ticked,
+  // so it can be unticked, but isn't opened: the Logs page would run the query the source says
+  // fails. With none left to open, there's no action (the button is disabled).
   useEffect(() => {
-    const selected = Array.from(checked.values());
+    const openable = Array.from(checked.values()).filter(
+      (item) => !(itemsById.get(item.id) ?? item).unavailable
+    );
     onBatchActionChange(
-      selected.length
+      openable.length
         ? {
             label: i18n.translate('explore.logsDrilldown.source.openInLogs', {
               defaultMessage: 'Open {count, plural, one {# item} other {# items}} in Logs',
-              values: { count: selected.length },
+              values: { count: openable.length },
             }),
             onClick: () => {
-              openInLogs(selected);
+              openInLogs(openable);
             },
             isLoading: opening,
           }
         : null
     );
-  }, [checked, openInLogs, onBatchActionChange, opening]);
+  }, [checked, itemsById, openInLogs, onBatchActionChange, opening]);
   useEffect(() => () => onBatchActionChange(null), [onBatchActionChange]);
 
   const [grouping, setGrouping] = useState<SourceGrouping>(SourceGrouping.ALPHABETICAL);

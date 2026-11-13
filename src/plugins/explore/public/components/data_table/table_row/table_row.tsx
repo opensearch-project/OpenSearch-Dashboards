@@ -38,6 +38,8 @@ export interface TableRowProps {
   docViewsRegistry: DocViewsRegistry;
   expandedTableHeader?: string;
   wrapCellText?: boolean;
+  /** Time column pattern for the list (see list_time_format.ts), computed once per table. */
+  timeColumnPattern?: string;
 }
 
 export const TableRowUI = ({
@@ -53,6 +55,7 @@ export const TableRowUI = ({
   docViewsRegistry,
   expandedTableHeader,
   wrapCellText,
+  timeColumnPattern,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -96,6 +99,7 @@ export const TableRowUI = ({
         onToggleExpand={handleExpanding}
         isOnTracesPage={onTracesPage}
         wrapCellText={wrapCellText}
+        timeColumnPattern={timeColumnPattern}
       />
       {isExpanded && (
         <ExpandedTableRow
