@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -28,7 +28,11 @@ describe('getProvidedNodeVersion', () => {
       copyFileSync(process.execPath, join(dir, 'node.exe'));
     } else {
       mkdirSync(join(dir, 'bin'));
-      symlinkSync(process.execPath, join(dir, 'bin', 'node'));
+      // A shim rather than a symlink, so a Node.js that is itself a wrapper script (which
+      // finds its binary relative to its own path) still runs
+      writeFileSync(join(dir, 'bin', 'node'), `#!/bin/sh\nexec "${process.execPath}" "$@"\n`, {
+        mode: 0o755,
+      });
     }
     if (license) writeFileSync(join(dir, 'LICENSE'), 'MIT');
   };
