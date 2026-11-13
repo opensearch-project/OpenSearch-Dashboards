@@ -113,7 +113,12 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
         });
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
-            const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+            let response: BatchResponseItem<Result, ErrorLike>;
+            try {
+              response = JSON.parse(json);
+            } catch (e) {
+              return;
+            }
             if (response.error) {
               responsesReceived++;
               items[response.id].future.reject(response.error);
