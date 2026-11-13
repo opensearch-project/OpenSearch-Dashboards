@@ -2626,6 +2626,95 @@ describe('ChatService', () => {
       expect(mockSavedObjectsClient.find.mock.calls.length).toBe(callsAfterFirst);
     });
 
+    it('should not re-fetch the data source list when several ids are known to be invalid', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-invalid-default');
+
+      (window as any).assistantContextStore = {
+        getAllContexts: () => [
+          {
+            categories: ['page'],
+            description: 'page',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-invalid-page' } } },
+          },
+        ],
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      await service.getCurrentDataSourceId();
+      expect(service.getRejectedDataSources()).toEqual([
+        { source: 'page', id: 'ds-invalid-page' },
+        { source: 'default', id: 'ds-invalid-default' },
+      ]);
+      const callsAfterFirst = mockSavedObjectsClient.find.mock.calls.length;
+      await service.getCurrentDataSourceId();
+      await service.peekCurrentDataSourceId();
+
+      expect(mockSavedObjectsClient.find.mock.calls.length).toBe(callsAfterFirst);
+    });
+
+    it('should keep a switched-to data source that an earlier resolve had marked invalid', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-new');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      // ds-new is not available yet, so the first resolve rejects it.
+      expect(await service.getCurrentDataSourceId()).toBeUndefined();
+
+      // ds-new becomes available mid-conversation and the user switches to it.
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [
+          { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+          { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          { id: 'ds-new', attributes: { title: 'Source New', dataSourceEngineType: 'OpenSearch' } },
+        ],
+      });
+      const { valid } = await service.validateDataSourceId('ds-new');
+      expect(valid).toBe(true);
+      service.setDataSourceId('ds-new');
+
+      // The next run must use the switched-to data source, not drop it as invalid.
+      expect(await service.getCurrentDataSourceId()).toBe('ds-new');
+      expect(service.getConfirmedDataSourceId()).toBe('ds-new');
+    });
+
+    it('should re-check ids marked invalid once the data source list is refreshed', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-new');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      expect(await service.getCurrentDataSourceId()).toBeUndefined();
+
+      // The list gains ds-new, and something else (here a lookup of an unknown id) refreshes it.
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [
+          { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+          { id: 'ds-new', attributes: { title: 'Source New', dataSourceEngineType: 'OpenSearch' } },
+        ],
+      });
+      await service.validateDataSourceId('ds-unknown');
+
+      expect(await service.getCurrentDataSourceId()).toBe('ds-new');
+    });
+
     it('should fall back to the next valid candidate when a higher one is invalid', async () => {
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-1');
