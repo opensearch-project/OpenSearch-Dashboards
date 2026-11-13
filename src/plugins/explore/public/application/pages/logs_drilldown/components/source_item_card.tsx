@@ -103,7 +103,7 @@ const SourceItemCardComponent: React.FC<Props> = ({
   // An unavailable item can't be newly ticked; one already ticked can still be unticked.
   const uncheckableReason = unavailable ? unavailable.title : checkDisabledReason;
   const checkDisabled = !checked && !!uncheckableReason;
-  const reasonId = `logsDrilldownSourceCardFull-${itemId}`;
+  const reasonId = `logsDrilldownSourceCardReason-${itemId}`;
 
   const details = (item.details ?? [])
     .filter((detail) => detail.value)
