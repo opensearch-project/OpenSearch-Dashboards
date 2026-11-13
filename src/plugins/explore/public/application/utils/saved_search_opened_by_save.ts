@@ -9,7 +9,8 @@
  * editor that the save didn't store, so loading it must not reset the editor or the results.
  *
  * The save marks the id it is about to open; the page initialization takes the mark when it loads
- * that id. Any other id clears the mark, so a later visit to the same saved search loads normally.
+ * that id, and clears it when the load fails. Any other id clears it too, so a later visit to the
+ * same saved search loads normally.
  */
 let openedBySaveId: string | undefined;
 

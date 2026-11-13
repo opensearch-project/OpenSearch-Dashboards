@@ -45,11 +45,11 @@ const savedExploreFor = (dataset: typeof EXPLICIT) => ({
 describe('useInitPage', () => {
   const dispatch = jest.fn();
 
-  const render = (dataset: typeof EXPLICIT) => {
+  const render = (dataset: typeof EXPLICIT, error: string | null = null) => {
     (useCurrentExploreId as jest.Mock).mockReturnValue('saved-1');
     (useSavedExplore as jest.Mock).mockReturnValue({
-      savedExplore: savedExploreFor(dataset),
-      error: null,
+      savedExplore: error ? undefined : savedExploreFor(dataset),
+      error,
     });
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: {
@@ -116,6 +116,40 @@ describe('useInitPage', () => {
       expect(dispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'legacy/setSavedSearch', payload: 'saved-1' })
       );
+    });
+
+    it('keeps the results on screen and runs nothing', () => {
+      markSavedSearchOpenedBySave('saved-1');
+      render(ORDINARY);
+      expect(executeQueries).not.toHaveBeenCalled();
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'results/clearResults' })
+      );
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'queryEditor/clearQueryStatusMap' })
+      );
+    });
+
+    it('keeps the results of an explicit Run source without staging the query again', () => {
+      markSavedSearchOpenedBySave('saved-1');
+      render(EXPLICIT);
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'results/clearResults' })
+      );
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'queryEditor/setIsQueryEditorDirty' })
+      );
+    });
+
+    // The mark is taken on load; a load that fails must clear it, or the next visit to that saved
+    // search would be taken for its own save and would not load it.
+    it('clears the mark when the load fails, so a later visit loads normally', () => {
+      markSavedSearchOpenedBySave('saved-1');
+      render(ORDINARY, 'Not found');
+
+      jest.clearAllMocks();
+      render(ORDINARY);
+      expect(mockSetEditorText).toHaveBeenCalledWith('source=logs');
     });
 
     it('loads normally when another saved search is opened, and the mark is used up', () => {
