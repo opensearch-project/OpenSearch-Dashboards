@@ -240,11 +240,10 @@ function convertToJsxComments(errors) {
 function runEslintFix(files) {
   logStep('Running ESLint to fix indentation...');
   try {
-    const eslintArgs = ['lint:es', '--fix', ...files];
-
-    const result = spawnSync('yarn', eslintArgs, {
+    // Same entry point as the `lint:es` script, run directly so it doesn't depend on a
+    // package manager and file names are passed as arguments rather than through a shell.
+    const result = spawnSync(process.execPath, ['scripts/eslint', '--fix', ...files], {
       encoding: 'utf8',
-      shell: true,
       stdio: 'pipe',
     });
 

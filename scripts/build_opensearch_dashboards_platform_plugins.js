@@ -38,9 +38,9 @@ var optimizerCliPath = path.resolve(__dirname, '../packages/osd-optimizer/target
 if (!existsSync(optimizerCliPath)) {
   console.log('Building @osd/optimizer package...');
   try {
-    execSync('yarn workspace @osd/optimizer build', {
+    execSync('npm run build', {
       stdio: 'inherit',
-      cwd: path.resolve(__dirname, '..'),
+      cwd: path.resolve(__dirname, '../packages/osd-optimizer'),
     });
   } catch {
     console.error('Failed to build @osd/optimizer package');

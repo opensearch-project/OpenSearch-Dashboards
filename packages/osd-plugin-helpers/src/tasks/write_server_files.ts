@@ -56,6 +56,7 @@ export async function writeServerFiles({
         ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
+              'package-lock.json',
               'tsconfig.json',
               'package.json',
               'index.{js,ts}',

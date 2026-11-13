@@ -31,30 +31,40 @@
 import { createReadStream, createWriteStream, unlinkSync, renameSync } from 'fs';
 import { createInterface } from 'readline';
 import { spawn, spawnStreaming } from './child_process';
+import { detectPackageManager, PackageManager } from './package_manager';
 import { Project } from './project';
 
-const YARN_EXEC = process.env.npm_execpath || 'yarn';
-
-interface WorkspaceInfo {
-  location: string;
-  workspaceDependencies: string[];
-}
-
-interface WorkspacesInfo {
-  [s: string]: WorkspaceInfo;
+function pmSpawnArgs(pm: PackageManager, args: string[]): [string, string[]] {
+  const { file, prefixArgs } = pm.command();
+  return [file, [...prefixArgs, ...args]];
 }
 
 /**
- * Install all dependencies in the given directory
+ * Install all dependencies in the given directory, using the package manager
+ * that owns the directory's lockfile. `extraArgs` are yarn-style flags.
  */
-export async function installInDir(directory: string, extraArgs: string[] = [], useAdd = false) {
-  const options = [useAdd ? 'add' : 'install', '--non-interactive', ...extraArgs];
+export async function installInDir(directory: string, extraArgs: string[] = []) {
+  const pm = detectPackageManager(directory);
+  await spawn(...pmSpawnArgs(pm, pm.installArgs({ extraArgs })), { cwd: directory });
+}
 
-  // We pass the mutex flag to ensure only one instance of yarn runs at any
-  // given time (e.g. to avoid conflicts).
-  await spawn(YARN_EXEC, options, {
-    cwd: directory,
-  });
+/**
+ * Add a dependency at an exact version in the given directory.
+ */
+export async function addInDir(directory: string, spec: string, dev = false) {
+  const pm = detectPackageManager(directory);
+  await spawn(...pmSpawnArgs(pm, pm.addArgs(spec, dev)), { cwd: directory });
+}
+
+/**
+ * Re-sync the lockfile after a manifest edit, when the package manager needs it.
+ * Returns the package manager so callers can decide on lockfile patching.
+ */
+export async function syncLockfileInDir(directory: string) {
+  const pm = detectPackageManager(directory);
+  const args = pm.syncLockfileArgs();
+  if (args) await spawn(...pmSpawnArgs(pm, args), { cwd: directory });
+  return pm;
 }
 
 /**
@@ -95,11 +105,8 @@ export function patchFile(
  * Run script in the given directory
  */
 export async function runScriptInPackage(script: string, args: string[], pkg: Project) {
-  const execOpts = {
-    cwd: pkg.path,
-  };
-
-  await spawn(YARN_EXEC, ['run', script, ...args], execOpts);
+  const pm = detectPackageManager(pkg.path);
+  await spawn(...pmSpawnArgs(pm, pm.runArgs(script, args)), { cwd: pkg.path });
 }
 
 /**
@@ -116,25 +123,8 @@ export function runScriptInPackageStreaming({
   pkg: Project;
   debug?: boolean;
 }) {
-  const execOpts = {
-    cwd: pkg.path,
-  };
+  const pm = detectPackageManager(pkg.path);
+  const [file, spawnArgs] = pmSpawnArgs(pm, pm.runArgs(script, args));
 
-  return spawnStreaming(YARN_EXEC, ['run', script, ...args], execOpts, {
-    prefix: pkg.name,
-    debug,
-  });
-}
-
-export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesInfo> {
-  const { stdout } = await spawn(YARN_EXEC, ['--json', 'workspaces', 'info'], {
-    cwd: directory,
-    stdio: 'pipe',
-  });
-
-  try {
-    return JSON.parse(JSON.parse(stdout).data);
-  } catch {
-    throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
-  }
+  return spawnStreaming(file, spawnArgs, { cwd: pkg.path }, { prefix: pkg.name, debug });
 }
