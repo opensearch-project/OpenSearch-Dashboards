@@ -10,6 +10,7 @@ import {
   setShowHistogram,
   setWrapCellText,
   setHideEmptyFields,
+  setShowRowSeparators,
   UIState,
 } from './ui_slice';
 
@@ -70,6 +71,16 @@ describe('UI Slice', () => {
 
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showHistogram).toBe(initialState.showHistogram);
+    });
+  });
+
+  describe('setShowRowSeparators', () => {
+    it('should handle setShowRowSeparators action', () => {
+      const action = setShowRowSeparators(true);
+      expect(action.type).toBe('ui/setShowRowSeparators');
+      const newState = uiReducer(initialState, action);
+      expect(newState.showRowSeparators).toBe(true);
+      expect(newState.wrapCellText).toBe(initialState.wrapCellText);
     });
   });
 
