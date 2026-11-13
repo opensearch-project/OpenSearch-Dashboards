@@ -500,6 +500,42 @@ describe('createStreamingBatchedFunction()', () => {
           b: '1',
         });
       });
+
+      test('skips malformed lines and rejects their promises with CONNECTION error', async () => {
+        const { fetchStreaming, stream } = setup();
+        const fn = createStreamingBatchedFunction({
+          url: '/test',
+          fetchStreaming,
+          maxItemAge: 5,
+          flushOnMaxItems: 3,
+        });
+
+        const promise1 = of(fn({ a: '1' }));
+        const promise2 = of(fn({ a: '2' }));
+
+        await new Promise((r) => setTimeout(r, 6));
+
+        stream.next('{"id":0\n');
+        stream.next(
+          JSON.stringify({
+            id: 1,
+            result: { b: '1' },
+          }) + '\n'
+        );
+        stream.complete();
+
+        await new Promise((r) => setTimeout(r, 1));
+
+        const [, error1] = await promise1;
+        const [result1] = await promise2;
+        expect(error1).toMatchObject({
+          message: 'Connection terminated prematurely.',
+          code: 'CONNECTION',
+        });
+        expect(result1).toMatchObject({
+          b: '1',
+        });
+      });
     });
 
     describe('when stream errors', () => {
