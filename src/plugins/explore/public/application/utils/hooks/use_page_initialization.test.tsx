@@ -11,6 +11,7 @@ import { useSavedExplore } from './use_saved_explore';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { executeQueries } from '../state_management/actions/query_actions';
+import { markSavedSearchOpenedBySave } from '../saved_search_opened_by_save';
 
 jest.mock('./use_saved_explore', () => ({ useSavedExplore: jest.fn() }));
 jest.mock('./use_current_explore_id', () => ({ useCurrentExploreId: jest.fn() }));
@@ -18,7 +19,8 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../../opensearch_dashboards_react/public'),
   useOpenSearchDashboards: jest.fn(),
 }));
-jest.mock('../../hooks', () => ({ useSetEditorText: () => jest.fn() }));
+const mockSetEditorText = jest.fn();
+jest.mock('../../hooks', () => ({ useSetEditorText: () => mockSetEditorText }));
 jest.mock('../../../components/visualizations/visualization_builder', () => ({
   getVisualizationBuilder: () => ({ setVisConfig: jest.fn() }),
 }));
@@ -60,6 +62,7 @@ describe('useInitPage', () => {
         data: {
           query: {
             queryString: {
+              getQuery: () => ({ query: 'source=logs | head 4', language: 'PPL', dataset }),
               getDatasetService: () => ({
                 getType: (type: string) =>
                   type === EXPLICIT.type ? { meta: { requiresExplicitRun: true } } : { meta: {} },
@@ -99,5 +102,33 @@ describe('useInitPage', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'results/clearResults' })
     );
+  });
+
+  describe('a saved search opened by its own save', () => {
+    it('keeps the editor and the query state as they are', () => {
+      markSavedSearchOpenedBySave('saved-1');
+      render(ORDINARY);
+      expect(mockSetEditorText).not.toHaveBeenCalled();
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/setQueryState' })
+      );
+      // It is still the page's saved search.
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'legacy/setSavedSearch', payload: 'saved-1' })
+      );
+    });
+
+    it('loads normally when another saved search is opened, and the mark is used up', () => {
+      markSavedSearchOpenedBySave('another-id');
+      render(ORDINARY);
+      expect(mockSetEditorText).toHaveBeenCalledWith('source=logs');
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/setQueryState' })
+      );
+
+      jest.clearAllMocks();
+      render(ORDINARY);
+      expect(mockSetEditorText).toHaveBeenCalledWith('source=logs');
+    });
   });
 });

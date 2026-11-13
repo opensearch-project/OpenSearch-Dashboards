@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useSavedExplore } from './use_saved_explore';
@@ -26,6 +26,8 @@ import { useSetEditorText } from '../../hooks';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+import { takeSavedSearchOpenedBySave } from '../saved_search_opened_by_save';
+import { SavedExplore } from '../../../types/saved_explore_types';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -35,12 +37,18 @@ export const useInitPage = () => {
   const setEditorText = useSetEditorText();
   const { chrome, data } = services;
   const visualizationBuilder = getVisualizationBuilder();
+  // The saved search that its own save opened (see saved_search_opened_by_save).
+  const openedBySaveRef = useRef<SavedExplore | undefined>(undefined);
 
   useEffect(() => {
     if (savedExplore && !error) {
       if (savedExplore.id) {
         // Deserialize state from saved object
         const { title } = savedExplore;
+        if (takeSavedSearchOpenedBySave(savedExplore.id)) openedBySaveRef.current = savedExplore;
+        // Saved from this page: the editor keeps its text, unrun edits included, and the query
+        // state already is the query that was saved.
+        const openedBySave = openedBySaveRef.current === savedExplore;
 
         // Update browser title and breadcrumbs
         chrome.docTitle.change(title);
@@ -49,8 +57,10 @@ export const useInitPage = () => {
         // Sync query from saved object to data plugin (explore doesn't use filters)
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
         const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
-        let restoredDataset;
-        if (searchSourceFields?.searchSourceJSON) {
+        let restoredDataset = openedBySave
+          ? services.data.query.queryString.getQuery?.()?.dataset
+          : undefined;
+        if (searchSourceFields?.searchSourceJSON && !openedBySave) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
           const query = {
