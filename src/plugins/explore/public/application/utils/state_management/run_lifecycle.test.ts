@@ -5,7 +5,7 @@
 
 /**
  * What happens to a query still running when what it was run for is replaced: a dataset change, a
- * new run of another query, a new search. Runs on the real reducers, the dataset change and overall
+ * new run of another query, a new search; and when an auto-refresh tick comes before it settles. Runs on the real reducers, the dataset change and overall
  * status middleware and the real query thunks; only the search itself is faked, one pending fetch
  * per query, which the test settles when it chooses.
  *
@@ -13,6 +13,10 @@
  * on another dataset has the same key.
  */
 
+import { createElement, ReactNode } from 'react';
+import { Provider } from 'react-redux';
+import { Subject } from 'rxjs';
+import { renderHook } from '@testing-library/react';
 import { AnyAction, configureStore } from '@reduxjs/toolkit';
 import { rootReducer, RootState } from './store';
 import { createDatasetChangeMiddleware } from './middleware/dataset_change_middleware';
@@ -23,6 +27,7 @@ import { setQueryState, setQueryWithHistory } from './slices';
 import { QueryExecutionStatus } from './types';
 import { getPreloadedState } from './utils/redux_persistence';
 import { REFINE_SELECTION_META } from '../requires_explicit_run';
+import { useTimefilterSubscription } from '../hooks/use_timefilter_subscription';
 import {
   SourceTypeRegistryService,
   setSourceTypeRegistry,
@@ -91,6 +96,7 @@ const flush = async () => {
 describe('queries still running when what they were run for is replaced', () => {
   let fetches: PendingFetch[];
   let services: ExploreServices;
+  let ticks: Subject<void>;
 
   const createServices = () => {
     const searchSource = {
@@ -143,6 +149,7 @@ describe('queries still running when what they were run for is replaced', () => 
             timefilter: {
               getTime: () => ({ from: 'now-15m', to: 'now' }),
               createFilter: jest.fn(),
+              getAutoRefreshFetch$: () => ticks,
             },
           },
           queryString: {
@@ -200,6 +207,7 @@ describe('queries still running when what they were run for is replaced', () => 
 
   beforeEach(() => {
     fetches = [];
+    ticks = new Subject<void>();
     services = createServices();
     const registry = new SourceTypeRegistryService();
     registry.register({
@@ -500,6 +508,70 @@ describe('queries still running when what they were run for is replaced', () => 
       await flush();
       expect(resultsFor(store)).toBeUndefined();
       expect(store.getState().queryEditor.queryStatusMap).toEqual({});
+    });
+  });
+
+  // With an interval shorter than the query, a tick that superseded the running query meant the
+  // page never showed a result, and every restart scanned the source again.
+  describe('an auto-refresh tick', () => {
+    const subscribeToTicks = (store: Store) =>
+      renderHook(() => useTimefilterSubscription(services), {
+        wrapper: ({ children }: { children: ReactNode }) =>
+          createElement(Provider, { store } as any, children),
+      });
+
+    it.each([
+      ['a dataset that requires an explicit Run', EXPLICIT],
+      ['a dataset that runs on its own', AUTO],
+    ])(
+      'while the query runs does nothing, and the next one after it settles runs it: %s',
+      async (_label, type) => {
+        const store = createStore({ query: QUERY, dataset: dataset(GROUP_A.id, type) });
+        const hook = subscribeToTicks(store);
+        run(store);
+        await flush();
+        expect(fetches).toHaveLength(1);
+
+        ticks.next();
+        ticks.next();
+        await flush();
+        expect(fetches).toHaveLength(1);
+        expect(fetches[0].signal.aborted).toBe(false);
+
+        fetches[0].resolve(rows('first'));
+        await flush();
+        expect(resultsFor(store)).toBeDefined();
+        expect(overallStatus(store)).toBe(QueryExecutionStatus.READY);
+
+        ticks.next();
+        await flush();
+        expect(fetches).toHaveLength(2);
+        fetches[1].resolve(rows('second'));
+        await flush();
+        expect(overallStatus(store)).toBe(QueryExecutionStatus.READY);
+        hook.unmount();
+      }
+    );
+
+    it('a Refresh while the query runs still replaces it', async () => {
+      const store = createStore({ query: QUERY, dataset: GROUP_A });
+      const hook = subscribeToTicks(store);
+      run(store);
+      await flush();
+      ticks.next();
+      await flush();
+
+      run(store);
+      await flush();
+      expect(fetches).toHaveLength(2);
+      expect(fetches[0].signal.aborted).toBe(true);
+      expect(fetches[1].signal.aborted).toBe(false);
+
+      fetches[0].reject(abortError());
+      fetches[1].resolve(rows('refreshed'));
+      await flush();
+      expect(overallStatus(store)).toBe(QueryExecutionStatus.READY);
+      hook.unmount();
     });
   });
 });

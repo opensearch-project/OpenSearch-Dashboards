@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
 // TODO: refactor it to now use legacy getServices
@@ -103,6 +103,23 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
             error={searchProps.error.message || searchProps.error.name || 'An error occurred'}
           />
         </EuiFlexItem>
+      );
+    }
+
+    // Nothing to show until the first run settles; "No results found" only once one returned none.
+    // A refresh keeps the previous rows on screen while it runs.
+    if (searchProps?.isLoading && !searchProps.rows?.length) {
+      return (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="exploreEmbeddableLoading"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 

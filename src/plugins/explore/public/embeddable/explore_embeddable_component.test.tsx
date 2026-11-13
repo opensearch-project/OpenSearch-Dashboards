@@ -119,6 +119,71 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
   });
 
+  describe('while the query runs', () => {
+    test('shows a loading state, not "No results", before the first run settles', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+        />
+      );
+
+      expect(screen.getByTestId('exploreEmbeddableLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockNoResults')).not.toBeInTheDocument();
+    });
+
+    test('shows the results once the run settles', () => {
+      const { rerender } = render(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+        />
+      );
+      rerender(
+        <ExploreEmbeddableComponent searchProps={{ ...mockSearchProps, isLoading: false }} />
+      );
+
+      expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockDataGridTable')).toBeInTheDocument();
+    });
+
+    test('shows "No results" only once a run returned nothing', () => {
+      const { rerender } = render(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+        />
+      );
+      rerender(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, rows: [], isLoading: false }}
+        />
+      );
+
+      expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
+    });
+
+    test('keeps the previous results on screen while a refresh runs', () => {
+      render(<ExploreEmbeddableComponent searchProps={{ ...mockSearchProps, isLoading: true }} />);
+
+      expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockDataGridTable')).toBeInTheDocument();
+    });
+
+    test('shows an error rather than the loading state', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{
+            ...mockSearchProps,
+            rows: [],
+            isLoading: true,
+            error: { name: 'Error', message: 'failed' },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
+    });
+  });
+
   test('renders with the correct data-test-subj attributes', () => {
     render(<ExploreEmbeddableComponent searchProps={mockSearchProps} />);
 
