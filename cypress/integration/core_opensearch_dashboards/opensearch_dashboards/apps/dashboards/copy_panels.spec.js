@@ -92,7 +92,7 @@ const PANELS = [
   { refName: 'panel_2', type: 'search' },
 ];
 
-const dashboardAttributes = (title) => ({
+const dashboardAttributes = (title, panelOverrides = {}) => ({
   title,
   description: '',
   panelsJSON: JSON.stringify(
@@ -103,6 +103,7 @@ const dashboardAttributes = (title) => ({
       panelIndex: String(i + 1),
       embeddableConfig: {},
       panelRefName: refName,
+      ...panelOverrides[refName],
     }))
   ),
   optionsJSON: JSON.stringify({ useMargins: true, hidePanelTitles: false }),
@@ -152,8 +153,8 @@ const runCopyPanelsTests = () => {
   const indexRefIds = (object) =>
     object.references.filter((r) => r.type === 'index-pattern').map((r) => r.id);
 
-  const openSourceDashboard = () => {
-    cy.visit(`/w/${workspaceId}/app/dashboards#/view/${sourceId}`);
+  const openDashboard = (id) => {
+    cy.visit(`/w/${workspaceId}/app/dashboards#/view/${id}`);
     // A hash-only visit keeps the app state from the previous test, so reload.
     cy.reload();
     cy.getElementByTestId('dashboardClone', { timeout: 60000 }).should('be.visible');
@@ -164,8 +165,10 @@ const runCopyPanelsTests = () => {
     });
   };
 
-  const clone = (title, copyPanels) => {
-    openSourceDashboard();
+  const openSourceDashboard = () => openDashboard(sourceId);
+
+  const clone = (title, copyPanels, id = sourceId) => {
+    openDashboard(id);
     cy.getElementByTestId('dashboardClone').click();
     cy.getElementByTestId('clonedDashboardTitle').clear().type(title);
     if (copyPanels) cy.getElementByTestId('cloneCopyPanelsCheckbox').check({ force: true });
@@ -293,6 +296,60 @@ const runCopyPanelsTests = () => {
         clone('copy-panels-clone-shared', false).then((cloned) => {
           PANELS.forEach(({ refName }) => {
             expect(panelRef(cloned, refName).id).to.equal(originals[refName].id);
+          });
+        });
+      });
+
+      it('applies the title template to custom panel titles', () => {
+        // A panel title, a title in embeddableConfig (moved to the panel title when the
+        // dashboard loads), and an empty title that hides it.
+        const overrides = {
+          panel_0: { title: 'custom markdown' },
+          panel_1: { embeddableConfig: { title: 'custom metric' } },
+          panel_2: { title: '' },
+        };
+        // Keyed by panelIndex, so the check does not depend on panel order.
+        const shownTitles = (dashboard) =>
+          Object.fromEntries(
+            JSON.parse(dashboard.attributes.panelsJSON).map((p) => [
+              p.panelIndex,
+              p.embeddableConfig?.title ?? p.title,
+            ])
+          );
+        // Unique titles, so a retry does not hit the clone left by an earlier attempt.
+        const stamp = Date.now();
+
+        api('POST', '/dashboard', {
+          attributes: dashboardAttributes(`copy-panels-custom-titles-${stamp}`, overrides),
+          references: PANELS.map(({ refName, type }) => ({
+            name: refName,
+            type,
+            id: originals[refName].id,
+          })),
+        }).then(({ body: { id: customSourceId } }) => {
+          clone(`copy-panels-clone-custom-titles-${stamp}`, true, customSourceId).then((cloned) => {
+            expect(shownTitles(cloned)).to.deep.equal({
+              1: 'custom markdown (copy)',
+              2: 'custom metric (copy)',
+              3: '',
+            });
+            openDashboard(cloned.id);
+            cy.get('[data-test-subj="dashboardPanelTitle"] .embPanel__titleInner').should(
+              ($els) => {
+                const texts = [...$els].map((el) => el.innerText.trim()).filter(Boolean);
+                expect(texts.sort()).to.deep.equal([
+                  'custom markdown (copy)',
+                  'custom metric (copy)',
+                ]);
+              }
+            );
+          });
+          getObject('dashboard', customSourceId).then((source) => {
+            expect(shownTitles(source)).to.deep.equal({
+              1: 'custom markdown',
+              2: 'custom metric',
+              3: '',
+            });
           });
         });
       });
