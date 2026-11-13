@@ -8,6 +8,7 @@ import {
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
+import { extractReferences, injectReferences } from './saved_explore_references';
 
 export const SAVED_OBJECT_TYPE = 'explore';
 
@@ -26,6 +27,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
       type: 'text',
       visualization: 'text',
       uiState: 'text',
+      queries: 'text',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -48,8 +50,12 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
           type: 'text',
           visualization: 'text',
           uiState: 'text',
+          queries: 'text',
         },
         searchSource: true,
+        // Each visualization editor row's index pattern (`queries`) is a reference too.
+        extractReferences,
+        injectReferences,
         defaults: {
           title: '',
           description: '',
@@ -60,6 +66,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
           type: '',
           visualization: '',
           uiState: '',
+          queries: '',
         },
       });
       this.showInRecentlyAccessed = true;

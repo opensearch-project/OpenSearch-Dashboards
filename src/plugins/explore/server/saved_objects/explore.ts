@@ -74,6 +74,8 @@ export const exploreSavedObjectType: SavedObjectsType = {
       type: { type: 'text' },
       visualization: { type: 'text', index: false },
       uiState: { type: 'text', index: false },
+      // The visualization editor's rows and editor state (JSON)
+      queries: { type: 'text', index: false },
     },
   },
 };

@@ -16,14 +16,14 @@ import { ExploreServices } from '../../../types';
 
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
-import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
 import { Query } from '../../../../../data/common';
 
 import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import { EditorMode } from '../../utils/state_management/types';
+import { useEditorDirty } from '../hooks/use_editor_dirty';
+import { toSavedQueries } from '../multi_query_builder/utils';
 import { ContainerState, CONTAINER_URL_KEY } from '../types';
 
 export interface OnSaveProps {
@@ -46,7 +46,7 @@ const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
 });
 
 export const SaveVisButton = () => {
-  const { queryEditorState, datasetView, resultState } = useQueryBuilderState();
+  const { datasetView, resultState, container } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const transformationService = visualizationBuilder.getTransformationService();
@@ -61,15 +61,15 @@ export const SaveVisButton = () => {
   const stateTransfer = embeddable.getStateTransfer();
   const [showModal, setShowModal] = useState(false);
 
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
-  const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
-  const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
+  const { isDirty: isEditorDirty, confirmSave } = useEditorDirty();
 
   // directly read from url storage
   const { originatingApp, containerInfo } =
     osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY) ?? {};
 
-  const searchContext = useSearchContext();
+  // TODO delte global search context
+  // The global query no longer mirrors the selected row, so save from the row itself.
+  // const searchContext = useSearchContext();
 
   const navigateTo = useCallback(
     ({ id, newTitle }: { id: string; newTitle: string }) => {
@@ -158,8 +158,23 @@ export const SaveVisButton = () => {
       });
       savedExploreToSave.version = 1;
 
+      // Every row, each with its hidden state, goes in queries.
+      const savedContainerState = container.getContainerState();
+      savedExploreToSave.queries = JSON.stringify(toSavedQueries(savedContainerState));
+      // searchSourceJSON keeps first visible row for readers that know only it (the Explore pages)
+      const { queries, editorState } = savedContainerState;
+      const hiddenRefIds = new Set(
+        editorState.rows.filter(([, state]) => state.isHidden).map(([refId]) => refId)
+      );
+      const [firstVisibleRefId, firstVisibleQuery] =
+        queries.find(([refId]) => !hiddenRefIds.has(refId)) ?? queries[0];
+      // A row hidden since it loaded may not have its dataset loaded: fall back to the selected one's.
+      const firstVisibleDataView =
+        container.getRow(firstVisibleRefId)?.datasetView$.getValue().dataView ??
+        datasetView.dataView;
+
       savedExploreToSave.searchSourceFields = {
-        index: datasetView.dataView,
+        index: firstVisibleDataView,
       };
       savedExploreToSave.copyOnSave = false;
       if (exploreId === undefined) {
@@ -168,15 +183,11 @@ export const SaveVisButton = () => {
       const searchSourceInstance = savedExploreToSave.searchSourceFields;
 
       if (searchSourceInstance) {
-        searchSourceInstance.query = searchContext.query as Query;
-        if (isPromptMode) {
-          // for prompt mode, store previous generated query string
-          searchSourceInstance.query = {
-            ...searchSourceInstance.query,
-            query: queryEditorState.lastExecutedTranslatedQuery ?? '',
-          };
-        }
-        searchSourceInstance.filter = searchContext.filters;
+        // A metrics row already carries max data points on its queryOptions.
+        searchSourceInstance.query = firstVisibleQuery as Query;
+
+        // Filters are shared by every row; read them at save time.
+        searchSourceInstance.filter = services.data.query.filterManager.getFilters();
       }
 
       const saveOptions = {
@@ -188,6 +199,7 @@ export const SaveVisButton = () => {
       try {
         const id = await savedExploreToSave.save(saveOptions);
         if (id) {
+          confirmSave();
           setShowModal(false);
           navigateTo({ id, newTitle });
         }
@@ -209,12 +221,11 @@ export const SaveVisButton = () => {
       datasetView.dataView,
       exploreId,
       navigateTo,
-      searchContext.query,
-      searchContext.filters,
+      container,
+      services.data.query.filterManager,
       toastNotifications,
-      isPromptMode,
-      queryEditorState.lastExecutedTranslatedQuery,
       transformationService,
+      confirmSave,
     ]
   );
 
@@ -234,7 +245,7 @@ export const SaveVisButton = () => {
     // If exploreId is defined, we're editing an existing saved visualization
     // Directly save without showing the modal
     if (exploreId !== undefined && savedExplore) {
-      if (!isVisDirty && !isQueryEditorDirty) {
+      if (!isEditorDirty) {
         navigateTo({ id: exploreId, newTitle: savedExplore.title });
         return;
       }
@@ -248,7 +259,7 @@ export const SaveVisButton = () => {
       // Show modal for new visualizations
       setShowModal(true);
     }
-  }, [exploreId, savedExplore, handleSave, isVisDirty, isQueryEditorDirty, navigateTo]);
+  }, [exploreId, savedExplore, handleSave, isEditorDirty, navigateTo]);
 
   const saveButton = (
     <EuiButtonEmpty
@@ -261,7 +272,7 @@ export const SaveVisButton = () => {
     </EuiButtonEmpty>
   );
 
-  const discardButtonColor = !isQueryEditorDirty && !isVisDirty ? 'primary' : 'danger';
+  const discardButtonColor = !isEditorDirty ? 'primary' : 'danger';
 
   const discardButton = (
     <EuiButtonEmpty

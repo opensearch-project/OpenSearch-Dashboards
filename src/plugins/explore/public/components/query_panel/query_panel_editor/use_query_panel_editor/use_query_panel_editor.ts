@@ -809,7 +809,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     (newText: string) => {
       setEditorText(newText);
 
-      if (!isQueryEditorDirty) {
+      if (!isQueryEditorDirty && handleEditorChange) {
         handleEditorChange({ isQueryEditorDirty: true });
       }
 

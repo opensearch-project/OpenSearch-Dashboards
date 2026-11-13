@@ -9,15 +9,12 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 import { QueryExecutionButton } from './query_execution_button';
 import { Query, TimeRange } from '../../../../../data/common';
-import {
-  EditorMode,
-  QueryExecutionStatus,
-} from '../../../application/utils/state_management/types';
+import { EditorMode } from '../../../application/utils/state_management/types';
 import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
-import { abortAllActiveQueries, SupportLanguageType } from '../query_builder/query_builder';
+import { SupportLanguageType } from '../query_builder/query_builder';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -26,7 +23,8 @@ export interface TopNavProps {
 
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, datasetView, queryEditorState } = useQueryBuilderState();
+  const { queryBuilder, container, datasetView, queryEditorState, hasTimeBasedRow, queryState } =
+    useQueryBuilderState();
   const { getEditorRef } = useEditorOperations();
 
   const {
@@ -45,66 +43,44 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     setScreenTitle(savedExplore?.id ? `Edit ${savedExplore?.title}` : 'Create');
   }, [savedExplore?.id, savedExplore?.title]);
 
-  const showDatePicker = useMemo(() => {
-    return dataset?.isTimeBased() ?? false;
-  }, [dataset]);
+  const showDatePicker = hasTimeBasedRow;
 
   // Custom onChange handler to track date range changes in query builder
   const handleQueryChange = useCallback(
-    (queryAndDateRange: { dateRange: any; query?: Query }) => {
-      if (queryAndDateRange.dateRange) {
-        queryBuilder.updateQueryEditorState({ dateRange: queryAndDateRange.dateRange });
+    (options: { dateRange: { from: string; to: string }; query?: Query }) => {
+      if (options.dateRange) {
+        container.updateMultiQueryEditorState({ dateRange: options.dateRange });
       }
     },
-    [queryBuilder]
+    [container]
   );
 
   const handleQuerySubmit = useCallback(
     async (payload?: { dateRange?: TimeRange; query?: Query }) => {
       // Update date range if provided
       if (payload?.dateRange) {
-        queryBuilder.updateQueryEditorState({ dateRange: payload.dateRange });
+        container.updateMultiQueryEditorState({ dateRange: payload.dateRange });
       }
 
       const editor = getEditorRef();
 
-      // update current query text only if on Query tab and not in Prompt mode
+      // update current query text only if not in Prompt/builder mode and not using promQL
       if (
         queryEditorState.editorMode !== EditorMode.Prompt &&
-        queryEditorState.activeBottomPanelTab === 'QUERY_TAB' &&
-        queryEditorState.languageType !== SupportLanguageType.promQL &&
+        queryState.language !== SupportLanguageType.promQL &&
         editor
       ) {
         queryBuilder.updateQueryState({ query: editor.getValue() });
       }
 
-      await queryBuilder.onQueryExecutionSubmit();
+      await container.executeAll();
     },
-    [
-      queryBuilder,
-      queryEditorState.editorMode,
-      queryEditorState.activeBottomPanelTab,
-      getEditorRef,
-      queryEditorState.languageType,
-    ]
+    [queryBuilder, container, queryEditorState.editorMode, getEditorRef, queryState.language]
   );
 
   const handleQueryCancel = useCallback(() => {
-    // Abort all active queries
-    abortAllActiveQueries();
-    queryBuilder.clearResultState();
-
-    // Reset query status to UNINITIALIZED to stop spinner immediately
-    queryBuilder.updateQueryEditorState({
-      queryStatus: {
-        status: QueryExecutionStatus.UNINITIALIZED,
-        startTime: undefined,
-        elapsedMs: undefined,
-        error: undefined,
-      },
-      userInitiatedQuery: false,
-    });
-  }, [queryBuilder]);
+    container.cancelAll();
+  }, [container]);
 
   const handleCustomButtonClick = useCallback(() => {
     handleQuerySubmit();
@@ -135,6 +111,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
+      groupedActionsBeforeDatePicker={true}
     />
   );
 };
