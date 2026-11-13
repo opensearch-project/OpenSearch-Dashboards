@@ -69,9 +69,11 @@ export const TableCellUI = ({
   // Prefer the explicitly-passed dataset; fall back to context for callers that
   // don't supply it.
   const dataset = datasetProp ?? contextDataset;
-  // Time values and every traces-page column keep the formatter's output.
+  const hasFieldFormat = Boolean(dataset?.fieldFormatMap?.[columnId]);
+  // Time values, every traces-page column and a field with a per-field format keep the
+  // formatter's output.
   const { jsonTreeValue, highlightTerms } = useJsonTreeValue(
-    isTimeField || isOnTracesPage ? undefined : fieldMapping,
+    isTimeField || isOnTracesPage || hasFieldFormat ? undefined : fieldMapping,
     sanitizedCellValue
   );
 

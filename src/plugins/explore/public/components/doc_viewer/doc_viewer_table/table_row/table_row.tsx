@@ -23,6 +23,9 @@ export interface Props {
   // True when this field is the dataset's configured time field. Used, together with
   // the date-typed check, to suppress value filters (see below).
   isTimeField?: boolean;
+  // True when the index pattern sets a per-field format for this field. Such a field keeps the
+  // formatter's output and never draws as a JSON tree.
+  hasFieldFormat?: boolean;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -40,6 +43,7 @@ export function DocViewTableRow({
   fieldMapping,
   fieldType,
   isTimeField,
+  hasFieldFormat,
   displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
@@ -64,7 +68,10 @@ export function DocViewTableRow({
   // OTEL startTime, are not date-typed).
   const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
   const disableValueFilter = isTimeField || isDateField;
-  const { jsonTreeValue, highlightTerms } = useJsonTreeValue(valueRaw, value);
+  const { jsonTreeValue, highlightTerms } = useJsonTreeValue(
+    hasFieldFormat ? undefined : valueRaw,
+    value
+  );
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>

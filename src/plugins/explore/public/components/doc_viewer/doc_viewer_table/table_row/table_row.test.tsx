@@ -306,5 +306,15 @@ describe('DocViewTableRow', () => {
       expect(valueElement).not.toHaveClass('exploreJsonTree');
       expect(valueElement.innerHTML).toBe('<strong>test value</strong>');
     });
+
+    it('keeps the formatted value for a field with a per-field format', () => {
+      renderWithJsonFormatOn(
+        <DocViewTableRow {...defaultProps} valueRaw={jsonValue} hasFieldFormat={true} />
+      );
+
+      const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+      expect(valueElement).not.toHaveClass('exploreJsonTree');
+      expect(valueElement.innerHTML).toBe('<strong>test value</strong>');
+    });
   });
 });

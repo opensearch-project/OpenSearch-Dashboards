@@ -733,5 +733,44 @@ describe('TableCell', () => {
         '<strong>test value</strong>'
       );
     });
+
+    it('keeps the formatted value for a field with a per-field format', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          dataset={{ ...mockDataset, fieldFormatMap: { 'test-column': {} } }}
+        />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).not.toBeInTheDocument();
+      expect(screen.getByTestId('osdDocTableCellDataField').innerHTML).toBe(
+        '<strong>test value</strong>'
+      );
+    });
+
+    it('draws the tree when the per-field format entry has no format', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          dataset={{ ...mockDataset, fieldFormatMap: { 'test-column': undefined } }}
+        />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).toBeInTheDocument();
+    });
+
+    it('draws the tree when only another field has a per-field format', () => {
+      const { container } = renderWithJsonFormatOn(
+        <TableCell
+          {...defaultProps}
+          fieldMapping={jsonValue}
+          dataset={{ ...mockDataset, fieldFormatMap: { other: {} } }}
+        />
+      );
+
+      expect(container.querySelector('.exploreJsonTree')).toBeInTheDocument();
+    });
   });
 });
