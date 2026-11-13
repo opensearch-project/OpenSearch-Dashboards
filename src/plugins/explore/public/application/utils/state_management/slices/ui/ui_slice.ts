@@ -21,7 +21,8 @@ export interface UIState {
    */
   showJsonFormat?: boolean;
   /**
-   * Opens up to 15 levels of each JSON tree in the table. Only applies while showJsonFormat is on.
+   * Opens up to 15 levels of each JSON tree in the table, or only the top level of a whole field
+   * value over 50,000 characters. Only applies while showJsonFormat is on.
    */
   expandAllJson?: boolean;
   metricsPageMode?: 'explore' | 'query';
