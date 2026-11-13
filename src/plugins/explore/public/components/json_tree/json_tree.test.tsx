@@ -484,8 +484,9 @@ describe('JsonTree', () => {
     render(<JsonTree value={parseJsonObjectOrArray(raw)!} raw={raw} inExpandedDocument />)
       .container;
 
-  it('opens each level of a tree of up to 15 levels whose own entries fit, however many entries it draws', () => {
-    const raw = JSON.stringify(keyed('k', 25, () => keyed('g', 25, () => keyed('l', 25, () => 1))));
+  // The last level stays small so the raw string stays under MAX_RAW_CHARS_TO_AUTO_OPEN.
+  it('opens each level of a tree of up to 15 levels whose own entries fit, however many entries it draws, within the raw limit', () => {
+    const raw = JSON.stringify(keyed('k', 25, () => keyed('g', 25, () => keyed('l', 5, () => 1))));
     // The root, its 25 groups and their 625 groups.
     expect(openStates(drawInExpandedDocument(raw)).filter(Boolean)).toHaveLength(651);
   });
@@ -687,5 +688,62 @@ describe('JsonTree with Expand all on in Table settings', () => {
       </JsonTreeSettingsContext.Provider>
     );
     expect(openStates(container)).toEqual([true, true, true]);
+  });
+});
+
+describe('JsonTree around the 50,000 character raw limit', () => {
+  // A small branch next to a long value, padded so the raw string is exactly `length` characters.
+  const rawOfLength = (length: number) => {
+    const unpadded = JSON.stringify({ a: { b: 1 }, pad: '' }).length;
+    const raw = JSON.stringify({ a: { b: 1 }, pad: 'x'.repeat(length - unpadded) });
+    expect(raw).toHaveLength(length);
+    return raw;
+  };
+  const containerWithExpandAll = (raw: string) =>
+    render(
+      <JsonTreeSettingsContext.Provider value={{ showJsonFormat: true, expandAllJson: true }}>
+        <JsonTree value={parseJsonObjectOrArray(raw)!} raw={raw} />
+      </JsonTreeSettingsContext.Provider>
+    ).container;
+
+  it('opens a small branch with Expand all on a raw string of exactly 50,000 characters', () => {
+    expect(openStates(containerWithExpandAll(rawOfLength(50000)))).toEqual([true, true]);
+  });
+
+  it('opens only the root with Expand all on a raw string of 50,001 characters', () => {
+    expect(openStates(containerWithExpandAll(rawOfLength(50001)))).toEqual([true, false]);
+  });
+
+  it('opens only the root in the expanded document on a raw string of 50,001 characters', () => {
+    const raw = rawOfLength(50001);
+    const { container } = render(
+      <JsonTree value={parseJsonObjectOrArray(raw)!} raw={raw} inExpandedDocument />
+    );
+    expect(openStates(container)).toEqual([true, false]);
+  });
+
+  it('opens a branch that holds a search match on a raw string of exactly 50,000 characters', () => {
+    expect(openStates(renderTree(rawOfLength(50000), ['b']).container)).toEqual([true, true]);
+  });
+
+  it('keeps a branch that holds a search match closed on a raw string of 50,001 characters', () => {
+    expect(openStates(renderTree(rawOfLength(50001), ['b']).container)).toEqual([true, false]);
+  });
+
+  it('counts the whitespace around the JSON toward the limit', () => {
+    const raw = `${JSON.stringify({ a: { b: 1 } })}${' '.repeat(50001)}`;
+    expect(openStates(containerWithExpandAll(raw))).toEqual([true, false]);
+  });
+
+  it('opens a branch on a click past the limit and keeps the branches inside it closed', async () => {
+    const unpadded = JSON.stringify({ a: { b: { c: 1 } }, pad: '' }).length;
+    const raw = JSON.stringify({ a: { b: { c: 1 } }, pad: 'x'.repeat(50001 - unpadded) });
+    const container = containerWithExpandAll(raw);
+    expect(openStates(container)).toEqual([true, false]);
+
+    fireEvent.click(summaryFor(container, 'a'));
+    await settle();
+
+    expect(openStates(container)).toEqual([true, true, false]);
   });
 });

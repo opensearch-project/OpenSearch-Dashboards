@@ -211,7 +211,7 @@ export const TableActionsPopoverButton = () => {
                   })}
                   content={i18n.translate('explore.discover.expandAllJsonInfo', {
                     defaultMessage:
-                      'Opens up to 15 levels of each JSON tree. An object or array over 1,000 characters of its own starts closed',
+                      'Opens up to 15 levels of each JSON tree. An object or array over 1,000 characters of its own starts closed, and a whole field value over 50,000 characters opens only its top level',
                   })}
                   iconProps={{
                     // @ts-expect-error TS2353 iconProps is typed as Omit<unknown, 'type'> in this EUI version

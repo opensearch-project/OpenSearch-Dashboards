@@ -138,6 +138,12 @@ const MAX_BRANCH_CHARS_TO_AUTO_OPEN = 1000;
 // expandAllJson doc in ui_slice.ts state this number too.
 const MAX_LEVELS_TO_AUTO_OPEN = 15;
 
+// A raw string longer than this many characters opens only its root by itself. The branch limit
+// above bounds one branch and the level limit bounds only depth, so neither bounds how many nodes
+// the tree mounts. A click opens that branch only. The Expand all tooltip and the expandAllJson
+// doc in ui_slice.ts state this number too.
+const MAX_RAW_CHARS_TO_AUTO_OPEN = 50000;
+
 const ownEntriesFit = (branch: JsonObjectOrArray) => {
   const isArray = Array.isArray(branch);
   // The brackets, less the comma the last entry does not have.
@@ -291,7 +297,8 @@ interface JsonTreeProps {
   raw: string;
   highlightTerms?: string[];
   // Set by the expanded document's Table tab, which opens up to MAX_LEVELS_TO_AUTO_OPEN
-  // levels, each branch only while its own entries fit.
+  // levels, each branch only while its own entries fit and the raw string is within
+  // MAX_RAW_CHARS_TO_AUTO_OPEN.
   inExpandedDocument?: boolean;
   'data-test-subj'?: string;
 }
@@ -310,6 +317,7 @@ export const JsonTree = ({
 }: JsonTreeProps) => {
   const { expandAllJson } = useContext(JsonTreeSettingsContext);
   const opensFittingBranches = inExpandedDocument || expandAllJson;
+  const rawFits = raw.length <= MAX_RAW_CHARS_TO_AUTO_OPEN;
   const [showRaw, setShowRaw] = useState(false);
   const highlightPattern = useHighlightPattern(highlightTerms);
   // The root always starts open. A deeper branch runs this rule when it first draws and again when
@@ -317,13 +325,14 @@ export const JsonTree = ({
   const shouldStartOpen = useCallback(
     (branch: JsonObjectOrArray, level: number) =>
       level === 1 ||
-      (level <= MAX_LEVELS_TO_AUTO_OPEN &&
+      (rawFits &&
+        level <= MAX_LEVELS_TO_AUTO_OPEN &&
         (opensFittingBranches
           ? ownEntriesFit(branch)
           : highlightPattern !== undefined &&
             ownEntriesFit(branch) &&
             containsMatch(branch, highlightPattern))),
-    [opensFittingBranches, highlightPattern]
+    [rawFits, opensFittingBranches, highlightPattern]
   );
 
   return (
