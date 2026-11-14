@@ -200,6 +200,23 @@ jest.doMock('../../../../../../data/public', () => {
         >
           Load From Flyout
         </button>
+        <button
+          data-test-subj="mock-load-ppl-button"
+          onClick={() =>
+            onLoad({
+              id: 'ppl-query-id',
+              attributes: {
+                query: {
+                  query: 'source = logs | head 10',
+                  language: 'PPL',
+                  dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+                },
+              },
+            })
+          }
+        >
+          Load PPL Query
+        </button>
         <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
           Clear Query
         </button>
@@ -642,7 +659,7 @@ describe('SaveQueryButton', () => {
           type === 'EXPLICIT_RUN_TYPE'
             ? { meta: { requiresExplicitRun: true } }
             : type === 'INDEX_PATTERN'
-              ? { meta: {} }
+              ? { meta: {}, supportedLanguages: () => ['PPL', 'SQL'] }
               : undefined,
       }));
     };
@@ -828,6 +845,23 @@ describe('SaveQueryButton', () => {
       );
       expect(mockLoadQueryActionCreator.mock.calls[0][3]).toEqual(INDEX_PATTERN);
       expect(mockTimeFilter.setTime).not.toHaveBeenCalled();
+    });
+
+    it('is not read again for a PPL query on an index pattern, and loads as before', async () => {
+      registerTypes();
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+      fireEvent.click(screen.getByTestId('mock-load-ppl-button'));
+
+      await waitFor(() =>
+        expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/executeQueries/pending' })
+      );
+      expect(mockSavedQueryService.getSavedQuery).not.toHaveBeenCalled();
+      expect(slices.setQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({ language: 'PPL', dataset: INDEX_PATTERN })
+      );
+      expect(mockLoadQueryActionCreator.mock.calls[0][2]).toBe('source = logs | head 10');
+      expect(mockLoadQueryActionCreator.mock.calls[0][3]).toEqual(INDEX_PATTERN);
     });
 
     it('is not switched to when its type is no longer registered', async () => {

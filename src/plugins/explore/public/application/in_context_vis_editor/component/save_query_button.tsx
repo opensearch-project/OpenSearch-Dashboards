@@ -22,6 +22,7 @@ import { QueryState } from '../query_builder/query_builder';
 import {
   getDatasetForSavedQuery,
   getStoredSavedQueryDataset,
+  savedQueryMayHaveStoredDataset,
 } from '../../utils/saved_query_dataset';
 
 export const SaveQueryButton = () => {
@@ -122,11 +123,17 @@ export const SaveQueryButton = () => {
       // Only the latest pick applies: a load reads the saved object first (see save_query.tsx).
       const loadId = ++latestLoadRef.current;
       // A query saved with its dataset (not an index pattern or index) loads on that dataset.
-      const storedDataset = await getStoredSavedQueryDataset(
-        savedQueryService,
+      const storedDataset = savedQueryMayHaveStoredDataset(
         services.data?.query?.queryString,
+        queryBuilder.queryState$.getValue()?.dataset,
         savedQuery
-      );
+      )
+        ? await getStoredSavedQueryDataset(
+            savedQueryService,
+            services.data?.query?.queryString,
+            savedQuery
+          )
+        : undefined;
       if (loadId !== latestLoadRef.current) return;
       setCurrentSavedQueryId(savedQuery.id);
       // Only a switch takes the stored dataset: it holds just the fields the saved query mapping

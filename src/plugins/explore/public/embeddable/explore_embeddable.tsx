@@ -17,6 +17,7 @@ import {
   getTime,
   UI_SETTINGS,
   IFieldType,
+  Query,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
 import {
@@ -41,7 +42,8 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { SAMPLE_SIZE_SETTING } from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import { datasetRequiresExplicitRun } from '../application/utils/requires_explicit_run';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -102,6 +104,13 @@ export interface SearchProps {
   indexPattern?: IndexPattern;
   hits?: number;
   isLoading?: boolean;
+  /**
+   * Whether the panel's dataset needs an explicit Run (DatasetTypeConfig meta.requiresExplicitRun).
+   * The Logs-tab columns and the loading state differ for those; other sources are as before.
+   */
+  requiresExplicitRun?: boolean;
+  /** The doc_table:hideTimeColumn setting, for the columns of a panel of another source. */
+  displayTimeColumn?: boolean;
   error?: ExpressionRenderError;
   services: ExploreServices;
   chartRender?: () => any;
@@ -187,6 +196,7 @@ export class ExploreEmbeddable
   // The inputs of the last fetch, undefined until the first one.
   private prevState?: {
     filters: Filter[] | undefined;
+    query: Query | undefined;
     timeRange: TimeRange | undefined;
   };
   private node?: HTMLElement;
@@ -401,6 +411,11 @@ export class ExploreEmbeddable
       services: this.services,
       indexPattern,
       isLoading: false,
+      requiresExplicitRun: datasetRequiresExplicitRun(
+        this.services.data?.query?.queryString,
+        searchSource.getField('query')?.dataset
+      ),
+      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
       variables: this.interpolationService.getVariables(),
     };
@@ -536,13 +551,15 @@ export class ExploreEmbeddable
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
-    const { filters, timeRange } = this.input;
-    // The dashboard's query (DQL or Lucene) is not compared: the panel runs its own query, which
-    // the dashboard query can't be combined with, so a change to it alone returns the same rows.
+    const { filters, query, timeRange } = this.input;
+    // For a dataset that needs an explicit Run, the dashboard's query (DQL or Lucene) is not
+    // compared: the panel runs its own query, which the dashboard query can't be combined with, so
+    // a change to it alone returns the same rows and only costs a billed scan.
     const fetchRequested =
       force ||
       !this.prevState ||
       !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      (!searchProps.requiresExplicitRun && !isEqual(query, this.prevState.query)) ||
       !isEqual(timeRange, this.prevState.timeRange);
 
     // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
@@ -566,7 +583,7 @@ export class ExploreEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
 
     if (needFetch) {
-      this.prevState = { filters, timeRange };
+      this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
 
       // Apply dashboard filters to the SearchSource (same as PPL)

@@ -26,6 +26,7 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { EditorMode } from '../../utils/state_management/types';
 import { ContainerState, CONTAINER_URL_KEY } from '../types';
 import { SupportLanguageType } from '../query_builder/query_builder';
+import { datasetRequiresExplicitRun } from '../../utils/requires_explicit_run';
 import {
   getUnrunQueryEdit,
   UnrunQueryEdit,
@@ -254,14 +255,27 @@ export const SaveVisButton = () => {
   // language change emptied it. The editor's unrun edits aren't part of it: they are what Run
   // would run (the editor's text in Query mode on the query tab; other editors, the PromQL rows
   // and the builders, write their edits to the query state as they go).
+  // These checks are for a dataset that needs an explicit Run (now, or in the last run); other
+  // sources save as they always have.
+  const isExplicitRun = useCallback(
+    (): boolean =>
+      datasetRequiresExplicitRun(services.data?.query?.queryString, queryState?.dataset) ||
+      datasetRequiresExplicitRun(
+        services.data?.query?.queryString,
+        queryBuilder?.getLastRunQueryState?.()?.dataset
+      ),
+    [services.data?.query?.queryString, queryState?.dataset, queryBuilder]
+  );
+
   const getUnrunEdit = useCallback((): UnrunQueryEdit | undefined => {
-    if (isPromptMode) return undefined;
+    if (isPromptMode || !isExplicitRun()) return undefined;
     if ((queryEditorState.activeBottomPanelTab ?? 'QUERY_TAB') !== 'QUERY_TAB') return undefined;
     if (queryEditorState.languageType === SupportLanguageType.promQL) return undefined;
     const editor = queryBuilder?.getEditor?.();
     return getUnrunQueryEdit(queryState?.query, editor ? editor.getValue() : undefined);
   }, [
     isPromptMode,
+    isExplicitRun,
     queryEditorState.activeBottomPanelTab,
     queryEditorState.languageType,
     queryBuilder,
@@ -271,20 +285,21 @@ export const SaveVisButton = () => {
   // A dataset pick or a language change that empties the query, not run since: saving it would
   // replace the chart's query with an empty one, which the chart can't be drawn from.
   const isQueryEmptiedSinceRun = useCallback((): boolean => {
-    if (isPromptMode) return false;
+    if (isPromptMode || !isExplicitRun()) return false;
     const lastRunQuery = queryBuilder?.getLastRunQueryState?.()?.query ?? '';
     return !(queryState?.query ?? '').trim() && !!lastRunQuery.trim();
-  }, [isPromptMode, queryBuilder, queryState?.query]);
+  }, [isPromptMode, isExplicitRun, queryBuilder, queryState?.query]);
 
   // A dataset pick keeps the query (dataset_select), so the text can be unchanged while the dataset
   // isn't the one it ran on: the chart's axes come from the last run's columns, and saving the new
   // dataset with them can leave a panel that can't load.
   const isDatasetChangedSinceRun = useCallback((): boolean => {
+    if (!isExplicitRun()) return false;
     const lastRun = queryBuilder?.getLastRunQueryState?.()?.dataset;
     const current = queryState?.dataset;
     if (!lastRun || !current) return false;
     return lastRun.id !== current.id || lastRun.type !== current.type;
-  }, [queryBuilder, queryState?.dataset]);
+  }, [isExplicitRun, queryBuilder, queryState?.dataset]);
 
   const saveExisting = useCallback(async () => {
     if (exploreId === undefined || !savedExplore) return;

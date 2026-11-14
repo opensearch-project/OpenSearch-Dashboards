@@ -48,6 +48,7 @@ import {
   SavedQueryService,
 } from '../../../../../../../../data/public';
 import { MetricsEmptyState } from '../../../../../pages/metrics/explore/components/metrics_empty_state';
+import { datasetRequiresExplicitRun } from '../../../../../utils/requires_explicit_run';
 import {
   getExplorationSource,
   getNoMetricsBody,
@@ -203,9 +204,11 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         newSampleQueries.push(...languageSampleQueries);
       }
     }
-    // Shown on their own unless the dataset type adds its samples below (a language can define
-    // samples while its dataset type defines none).
-    setSampleQueries(newSampleQueries);
+    // For an explicit-Run dataset type, shown on their own unless the type adds its samples below
+    // (a language can define samples while its dataset type defines none).
+    if (datasetRequiresExplicitRun(queryString, query?.dataset)) {
+      setSampleQueries(newSampleQueries);
+    }
 
     // Samples for the dataset type
     if (query?.dataset?.type) {

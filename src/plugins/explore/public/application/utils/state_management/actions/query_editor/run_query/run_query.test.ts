@@ -238,22 +238,57 @@ describe('runQueryActionCreator', () => {
     });
   });
 
-  it('dispatches detectAndSetOptimalTab for the same query when no tab has been chosen yet', async () => {
+  it('dispatches detectAndSetOptimalTab for the same query when an explicit-Run dataset has no tab yet', async () => {
     // e.g. a link without a tab, to a dataset that needs an explicit Run: the page load didn't run
     // the query or pick a tab, and the first Run keeps the linked query text.
-    mockGetState.mockReturnValue({ query: { query: previousQuery }, ui: { activeTabId: '' } });
+    const services = {
+      data: {
+        query: {
+          queryString: {
+            getDatasetService: () => ({
+              getType: () => ({ meta: { requiresExplicitRun: true } }),
+            }),
+          },
+        },
+      },
+    } as any;
+    mockGetState.mockReturnValue({
+      query: { query: previousQuery, dataset: { id: 'ds', type: 'LOGS' } },
+      ui: { activeTabId: '' },
+    });
 
-    await runQueryActionCreator(mockServices, previousQuery)(mockDispatch, mockGetState);
+    await runQueryActionCreator(services, previousQuery)(mockDispatch, mockGetState);
 
-    expect(detectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
+    expect(detectAndSetOptimalTab).toHaveBeenCalledWith({ services });
     expect(mockDispatch).toHaveBeenNthCalledWith(5, {
       type: 'detectAndSetOptimalTab',
-      payload: { services: mockServices },
+      payload: { services },
     });
     expect(mockDispatch).toHaveBeenNthCalledWith(6, {
       type: 'executeQueries',
-      payload: { services: mockServices },
+      payload: { services },
     });
+  });
+
+  it('skips detectAndSetOptimalTab for the same query on an OpenSearch dataset with no tab yet', async () => {
+    const services = {
+      data: {
+        query: {
+          queryString: {
+            getDatasetService: () => ({ getType: () => ({ meta: {} }) }),
+          },
+        },
+      },
+    } as any;
+    mockGetState.mockReturnValue({
+      query: { query: previousQuery, dataset: { id: 'ds', type: 'INDEX_PATTERN' } },
+      ui: { activeTabId: '' },
+    });
+
+    await runQueryActionCreator(services, previousQuery)(mockDispatch, mockGetState);
+
+    expect(detectAndSetOptimalTab).not.toHaveBeenCalled();
+    expect(executeQueries).toHaveBeenCalledWith({ services });
   });
 
   // The run clears every result and status, so a query still running for another text could

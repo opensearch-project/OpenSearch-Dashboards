@@ -87,6 +87,7 @@ import {
   executeLatencyQuery,
 } from './trace_query_actions';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
+import { datasetRequiresExplicitRun } from '../../requires_explicit_run';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -1118,6 +1119,8 @@ const executeQueryBase = async (
       !isHistogramQuery &&
       !queryIsAggregation(queryString, {
         patternsDefaultMode: getPatternsDefaultMode(getState().query),
+        // A query of an explicit-Run source can start with a command (`stats count(*) by level`).
+        leadingCommand: datasetRequiresExplicitRun(services.data.query.queryString, query.dataset),
       });
 
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {

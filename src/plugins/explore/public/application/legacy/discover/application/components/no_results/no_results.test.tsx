@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { DiscoverNoResults } from './no_results';
 import { ExploreFlavor } from '../../../../../../../common';
 import {
@@ -123,13 +123,16 @@ describe('DiscoverNoResults PromQL branch', () => {
 describe('DiscoverNoResults sample queries', () => {
   const languageSamples = [{ title: 'Language sample', query: 'language query' }];
 
-  const makeSampleDeps = (getSampleQueries?: jest.Mock) => {
+  const makeSampleDeps = (getSampleQueries?: jest.Mock, requiresExplicitRun = true) => {
     const { queryString, savedQuery } = makeDeps();
     queryString.getLanguageService.mockReturnValue({
       getLanguage: () => ({ sampleQueries: languageSamples }),
     });
     queryString.getDatasetService.mockReturnValue({
-      getType: () => (getSampleQueries ? { getSampleQueries } : {}),
+      getType: () => ({
+        meta: { requiresExplicitRun },
+        ...(getSampleQueries ? { getSampleQueries } : {}),
+      }),
     });
     return { queryString, savedQuery };
   };
@@ -149,12 +152,24 @@ describe('DiscoverNoResults sample queries', () => {
       />
     );
 
-  it("shows the language's samples when the dataset type has none", async () => {
+  it("shows the language's samples when an explicit-Run dataset type has none", async () => {
     renderWith(makeSampleDeps());
 
     expect(await screen.findByText('Sample Queries')).toBeInTheDocument();
     expect(screen.getByText('Language sample')).toBeInTheDocument();
     expect(screen.getByText('language query')).toBeInTheDocument();
+  });
+
+  it('shows no samples when another dataset type has none, even if the language does', async () => {
+    const deps = makeSampleDeps(undefined, false);
+    renderWith(deps);
+
+    expect(
+      await screen.findByRole('heading', { level: 2, name: 'No Results' })
+    ).toBeInTheDocument();
+    await waitFor(() => expect(deps.savedQuery.findSavedQueries).toHaveBeenCalled());
+    expect(screen.queryByText('Sample Queries')).not.toBeInTheDocument();
+    expect(screen.queryByText('Language sample')).not.toBeInTheDocument();
   });
 
   it("lists the dataset type's samples before the language's", async () => {

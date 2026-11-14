@@ -5,7 +5,12 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../data/common';
+import {
+  Dataset,
+  datasetTypeRequiresExplicitRun,
+  DEFAULT_DATA,
+  EMPTY_QUERY,
+} from '../../../../../data/common';
 import { ExploreServices } from '../../../types';
 import { EXPLORE_DEFAULT_LANGUAGE, ExploreFlavor } from '../../../../common';
 import {
@@ -46,6 +51,21 @@ export const DatasetSelectWidget = () => {
   } = services;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Whether the dataset's type needs an explicit Run (DatasetTypeConfig meta.requiresExplicitRun).
+  const requiresExplicitRun = useCallback(
+    (dataset: Dataset): boolean => {
+      try {
+        return datasetTypeRequiresExplicitRun(
+          queryString.getDatasetService?.()?.getType(dataset.type),
+          dataset
+        );
+      } catch {
+        return false;
+      }
+    },
+    [queryString]
+  );
 
   // The languages the dataset's type can run, or undefined when its type isn't known.
   const getTypeLanguages = useCallback(
@@ -97,7 +117,8 @@ export const DatasetSelectWidget = () => {
         const namesPreviousDataset =
           namesItsDataset(currentQuery, currentLanguage) ||
           (!!previousTitle && currentQuery.includes(previousTitle));
-        if (runsCurrentLanguage && !namesPreviousDataset) {
+        // Only for a dataset that needs an explicit Run; other sources start from an empty query.
+        if (runsCurrentLanguage && !namesPreviousDataset && requiresExplicitRun(dataset)) {
           queryBuilder.updateQueryState({ dataset });
           queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
           return;
@@ -123,6 +144,7 @@ export const DatasetSelectWidget = () => {
       queryBuilder,
       queryState,
       getTypeLanguages,
+      requiresExplicitRun,
       services.notifications?.toasts,
     ]
   );

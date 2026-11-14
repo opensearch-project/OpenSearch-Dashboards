@@ -17,22 +17,40 @@ jest.mock('../slices', () => ({
 
 const mockServices = {} as any;
 
+// Services whose dataset types are looked up: only 'LOGS' requires an explicit Run.
+const explicitRunServices = {
+  data: {
+    query: {
+      queryString: {
+        getDatasetService: () => ({
+          getType: (type: string) =>
+            type === 'LOGS' ? { meta: { requiresExplicitRun: true } } : { meta: {} },
+        }),
+      },
+    },
+  },
+} as any;
+
 /**
  * Helper to build a minimal RootState-like object for getState().
  */
-const buildState = (query: string, activeTabId: string) => ({
-  query: { query },
+const buildState = (query: string, activeTabId: string, datasetType?: string) => ({
+  query: { query, ...(datasetType ? { dataset: { id: 'ds', type: datasetType } } : {}) },
   ui: { activeTabId },
 });
 
 /**
  * Invokes the thunk and returns the tab id that was dispatched via setActiveTab.
  */
-const runDetect = async (query: string, activeTabId: string): Promise<string> => {
+const runDetect = async (
+  query: string,
+  activeTabId: string,
+  { datasetType, services = mockServices }: { datasetType?: string; services?: any } = {}
+): Promise<string> => {
   const mockDispatch = jest.fn();
-  const mockGetState = jest.fn().mockReturnValue(buildState(query, activeTabId));
+  const mockGetState = jest.fn().mockReturnValue(buildState(query, activeTabId, datasetType));
 
-  const thunk = detectAndSetOptimalTab({ services: mockServices });
+  const thunk = detectAndSetOptimalTab({ services });
   await thunk(mockDispatch, mockGetState, undefined);
 
   // setActiveTab is called inside the thunk via dispatch
@@ -57,9 +75,20 @@ describe('detectAndSetOptimalTab', () => {
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
     });
 
-    it('switches to Statistics when the query starts with stats (no source clause)', async () => {
-      const tab = await runDetect('stats count(*) by host', EXPLORE_LOGS_TAB_ID);
+    it('switches to Statistics when the query starts with stats, for an explicit-Run dataset', async () => {
+      const tab = await runDetect('stats count(*) by host', EXPLORE_LOGS_TAB_ID, {
+        datasetType: 'LOGS',
+        services: explicitRunServices,
+      });
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('stays on Logs when the query starts with stats, for an OpenSearch dataset', async () => {
+      const tab = await runDetect('stats count(*) by host', EXPLORE_LOGS_TAB_ID, {
+        datasetType: 'INDEX_PATTERN',
+        services: explicitRunServices,
+      });
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
     });
 
     it('switches to Statistics when query contains | table', async () => {

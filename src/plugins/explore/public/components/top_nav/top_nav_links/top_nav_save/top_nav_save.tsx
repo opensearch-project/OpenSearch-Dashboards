@@ -34,6 +34,7 @@ import { getUnrunQueryEdit, UnrunQueryEditCallout } from '../../../../helpers/un
 import { prepareQueryForLanguage } from '../../../../application/utils/languages';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { Query } from '../../../../../../data/common';
+import { datasetRequiresExplicitRun } from '../../../../application/utils/requires_explicit_run';
 
 // One label for both the tooltip and the aria-label: "Save" alone was too easily confused with
 // the query panel's "Save query" control, which persists something different.
@@ -152,8 +153,16 @@ export const getSaveButtonRun =
     // an unedited builder query would read as an unrun edit.
     //
     const lastRunQuery = editorText === undefined ? preparedQueryOf(query) : query?.query;
-    const unrunQueryEdit = query ? getUnrunQueryEdit(lastRunQuery, draft) : undefined;
-    const searchContextToSave = getSearchContextToSave(searchContext, query);
+    // Only for a dataset that needs an explicit Run: other sources save as they always have.
+    const explicitRun = datasetRequiresExplicitRun(
+      services.data?.query?.queryString,
+      query?.dataset
+    );
+    const unrunQueryEdit =
+      explicitRun && query ? getUnrunQueryEdit(lastRunQuery, draft) : undefined;
+    const searchContextToSave = explicitRun
+      ? getSearchContextToSave(searchContext, query)
+      : searchContext;
 
     const onSave = async ({
       newTitle,
@@ -171,6 +180,11 @@ export const getSaveButtonRun =
       const hasRun =
         !!Object.keys(editorState?.queryStatusMap ?? {}).length && !editorState?.isSelectionStale;
       if (
+        (explicitRun ||
+          datasetRequiresExplicitRun(
+            services.data?.query?.queryString,
+            storedQueryOf(savedExplore)?.dataset
+          )) &&
         !hasRun &&
         !!savedExplore.id &&
         !newCopyOnSave &&
