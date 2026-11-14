@@ -221,24 +221,29 @@ async function migrateSourceToDest(context: Context) {
     await Index.convertToAlias(client, source, alias, batchSize, context.convertToAliasScript);
   }
 
-  const read = Index.reader(client, source.indexName, { batchSize, scrollDuration });
+  const { read, close } = Index.reader(client, source.indexName, { batchSize, scrollDuration });
 
   log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
 
-  while (true) {
-    const docs = await read();
+  try {
+    while (true) {
+      const docs = await read();
 
-    if (!docs || !docs.length) {
-      return;
+      if (!docs || !docs.length) {
+        return;
+      }
+
+      // @ts-expect-error TS2345 TODO Fix me
+      log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
+
+      await Index.write(
+        client,
+        dest.indexName,
+        await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      );
     }
-
-    // @ts-expect-error TS2345 TODO Fix me
-    log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
-
-    await Index.write(
-      client,
-      dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
-    );
+  } catch (e) {
+    await close().catch(() => {});
+    throw e;
   }
 }

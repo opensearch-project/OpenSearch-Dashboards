@@ -785,6 +785,29 @@ describe('IndexMigrator', () => {
       `"error migrating document"`
     );
   });
+
+  test('clears the scroll when the migration fails', async () => {
+    const { client } = testOpts;
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: jest.fn(() => {
+        throw new Error('error migrating document');
+      }),
+    };
+
+    withIndex(client, { numOutOfDate: 1 });
+    client.search.mockReturnValue(
+      opensearchClientMock.createSuccessTransportRequestPromise({
+        _scroll_id: 'scroll-1',
+        _shards: { successful: 1, total: 1 },
+        hits: { hits: [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }] },
+      } as any)
+    );
+
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow('error migrating document');
+    expect(client.clearScroll).toHaveBeenCalledWith({ scroll_id: 'scroll-1' });
+  });
 });
 
 function withIndex(
