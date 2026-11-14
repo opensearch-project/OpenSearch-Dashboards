@@ -9,6 +9,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRowContent } from './table_row_content';
+import { setOsdFieldOverrides } from '../../../../../data/common';
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
@@ -235,6 +236,69 @@ describe('TableRowContent', () => {
 
     expect(screen.getByTestId('non-filterable-cell-field1')).toBeInTheDocument();
     expect(screen.queryByTestId('table-cell-field1')).not.toBeInTheDocument();
+  });
+
+  describe('a column without field info', () => {
+    afterEach(() => setOsdFieldOverrides(undefined));
+
+    it("offers no value filters when the query language's fields aren't filterable", () => {
+      setOsdFieldOverrides({ filterable: false });
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('non-filterable-cell-field1')).toBeInTheDocument();
+      expect(screen.queryByTestId('table-cell-field1')).not.toBeInTheDocument();
+    });
+
+    it('disables value filters on the traces page when the language says so', () => {
+      setOsdFieldOverrides({ filterable: false });
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent
+              {...(defaultProps as any)}
+              isOnTracesPage={true}
+              columns={['field1']}
+            />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'true'
+      );
+    });
+
+    it('keeps value filters when the language leaves filtering to the fields', () => {
+      // e.g. a PPL `eval` field: PPL can filter on it although the dataset doesn't list it.
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'false'
+      );
+    });
   });
 
   it('keeps a non-filterable Span ID column as an interactive TableCell on the traces page', () => {

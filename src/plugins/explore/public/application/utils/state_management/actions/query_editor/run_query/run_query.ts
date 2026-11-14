@@ -25,6 +25,9 @@ export const runQueryActionCreator =
   (services: ExploreServices, query?: string) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     const previousQuery = getState().query.query;
+    // No tab chosen yet: the page loaded without running (e.g. a link to a dataset that needs an
+    // explicit Run) and without a tab in the URL, so this first Run picks it.
+    const hasActiveTab = !!getState().ui?.activeTabId;
 
     if (typeof query === 'string') {
       dispatch(setQueryStringWithHistory(query));
@@ -33,10 +36,9 @@ export const runQueryActionCreator =
     dispatch(clearQueryStatusMap());
     dispatch(setIsQueryEditorDirty(false));
 
-    // Only re-detect the optimal tab when the query text actually changed.
-    // Time-only refreshes (no query param or same query) should preserve the
-    // current tab choice.
-    if (query !== previousQuery) {
+    // Only re-detect the optimal tab when the query text actually changed, or when no tab has
+    // been chosen yet. Time-only refreshes (same query) should preserve the current tab choice.
+    if (query !== previousQuery || !hasActiveTab) {
       await dispatch(detectAndSetOptimalTab({ services }));
     }
 

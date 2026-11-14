@@ -60,7 +60,7 @@ describe('runQueryActionCreator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetState.mockReturnValue({ query: { query: previousQuery } });
+    mockGetState.mockReturnValue({ query: { query: previousQuery }, ui: { activeTabId: 'logs' } });
   });
 
   it('dispatches detectAndSetOptimalTab when query differs from previous query', async () => {
@@ -234,6 +234,24 @@ describe('runQueryActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(6, {
       type: 'queryEditor/setQueryExecutionButtonStatus',
       payload: 'REFRESH',
+    });
+  });
+
+  it('dispatches detectAndSetOptimalTab for the same query when no tab has been chosen yet', async () => {
+    // e.g. a link without a tab, to a dataset that needs an explicit Run: the page load didn't run
+    // the query or pick a tab, and the first Run keeps the linked query text.
+    mockGetState.mockReturnValue({ query: { query: previousQuery }, ui: { activeTabId: '' } });
+
+    await runQueryActionCreator(mockServices, previousQuery)(mockDispatch, mockGetState);
+
+    expect(detectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
+    expect(mockDispatch).toHaveBeenNthCalledWith(5, {
+      type: 'detectAndSetOptimalTab',
+      payload: { services: mockServices },
+    });
+    expect(mockDispatch).toHaveBeenNthCalledWith(6, {
+      type: 'executeQueries',
+      payload: { services: mockServices },
     });
   });
 });
