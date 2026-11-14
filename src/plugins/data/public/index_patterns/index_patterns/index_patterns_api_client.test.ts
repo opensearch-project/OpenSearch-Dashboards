@@ -63,4 +63,12 @@ describe('IndexPatternsApiClient', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
+
+  test('uses the standard URI to fetch fields for dataset types', async function () {
+    const expectedPath = '/api/index_patterns/_fields_for_wildcard';
+
+    await indexPatternsApiClient.getFieldsForWildcard({ type: 'INDEXES' });
+
+    expect(fetchSpy).toHaveBeenLastCalledWith(expectedPath, expect.any(Object));
+  });
 });
