@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useSavedExplore } from './use_saved_explore';
@@ -26,6 +26,8 @@ import { useSetEditorText } from '../../hooks';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+import { takeSavedSearchOpenedBySave } from '../saved_search_opened_by_save';
+import { SavedExplore } from '../../../types/saved_explore_types';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -35,12 +37,18 @@ export const useInitPage = () => {
   const setEditorText = useSetEditorText();
   const { chrome, data } = services;
   const visualizationBuilder = getVisualizationBuilder();
+  // The saved search that its own save opened (see saved_search_opened_by_save).
+  const openedBySaveRef = useRef<SavedExplore | undefined>(undefined);
 
   useEffect(() => {
     if (savedExplore && !error) {
       if (savedExplore.id) {
         // Deserialize state from saved object
         const { title } = savedExplore;
+        if (takeSavedSearchOpenedBySave(savedExplore.id)) openedBySaveRef.current = savedExplore;
+        // Saved from this page: the editor keeps its text, unrun edits included, the query state
+        // already is the query that was saved, and the results on screen are its results.
+        const openedBySave = openedBySaveRef.current === savedExplore;
 
         // Update browser title and breadcrumbs
         chrome.docTitle.change(title);
@@ -50,7 +58,7 @@ export const useInitPage = () => {
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
         const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
         let restoredDataset;
-        if (searchSourceFields?.searchSourceJSON) {
+        if (searchSourceFields?.searchSourceJSON && !openedBySave) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
           const query = {
@@ -69,6 +77,17 @@ export const useInitPage = () => {
         // Update savedSearch to store just the ID (like discover)
         // TODO: remove this once legacy state is not consumed any more
         dispatch(setSavedSearch(savedExplore.id));
+
+        // Add to recently accessed
+        chrome.recentlyAccessed.add(
+          `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
+          title,
+          savedExplore.id,
+          { type: 'explore' }
+        );
+
+        // The page already shows the saved search's visualization, tab and results.
+        if (openedBySave) return;
 
         // Init vis state and ui state
         const visualization = savedExplore.visualization;
@@ -109,14 +128,6 @@ export const useInitPage = () => {
           }
         }
 
-        // Add to recently accessed
-        chrome.recentlyAccessed.add(
-          `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
-          title,
-          savedExplore.id,
-          { type: 'explore' }
-        );
-
         dispatch(clearLastExecutedData());
         dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
@@ -133,6 +144,9 @@ export const useInitPage = () => {
       }
     }
     if (error) {
+      // The load failed, so the mark is never taken below: clear it, or a later visit to that
+      // saved search would be taken for its own save and would not load it.
+      takeSavedSearchOpenedBySave(undefined);
       // Navigate to management page for invalid IDs
       // TODO: need to confirm the UI behavior for invalid ID, the current logic is copied from useSavedExplore hook
       if (error.includes('Not found')) {

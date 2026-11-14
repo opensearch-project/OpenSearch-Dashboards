@@ -4,3 +4,4 @@
  */
 
 export { saveTopNavData, getSaveButtonRun } from './top_nav_save';
+export type { SaveStateProps } from './top_nav_save';

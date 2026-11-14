@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
@@ -19,6 +19,10 @@ import { useEditorOperations } from '../hooks/use_editor_operations';
 import { EditorMode } from '../../utils/state_management/types';
 import '../../../components/query_panel/query_panel_widgets/save_query/save_query.scss';
 import { QueryState } from '../query_builder/query_builder';
+import {
+  getDatasetForSavedQuery,
+  getStoredSavedQueryDataset,
+} from '../../utils/saved_query_dataset';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -57,6 +61,9 @@ export const SaveQueryButton = () => {
 
       const clonedQuery = cloneDeep(queryState);
       delete clonedQuery.dataset;
+      // An index pattern's or index's query is saved without its dataset; another type's keeps it.
+      const datasetToSave = getDatasetForSavedQuery(queryState.dataset);
+      if (datasetToSave) clonedQuery.dataset = datasetToSave;
 
       const queryToSave = {
         ...clonedQuery,
@@ -108,10 +115,34 @@ export const SaveQueryButton = () => {
     }
   };
 
+  const latestLoadRef = useRef(0);
+
   const handleLoadSavedQuery = useCallback(
     async (savedQuery: SavedQuery) => {
+      // Only the latest pick applies: a load reads the saved object first (see save_query.tsx).
+      const loadId = ++latestLoadRef.current;
+      // A query saved with its dataset (not an index pattern or index) loads on that dataset.
+      const storedDataset = await getStoredSavedQueryDataset(
+        savedQueryService,
+        services.data?.query?.queryString,
+        savedQuery
+      );
+      if (loadId !== latestLoadRef.current) return;
       setCurrentSavedQueryId(savedQuery.id);
-      queryBuilder.updateQueryState(savedQuery.attributes.query as QueryState);
+      // Only a switch takes the stored dataset: it holds just the fields the saved query mapping
+      // has, so the dataset already on screen is kept as it is (see save_query.tsx).
+      const currentDataset = queryBuilder.queryState$.getValue()?.dataset;
+      const switchesDataset =
+        !!storedDataset &&
+        (storedDataset.id !== currentDataset?.id || storedDataset.type !== currentDataset?.type);
+      queryBuilder.updateQueryState({
+        ...(savedQuery.attributes.query as QueryState),
+        ...(switchesDataset
+          ? { dataset: storedDataset }
+          : currentDataset
+            ? { dataset: currentDataset }
+            : {}),
+      });
 
       // Update editor text
       setEditorText(savedQuery.attributes.query.query as string);
@@ -131,7 +162,7 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
     },
-    [queryBuilder, setEditorText, timeFilter]
+    [queryBuilder, setEditorText, timeFilter, savedQueryService, services.data?.query?.queryString]
   );
 
   const handleClearSavedQuery = useCallback(() => {

@@ -13,6 +13,7 @@ import { Query } from '../../../data/common';
 import { SaveResult } from '../../../saved_objects/public';
 import { LegacyState, setSavedSearch } from '../application/utils/state_management/slices';
 import { updateLegacyPropertiesInSavedObject } from '../saved_explore/transforms';
+import { markSavedSearchOpenedBySave } from '../application/utils/saved_search_opened_by_save';
 
 export async function saveSavedExplore({
   savedExplore,
@@ -80,6 +81,8 @@ export async function saveSavedExplore({
         const currentHash = services.scopedHistory?.location.hash || '';
         const hashSearch =
           currentHash.indexOf('?') >= 0 ? currentHash.substring(currentHash.indexOf('?')) : '';
+        // The page already shows the saved search: opening its URL keeps the editor as it is.
+        markSavedSearchOpenedBySave(id);
         services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}${hashSearch}`);
       } else {
         // Update browser title and breadcrumbs

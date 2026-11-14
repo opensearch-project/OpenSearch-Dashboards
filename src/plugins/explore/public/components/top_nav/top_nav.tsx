@@ -102,6 +102,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const dispatch = useDispatch();
 
+  // The editor's text for Save to compare with the query that last ran (undefined when unmounted).
+  const getEditorText = useCallback(() => editorRef.current?.getValue(), [editorRef]);
+
   const topNavLinks = useMemo(() => {
     return getTopNavLinks(
       services,
@@ -113,11 +116,13 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         flavorId,
         tabDefinition,
         activeTabId,
+        getEditorText,
       },
       clearEditors,
       savedExplore
     );
   }, [
+    getEditorText,
     savedExplore,
     dataset,
     searchContext,
@@ -232,12 +237,14 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
           flavorId,
           tabDefinition,
           activeTabId,
+          getEditorText,
         },
         savedExplore
       );
       saveButtonRun({} as HTMLElement);
     }
   }, [
+    getEditorText,
     services,
     startSyncingQueryStateWithUrl,
     searchContext,

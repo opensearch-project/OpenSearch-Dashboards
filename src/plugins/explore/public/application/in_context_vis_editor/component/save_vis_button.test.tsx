@@ -31,25 +31,30 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: (component: any) => component,
   toMountPoint: jest.fn(),
 }));
+let mockSaveVisModalProps: any;
 jest.mock('./save_vis_modal', () => ({
-  SaveVisModal: ({ onConfirm }: any) => (
-    <button
-      data-test-subj="save-vis-modal"
-      onClick={() =>
-        onConfirm({
-          savedExplore: {
-            title: '',
-            save: jest.fn().mockResolvedValue('new-explore'),
-          },
-          newTitle: 'New Explore',
-          isTitleDuplicateConfirmed: false,
-          onTitleDuplicate: jest.fn(),
-        })
-      }
-    >
-      Modal
-    </button>
-  ),
+  SaveVisModal: (props: any) => {
+    mockSaveVisModalProps = props;
+    const { onConfirm } = props;
+    return (
+      <button
+        data-test-subj="save-vis-modal"
+        onClick={() =>
+          onConfirm({
+            savedExplore: {
+              title: '',
+              save: jest.fn().mockResolvedValue('new-explore'),
+            },
+            newTitle: 'New Explore',
+            isTitleDuplicateConfirmed: false,
+            onTitleDuplicate: jest.fn(),
+          })
+        }
+      >
+        Modal
+      </button>
+    );
+  },
 }));
 
 jest.mock('../../../components/data_transformations', () => {
@@ -80,13 +85,14 @@ jest.mock('@osd/i18n', () => ({
 const mockNavigateToWithEmbeddablePackage = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAdd = jest.fn();
+const mockAddWarning = jest.fn();
 const mockDocTitleChange = jest.fn();
 const mockSetBreadcrumbs = jest.fn();
 const mockScopedHistoryPush = jest.fn();
 const mockOsdUrlStateStorageGet = jest.fn().mockReturnValue(null);
 
 const buildServices = () => ({
-  toastNotifications: { addSuccess: mockAddSuccess, add: mockAdd },
+  toastNotifications: { addSuccess: mockAddSuccess, add: mockAdd, addWarning: mockAddWarning },
   chrome: { docTitle: { change: mockDocTitleChange }, setBreadcrumbs: mockSetBreadcrumbs },
   embeddable: {
     getStateTransfer: jest.fn().mockReturnValue({
@@ -245,5 +251,153 @@ describe('SaveVisButton', () => {
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));
     expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboard');
+  });
+
+  describe('the query it saves', () => {
+    const LAST_RUN = 'stats count(*) as n by bin(5m)';
+
+    const withQuery = ({
+      query,
+      editorText,
+      lastRun = LAST_RUN,
+      dataset,
+      lastRunDataset,
+    }: {
+      query: string;
+      editorText?: string;
+      lastRun?: string;
+      dataset?: { id: string; type: string };
+      lastRunDataset?: { id: string; type: string };
+    }) => {
+      (useQueryBuilderState as jest.Mock).mockReturnValue({
+        queryState: { query, language: 'my_language', dataset },
+        queryEditorState: {
+          isQueryEditorDirty: true,
+          editorMode: EditorMode.Query,
+          activeBottomPanelTab: 'QUERY_TAB',
+          languageType: 'my_language',
+        },
+        datasetView: { dataView: undefined },
+        queryBuilder: {
+          getEditor: () => (editorText === undefined ? null : { getValue: () => editorText }),
+          getLastRunQueryState: () => ({
+            query: lastRun,
+            language: 'my_language',
+            dataset: lastRunDataset,
+          }),
+        },
+      });
+    };
+
+    const existing = () => {
+      const savedExplore = { ...mockSavedExplore, save: jest.fn().mockResolvedValue('explore-1') };
+      (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
+      (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore });
+      return savedExplore;
+    };
+
+    it('saves an existing visualization right away when the editor holds the last-run query', async () => {
+      const savedExplore = existing();
+      withQuery({ query: LAST_RUN, editorText: LAST_RUN });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+      expect(screen.queryByTestId('saveVisualizationUnrunEditConfirm')).toBeNull();
+    });
+
+    it('asks before saving the last-run query when the editor holds unrun edits', async () => {
+      const savedExplore = existing();
+      withQuery({ query: LAST_RUN, editorText: `${LAST_RUN} | filter status >= 500` });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      expect(await screen.findByTestId('saveVisualizationUnrunEditConfirm')).toBeInTheDocument();
+      expect(screen.getByTestId('unrunQueryEditSavedQuery')).toHaveTextContent(LAST_RUN);
+      expect(screen.getByTestId('unrunQueryEditEditorQuery')).toHaveTextContent(
+        `${LAST_RUN} | filter status >= 500`
+      );
+      expect(savedExplore.save).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+    });
+
+    // A dataset pick keeps the query, so the text alone can't show that the chart was drawn from
+    // another dataset; saving the new one with the old axes can leave a panel that can't load.
+    it('saves nothing when the dataset changed since the last run, and says so', async () => {
+      const savedExplore = existing();
+      withQuery({
+        query: LAST_RUN,
+        editorText: LAST_RUN,
+        dataset: { id: 'set-b', type: 'MY_TYPE' },
+        lastRunDataset: { id: 'set-a', type: 'MY_TYPE' },
+      });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      await waitFor(() =>
+        expect(mockAddWarning).toHaveBeenCalledWith(
+          expect.objectContaining({ 'data-test-subj': 'saveVisualizationDatasetNotRunWarning' })
+        )
+      );
+      expect(savedExplore.save).not.toHaveBeenCalled();
+    });
+
+    it('saves nothing when the user cancels', async () => {
+      const savedExplore = existing();
+      withQuery({ query: LAST_RUN, editorText: 'fields @message' });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+      fireEvent.click(await screen.findByTestId('confirmModalCancelButton'));
+
+      expect(screen.queryByTestId('saveVisualizationUnrunEditConfirm')).toBeNull();
+      expect(savedExplore.save).not.toHaveBeenCalled();
+      expect(mockNavigateToWithEmbeddablePackage).not.toHaveBeenCalled();
+    });
+
+    it('never saves a query that a dataset or language change emptied, and says so', async () => {
+      const savedExplore = existing();
+      withQuery({ query: '', editorText: '' });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      await waitFor(() =>
+        expect(mockAddWarning).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Not saved: the query is empty' })
+        )
+      );
+      expect(savedExplore.save).not.toHaveBeenCalled();
+      expect(mockNavigateToWithEmbeddablePackage).not.toHaveBeenCalled();
+    });
+
+    it('saves an empty query that is the one that ran (e.g. a PPL default query)', async () => {
+      const savedExplore = existing();
+      withQuery({ query: '', editorText: '', lastRun: '' });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+      expect(mockAddWarning).not.toHaveBeenCalled();
+    });
+
+    it("tells the save dialog of a new visualization about the editor's unrun edits", async () => {
+      withQuery({ query: LAST_RUN, editorText: 'fields @message' });
+
+      render(<SaveVisButton />);
+      fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+      await screen.findByTestId('save-vis-modal');
+      expect(mockSaveVisModalProps.unrunQueryEdit).toEqual({
+        savedQuery: LAST_RUN,
+        editorQuery: 'fields @message',
+      });
+    });
   });
 });
