@@ -1,0 +1,2 @@
+fix:
+- [Explore] Allow re-analyzing patterns after filtering out a pattern ([#13223](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13223))
