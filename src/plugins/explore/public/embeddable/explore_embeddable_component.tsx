@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
 // TODO: refactor it to now use legacy getServices
@@ -16,6 +16,7 @@ import { DataTable } from '../components/data_table/data_table';
 import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { processDisplayedColumns } from '../helpers/use_displayed_columns';
+import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
 
 /** How many rows carry each field, as Discover counts them for its fields list. */
@@ -43,14 +44,23 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
   // Get docViewsRegistry for DataTable
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
 
-  // Process the saved columns the way Discover's table does: drop columns that neither the
-  // dataset nor the returned rows have, falling back to _source, so a panel never shows only "-".
+  // For a dataset that needs an explicit Run, process the saved columns the way Discover's table
+  // does: drop columns that neither the dataset nor the returned rows have, falling back to
+  // _source, so a panel never shows only "-". Other sources show the saved columns as before.
   // The embeddable updates one searchProps object in place and renders it again, so the memo
   // depends on the fields it reads, not on the object.
-  const { columns, indexPattern, rows } = searchProps;
+  const { columns, indexPattern, rows, requiresExplicitRun, displayTimeColumn } = searchProps;
   const displayedColumns = useMemo(() => {
     if (!columns || !indexPattern) {
       return [];
+    }
+    if (!requiresExplicitRun) {
+      return getLegacyDisplayedColumns(
+        columns,
+        indexPattern,
+        !displayTimeColumn,
+        false // isShortDots
+      );
     }
     return processDisplayedColumns(
       columns,
@@ -58,7 +68,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       services.uiSettings,
       rows?.length ? { fieldCounts: getFieldCounts(rows, indexPattern) } : undefined
     );
-  }, [columns, indexPattern, rows, services.uiSettings]);
+  }, [columns, indexPattern, rows, requiresExplicitRun, displayTimeColumn, services.uiSettings]);
 
   // Get sample size from UI settings
   const sampleSize = services.uiSettings.get(SAMPLE_SIZE_SETTING);
@@ -103,6 +113,23 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
             error={searchProps.error.message || searchProps.error.name || 'An error occurred'}
           />
         </EuiFlexItem>
+      );
+    }
+
+    // For a dataset that needs an explicit Run, nothing to show until the first run settles; "No
+    // results found" only once one returned none. A refresh keeps the previous rows on screen.
+    if (searchProps?.requiresExplicitRun && searchProps.isLoading && !searchProps.rows?.length) {
+      return (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="exploreEmbeddableLoading"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 

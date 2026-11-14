@@ -179,25 +179,47 @@ describe('saveSavedExplore', () => {
     expect(savedExplore.title).toBe('Old Title'); // title restored
   });
 
-  it('marks the new saved search it opens, so opening it keeps the page as it is', async () => {
+  // Whether the mark was set when the URL changed (the page initialization reads it then).
+  const saveNewAndReadMark = async (requiresExplicitRun: boolean) => {
     savedExplore.save.mockResolvedValue('456');
+    let marked: boolean | undefined;
     const pushMock = jest.fn(() => {
-      // The page initialization reads the mark when the URL changes.
-      expect(takeSavedSearchOpenedBySave('456')).toBe(true);
+      marked = takeSavedSearchOpenedBySave('456');
     });
     services.scopedHistory = { location: { hash: '#/' }, push: pushMock };
+    services.data = {
+      query: {
+        queryString: {
+          getDatasetService: () => ({
+            getType: () => ({ meta: { requiresExplicitRun } }),
+          }),
+        },
+      },
+    };
 
     await saveSavedExplore({
       savedExplore,
       newTitle: 'New Title',
       saveOptions,
-      searchContext,
+      searchContext: {
+        ...searchContext,
+        query: { query: 'test', language: 'PPL', dataset: { id: 'd', type: 'MY_TYPE' } },
+      },
       services,
       startSyncingQueryStateWithUrl: jest.fn(),
       openAfterSave: true,
     });
 
     expect(pushMock).toHaveBeenCalled();
+    return marked;
+  };
+
+  it('marks the new saved search it opens, for an explicit-Run dataset', async () => {
+    expect(await saveNewAndReadMark(true)).toBe(true);
+  });
+
+  it('marks nothing for a new saved search of another dataset', async () => {
+    expect(await saveNewAndReadMark(false)).toBe(false);
   });
 
   it('marks nothing when it saves the search the page already has open', async () => {

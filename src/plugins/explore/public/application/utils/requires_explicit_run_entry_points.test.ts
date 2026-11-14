@@ -21,6 +21,7 @@ jest.mock('./state_management/actions/query_editor/run_query', () => ({
 }));
 jest.mock('./state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'EXECUTE_QUERIES' })),
+  supersedeAllActiveQueries: jest.fn(),
 }));
 jest.mock('./state_management/actions/detect_optimal_tab', () => ({
   detectAndSetOptimalTab: jest.fn(() => ({ type: 'DETECT_OPTIMAL_TAB' })),

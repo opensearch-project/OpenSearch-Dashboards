@@ -80,12 +80,14 @@ import { TRACES_CHART_BAR_TARGET } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
 import {
   abortAllTraceQueries,
+  supersedeAllTraceQueries,
   prepareTraceCacheKeys,
   executeRequestCountQuery,
   executeErrorCountQuery,
   executeLatencyQuery,
 } from './trace_query_actions';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
+import { datasetRequiresExplicitRun } from '../../requires_explicit_run';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -103,6 +105,33 @@ export const abortAllActiveQueries = () => {
   });
   activeQueryAbortControllers.clear();
   abortAllTraceQueries();
+};
+
+// The same selection: a dataset's id names it (e.g. the source's region and log groups).
+const isSameDataset = (a: Query['dataset'], b: Query['dataset']) =>
+  a?.id === b?.id && a?.type === b?.type;
+
+// Runs stopped by `supersedeAllActiveQueries`: they settle without reporting anything.
+const supersededQueryAbortControllers = new WeakSet<AbortController>();
+
+/**
+ * Stops every query in flight because what they were run for is being replaced: a new run, a new
+ * search, or another dataset. Aborting reaches the search strategy (and a source's interceptor,
+ * which cancels the query server-side), as Stop does.
+ *
+ * Unlike Stop (`abortAllActiveQueries`), the stopped runs publish nothing, not even their
+ * cancellation: the caller clears or replaces the results and statuses, and a late status from a
+ * stopped run would land on its replacement's (an UNINITIALIZED key keeps the overall status from
+ * settling as READY).
+ */
+export const supersedeAllActiveQueries = () => {
+  activeQueryAbortControllers.forEach((controller) =>
+    supersededQueryAbortControllers.add(controller)
+  );
+  supersedeAllTraceQueries();
+  abortAllActiveQueries();
+  // The caller clears the status map, so the keys returned here need no clearing of their own.
+  supersedeOtherStreamingQueries([]);
 };
 
 /**
@@ -855,11 +884,31 @@ const executeQueryBase = async (
   const queryStartTime = Date.now();
   let abortController: AbortController | undefined;
   let partialRowsShown = false;
-  // A newer run for the same key replaces this run's controller. A superseded run must leave the
-  // key's results, status and controller to its successor.
+  // A superseded run must leave the key's results, status and controller to whatever replaced it:
+  // a newer run for the same key (which replaces this run's controller), or a new search or another
+  // dataset (`supersedeAllActiveQueries`, whose caller clears the statuses).
   const isSuperseded = () => {
+    if (abortController === undefined) return false;
+    if (supersededQueryAbortControllers.has(abortController)) return true;
     const current = activeQueryAbortControllers.get(cacheKey);
-    return abortController !== undefined && current !== undefined && current !== abortController;
+    return current !== undefined && current !== abortController;
+  };
+  // The page shows another dataset than this run's, and nothing superseded the run. Keys don't
+  // name the dataset (results are kept by query text across a refined selection), so its rows
+  // would show as the new selection's: the run settles as stopped instead (no rows, the key back
+  // to UNINITIALIZED), as a run stopped for a refined selection does. It must still settle when its
+  // own LOADING status is still there: a key left LOADING would keep the page loading, and
+  // auto-refresh would skip every tick.
+  const isForAnotherDataset = () => !isSameDataset(getState().query.dataset, query.dataset);
+  // The key's status is still this run's: the statuses weren't cleared or replaced since it started
+  // (a cleared map, e.g. a state replaced by browser history, is the new page's to fill).
+  const ownsStatus = () =>
+    getState().queryEditor.queryStatusMap[cacheKey]?.startTime === queryStartTime;
+  // A run replaced by a newer run of its key no longer owns the key's controller.
+  const releaseController = () => {
+    if (abortController && activeQueryAbortControllers.get(cacheKey) === abortController) {
+      activeQueryAbortControllers.delete(cacheKey);
+    }
   };
 
   try {
@@ -950,19 +999,29 @@ const executeQueryBase = async (
       // the histogram (an interval or breakdown change) would otherwise never do.
       if (!sourceHistogramQuery) {
         // A newer run of this key aborted this one: the key is that run's to settle.
-        if (isSuperseded() || abortController.signal.aborted) {
+        if (isSuperseded()) {
           return;
         }
         activeQueryAbortControllers.delete(cacheKey);
+        // Stopped (Stop) while it was being built, or the page moved to another dataset.
+        const stopped = abortController.signal.aborted || isForAnotherDataset();
+        if (stopped && !ownsStatus()) return;
         dispatch(
           setIndividualQueryStatus({
             cacheKey,
-            status: {
-              status: QueryExecutionStatus.NO_RESULTS,
-              startTime: queryStartTime,
-              elapsedMs: Date.now() - queryStartTime,
-              error: undefined,
-            },
+            status: stopped
+              ? {
+                  status: QueryExecutionStatus.UNINITIALIZED,
+                  startTime: undefined,
+                  elapsedMs: undefined,
+                  error: undefined,
+                }
+              : {
+                  status: QueryExecutionStatus.NO_RESULTS,
+                  startTime: queryStartTime,
+                  elapsedMs: Date.now() - queryStartTime,
+                  error: undefined,
+                },
           })
         );
         return;
@@ -978,8 +1037,9 @@ const executeQueryBase = async (
     ) {
       let sqlHistogramConfig = histogramConfig;
       let breakdownValues: Array<string | number> | undefined;
-      // Pass 1 finds the top-N breakdown values; pass 2 buckets by them.
-      if (histogramConfig.breakdownField) {
+      // Pass 1 finds the top-N breakdown values; pass 2 buckets by them. A run stopped meanwhile
+      // sends neither (the main fetch below settles it).
+      if (histogramConfig.breakdownField && !abortController.signal.aborted) {
         try {
           const topBreakdownQuery = buildSQLTopBreakdownQuery(queryString, histogramConfig);
           const topBreakdownSource = await createSearchSourceWithQuery(
@@ -1059,12 +1119,23 @@ const executeQueryBase = async (
       !isHistogramQuery &&
       !queryIsAggregation(queryString, {
         patternsDefaultMode: getPatternsDefaultMode(getState().query),
+        // A query of an explicit-Run source can start with a command (`stats count(*) by level`).
+        leadingCommand: datasetRequiresExplicitRun(services.data.query.queryString, query.dataset),
       });
 
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
-      // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
-      // query cleared its key; writing them would bring the key back and keep the page loading.
-      if (abortController?.signal.aborted || !getState().queryEditor.queryStatusMap[cacheKey]) {
+      // Drop partials once this run is cancelled (a newer run of the key aborts it), replaced, or a
+      // newer query cleared its key; writing them would bring the key back and keep the page loading.
+      if (
+        abortController?.signal.aborted ||
+        isSuperseded() ||
+        !getState().queryEditor.queryStatusMap[cacheKey]
+      ) {
+        return;
+      }
+      // The page moved to another dataset: stop the query, which then settles as stopped.
+      if (isForAnotherDataset()) {
+        abortController?.abort();
         return;
       }
       partialRowsShown = true;
@@ -1097,6 +1168,17 @@ const executeQueryBase = async (
       );
     };
 
+    // Stopped or superseded while the query was being built (e.g. while its data view loaded):
+    // don't send it. An interceptor that overrides `search()` skips the base class's
+    // already-aborted check (PPLSearchInterceptor does), so a source's interceptor can start a
+    // server-side job before the signal stops anything. The catch below settles this run as
+    // stopped, or leaves the key to whatever superseded it.
+    if (abortController.signal.aborted) {
+      throw Object.assign(new Error('The query was stopped before it was sent'), {
+        name: 'AbortError',
+      });
+    }
+
     // `onPartialResults` and `pollInterval` only matter to polling sources.
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
@@ -1107,7 +1189,15 @@ const executeQueryBase = async (
     });
 
     if (isSuperseded()) {
+      releaseController();
       return;
+    }
+    // Stopped for a refined selection but answered anyway, or the page moved to another dataset
+    // meanwhile: the rows are the previous selection's, so the run settles as stopped instead.
+    if (isForAnotherDataset()) {
+      throw Object.assign(new Error('The query was stopped for another dataset'), {
+        name: 'AbortError',
+      });
     }
 
     // Add response stats to inspector
@@ -1161,7 +1251,9 @@ const executeQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
-    if (isSuperseded()) {
+    // Replaced, or for a dataset the page no longer shows with statuses that are no longer its own.
+    if (isSuperseded() || (isForAnotherDataset() && !ownsStatus())) {
+      releaseController();
       return;
     }
 
@@ -1173,8 +1265,9 @@ const executeQueryBase = async (
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
-    // Handle abort errors - reset query status to initial state
-    if (error instanceof Error && error.name === 'AbortError') {
+    // Handle abort errors - reset query status to initial state. A run that failed after the page
+    // moved to another dataset settles the same way: its error is about the previous selection.
+    if ((error instanceof Error && error.name === 'AbortError') || isForAnotherDataset()) {
       dispatch(
         setIndividualQueryStatus({
           cacheKey,

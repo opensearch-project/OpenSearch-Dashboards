@@ -20,6 +20,7 @@ import {
   PPLTraitOptions,
 } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
+import { datasetRequiresExplicitRun } from '../../requires_explicit_run';
 
 // Derived from the shared PPL command traits, so every command stripped from the Logs/histogram
 // query is routed off the Logs tab (otherwise Logs would silently show the stripped documents).
@@ -61,7 +62,14 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   if (patternsDefaultModeNeedsFetch(state.query)) {
     await ensurePatternsDefaultMode(services?.http, state.query);
   }
-  const options: PPLTraitOptions = { patternsDefaultMode: getPatternsDefaultMode(state.query) };
+  const options: PPLTraitOptions = {
+    patternsDefaultMode: getPatternsDefaultMode(state.query),
+    // A query of an explicit-Run source can start with a command (`stats count(*) by level`).
+    leadingCommand: datasetRequiresExplicitRun(
+      services?.data?.query?.queryString,
+      state.query.dataset
+    ),
+  };
   const currentTab = state.ui.activeTabId || EXPLORE_LOGS_TAB_ID;
 
   let targetTab: string;
