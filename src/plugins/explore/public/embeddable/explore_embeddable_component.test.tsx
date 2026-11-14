@@ -120,10 +120,13 @@ describe('ExploreEmbeddableComponent', () => {
   });
 
   describe('while the query runs', () => {
+    // The loading state is for a dataset that needs an explicit Run.
+    const explicitRunProps: SearchProps = { ...mockSearchProps, requiresExplicitRun: true };
+
     test('shows a loading state, not "No results", before the first run settles', () => {
       render(
         <ExploreEmbeddableComponent
-          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+          searchProps={{ ...explicitRunProps, rows: [], isLoading: true }}
         />
       );
 
@@ -134,11 +137,11 @@ describe('ExploreEmbeddableComponent', () => {
     test('shows the results once the run settles', () => {
       const { rerender } = render(
         <ExploreEmbeddableComponent
-          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+          searchProps={{ ...explicitRunProps, rows: [], isLoading: true }}
         />
       );
       rerender(
-        <ExploreEmbeddableComponent searchProps={{ ...mockSearchProps, isLoading: false }} />
+        <ExploreEmbeddableComponent searchProps={{ ...explicitRunProps, isLoading: false }} />
       );
 
       expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
@@ -148,12 +151,12 @@ describe('ExploreEmbeddableComponent', () => {
     test('shows "No results" only once a run returned nothing', () => {
       const { rerender } = render(
         <ExploreEmbeddableComponent
-          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+          searchProps={{ ...explicitRunProps, rows: [], isLoading: true }}
         />
       );
       rerender(
         <ExploreEmbeddableComponent
-          searchProps={{ ...mockSearchProps, rows: [], isLoading: false }}
+          searchProps={{ ...explicitRunProps, rows: [], isLoading: false }}
         />
       );
 
@@ -162,7 +165,7 @@ describe('ExploreEmbeddableComponent', () => {
     });
 
     test('keeps the previous results on screen while a refresh runs', () => {
-      render(<ExploreEmbeddableComponent searchProps={{ ...mockSearchProps, isLoading: true }} />);
+      render(<ExploreEmbeddableComponent searchProps={{ ...explicitRunProps, isLoading: true }} />);
 
       expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
       expect(screen.getByTestId('mockDataGridTable')).toBeInTheDocument();
@@ -172,7 +175,7 @@ describe('ExploreEmbeddableComponent', () => {
       render(
         <ExploreEmbeddableComponent
           searchProps={{
-            ...mockSearchProps,
+            ...explicitRunProps,
             rows: [],
             isLoading: true,
             error: { name: 'Error', message: 'failed' },
@@ -181,6 +184,17 @@ describe('ExploreEmbeddableComponent', () => {
       );
 
       expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
+    });
+
+    test('shows "No results" while loading for another dataset, as before', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, rows: [], isLoading: true }}
+        />
+      );
+
+      expect(screen.queryByTestId('exploreEmbeddableLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
     });
   });
 
@@ -279,6 +293,9 @@ describe('ExploreEmbeddableComponent', () => {
   });
 
   describe('logs table columns', () => {
+    // Discover's column processing is for a dataset that needs an explicit Run.
+    const explicitRunProps: SearchProps = { ...mockSearchProps, requiresExplicitRun: true };
+
     // A dataset whose mapping knows only the time field, like one that isn't an index pattern
     // and learns its fields from the results.
     const createDataset = (fieldNames: string[] = ['@timestamp']) =>
@@ -312,7 +329,7 @@ describe('ExploreEmbeddableComponent', () => {
       render(
         <ExploreEmbeddableComponent
           searchProps={{
-            ...mockSearchProps,
+            ...explicitRunProps,
             indexPattern: createDataset(),
             columns: ['body', 'severityText', 'resource.attributes.service.name'],
             rows: logRows,
@@ -327,7 +344,7 @@ describe('ExploreEmbeddableComponent', () => {
       render(
         <ExploreEmbeddableComponent
           searchProps={{
-            ...mockSearchProps,
+            ...explicitRunProps,
             indexPattern: createDataset(),
             columns: ['body', '@message'],
             rows: logRows,
@@ -342,7 +359,7 @@ describe('ExploreEmbeddableComponent', () => {
       render(
         <ExploreEmbeddableComponent
           searchProps={{
-            ...mockSearchProps,
+            ...explicitRunProps,
             indexPattern: createDataset(['@timestamp', 'level', 'service']),
             columns: ['level', 'service'],
             rows: [{ _id: '1', _source: { '@timestamp': '2026-01-01T00:00:00Z', level: 'ERROR' } }],
@@ -359,7 +376,7 @@ describe('ExploreEmbeddableComponent', () => {
       render(
         <ExploreEmbeddableComponent
           searchProps={{
-            ...mockSearchProps,
+            ...explicitRunProps,
             indexPattern: createDataset(),
             columns: ['body', 'severityText'],
             rows: logRows,
@@ -380,7 +397,7 @@ describe('ExploreEmbeddableComponent', () => {
         },
       ];
       const searchProps: SearchProps = {
-        ...mockSearchProps,
+        ...explicitRunProps,
         indexPattern: createDataset(),
         columns: ['body', '@message'],
         rows: [],
@@ -407,7 +424,7 @@ describe('ExploreEmbeddableComponent', () => {
 
       render(
         <ExploreEmbeddableComponent
-          searchProps={{ ...mockSearchProps, indexPattern: createDataset(), rows: logRows }}
+          searchProps={{ ...explicitRunProps, indexPattern: createDataset(), rows: logRows }}
         />
       );
 
@@ -415,6 +432,53 @@ describe('ExploreEmbeddableComponent', () => {
         .calls[0];
       expect(isShortDots).toBe(false);
       expect(hideTimeField).toBe(true);
+    });
+
+    describe('for another dataset, as before', () => {
+      test('shows the saved columns, including ones the dataset and results lack', () => {
+        render(
+          <ExploreEmbeddableComponent
+            searchProps={{
+              ...mockSearchProps,
+              indexPattern: createDataset(),
+              columns: ['body', 'severityText'],
+              rows: logRows,
+            }}
+          />
+        );
+
+        expect(renderedColumnNames()).toEqual(['body', 'severityText']);
+      });
+
+      test('passes displayTimeColumn to getLegacyDisplayedColumns', () => {
+        const { getLegacyDisplayedColumns } = jest.requireMock('../helpers/data_table_helper');
+        const indexPattern = createDataset();
+        const columns = ['body'];
+
+        const { rerender } = render(
+          <ExploreEmbeddableComponent
+            searchProps={{ ...mockSearchProps, indexPattern, columns, displayTimeColumn: true }}
+          />
+        );
+        expect(getLegacyDisplayedColumns).toHaveBeenLastCalledWith(
+          columns,
+          indexPattern,
+          false,
+          false
+        );
+
+        rerender(
+          <ExploreEmbeddableComponent
+            searchProps={{ ...mockSearchProps, indexPattern, columns, displayTimeColumn: false }}
+          />
+        );
+        expect(getLegacyDisplayedColumns).toHaveBeenLastCalledWith(
+          columns,
+          indexPattern,
+          true,
+          false
+        );
+      });
     });
   });
 });

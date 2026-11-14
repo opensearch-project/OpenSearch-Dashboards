@@ -845,45 +845,94 @@ describe('ExploreEmbeddable', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
-  test('updateHandler does not re-run the panel when only the dashboard query changes', async () => {
-    // The panel's own query is what runs; a dashboard query (DQL or Lucene) can't be added to it,
-    // so re-running would return the same rows as if they had been filtered.
+  // A panel whose saved search's dataset type does (or doesn't) need an explicit Run.
+  const createPanelOn = (requiresExplicitRun: boolean) => {
+    const services = createMockServices();
+    services.data.query.queryString.getDatasetService = jest.fn().mockReturnValue({
+      getType: jest.fn().mockReturnValue({ meta: { requiresExplicitRun } }),
+    });
+    const panelContainer = createTestContainer('dataset-panel');
+    const panel = new ExploreEmbeddable(
+      {
+        savedExplore: {
+          ...mockSavedExplore,
+          searchSource: createMockSearchSource({
+            getField: jest.fn((field) => {
+              if (field === 'index') return { id: 'test-index' };
+              if (field === 'query') {
+                return { query: 'test', language: 'PPL', dataset: { id: 'd', type: 'MY_TYPE' } };
+              }
+              return null;
+            }),
+          }),
+        },
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: services.filterManager,
+        services,
+        editApp: 'explore/logs',
+      },
+      { ...mockInput, id: 'dataset-panel' },
+      mockExecuteTriggerActions,
+      panelContainer
+    );
     // @ts-ignore
-    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    const fetchSpy = jest.spyOn(panel as any, 'fetch').mockResolvedValue(undefined);
     // @ts-ignore
-    embeddable.node = mockNode;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps);
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    // @ts-ignore
-    embeddable.input.query = { query: 'level:ERROR', language: 'kuery' };
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps);
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    // A time range change still re-runs it.
-    // @ts-ignore
-    embeddable.input.timeRange = { from: 'now-1h', to: 'now' };
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps);
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    panel.node = mockNode;
+    const cleanup = () => {
+      panel.destroy();
+      panelContainer.destroy();
+    };
+    return { panel: panel as any, fetchSpy, cleanup };
+  };
+
+  test('sets searchProps.requiresExplicitRun from the saved search dataset type', () => {
+    const explicit = createPanelOn(true);
+    const other = createPanelOn(false);
+    expect(explicit.panel.searchProps.requiresExplicitRun).toBe(true);
+    expect(other.panel.searchProps.requiresExplicitRun).toBe(false);
+    explicit.cleanup();
+    other.cleanup();
   });
 
-  test('updateHandler does not owe a fetch for a dashboard query change while not visible', async () => {
-    // @ts-ignore
-    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
-    // @ts-ignore
-    embeddable.node = mockNode;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps);
-    // @ts-ignore
-    embeddable.input.isVisible = false;
-    // @ts-ignore
-    embeddable.input.query = { query: 'level:ERROR', language: 'kuery' };
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps);
-    // @ts-ignore
-    expect(embeddable.pendingFetchOnResume).toBe(false);
+  test('updateHandler does not re-run an explicit-Run panel when only the dashboard query changes', async () => {
+    // The panel's own query is what runs; a dashboard query (DQL or Lucene) can't be added to it,
+    // so re-running would return the same rows as if they had been filtered.
+    const { panel, fetchSpy, cleanup } = createPanelOn(true);
+    await panel.updateHandler(panel.searchProps);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
+    panel.input.query = { query: 'level:ERROR', language: 'kuery' };
+    await panel.updateHandler(panel.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // A time range change still re-runs it.
+    panel.input.timeRange = { from: 'now-1h', to: 'now' };
+    await panel.updateHandler(panel.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    cleanup();
+  });
+
+  test('updateHandler re-runs another panel when the dashboard query changes, as before', async () => {
+    const { panel, fetchSpy, cleanup } = createPanelOn(false);
+    await panel.updateHandler(panel.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    panel.input.query = { query: 'level:ERROR', language: 'kuery' };
+    await panel.updateHandler(panel.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    cleanup();
+  });
+
+  test('updateHandler owes no fetch for a dashboard query change on a hidden explicit-Run panel', async () => {
+    const { panel, fetchSpy, cleanup } = createPanelOn(true);
+    await panel.updateHandler(panel.searchProps);
+    panel.input.isVisible = false;
+    panel.input.query = { query: 'level:ERROR', language: 'kuery' };
+    await panel.updateHandler(panel.searchProps);
+    expect(panel.pendingFetchOnResume).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    cleanup();
   });
 
   test('updateHandler skips fetch while not visible and records one is owed', async () => {

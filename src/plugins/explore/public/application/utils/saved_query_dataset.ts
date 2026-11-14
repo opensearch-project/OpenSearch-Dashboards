@@ -5,6 +5,7 @@
 
 import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA } from '../../../../data/common';
 import type { QueryStringContract, SavedQuery, SavedQueryService } from '../../../../data/public';
+import { datasetRequiresExplicitRun, getDatasetTypeConfig } from './requires_explicit_run';
 
 const INDEX_DATASET_TYPES: string[] = [
   DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
@@ -96,4 +97,29 @@ export const getStoredSavedQueryDataset = async (
     return undefined;
   }
   return stored;
+};
+
+/**
+ * Whether opening the saved query reads it again for a stored dataset (getStoredSavedQueryDataset):
+ * only from a dataset that needs an explicit Run, or for a query in a language the dataset on
+ * screen can't run (e.g. a CloudWatch Logs query opened on an index pattern). A PPL, SQL or DQL
+ * saved query opened on an OpenSearch dataset loads as it always has, with no extra request.
+ */
+export const savedQueryMayHaveStoredDataset = (
+  queryString: Pick<QueryStringContract, 'getDatasetService'> | undefined,
+  currentDataset: Dataset | undefined,
+  savedQuery: SavedQuery
+): boolean => {
+  if (!currentDataset) return false;
+  if (datasetRequiresExplicitRun(queryString, currentDataset)) return true;
+  const language = savedQuery.attributes.query?.language;
+  let languages: string[] | undefined;
+  try {
+    languages = getDatasetTypeConfig(queryString, currentDataset.type)?.supportedLanguages(
+      currentDataset
+    );
+  } catch {
+    languages = undefined;
+  }
+  return !!language && !!languages && !languages.includes(language);
 };
