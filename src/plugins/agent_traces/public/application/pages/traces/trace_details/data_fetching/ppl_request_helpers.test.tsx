@@ -70,6 +70,15 @@ describe('ppl_request_helpers', () => {
         },
       });
     });
+
+    it('includes schema mappings when present', () => {
+      const schemaMappings = {
+        otelTraces: { traceId: 'traceId' },
+      };
+      const result = buildPPLDataset({ ...createMockDataset(), schemaMappings });
+
+      expect(result.schemaMappings).toEqual(schemaMappings);
+    });
   });
 
   describe('buildPPLQueryRequest', () => {

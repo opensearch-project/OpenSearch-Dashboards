@@ -730,6 +730,9 @@ describe('redux_persistence', () => {
 
   describe('loadReduxState with SignalType validation for URL datasets', () => {
     it('should validate URL dataset and use it if it has TRACES signal type', async () => {
+      const schemaMappings = {
+        pplCapabilities: { highlight: 'false' },
+      };
       const mockQueryState = {
         query: 'source=traces | head 10',
         language: 'PPL',
@@ -750,12 +753,42 @@ describe('redux_persistence', () => {
         id: 'traces-dataset',
         title: 'Traces Dataset',
         signalType: CORE_SIGNAL_TYPES.TRACES,
+        schemaMappings,
       });
 
       const result = await loadReduxState(mockServices);
 
       expect(result.query.dataset).toBeDefined();
       expect(result.query.dataset?.id).toBe('traces-dataset');
+      expect(result.query.dataset?.schemaMappings).toEqual(schemaMappings);
+    });
+
+    it('should retain URL schema mappings when the saved data view is unavailable', async () => {
+      const schemaMappings = {
+        pplFieldAliases: { 'attributes.gen_ai': 'gen_ai' },
+      };
+      const mockQueryState = {
+        query: 'source=traces | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'traces-dataset',
+          title: 'Traces Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+          schemaMappings,
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+      (mockServices.data.dataViews!.get as jest.Mock).mockRejectedValue(
+        new Error('Dataset not found')
+      );
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.query.dataset?.schemaMappings).toEqual(schemaMappings);
     });
 
     it('should reject non-TRACES URL dataset and fetch compatible one', async () => {
