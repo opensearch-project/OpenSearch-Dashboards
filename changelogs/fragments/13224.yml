@@ -1,0 +1,2 @@
+fix:
+- [Saved Objects] Clear the migration scroll when a batch fails ([#13224](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13224))
