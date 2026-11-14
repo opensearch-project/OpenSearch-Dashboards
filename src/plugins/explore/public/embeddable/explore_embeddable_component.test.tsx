@@ -7,18 +7,24 @@ import { render, screen } from '@testing-library/react';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { SearchProps } from './explore_embeddable';
 
+// Settings the panel reads; tests override entries and `beforeEach` resets them.
+const mockUiSettings: Record<string, unknown> = {};
+
+// One services object, as the real getServices returns, so a memo on it behaves as in the app.
+const mockServices = {
+  uiSettings: {
+    get: jest.fn((key: string) => {
+      if (key === 'discover:sampleSize') return 500;
+      return key in mockUiSettings ? mockUiSettings[key] : false;
+    }),
+  },
+};
+
 jest.mock('../application/legacy/discover/opensearch_dashboards_services', () => ({
   getDocViewsRegistry: jest.fn(() => ({
     getDocViewsSorted: jest.fn(() => []),
   })),
-  getServices: jest.fn(() => ({
-    uiSettings: {
-      get: jest.fn((key) => {
-        if (key === 'discover:sampleSize') return 500;
-        return false;
-      }),
-    },
-  })),
+  getServices: jest.fn(() => mockServices),
 }));
 
 jest.mock('../components/data_table/data_table', () => ({
@@ -70,7 +76,6 @@ describe('ExploreEmbeddableComponent', () => {
       { _id: '2', _source: { field1: 'value2' } },
     ],
     sort: [['column1', 'asc']],
-    displayTimeColumn: true,
     services: {} as any,
     hits: 2,
     title: 'Test Explore',
@@ -80,6 +85,7 @@ describe('ExploreEmbeddableComponent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.keys(mockUiSettings).forEach((key) => delete mockUiSettings[key]);
   });
 
   test('renders data grid table when activeTab is logs and rows exist', () => {
@@ -159,7 +165,6 @@ describe('ExploreEmbeddableComponent', () => {
   test('renders gracefully with missing optional fields in searchProps', () => {
     const minimalProps = {
       services: {} as any,
-      displayTimeColumn: true,
       title: 'Minimal',
       rows: [{ _id: '1' }],
     };
@@ -206,5 +211,145 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
     expect(screen.queryByTestId('mockDataGridTable')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockTableVis')).not.toBeInTheDocument();
+  });
+
+  describe('logs table columns', () => {
+    // A dataset whose mapping knows only the time field, like one that isn't an index pattern
+    // and learns its fields from the results.
+    const createDataset = (fieldNames: string[] = ['@timestamp']) =>
+      ({
+        id: 'logs-dataset',
+        timeFieldName: '@timestamp',
+        fields: {
+          getAll: () => fieldNames.map((name) => ({ name })),
+          getByName: (name: string) => (fieldNames.includes(name) ? { name } : undefined),
+        },
+        getFieldByName: (name: string) => (fieldNames.includes(name) ? { name } : undefined),
+        flattenHit: (hit: any) => ({ ...hit._source }),
+      }) as any;
+
+    const logRows = [
+      { _id: '1', _source: { '@timestamp': '2026-01-01T00:00:00Z', '@message': 'first' } },
+      { _id: '2', _source: { '@timestamp': '2026-01-01T00:01:00Z', '@message': 'second' } },
+    ];
+
+    const renderedColumnNames = () =>
+      JSON.parse(screen.getByTestId('mockColumns').textContent || '[]').map(
+        (column: { name: string }) => column.name
+      );
+
+    beforeEach(() => {
+      mockUiSettings.defaultColumns = ['_source'];
+      mockUiSettings['discover:modifyColumnsOnSwitch'] = true;
+    });
+
+    test('falls back to _source when no saved column is in the dataset or the results', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{
+            ...mockSearchProps,
+            indexPattern: createDataset(),
+            columns: ['body', 'severityText', 'resource.attributes.service.name'],
+            rows: logRows,
+          }}
+        />
+      );
+
+      expect(renderedColumnNames()).toEqual(['_source']);
+    });
+
+    test('keeps a saved column that the results carry, even if the dataset does not map it', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{
+            ...mockSearchProps,
+            indexPattern: createDataset(),
+            columns: ['body', '@message'],
+            rows: logRows,
+          }}
+        />
+      );
+
+      expect(renderedColumnNames()).toEqual(['@message']);
+    });
+
+    test('keeps saved columns that the dataset maps', () => {
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{
+            ...mockSearchProps,
+            indexPattern: createDataset(['@timestamp', 'level', 'service']),
+            columns: ['level', 'service'],
+            rows: [{ _id: '1', _source: { '@timestamp': '2026-01-01T00:00:00Z', level: 'ERROR' } }],
+          }}
+        />
+      );
+
+      expect(renderedColumnNames()).toEqual(['level', 'service']);
+    });
+
+    test('keeps every saved column when columns are not adjusted to the dataset', () => {
+      mockUiSettings['discover:modifyColumnsOnSwitch'] = false;
+
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{
+            ...mockSearchProps,
+            indexPattern: createDataset(),
+            columns: ['body', 'severityText'],
+            rows: logRows,
+          }}
+        />
+      );
+
+      expect(renderedColumnNames()).toEqual(['body', 'severityText']);
+    });
+
+    test('follows rows and columns set on the same searchProps object, as the embeddable does', () => {
+      // The embeddable renders while loading (no rows yet), then writes the rows, and a column
+      // change, onto the one searchProps object it renders again.
+      const rows = [
+        {
+          _id: '1',
+          _source: { '@timestamp': '2026-01-01T00:00:00Z', '@message': 'a', level: 'E' },
+        },
+      ];
+      const searchProps: SearchProps = {
+        ...mockSearchProps,
+        indexPattern: createDataset(),
+        columns: ['body', '@message'],
+        rows: [],
+      };
+      const { rerender } = render(<ExploreEmbeddableComponent searchProps={searchProps} />);
+
+      searchProps.rows = rows;
+      rerender(<ExploreEmbeddableComponent searchProps={searchProps} />);
+      expect(renderedColumnNames()).toEqual(['@message']);
+
+      searchProps.columns = ['@message', 'level'];
+      rerender(<ExploreEmbeddableComponent searchProps={searchProps} />);
+      expect(renderedColumnNames()).toEqual(['@message', 'level']);
+
+      searchProps.columns = ['level'];
+      rerender(<ExploreEmbeddableComponent searchProps={searchProps} />);
+      expect(renderedColumnNames()).toEqual(['level']);
+    });
+
+    test('honours the hide-time-column and short-dots settings', () => {
+      const { getLegacyDisplayedColumns } = jest.requireMock('../helpers/data_table_helper');
+      mockUiSettings['doc_table:hideTimeColumn'] = true;
+      mockUiSettings['shortDots:enable'] = false;
+
+      render(
+        <ExploreEmbeddableComponent
+          searchProps={{ ...mockSearchProps, indexPattern: createDataset(), rows: logRows }}
+        />
+      );
+
+      const [, , isShortDots, hideTimeField] = (getLegacyDisplayedColumns as jest.Mock).mock
+        .calls[0];
+      expect(isShortDots).toBe(false);
+      expect(hideTimeField).toBe(true);
+    });
   });
 });

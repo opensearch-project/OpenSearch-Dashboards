@@ -346,7 +346,6 @@ describe('ExploreEmbeddable', () => {
     expect(searchProps).toBeDefined();
     expect(searchProps?.title).toBe('Test Explore');
     expect(searchProps?.description).toBe('Test description');
-    expect(searchProps?.displayTimeColumn).toBe(false);
   });
 
   test('cleans up when destroy is called', () => {
@@ -717,6 +716,59 @@ describe('ExploreEmbeddable', () => {
     // @ts-ignore
     await embeddable.updateHandler(embeddable.searchProps, true);
     expect(fetchSpy).toHaveBeenCalled();
+  });
+
+  test('updateHandler fetches on the first render even without a time range', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    embeddable.input.timeRange = undefined;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updateHandler does not re-run the panel when only the dashboard query changes', async () => {
+    // The panel's own query is what runs; a dashboard query (DQL or Lucene) can't be added to it,
+    // so re-running would return the same rows as if they had been filtered.
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    embeddable.input.query = { query: 'level:ERROR', language: 'kuery' };
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // A time range change still re-runs it.
+    // @ts-ignore
+    embeddable.input.timeRange = { from: 'now-1h', to: 'now' };
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('updateHandler does not owe a fetch for a dashboard query change while not visible', async () => {
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    embeddable.input.isVisible = false;
+    // @ts-ignore
+    embeddable.input.query = { query: 'level:ERROR', language: 'kuery' };
+    // @ts-ignore
+    await embeddable.updateHandler(embeddable.searchProps);
+    // @ts-ignore
+    expect(embeddable.pendingFetchOnResume).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   test('updateHandler skips fetch while not visible and records one is owed', async () => {
@@ -1272,6 +1324,10 @@ describe('ExploreEmbeddable', () => {
         expect(mounts).toBe(1);
         const rowsBeforeReload = renderedRows;
 
+        // The reload's response carries other rows than the first render's fetch.
+        mockSavedExplore.searchSource.fetch.mockResolvedValueOnce({
+          hits: { hits: [{ _id: '3', _source: { field1: 'value3' } }] },
+        });
         await act(async () => {
           emb.reload();
         });
