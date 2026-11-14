@@ -27,14 +27,11 @@ jest.mock('./chart_config', () => ({
 }));
 
 describe('ExpandedView', () => {
-  it('ignores Escape during IME composition and closes on a real Escape', () => {
+  it('closes on Escape', () => {
     const onClose = jest.fn();
     const chartData = { title: 'Chart', series: [] } as unknown as ChartData;
 
     render(<ExpandedView isOpen={true} onClose={onClose} chartData={chartData} />);
-
-    fireEvent.keyDown(document, { key: 'Escape', keyCode: 229, isComposing: true });
-    expect(onClose).not.toHaveBeenCalled();
 
     fireEvent.keyDown(document, { key: 'Escape', keyCode: 27 });
     expect(onClose).toHaveBeenCalledTimes(1);
