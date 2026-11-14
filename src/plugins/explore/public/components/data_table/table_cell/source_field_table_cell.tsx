@@ -63,15 +63,24 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   const orderedKeys = highlightedKeys.length ? [...highlightedKeys, ...rawKeys] : rawKeys;
 
   const previewKeys: string[] = [];
+  let parentPrefixes: Set<string> | undefined;
   let hasMoreFields = false;
   for (const rawKey of orderedKeys) {
     if (previewKeys.includes(rawKey)) continue;
     // flattenHit retains some parent containers alongside their flattened children.
-    if (
-      isParentContainer(flattened[rawKey]) &&
-      rawKeys.some((key) => key.startsWith(`${rawKey}.`))
-    ) {
-      continue;
+    if (isParentContainer(flattened[rawKey])) {
+      // Index prefixes once to avoid repeated scans, only when a container needs checking.
+      if (!parentPrefixes) {
+        parentPrefixes = new Set<string>();
+        for (const key of rawKeys) {
+          let dotIndex = key.indexOf('.');
+          while (dotIndex !== -1) {
+            parentPrefixes.add(key.slice(0, dotIndex));
+            dotIndex = key.indexOf('.', dotIndex + 1);
+          }
+        }
+      }
+      if (parentPrefixes.has(rawKey)) continue;
     }
     if (previewKeys.length === MAX_INLINE_SOURCE_FIELDS) {
       hasMoreFields = true;

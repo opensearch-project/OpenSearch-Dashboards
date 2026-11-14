@@ -241,6 +241,29 @@ describe('SourceFieldTableCell', () => {
     }
   );
 
+  it('selects leaf fields when returned fields put many parent containers before their children', () => {
+    const count = 1000;
+    const parents = Object.fromEntries(
+      Array.from({ length: count }, (_, index) => [`group${index}`, [{ value: index }]])
+    );
+    const children = Object.fromEntries(
+      Array.from({ length: count }, (_, index) => [`group${index}.value`, [index]])
+    );
+    renderInTable({
+      ...defaultProps,
+      row: { ...mockRow, _source: {}, fields: { ...parents, ...children } },
+    });
+
+    expect(screen.getAllByTestId('sourceFieldKey').map((field) => field.textContent)).toEqual(
+      Array.from({ length: 10 }, (_, index) => `group${index}.value:`)
+    );
+    expect(screen.getAllByTestId('sourceFieldValue').map((field) => field.textContent)).toEqual(
+      Array.from({ length: 10 }, (_, index) => String(index))
+    );
+    expect(mockDataset.getFormatterForField).toHaveBeenCalledTimes(10);
+    expect(screen.getByTestId('sourceFieldPreviewHint')).toBeInTheDocument();
+  });
+
   it('handles empty data gracefully', () => {
     renderInTable({ ...defaultProps, row: { ...mockRow, _source: {} } });
 
