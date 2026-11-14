@@ -500,7 +500,7 @@
     "postcss": "^8.5.23",
     "prettier": "^3.5.3",
     "prop-types": "^15.7.2",
-    "puppeteer": "^24.43.1",
+    "puppeteer": "^25.0.0",
     "react": "^18.2.0",
     "react-grid-layout": "^1.5.3",
     "react-markdown": "^6.0.0",
