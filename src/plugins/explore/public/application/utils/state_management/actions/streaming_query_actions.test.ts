@@ -1233,10 +1233,11 @@ describe('executeStreamingQuery against a stateful engine', () => {
   // ever delivers it, so assert the formatter's own output reaches the rendered rows.
   // An abort can land while a poll is in flight rather than during a sleep, in which case the poll
   // resolves, its rows publish, and the loop exits on its own condition instead of throwing. That
-  // path still has to report the run as aborted.
-  it('reports an abort that lands between iterations', async () => {
+  // path still has to report the run as aborted and release the job.
+  it('reports and releases an abort that lands between iterations', async () => {
     const engine = new FakeStreamEngine({ totalRows: 1_000, commitPerPoll: 10 });
     mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
+    mockCancel.mockClear();
 
     const dispatched: any[] = [];
     const dispatch: jest.Mock = jest.fn((action: any) => {
@@ -1268,6 +1269,7 @@ describe('executeStreamingQuery against a stateful engine', () => {
       .payload.status;
     expect(final.streaming.isPolling).toBe(false);
     expect(final.streaming.aborted).toBe(true);
+    expect(mockCancel).toHaveBeenCalledTimes(1);
   });
 
   it('renders date values through the PPL formatter', async () => {
