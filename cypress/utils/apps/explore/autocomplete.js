@@ -9,6 +9,7 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   DatasetTypes,
 } from './constants';
+import { getExpandedDocTableRowFieldValue } from './doc_table';
 
 // =======================================
 // Common Utilities (Used across multiple autocomplete specs)
@@ -661,7 +662,7 @@ export const generateAutocompleteTestConfigurations = (
 export const validateQueryResults = (field, expectedValue, operator) => {
   // Expand the first row to view the field value
   cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
-  cy.getElementByTestId(`tableDocViewRow-${field}-value`).within(() => {
+  getExpandedDocTableRowFieldValue(field).within(() => {
     cy.get('span')
       .invoke('text')
       .then((text) => {

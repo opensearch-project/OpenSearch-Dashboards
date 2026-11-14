@@ -15,6 +15,7 @@ import {
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
+import { getExpandedDocTableRowFieldValue } from '../../../../../../utils/apps/explore/doc_table';
 import {
   prepareTestSuite,
   createWorkspaceAndDatasetUsingEndpoint,
@@ -93,7 +94,7 @@ const runHistogramInteractionTests = () => {
             .eq(0)
             .find('button')
             .click({ force: true });
-          cy.getElementByTestId('tableDocViewRow-timestamp-value').then(($timestamp) => {
+          getExpandedDocTableRowFieldValue('timestamp').then(($timestamp) => {
             const timestampTxt = $timestamp.text();
             const parsedDate = timestampTxt.split('@');
             const date = parsedDate[0].trim();
