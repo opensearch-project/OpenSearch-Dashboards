@@ -27,6 +27,13 @@ describe('list time format', () => {
   it("keeps moment's localized LTS token (time with seconds)", () => {
     expect(toListTimePattern('L LTS')).toBe('L LTS');
     expect(toListTimePattern('LTS.SSS')).toBe('LTS');
+    expect(toListTimePattern('LT')).toBe('LT');
+    expect(toListTimePattern('LT SSS')).toBe('LT');
+    expect(toListTimePattern('LLLL LTS')).toBe('LLLL LTS');
+  });
+
+  it('uses no RegExp lookbehind, which older Safari cannot parse', () => {
+    expect(toListTimePattern.toString()).not.toMatch(/\(\?<[!=]/);
   });
 
   it('keeps bracketed literals', () => {
