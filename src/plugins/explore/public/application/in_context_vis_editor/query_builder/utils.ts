@@ -237,6 +237,23 @@ export const withLanguageQueryOptions = <T extends { language?: string; queryOpt
     ? query
     : { ...query, queryOptions: undefined };
 
+/**
+ * Whether PromQL rows run with their refId (the server prefixes their series names with it): only
+ * with two or more PromQL rows, so the same series from two rows (and their legend names) stay
+ * apart. One PromQL row keeps its plain series names, as a single-query visualization has them.
+ */
+export const shouldPrefixSeriesWithRefId = (queries: Array<{ language?: string }>): boolean =>
+  queries.filter(({ language }) => language === SupportLanguageType.promQL).length >= 2;
+
+// A metrics row runs with its refId, which the PromQL server prefixes its series names with.
+export const withRowRefId = <T extends { language?: string; queryOptions?: unknown }>(
+  query: T,
+  refId: string
+): T =>
+  getSourceTypeRegistry().isMetricsLanguage(query.language)
+    ? { ...query, queryOptions: { ...(query.queryOptions as object | undefined), refId } }
+    : query;
+
 export const getRequiredSignalType = (languageType?: SupportLanguageType): string | string[] =>
   getSourceTypeRegistry().isMetricsLanguage(languageType)
     ? CORE_SIGNAL_TYPES.METRICS

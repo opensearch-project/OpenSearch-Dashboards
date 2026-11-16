@@ -17,6 +17,13 @@ import { visualizationRegistry } from '../components/visualizations/visualizatio
 import { VisFieldType } from '../components/visualizations/types';
 import { Container, ContainerInput, EmbeddableInput } from '../../../embeddable/public';
 import { IVariableInterpolationService } from '../../../dashboard/public';
+import { fetchSavedQueries } from './fetch_saved_queries';
+
+// The visualization editor's rows run through fetchSavedQueries (tested on its own).
+jest.mock('./fetch_saved_queries', () => ({
+  ...jest.requireActual('./fetch_saved_queries'),
+  fetchSavedQueries: jest.fn(),
+}));
 
 // Mock react-dom/client
 const mockUnmount = jest.fn();
@@ -1703,5 +1710,128 @@ describe('ExploreEmbeddable', () => {
       emb.destroy();
       parent.destroy();
     });
+  });
+});
+
+describe('ExploreEmbeddable with the visualization editor rows (`queries`)', () => {
+  const logs = { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' };
+  const savedQueries = JSON.stringify([
+    { refId: 'A', query: { query: 'source = a', language: 'PPL', dataset: logs } },
+    // {
+    //   refId: 'B',
+    //   query: { query: 'source = b', language: 'PPL', dataset: logs, isHidden: true },
+    // },
+    {
+      refId: 'B',
+      query: { query: 'source = b', language: 'PPL', dataset: logs },
+      isHidden: true,
+    },
+    { refId: 'C', query: { query: 'source = c', language: 'PPL', dataset: logs } },
+  ]);
+  // fetchSavedQueries returns flattened series.
+  const seriesFor = (refId: string, value: number) => ({
+    refId,
+    // rows: [{ _index: 'logs', _id: refId, _source: { value } }],
+    // fieldSchema: [{ name: 'value', type: 'integer' }],
+    rows: [{ value }],
+    fieldSchema: [{ name: 'value', type: 'integer' }],
+  });
+
+  let embeddable: ExploreEmbeddable;
+  let container: TestDashboardContainer;
+  let savedExplore: any;
+  const input: ExploreInput = {
+    id: 'rows-embeddable',
+    timeRange: { from: 'now-15m', to: 'now' },
+    filters: [],
+    query: { query: '', language: 'PPL' },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    savedExplore = {
+      id: 'rows-id',
+      title: 'Rows',
+      searchSource: createMockSearchSource(),
+      uiState: '{}',
+      visualization: '{"chartType":"table"}',
+      queries: savedQueries,
+    };
+    container = createTestContainer(input.id);
+    const services = createMockServices();
+    embeddable = new ExploreEmbeddable(
+      {
+        savedExplore,
+        editUrl: '/app/visualization-editor/#/edit/rows-id',
+        editPath: 'edit/rows-id',
+        indexPatterns: [],
+        editable: true,
+        filterManager: services.filterManager,
+        services,
+        editApp: 'visualization-editor',
+      },
+      input,
+      jest.fn(),
+      container
+    );
+  });
+
+  afterEach(() => {
+    embeddable.destroy();
+    container.destroy();
+  });
+
+  test("runs the visible rows with the panel's filters and time, not the single query", async () => {
+    (fetchSavedQueries as jest.Mock).mockResolvedValue({
+      series: [seriesFor('A', 1), seriesFor('C', 3)],
+      failed: [],
+    });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    const [rows, options] = (fetchSavedQueries as jest.Mock).mock.calls[0];
+    expect(rows.map(([refId]: [string]) => refId)).toEqual(['A', 'C']);
+    // (Compared field by field: the services mock can't be deep-compared.)
+    // The panel's own input (the container fills filters / time in).
+    expect(options.filters).toBe(embeddable.getInput().filters);
+    expect(options.timeRange).toBe(embeddable.getInput().timeRange);
+    expect(savedExplore.searchSource.fetch).not.toHaveBeenCalled();
+  });
+
+  test('renders the rows merged, each tagged with its query', async () => {
+    (fetchSavedQueries as jest.Mock).mockResolvedValue({
+      series: [seriesFor('A', 1), seriesFor('C', 3)],
+      failed: [],
+    });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    // @ts-ignore
+    expect(embeddable.searchProps.tableData.rows).toEqual([
+      { value: 1, Query: 'A' },
+      { value: 3, Query: 'C' },
+    ]);
+    expect(embeddable.getOutput().loading).toBe(false);
+  });
+
+  test('shows the rows that ran when another fails, and the first error when all do', async () => {
+    const boom = new Error('boom');
+    (fetchSavedQueries as jest.Mock).mockResolvedValueOnce({
+      series: [seriesFor('A', 1)],
+      failed: [{ refId: 'C', error: boom }],
+    });
+    // @ts-ignore
+    await embeddable.fetch();
+    // @ts-ignore
+    expect(embeddable.searchProps.tableData.rows).toEqual([{ value: 1 }]);
+
+    (fetchSavedQueries as jest.Mock).mockResolvedValueOnce({
+      series: [],
+      failed: [{ refId: 'A', error: boom }],
+    });
+    // @ts-ignore
+    await expect(embeddable.fetch()).rejects.toBe(boom);
   });
 });

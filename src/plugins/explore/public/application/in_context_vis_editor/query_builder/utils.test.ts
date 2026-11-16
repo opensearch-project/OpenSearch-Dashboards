@@ -13,6 +13,7 @@ import {
   handleAgentError,
   resolveDatasetLanguage,
   getInitialQueryString,
+  shouldPrefixSeriesWithRefId,
 } from './utils';
 import { SupportLanguageType } from './query_builder';
 import type { Dataset } from '../../../../../data/common';
@@ -565,5 +566,17 @@ describe('getInitialQueryString', () => {
 
   it('starts empty without a dataset', () => {
     expect(getInitialQueryString(queryStringFor(), undefined, 'SQL')).toBe('');
+  });
+});
+
+describe('shouldPrefixSeriesWithRefId', () => {
+  it('is true only with two or more PromQL rows', () => {
+    const promql = { language: SupportLanguageType.promQL };
+    const ppl = { language: SupportLanguageType.ppl };
+    expect(shouldPrefixSeriesWithRefId([promql])).toBe(false);
+    expect(shouldPrefixSeriesWithRefId([ppl, promql])).toBe(false);
+    expect(shouldPrefixSeriesWithRefId([ppl, ppl])).toBe(false);
+    expect(shouldPrefixSeriesWithRefId([promql, promql])).toBe(true);
+    expect(shouldPrefixSeriesWithRefId([ppl, promql, promql])).toBe(true);
   });
 });

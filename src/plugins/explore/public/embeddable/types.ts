@@ -43,4 +43,5 @@ type ExploreByValueAttributes = Pick<
   | 'visualization'
   | 'uiState'
   | 'kibanaSavedObjectMeta'
+  | 'queries'
 >;

@@ -15,6 +15,7 @@ import {
   TimeRange,
   FilterManager,
   getTime,
+  Query,
   UI_SETTINGS,
   IFieldType,
 } from '../../../data/public';
@@ -36,6 +37,7 @@ import {
 } from '../application/legacy/discover/opensearch_dashboards_services';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { SortOrder } from '../types/saved_explore_types';
+import { OpenSearchSearchHit } from '../types/doc_views_types';
 import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
@@ -55,10 +57,12 @@ import {
   convertStringsToMappings,
   isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
+
 import {
   normalizeResultRows,
-  normalizeSearchHits,
+  hitsToSeriesResult,
 } from '../components/visualizations/utils/normalize_result_rows';
+import type { SeriesResult } from '../application/in_context_vis_editor/multi_query_builder/types';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
@@ -70,6 +74,11 @@ import {
   registerAllTransformations,
 } from '../components/data_transformations';
 import { PanelDataService } from './panel_data_service';
+import { fetchSavedQueries, getVisibleSavedRows } from './fetch_saved_queries';
+
+import { parseSavedContainerState } from '../application/in_context_vis_editor/multi_query_builder/utils';
+import type { UrlRowEntry } from '../application/in_context_vis_editor/multi_query_builder/types';
+import { QueryState } from '../application/in_context_vis_editor/query_builder/query_builder';
 import { visDataToTabular } from '../components/visualizations/utils/vis_data_to_tabular';
 import { parseErrorEnvelope } from '../application/utils/parse_error_envelope';
 
@@ -157,6 +166,9 @@ const getVisualizationMetadata = (visualization?: string): VisualizationMetadata
   }
 };
 
+// The single saved query, as one table in the pipeline.
+const SINGLE_QUERY_REF_ID = 'A';
+
 const UNSAVED_DASHBOARD_CROSSHAIR_GROUP = 'dashboard-unsaved';
 
 export const getCrosshairGroup = (
@@ -172,6 +184,9 @@ export class ExploreEmbeddable
   // A data fetch was requested while not visible and must run once visible again.
   private pendingFetchOnResume: boolean = false;
   private readonly savedExplore: SavedExplore;
+  // The visualization editor's visible rows when the saved object has them (its `queries`);
+  // the panel then runs and merges them instead of the single searchSourceJSON query.
+  private readonly savedRows?: Array<UrlRowEntry<QueryState>>;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
   private filtersSearchSource?: ISearchSource;
@@ -196,6 +211,7 @@ export class ExploreEmbeddable
   private variableSubscription?: Subscription;
   public originalQuery?: string;
   private lastInterpolatedQuery?: string;
+  private lastInterpolatedRows?: string[];
 
   // Data transformation support
   private transformationService: TransformationService;
@@ -233,6 +249,8 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    const savedContainerState = parseSavedContainerState(savedExplore.queries);
+    this.savedRows = savedContainerState ? getVisibleSavedRows(savedContainerState) : undefined;
     this.visualizationMetadata = visualizationMetadata;
     // manage data adapters for CSV export
     this.inspectorAdaptors = {
@@ -357,7 +375,17 @@ export class ExploreEmbeddable
       linkVariablesChanged = true;
     }
 
-    if (this.originalQuery && this.interpolationService.hasVariables(this.originalQuery)) {
+    if (this.savedRows) {
+      const interpolated = this.interpolateSavedRows(this.savedRows);
+      if (!isEqual(interpolated, this.lastInterpolatedRows)) {
+        this.lastInterpolatedRows = interpolated;
+        if (this.searchProps) {
+          // The refetch re-renders with the new variables.
+          this.updateHandler(this.searchProps, true);
+          return;
+        }
+      }
+    } else if (this.originalQuery && this.interpolationService.hasVariables(this.originalQuery)) {
       const { searchSource } = this.savedExplore;
       const currentQuery = searchSource.getField('query');
       const interpolatedQuery = this.interpolationService.interpolate(
@@ -421,6 +449,10 @@ export class ExploreEmbeddable
 
     // If the query contains variable placeholders, apply initial interpolation
     // using whatever current values are available (from saved state).
+    if (this.savedRows) {
+      this.lastInterpolatedRows = this.interpolateSavedRows(this.savedRows);
+    }
+
     const queryHasVariables =
       query?.query && this.interpolationService.hasVariables(String(query.query));
     if (queryHasVariables && query) {
@@ -598,12 +630,45 @@ export class ExploreEmbeddable
       this.updateHandler(this.searchProps, true);
     }
   }
+  /**
+   * Runs the visualization editor's rows (each on its own dataset, in parallel) and renders them
+   * merged, as the editor does. Rows that fail don't stop the others; if every row fails, the
+   * first error is the panel's.
+   */
+  private async fetchSavedRows(rows: Array<UrlRowEntry<QueryState>>, signal: AbortSignal) {
+    if (!this.searchProps) return;
+    this.inspectorAdaptors.requests.reset();
+    this.updateOutput({ loading: true, error: undefined });
+    this.searchProps.isLoading = true;
+    this.searchProps.error = undefined;
+
+    const { series, failed } = await fetchSavedQueries(rows, {
+      services: this.services,
+      filters: this.input.filters,
+      timeRange: this.input.timeRange,
+      signal,
+      interpolate: (query, language) => this.interpolationService.interpolate(query, language),
+      requests: this.inspectorAdaptors.requests,
+    });
+    if (signal.aborted) return;
+    // if all queries fail, return first failed row
+    if (series.length === 0 && failed.length > 0) throw failed[0].error;
+
+    // The first row is used to render empty state
+    const firstQuery = rows.find(([, query]) => !!query.dataset)?.[1];
+
+    this.renderResults(series, firstQuery);
+  }
 
   private fetch = async () => {
     if (!this.searchProps) return;
     const { searchSource } = this.savedExplore;
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
+    if (this.savedRows) {
+      await this.fetchSavedRows(this.savedRows, this.abortController.signal);
+      return;
+    }
     searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
 
     this.inspectorAdaptors.requests.reset();
@@ -637,16 +702,47 @@ export class ExploreEmbeddable
     });
     const rawRows = resp.hits.hits;
     const dataFrame = searchSource.getDataFrame();
-    const fieldSchema = dataFrame?.schema;
-    const normalizedRows = normalizeSearchHits(rawRows);
-    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      normalizedRows,
-      fieldSchema ?? []
+    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
+
+    // single saved query
+    this.renderResults(
+      [
+        hitsToSeriesResult(
+          SINGLE_QUERY_REF_ID,
+          rawRows,
+          dataFrame?.schema ?? [],
+          dataFrame?.meta?.seriesDisplayNames
+        ),
+      ],
+      query,
+      rawRows
     );
+  };
+
+  private interpolateSavedRows(rows: Array<UrlRowEntry<QueryState>>): string[] {
+    return rows.map(([, query]) =>
+      this.interpolationService.interpolate(prepareQueryForLanguage(query).query, query.language)
+    );
+  }
+
+  private renderResults(
+    series: SeriesResult[],
+    query: Query | undefined,
+    // rawRows: the search hits as fetched, for the logs tab and the hit count (single query only).
+    rawRows?: OpenSearchSearchHit[]
+  ) {
+    if (!this.searchProps) return;
+    const { searchSource } = this.savedExplore;
+
+    const {
+      rows: transformedRows,
+      finalSchema,
+      seriesDisplayNames,
+    } = this.transformationService.applyPipelineToSeries(series);
 
     const visualizationData = {
       ...normalizeResultRows(transformedRows, finalSchema ?? []),
-      seriesDisplayNames: dataFrame?.meta?.seriesDisplayNames as Record<string, string>,
+      seriesDisplayNames,
     };
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
@@ -758,10 +854,10 @@ export class ExploreEmbeddable
       }
     }
     this.updateOutput({ loading: false, error: undefined });
-    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
+    // this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
+    this.searchProps.rows = uiState.activeTab === 'logs' && rawRows ? rawRows : transformedRows;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = rawRows.length;
+    this.searchProps.hits = rawRows?.length ?? series.reduce((n, s) => n + s.rows.length, 0);
     this.searchProps.isLoading = false;
 
     // Update shared panel data store so the global fetch_panel_data tool returns fresh data
@@ -781,7 +877,7 @@ export class ExploreEmbeddable
         { returnsFormattedValues: true }
       );
     }
-  };
+  }
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
