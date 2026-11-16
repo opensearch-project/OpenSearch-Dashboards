@@ -90,7 +90,7 @@ const mockServices = {
   core: { application: { navigateToApp: jest.fn() } },
   scopedHistory: { push: jest.fn() },
   chrome: {
-    docTitle: { change: jest.fn() },
+    docTitle: { change: jest.fn(), reset: jest.fn() },
     recentlyAccessed: { add: jest.fn() },
     setBreadcrumbs: jest.fn(),
   },
@@ -185,6 +185,23 @@ describe('VisualizationEditorPage', () => {
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Chart');
       expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalled();
     });
+  });
+
+  it('resets the doc title for a new explore', async () => {
+    (useInitialSaveExplore as jest.Mock).mockReturnValue({
+      savedExplore: { id: undefined, title: 'New' },
+      isLoading: false,
+      error: undefined,
+      savedQueryState: undefined,
+      savedVisConfig: undefined,
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(mockServices.chrome.docTitle.reset).toHaveBeenCalled();
+    });
+    expect(mockServices.chrome.docTitle.change).not.toHaveBeenCalled();
   });
 
   it('applies saved vis config when present', async () => {

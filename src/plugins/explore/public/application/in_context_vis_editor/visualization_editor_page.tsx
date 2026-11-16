@@ -86,6 +86,10 @@ export const VisualizationEditorPage = ({
         savedExplore.id,
         { type: 'explore' }
       );
+    } else {
+      // A new vis: drop the title left by a saved vis this tab showed before (e.g. back from
+      // `#/edit/:id` to `#/`, which remounts the editor without reloading the page).
+      chrome.docTitle.reset();
     }
     chrome.setBreadcrumbs([
       ...getBreadcrumbs(application.navigateToApp, embeddable, originatingApp, containerInfo),

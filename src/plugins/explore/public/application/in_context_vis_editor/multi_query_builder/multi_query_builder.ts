@@ -111,12 +111,6 @@ export class MultiQueryBuilder {
     this.getServices = getServices;
   }
 
-  // TODO URL sync is one-way (state -> URL). An external URL change (back/forward POP, or a PUSH
-  // into the app with a different `_eq`) is not picked up because the app stays mounted. Rather
-  // than every builder listening to the URL, remount the editor on such a change (bump the
-  // MultiQueryBuilderProvider's key from scopedHistory.listen), so a new instance reads the URL.
-  // Our own writes use `replace: true`, so REPLACE can be ignored.
-
   isLoaded(): boolean {
     return this.loaded;
   }
@@ -151,7 +145,7 @@ export class MultiQueryBuilder {
    * - setupGlobalDataRangeSync(): sync current time filter to global time filter.
    * - setupTimefilterToDateRangeSync(): Sync global time filter to shared editor states
    * - startUrlSync(): one-way, state -> URL, debounced. dateRange is left out: _g (timefilter) owns
-   *   it. External URL changes (back/forward) are not read back; remount the editor instead.
+   *   it. External URL changes (back/forward) are not read back; EditorSession remounts the editor.
    */
   private setupGlobalDataRangeSync() {
     const dataRangeSyncSub = this.multiQueryEditorState$
@@ -196,7 +190,7 @@ export class MultiQueryBuilder {
    * - readUrlState(): reads _eq ([refId, QueryState][]) and _e (container state + per-row isHidden),
    *   both keyed by refId. For previous single query builder that holds a single row's state, use ref A.
    * - startUrlSync(): one-way, state -> URL, debounced. dateRange is left out: _g (timefilter) owns
-   *   it. External URL changes (back/forward) are not read back; remount the editor instead.
+   *   it. External URL changes (back/forward) are not read back; EditorSession remounts the editor.
    */
 
   private startUrlSync() {
