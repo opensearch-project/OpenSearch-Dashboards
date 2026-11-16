@@ -11,7 +11,7 @@ import { setPromptModeIsAvailable, setSummaryAgentIsAvailable } from '../slices'
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 
-export const AI_AVAILABILITY_PROBE_TIMEOUT_MS = 5000;
+export const AI_AVAILABILITY_PROBE_TIMEOUT_MS = 30000;
 
 /**
  * Re-checks whether the AI entry points are available for the current dataset. The probes run in
@@ -77,17 +77,22 @@ export const createAiAvailabilityMiddleware =
       }
       const runCancel = new AbortController();
       cancelController = runCancel;
-      // The summary request has its own controller, so its timeout never affects the prompt probe.
+      // Each probe has its own controller, so one probe's timeout never affects the other.
+      const promptRequest = new AbortController();
       const summaryRequest = new AbortController();
-      runCancel.signal.addEventListener('abort', () => summaryRequest.abort());
+      runCancel.signal.addEventListener('abort', () => {
+        promptRequest.abort();
+        summaryRequest.abort();
+      });
       // A result only applies to the dataset it was probed for.
       const isCurrent = () =>
         runGeneration === generation && isEqual(store.getState().query.dataset, dataset);
 
       withTimeout(
-        getPromptModeIsAvailable(services),
+        getPromptModeIsAvailable(services, { signal: promptRequest.signal }),
         AI_AVAILABILITY_PROBE_TIMEOUT_MS,
-        runCancel.signal
+        runCancel.signal,
+        () => promptRequest.abort()
       ).then((value) => {
         if (isCurrent() && store.getState().queryEditor.promptModeIsAvailable !== value) {
           store.dispatch(setPromptModeIsAvailable(value));

@@ -103,6 +103,9 @@ describe('createAiAvailabilityMiddleware', () => {
     const store = createStore();
 
     store.dispatch(refreshAiAvailability());
+    expect(mockedGetPromptModeIsAvailable).toHaveBeenCalledWith(services, {
+      signal: expect.any(AbortSignal),
+    });
     expect(mockedGetSummaryAgentIsAvailable).toHaveBeenCalledWith(services, 'ds-a', {
       signal: expect.any(AbortSignal),
     });
@@ -304,6 +307,100 @@ describe('createAiAvailabilityMiddleware', () => {
 
       expect(signal?.aborted).toBe(false);
       expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(true);
+    });
+  });
+
+  describe('prompt probe cancellation', () => {
+    let promptSignal: AbortSignal | undefined;
+    let summarySignal: AbortSignal | undefined;
+    const captureSignals = (summary: () => Promise<boolean> = () => new Promise(() => {})) => {
+      mockedGetPromptModeIsAvailable.mockImplementation((_s, options) => {
+        promptSignal = options?.signal;
+        return new Promise(() => {});
+      });
+      mockedGetSummaryAgentIsAvailable.mockImplementation((_s, _id, options) => {
+        summarySignal = options?.signal;
+        return summary();
+      });
+    };
+
+    beforeEach(() => {
+      promptSignal = undefined;
+      summarySignal = undefined;
+    });
+    afterEach(() => jest.useRealTimers());
+
+    it('aborts the prompt probe exactly when it times out', () => {
+      jest.useFakeTimers();
+      captureSignals();
+      const store = createStore();
+
+      store.dispatch(refreshAiAvailability());
+      jest.advanceTimersByTime(AI_AVAILABILITY_PROBE_TIMEOUT_MS - 1);
+      expect(promptSignal?.aborted).toBe(false);
+      jest.advanceTimersByTime(1);
+
+      expect(promptSignal?.aborted).toBe(true);
+    });
+
+    it('does not abort the summary request when the prompt probe times out', async () => {
+      jest.useFakeTimers();
+      captureSignals(() => new Promise((resolve) => setTimeout(() => resolve(true), 1000)));
+      const store = createStore();
+
+      store.dispatch(refreshAiAvailability());
+      // The summary request answers first, so only the prompt probe is left to time out.
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(AI_AVAILABILITY_PROBE_TIMEOUT_MS);
+
+      expect(promptSignal?.aborted).toBe(true);
+      expect(summarySignal?.aborted).toBe(false);
+    });
+
+    it('does not abort the prompt probe when the summary request times out', async () => {
+      jest.useFakeTimers();
+      captureSignals();
+      mockedGetPromptModeIsAvailable.mockImplementation((_s, options) => {
+        promptSignal = options?.signal;
+        return new Promise((resolve) => setTimeout(() => resolve(true), 1000));
+      });
+      const store = createStore();
+
+      store.dispatch(refreshAiAvailability());
+      // The prompt probe answers first, so only the summary request is left to time out.
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(AI_AVAILABILITY_PROBE_TIMEOUT_MS);
+
+      expect(summarySignal?.aborted).toBe(true);
+      expect(promptSignal?.aborted).toBe(false);
+    });
+
+    it('aborts the previous run when a newer refresh starts', () => {
+      captureSignals();
+      const store = createStore();
+
+      store.dispatch(refreshAiAvailability());
+      const firstPromptSignal = promptSignal;
+      store.dispatch(refreshAiAvailability());
+
+      expect(firstPromptSignal?.aborted).toBe(true);
+      expect(promptSignal?.aborted).toBe(false);
+    });
+
+    it('aborts the pending prompt probe when the store is reset', () => {
+      captureSignals();
+      const store = createStore();
+      const initialState = store.getState();
+
+      store.dispatch(refreshAiAvailability());
+      expect(promptSignal?.aborted).toBe(false);
+      store.dispatch(resetState(initialState));
+
+      expect(promptSignal?.aborted).toBe(true);
     });
   });
 
