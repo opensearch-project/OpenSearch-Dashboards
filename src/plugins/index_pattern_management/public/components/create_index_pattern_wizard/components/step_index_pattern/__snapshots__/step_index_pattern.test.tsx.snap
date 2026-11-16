@@ -34,6 +34,7 @@ exports[`StepIndexPattern renders indices which match the initial query 1`] = `
       },
     ]
   }
+  onIndexClick={[Function]}
   query="opensearch-dashboards"
 />
 `;
@@ -49,6 +50,7 @@ exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
       },
     ]
   }
+  onIndexClick={[Function]}
   query="o*"
 />
 `;
