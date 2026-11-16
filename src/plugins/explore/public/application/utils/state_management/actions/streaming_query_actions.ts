@@ -4,10 +4,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import type {
-  PPLStreamSnapshot,
-  PPLStreamUpdateMode,
-} from '../../../../../../query_enhancements/common';
+import type { PPLStreamSnapshot } from '../../../../../../query_enhancements/common';
 import {
   isTerminalPPLStreamStatus,
   PPL_STREAM_UNKNOWN,
@@ -31,33 +28,14 @@ import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
 import { streamJobError } from '../../streaming/stream_error_status';
 
-/** Minimum time between the starts of two polls. */
+/**
+ * Minimum time between the starts of two polls. Every poll returns all the rows found so far, so
+ * this also bounds how often a growing result is transferred.
+ */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
 
-/** Under the 30s OpenSearch client request timeout. */
-export const STREAMING_LONG_POLL_WAIT = '10s';
-
-/**
- * Rows held client-side; `total` still reports the real size. Must stay well above ROWS_PER_POLL,
- * or the cap is reached on the first poll and the table stops growing.
- */
+/** Rows held client-side; `total` still reports the real size. */
 export const STREAMING_MAX_HELD_ROWS = 100_000;
-
-/**
- * Rows requested per poll. 10,000 is the default ceiling of the cluster's
- * `plugins.ppl.async.max_page_size`; asking for more is rejected by the engine.
- */
-const ROWS_PER_POLL = 10_000;
-
-/** The route rejects count < 1, so a status-only poll asks for the smallest allowed window. */
-const STATUS_ONLY_POLL_COUNT = 1;
-
-/**
- * Rows to request on the next poll. Once the held-row cap is reached the accumulator keeps nothing
- * more, so a full window would be fetched and discarded; poll for status only instead.
- */
-export const streamingPollCount = (rowsPerPoll: number, heldRowCapReached: boolean): number =>
-  heldRowCapReached ? STATUS_ONLY_POLL_COUNT : rowsPerPoll;
 
 export interface ExecuteStreamingQueryArgs {
   services: ExploreServices;
@@ -196,8 +174,6 @@ export const executeStreamingQuery = createAsyncThunk<
         // Persisted so release-on-unload can target the job's cluster; a remote job released
         // against the local cluster 404s and silently leaks until keep_alive.
         dataSourceId,
-        sequence: snapshot.sequence,
-        updateMode: snapshot.update_mode as PPLStreamUpdateMode | undefined,
         total: snapshot.total ?? 0,
         rowsFetched: rows.heldRows.length,
         fractionDone: maxFraction,
@@ -277,27 +253,6 @@ export const executeStreamingQuery = createAsyncThunk<
       );
     };
 
-    /**
-     * Drains the remaining committed rows after a terminal snapshot, which serves only one window.
-     * Those rows are already committed, so there is nothing to wait for between requests.
-     */
-    const fetchCommittedRows = async (total: number, longNumerals: boolean) => {
-      const wanted = Math.min(total, STREAMING_MAX_HELD_ROWS);
-      // `wanted` alone bounds this only if windows come back the size asked for.
-      const maxRequests = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
-      for (let n = 0; n < maxRequests && !signal.aborted && rows.nextOffset < wanted; n++) {
-        const snap = await pollWithRetry({
-          id: jobId!,
-          withLongNumeralsSupport: longNumerals,
-          offset: rows.nextOffset,
-          count: ROWS_PER_POLL,
-          dataSourceId,
-          signal,
-        });
-        if (rows.absorb(snap) === 0) return;
-      }
-    };
-
     try {
       // Claim the cache key as LOADING before awaiting submit, which can take up to
       // DEFAULT_WAIT_FOR_COMPLETION. Until this key reports, a faster sibling query completing makes
@@ -350,12 +305,6 @@ export const executeStreamingQuery = createAsyncThunk<
       if (!asHistogram) rows.absorb(submitted);
       publish(submitted, true);
 
-      // Which window to ask for next. Separate from where returned rows belong, which the
-      // accumulator decides from `window.offset`. A provisional set is re-read from the start to
-      // pick up revisions; committed rows are continued from. REPLACE until the engine classifies
-      // the job, since re-reading is always safe.
-      let updateMode: PPLStreamUpdateMode = 'REPLACE';
-      let last: PPLStreamSnapshot = submitted;
       let nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
       while (!signal.aborted) {
@@ -363,38 +312,12 @@ export const executeStreamingQuery = createAsyncThunk<
         if (wait > 0) await sleep(wait, signal);
         nextPollAt = Date.now() + STREAMING_POLL_INTERVAL_MS;
 
-        // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
-        // just transfers and parses rows to discard them every interval. Drop to the smallest
-        // window the route allows and keep polling only to observe progress and terminal status.
-        const pollCount = streamingPollCount(ROWS_PER_POLL, !asHistogram && rows.isFull);
-
-        // Only a caught-up client waits for a newer snapshot; unread committed rows are fetched now.
-        const canWait =
-          last.sequence !== undefined &&
-          (asHistogram || updateMode === 'REPLACE' || rows.isFull || rows.nextOffset >= last.total);
-
-        // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
-        // advancing would ask for a later slice of one.
         const snapshot = await pollWithRetry({
           id: jobId,
           withLongNumeralsSupport,
-          offset: asHistogram || updateMode === 'REPLACE' ? 0 : rows.nextOffset,
-          count: pollCount,
           dataSourceId,
           signal,
-          ...(canWait && {
-            waitForSequence: last.sequence,
-            waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
-          }),
         });
-        last = snapshot;
-
-        if (snapshot.update_mode) {
-          updateMode = snapshot.update_mode as PPLStreamUpdateMode;
-        }
-
-        // Placement is by served window, not `update_mode`: a completed job reports REPLACE while
-        // serving only the window asked for.
         if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
@@ -409,25 +332,10 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
-        let drainFailed = false;
-        if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
-          publish(snapshot, true);
-          // A failure paging the tail of an already-completed query must not discard the rows
-          // already held; publish the terminal snapshot with what we have, marked incomplete. An
-          // abort still propagates, to be handled as a cancellation below.
-          try {
-            await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
-          } catch (drainError) {
-            if (isAbort(drainError)) throw drainError;
-            drainFailed = true;
-          }
-        }
-
         publish(snapshot, !terminal);
         if (terminal) {
           // Rows are held client-side from here, so the job is never read again.
           release();
-          if (drainFailed) finalise(false, true);
           return;
         }
       }

@@ -28,7 +28,8 @@ export const PPL_STREAM_UNKNOWN = -1;
 const TERMINAL: ReadonlySet<string> = new Set(['SUCCEEDED', 'FAILED', 'CANCELLED']);
 
 /** Terminal does not imply success, so callers must still check for `SUCCEEDED` specifically. */
-export const isTerminalPPLStreamStatus = (status: PPLStreamStatus): boolean => TERMINAL.has(status);
+export const isTerminalPPLStreamStatus = (status?: PPLStreamStatus): boolean =>
+  status !== undefined && TERMINAL.has(status);
 
 export const isPPLStreamProgressKnown = (progress?: PPLStreamProgress): boolean =>
   typeof progress?.fraction_done === 'number' && progress.fraction_done >= 0;

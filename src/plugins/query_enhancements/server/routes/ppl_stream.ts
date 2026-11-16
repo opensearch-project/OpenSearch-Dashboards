@@ -28,7 +28,6 @@ const MAX_KEEP_ALIVE_MS = 24 * 60 * 60 * 1000;
  */
 const DEFAULT_WAIT_FOR_COMPLETION = '1s';
 const DEFAULT_KEEP_ALIVE = '5m';
-const DEFAULT_COUNT = 500;
 
 const DURATION_PATTERN = /^(\d+)(ms|s|m|h)$/;
 const DURATION_UNIT_MS: Record<string, number> = { ms: 1, s: 1000, m: 60_000, h: 3_600_000 };
@@ -130,13 +129,6 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
       validate: {
         params: schema.object({ id: schema.string({ minLength: 1 }) }),
         query: schema.object({
-          offset: schema.maybe(schema.number({ min: 0 })),
-          // Unbounded here: the ceiling is the cluster's plugins.ppl.async.max_page_size, which is
-          // configurable, so the cluster is the only correct authority on it.
-          count: schema.maybe(schema.number({ min: 1 })),
-          waitForSequence: schema.maybe(schema.number({ min: -1 })),
-          waitForCompletionTimeout: schema.maybe(waitForCompletionTimeoutSchema),
-          keepAlive: schema.maybe(keepAliveSchema),
           dataSourceId: schema.maybe(schema.string()),
           // Rows arrive here rather than at submit, so this matters on every poll.
           withLongNumeralsSupport: schema.maybe(schema.boolean()),
@@ -146,15 +138,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
     requireFeature('pplStreaming', logger, async (context, req, res) => {
       const { id } = req.params;
       try {
-        const {
-          offset,
-          count,
-          waitForSequence,
-          waitForCompletionTimeout,
-          keepAlive,
-          dataSourceId,
-          withLongNumeralsSupport,
-        } = req.query;
+        const { dataSourceId, withLongNumeralsSupport } = req.query;
         const client = await resolveOpenSearchClient(
           context,
           dataSourceId,
@@ -164,18 +148,11 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           return res.custom({ statusCode: 400, body: DATASOURCE_UNAVAILABLE_MESSAGE });
         }
 
+        // The route takes no parameters and rejects any it does not recognise. Each response carries
+        // every row found so far.
         const result = await client.transport.request({
           method: 'GET',
-          path: `${URI.PPL_JOBS}/${encodeURIComponent(id)}`,
-          querystring: {
-            offset: String(offset ?? 0),
-            count: String(count ?? DEFAULT_COUNT),
-            ...(waitForSequence !== undefined && { wait_for_sequence: String(waitForSequence) }),
-            ...(waitForCompletionTimeout && {
-              wait_for_completion_timeout: waitForCompletionTimeout,
-            }),
-            ...(keepAlive && { keep_alive: keepAlive }),
-          },
+          path: `${URI.ASYNC_QUERY}/${encodeURIComponent(id)}`,
         });
 
         return res.ok({ body: result?.body ?? result });
@@ -215,7 +192,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
 
         const result = await client.transport.request({
           method: 'DELETE',
-          path: `${URI.PPL_JOBS}/${encodeURIComponent(id)}`,
+          path: `${URI.ASYNC_QUERY}/${encodeURIComponent(id)}`,
         });
 
         return res.ok({ body: result?.body ?? result });

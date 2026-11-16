@@ -30,14 +30,6 @@ export interface SubmitStreamingQueryArgs {
 
 export interface PollStreamingQueryArgs {
   id: string;
-  /** Row window start. Advance by `size` for `APPEND`; keep at 0 for `REPLACE`. */
-  offset?: number;
-  /** Capped by the cluster's `plugins.ppl.async.max_page_size` (default 10000). */
-  count?: number;
-  /** The last sequence seen; the server holds the request until a newer one, terminal status or the wait. */
-  waitForSequence?: number;
-  waitForCompletionTimeout?: string;
-  keepAlive?: string;
   dataSourceId?: string;
   signal?: AbortSignal;
   withLongNumeralsSupport?: boolean;
@@ -83,11 +75,6 @@ export class PPLStreamService {
   /** @throws {PPLStreamJobNotFoundError} when the job no longer exists. */
   async poll({
     id,
-    offset,
-    count,
-    waitForSequence,
-    waitForCompletionTimeout,
-    keepAlive,
     dataSourceId,
     signal,
     withLongNumeralsSupport,
@@ -97,11 +84,6 @@ export class PPLStreamService {
         `${PPL_STREAM_API.JOB}/${encodeURIComponent(id)}`,
         {
           query: {
-            ...(offset !== undefined && { offset }),
-            ...(count !== undefined && { count }),
-            ...(waitForSequence !== undefined && { waitForSequence }),
-            ...(waitForCompletionTimeout && { waitForCompletionTimeout }),
-            ...(keepAlive && { keepAlive }),
             ...(dataSourceId && { dataSourceId }),
             ...(withLongNumeralsSupport && { withLongNumeralsSupport }),
           },

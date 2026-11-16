@@ -332,7 +332,7 @@ describe('registerPPLStreamRoutes', () => {
   });
 
   describe('poll', () => {
-    it('applies window and sequence defaults', async () => {
+    it('polls the async query route with no parameters, which it would reject', async () => {
       const { poll } = setup();
       const request = jest.fn().mockResolvedValue({ body: { status: 'RUNNING' } });
 
@@ -344,40 +344,7 @@ describe('registerPPLStreamRoutes', () => {
 
       expect(request).toHaveBeenCalledWith({
         method: 'GET',
-        path: `${URI.PPL_JOBS}/job-1`,
-        querystring: { offset: '0', count: '500' },
-      });
-    });
-
-    it('forwards an explicit window and long-poll parameters', async () => {
-      const { poll } = setup();
-      const request = jest.fn().mockResolvedValue({ body: {} });
-
-      await poll.handler(
-        contextWith(request),
-        {
-          params: { id: 'job-1' },
-          query: {
-            offset: 1000,
-            count: 250,
-            waitForSequence: 0,
-            waitForCompletionTimeout: '1s',
-            keepAlive: '5m',
-          },
-        } as any,
-        createResponse()
-      );
-
-      expect(request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: `${URI.PPL_JOBS}/job-1`,
-        querystring: {
-          offset: '1000',
-          count: '250',
-          wait_for_sequence: '0',
-          wait_for_completion_timeout: '1s',
-          keep_alive: '5m',
-        },
+        path: `${URI.ASYNC_QUERY}/job-1`,
       });
     });
 
@@ -392,7 +359,7 @@ describe('registerPPLStreamRoutes', () => {
       );
 
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ path: `${URI.PPL_JOBS}/a%2Fb%2Bc%3D` })
+        expect.objectContaining({ path: `${URI.ASYNC_QUERY}/a%2Fb%2Bc%3D` })
       );
     });
 
@@ -437,20 +404,16 @@ describe('registerPPLStreamRoutes', () => {
       expect(res.ok).toHaveBeenCalledWith({ body: raw });
     });
 
-    it('rejects a count below one', () => {
+    it('rejects the paging and long-poll parameters the route no longer forwards', () => {
       const { poll } = setup();
-      expect(() => poll.config.validate.query.validate({ count: 0 })).toThrow();
-    });
-
-    it('does not cap count, since max_page_size is a cluster setting', () => {
-      const { poll } = setup();
-      expect(() => poll.config.validate.query.validate({ count: 100000 })).not.toThrow();
-    });
-
-    it('accepts -1 for waitForSequence, the contract value for "return now"', () => {
-      const { poll } = setup();
-      expect(() => poll.config.validate.query.validate({ waitForSequence: -1 })).not.toThrow();
-      expect(() => poll.config.validate.query.validate({ waitForSequence: -2 })).toThrow();
+      for (const query of [
+        { offset: 0 },
+        { count: 10 },
+        { waitForSequence: 1 },
+        { keepAlive: '5m' },
+      ]) {
+        expect(() => poll.config.validate.query.validate(query)).toThrow();
+      }
     });
   });
 
@@ -468,7 +431,7 @@ describe('registerPPLStreamRoutes', () => {
 
       expect(request).toHaveBeenCalledWith({
         method: 'DELETE',
-        path: `${URI.PPL_JOBS}/job-1`,
+        path: `${URI.ASYNC_QUERY}/job-1`,
       });
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'job-1', status: 'CANCELLED' } });
     });

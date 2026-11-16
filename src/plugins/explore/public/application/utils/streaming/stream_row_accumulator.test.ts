@@ -10,175 +10,109 @@ const schema = [
   { name: 'event_id', type: 'int' },
 ];
 
-/** A window of `n` rows starting at `at`, each carrying its absolute index. */
-const window_ = (at: number, n: number, updateMode = 'APPEND') =>
+/** A snapshot holding the first `n` rows of a result, each carrying its index. */
+const firstRows = (n: number) =>
   ({
     schema,
-    datarows: Array.from({ length: n }, (_, i) => [`2026-09-15 10:00:00`, at + i]),
-    window: { offset: at, count: n },
-    update_mode: updateMode,
+    datarows: Array.from({ length: n }, (_, i) => [`2026-09-15 10:00:00`, i]),
   }) as any;
+
+const rowsWithIds = (eventIds: number[]) =>
+  ({ schema, datarows: eventIds.map((id) => [`2026-09-15 10:00:00`, id]) }) as any;
 
 const ids = (acc: StreamRowAccumulator) => acc.heldRows.map((r) => r.event_id);
 
 describe('StreamRowAccumulator', () => {
-  it('starts empty, asking for the first row', () => {
-    const acc = new StreamRowAccumulator(100);
-    expect(acc.heldRows).toEqual([]);
-    expect(acc.nextOffset).toBe(0);
+  it('starts empty', () => {
+    expect(new StreamRowAccumulator(100).heldRows).toEqual([]);
   });
 
-  it('accumulates successive windows into one prefix', () => {
+  // Every snapshot carries all the rows found so far, so appending would repeat them.
+  it('replaces the held rows with each snapshot', () => {
     const acc = new StreamRowAccumulator(100);
-    expect(acc.absorb(window_(0, 10))).toBe(10);
-    expect(acc.absorb(window_(10, 10))).toBe(10);
-    expect(ids(acc)).toEqual([...Array(20).keys()]);
-    expect(acc.nextOffset).toBe(20);
+    expect(acc.absorb(firstRows(10))).toBe(10);
+    expect(acc.absorb(firstRows(25))).toBe(25);
+    expect(ids(acc)).toEqual([...Array(25).keys()]);
   });
 
-  // The defect this class exists to prevent: a completed job reports REPLACE while serving only the
-  // window asked for, and placing by update_mode discarded everything accumulated before it.
-  it('appends a terminal REPLACE window rather than replacing what came before', () => {
+  it('takes a revised result as it is', () => {
     const acc = new StreamRowAccumulator(100);
-    acc.absorb(window_(0, 10));
-    acc.absorb(window_(10, 10));
+    acc.absorb(firstRows(10));
 
-    acc.absorb(window_(20, 10, 'REPLACE'));
-
-    expect(ids(acc)).toEqual([...Array(30).keys()]);
-    expect(acc.nextOffset).toBe(30);
-  });
-
-  it('replaces wholesale when the engine re-serves from the start', () => {
-    const acc = new StreamRowAccumulator(100);
-    acc.absorb(window_(0, 10));
-    acc.absorb(window_(10, 10));
-
-    // A provisional set revised from the beginning, as a partial top-N would be.
-    const revised = window_(0, 3, 'REPLACE');
-    revised.datarows = [
-      [`2026-09-15 10:00:00`, 900],
-      [`2026-09-15 10:00:00`, 901],
-    ];
-    acc.absorb(revised);
+    acc.absorb(rowsWithIds([900, 901]));
 
     expect(ids(acc)).toEqual([900, 901]);
-    expect(acc.nextOffset).toBe(2);
   });
 
-  it('advances the generation when a replacement changes the rows, so ids do not carry over', () => {
+  it('keeps the rows shown when a snapshot has none yet', () => {
     const acc = new StreamRowAccumulator(100);
-    acc.absorb(window_(0, 5));
-    const before = acc.rowGeneration;
+    acc.absorb(firstRows(10));
 
-    // Re-served at offset 0, same length but different content (event_id 100..104).
-    const changed = {
-      schema,
-      datarows: Array.from({ length: 5 }, (_, i) => [`2026-09-15 10:00:00`, 100 + i]),
-      window: { offset: 0, count: 5 },
-      update_mode: 'REPLACE',
-    } as any;
-    acc.absorb(changed);
-
-    expect(acc.rowGeneration).toBe(before + 1);
+    expect(acc.absorb(firstRows(0))).toBe(10);
+    expect(acc.heldRows).toHaveLength(10);
   });
 
-  // The engine re-serves offset 0 every poll in the provisional phase; bumping on an identical
-  // re-serve would remount the whole table each interval.
-  it('does not advance the generation when the re-served rows are identical', () => {
-    const acc = new StreamRowAccumulator(100);
-    acc.absorb(window_(0, 5));
-    const before = acc.rowGeneration;
-
-    acc.absorb(window_(0, 5, 'REPLACE'));
-
-    expect(acc.rowGeneration).toBe(before);
-  });
-
-  // A nested field value is a fresh object each poll, so reference equality would wrongly see every
-  // re-serve as a change and remount the table.
-  it('does not advance the generation when identical rows carry a nested field', () => {
-    const nested = (updateMode: string) =>
-      ({
-        schema: [
-          { name: '@timestamp', type: 'timestamp' },
-          { name: 'geo', type: 'geo_point' },
-        ],
-        datarows: [['2026-09-15 10:00:00', { lat: 1, lon: 2 }]],
-        window: { offset: 0, count: 1 },
-        update_mode: updateMode,
-      }) as any;
-    const acc = new StreamRowAccumulator(100);
-    acc.absorb(nested('REPLACE'));
-    const before = acc.rowGeneration;
-
-    acc.absorb(nested('REPLACE'));
-
-    expect(acc.rowGeneration).toBe(before);
-  });
-
-  it('does not advance the generation on the first window, which replaces nothing', () => {
-    const acc = new StreamRowAccumulator(100);
-    acc.absorb(window_(0, 5));
-    expect(acc.rowGeneration).toBe(0);
-  });
-
-  describe('windows that cannot be placed', () => {
-    it('ignores a window already held, so a re-served page is not duplicated', () => {
+  describe('row generation', () => {
+    it('does not advance on the first snapshot, which replaces nothing', () => {
       const acc = new StreamRowAccumulator(100);
-      acc.absorb(window_(0, 10));
-      acc.absorb(window_(10, 10));
-
-      expect(acc.absorb(window_(10, 10))).toBe(0);
-      expect(acc.heldRows).toHaveLength(20);
+      acc.absorb(firstRows(5));
+      expect(acc.rowGeneration).toBe(0);
     });
 
-    it('refuses a window that would leave a gap', () => {
+    // A scan appends to its result; changing the generation would remount every row each poll.
+    it('does not advance when the new rows extend the held ones', () => {
       const acc = new StreamRowAccumulator(100);
-      acc.absorb(window_(0, 10));
+      acc.absorb(firstRows(5));
 
-      expect(acc.absorb(window_(50, 10))).toBe(0);
-      // nextOffset still describes what is held, so the run re-requests the right window.
-      expect(acc.nextOffset).toBe(10);
+      acc.absorb(firstRows(5));
+      acc.absorb(firstRows(12));
+
+      expect(acc.rowGeneration).toBe(0);
     });
 
-    it('treats a window-less snapshot as starting from zero', () => {
+    it('advances when the held rows change, so their ids do not carry over', () => {
       const acc = new StreamRowAccumulator(100);
-      const bare = window_(0, 4);
-      delete bare.window;
-      expect(acc.absorb(bare)).toBe(4);
-      expect(acc.nextOffset).toBe(4);
+      acc.absorb(firstRows(5));
+
+      acc.absorb(rowsWithIds([100, 101, 102, 103, 104, 105]));
+
+      expect(acc.rowGeneration).toBe(1);
     });
 
-    it('reports nothing added for an empty window', () => {
+    // A nested field value is a fresh object each poll, so reference equality would see every
+    // snapshot as a change.
+    it('does not advance when identical rows carry a nested field', () => {
+      const nested = () =>
+        ({
+          schema: [
+            { name: '@timestamp', type: 'timestamp' },
+            { name: 'geo', type: 'geo_point' },
+          ],
+          datarows: [['2026-09-15 10:00:00', { lat: 1, lon: 2 }]],
+        }) as any;
       const acc = new StreamRowAccumulator(100);
-      acc.absorb(window_(0, 10));
-      expect(acc.absorb(window_(10, 0))).toBe(0);
-      expect(acc.heldRows).toHaveLength(10);
+      acc.absorb(nested());
+
+      acc.absorb(nested());
+
+      expect(acc.rowGeneration).toBe(0);
     });
   });
 
   describe('the hold cap', () => {
-    it('stops at the cap and reports only the rows it took', () => {
-      const acc = new StreamRowAccumulator(15);
-      acc.absorb(window_(0, 10));
-
-      expect(acc.absorb(window_(10, 10))).toBe(5);
-      expect(acc.heldRows).toHaveLength(15);
-      expect(acc.isFull).toBe(true);
-    });
-
-    it('truncates a replacement to the cap', () => {
+    it('keeps only the first rows up to the cap', () => {
       const acc = new StreamRowAccumulator(5);
-      acc.absorb(window_(0, 20));
-      expect(acc.heldRows).toHaveLength(5);
+      expect(acc.absorb(firstRows(20))).toBe(5);
       expect(ids(acc)).toEqual([0, 1, 2, 3, 4]);
     });
 
-    it('is not full before the cap is reached', () => {
-      const acc = new StreamRowAccumulator(10);
-      acc.absorb(window_(0, 9));
-      expect(acc.isFull).toBe(false);
+    it('does not advance the generation once the cap is reached and the result keeps growing', () => {
+      const acc = new StreamRowAccumulator(5);
+      acc.absorb(firstRows(5));
+
+      acc.absorb(firstRows(50));
+
+      expect(acc.rowGeneration).toBe(0);
     });
   });
 });

@@ -7,19 +7,15 @@ import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common
 
 /**
  * A stateful stand-in for the async PPL engine, for tests that need a realistic lifecycle rather
- * than a fixed sequence of canned snapshots. Serves rows from the `offset` and `count` asked for,
- * which per-call mocks cannot express, and reproduces two envelope details:
- *
- *  - while running, `update_mode: APPEND` and a `total` that grows as rows are committed;
- *  - once finished, `update_mode: REPLACE` — the final result is a whole result set rather than an
- *    increment — while still serving only the requested window.
+ * than a fixed sequence of canned snapshots. Like the real API, every response carries all the rows
+ * found so far, and a `total` that grows as the query runs.
  */
 export interface FakeStreamEngineOptions {
   /** Rows the query will ultimately match. */
   totalRows: number;
-  /** Rows committed per poll while running. Reaching `totalRows` ends the query. */
+  /** Rows found per poll while running. Reaching `totalRows` ends the query. */
   commitPerPoll?: number;
-  /** Rows already committed when submit returns; 0 means submit serves nothing. */
+  /** Rows already found when submit returns. */
   committedAtSubmit?: number;
   /** Omit the job id from submit, i.e. the query finished inside the submit timeout. */
   completeOnSubmit?: boolean;
@@ -30,8 +26,6 @@ export class FakeStreamEngine {
   private readonly totalRows: number;
   private readonly commitPerPoll: number;
   private readonly completeOnSubmit: boolean;
-  /** Every window served, so a test can assert what the client actually asked for. */
-  readonly servedWindows: Array<{ offset: number; count: number }> = [];
 
   constructor({
     totalRows,
@@ -49,22 +43,20 @@ export class FakeStreamEngine {
     return this.committed >= this.totalRows;
   }
 
-  /** Row `n` is identifiable, so a test can tell which window it came from. */
-  private rows(offset: number, count: number): unknown[][] {
-    const end = Math.min(offset + count, this.committed);
+  /** Row `n` is identifiable, so a test can tell whether rows were dropped or repeated. */
+  private rows(): unknown[][] {
     const out: unknown[][] = [];
-    for (let n = offset; n < end; n++) {
+    for (let n = 0; n < this.committed; n++) {
       out.push([`2026-09-15 10:00:00.${String(n % 1000).padStart(3, '0')}`, n]);
     }
     return out;
   }
 
-  private snapshot(offset: number, count: number, withId: boolean): PPLStreamSnapshot {
-    const datarows = this.rows(offset, count);
+  private snapshot(withId: boolean): PPLStreamSnapshot {
+    const datarows = this.rows();
     return {
       ...(withId && { id: 'job-fake' }),
       status: this.done ? 'SUCCEEDED' : 'RUNNING',
-      update_mode: this.done ? 'REPLACE' : 'APPEND',
       schema: [
         { name: '@timestamp', type: 'timestamp' },
         { name: 'event_id', type: 'int' },
@@ -72,19 +64,15 @@ export class FakeStreamEngine {
       datarows,
       size: datarows.length,
       total: this.committed,
-      window: { offset, count },
       progress: { fraction_done: this.done ? 1 : this.committed / this.totalRows },
-    } as unknown as PPLStreamSnapshot;
+    };
   }
 
-  submit = jest.fn(async () => this.snapshot(0, this.commitPerPoll, !this.completeOnSubmit));
+  submit = jest.fn(async () => this.snapshot(!this.completeOnSubmit));
 
-  poll = jest.fn(async ({ offset = 0, count = 10 }: { offset?: number; count?: number }) => {
-    // Commit more rows only while the query is running, so paging after it finishes does not
-    // extend it.
+  poll = jest.fn(async (_args?: unknown) => {
     if (!this.done) this.committed = Math.min(this.committed + this.commitPerPoll, this.totalRows);
-    this.servedWindows.push({ offset, count });
-    return this.snapshot(offset, count, true);
+    return this.snapshot(true);
   });
 
   cancel = jest.fn(async () => undefined);

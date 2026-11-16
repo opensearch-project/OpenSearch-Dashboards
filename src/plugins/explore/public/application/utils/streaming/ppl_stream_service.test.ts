@@ -58,33 +58,26 @@ describe('PPLStreamService', () => {
   describe('poll', () => {
     it('sends only the parameters provided', async () => {
       const http = createHttp();
-      await new PPLStreamService(http as any).poll({ id: 'job-1', offset: 0, count: 500 });
+      await new PPLStreamService(http as any).poll({ id: 'job-1' });
 
       expect(http.get).toHaveBeenCalledWith(`${PPL_STREAM_API.JOB}/job-1`, {
-        query: { offset: 0, count: 500 },
+        query: {},
         signal: undefined,
       });
     });
 
-    it('forwards offset 0 rather than dropping it as falsy', async () => {
+    it('passes dataSourceId and long-numeral support through', async () => {
       const http = createHttp();
-      await new PPLStreamService(http as any).poll({ id: 'job-1', offset: 0 });
+      await new PPLStreamService(http as any).poll({
+        id: 'job-1',
+        dataSourceId: 'ds-1',
+        withLongNumeralsSupport: true,
+      });
 
-      expect(http.get).toHaveBeenCalledWith(
-        `${PPL_STREAM_API.JOB}/job-1`,
-        expect.objectContaining({ query: { offset: 0 } })
-      );
-    });
-
-    // Sequences start at 0, so the first long poll must not drop it as falsy.
-    it('forwards waitForSequence 0 rather than dropping it as falsy', async () => {
-      const http = createHttp();
-      await new PPLStreamService(http as any).poll({ id: 'job-1', waitForSequence: 0 });
-
-      expect(http.get).toHaveBeenCalledWith(
-        `${PPL_STREAM_API.JOB}/job-1`,
-        expect.objectContaining({ query: { waitForSequence: 0 } })
-      );
+      expect(http.get).toHaveBeenCalledWith(`${PPL_STREAM_API.JOB}/job-1`, {
+        query: { dataSourceId: 'ds-1', withLongNumeralsSupport: true },
+        signal: undefined,
+      });
     });
 
     it('percent-encodes the opaque job id', async () => {
