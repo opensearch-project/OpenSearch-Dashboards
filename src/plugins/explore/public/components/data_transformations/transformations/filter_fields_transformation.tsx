@@ -14,7 +14,12 @@ import {
   FieldSchema,
 } from '../index';
 import { TransformationConfigSchema } from '../types';
-import { createAppliedResult, createInvalidConfigResult } from '../transformation_utils';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  rowHasField,
+} from '../transformation_utils';
 import { FieldSelector } from '../field_selector';
 
 type FilterFieldsMode = 'include' | 'exclude';
@@ -104,6 +109,15 @@ export function createFilterFieldsTransformation(): TransformationInstance<Filte
       }
 
       const fieldNames = new Set(config.fieldOptions.map((f) => f.name));
+
+      // None of the configured fields is in the data (e.g. the step that added them now runs on
+      // another query): the step does nothing, so report them. Some absent fields are fine.
+      const missing = Array.from(fieldNames).filter(
+        (name) => !data.some((row) => rowHasField(row, name))
+      );
+      if (data.length > 0 && missing.length === fieldNames.size) {
+        return createMissingFieldsResult(data, missing);
+      }
 
       const transformed = data.map((row) =>
         config.mode === 'include'

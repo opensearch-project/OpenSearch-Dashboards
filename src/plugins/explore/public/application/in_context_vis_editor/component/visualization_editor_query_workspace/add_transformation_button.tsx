@@ -5,6 +5,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiCard,
   EuiFieldSearch,
@@ -25,6 +26,29 @@ import {
 } from '../../../../components/data_transformations';
 import './query_workspace.scss';
 
+type TransformationCategory = 'all' | 'combine' | 'transform';
+
+const CATEGORY_OPTIONS: Array<{ id: TransformationCategory; label: string }> = [
+  {
+    id: 'all',
+    label: i18n.translate('explore.queryWorkspace.transformCategoryAll', {
+      defaultMessage: 'View all',
+    }),
+  },
+  {
+    id: 'combine',
+    label: i18n.translate('explore.queryWorkspace.transformCategoryCombine', {
+      defaultMessage: 'Combine',
+    }),
+  },
+  {
+    id: 'transform',
+    label: i18n.translate('explore.queryWorkspace.transformCategoryTransform', {
+      defaultMessage: 'Transform data',
+    }),
+  },
+];
+
 export const TransformationAddButton = ({
   definitions,
   onSelectTransformation,
@@ -35,9 +59,12 @@ export const TransformationAddButton = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
 
+  const [category, setCategory] = useState<TransformationCategory>('all');
+
   const closeFlyout = () => {
     setIsOpen(false);
     setSearchText('');
+    setCategory('all');
   };
 
   const filteredDefinitions = useMemo(
@@ -66,8 +93,8 @@ export const TransformationAddButton = ({
           }),
           items: filteredDefinitions.filter((d) => d.type !== COMBINE_TRANSFORMATION_TYPE),
         },
-      ].filter(({ items }) => items.length > 0),
-    [filteredDefinitions]
+      ].filter(({ id, items }) => (category === 'all' || category === id) && items.length > 0),
+    [filteredDefinitions, category]
   );
 
   return (
@@ -111,8 +138,30 @@ export const TransformationAddButton = ({
               fullWidth
             />
             <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+              {CATEGORY_OPTIONS.map((option) => {
+                const isSelected = option.id === category;
+                return (
+                  <EuiFlexItem key={option.id} grow={false}>
+                    <EuiButton
+                      size="s"
+                      fill={isSelected}
+                      color={isSelected ? 'primary' : 'text'}
+                      iconType={isSelected ? 'check' : undefined}
+                      iconSide="right"
+                      aria-pressed={isSelected}
+                      onClick={() => setCategory(option.id)}
+                      data-test-subj={`transformCategory-${option.id}`}
+                    >
+                      {option.label}
+                    </EuiButton>
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
 
-            {filteredDefinitions.length > 0 ? (
+            {groups.length > 0 ? (
               groups.map((group) => (
                 <React.Fragment key={group.id}>
                   <EuiTitle size="xxs">
