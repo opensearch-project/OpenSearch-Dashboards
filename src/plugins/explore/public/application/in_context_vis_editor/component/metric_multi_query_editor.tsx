@@ -20,7 +20,7 @@ import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { getSourceTypeRegistry } from '../../../services/source_type_registry';
-import { getQueryLabel } from '../../../../../data/common';
+import { getQueryLabel, splitMultiQueries } from '../../../../../data/common';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import {
   useMetricsQuerySettings,
@@ -303,7 +303,7 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {rows.length > 1 && (
+        {splitMultiQueries(queryState.query).length > 1 && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate('explore.visEditorMetricsQueryPanel.splitQueriesTooltip', {

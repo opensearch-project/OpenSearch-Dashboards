@@ -12,8 +12,6 @@ import type { SeriesResult } from '../../application/in_context_vis_editor/multi
 export interface FieldSchema {
   name: string;
   type: string;
-  // The query this field came from, set by a step that puts several queries' fields side by side.
-  refId?: string;
 }
 
 export interface FieldReference {
@@ -30,8 +28,15 @@ export interface UrlTransformationState {
   applyTo?: string;
 }
 
+// export type TransformationIssueCode =
+//   'invalid_config' | 'missing_fields' | 'missing_series' | 'execution_error';
 export type TransformationIssueCode =
-  'invalid_config' | 'missing_fields' | 'missing_series' | 'execution_error';
+  | 'invalid_config'
+  | 'missing_fields'
+  | 'missing_series'
+  | 'execution_error'
+  // Several rows land on the same output cell; only one value is kept.
+  | 'duplicate_keys';
 
 export interface TransformationIssue {
   code: TransformationIssueCode;

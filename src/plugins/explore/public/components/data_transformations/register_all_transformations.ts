@@ -40,6 +40,38 @@ import {
   mergeSeriesConfigSchema,
   mergeSeriesTransformationDefinition,
 } from './transformations/merge_series_transformation';
+import {
+  concatenateFieldsConfigSchema,
+  concatenateFieldsTransformationDefinition,
+} from './transformations/concatenate_fields_transformation';
+import {
+  mergeTablesConfigSchema,
+  mergeTablesTransformationDefinition,
+} from './transformations/merge_tables_transformation';
+import {
+  joinByFieldConfigSchema,
+  joinByFieldTransformationDefinition,
+} from './transformations/join_by_field_transformation';
+import {
+  joinByLabelsConfigSchema,
+  joinByLabelsTransformationDefinition,
+} from './transformations/join_by_labels_transformation';
+import {
+  seriesToRowsConfigSchema,
+  seriesToRowsTransformationDefinition,
+} from './transformations/series_to_rows_transformation';
+import {
+  reduceConfigSchema,
+  reduceTransformationDefinition,
+} from './transformations/reduce_transformation';
+import {
+  formatStringConfigSchema,
+  formatStringTransformationDefinition,
+} from './transformations/format_string_transformation';
+import {
+  organizeFieldsConfigSchema,
+  organizeFieldsTransformationDefinition,
+} from './transformations/organize_fields_transformation';
 import { TransformationConfigSchema, TransformationDefinition } from './types';
 
 function createTransformationDefinitionEntry<T>(
@@ -72,6 +104,29 @@ const transformationDefinitionEntries = [
     extractFieldsConfigSchema
   ),
   createTransformationDefinitionEntry(mergeSeriesTransformationDefinition, mergeSeriesConfigSchema),
+  createTransformationDefinitionEntry(
+    concatenateFieldsTransformationDefinition,
+    concatenateFieldsConfigSchema
+  ),
+  createTransformationDefinitionEntry(mergeTablesTransformationDefinition, mergeTablesConfigSchema),
+  createTransformationDefinitionEntry(joinByFieldTransformationDefinition, joinByFieldConfigSchema),
+  createTransformationDefinitionEntry(
+    joinByLabelsTransformationDefinition,
+    joinByLabelsConfigSchema
+  ),
+  createTransformationDefinitionEntry(
+    seriesToRowsTransformationDefinition,
+    seriesToRowsConfigSchema
+  ),
+  createTransformationDefinitionEntry(reduceTransformationDefinition, reduceConfigSchema),
+  createTransformationDefinitionEntry(
+    formatStringTransformationDefinition,
+    formatStringConfigSchema
+  ),
+  createTransformationDefinitionEntry(
+    organizeFieldsTransformationDefinition,
+    organizeFieldsConfigSchema
+  ),
 ];
 
 export function getAllTransformationDefinitions() {

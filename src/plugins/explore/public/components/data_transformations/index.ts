@@ -64,10 +64,6 @@ export {
   mergeSeriesTransformationDefinition,
 } from './transformations/merge_series_transformation';
 export {
-  createFilterByRefIdTransformation,
-  filterByRefIdTransformationDefinition,
-} from './transformations/filter_by_ref_id_transformation';
-export {
   createConcatenateFieldsTransformation,
   concatenateFieldsTransformationDefinition,
 } from './transformations/concatenate_fields_transformation';

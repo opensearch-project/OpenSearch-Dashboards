@@ -35,6 +35,9 @@ const issueCodeLabels: Record<TransformationIssueCode, string> = {
   missing_series: i18n.translate('explore.transformations.stepIssues.missingSeriesLabel', {
     defaultMessage: 'Missing series',
   }),
+  duplicate_keys: i18n.translate('explore.transformations.stepIssues.duplicateKeysLabel', {
+    defaultMessage: 'Duplicates',
+  }),
 };
 
 /**
