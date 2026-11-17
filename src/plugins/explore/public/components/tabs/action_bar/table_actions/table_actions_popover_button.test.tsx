@@ -92,34 +92,42 @@ describe('TableActionsPopoverButton', () => {
     });
   });
 
-  it('turns Show as JSON format on when state is missing, with Expand all off', () => {
+  // The Expand all label has no test id, so this climbs from its info icon to the colour wrapper
+  // that EuiText adds.
+  const expandAllLabelIsSubdued = () =>
+    screen.getByTestId('exploreExpandAllJsonInfo').closest('[class*="TextColor--subdued"]') !==
+    null;
+
+  it('defaults Show as JSON format off when state is missing, with Expand all off and greyed out', () => {
     renderWithState({});
     fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
-    expect(screen.getByTestId('exploreShowJsonFormatSwitch')).toBeChecked();
+    expect(screen.getByTestId('exploreShowJsonFormatSwitch')).not.toBeChecked();
     expect(screen.getByTestId('exploreExpandAllJsonSwitch')).not.toBeChecked();
-    expect(screen.getByTestId('exploreExpandAllJsonSwitch')).toBeEnabled();
+    expect(screen.getByTestId('exploreExpandAllJsonSwitch')).toBeDisabled();
+    expect(expandAllLabelIsSubdued()).toBe(true);
   });
 
-  it('greys out Expand all while Show as JSON format is off', () => {
+  it('disables Expand all while Show as JSON format is explicitly off', () => {
     renderWithState({ showJsonFormat: false });
     fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
     expect(screen.getByTestId('exploreShowJsonFormatSwitch')).not.toBeChecked();
     expect(screen.getByTestId('exploreExpandAllJsonSwitch')).toBeDisabled();
   });
 
-  it('dispatches setShowJsonFormat when toggled off from the default', () => {
+  it('dispatches setShowJsonFormat when toggled on from the default', () => {
     const store = renderWithState({});
     fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
     fireEvent.click(screen.getByTestId('exploreShowJsonFormatSwitch'));
-    expect(store.getActions()).toContainEqual({ type: 'ui/setShowJsonFormat', payload: false });
+    expect(store.getActions()).toContainEqual({ type: 'ui/setShowJsonFormat', payload: true });
   });
 
-  it('dispatches setExpandAllJson while Show as JSON format is on', () => {
+  it('enables Expand all in full colour and dispatches setExpandAllJson while Show as JSON format is on', () => {
     const store = renderWithState({ showJsonFormat: true });
     fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
     expect(screen.getByTestId('exploreShowJsonFormatSwitch')).toBeChecked();
     expect(screen.getByTestId('exploreExpandAllJsonSwitch')).not.toBeChecked();
     expect(screen.getByTestId('exploreExpandAllJsonSwitch')).toBeEnabled();
+    expect(expandAllLabelIsSubdued()).toBe(false);
     fireEvent.click(screen.getByTestId('exploreExpandAllJsonSwitch'));
     expect(store.getActions()).toContainEqual({ type: 'ui/setExpandAllJson', payload: true });
   });

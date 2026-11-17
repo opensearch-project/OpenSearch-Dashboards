@@ -16,8 +16,8 @@ export interface UIState {
    */
   hideEmptyFields: boolean;
   /**
-   * Draws string values that hold JSON as a collapsible tree. Unset means on, so state saved
-   * before this setting existed shows them as trees too.
+   * Draws string values that hold JSON as a collapsible tree. Unset by default, which
+   * selectShowJsonFormat reads as off, so cells keep showing text until the user opts in.
    */
   showJsonFormat?: boolean;
   /**

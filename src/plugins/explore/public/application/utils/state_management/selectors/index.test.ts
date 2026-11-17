@@ -278,12 +278,12 @@ describe('selectors/index', () => {
   });
 
   describe('JSON Table settings', () => {
-    it('reads Show as JSON format as on and Expand all as off when the UI state has neither', () => {
-      expect(selectShowJsonFormat(mockState)).toBe(true);
+    it('reads Show as JSON format and Expand all as off when the UI state has neither', () => {
+      expect(selectShowJsonFormat(mockState)).toBe(false);
       expect(selectExpandAllJson(mockState)).toBe(false);
     });
 
-    it('keeps Show as JSON format off once it is turned off', () => {
+    it('reads Show as JSON format as off when it is explicitly false', () => {
       const state = { ...mockState, ui: { ...mockState.ui, showJsonFormat: false } };
       expect(selectShowJsonFormat(state)).toBe(false);
     });

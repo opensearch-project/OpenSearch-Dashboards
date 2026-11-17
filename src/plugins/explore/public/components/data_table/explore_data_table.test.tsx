@@ -12,6 +12,7 @@ import {
   setExpandAllJson,
   setShowJsonFormat,
   setWrapCellText,
+  UIState,
 } from '../../application/utils/state_management/slices';
 import {
   legacyReducer,
@@ -147,7 +148,7 @@ const fullTestResult = {
 };
 
 describe('ExploreDataTable', () => {
-  const createMockStore = (hasResults = true) => {
+  const createMockStore = (hasResults = true, uiState: Partial<UIState> = {}) => {
     if (hasResults) {
       resultsCache.set('test-cache-key', fullTestResult as any);
     }
@@ -172,6 +173,7 @@ describe('ExploreDataTable', () => {
         ui: {
           activeTabId: 'logs',
           showHistogram: true,
+          ...uiState,
         },
         query: {
           query: 'source=logs',
@@ -214,8 +216,10 @@ describe('ExploreDataTable', () => {
   });
 
   // The table's sticky column header ends at 130 px on screen, so rows show from 130 px down.
+  // Show as JSON format starts on here, unlike the default, since Expand all only applies while it
+  // is on and one case below turns it off.
   const renderScrolledTable = (scrollTop = 1000) => {
-    const store = createMockStore();
+    const store = createMockStore(true, { showJsonFormat: true });
     render(
       <Provider store={store}>
         <ExploreDataTable />
@@ -234,27 +238,27 @@ describe('ExploreDataTable', () => {
   };
   const drawnSettings = () => screen.getByTestId('data-table').dataset.jsonTreeSettings;
 
-  it('passes the JSON Table settings from the store to the cells, Show on by default', () => {
+  it('passes both JSON switches from the store to the cells, each off by default', () => {
     const store = createMockStore();
     render(
       <Provider store={store}>
         <ExploreDataTable />
       </Provider>
     );
-    expect(drawnSettings()).toBe('true,false');
-
-    act(() => {
-      store.dispatch(setShowJsonFormat(false));
-    });
     expect(drawnSettings()).toBe('false,false');
-    act(() => {
-      store.dispatch(setExpandAllJson(true));
-    });
-    expect(drawnSettings()).toBe('false,true');
+
     act(() => {
       store.dispatch(setShowJsonFormat(true));
     });
+    expect(drawnSettings()).toBe('true,false');
+    act(() => {
+      store.dispatch(setExpandAllJson(true));
+    });
     expect(drawnSettings()).toBe('true,true');
+    act(() => {
+      store.dispatch(setShowJsonFormat(false));
+    });
+    expect(drawnSettings()).toBe('false,true');
   });
 
   it.each([

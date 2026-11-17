@@ -56,7 +56,7 @@ export const selectHideEmptyFields = createSelector(
 
 export const selectShowJsonFormat = createSelector(
   [selectUIState],
-  (uiState) => uiState.showJsonFormat ?? true
+  (uiState) => uiState.showJsonFormat ?? false
 );
 
 export const selectExpandAllJson = createSelector(
