@@ -652,6 +652,21 @@ describe('DatasetSelect', () => {
         screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
       ).not.toBeInTheDocument();
     });
+
+    it('shows default footer content for a mixed signal type list that includes METRICS', async () => {
+      renderWithContext({
+        ...defaultProps,
+        signalType: [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES, CORE_SIGNAL_TYPES.METRICS],
+      });
+
+      await openPopover();
+
+      expect(screen.getByTestId('datasetSelectorAdvancedButton')).toBeInTheDocument();
+      expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('showNonTimeFieldDatasets filtering', () => {

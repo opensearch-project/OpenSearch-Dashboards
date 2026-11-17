@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual, isUndefined, omitBy } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiDragDropContext,
@@ -43,6 +43,13 @@ import type { RowStepReadout } from '../../pages/metrics/query_panel';
 import type { PerQueryOptions } from '../../../../../query_enhancements/common';
 
 import '../../pages/metrics/metrics_query_panel.scss';
+
+// Compare per-query options by what is set: rows serialize unset fields as undefined while the
+// stored options (URL / saved object) omit them, and "nothing set" may be undefined, [] or [{}].
+const normalizePerQueryOptions = (options?: PerQueryOptions[]) => {
+  const cleaned = (options ?? []).map((option) => omitBy(option, isUndefined));
+  return cleaned.every(isEmpty) ? [] : cleaned;
+};
 
 /**
  * Multi-row PromQL editor for the in-context visualization editor, mirroring the metrics page query panel
@@ -93,7 +100,11 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
       const { query: combined, perQueryOptions: nextOptions } = serializeRows(updatedRows);
       if (
         combined === lastSyncedQueryRef.current.query &&
-        isEqual(nextOptions, lastSyncedQueryRef.current.perQueryOptions)
+        // The builder reports its query on mount; that echo is not an edit.
+        isEqual(
+          normalizePerQueryOptions(nextOptions),
+          normalizePerQueryOptions(lastSyncedQueryRef.current.perQueryOptions)
+        )
       ) {
         return;
       }

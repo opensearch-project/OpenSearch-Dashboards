@@ -178,6 +178,8 @@ export const DatasetSelectWidget = () => {
         // A row without a dataset stays empty until the user picks one; a fresh editor's first
         // row already gets the default dataset from loadContainerState.
         autoSelectDefault={false}
+        // The query panel sits in the lower half of the page: open upward so the list stays on screen.
+        anchorPosition="upLeft"
       />
     </div>
   );

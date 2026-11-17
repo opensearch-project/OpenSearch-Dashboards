@@ -304,13 +304,14 @@ export const SaveVisButton = () => {
 
   const handleSaveButtonClick = useCallback(async () => {
     const isExisting = exploreId !== undefined && !!savedExplore;
-    // If exploreId is defined, we're editing an existing saved visualization
-    // Directly save without showing the modal
+
+    // 1. the explore is saved and the editor is not dirty, directly save.
     if (isExisting && !isEditorDirty) {
       navigateTo({ id: exploreId!, newTitle: savedExplore!.title });
       return;
     }
 
+    // 2. dataset is changed but the query doesn't run, show toast
     if (isDatasetChangedSinceRun()) {
       toastNotifications.addWarning({
         title: i18n.translate('explore.editor.saveVisualization.datasetNotRunTitle', {
@@ -325,6 +326,7 @@ export const SaveVisButton = () => {
       return;
     }
 
+    // 3. query is empty due to dataset change or language switch, show toast
     if (isQueryEmptiedSinceRun()) {
       toastNotifications.addWarning({
         title: i18n.translate('explore.editor.saveVisualization.emptyQueryTitle', {
@@ -339,6 +341,7 @@ export const SaveVisButton = () => {
       return;
     }
 
+    // 4. Input a query without running it, show toast
     const unrunEdit = getUnrunEdit();
     if (isExisting) {
       if (unrunEdit) {
