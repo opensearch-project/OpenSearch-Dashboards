@@ -62,4 +62,38 @@ describe('getSummaryAgentIsAvailable', () => {
 
     expect(result).toBe(false);
   });
+
+  describe('when the request is aborted', () => {
+    // Behaves like the browser: the request rejects with an AbortError once its signal aborts.
+    const abortableFetch = ({ signal }: { signal?: AbortSignal }) =>
+      new Promise((_resolve, reject) => {
+        const fail = () => reject(new DOMException('The operation was aborted.', 'AbortError'));
+        if (signal?.aborted) return fail();
+        signal?.addEventListener('abort', fail);
+      });
+
+    beforeEach(() => {
+      (services.http.fetch as jest.Mock).mockImplementation(abortableFetch);
+    });
+
+    it('returns false when the signal aborts while the request is pending', async () => {
+      const controller = new AbortController();
+
+      const result = getSummaryAgentIsAvailable(services, dataSourceId, {
+        signal: controller.signal,
+      });
+      controller.abort();
+
+      expect(await result).toBe(false);
+    });
+
+    it('returns false when the signal is already aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+
+      expect(
+        await getSummaryAgentIsAvailable(services, dataSourceId, { signal: controller.signal })
+      ).toBe(false);
+    });
+  });
 });
