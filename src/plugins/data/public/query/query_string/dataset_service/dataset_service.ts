@@ -312,9 +312,13 @@ export class DatasetService {
     try {
       const asyncType = type?.meta.isFieldLoadAsync ?? false;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-        const fetchedFields = asyncType
-          ? ({} as IndexPatternFieldMap)
-          : await type?.fetchFields(dataset, services);
+        // createAndSave has the server discover and save OpenSearch index fields, so they are
+        // not fetched here and uploaded with the create request.
+        const fieldsFromServer = dataset.type === DEFAULT_DATA.SET_TYPES.INDEX;
+        const fetchedFields =
+          asyncType || fieldsFromServer
+            ? ({} as IndexPatternFieldMap)
+            : await type?.fetchFields(dataset, services);
         const spec = {
           // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
           id: dataset.dataSource?.id ? `${dataset.dataSource.id}_${uuidv4()}` : undefined,
