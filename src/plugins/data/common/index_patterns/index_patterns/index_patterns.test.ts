@@ -446,12 +446,20 @@ describe('IndexPatterns', () => {
     const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
     apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
     await indexPatterns.refreshFieldsAndSave(indexPattern);
-    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', {
-      metaFields: false,
-      dataSourceId: undefined,
-    });
+    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', { metaFields: false });
     expect(indexPattern.fields.getByName('foo')).toBeDefined();
     expect(indexPattern.version).toBe('v2');
+  });
+
+  test('refreshFieldsAndSave rejects an index pattern that has not been saved', async () => {
+    const apiClient = { ...createFieldsFetcher(), refreshFields: jest.fn() };
+    indexPatterns = newService(apiClient);
+    const indexPattern = await indexPatterns.create({ title: 'opensearch-dashboards-*' }, true);
+
+    await expect(indexPatterns.refreshFieldsAndSave(indexPattern)).rejects.toThrow(
+      'has not been saved'
+    );
+    expect(apiClient.refreshFields).not.toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {

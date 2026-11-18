@@ -29,9 +29,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import { schema } from '@osd/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
-import { FieldSpec, IndexPatternAttributes } from '../../common';
+import {
+  HttpServiceSetup,
+  LegacyAPICaller,
+  RequestHandlerContext,
+} from 'opensearch-dashboards/server';
+import { FieldSpec, IndexPatternAttributes, getDataSourceReference } from '../../common';
 import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
 
@@ -164,13 +169,10 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
-          data_source: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const callAsCurrentUser = await decideLegacyClient(context, request);
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const savedObjectsClient = context.core.savedObjects.client;
       const { id } = request.params;
 
@@ -186,14 +188,47 @@ export function registerRoutes(http: HttpServiceSetup) {
           'index-pattern',
           id
         );
-        const savedFields: FieldSpec[] = JSON.parse(savedObject.attributes.fields || '[]');
-        const fields = [
-          ...(await indexPatterns.getFieldsForWildcard({
-            pattern: savedObject.attributes.title,
-            metaFields: parsedFields,
-          })),
+
+        // Objects written directly to the index by external tooling can store `fields` as an array.
+        const storedFields = savedObject.attributes.fields;
+        const savedFields: FieldSpec[] = Array.isArray(storedFields)
+          ? storedFields
+          : JSON.parse(storedFields || '[]');
+
+        // Fields always come from the data source the pattern references, never from the request.
+        const dataSourceId = getDataSourceReference(savedObject.references)?.id;
+        if (dataSourceId && !context.dataSource) {
+          return response.badRequest({
+            body: {
+              message: `Index pattern [${id}] references a data source, but data sources are not enabled`,
+            },
+          });
+        }
+        const callAsCurrentUser: LegacyAPICaller = dataSourceId
+          ? (context.dataSource.opensearch.legacy.getClient(dataSourceId)
+              .callAPI as LegacyAPICaller)
+          : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+        // Popularity is the only user setting stored on discovered fields; keep it across refreshes.
+        const savedCounts = new Map<string, number>();
+        savedFields.forEach(({ name, scripted, count }) => {
+          if (!scripted && count) {
+            savedCounts.set(name, count);
+          }
+        });
+        const fetcher = new IndexPatternsFetcher(callAsCurrentUser);
+        const discoveredFields = await fetcher.getFieldsForWildcard({
+          pattern: savedObject.attributes.title,
+          metaFields: parsedFields,
+        });
+        const fields: FieldSpec[] = [
+          ...discoveredFields.map((field) => {
+            const count = savedCounts.get(field.name);
+            return count ? { ...field, count } : field;
+          }),
           ...savedFields.filter((field) => field.scripted),
         ];
+
         const { version } = await savedObjectsClient.update(
           'index-pattern',
           id,
@@ -201,7 +236,9 @@ export function registerRoutes(http: HttpServiceSetup) {
           { version: savedObject.version }
         );
 
-        return response.ok({ body: { fields, version } });
+        return response.ok({
+          body: { fields, version, attributes: omit(savedObject.attributes, 'fields') },
+        });
       } catch (error) {
         if (Boom.isBoom(error)) {
           return response.customError({

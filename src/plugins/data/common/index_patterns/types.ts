@@ -139,8 +139,19 @@ export interface IIndexPatternsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
   refreshFields: (
     id: string,
-    options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'>
-  ) => Promise<{ fields: FieldSpec[]; version: string }>;
+    options: Pick<GetFieldsOptions, 'metaFields'>
+  ) => Promise<RefreshFieldsResponse>;
+}
+
+/**
+ * Result of refreshing a saved index pattern's fields on the server. `attributes` are the saved
+ * attributes other than `fields` at the time of the write, so callers can catch up with changes
+ * made elsewhere.
+ */
+export interface RefreshFieldsResponse {
+  fields: FieldSpec[];
+  version: string;
+  attributes: Omit<IndexPatternAttributes, 'fields'>;
 }
 
 export type { SavedObject };

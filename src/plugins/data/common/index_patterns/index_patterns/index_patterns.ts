@@ -394,10 +394,14 @@ export class IndexPatternsService {
   };
 
   refreshFieldsAndSave = async (indexPattern: IndexPattern) => {
+    // Only a saved index pattern can be refreshed on the server; without an id the request would
+    // silently target a different URL.
+    if (!indexPattern.id) {
+      throw new Error('Cannot refresh the fields of an index pattern that has not been saved');
+    }
     try {
-      const { fields, version } = await this.apiClient.refreshFields(indexPattern.id as string, {
+      const { fields, version } = await this.apiClient.refreshFields(indexPattern.id, {
         metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-        dataSourceId: indexPattern.dataSourceRef?.id,
       });
       indexPattern.fields.replaceAll(fields);
       indexPattern.version = version;

@@ -9,6 +9,7 @@ import {
   DataViewGetFieldsOptions as GetFieldsOptions,
   IDataViewsApiClient,
 } from '../../../common/data_views/types';
+import { RefreshFieldsResponse } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -63,17 +64,12 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     return this._request(url, query).then((resp: any) => resp.fields);
   }
 
-  refreshFields(id: string, options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'> = {}) {
-    const { metaFields, dataSourceId } = options;
+  refreshFields(
+    id: string,
+    options: Pick<GetFieldsOptions, 'metaFields'> = {}
+  ): Promise<RefreshFieldsResponse> {
     const url = this._getUrl([id, '_refresh_fields']);
 
-    return this._request(
-      url,
-      {
-        meta_fields: metaFields,
-        data_source: dataSourceId,
-      },
-      'POST'
-    );
+    return this._request(url, { meta_fields: options.metaFields }, 'POST');
   }
 }

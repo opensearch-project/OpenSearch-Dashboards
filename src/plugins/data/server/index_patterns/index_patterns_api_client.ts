@@ -39,7 +39,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   }
   async refreshFields(
     id: string,
-    options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'> = {}
+    options: Pick<GetFieldsOptions, 'metaFields'> = {}
   ): Promise<never> {
     throw new Error('IndexPatternsApiServer - refreshFields not defined');
   }

@@ -65,11 +65,11 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('posts to the right URI to refresh fields', async function () {
-    await indexPatternsApiClient.refreshFields('id', { metaFields: ['_id'], dataSourceId: 'ds' });
+    await indexPatternsApiClient.refreshFields('id', { metaFields: ['_id'] });
 
     expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/id/_refresh_fields', {
       method: 'POST',
-      query: { meta_fields: ['_id'], data_source: 'ds' },
+      query: { meta_fields: ['_id'] },
     });
   });
 });

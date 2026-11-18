@@ -390,10 +390,14 @@ export class DataViewsService {
   };
 
   refreshFieldsAndSave = async (dataView: DataView) => {
+    // Only a saved data view can be refreshed on the server; without an id the request would
+    // silently target a different URL.
+    if (!dataView.id) {
+      throw new Error('Cannot refresh the fields of a data view that has not been saved');
+    }
     try {
-      const { fields, version } = await this.apiClient.refreshFields(dataView.id as string, {
+      const { fields, version } = await this.apiClient.refreshFields(dataView.id, {
         metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-        dataSourceId: dataView.dataSourceRef?.id,
       });
       dataView.fields.replaceAll(fields);
       dataView.version = version;

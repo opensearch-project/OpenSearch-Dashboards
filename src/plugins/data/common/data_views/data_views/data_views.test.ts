@@ -241,12 +241,16 @@ describe('DataViews', () => {
     const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
     apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
     await dataViews.refreshFieldsAndSave(dataView);
-    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', {
-      metaFields: false,
-      dataSourceId: undefined,
-    });
+    expect(apiClient.refreshFields).toHaveBeenCalledWith('id', { metaFields: false });
     expect(dataView.fields.getByName('foo')).toBeDefined();
     expect(dataView.version).toBe('v2');
+  });
+
+  test('refreshFieldsAndSave rejects a data view that has not been saved', async () => {
+    const dataView = await dataViews.create({ title: 'opensearch-dashboards-*' }, true);
+
+    await expect(dataViews.refreshFieldsAndSave(dataView)).rejects.toThrow('has not been saved');
+    expect(apiClient.refreshFields).not.toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {
