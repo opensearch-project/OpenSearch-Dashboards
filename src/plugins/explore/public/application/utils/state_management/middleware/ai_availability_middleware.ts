@@ -64,17 +64,29 @@ export const createAiAvailabilityMiddleware =
       cancelController = undefined;
     };
 
+    // Data source of the last refresh.
+    let probedDataSourceId: string | undefined;
+
+    const turnOff = () => {
+      const { promptModeIsAvailable, summaryAgentIsAvailable } = store.getState().queryEditor;
+      if (promptModeIsAvailable) store.dispatch(setPromptModeIsAvailable(false));
+      if (summaryAgentIsAvailable) store.dispatch(setSummaryAgentIsAvailable(false));
+    };
+
     const refresh = () => {
       cancel();
       const runGeneration = generation;
       const dataset = store.getState().query.dataset;
       // Nothing to probe without a dataset: the AI entry points stay off.
       if (!dataset) {
-        const { promptModeIsAvailable, summaryAgentIsAvailable } = store.getState().queryEditor;
-        if (promptModeIsAvailable) store.dispatch(setPromptModeIsAvailable(false));
-        if (summaryAgentIsAvailable) store.dispatch(setSummaryAgentIsAvailable(false));
+        probedDataSourceId = undefined;
+        turnOff();
         return;
       }
+      // Flags from another data source do not apply here: keep them off until this probe lands.
+      const dataSourceId = dataset.dataSource?.id || '';
+      if (dataSourceId !== probedDataSourceId) turnOff();
+      probedDataSourceId = dataSourceId;
       const runCancel = new AbortController();
       cancelController = runCancel;
       // Each probe has its own controller, so one probe's timeout never affects the other.
@@ -100,7 +112,7 @@ export const createAiAvailabilityMiddleware =
       });
 
       withTimeout(
-        getSummaryAgentIsAvailable(services, dataset.dataSource?.id || '', {
+        getSummaryAgentIsAvailable(services, dataSourceId, {
           signal: summaryRequest.signal,
         }),
         AI_AVAILABILITY_PROBE_TIMEOUT_MS,

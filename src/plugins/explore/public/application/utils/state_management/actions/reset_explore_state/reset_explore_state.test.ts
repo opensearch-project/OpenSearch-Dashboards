@@ -101,10 +101,13 @@ describe('resetExploreStateActionCreator', () => {
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
   });
 
-  it('keeps the current AI flags and refreshes them in the background after the reset', async () => {
+  it('keeps the current AI flags on the same data source and refreshes them after the reset', async () => {
     (getPreloadedState as jest.Mock).mockResolvedValue({
       ...preloadedState,
-      query: { query: '', dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' } },
+      query: {
+        query: '',
+        dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN', dataSource: { id: 'ds-a' } },
+      },
       queryEditor: {
         editorMode: 'SingleQuery',
         promptModeIsAvailable: false,
@@ -112,6 +115,7 @@ describe('resetExploreStateActionCreator', () => {
       },
     });
     const getState = jest.fn(() => ({
+      query: { dataset: { id: 'a', dataSource: { id: 'ds-a' } } },
       queryEditor: { promptModeIsAvailable: true, summaryAgentIsAvailable: true },
     }));
 
@@ -129,6 +133,34 @@ describe('resetExploreStateActionCreator', () => {
     expect(types.indexOf(refreshAiAvailability.type)).toBeLessThan(
       types.indexOf('EXECUTE_QUERIES')
     );
+  });
+
+  it('does not keep the current AI flags when the reset dataset is on another data source', async () => {
+    (getPreloadedState as jest.Mock).mockResolvedValue({
+      ...preloadedState,
+      query: {
+        query: '',
+        dataset: { id: 'b', title: 'b', type: 'INDEX_PATTERN', dataSource: { id: 'ds-b' } },
+      },
+      queryEditor: {
+        editorMode: 'SingleQuery',
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+    });
+    const getState = jest.fn(() => ({
+      query: { dataset: { id: 'a', dataSource: { id: 'ds-a' } } },
+      queryEditor: { promptModeIsAvailable: true, summaryAgentIsAvailable: true },
+    }));
+
+    await resetExploreStateActionCreator(services, clearEditors)(mockDispatch, getState as any);
+
+    expect(setQueryEditorState).toHaveBeenCalledWith({
+      editorMode: 'SingleQuery',
+      promptModeIsAvailable: false,
+      summaryAgentIsAvailable: false,
+    });
+    expect(mockDispatch.mock.calls.map(([a]) => a?.type)).toContain(refreshAiAvailability.type);
   });
 
   it('turns the AI flags off and does not re-probe when the reset state has no dataset', async () => {

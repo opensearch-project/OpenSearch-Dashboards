@@ -28,8 +28,13 @@ export const resetExploreStateActionCreator =
   (services: ExploreServices, clearEditors: ReturnType<typeof useClearEditors>) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = await getPreloadedState(services);
-    // The preloaded state has the AI flags off; keep the current ones until the refresh lands.
-    const currentQueryEditor = state.query?.dataset ? getState().queryEditor : undefined;
+    // The preloaded state has the AI flags off; keep the current ones until the refresh lands,
+    // but only when they were probed for the same data source.
+    const sameDataSource =
+      (getState().query?.dataset?.dataSource?.id || '') ===
+      (state.query?.dataset?.dataSource?.id || '');
+    const currentQueryEditor =
+      state.query?.dataset && sameDataSource ? getState().queryEditor : undefined;
     const queryEditorState = currentQueryEditor
       ? {
           ...state.queryEditor,

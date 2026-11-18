@@ -20,6 +20,17 @@ import {
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { ExploreServices } from '../../../../types';
+import { createDatasetChangeMiddleware } from './dataset_change_middleware';
+import { executeQueries } from '../actions/query_actions';
+import { createMockExploreServices } from '../__mocks__';
+
+jest.mock('../actions/query_actions', () => ({
+  executeQueries: jest.fn(),
+}));
+
+jest.mock('../actions/reset_legacy_state', () => ({
+  resetLegacyStateActionCreator: jest.fn().mockReturnValue({ type: 'mock/resetLegacyState' }),
+}));
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn(),
@@ -439,6 +450,86 @@ describe('createAiAvailabilityMiddleware', () => {
       await flush();
 
       expect(store.getState().queryEditor.promptModeIsAvailable).toBe(false);
+    });
+  });
+
+  describe('data source change', () => {
+    const datasetA2 = { ...datasetA, id: 'a2', title: 'a2' };
+
+    const probeTrue = async (store: ReturnType<typeof createStore>) => {
+      mockedGetPromptModeIsAvailable.mockResolvedValueOnce(true);
+      mockedGetSummaryAgentIsAvailable.mockResolvedValueOnce(true);
+      store.dispatch(refreshAiAvailability());
+      await flush();
+    };
+
+    it('turns the flags off at once when the data source changes', async () => {
+      const store = createStore();
+      await probeTrue(store);
+      mockedGetPromptModeIsAvailable.mockReturnValue(new Promise(() => {}));
+      mockedGetSummaryAgentIsAvailable.mockReturnValue(new Promise(() => {}));
+
+      store.dispatch(setQueryState({ query: '', language: 'PPL', dataset: datasetB } as any));
+      store.dispatch(refreshAiAvailability());
+
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(false);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(false);
+    });
+
+    it('keeps the flags while re-probing a dataset on the same data source', async () => {
+      const store = createStore();
+      await probeTrue(store);
+      mockedGetPromptModeIsAvailable.mockReturnValue(new Promise(() => {}));
+      mockedGetSummaryAgentIsAvailable.mockReturnValue(new Promise(() => {}));
+
+      store.dispatch(setQueryState({ query: '', language: 'PPL', dataset: datasetA2 } as any));
+      store.dispatch(refreshAiAvailability());
+
+      expect(store.getState().queryEditor.promptModeIsAvailable).toBe(true);
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(true);
+    });
+
+    it('does not run the query for a new data source with the old flags', async () => {
+      const seen: Array<{ dataSourceId: string; prompt: boolean; summary: boolean }> = [];
+      (executeQueries as jest.Mock).mockImplementation(() => (_dispatch: any, getState: any) => {
+        const { query, queryEditor } = getState();
+        seen.push({
+          dataSourceId: query.dataset.dataSource.id,
+          prompt: queryEditor.promptModeIsAvailable,
+          summary: queryEditor.summaryAgentIsAvailable,
+        });
+      });
+      const exploreServices = createMockExploreServices() as any;
+      exploreServices.data.query.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue({ cacheDataset: jest.fn() });
+      const store = configureStore({
+        reducer: combineReducers({ query: queryReducer, queryEditor: queryEditorReducer }),
+        middleware: (getDefault) =>
+          getDefault({ serializableCheck: false }).concat(
+            createDatasetChangeMiddleware(exploreServices) as any,
+            createAiAvailabilityMiddleware(exploreServices) as any
+          ),
+      });
+      mockedGetPromptModeIsAvailable.mockResolvedValueOnce(true);
+      mockedGetSummaryAgentIsAvailable.mockResolvedValueOnce(true);
+      await store.dispatch(
+        setQueryState({ query: '', language: 'PPL', dataset: datasetA } as any) as any
+      );
+      await flush();
+      expect(store.getState().queryEditor.summaryAgentIsAvailable).toBe(true);
+      mockedGetPromptModeIsAvailable.mockReturnValue(new Promise(() => {}));
+      mockedGetSummaryAgentIsAvailable.mockReturnValue(new Promise(() => {}));
+
+      await store.dispatch(
+        setQueryState({ query: '', language: 'PPL', dataset: datasetB } as any) as any
+      );
+
+      expect(seen[seen.length - 1]).toEqual({
+        dataSourceId: 'ds-b',
+        prompt: false,
+        summary: false,
+      });
     });
   });
 });
