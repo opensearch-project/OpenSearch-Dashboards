@@ -17,6 +17,7 @@ import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { processDisplayedColumns } from '../helpers/use_displayed_columns';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
+import { UI_SETTINGS } from '../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../common';
 
 /** How many rows carry each field, as Discover counts them for its fields list. */
@@ -49,17 +50,19 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
   // _source, so a panel never shows only "-". Other sources show the saved columns as before.
   // The embeddable updates one searchProps object in place and renders it again, so the memo
   // depends on the fields it reads, not on the object.
-  const { columns, indexPattern, rows, requiresExplicitRun, displayTimeColumn } = searchProps;
+  const { columns, indexPattern, rows, requiresExplicitRun, hideTimeColumn } = searchProps;
   const displayedColumns = useMemo(() => {
     if (!columns || !indexPattern) {
       return [];
     }
     if (!requiresExplicitRun) {
+      // As Discover's legacy table: no column left shows the document (_source), and the
+      // shortDots:enable and doc_table:hideTimeColumn settings apply.
       return getLegacyDisplayedColumns(
-        columns,
+        columns.length ? columns : ['_source'],
         indexPattern,
-        !displayTimeColumn,
-        false // isShortDots
+        !!services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+        !!hideTimeColumn
       );
     }
     return processDisplayedColumns(
@@ -68,7 +71,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       services.uiSettings,
       rows?.length ? { fieldCounts: getFieldCounts(rows, indexPattern) } : undefined
     );
-  }, [columns, indexPattern, rows, requiresExplicitRun, displayTimeColumn, services.uiSettings]);
+  }, [columns, indexPattern, rows, requiresExplicitRun, hideTimeColumn, services.uiSettings]);
 
   // Get sample size from UI settings
   const sampleSize = services.uiSettings.get(SAMPLE_SIZE_SETTING);

@@ -450,14 +450,29 @@ describe('ExploreEmbeddableComponent', () => {
         expect(renderedColumnNames()).toEqual(['body', 'severityText']);
       });
 
-      test('passes displayTimeColumn to getLegacyDisplayedColumns', () => {
+      test('passes the short-dots and hide-time-column settings in their own places', () => {
         const { getLegacyDisplayedColumns } = jest.requireMock('../helpers/data_table_helper');
         const indexPattern = createDataset();
         const columns = ['body'];
+        mockUiSettings['shortDots:enable'] = true;
 
         const { rerender } = render(
           <ExploreEmbeddableComponent
-            searchProps={{ ...mockSearchProps, indexPattern, columns, displayTimeColumn: true }}
+            searchProps={{ ...mockSearchProps, indexPattern, columns, hideTimeColumn: true }}
+          />
+        );
+        // (columns, indexPattern, isShortDots, hideTimeField)
+        expect(getLegacyDisplayedColumns).toHaveBeenLastCalledWith(
+          columns,
+          indexPattern,
+          true,
+          true
+        );
+
+        mockUiSettings['shortDots:enable'] = false;
+        rerender(
+          <ExploreEmbeddableComponent
+            searchProps={{ ...mockSearchProps, indexPattern, columns, hideTimeColumn: false }}
           />
         );
         expect(getLegacyDisplayedColumns).toHaveBeenLastCalledWith(
@@ -466,18 +481,22 @@ describe('ExploreEmbeddableComponent', () => {
           false,
           false
         );
+      });
 
-        rerender(
+      // Removing the last column from a panel leaves none: the document shows, as in Discover.
+      test('shows _source when no column is left', () => {
+        render(
           <ExploreEmbeddableComponent
-            searchProps={{ ...mockSearchProps, indexPattern, columns, displayTimeColumn: false }}
+            searchProps={{
+              ...mockSearchProps,
+              indexPattern: createDataset(),
+              columns: [],
+              rows: logRows,
+            }}
           />
         );
-        expect(getLegacyDisplayedColumns).toHaveBeenLastCalledWith(
-          columns,
-          indexPattern,
-          true,
-          false
-        );
+
+        expect(renderedColumnNames()).toEqual(['_source']);
       });
     });
   });

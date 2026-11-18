@@ -110,7 +110,7 @@ export interface SearchProps {
    */
   requiresExplicitRun?: boolean;
   /** The doc_table:hideTimeColumn setting, for the columns of a panel of another source. */
-  displayTimeColumn?: boolean;
+  hideTimeColumn?: boolean;
   error?: ExpressionRenderError;
   services: ExploreServices;
   chartRender?: () => any;
@@ -415,7 +415,7 @@ export class ExploreEmbeddable
         this.services.data?.query?.queryString,
         searchSource.getField('query')?.dataset
       ),
-      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      hideTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
       variables: this.interpolationService.getVariables(),
     };
