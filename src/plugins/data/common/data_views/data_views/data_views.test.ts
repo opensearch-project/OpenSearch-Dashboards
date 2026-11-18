@@ -239,10 +239,33 @@ describe('DataViews', () => {
   test('refreshFieldsAndSave', async () => {
     const dataView = await dataViews.create({ id: 'id', title: 'opensearch-dashboards-*' }, true);
     const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
-    apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
+    apiClient.refreshFields.mockResolvedValue({
+      fields,
+      version: 'v2',
+      attributes: { title: 'opensearch-dashboards-*' },
+    });
     await dataViews.refreshFieldsAndSave(dataView);
     expect(apiClient.refreshFields).toHaveBeenCalledWith('id', { metaFields: false });
     expect(dataView.fields.getByName('foo')).toBeDefined();
+    expect(dataView.version).toBe('v2');
+  });
+
+  test('refreshFieldsAndSave takes attribute changes saved elsewhere', async () => {
+    const dataView = await dataViews.create(
+      { id: 'id', title: 'opensearch-dashboards-*', displayName: 'Old' },
+      true
+    );
+    dataView.resetOriginalSavedObjectBody();
+    apiClient.refreshFields.mockResolvedValue({
+      fields: [],
+      version: 'v2',
+      attributes: { title: 'opensearch-dashboards-*', displayName: 'New' },
+    });
+
+    await dataViews.refreshFieldsAndSave(dataView);
+
+    expect(dataView.displayName).toBe('New');
+    expect(dataView.getOriginalSavedObjectBody().displayName).toBe('New');
     expect(dataView.version).toBe('v2');
   });
 

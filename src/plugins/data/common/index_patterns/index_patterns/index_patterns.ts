@@ -62,6 +62,14 @@ import { findByTitle, getDataSourceIdFromIndexPattern, getIndexPatternTitle } fr
 import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
+
+const copyProperty = <K extends keyof IndexPattern>(
+  target: IndexPattern,
+  source: IndexPattern,
+  key: K
+) => {
+  target[key] = source[key];
+};
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
@@ -400,10 +408,28 @@ export class IndexPatternsService {
       throw new Error('Cannot refresh the fields of an index pattern that has not been saved');
     }
     try {
-      const { fields, version } = await this.apiClient.refreshFields(indexPattern.id, {
+      const { fields, version, attributes } = await this.apiClient.refreshFields(indexPattern.id, {
         metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
       });
-      indexPattern.fields.replaceAll(fields);
+      // The server refreshed the latest saved copy, which can include changes made elsewhere
+      // since this one was loaded. Take those too: adopting only the new version would let the
+      // next save overwrite them without a conflict.
+      const spec = this.savedObjectToSpec({
+        id: indexPattern.id,
+        type: savedObjectType,
+        version,
+        attributes: { ...attributes, fields },
+        references: [],
+      });
+      const savedPattern = await this.create(spec, true);
+      const savedBody = savedPattern.getAsSavedObjectBody();
+      (Object.keys(savedBody) as Array<keyof typeof savedBody>).forEach((key) => {
+        if (key !== 'fields') {
+          copyProperty(indexPattern, savedPattern, key);
+        }
+      });
+      // Update the field list in place; code holding it would otherwise keep stale fields.
+      indexPattern.fields.replaceAll(Object.values(spec.fields ?? {}));
       indexPattern.version = version;
       indexPattern.resetOriginalSavedObjectBody();
     } catch (err) {
@@ -460,7 +486,15 @@ export class IndexPatternsService {
    * @param savedObject
    */
 
-  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
+  savedObjectToSpec = (
+    // `fields` can also be an already parsed list, as stored by external tooling or returned by
+    // the refresh route.
+    savedObject: SavedObject<
+      Omit<IndexPatternAttributes, 'fields'> & {
+        fields?: IndexPatternAttributes['fields'] | FieldSpec[];
+      }
+    >
+  ): IndexPatternSpec => {
     const {
       id,
       version,

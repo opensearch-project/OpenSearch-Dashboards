@@ -30,6 +30,10 @@ import { findByTitle } from '../utils';
 import { DuplicateDataViewError, MissingDataViewError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+
+const copyProperty = <K extends keyof DataView>(target: DataView, source: DataView, key: K) => {
+  target[key] = source[key];
+};
 const savedObjectType = 'index-pattern';
 
 export interface DataViewSavedObjectAttrs {
@@ -396,10 +400,28 @@ export class DataViewsService {
       throw new Error('Cannot refresh the fields of a data view that has not been saved');
     }
     try {
-      const { fields, version } = await this.apiClient.refreshFields(dataView.id, {
+      const { fields, version, attributes } = await this.apiClient.refreshFields(dataView.id, {
         metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
       });
-      dataView.fields.replaceAll(fields);
+      // The server refreshed the latest saved copy, which can include changes made elsewhere
+      // since this one was loaded. Take those too: adopting only the new version would let the
+      // next save overwrite them without a conflict.
+      const spec = this.savedObjectToSpec({
+        id: dataView.id,
+        type: savedObjectType,
+        version,
+        attributes: { ...attributes, fields },
+        references: [],
+      });
+      const savedDataView = await this.create(spec, true);
+      const savedBody = savedDataView.getAsSavedObjectBody();
+      (Object.keys(savedBody) as Array<keyof typeof savedBody>).forEach((key) => {
+        if (key !== 'fields') {
+          copyProperty(dataView, savedDataView, key);
+        }
+      });
+      // Update the field list in place; code holding it would otherwise keep stale fields.
+      dataView.fields.replaceAll(Object.values(spec.fields ?? {}));
       dataView.version = version;
       dataView.resetOriginalSavedObjectBody();
     } catch (err) {
@@ -451,7 +473,15 @@ export class DataViewsService {
    * Converts data view saved object to data view spec
    * @param savedObject
    */
-  savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+  savedObjectToSpec = (
+    // `fields` can also be an already parsed list, as stored by external tooling or returned by
+    // the refresh route.
+    savedObject: SavedObject<
+      Omit<DataViewAttributes, 'fields'> & {
+        fields?: DataViewAttributes['fields'] | DataViewFieldSpec[];
+      }
+    >
+  ): DataViewSpec => {
     const {
       id,
       version,

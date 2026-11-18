@@ -444,10 +444,35 @@ describe('IndexPatterns', () => {
       true
     );
     const fields = [{ name: 'foo', type: 'string', searchable: true, aggregatable: true }];
-    apiClient.refreshFields.mockResolvedValue({ fields, version: 'v2' });
+    apiClient.refreshFields.mockResolvedValue({
+      fields,
+      version: 'v2',
+      attributes: { title: 'opensearch-dashboards-*' },
+    });
     await indexPatterns.refreshFieldsAndSave(indexPattern);
     expect(apiClient.refreshFields).toHaveBeenCalledWith('id', { metaFields: false });
     expect(indexPattern.fields.getByName('foo')).toBeDefined();
+    expect(indexPattern.version).toBe('v2');
+  });
+
+  test('refreshFieldsAndSave takes attribute changes saved elsewhere', async () => {
+    const apiClient = { ...createFieldsFetcher(), refreshFields: jest.fn() };
+    indexPatterns = newService(apiClient);
+    const indexPattern = await indexPatterns.create(
+      { id: 'id', title: 'opensearch-dashboards-*', displayName: 'Old' },
+      true
+    );
+    indexPattern.resetOriginalSavedObjectBody();
+    apiClient.refreshFields.mockResolvedValue({
+      fields: [],
+      version: 'v2',
+      attributes: { title: 'opensearch-dashboards-*', displayName: 'New' },
+    });
+
+    await indexPatterns.refreshFieldsAndSave(indexPattern);
+
+    expect(indexPattern.displayName).toBe('New');
+    expect(indexPattern.getOriginalSavedObjectBody().displayName).toBe('New');
     expect(indexPattern.version).toBe('v2');
   });
 
