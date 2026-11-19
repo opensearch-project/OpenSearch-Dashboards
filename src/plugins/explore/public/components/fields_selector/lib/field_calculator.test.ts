@@ -189,6 +189,15 @@ describe('field_calculator', function () {
       };
     });
 
+    it('preserves value counts when reusing already flattened hits', () => {
+      const expected = getFieldValueCounts(params);
+      const flattenedHits = params.hits.map((hit) => indexPattern.flattenHit(hit));
+      const flattenHit = jest.spyOn(indexPattern, 'flattenHit');
+
+      expect(getFieldValueCounts({ ...params, flattenedHits })).toEqual(expected);
+      expect(flattenHit).not.toHaveBeenCalled();
+    });
+
     it('counts the top 5 values by default', function () {
       params.hits = params.hits.map((hit: Record<string, any>, i) => ({
         ...hit,
