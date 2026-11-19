@@ -52,6 +52,9 @@ import {
   setActivePPLLintFixSession,
 } from '../../actions/ppl_lint_fix_session';
 import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
+import { createIntervalVariableCompletionProvider } from './interval_variable_completion_provider';
+
+const intervalVariableCompletionProvider = createIntervalVariableCompletionProvider();
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -104,7 +107,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     switchEditorMode,
     editorRef,
     getEditorContainerHeight,
-    completionProviders,
+    completionProviders: consumerCompletionProviders,
     readOnly = false,
   } = props;
 
@@ -122,6 +125,14 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
   const queryLanguage = queryState.language;
+  // PPL also suggests the built-in `$__interval` variable, which the PPL search interceptor fills in.
+  const completionProviders = useMemo(
+    () =>
+      queryLanguage === 'PPL'
+        ? [intervalVariableCompletionProvider, ...(consumerCompletionProviders ?? [])]
+        : consumerCompletionProviders,
+    [queryLanguage, consumerCompletionProviders]
+  );
   const languageTitle = useMemo(() => {
     return getSourceTypeRegistry().getLanguageLabel(queryLanguage, queryState.dataset);
   }, [queryLanguage, queryState.dataset]);

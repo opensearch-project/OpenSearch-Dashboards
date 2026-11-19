@@ -41,6 +41,11 @@ import {
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
+import {
+  hasPPLIntervalMacros,
+  interpolatePPLIntervalMacros,
+  resolveAutoPPLInterval,
+} from './ppl_interval_macros';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
@@ -136,8 +141,26 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
   }
 
+  /**
+   * Replaces `$__interval` with actual time interval.
+   * This implementation follows the interval Explore's histogram uses for "Auto"  over the request's time range (else the global one)
+   * so `span(@timestamp, $__interval)` follows the time picker. Left as is when the range can't be read.
+   *
+   * A user-defined dashboard variable named `__interval` wins: callers interpolate variables before
+   * the search, and an unknown variable keeps its placeholder, so only an undefined `$__interval` is still here.
+   */
+  private interpolateIntervalVar(query: Query, request: IOpenSearchDashboardsSearchRequest): Query {
+    if (typeof query.query !== 'string' || !hasPPLIntervalMacros(query.query)) return query;
+    const timeRange =
+      request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime();
+    const interval = resolveAutoPPLInterval(timeRange, this.uiSettings);
+    return interval
+      ? { ...query, query: interpolatePPLIntervalMacros(query.query, interval) }
+      : query;
+  }
+
   private async buildQuery(request: IOpenSearchDashboardsSearchRequest, options?: any) {
-    const query = this.getQuery(request);
+    const query = this.interpolateIntervalVar(this.getQuery(request), request);
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
