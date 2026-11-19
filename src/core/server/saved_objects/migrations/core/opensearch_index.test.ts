@@ -493,7 +493,7 @@ describe('OpenSearchIndex', () => {
         );
 
       // @ts-expect-error TS2345 TODO Fix me
-      const read = Index.reader(client, index, { batchSize: 100, scrollDuration: '5m' });
+      const { read } = Index.reader(client, index, { batchSize: 100, scrollDuration: '5m' });
 
       expect(await read()).toEqual(batch1);
       expect(await read()).toEqual(batch2);
@@ -547,7 +547,7 @@ describe('OpenSearchIndex', () => {
       );
 
       // @ts-expect-error TS2345 TODO Fix me
-      const read = Index.reader(client, index, {
+      const { read } = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -565,7 +565,7 @@ describe('OpenSearchIndex', () => {
       );
 
       // @ts-expect-error TS2345 TODO Fix me
-      const read = Index.reader(client, index, {
+      const { read } = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -601,7 +601,7 @@ describe('OpenSearchIndex', () => {
       );
 
       // @ts-expect-error TS2345 TODO Fix me
-      const read = Index.reader(client, index, {
+      const { read } = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
