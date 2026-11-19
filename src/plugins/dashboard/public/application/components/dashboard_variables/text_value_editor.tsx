@@ -6,7 +6,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFieldText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { isImeComposing } from '../../../../../../core/public/utils';
 import { VariableWithState } from '../../../variables/types';
 import './variable_selector.scss';
 
@@ -55,7 +54,7 @@ export const TextValueEditor: React.FC<TextValueEditorProps> = ({ variable, onVa
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !isImeComposing(e)) {
+            if (e.key === 'Enter') {
               commit();
             }
           }}
