@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { ExploreLogsChart } from './explore_logs_chart';
@@ -14,6 +14,7 @@ import {
   queryEditorReducer,
   resultsReducer,
   tabReducer,
+  setSummaryAgentIsAvailable,
 } from '../../application/utils/state_management/slices';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../../../data/public';
@@ -40,11 +41,20 @@ import {
 
 // Mock the TimechartHeader component
 jest.mock('./timechart_header', () => ({
-  TimechartHeader: (props: { onChangeInterval: (interval: string) => void }) => (
+  TimechartHeader: (props: {
+    onChangeInterval: (interval: string) => void;
+    toggleIdSelected: string;
+  }) => (
     <div data-test-subj="mockTimechartHeader">
       <button onClick={() => props.onChangeInterval('1h')}>Change Interval</button>
+      <span data-test-subj="mockHeaderView">{props.toggleIdSelected}</span>
     </div>
   ),
+}));
+
+// Mock the results summary panel
+jest.mock('../results_summary/results_summary', () => ({
+  ResultsSummary: () => <div data-test-subj="mockResultsSummary">Mock Summary</div>,
 }));
 
 // Mock the DiscoverHistogram component
@@ -323,5 +333,112 @@ describe('DiscoverChart', () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'legacy/setInterval' })
     );
+  });
+
+  describe('saved view preference while the summary check is pending', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    const assistantServices = {
+      ...mockServices,
+      core: { application: { capabilities: { assistant: { enabled: true } } } },
+    } as unknown as ExploreServices;
+
+    const createStore = () =>
+      configureStore({
+        reducer: {
+          legacy: legacyReducer,
+          ui: uiReducer,
+          query: queryReducer,
+          queryEditor: queryEditorReducer,
+          results: resultsReducer,
+          tab: tabReducer,
+        },
+        preloadedState: mockStore.getState(),
+      });
+
+    const renderWithStore = (store: ReturnType<typeof createStore>) =>
+      render(
+        <Provider store={store}>
+          <ExploreLogsChart {...defaultProps} services={assistantServices} chartData={chartData} />
+        </Provider>
+      );
+
+    beforeEach(() => localStorage.clear());
+    afterAll(() => localStorage.clear());
+
+    it('shows the histogram, and keeps the saved AI Summary choice, until the check passes', () => {
+      localStorage.setItem('exploreChartState', 'summary');
+      renderWithStore(createStore());
+
+      expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockResultsSummary')).not.toBeInTheDocument();
+      // The header follows what is shown, so it keeps the interval picker.
+      expect(screen.getByTestId('mockHeaderView')).toHaveTextContent('histogram');
+      expect(localStorage.getItem('exploreChartState')).toBe('summary');
+    });
+
+    it('switches to the saved AI Summary view once the check passes', () => {
+      localStorage.setItem('exploreChartState', 'summary');
+      const store = createStore();
+      renderWithStore(store);
+
+      act(() => {
+        store.dispatch(setSummaryAgentIsAvailable(true));
+      });
+
+      expect(screen.getByTestId('mockResultsSummary')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockHeaderView')).toHaveTextContent('summary');
+      expect(localStorage.getItem('exploreChartState')).toBe('summary');
+    });
+
+    it('keeps a saved histogram choice when the check passes', () => {
+      localStorage.setItem('exploreChartState', 'histogram');
+      const store = createStore();
+      renderWithStore(store);
+
+      act(() => {
+        store.dispatch(setSummaryAgentIsAvailable(true));
+      });
+
+      expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockResultsSummary')).not.toBeInTheDocument();
+      expect(localStorage.getItem('exploreChartState')).toBe('histogram');
+    });
+
+    it('shows the histogram again, keeping the saved choice, when the check turns off', () => {
+      localStorage.setItem('exploreChartState', 'summary');
+      const store = createStore();
+      renderWithStore(store);
+      act(() => {
+        store.dispatch(setSummaryAgentIsAvailable(true));
+      });
+      expect(screen.getByTestId('mockResultsSummary')).toBeInTheDocument();
+
+      act(() => {
+        store.dispatch(setSummaryAgentIsAvailable(false));
+      });
+
+      expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockResultsSummary')).not.toBeInTheDocument();
+      expect(localStorage.getItem('exploreChartState')).toBe('summary');
+    });
+
+    it('does not show the summary when the assistant is off, even if the check passes', () => {
+      localStorage.setItem('exploreChartState', 'summary');
+      const store = createStore();
+      render(
+        <Provider store={store}>
+          <ExploreLogsChart {...defaultProps} chartData={chartData} />
+        </Provider>
+      );
+
+      act(() => {
+        store.dispatch(setSummaryAgentIsAvailable(true));
+      });
+
+      expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockResultsSummary')).not.toBeInTheDocument();
+      expect(localStorage.getItem('exploreChartState')).toBe('summary');
+    });
   });
 });
