@@ -282,6 +282,35 @@ describe('DatasetSelect', () => {
     });
   });
 
+  it('keeps an empty selection when autoSelectDefault is false', async () => {
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+    const localServices = {
+      ...mockServices,
+      uiSettings: {
+        ...mockServices.uiSettings,
+        get: jest.fn((key: string) => (key === 'defaultIndex' ? 'index-pattern-id' : undefined)),
+      },
+    } as IDataPluginServices;
+
+    render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={localServices}>
+          <DatasetSelect
+            {...defaultProps}
+            signalType={CORE_SIGNAL_TYPES.LOGS}
+            autoSelectDefault={false}
+          />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+
+    // Initial load done: the button leaves its loading/disabled state.
+    await waitFor(() =>
+      expect(screen.getByTestId('datasetSelectButton')).not.toHaveClass('euiButtonEmpty-isDisabled')
+    );
+    expect(mockOnSelect).not.toHaveBeenCalled();
+  });
+
   it('filters datasets by supportedAppNames', async () => {
     const restrictedChild = makeChild({
       id: 'restricted-id',
@@ -619,6 +648,21 @@ describe('DatasetSelect', () => {
       expect(screen.getByTestId('datasetSelectorAdvancedButton')).toBeInTheDocument();
       expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
 
+      expect(
+        screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows default footer content for a mixed signal type list that includes METRICS', async () => {
+      renderWithContext({
+        ...defaultProps,
+        signalType: [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.TRACES, CORE_SIGNAL_TYPES.METRICS],
+      });
+
+      await openPopover();
+
+      expect(screen.getByTestId('datasetSelectorAdvancedButton')).toBeInTheDocument();
+      expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
       expect(
         screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
       ).not.toBeInTheDocument();

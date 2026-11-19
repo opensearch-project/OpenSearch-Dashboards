@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual, isUndefined, omitBy } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiDragDropContext,
@@ -14,12 +14,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   DragDropContextProps,
+  EuiToolTip,
 } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { getSourceTypeRegistry } from '../../../services/source_type_registry';
-import { getQueryLabel } from '../../../../../data/common';
+import { getQueryLabel, splitMultiQueries } from '../../../../../data/common';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import {
   useMetricsQuerySettings,
@@ -36,7 +37,6 @@ import {
   joinRows,
   serializeRows,
   createPromQLSuggestionProvider,
-  MetricsQueryOptions,
   formatStepSeconds,
 } from '../../pages/metrics/query_panel';
 import type { RowStepReadout } from '../../pages/metrics/query_panel';
@@ -44,12 +44,19 @@ import type { PerQueryOptions } from '../../../../../query_enhancements/common';
 
 import '../../pages/metrics/metrics_query_panel.scss';
 
+// Compare per-query options by what is set: rows serialize unset fields as undefined while the
+// stored options (URL / saved object) omit them, and "nothing set" may be undefined, [] or [{}].
+const normalizePerQueryOptions = (options?: PerQueryOptions[]) => {
+  const cleaned = (options ?? []).map((option) => omitBy(option, isUndefined));
+  return cleaned.every(isEmpty) ? [] : cleaned;
+};
+
 /**
  * Multi-row PromQL editor for the in-context visualization editor, mirroring the metrics page query panel
  */
 export const MetricMultiQueryPanelEditor: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryState, queryBuilder } = useQueryBuilderState();
+  const { queryState, queryBuilder, container } = useQueryBuilderState();
 
   const dataConnectionId = queryState.dataset?.id ?? '';
   const resourceClientId =
@@ -93,20 +100,23 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
       const { query: combined, perQueryOptions: nextOptions } = serializeRows(updatedRows);
       if (
         combined === lastSyncedQueryRef.current.query &&
-        isEqual(nextOptions, lastSyncedQueryRef.current.perQueryOptions)
+        // The builder reports its query on mount; that echo is not an edit.
+        isEqual(
+          normalizePerQueryOptions(nextOptions),
+          normalizePerQueryOptions(lastSyncedQueryRef.current.perQueryOptions)
+        )
       ) {
         return;
       }
       lastSyncedQueryRef.current = { query: combined, perQueryOptions: nextOptions };
       queryBuilder.updateQueryOptions({ perQueryOptions: nextOptions });
       queryBuilder.updateQueryState({ query: combined });
-      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+      container.markStale();
     },
-    [queryBuilder]
+    [queryBuilder, container]
   );
 
-  const { maxDataPoints, onMaxDataPointsChange, getResolvedStep } =
-    useMetricsQuerySettings(services);
+  const { getResolvedStep } = useMetricsQuerySettings(services);
 
   // Server-reported steps only line up with the rows by position, so trust them
   // only while the rows still serialize to the query that produced them.
@@ -133,13 +143,13 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
   );
 
   const handleRun = useCallback(() => {
-    queryBuilder.onQueryExecutionSubmit().catch((error) => {
+    container.executeAll().catch((error) => {
       services.notifications?.toasts.addError(error, {
         title: 'Query execution failed',
         toastLifeTimeMs: 2000,
       });
     });
-  }, [queryBuilder, services.notifications]);
+  }, [container, services.notifications]);
 
   const updateRow = useCallback(
     (rowId: string, updates: Partial<QueryRow>) => {
@@ -225,6 +235,15 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
     [syncQuery]
   );
 
+  // for previous multi-lines query, use this buttin to split into one query each.
+  const handleSplit = useCallback(() => {
+    if (container.splitRow(queryBuilder.refId).length > 0) {
+      container.executeAll({ userInitiated: false }).catch(() => {
+        // each row's own queryStatus records its error
+      });
+    }
+  }, [container, queryBuilder.refId]);
+
   useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider(
       'PROMQL',
@@ -256,6 +275,7 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
                   row={row}
                   label={readoutLabels[idx]}
                   client={client}
+                  positionLabel={getQueryLabel(idx)}
                   onBuilderChange={onBuilderChange}
                   onCodeChange={onCodeChange}
                   onModeChange={onModeChange}
@@ -267,6 +287,8 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
                   isDragging={snapshot.isDragging}
                   dragHandleProps={provided.dragHandleProps}
                   stepReadout={stepReadoutFor(readoutLabels[idx], row.minStep)}
+                  // A lone expression needs no label (the row's refId is in the panel header).
+                  showLabel={rows.length > 1}
                 />
               )}
             </EuiDraggable>
@@ -292,13 +314,27 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MetricsQueryOptions
-            maxDataPoints={maxDataPoints}
-            onMaxDataPointsChange={onMaxDataPointsChange}
-            resolvedMaxDataPoints={executedSteps?.maxDataPoints}
-          />
-        </EuiFlexItem>
+        {splitMultiQueries(queryState.query).length > 1 && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('explore.visEditorMetricsQueryPanel.splitQueriesTooltip', {
+                defaultMessage:
+                  'These expressions run as one combined query. Split them into one query each.',
+              })}
+            >
+              <EuiButtonEmpty
+                size="xs"
+                iconType="list"
+                onClick={handleSplit}
+                data-test-subj="visEditorSplitQueries"
+              >
+                {i18n.translate('explore.visEditorMetricsQueryPanel.splitQueries', {
+                  defaultMessage: 'Split into queries',
+                })}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

@@ -14,10 +14,8 @@ import { createVariableCompletionProvider } from '../utils/variable_completion_p
 
 export const useQueryPanelEditorProps = (): QueryEditorProps & { editorKey: number } => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, queryState, queryEditorState } = useQueryBuilderState();
+  const { queryBuilder, queryState, queryEditorState, container } = useQueryBuilderState();
   const { switchEditorMode } = useEditorOperations();
-  const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
-
   const previousEditorModeRef = useRef(queryEditorState.editorMode);
 
   // use this editorKey to force monaco editor to mount/unmount only for Prompt -> Query
@@ -36,17 +34,17 @@ export const useQueryPanelEditorProps = (): QueryEditorProps & { editorKey: numb
 
   const onRun = useCallback(
     (queryString: string) => {
-      if (!isPromptMode) {
+      if (queryBuilder.getQueryEditorState().editorMode !== EditorMode.Prompt) {
         queryBuilder.updateQueryState({ query: queryString });
       }
-      queryBuilder.onQueryExecutionSubmit().catch((error) => {
+      container.executeAll().catch((error) => {
         services.notifications?.toasts.addError(error, {
           title: 'Query execution failed',
           toastLifeTimeMs: 2000,
         });
       });
     },
-    [isPromptMode, queryBuilder, services.notifications]
+    [queryBuilder, container, services.notifications]
   );
 
   const getEditorContainerHeight = useCallback((domNode: HTMLElement | null) => {
@@ -61,8 +59,8 @@ export const useQueryPanelEditorProps = (): QueryEditorProps & { editorKey: numb
   // Contribute dashboard variable (`${var}`) suggestions as a completion extension so the
   // shared query editor need not know about the dashboard-variables feature.
   const completionProviders = useMemo(
-    () => [createVariableCompletionProvider(() => queryBuilder.getVariableNames())],
-    [queryBuilder]
+    () => [createVariableCompletionProvider(() => container.getVariableNames())],
+    [container]
   );
 
   return {
@@ -74,7 +72,8 @@ export const useQueryPanelEditorProps = (): QueryEditorProps & { editorKey: numb
     onRun,
     switchEditorMode,
     getEditorContainerHeight,
-    handleEditorChange: (updates) => queryBuilder.updateQueryEditorState(updates),
+    // Typing marks the rows stale (Update); the text reaches the query state only on run.
+    handleEditorChange: () => container.markStale(),
     focusShortcutId: 'vis_editor_focus_query_bar',
     completionProviders,
   };

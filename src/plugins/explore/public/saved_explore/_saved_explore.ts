@@ -8,13 +8,15 @@ import {
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
+import { extractReferences, injectReferences } from './saved_explore_references';
 import { GetDatasetTypeConfig, inlineDatasetReferences } from './inline_dataset_references';
 
 export const SAVED_OBJECT_TYPE = 'explore';
 
 /**
  * @param getDatasetTypeConfig the dataset type's config, for the types whose datasets have no saved
- *   object (inlineDatasetReferences); without it, every dataset is saved as a reference.
+ *   object (inlineDatasetReferences); without it, every search source dataset is saved as a
+ *   reference. The rows in `queries` reference their index patterns either way.
  */
 export function createSavedExploreClass(
   services: SavedObjectOpenSearchDashboardsServices,
@@ -34,6 +36,7 @@ export function createSavedExploreClass(
       type: 'text',
       visualization: 'text',
       uiState: 'text',
+      queries: 'text',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -56,11 +59,19 @@ export function createSavedExploreClass(
           type: 'text',
           visualization: 'text',
           uiState: 'text',
+          queries: 'text',
         },
         searchSource: true,
-        ...(getDatasetTypeConfig && {
-          extractReferences: inlineDatasetReferences(getDatasetTypeConfig),
-        }),
+        // Each visualization editor row's index pattern (`queries`) is a reference too.
+        injectReferences,
+        // The rows' index patterns become references, and a search source dataset with no saved
+        // object behind it stays inline.
+        extractReferences: (doc) => {
+          const withRowReferences = extractReferences(doc);
+          return getDatasetTypeConfig
+            ? inlineDatasetReferences(getDatasetTypeConfig)(withRowReferences)
+            : withRowReferences;
+        },
         defaults: {
           title: '',
           description: '',
@@ -71,6 +82,7 @@ export function createSavedExploreClass(
           type: '',
           visualization: '',
           uiState: '',
+          queries: '',
         },
       });
       this.showInRecentlyAccessed = true;

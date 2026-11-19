@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryExecutionButton } from './query_execution_button';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -21,13 +22,26 @@ jest.mock('../../../../../data/public', () => ({
   useCancelButtonTiming: jest.fn((v) => v),
 }));
 
-const buildState = (overrides: Record<string, any> = {}) => ({
+// dateRange is the shared range of all queries (top-level), not part of the row's editor state.
+// isStale is the container's "rows changed since the last run" flag.
+// isExecuting is the container's "a batch of rows is running" flag (what Stop follows).
+const buildState = ({
+  dateRange,
+  isStale = false,
+  isExecuting = false,
+  ...overrides
+}: Record<string, any> = {}) => ({
   queryEditorState: {
-    isQueryEditorDirty: false,
-    dateRange: undefined,
     userInitiatedQuery: false,
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
     ...overrides,
+  },
+  dateRange,
+  // container: { getIsStale$: () => of(isStale) },
+  // container: { isStale$: new BehaviorSubject(isStale) },
+  container: {
+    isStale$: new BehaviorSubject(isStale),
+    isExecuting$: new BehaviorSubject(isExecuting),
   },
 });
 
@@ -44,7 +58,7 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
   });
 
-  it('shows Refresh when query is not dirty', () => {
+  it('shows Refresh when the rows have not changed since the last run', () => {
     render(<QueryExecutionButton />);
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
@@ -53,8 +67,8 @@ describe('QueryExecutionButton', () => {
     expect(button).toHaveClass('euiButton--primary');
   });
 
-  it('shows Update when query is dirty', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isQueryEditorDirty: true }));
+  it('shows Update when the rows changed since the last run', () => {
+    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isStale: true }));
     render(<QueryExecutionButton />);
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
@@ -83,10 +97,7 @@ describe('QueryExecutionButton', () => {
   });
 
   describe('Run and Stop', () => {
-    const running = buildState({
-      queryStatus: { status: QueryExecutionStatus.LOADING },
-      userInitiatedQuery: true,
-    });
+    const running = buildState({ isExecuting: true });
 
     it('reads Refresh when no query is running', () => {
       render(<QueryExecutionButton onCancel={jest.fn()} />);
@@ -94,11 +105,20 @@ describe('QueryExecutionButton', () => {
       expect(screen.queryByTestId('exploreQueryStopButton')).not.toBeInTheDocument();
     });
 
-    it('does not offer Stop for a query the user did not start', () => {
+    it('offers Stop while another row runs, though the selected row is done', () => {
+      (useQueryBuilderState as jest.Mock).mockReturnValue(
+        buildState({ isExecuting: true, queryStatus: { status: QueryExecutionStatus.READY } })
+      );
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.getByTestId('exploreQueryStopButton')).toBeInTheDocument();
+    });
+
+    it('does not offer Stop while the selected row loads outside a batch', () => {
       (useQueryBuilderState as jest.Mock).mockReturnValue(
         buildState({
+          isExecuting: false,
           queryStatus: { status: QueryExecutionStatus.LOADING },
-          userInitiatedQuery: false,
+          userInitiatedQuery: true,
         })
       );
       render(<QueryExecutionButton onCancel={jest.fn()} />);
@@ -126,11 +146,7 @@ describe('QueryExecutionButton', () => {
     it('offers Stop even when the time range is invalid', () => {
       (isTimeRangeInvalid as jest.Mock).mockReturnValue(true);
       (useQueryBuilderState as jest.Mock).mockReturnValue(
-        buildState({
-          queryStatus: { status: QueryExecutionStatus.LOADING },
-          userInitiatedQuery: true,
-          dateRange: { from: 'now', to: 'now' },
-        })
+        buildState({ isExecuting: true, dateRange: { from: 'now', to: 'now' } })
       );
       render(<QueryExecutionButton onCancel={jest.fn()} />);
       expect(screen.getByTestId('exploreQueryStopButton')).toBeEnabled();

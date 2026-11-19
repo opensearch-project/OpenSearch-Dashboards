@@ -74,6 +74,30 @@ describe('filter_fields_transformation', () => {
       }
     );
 
+    it.each(['include' as const, 'exclude' as const])(
+      'skips and reports the fields in %s mode when none of them is in the data',
+      (mode) => {
+        const data = [createRow({ name: 'Alice', age: 30 })];
+        const config = { mode, fieldOptions: [{ name: 'cc' }, { name: 'dd' }] };
+
+        expect(instance.transformationMethod(data, config)).toMatchObject({
+          rows: data,
+          status: 'skipped',
+          issues: [{ code: 'missing_fields', fields: ['cc', 'dd'] }],
+        });
+      }
+    );
+
+    it('reports nothing on empty data', () => {
+      const config = { mode: 'exclude' as const, fieldOptions: [{ name: 'cc' }] };
+
+      expect(instance.transformationMethod([], config)).toEqual({
+        rows: [],
+        status: 'applied',
+        issues: [],
+      });
+    });
+
     it('applies independently to rows with different fields', () => {
       const config = {
         mode: 'include' as const,

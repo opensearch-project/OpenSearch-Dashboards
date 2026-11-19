@@ -32,6 +32,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -102,6 +103,16 @@ export interface DatasetSelectProps {
    * Pass this to stay controlled regardless of the current selection.
    */
   isControlled?: boolean;
+  /**
+   * Select the default dataset on the first load when none is selected. Defaults to true; pass
+   * false when an empty selection is meaningful
+   */
+  autoSelectDefault?: boolean;
+  /**
+   * Where the popover opens relative to the button. Defaults to `downLeft`; pass `upLeft` when
+   * the selector sits low on the page (e.g. the in-context editor's query panel).
+   */
+  anchorPosition?: PopoverAnchorPosition;
 }
 
 interface ViewDatasetsModalProps {
@@ -309,6 +320,8 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   showNonTimeFieldDatasets = true,
   controlledSelectedDataset,
   isControlled: isControlledProp,
+  autoSelectDefault = true,
+  anchorPosition = 'downLeft',
 }) => {
   const isControlled = isControlledProp ?? controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
@@ -582,6 +595,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       // IMPORTANT: Don't override a dataset that's already selected - it may have been set by
       // a saved query, test, or manual selection, and may not be in the fetched list
       if (
+        autoSelectDefault &&
         !hasCompletedInitialLoad.current &&
         signalType !== null &&
         !currentlySelectedDataset &&
@@ -611,6 +625,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     supportedTypes,
     showNonTimeFieldDatasets,
     isControlled,
+    autoSelectDefault,
   ]);
 
   useEffect(() => {
@@ -870,7 +885,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      anchorPosition="downLeft"
+      anchorPosition={anchorPosition}
       panelPaddingSize="none"
     >
       <EuiPopoverTitle paddingSize="none">
@@ -1025,10 +1040,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           gutterSize="s"
           className="datasetSelect__footer"
         >
-          {signalType === CORE_SIGNAL_TYPES.METRICS ||
-          (Array.isArray(signalType) && signalType.includes(CORE_SIGNAL_TYPES.METRICS))
-            ? metricsFooterContent
-            : defaultFooterContent}
+          {/* Only a metrics-only picker (the Metrics page) gets the data-source footer; a mixed
+              list (the in-context editor's logs + traces + metrics) can still create datasets. */}
+          {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>

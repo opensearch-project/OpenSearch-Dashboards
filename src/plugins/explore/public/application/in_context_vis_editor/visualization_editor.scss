@@ -117,7 +117,12 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
   &__editorBody {
     min-height: 0;
-    overflow-y: auto;
+
+    // PromQL rows line up with the language selector above (the Metrics page indents them).
+    .mqpQueryRow {
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }
 

@@ -16,16 +16,27 @@ import {
   TransformationStepResult,
   FieldSchema,
   NormalizedRow,
+  FinalPipelineSeriesResult,
+  TransformationInstance,
+  MultiSeriesTransformationInstance,
+  SeriesExecutionResult,
 } from './types';
+import { mergeSeries } from './merge_series';
+import type { SeriesResult } from '../../application/in_context_vis_editor/multi_query_builder/types';
 import {
   addTransformation,
   removeTransformation,
   updateTransformationConfig,
   toggleTransformationHide,
   inferSchemaFromRows,
+  isCompleteFieldSchema,
 } from './transformation_utils';
 
 export const TRANSFORMATION_STATE_KEY = '_t';
+
+type StepOutcome = Omit<SeriesExecutionResult, 'status'> & {
+  status: TransformationStepResult['status'];
+};
 
 // Non-empty rows determine which fields exist. Empty results preserve the last known schema
 // because they provide no evidence that fields were removed.
@@ -64,8 +75,137 @@ const reconcileSchemaWithRows = (
   return reconciledSchema;
 };
 
-const isCompleteFieldSchema = (field: { name?: string; type?: string }): field is FieldSchema =>
-  Boolean(field.name && field.type);
+// The refId of the one series applyPipeline runs on.
+const SINGLE_SERIES_REF_ID = 'A';
+
+// Every series's fields, first-seen name wins: what a step's editor offers (unified field picker).
+const unionSchema = (series: SeriesResult[]): FieldSchema[] => {
+  const byName = new Map<string, FieldSchema>();
+  series.forEach(({ fieldSchema }) =>
+    fieldSchema.forEach((field) => {
+      if (!byName.has(field.name)) byName.set(field.name, field);
+    })
+  );
+  return Array.from(byName.values());
+};
+
+// Its applyTo query's; without applyTo, the only series (several need the user to pick one).
+const resolveTargetSeries = (applyTo: string | undefined, series: SeriesResult[]) =>
+  applyTo
+    ? series.find(({ refId }) => refId === applyTo)
+    : series.length === 1
+      ? series[0]
+      : undefined;
+
+const toExecutionIssue = (err: unknown): TransformationIssue => ({
+  code: 'execution_error',
+  message: err instanceof Error ? err.message : String(err),
+});
+
+/**
+ * A single-series step on one series: its applyTo query's, or the only series without applyTo.
+ * With several series and no applyTo it waits for the user to pick a query (skipped).
+ */
+const runSingleSeriesStep = (
+  instance: TransformationInstance,
+  series: SeriesResult[]
+): StepOutcome => {
+  const { applyTo } = instance;
+
+  const target = resolveTargetSeries(applyTo, series);
+  // No query picked yet (several series): an unconfigured step, like a missing required field
+  if (!target && !applyTo) {
+    return {
+      series,
+      status: 'skipped',
+      issues: [{ code: 'invalid_config', message: 'Pick the query this step applies to.' }],
+    };
+  }
+  if (!target) {
+    return {
+      series,
+      status: 'skipped',
+      issues: [
+        {
+          code: 'missing_series',
+          message: `Query ${applyTo} isn't in this step's input (removed, hidden, or merged by an earlier step).`,
+        },
+      ],
+    };
+  }
+  const outcome = runOnSingleSeries(instance, target);
+  return {
+    ...outcome,
+    // replace applyTo to transformed outcome
+    series: series.map((oneSeries) =>
+      oneSeries.refId === target.refId ? outcome.series[0] : oneSeries
+    ),
+  };
+};
+
+// One series through the step: its own result; a throw keeps the series as it was.
+const runOnSingleSeries = (
+  instance: TransformationInstance,
+  oneSeries: SeriesResult
+): StepOutcome => {
+  try {
+    const result = instance.transformationMethod(oneSeries.rows, instance.config);
+    return {
+      series: [
+        {
+          ...oneSeries,
+          rows: result.rows,
+          fieldSchema: reconcileSchemaWithRows(
+            result.rows,
+            oneSeries.fieldSchema,
+            result.typeOverrides
+          ),
+        },
+      ],
+      status: result.status,
+      issues: result.issues,
+    };
+  } catch (err) {
+    return { series: [oneSeries], status: 'failed', issues: [toExecutionIssue(err)] };
+  }
+};
+
+// A multi-series step on every series at once; a throw leaves the series as they were.
+const runMultiSeriesStep = (
+  instance: MultiSeriesTransformationInstance,
+  series: SeriesResult[]
+): StepOutcome => {
+  try {
+    const result = instance.seriesMethod(series, instance.config);
+    return {
+      series: result.series.map((oneSeries) => ({
+        ...oneSeries,
+        fieldSchema: reconcileSchemaWithRows(oneSeries.rows, oneSeries.fieldSchema),
+      })),
+      status: result.status,
+      issues: result.issues,
+    };
+  } catch (err) {
+    return { series, status: 'failed', issues: [toExecutionIssue(err)] };
+  }
+};
+
+// The series the pipeline ended with, merged into the one series the vis reads.
+const toPipelineResult = (
+  series: SeriesResult[],
+  steps: TransformationStepResult[]
+): FinalPipelineSeriesResult => {
+  // default merge
+  const merged = mergeSeries(series);
+  return {
+    series,
+    rows: merged.rows,
+    finalSchema: merged.fieldSchema,
+    seriesDisplayNames: merged.seriesDisplayNames,
+    queryField: merged.queryField,
+    steps,
+  };
+};
 
 export class TransformationService implements ITransformationService {
   // Catalog of available transformations.
@@ -75,6 +215,10 @@ export class TransformationService implements ITransformationService {
   public pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
   // Per-instance fields projected from each step's input rows.
   public stageFields$ = new BehaviorSubject<Map<string, FieldSchema[]>>(new Map());
+  // Per-instance outcome of the last applyPipeline run.
+  public stepResults$ = new BehaviorSubject<Map<string, TransformationStepResult>>(new Map());
+  // Per-instance refIds of the series entering the step (for the applyTo and query pickers).
+  public stageRefIds$ = new BehaviorSubject<Map<string, string[]>>(new Map());
   private debouncedPipeline$ = this.pipeline$.pipe(debounceTime(300));
 
   private urlStateStorage?: IOsdUrlStateStorage;
@@ -131,6 +275,17 @@ export class TransformationService implements ITransformationService {
     this.pipeline$.next(toggleTransformationHide(this.pipeline$.getValue(), id));
   }
 
+  // Limits a single-series step to one query
+  updateInstanceApplyTo(id: string, refId: string | undefined): void {
+    this.pipeline$.next(
+      this.pipeline$
+        .getValue()
+        .map((instance) =>
+          instance.instance_id === id ? { ...instance, applyTo: refId } : instance
+        )
+    );
+  }
+
   setPipeline(instances: TransformationPipeline): void {
     this.pipeline$.next(instances);
   }
@@ -155,6 +310,7 @@ export class TransformationService implements ITransformationService {
         ...instance,
         config: item.config,
         hide: item.hide,
+        ...(typeof item.applyTo === 'string' && item.applyTo ? { applyTo: item.applyTo } : {}),
       });
     }
     if (restoredPipeline.length > 0) {
@@ -169,11 +325,12 @@ export class TransformationService implements ITransformationService {
       definitionId: instance.definition_id,
       config: instance.config,
       hide: instance.hide,
+      ...(instance.applyTo ? { applyTo: instance.applyTo } : {}),
     }));
   }
 
   /**
-   * Apply the full pipeline without changing its stored configuration.
+   * Apply the full pipeline to one query without changing its stored configuration.
    * Returns the final rows, their inferred schema, and execution diagnostics for each step.
    * stageFields$ projects each step's input rows into fields for its editor.
    */
@@ -185,24 +342,59 @@ export class TransformationService implements ITransformationService {
     finalSchema: FieldSchema[];
     steps: TransformationStepResult[];
   } {
+    // One query is one series; one series never gets a Query column.
+    const { rows, finalSchema, steps } = this.applyPipelineToSeries([
+      {
+        refId: SINGLE_SERIES_REF_ID,
+        rows: inputRows,
+        fieldSchema: originalSchema.filter(isCompleteFieldSchema),
+      },
+    ]);
+    return { rows, finalSchema, steps };
+  }
+
+  /**
+   * Apply the full pipeline to multi queries without changing its configuration.
+   * A single-series step runs on one series (its applyTo query's, else the first); the others pass
+   * through. A multi-series step runs on all series. Series left at the end are merged into one series (implicit Merge series);
+   * stageFields$ gets each step's input fields: a single-series step its target series' fields; a
+   * multi-series step, or one whose applyTo series is gone, the union over its series.
+   */
+  applyPipelineToSeries(inputSeries: SeriesResult[]): FinalPipelineSeriesResult {
     const instances = this.pipeline$.getValue();
-    const inputSchema = reconcileSchemaWithRows(
-      inputRows,
-      originalSchema.filter(isCompleteFieldSchema)
-    );
+    const initialSeries = inputSeries.map((oneSeries) => ({
+      ...oneSeries,
+      fieldSchema: reconcileSchemaWithRows(
+        oneSeries.rows,
+        oneSeries.fieldSchema.filter(isCompleteFieldSchema)
+      ),
+    }));
 
     if (instances.length === 0) {
       this.stageFields$.next(new Map());
-      return { rows: inputRows, finalSchema: inputSchema, steps: [] };
+      this.stageRefIds$.next(new Map());
+      this.stepResults$.next(new Map());
+      return toPipelineResult(initialSeries, []);
     }
 
     const stageFields = new Map<string, FieldSchema[]>();
+    const stageRefIds = new Map<string, string[]>();
     const steps: TransformationStepResult[] = [];
-    let rows = [...inputRows];
-    let currentSchema = inputSchema;
+    let series = initialSeries;
 
     for (const instance of instances) {
-      stageFields.set(instance.instance_id, currentSchema);
+      // A multi-series step (e.g. join) offers every series's fields; a single-series step its
+      // target series' fields, none until a query is picked (or when its query is gone).
+      stageFields.set(
+        instance.instance_id,
+        'seriesMethod' in instance
+          ? unionSchema(series)
+          : (resolveTargetSeries(instance.applyTo, series)?.fieldSchema ?? [])
+      );
+      stageRefIds.set(
+        instance.instance_id,
+        series.map(({ refId }) => refId)
+      );
 
       if (instance.hide) {
         steps.push({
@@ -214,42 +406,27 @@ export class TransformationService implements ITransformationService {
         continue;
       }
 
-      try {
-        const result = instance.transformationMethod(rows, instance.config);
-        rows = result.rows;
-        currentSchema = reconcileSchemaWithRows(rows, currentSchema, result.typeOverrides);
-
-        steps.push({
-          instanceId: instance.instance_id,
-          definitionId: instance.definition_id,
-          status: result.status,
-          issues: result.issues,
-        });
-      } catch (err) {
-        const executionIssue: TransformationIssue = {
-          code: 'execution_error',
-          message: err instanceof Error ? err.message : String(err),
-        };
-        // eslint-disable-next-line no-console
-        console.error(
-          `TransformationService: step "${instance.instance_id}" throws — skipping`,
-          err
-        );
-        steps.push({
-          instanceId: instance.instance_id,
-          definitionId: instance.definition_id,
-          status: 'failed',
-          issues: [executionIssue],
-        });
-      }
+      // An instance is multi-series when it has seriesMethod (the union has no shared discriminant).
+      const outcome =
+        'seriesMethod' in instance
+          ? runMultiSeriesStep(instance, series)
+          : runSingleSeriesStep(instance, series);
+      series = outcome.series;
+      steps.push({
+        instanceId: instance.instance_id,
+        definitionId: instance.definition_id,
+        status: outcome.status,
+        issues: outcome.issues,
+      });
     }
 
     this.stageFields$.next(stageFields);
+    this.stageRefIds$.next(stageRefIds);
+    this.stepResults$.next(new Map(steps.map((step) => [step.instanceId, step])));
 
+    // With every step hidden, keep the input schema (as before: hidden steps change nothing).
     const hasActiveTransformations = instances.some((instance) => !instance.hide);
-    const finalSchema = hasActiveTransformations ? currentSchema : inputSchema;
-
-    return { rows, finalSchema, steps };
+    return toPipelineResult(hasActiveTransformations ? series : initialSeries, steps);
   }
 
   /**
@@ -272,6 +449,22 @@ export class TransformationService implements ITransformationService {
       .subscribe((pipeline) => {
         this.persistToUrl(pipeline);
       });
+  }
+
+  /** Stops persisting the pipeline to the URL (the pipeline itself stays). */
+  stopUrlSync(): void {
+    this.urlSyncSubscription?.unsubscribe();
+    this.urlSyncSubscription = undefined;
+    this.urlStateStorage = undefined;
+  }
+
+  /** Back to an empty pipeline for a new session; the registered definitions stay. */
+  reset(): void {
+    this.stopUrlSync();
+    this.pipeline$.next([]);
+    this.stageFields$.next(new Map());
+    this.stageRefIds$.next(new Map());
+    this.stepResults$.next(new Map());
   }
 
   private restoreFromUrl(): void {
@@ -313,6 +506,8 @@ export class TransformationService implements ITransformationService {
     }
     this.pipeline$.complete();
     this.stageFields$.complete();
+    this.stageRefIds$.complete();
+    this.stepResults$.complete();
     this.definitions.clear();
   }
 }

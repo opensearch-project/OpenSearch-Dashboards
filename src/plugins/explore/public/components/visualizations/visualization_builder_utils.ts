@@ -241,3 +241,15 @@ export const adaptLegacyData = (config?: ChartConfig) => {
 
   return transformedConfig;
 };
+export const normalizeMapping = (
+  mapping: AxisFieldNameMappings | undefined
+): Record<string, string[]> | undefined => {
+  if (!mapping) return undefined;
+  const normalized: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(mapping)) {
+    if (value) {
+      normalized[key] = Array.isArray(value) ? value : [value];
+    }
+  }
+  return normalized;
+};

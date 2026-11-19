@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformSelectorButton } from './transform_selector_overlay';
-import { TransformationInstance, FieldSchema } from './types';
+import { AllTransformationInstance, FieldSchema } from './types';
 import { TransformationService } from './transformation_service';
 
 const DROPPABLE_ID = 'transformationPipelineDroppable';
@@ -103,7 +103,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
         <>
           <EuiDragDropContext onDragEnd={onDragEnd}>
             <EuiDroppable droppableId={DROPPABLE_ID}>
-              {pipeline.map((instance: TransformationInstance, index: number) => (
+              {pipeline.map((instance: AllTransformationInstance, index: number) => (
                 <EuiDraggable
                   spacing="s"
                   key={instance.instance_id}
@@ -144,7 +144,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
 
 interface TransformationCardProps {
   index: number;
-  instance: TransformationInstance;
+  instance: AllTransformationInstance;
   label: string;
   onRemove: (id: string) => void;
   onConfigChange: (id: string, newConfig: any) => void;
