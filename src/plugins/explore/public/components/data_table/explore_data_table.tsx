@@ -20,6 +20,7 @@ import { ExploreServices } from '../../types';
 import {
   selectSavedSearch,
   selectWrapCellText,
+  selectShowRowSeparators,
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
@@ -37,6 +38,7 @@ const ExploreDataTableComponent = () => {
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
   const wrapCellText = useSelector(selectWrapCellText);
+  const showRowSeparators = useSelector(selectShowRowSeparators);
   const { dataset } = useDatasetContext();
 
   // Get rows for the DataTable (hook handles column processing)
@@ -120,6 +122,7 @@ const ExploreDataTableComponent = () => {
             onRemoveColumn={onRemoveColumn}
             expandedTableHeader={expandedTableHeader}
             wrapCellText={wrapCellText}
+            showRowSeparators={showRowSeparators}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
