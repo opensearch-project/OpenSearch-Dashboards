@@ -138,7 +138,7 @@ export const regexExcludeSearchPatternQuery = (
 ) => {
   return `${queryBase} | patterns \`${patternsField}\` | where patterns_field != ${escapePPLValue(
     patternString
-  )}`;
+  )} | fields - patterns_field`;
 };
 
 export const brainExcludeSearchPatternQuery = (
@@ -148,7 +148,7 @@ export const brainExcludeSearchPatternQuery = (
 ) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field != ${escapePPLValue(
     patternString
-  )}`;
+  )} | fields - patterns_field`;
 };
 
 /**
