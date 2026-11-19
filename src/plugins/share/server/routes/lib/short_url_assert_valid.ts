@@ -28,17 +28,19 @@
  * under the License.
  */
 
-import { parse } from 'url';
+import { parseLegacyUrl as parse } from '@osd/std';
 import { trim } from 'lodash';
 import Boom from '@hapi/boom';
 import { WORKSPACE_PATH_PREFIX } from '../../../../../core/server';
 
 export function shortUrlAssertValid(url: string) {
-  const { protocol, hostname, pathname } = parse(
-    url,
-    false /* parseQueryString */,
-    true /* slashesDenoteHost */
-  );
+  let parsed: ReturnType<typeof parse>;
+  try {
+    parsed = parse(url, false /* parseQueryString */, true /* slashesDenoteHost */);
+  } catch {
+    throw Boom.notAcceptable(`Short url target is not a valid URL, found "${url}"`);
+  }
+  const { protocol, hostname, pathname } = parsed;
 
   if (protocol !== null) {
     throw Boom.notAcceptable(`Short url targets cannot have a protocol, found "${protocol}"`);

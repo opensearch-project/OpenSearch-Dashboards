@@ -622,6 +622,12 @@ module.exports = defineConfig([
               name: 'lodash/template',
               message: 'lodash.template is not allowed due to security concerns',
             },
+            ...['url', 'node:url'].map((name) => ({
+              name,
+              importNames: ['parse', 'resolve'],
+              message:
+                'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseLegacyUrl from @osd/std or the WHATWG URL API.',
+            })),
           ],
         },
       ],
@@ -660,6 +666,12 @@ module.exports = defineConfig([
 
       'no-restricted-properties': [
         2,
+        ...['parse', 'resolve'].map((property) => ({
+          object: 'url',
+          property,
+          message:
+            'url.parse() and url.resolve() are deprecated (DEP0169) and the warning terminates OpenSearch Dashboards. Use parseLegacyUrl from @osd/std or the WHATWG URL API.',
+        })),
         {
           object: 'lodash',
           property: 'set',

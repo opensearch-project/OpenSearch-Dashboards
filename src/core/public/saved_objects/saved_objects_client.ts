@@ -29,7 +29,6 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import {
@@ -561,7 +560,12 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(API_BASE_URL, join(...path));
+    // Resolve like `url.resolve(API_BASE_URL, …)` did, including `.`/`..` segments and its
+    // escaping of `'`, which `encodeURIComponent` (via `join`) leaves as-is.
+    return new URL(join(...path), `http://osd-placeholder.invalid${API_BASE_URL}`).pathname.replace(
+      /'/g,
+      '%27'
+    );
   }
 
   /**

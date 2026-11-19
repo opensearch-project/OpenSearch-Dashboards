@@ -14,7 +14,16 @@ node scripts/build --release
 
 # reuse already downloaded node executables, turn on debug logging
 node scripts/build --skip-node-download --debug
+
+# bundle a Node.js install you provide instead of downloading one
+node scripts/build --node-dir /path/to/node-v26.13.1-linux-x64
 ```
+
+# Bundled Node.js
+
+By default the build downloads the Node.js release named in `.node-version` from nodejs.org for each target platform and checks every archive against the sha256 committed in `tasks/nodejs/node_checksums.json`. A download that doesn't match fails the build. To change the version, run `node scripts/update_node_checksums <version>` (see the Node.js version files section of `DEVELOPER_GUIDE.md`).
+
+`--node-dir <path>` skips the download and its checks and bundles the given install instead, for packagers who build or vet Node.js themselves. The directory must be laid out like an official archive (`bin/node`, or `node.exe` on Windows, plus `LICENSE`), its version must satisfy `engines.node`, and the build must target only the current host's platform, because the build runs the binary to read its version. You are then responsible for where that Node.js came from.
 
 # Fixing out of memory issues
 

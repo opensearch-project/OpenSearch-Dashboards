@@ -30,7 +30,15 @@
 
 import * as Rx from 'rxjs';
 
-const shuffle = <T>(arr: T[]) => arr.slice().sort(() => (Math.random() > 0.5 ? 1 : -1));
+// Fisher-Yates; a random sort comparator is biased and its order varies by V8 version
+const shuffle = <T>(arr: T[]) => {
+  const result = arr.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
 
 export type GetArgsType<T extends LifecyclePhase<any>> =
   T extends LifecyclePhase<infer X> ? X : never;

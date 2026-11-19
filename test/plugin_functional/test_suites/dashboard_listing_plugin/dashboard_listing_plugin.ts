@@ -9,12 +9,11 @@
  * GitHub history for details.
  */
 
-import url from 'url';
 import expect from '@osd/expect';
 
 const getPathWithHash = (absoluteUrl: string) => {
-  const parsed = url.parse(absoluteUrl);
-  return `${parsed.path}${parsed.hash ?? ''}`;
+  const { pathname, search, hash } = new URL(absoluteUrl);
+  return `${pathname}${search}${hash}`;
 };
 
 export default function ({ getService, getPageObjects }) {

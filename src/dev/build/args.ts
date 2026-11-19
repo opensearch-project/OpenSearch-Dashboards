@@ -63,6 +63,7 @@ export function readCliArgs(argv: string[]) {
       'help',
       'with-translations',
     ],
+    string: ['node-dir'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -127,6 +128,7 @@ export function readCliArgs(argv: string[]) {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
     downloadFreshNode: !Boolean(flags['skip-node-download']),
+    ...(flags['node-dir'] ? { nodeDir: flags['node-dir'] } : {}),
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createRpmArmPackage: isOsPackageDesired('rpm-arm'),
