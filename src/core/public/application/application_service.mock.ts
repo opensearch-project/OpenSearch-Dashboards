@@ -45,12 +45,14 @@ import { ApplicationServiceContract } from './test_types';
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
   registerAppUpdater: jest.fn(),
+  createAsyncUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
   register: jest.fn(),
   registerAppUpdater: jest.fn(),
+  createAsyncUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
