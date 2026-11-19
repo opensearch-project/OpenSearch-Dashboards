@@ -49,6 +49,7 @@ const createServiceMock = (): PluginsServiceMock => ({
 function createUiPlugins() {
   return {
     browserConfigs: new Map(),
+    exposedConfigKeys: new Map(),
     internal: new Map(),
     public: new Map(),
   };
