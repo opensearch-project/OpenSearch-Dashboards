@@ -37,6 +37,7 @@ import { useEditorText, useSetEditorTextWithQuery } from '../../../../applicatio
 import {
   getDatasetForSavedQuery,
   getStoredSavedQueryDataset,
+  savedQueryMayHaveStoredDataset,
 } from '../../../../application/utils/saved_query_dataset';
 import './save_query.scss';
 
@@ -147,11 +148,13 @@ export const SaveQueryButton = () => {
       const loadId = ++latestLoadRef.current;
       // A query saved with its dataset (not an index pattern or index) loads on that dataset, in
       // its language. Others load on the dataset on screen, as before.
-      const storedDataset = await getStoredSavedQueryDataset(
-        savedQueryService,
+      const storedDataset = savedQueryMayHaveStoredDataset(
         queryString,
+        (store.getState() as RootState).query?.dataset,
         savedQuery
-      );
+      )
+        ? await getStoredSavedQueryDataset(savedQueryService, queryString, savedQuery)
+        : undefined;
       if (loadId !== latestLoadRef.current) return;
       const currentDataset = (store.getState() as RootState).query?.dataset;
       const switchesDataset =

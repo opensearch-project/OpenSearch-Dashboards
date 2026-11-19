@@ -255,13 +255,35 @@ describe('SaveVisButton', () => {
 
   describe('the query it saves', () => {
     const LAST_RUN = 'stats count(*) as n by bin(5m)';
+    // MY_TYPE needs an explicit Run; INDEX_PATTERN (OpenSearch) doesn't.
+    const EXPLICIT_RUN_DATASET = { id: 'set-a', type: 'MY_TYPE' };
+    const OPENSEARCH_DATASET = { id: 'logs-a', type: 'INDEX_PATTERN' };
+
+    beforeEach(() => {
+      (useOpenSearchDashboards as jest.Mock).mockReturnValue({
+        services: {
+          ...buildServices(),
+          data: {
+            query: {
+              queryString: {
+                getDatasetService: () => ({
+                  getType: (type: string) => ({
+                    meta: { requiresExplicitRun: type === 'MY_TYPE' },
+                  }),
+                }),
+              },
+            },
+          },
+        },
+      });
+    });
 
     const withQuery = ({
       query,
       editorText,
       lastRun = LAST_RUN,
-      dataset,
-      lastRunDataset,
+      dataset = EXPLICIT_RUN_DATASET,
+      lastRunDataset = dataset,
     }: {
       query: string;
       editorText?: string;
@@ -397,6 +419,74 @@ describe('SaveVisButton', () => {
       expect(mockSaveVisModalProps.unrunQueryEdit).toEqual({
         savedQuery: LAST_RUN,
         editorQuery: 'fields @message',
+      });
+    });
+
+    describe('on an OpenSearch dataset, as before', () => {
+      const PPL = 'source = logs | stats count() by status';
+
+      it('saves an existing visualization without asking about unrun edits', async () => {
+        const savedExplore = existing();
+        withQuery({
+          query: PPL,
+          editorText: `${PPL} | head 5`,
+          lastRun: PPL,
+          dataset: OPENSEARCH_DATASET,
+        });
+
+        render(<SaveVisButton />);
+        fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+        await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+        expect(screen.queryByTestId('saveVisualizationUnrunEditConfirm')).toBeNull();
+      });
+
+      it('saves after a dataset change without a run', async () => {
+        const savedExplore = existing();
+        withQuery({
+          query: PPL,
+          editorText: PPL,
+          lastRun: PPL,
+          dataset: { id: 'logs-b', type: 'INDEX_PATTERN' },
+          lastRunDataset: OPENSEARCH_DATASET,
+        });
+
+        render(<SaveVisButton />);
+        fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+        await waitFor(() => expect(savedExplore.save).toHaveBeenCalled());
+        expect(mockAddWarning).not.toHaveBeenCalled();
+      });
+
+      it('saves and goes back with a query that a dataset change emptied', async () => {
+        mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboards' });
+        const savedExplore = existing();
+        withQuery({ query: '', editorText: '', lastRun: PPL, dataset: OPENSEARCH_DATASET });
+
+        render(<SaveVisButton />);
+        expect(screen.getByTestId('saveVisualizationEditorButton')).toHaveTextContent(
+          'Save and back'
+        );
+        fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+        await waitFor(() => expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalled());
+        expect(savedExplore.save).toHaveBeenCalled();
+        expect(mockAddWarning).not.toHaveBeenCalled();
+      });
+
+      it('does not tell the save dialog of a new visualization about unrun edits', async () => {
+        withQuery({
+          query: PPL,
+          editorText: `${PPL} | head 5`,
+          lastRun: PPL,
+          dataset: OPENSEARCH_DATASET,
+        });
+
+        render(<SaveVisButton />);
+        fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+
+        await screen.findByTestId('save-vis-modal');
+        expect(mockSaveVisModalProps.unrunQueryEdit).toBeUndefined();
       });
     });
   });

@@ -28,6 +28,7 @@ import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
 import * as resetLegacyStateActions from '../actions/reset_legacy_state';
+import { abortAllStreamingQueries } from '../../streaming/streaming_abort_registry';
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn().mockResolvedValue(true),
@@ -39,6 +40,12 @@ jest.mock('../../get_summary_agent_is_available', () => ({
 
 jest.mock('../actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'mock/executeQueries' }),
+  abortAllActiveQueries: jest.fn(),
+  supersedeAllActiveQueries: jest.fn(),
+}));
+
+jest.mock('../../streaming/streaming_abort_registry', () => ({
+  abortAllStreamingQueries: jest.fn(),
 }));
 
 jest.mock('../actions/reset_legacy_state', () => ({
@@ -200,6 +207,49 @@ describe('createDatasetChangeMiddleware', () => {
       );
     });
 
+    // A page opened from a URL or reloaded has dispatched no query state action yet: the dataset
+    // it loaded with is the one the picker refines.
+    it('keeps the results on the first refinement after a page load', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValueOnce(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }))
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(setIsSelectionStale(true));
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
+    });
+
+    it('does nothing when the first refinement after a page load re-applies its selection', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
+
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+      expect(queryActions.abortAllActiveQueries).not.toHaveBeenCalled();
+    });
+
+    // The running query is for the previous selection; Stop's semantics, so what finished stays.
+    it('stops the running queries as Stop does when the picker refines the selection', async () => {
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'a', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(setQueryState({ query: 'q', language: 'L' }));
+      jest.clearAllMocks();
+
+      mockStore.getState = jest
+        .fn()
+        .mockReturnValue(stateWith({ id: 'b', type: 'EXPLICIT_RUN_TYPE' }));
+      await middleware(refine(setQueryState({ query: 'q', language: 'L' })));
+
+      expect(queryActions.abortAllActiveQueries).toHaveBeenCalledTimes(1);
+      expect(abortAllStreamingQueries).toHaveBeenCalledTimes(1);
+      expect(queryActions.supersedeAllActiveQueries).not.toHaveBeenCalled();
+    });
+
     it('still resets for a same-type change that the picker did not make (e.g. a saved query)', async () => {
       mockStore.getState = jest
         .fn()
@@ -232,6 +282,25 @@ describe('createDatasetChangeMiddleware', () => {
       expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
       expect(mockStore.dispatch).not.toHaveBeenCalledWith(setIsQueryEditorDirty(true));
     });
+  });
+
+  // Their rows would otherwise land under the new dataset, whose statuses are cleared here.
+  it('stops the queries still running for the previous dataset before clearing', async () => {
+    const order: string[] = [];
+    (queryActions.supersedeAllActiveQueries as jest.Mock).mockImplementation(() =>
+      order.push('supersede')
+    );
+    (mockStore.dispatch as jest.Mock).mockImplementation((action) => order.push(action?.type));
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'logs-b', type: 'INDEX_PATTERN' } },
+      queryEditor: { promptModeIsAvailable: false, summaryAgentIsAvailable: false },
+    });
+
+    await middleware(setQueryState({ query: 'q', language: 'PPL' }));
+
+    expect(queryActions.supersedeAllActiveQueries).toHaveBeenCalledTimes(1);
+    expect(order.indexOf('supersede')).toBeLessThan(order.indexOf(clearQueryStatusMap().type));
+    expect(order.indexOf('supersede')).toBeLessThan(order.indexOf('mock/executeQueries'));
   });
 
   it('fully resets and runs when switching between two index patterns', async () => {

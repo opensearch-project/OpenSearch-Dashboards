@@ -13,7 +13,7 @@ import {
   setUiState,
 } from '../../slices';
 import { getPreloadedState } from '../../utils/redux_persistence';
-import { executeQueries } from '../query_actions';
+import { executeQueries, supersedeAllActiveQueries } from '../query_actions';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 
 jest.mock('../../utils/redux_persistence');
@@ -88,5 +88,16 @@ describe('resetExploreStateActionCreator', () => {
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_QUERY' });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'DETECT_OPTIMAL_TAB' });
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
+  });
+  it('stops the running queries before replacing the state', async () => {
+    const order: string[] = [];
+    (supersedeAllActiveQueries as jest.Mock).mockImplementation(() => order.push('supersede'));
+    mockDispatch.mockImplementation((action) => order.push(action?.type));
+
+    await resetExploreStateActionCreator(services, clearEditors)(mockDispatch);
+
+    expect(supersedeAllActiveQueries).toHaveBeenCalledTimes(1);
+    expect(order[0]).toBe('supersede');
+    mockDispatch.mockReset();
   });
 });

@@ -25,7 +25,12 @@ import {
   setIsQueryEditorDirty,
   setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
-import { executeQueries } from '../actions/query_actions';
+import {
+  abortAllActiveQueries,
+  executeQueries,
+  supersedeAllActiveQueries,
+} from '../actions/query_actions';
+import { abortAllStreamingQueries } from '../../streaming/streaming_abort_registry';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
@@ -48,9 +53,13 @@ export const createDatasetChangeMiddleware = (
   let currentDataset: Dataset | undefined;
 
   return (store) => (next) => async (action) => {
+    const isQueryStateAction =
+      action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory';
+    // The dataset the page showed before this action.
+    const datasetBefore = isQueryStateAction ? store.getState().query?.dataset : undefined;
     const result = next(action);
 
-    if (action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory') {
+    if (isQueryStateAction) {
       const {
         queryEditor,
         query: { dataset },
@@ -58,8 +67,13 @@ export const createDatasetChangeMiddleware = (
 
       if (isEqual(currentDataset, dataset)) return result;
 
-      const previousDataset = currentDataset;
+      // Until the first of these actions (a page opened from a URL or reloaded has dispatched
+      // none), the dataset the page loaded with is the previous one.
+      const previousDataset = currentDataset ?? datasetBefore;
       currentDataset = dataset;
+
+      // The picker re-applied the selection the page already shows: nothing changed.
+      if (action.meta?.refineSelection && isEqual(previousDataset, dataset)) return result;
 
       if (
         action.meta?.refineSelection &&
@@ -68,9 +82,16 @@ export const createDatasetChangeMiddleware = (
         // The picker refined the selection (same type, explicit Run): keep the results and the
         // view (columns, sort, breakdown, patterns) they're shown with until the user runs the
         // query on the new selection, as for an edited query, and mark them as stale meanwhile.
+        // A query still running is for the previous selection: stop it, as Stop does (it keeps
+        // what has finished, and the user runs the query on the new selection).
+        abortAllActiveQueries();
+        abortAllStreamingQueries();
         store.dispatch(setIsQueryEditorDirty(true));
         store.dispatch(setIsSelectionStale(true));
       } else {
+        // The results and statuses below are cleared, so the queries for the previous dataset
+        // must stop too: their rows would otherwise land under this one when they finish.
+        supersedeAllActiveQueries();
         store.dispatch(setIsSelectionStale(false));
         store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
         store.dispatch(clearResults());

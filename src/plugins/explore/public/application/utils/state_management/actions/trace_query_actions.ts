@@ -29,6 +29,20 @@ export const abortAllTraceQueries = () => {
   activeTraceQueryAbortControllers.clear();
 };
 
+// Queries stopped by `supersedeAllTraceQueries`: they settle without reporting anything.
+const supersededTraceQueryAbortControllers = new WeakSet<AbortController>();
+
+/**
+ * Aborts every RED metrics query in flight for a search that is being replaced (see
+ * `supersedeAllActiveQueries`): unlike Stop, they publish neither results nor their cancellation.
+ */
+export const supersedeAllTraceQueries = () => {
+  activeTraceQueryAbortControllers.forEach((controller) =>
+    supersededTraceQueryAbortControllers.add(controller)
+  );
+  abortAllTraceQueries();
+};
+
 /**
  * Query preparation for trace queries
  */
@@ -76,6 +90,9 @@ const executeTraceQueryBase = async (
 
   const query = getState().query;
   const queryStartTime = Date.now();
+  let abortController: AbortController | undefined;
+  const isSuperseded = () =>
+    abortController !== undefined && supersededTraceQueryAbortControllers.has(abortController);
 
   try {
     dispatch(
@@ -97,7 +114,7 @@ const executeTraceQueryBase = async (
     }
 
     // Create abort controller for this specific query
-    const abortController = new AbortController();
+    abortController = new AbortController();
     activeTraceQueryAbortControllers.set(cacheKey, abortController);
 
     services.inspectorAdapters.requests.reset();
@@ -171,12 +188,24 @@ const executeTraceQueryBase = async (
       .getLanguageService()
       .getLanguage(query.language);
 
+    // Stopped or superseded while the query was being built (as in executeQueryBase): don't send it.
+    // The catch below settles it as stopped, or leaves the key to whatever superseded it.
+    if (abortController.signal.aborted) {
+      throw Object.assign(new Error('The query was stopped before it was sent'), {
+        name: 'AbortError',
+      });
+    }
+
     // Execute query
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
     });
+
+    if (isSuperseded()) {
+      return;
+    }
 
     // Add response stats to inspector
     inspectorRequest
@@ -212,6 +241,10 @@ const executeTraceQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
+    if (isSuperseded()) {
+      return;
+    }
+
     // Clean up aborted/failed query
     activeTraceQueryAbortControllers.delete(cacheKey);
 

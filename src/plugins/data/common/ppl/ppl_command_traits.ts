@@ -84,6 +84,11 @@ export type PPLPatternsMode = 'label' | 'aggregation';
 export interface PPLTraitOptions {
   /** The cluster's default `patterns` mode, or undefined when it hasn't been read. */
   patternsDefaultMode?: PPLPatternsMode;
+  /**
+   * Also match a command that starts the query (see {@link buildPPLCommandRegex}), for a language
+   * whose query can begin with one. Off by default: only a piped command matches.
+   */
+  leadingCommand?: boolean;
 }
 
 /**
@@ -136,12 +141,11 @@ export const getPPLCommandsWhere = (predicate: (traits: PPLCommandTraits) => boo
     .map(([command]) => command);
 
 /**
- * Builds a case-insensitive regex matching a top-level `| <command>` for any of `commands`. Without
- * `toEnd`, a command that starts the query also matches, for languages whose query can begin with a
- * command (e.g. `stats count() by host`). What follows a field of that name in a leading search
- * expression excludes it: a comparison, a path (`.`, `[`), or `in`, `like` or `is`, none of which
- * follows a command name. Explore runs PPL editor text without a source clause as
- * `source = <dataset> <text>`, so `top > 10` and `table.name = 'x'` filter on a field.
+ * Builds a case-insensitive regex matching a top-level `| <command>` for any of `commands`. With
+ * `leadingCommand` (and without `toEnd`), a command that starts the query also matches, for a
+ * language whose query can begin with a command (e.g. `stats count() by host`). What follows a field
+ * of that name in a leading search expression excludes it: a comparison, a path (`.`, `[`), or `in`,
+ * `like` or `is`, none of which follows a command name.
  *
  * With `toEnd`, the match also consumes leading whitespace and the rest of the query, so slicing at
  * its index removes the command and everything after it; only a piped command matches there, since
@@ -152,16 +156,20 @@ export const getPPLCommandsWhere = (predicate: (traits: PPLCommandTraits) => boo
  * `\|\s*()\b`, which matches any pipe. This happens when no command has a trait, e.g. if
  * `timewrap` ever becomes bucket-countable.
  */
-export const buildPPLCommandRegex = (commands: string[], { toEnd = false } = {}): RegExp => {
+export const buildPPLCommandRegex = (
+  commands: string[],
+  { toEnd = false, leadingCommand = false } = {}
+): RegExp => {
   if (commands.length === 0) {
     return /(?!)/;
   }
-  return toEnd
-    ? new RegExp(`\\s*\\|\\s*(${commands.join('|')})\\b[\\s\\S]*$`, 'i')
-    : new RegExp(
+  if (toEnd) return new RegExp(`\\s*\\|\\s*(${commands.join('|')})\\b[\\s\\S]*$`, 'i');
+  return leadingCommand
+    ? new RegExp(
         `(?:^|\\|)\\s*(${commands.join('|')})\\b(?!\\s*(?:[=!<>~.[]|(?:in|like|is)\\b))`,
         'i'
-      );
+      )
+    : new RegExp(`\\|\\s*(${commands.join('|')})\\b`, 'i');
 };
 
 /**
@@ -172,9 +180,9 @@ export const buildPPLCommandRegex = (commands: string[], { toEnd = false } = {})
 export const maskedPPLQueryHasTrait = (
   maskedQuery: string,
   predicate: (traits: PPLCommandTraits) => boolean,
-  { patternsDefaultMode }: PPLTraitOptions = {}
+  { patternsDefaultMode, leadingCommand }: PPLTraitOptions = {}
 ): boolean =>
-  buildPPLCommandRegex(getPPLCommandsWhere(predicate)).test(maskedQuery) ||
+  buildPPLCommandRegex(getPPLCommandsWhere(predicate), { leadingCommand }).test(maskedQuery) ||
   (predicate(PPL_PATTERNS_AGGREGATION_TRAITS) &&
     getPPLPatternsAggregationRegex(patternsDefaultMode).test(maskedQuery));
 

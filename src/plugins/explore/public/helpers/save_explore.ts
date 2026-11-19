@@ -14,6 +14,7 @@ import { SaveResult } from '../../../saved_objects/public';
 import { LegacyState, setSavedSearch } from '../application/utils/state_management/slices';
 import { updateLegacyPropertiesInSavedObject } from '../saved_explore/transforms';
 import { markSavedSearchOpenedBySave } from '../application/utils/saved_search_opened_by_save';
+import { datasetRequiresExplicitRun } from '../application/utils/requires_explicit_run';
 
 export async function saveSavedExplore({
   savedExplore,
@@ -81,8 +82,16 @@ export async function saveSavedExplore({
         const currentHash = services.scopedHistory?.location.hash || '';
         const hashSearch =
           currentHash.indexOf('?') >= 0 ? currentHash.substring(currentHash.indexOf('?')) : '';
-        // The page already shows the saved search: opening its URL keeps the editor as it is.
-        markSavedSearchOpenedBySave(id);
+        // For a dataset that needs an explicit Run, the page already shows the saved search:
+        // opening its URL keeps the editor and the results as they are. Other sources reload it.
+        if (
+          datasetRequiresExplicitRun(
+            services.data?.query?.queryString,
+            (searchContext.query as Query | undefined)?.dataset
+          )
+        ) {
+          markSavedSearchOpenedBySave(id);
+        }
         services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}${hashSearch}`);
       } else {
         // Update browser title and breadcrumbs
