@@ -8,10 +8,18 @@ import {
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
+import { GetDatasetTypeConfig, inlineDatasetReferences } from './inline_dataset_references';
 
 export const SAVED_OBJECT_TYPE = 'explore';
 
-export function createSavedExploreClass(services: SavedObjectOpenSearchDashboardsServices) {
+/**
+ * @param getDatasetTypeConfig the dataset type's config, for the types whose datasets have no saved
+ *   object (inlineDatasetReferences); without it, every dataset is saved as a reference.
+ */
+export function createSavedExploreClass(
+  services: SavedObjectOpenSearchDashboardsServices,
+  getDatasetTypeConfig?: GetDatasetTypeConfig
+) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedExplore extends SavedObjectClass {
@@ -50,6 +58,9 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
           uiState: 'text',
         },
         searchSource: true,
+        ...(getDatasetTypeConfig && {
+          extractReferences: inlineDatasetReferences(getDatasetTypeConfig),
+        }),
         defaults: {
           title: '',
           description: '',

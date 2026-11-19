@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexResponse } from '@opensearch-project/opensearch/api/types';
 import { opensearchServiceMock } from '../../../../core/server/mocks';
 import { NDJSONProcessor } from './ndjson_processor';
 import {
@@ -12,6 +11,8 @@ import {
   VALID_NDJSON_TEST_CASES,
 } from './test_utils/ndjson_test_cases';
 import { Readable } from 'stream';
+import { IngestResponse } from '../types';
+import { bulkDocs, mockBulk } from './test_utils/bulk_test_utils';
 
 describe('NDJSONProcessor', () => {
   const processor = new NDJSONProcessor();
@@ -32,47 +33,70 @@ describe('NDJSONProcessor', () => {
     );
   });
 
-  describe('ingestText()', () => {
+  const ingestModes: Array<{
+    mode: string;
+    ingest: (
+      raw: string[],
+      options: Omit<Parameters<NDJSONProcessor['ingestFile']>[1], 'client' | 'indexName'>
+    ) => Promise<IngestResponse>;
+  }> = [
+    {
+      mode: 'ingestText()',
+      ingest: (raw, options) =>
+        processor.ingestText(raw.join('\n'), { client: clientMock, indexName: 'foo', ...options }),
+    },
+    {
+      mode: 'ingestFile()',
+      ingest: (raw, options) =>
+        processor.ingestFile(Readable.from(raw.join('\n')), {
+          client: clientMock,
+          indexName: 'foo',
+          ...options,
+        }),
+    },
+  ];
+
+  describe.each(ingestModes)('$mode', ({ ingest }) => {
     beforeEach(() => {
+      clientMock.bulk.mockReset();
       clientMock.index.mockClear();
+      mockBulk(clientMock);
     });
 
     it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
-      'should index $expected.length documents into OpenSearch',
+      'should bulk index $expected.length documents into OpenSearch',
       async ({ rawString, expected }) => {
-        const response = await processor.ingestText(rawString.join('\n'), {
-          client: clientMock,
-          indexName: 'foo',
-        });
+        const response = await ingest(rawString, {});
 
+        expect(clientMock.index).not.toHaveBeenCalled();
         expect(response.total).toBe(expected.length);
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        expect(bulkDocs(clientMock)).toEqual(expected);
+        expect(response.failedRows).toEqual([]);
+        expect(response.errorSummary).toEqual([]);
       }
     );
 
     it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
-      'should handle OpenSearch errors and show the correct failedRow',
+      'should report partial bulk failures with row numbers and a bucketed error summary',
       async ({ rawString, expected }) => {
-        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
-        clientMock.index
-          .mockResolvedValueOnce(mockSuccessfulResponse)
-          .mockRejectedValueOnce({})
-          .mockRejectedValueOnce({})
-          .mockResolvedValue(mockSuccessfulResponse);
+        mockBulk(clientMock, [2, 3]);
 
-        const response = await processor.ingestText(rawString.join('\n'), {
-          client: clientMock,
-          indexName: 'foo',
-        });
+        const response = await ingest(rawString, {});
 
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        const expectedFailed = [2, 3].filter((r) => r <= expected.length);
         expect(response.total).toBe(expected.length);
-        if (expected.length > 1) {
-          expect(response.failedRows).toContain(2);
-        }
-        if (expected.length > 2) {
-          expect(response.failedRows).toContain(3);
-        }
+        expect(response.failedRows).toEqual(expectedFailed);
+        expect(response.errorSummary).toEqual(
+          expectedFailed.length > 0
+            ? [
+                expect.objectContaining({
+                  type: 'mapper_parsing_exception',
+                  count: expectedFailed.length,
+                  sampleRows: expectedFailed,
+                }),
+              ]
+            : []
+        );
       }
     );
 
@@ -82,95 +106,20 @@ describe('NDJSONProcessor', () => {
         const lookupId = 'test-lookup-id';
         const lookupField = '__lookup';
 
-        await processor.ingestText(rawString.join('\n'), {
-          client: clientMock,
-          indexName: 'foo',
-          lookupId,
-          lookupField,
-        });
+        await ingest(rawString, { lookupId, lookupField });
 
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
-
-        // Verify each indexed document includes the lookup field
-        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
-        clientMock.index.mock.calls.forEach((call) => {
-          const callArgs = call[0];
-          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
-        });
+        const docs = bulkDocs(clientMock);
+        expect(docs).toHaveLength(expected.length);
+        docs.forEach((doc) => expect(doc).toHaveProperty(lookupField, lookupId));
       }
     );
   });
 
   describe('ingestFile()', () => {
     beforeEach(() => {
-      clientMock.index.mockClear();
+      clientMock.bulk.mockReset();
+      mockBulk(clientMock);
     });
-
-    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
-      'should index $expected.length documents into OpenSearch',
-      async ({ rawString, expected }) => {
-        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-        const response = await processor.ingestFile(validNDJSONFileStream, {
-          client: clientMock,
-          indexName: 'foo',
-        });
-
-        expect(response.total).toBe(expected.length);
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
-      }
-    );
-
-    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
-      'should handle OpenSearch errors and show the correct failedRow',
-      async ({ rawString, expected }) => {
-        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
-        clientMock.index
-          .mockRejectedValueOnce({})
-          .mockResolvedValueOnce(mockSuccessfulResponse)
-          .mockRejectedValueOnce({})
-          .mockResolvedValue(mockSuccessfulResponse);
-
-        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-        const response = await processor.ingestFile(validNDJSONFileStream, {
-          client: clientMock,
-          indexName: 'foo',
-        });
-
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
-        expect(response.total).toBe(expected.length);
-        if (expected.length > 1) {
-          expect(response.failedRows).toContain(1);
-        }
-        if (expected.length > 2) {
-          expect(response.failedRows).toContain(3);
-        }
-      }
-    );
-
-    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
-      'should inject lookup field when lookupId and lookupField are provided',
-      async ({ rawString, expected }) => {
-        const lookupId = 'test-lookup-id';
-        const lookupField = '__lookup';
-        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-
-        await processor.ingestFile(validNDJSONFileStream, {
-          client: clientMock,
-          indexName: 'foo',
-          lookupId,
-          lookupField,
-        });
-
-        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
-
-        // Verify each indexed document includes the lookup field
-        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
-        clientMock.index.mock.calls.forEach((call) => {
-          const callArgs = call[0];
-          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
-        });
-      }
-    );
 
     it.each<NDJSONTestCaseFormat>(INVALID_NDJSON_TEST_CASES)(
       'should throw an error for invalid NDJSON',
@@ -183,11 +132,39 @@ describe('NDJSONProcessor', () => {
           });
 
           expect(response.failedRows.length).toBeGreaterThan(0);
-          expect(clientMock.index.mock.calls.length).toBeLessThanOrEqual(rawString.length);
+          expect(bulkDocs(clientMock).length).toBeLessThanOrEqual(rawString.length);
           // eslint-disable-next-line no-empty
         } catch {}
       }
     );
+
+    it('should stringify numbers going into keyword fields, leaving a mixed column consistent', async () => {
+      const response = await processor.ingestFile(
+        Readable.from(['{"code": 123}', '{"code": "N/A"}', '{"code": 4.5}'].join('\n')),
+        {
+          client: clientMock,
+          indexName: 'foo',
+          mapping: { properties: { code: { type: 'keyword' } } },
+        }
+      );
+
+      expect(response.failedRows).toEqual([]);
+      expect(bulkDocs(clientMock)).toEqual([{ code: '123' }, { code: 'N/A' }, { code: '4.5' }]);
+    });
+
+    it('should report documents with empty fields as invalid_row without sending them', async () => {
+      const response = await processor.ingestFile(
+        Readable.from(['{"a": 1}', '{"": 2}', '{"b": 3}'].join('\n')),
+        { client: clientMock, indexName: 'foo' }
+      );
+
+      expect(bulkDocs(clientMock)).toEqual([{ a: 1 }, { b: 3 }]);
+      expect(response.total).toBe(3);
+      expect(response.failedRows).toEqual([2]);
+      expect(response.errorSummary).toEqual([
+        expect.objectContaining({ type: 'invalid_row', count: 1, sampleRows: [2] }),
+      ]);
+    });
   });
 
   describe('parseFile()', () => {

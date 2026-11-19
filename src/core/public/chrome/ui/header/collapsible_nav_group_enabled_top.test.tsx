@@ -42,6 +42,7 @@ describe('<CollapsibleNavTop />', () => {
     const props = getMockedProps();
     const { findByTestId, getByTestId } = render(<CollapsibleNavTop {...props} />);
     await findByTestId('collapsibleNavHome');
+    expect(getByTestId('collapsibleNavHome').getAttribute('aria-label')).toBe('Go to home page');
     fireEvent.click(getByTestId('collapsibleNavHome'));
     expect(props.navigateToApp).toHaveBeenCalledWith('home');
   });
@@ -56,7 +57,7 @@ describe('<CollapsibleNavTop />', () => {
 
   it('should render home logo and pin button when icon side nav enabled', async () => {
     const onIsLockedUpdate = jest.fn();
-    const { findByTestId } = render(
+    const { findByTestId, getByTestId } = render(
       <CollapsibleNavTop
         {...getMockedProps()}
         shouldShrinkNavigation
@@ -67,5 +68,6 @@ describe('<CollapsibleNavTop />', () => {
     // The logo (home link) is present; expansion is hover-driven, and a pin
     // button keeps the nav open (no dedicated collapse toggle anymore).
     await findByTestId('collapsibleNavLockButton');
+    expect(getByTestId('collapsibleNavHome').getAttribute('aria-label')).toBe('Go to home page');
   });
 });

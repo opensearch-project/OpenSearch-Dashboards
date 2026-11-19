@@ -26,14 +26,29 @@ jest.mock('../../../application/utils/state_management/selectors', () => ({
 const mockObserve = jest.fn();
 const mockDisconnect = jest.fn();
 const resizeObserverCallbacks: ResizeObserverCallback[] = [];
+// What each observer currently watches, to fire only the observers of a given element.
+const resizeObserverTargets = new Map<ResizeObserverCallback, Set<Element>>();
 global.ResizeObserver = jest.fn().mockImplementation((callback: ResizeObserverCallback) => {
   resizeObserverCallbacks.push(callback);
+  const targets = new Set<Element>();
+  resizeObserverTargets.set(callback, targets);
   return {
-    observe: mockObserve,
-    unobserve: jest.fn(),
-    disconnect: mockDisconnect,
+    observe: jest.fn((target: Element) => {
+      targets.add(target);
+      mockObserve(target);
+    }),
+    unobserve: jest.fn((target: Element) => targets.delete(target)),
+    disconnect: jest.fn(() => {
+      targets.clear();
+      mockDisconnect();
+    }),
   };
 });
+
+const resizeElement = (target: Element) =>
+  resizeObserverCallbacks
+    .filter((callback) => resizeObserverTargets.get(callback)?.has(target))
+    .forEach((callback) => callback([] as ResizeObserverEntry[], {} as ResizeObserver));
 
 // Track resize events
 const resizeEvents: Event[] = [];
@@ -44,6 +59,7 @@ describe('ResizableQueryContainer', () => {
     jest.useFakeTimers();
     resizeEvents.length = 0;
     resizeObserverCallbacks.length = 0;
+    resizeObserverTargets.clear();
     mockObserve.mockClear();
     mockDisconnect.mockClear();
     // Default: not in prompt mode (PPL/resizable path)
@@ -349,6 +365,35 @@ describe('ResizableQueryContainer', () => {
           callback([] as ResizeObserverEntry[], {} as ResizeObserver)
         );
       });
+
+      // 54px widgets bar + 42px editor line.
+      expect(queryPanelSize()).toBe(96);
+    });
+
+    it('follows a re-mounted query panel and grows when its widgets bar wraps', async () => {
+      // The logs page keys its query panel by dataset, so a source switch replaces the widgets
+      // bar without re-rendering this container.
+      const keyedPanel = (key: string) => (
+        <div key={key} data-test-subj="query-panel">
+          <div className="exploreQueryPanel__widgetsRow">Widgets</div>
+        </div>
+      );
+      const { rerender } = render(
+        <ResizableQueryContainer queryPanel={keyedPanel('a')}>{content}</ResizableQueryContainer>
+      );
+      const firstWidgetsEl = document.querySelector('.exploreQueryPanel__widgetsRow');
+
+      rerender(
+        <ResizableQueryContainer queryPanel={keyedPanel('b')}>{content}</ResizableQueryContainer>
+      );
+      // MutationObserver callbacks run as microtasks.
+      await act(async () => {});
+      const widgetsEl = document.querySelector('.exploreQueryPanel__widgetsRow') as HTMLElement;
+      expect(widgetsEl).not.toBe(firstWidgetsEl);
+
+      // The new source's toolbar wraps to two rows.
+      Object.defineProperty(widgetsEl, 'scrollHeight', { value: 54, configurable: true });
+      act(() => resizeElement(widgetsEl));
 
       // 54px widgets bar + 42px editor line.
       expect(queryPanelSize()).toBe(96);

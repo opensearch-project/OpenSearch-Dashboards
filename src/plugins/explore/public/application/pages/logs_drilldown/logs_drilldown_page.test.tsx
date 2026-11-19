@@ -322,6 +322,18 @@ describe('LogsDrilldownPage', () => {
     await waitFor(() => expect(lastRowsProps.search).toBe('logs'));
   });
 
+  it('shows the range the URL sync set on mount, not the range before it', () => {
+    // The `_g` sync sets the timefilter before the page subscribes to its updates.
+    mockSyncQueryStateWithUrl.mockImplementationOnce(() => {
+      currentTime = { from: 'now-30d', to: 'now' };
+      return { stop: jest.fn() };
+    });
+    render(
+      <LogsDrilldownPage services={makeServices({ urlStateStorage: makeUrlStateStorage() })} />
+    );
+    expect(lastRowsProps.refreshKey).toBe('now-30d|now|0');
+  });
+
   it('unsubscribes from timeUpdate$ on unmount (no leak / late update)', () => {
     const { unmount } = render(<LogsDrilldownPage services={makeServices()} />);
     expect(timeUpdate$.observers.length).toBe(1);

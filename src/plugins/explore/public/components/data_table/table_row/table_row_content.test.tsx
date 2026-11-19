@@ -9,6 +9,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRowContent } from './table_row_content';
+import { setOsdFieldOverrides } from '../../../../../data/common';
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
@@ -121,6 +122,19 @@ describe('TableRowContent', () => {
     expect(screen.getByTestId('source-cell-_source')).toBeInTheDocument();
   });
 
+  it("renders the source field cell for a _source column the dataset doesn't list", () => {
+    // Datasets whose rows come from a data frame have no _source field; their rows still do.
+    mockDataset.fields.getByName.mockReturnValue(undefined);
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['_source']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('source-cell-_source')).toBeInTheDocument();
+  });
+
   it('renders empty cells when formatField returns undefined', () => {
     mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
     mockDataset.formatField.mockReturnValue(undefined);
@@ -224,6 +238,69 @@ describe('TableRowContent', () => {
     expect(screen.queryByTestId('table-cell-field1')).not.toBeInTheDocument();
   });
 
+  describe('a column without field info', () => {
+    afterEach(() => setOsdFieldOverrides(undefined));
+
+    it("offers no value filters when the query language's fields aren't filterable", () => {
+      setOsdFieldOverrides({ filterable: false });
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('non-filterable-cell-field1')).toBeInTheDocument();
+      expect(screen.queryByTestId('table-cell-field1')).not.toBeInTheDocument();
+    });
+
+    it('disables value filters on the traces page when the language says so', () => {
+      setOsdFieldOverrides({ filterable: false });
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent
+              {...(defaultProps as any)}
+              isOnTracesPage={true}
+              columns={['field1']}
+            />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'true'
+      );
+    });
+
+    it('keeps value filters when the language leaves filtering to the fields', () => {
+      // e.g. a PPL `eval` field: PPL can filter on it although the dataset doesn't list it.
+      mockDataset.fields.getByName.mockReturnValue(undefined);
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'false'
+      );
+    });
+  });
+
   it('keeps a non-filterable Span ID column as an interactive TableCell on the traces page', () => {
     // Regression: a field-caps conflict can flip a trace-link field to
     // non-filterable; it must still render its link, not degrade to plain text.
@@ -282,5 +359,115 @@ describe('TableRowContent', () => {
     );
 
     expect(screen.getByTestId('table-cell-field1')).toHaveAttribute('data-has-dataset', 'true');
+  });
+
+  describe('time field in the list', () => {
+    const timeProps = { ...defaultProps, columns: ['timestamp', 'field1'] };
+    beforeEach(() => {
+      mockDataset.fields.getByName.mockReturnValue({ type: 'date', filterable: true });
+      mockDataset.flattenHit.mockReturnValue({
+        timestamp: '2026-11-09T20:13:07.227+00:00',
+        field1: 'flattened_value1',
+      });
+      mockDataset.formatField.mockImplementation((_row: unknown, col: string) =>
+        col === 'timestamp' ? 'Nov 9, 2026 @ 20:13:07.227000000' : 'test_value'
+      );
+      (mockDataset as any).getFormatterForField = jest.fn(() => ({ type: { id: 'date_nanos' } }));
+    });
+    afterEach(() => {
+      delete (mockDataset as any).fieldFormatMap;
+      delete (mockDataset as any).getFormatterForField;
+    });
+
+    it('shows the time to the second with the list pattern', () => {
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp').textContent).toMatch(
+        /^sanitized_2026-11-\d\d \d\d:13:07$/
+      );
+      expect(screen.getByTestId('table-cell-field1')).toHaveTextContent('sanitized_test_value');
+    });
+
+    it("keeps the field's own format when the time field has a format override", () => {
+      (mockDataset as any).fieldFormatMap = { timestamp: { id: 'date' } };
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+
+    it('keeps the formatted value when format:defaultTypeMap uses another formatter for dates', () => {
+      (mockDataset as any).getFormatterForField = jest.fn(() => ({
+        type: { id: 'relative_date' },
+      }));
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} timeColumnPattern="YYYY-MM-DD HH:mm:ss" />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+
+    it('keeps the formatted value without a list pattern', () => {
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(timeProps as any)} />
+          </tbody>
+        </table>
+      );
+      expect(screen.getByTestId('table-cell-timestamp')).toHaveTextContent(
+        'sanitized_Nov 9, 2026 @ 20:13:07.227000000'
+      );
+    });
+  });
+
+  it('shows severityText with one casing and leaves other columns as formatted', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.flattenHit.mockReturnValue({ severityText: 'Information', field1: 'INFO' });
+    mockDataset.formatField.mockImplementation((_row: unknown, col: string) =>
+      col === 'severityText' ? 'Information' : 'INFO'
+    );
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['severityText', 'field1']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('table-cell-severityText')).toHaveTextContent('sanitized_Info');
+    expect(screen.getByTestId('table-cell-field1')).toHaveTextContent('sanitized_INFO');
+  });
+
+  it('keeps a field format set on severityText in the index pattern', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.flattenHit.mockReturnValue({ severityText: 'INFO' });
+    mockDataset.formatField.mockImplementation(() => '<span style="color:red">INFO</span>');
+    (mockDataset as any).fieldFormatMap = { severityText: { id: 'color' } };
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['severityText']} />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByTestId('table-cell-severityText')).toHaveTextContent('INFO');
+    expect(screen.getByTestId('table-cell-severityText')).not.toHaveTextContent('sanitized_Info');
+    delete (mockDataset as any).fieldFormatMap;
   });
 });

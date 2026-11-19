@@ -121,6 +121,12 @@ describe('DiscoverDownloadCsv', () => {
       ).toBeInTheDocument();
     });
 
+    it('counts Visible from visibleRowsCount when given, not from rows', () => {
+      render(<TestHarness visibleRowsCount={3} />);
+      fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+      expect(screen.getByLabelText('Visible (3)')).toBeInTheDocument();
+    });
+
     it('Clicking on visible option calls downloadCsvForOption correctly', () => {
       render(<TestHarness />);
       fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
@@ -135,6 +141,32 @@ describe('DiscoverDownloadCsv', () => {
       fireEvent.click(screen.getByLabelText(`Max available (${mockHits.toLocaleString()})`));
       fireEvent.click(screen.getByTestId('dscDownloadCsvSubmit'));
       expect(mockDownloadCsvForOption).toHaveBeenCalledWith(DownloadCsvFormId.Max);
+    });
+  });
+
+  describe('while the rows are still streaming', () => {
+    beforeEach(() => {
+      (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({
+        isLoading: false,
+        downloadCsvForOption: mockDownloadCsvForOption,
+      }));
+    });
+
+    // Max available runs its own search, but offering it for the first second or two of a stream
+    // only made the button flicker between enabled and disabled.
+    it('cannot be opened, by click or shortcut, even when Max would export more', async () => {
+      render(<TestHarness isStreaming />);
+      expect(screen.getByTestId('dscDownloadCsvButton')).toBeDisabled();
+      // Styled as disabled too, not only unclickable.
+      expect(screen.getByTestId('dscDownloadCsvButton')).toHaveClass('euiButtonIcon-isDisabled');
+      fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+
+      const shortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'download_csv'
+      );
+      await act(async () => shortcut[0].execute());
+
+      expect(screen.queryByTestId('dscDownloadCsvPopoverContent')).not.toBeInTheDocument();
     });
   });
 

@@ -6,6 +6,13 @@
 import { Readable } from 'stream';
 import { IFileProcessor, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 import { isValidObject } from '../utils/util';
+import {
+  BulkIngester,
+  BULK_CHUNK_SIZE,
+  INVALID_ROW_ERROR_REASON,
+  INVALID_ROW_ERROR_TYPE,
+  PARSE_ERROR_TYPE,
+} from '../utils/bulk_ingest';
 
 export class JSONProcessor implements IFileProcessor {
   public async validateText(text: string, _: ValidationOptions) {
@@ -21,68 +28,52 @@ export class JSONProcessor implements IFileProcessor {
   }
 
   public async ingestText(text: string, options: IngestOptions) {
-    const { client, indexName, lookupId, lookupField } = options;
+    const { client, indexName, lookupId, lookupField, mapping } = options;
     const document = JSON.parse(text);
 
     // Inject lookup field if provided
     const doc = lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
 
-    const isSuccessful = await new Promise<boolean>(async (resolve) => {
-      try {
-        await client.index({
-          index: indexName,
-          body: doc,
-        });
-        resolve(true);
-      } catch {
-        resolve(false);
-      }
-    });
-
-    const total = isSuccessful ? 1 : 0;
-
-    return {
-      total: 1,
-      message: `Indexed ${total} document`,
-      failedRows: isSuccessful ? [] : [1],
-    };
+    const ingester = new BulkIngester(client, indexName, BULK_CHUNK_SIZE, mapping);
+    await ingester.add(1, doc);
+    return await ingester.finish(1);
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
-    const { client, indexName, lookupId, lookupField } = options;
+    const { client, indexName, lookupId, lookupField, mapping } = options;
 
-    const numSucessfulDocs = await new Promise<number>((resolve) => {
+    const ingester = new BulkIngester(client, indexName, BULK_CHUNK_SIZE, mapping);
+    await new Promise<void>((resolve) => {
       let rawData = '';
       file
         .on('data', (chunk) => (rawData += chunk))
-        .on('error', (_) => resolve(0))
-        .on('end', async () => {
+        .on('error', (e) => {
+          ingester.addFailure(1, PARSE_ERROR_TYPE, String(e));
+          resolve();
+        })
+        .on('end', () => {
+          let document: Record<string, unknown>;
           try {
-            const document = JSON.parse(rawData);
-            if (!isValidObject(document)) {
-              resolve(0);
-            }
-
-            // Inject lookup field if provided
-            const doc =
-              lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
-
-            await client.index({
-              index: indexName,
-              body: doc,
-            });
-            resolve(1);
-          } catch (_) {
-            resolve(0);
+            document = JSON.parse(rawData);
+          } catch (e) {
+            ingester.addFailure(1, PARSE_ERROR_TYPE, e instanceof Error ? e.message : String(e));
+            resolve();
+            return;
           }
+          if (!isValidObject(document)) {
+            ingester.addFailure(1, INVALID_ROW_ERROR_TYPE, INVALID_ROW_ERROR_REASON);
+            resolve();
+            return;
+          }
+
+          // Inject lookup field if provided
+          const doc = lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
+          ingester.add(1, doc);
+          resolve();
         });
     });
 
-    return {
-      total: 1,
-      message: `Indexed ${numSucessfulDocs} document`,
-      failedRows: numSucessfulDocs === 1 ? [] : [1],
-    };
+    return await ingester.finish(1);
   }
 
   public async parseFile(file: Readable, limit: number, _: ParseOptions) {

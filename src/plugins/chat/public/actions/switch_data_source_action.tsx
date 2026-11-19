@@ -27,7 +27,10 @@ interface SwitchDataSourceResult {
   skipped?: boolean;
   dataSourceId?: string;
   datasourceTitle?: string;
+  // Sent to the agent. May carry instructions meant for the model, not the user.
   message?: string;
+  // Shown to the user in the card when present. Plain, user-facing text with no agent instructions.
+  displayMessage?: string;
   error?: string;
 }
 
@@ -62,7 +65,7 @@ const SwitchDataSourceCard = ({
         alignItems="center"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="s" />
@@ -82,6 +85,7 @@ const SwitchDataSourceCard = ({
 
   if (!isSuccess) {
     const errorMsg =
+      parsedResult?.displayMessage ??
       parsedResult?.message ??
       parsedResult?.error ??
       i18n.translate('chat.switchDataSource.error.default', {
@@ -92,7 +96,7 @@ const SwitchDataSourceCard = ({
         alignItems="flexStart"
         gutterSize="xs"
         responsive={false}
-        style={{ padding: '2px 0', flexGrow: 0 }}
+        style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="s" color="danger" />
@@ -114,7 +118,7 @@ const SwitchDataSourceCard = ({
       gutterSize="xs"
       responsive={false}
       wrap={false}
-      style={{ padding: '2px 0', flexGrow: 0 }}
+      style={{ padding: '2px 0', flexGrow: 0, width: '100%' }}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="database" size="s" color="primary" />
@@ -146,22 +150,13 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
     name: SWITCH_DATA_SOURCE_TOOL_NAME,
     description:
       'WHAT THIS TOOL DOES: sets the active data source for subsequent data-source-aware tools ' +
-      '(for example, tools that inspect fields, query data, or create visualizations) only in conversations involving multiple data sources. ' +
-      'PRECONDITION: call this tool only when available-data-sources-context is present and its sessionDataSourceList has ' +
-      'MORE THAN ONE distinct data source. If zero or exactly one data source has appeared, do NOT call it at all: ' +
-      'with one, that data source is already active and calling this tool is redundant; ' +
-      'with none, there is nothing to select. ' +
-      'WHEN THE PRECONDITION IS MET: determine the data source for the CURRENT request. ' +
-      '(1) If the user explicitly named one in the current request by name or by position, e.g. ' +
-      '"the first one", call this tool with that id. ' +
-      "(2) Otherwise, you MUST FIRST call the ask_user tool (inputType 'select'; one option per data " +
-      "source in this conversation, label = the data source's title/name, value = its id) to let " +
-      'the user choose, then call this tool with the id they chose. ' +
+      '(for example, tools that inspect fields, query data, or create visualizations). ' +
+      'WHEN TO CALL: only when the user explicitly asks for a data source listed in ' +
+      'available-data-sources-context that is not the currently active one, or after the user ' +
+      'picked one through ask_user. Do NOT call it when the requested data source is already active. ' +
       'NOTES: (1) A data source id/title in page, panel, visualization, or message context is metadata, not a request to switch. ' +
-      '(2) A data source chosen earlier in the conversation does NOT carry over to a new request; ' +
-      'do not reuse it silently, guess, or decide on your own that the choice is obvious. ' +
-      '(3) A dataset or index-pattern id is not a data source id. ' +
-      '(4) Once set, subsequent data-source-aware tools use it automatically; do not pass a data source id to them.',
+      '(2) A dataset or index-pattern id is not a data source id. ' +
+      '(3) Once set, subsequent data-source-aware tools use it automatically; do not pass a data source id to them.',
     parameters: {
       type: 'object',
       properties: {
@@ -183,18 +178,7 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
-        const sessionDataSourceList = chatService.getSessionDataSourceList();
-        if (sessionDataSourceList.length <= 1) {
-          return {
-            success: true,
-            skipped: true,
-            message:
-              `Skipped switch_data_source because this conversation has ` +
-              `${sessionDataSourceList.length} data source. No data source switch is needed.`,
-          };
-        }
-
-        // Validate  first
+        // Validate first
         const { valid, dataSource, availableDataSources } = await chatService.validateDataSourceId(
           args.dataSourceId
         );
@@ -206,6 +190,27 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
               `Unknown dataSourceId "${args.dataSourceId}". Valid data source ids are: ` +
               `${availableDataSources.map((ds) => ds.id).join(', ')}. ` +
               'Note that a dataset or index pattern id is not a data source id.',
+          };
+        }
+
+        // The page context data source has the highest resolution priority. While the page pins
+        // a usable data source, a switch would report success but the next run would return to
+        // the page's data source. Refuse it instead of pretending to switch.
+        const pinnedId = await chatService.getPinnedPageDataSourceId();
+        if (pinnedId && pinnedId !== args.dataSourceId) {
+          const pinnedTitle =
+            availableDataSources.find((ds) => ds.id === pinnedId)?.title ?? pinnedId;
+          return {
+            success: false,
+            message:
+              `The active data source is fixed to "${pinnedTitle}" by the current page and cannot ` +
+              'be changed here. Do not retry; tell the user this page fixes the data source and ' +
+              'they should leave the page or change the page dataset to use a different one.',
+            displayMessage: i18n.translate('chat.switchDataSource.error.pagePinned', {
+              defaultMessage:
+                'This page is fixed to "{title}", so the data source can\'t be changed here. Leave this page or change the page dataset to use another one.',
+              values: { title: pinnedTitle },
+            }),
           };
         }
 

@@ -4,8 +4,10 @@
  */
 
 import {
+  canAppendPPLDefaultSort,
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
+  PPLPatternsMode,
   TimeRange,
 } from '../../../../../data/common';
 
@@ -13,29 +15,14 @@ import {
  * Applies the query enrichment that `PPLSearchInterceptor` performs, for the streaming path which
  * bypasses that interceptor.
  *
- * Must stay byte-identical to `PPLSearchInterceptor.buildQuery` and `appendDefaultSort`; a
+ * Must stay byte-identical to `PPLSearchInterceptor.buildQuery` and `appendDefaultSort` (the sort
+ * decision is the shared `canAppendPPLDefaultSort`); a
  * divergence means the same query returns different results depending on whether streaming is
  * enabled. Dashboard filters are intentionally absent: the interceptor applies those only for the
  * `dashboards` app.
  */
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
-
-// chart and timechart emit their own time column, so a trailing sort on the dataset field fails.
-const SORT_BLOCKING_COMMANDS = [
-  'sort',
-  'stats',
-  'head',
-  'rare',
-  'top',
-  'rename',
-  'chart',
-  'timechart',
-];
-const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
-  `\\|\\s*(${SORT_BLOCKING_COMMANDS.join('|')})\\b`,
-  'i'
-);
 
 /**
  * Open Distro PPL rejects a bare string compared against a timestamp and needs `TIMESTAMP(...)`.
@@ -76,15 +63,13 @@ export const insertWhereCommand = (query: string, whereCommand: string): string 
 
 /**
  * A default sort is only appended when the query neither projects specific fields nor contains a
- * command whose output order the sort would override.
+ * command whose output order the sort would override. Shared with `PPLSearchInterceptor` (see
+ * `canAppendPPLDefaultSort`), so both paths decide identically.
  */
-export const canAppendDefaultSort = (queryString: string): boolean => {
-  const masked = queryString
-    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
-    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
-  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
-};
+export const canAppendDefaultSort = (
+  queryString: string,
+  patternsDefaultMode?: PPLPatternsMode
+): boolean => canAppendPPLDefaultSort(queryString, { patternsDefaultMode });
 
 export interface EnrichStreamingQueryArgs {
   queryString: string;
@@ -96,6 +81,11 @@ export interface EnrichStreamingQueryArgs {
    * meaningless over buckets.
    */
   skipDefaultSort?: boolean;
+  /**
+   * The cluster's default `patterns` mode, which decides whether a `patterns` without `mode=` drops
+   * the time field. Undefined when unknown.
+   */
+  patternsDefaultMode?: PPLPatternsMode;
 }
 
 export const enrichStreamingQuery = ({
@@ -104,6 +94,7 @@ export const enrichStreamingQuery = ({
   timeRange,
   engineType,
   skipDefaultSort = false,
+  patternsDefaultMode,
 }: EnrichStreamingQueryArgs): string => {
   let enriched = queryString;
 
@@ -114,7 +105,7 @@ export const enrichStreamingQuery = ({
     );
   }
 
-  if (!skipDefaultSort && timeFieldName && canAppendDefaultSort(enriched)) {
+  if (!skipDefaultSort && timeFieldName && canAppendDefaultSort(enriched, patternsDefaultMode)) {
     enriched = `${enriched} | sort - \`${timeFieldName}\``;
   }
 

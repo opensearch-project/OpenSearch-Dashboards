@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { NewExperienceBanner } from './new_experience_banner';
+export * from './ppl_command_traits';

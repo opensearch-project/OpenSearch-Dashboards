@@ -32,6 +32,12 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   prepareHistogramCacheKey: jest.fn((query) => `histogram:${query.language}:${query.query}`),
 }));
 
+import { prepareHistogramCacheKey } from '../../application/utils/state_management/actions/query_actions';
+import {
+  isCurrentStreamingRun,
+  registerStreamingAbort,
+} from '../../application/utils/streaming/streaming_abort_registry';
+
 // Mock the TimechartHeader component
 jest.mock('./timechart_header', () => ({
   TimechartHeader: (props: { onChangeInterval: (interval: string) => void }) => (
@@ -282,6 +288,26 @@ describe('DiscoverChart', () => {
 
     // Verify that getTime is called to get the time range
     expect(mockData.query.timefilter.timefilter.getTime).toHaveBeenCalled();
+  });
+
+  // The streamed histogram runs under the plain histogram key; left running, it would write
+  // buckets for the old interval into the re-run chart.
+  it('stops a streamed histogram, and clears its status, when the interval changes', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    const key = prepareHistogramCacheKey(mockStore.getState().query);
+    const abort = jest.fn();
+    const token = {};
+    registerStreamingAbort(key, abort, token);
+    const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
+    renderComponent({ chartData });
+
+    fireEvent.click(screen.getByText('Change Interval'));
+
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(isCurrentStreamingRun(key, token)).toBe(false);
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'queryEditor/clearQueryStatusMapByKey', payload: key })
+    );
   });
 
   it('should dispatch multiple actions when interval changes', () => {

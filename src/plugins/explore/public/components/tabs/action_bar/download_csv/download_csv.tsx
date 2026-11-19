@@ -19,9 +19,19 @@ export interface DiscoverDownloadCsvProps {
   hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  shouldShowMaxExport?: boolean;
+  visibleRowsCount?: number;
+  isStreaming?: boolean;
 }
 
-export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
+export const DiscoverDownloadCsv = ({
+  indexPattern,
+  hits,
+  rows,
+  shouldShowMaxExport = true,
+  visibleRowsCount,
+  isStreaming = false,
+}: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
@@ -38,7 +48,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleDownloadCsvShortcut = () => {
-    if (!isLoading) {
+    if (!isLoading && !isStreaming) {
       openPopover();
     }
   };
@@ -66,17 +76,22 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   const buttonLabel = i18n.translate('explore.discover.downloadCsvButtonText', {
     defaultMessage: 'Export',
   });
+  const tooltip = isStreaming
+    ? i18n.translate('explore.discover.downloadCsvStreamingTooltip', {
+        defaultMessage: 'Export is available when the query finishes',
+      })
+    : buttonLabel;
 
   // Disable trap foucus, since it can break dismiss
   return (
     <EuiPopover
       button={
         // Icon-only with a hover tooltip carrying the name (Variant A, UXSO #3).
-        <EuiToolTip content={buttonLabel} delay="long">
+        <EuiToolTip content={tooltip} delay="long">
           <EuiButtonIcon
             size="s"
             data-test-subj="dscDownloadCsvButton"
-            disabled={isLoading}
+            isDisabled={isLoading || isStreaming}
             iconType="download"
             color="text"
             aria-label={buttonLabel}
@@ -90,8 +105,9 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
       ownFocus={false}
     >
       <DiscoverDownloadCsvPopoverContent
-        rowsCount={rows?.length || 0}
+        rowsCount={visibleRowsCount ?? rows?.length ?? 0}
         hitsCount={hits || 0}
+        shouldShowMaxExport={shouldShowMaxExport}
         downloadForOption={handleDownloadCsvForOption}
       />
     </EuiPopover>

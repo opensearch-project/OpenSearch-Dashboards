@@ -63,7 +63,7 @@ describe('registerPPLStreamRoutes', () => {
           client: {
             getConfig: jest.fn().mockResolvedValue({ ppl: { streaming: { enabled: true } } }),
           },
-          asyncLocalStore: undefined,
+          createStoreFromRequest: jest.fn(() => undefined),
         },
       },
     }) as any;
@@ -276,6 +276,22 @@ describe('registerPPLStreamRoutes', () => {
 
       expect(res.custom).toHaveBeenCalledWith({ statusCode: 503, body: 'boom' });
     });
+
+    // The client falls back when a submit is refused; reporting it as 503 would read as an outage.
+    it('keeps a 429 from the cluster a 429', async () => {
+      const { submit } = setup();
+      const res = createResponse();
+
+      await submit.handler(
+        contextWith(
+          jest.fn().mockRejectedValue({ meta: { statusCode: 429 }, message: 'too many jobs' })
+        ),
+        { query: {}, body: { query: 'source=logs' } } as any,
+        res
+      );
+
+      expect(res.custom).toHaveBeenCalledWith({ statusCode: 429, body: 'too many jobs' });
+    });
   });
 
   describe('submit validation', () => {
@@ -344,6 +360,7 @@ describe('registerPPLStreamRoutes', () => {
           query: {
             offset: 1000,
             count: 250,
+            waitForSequence: 0,
             waitForCompletionTimeout: '1s',
             keepAlive: '5m',
           },
@@ -357,6 +374,7 @@ describe('registerPPLStreamRoutes', () => {
         querystring: {
           offset: '1000',
           count: '250',
+          wait_for_sequence: '0',
           wait_for_completion_timeout: '1s',
           keep_alive: '5m',
         },
@@ -427,6 +445,12 @@ describe('registerPPLStreamRoutes', () => {
     it('does not cap count, since max_page_size is a cluster setting', () => {
       const { poll } = setup();
       expect(() => poll.config.validate.query.validate({ count: 100000 })).not.toThrow();
+    });
+
+    it('accepts -1 for waitForSequence, the contract value for "return now"', () => {
+      const { poll } = setup();
+      expect(() => poll.config.validate.query.validate({ waitForSequence: -1 })).not.toThrow();
+      expect(() => poll.config.validate.query.validate({ waitForSequence: -2 })).toThrow();
     });
   });
 

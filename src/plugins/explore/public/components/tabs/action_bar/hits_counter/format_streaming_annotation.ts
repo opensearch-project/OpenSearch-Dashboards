@@ -6,13 +6,14 @@
 import { i18n } from '@osd/i18n';
 import { StreamingQueryStatus } from '../../../../application/utils/state_management/types';
 
-export type StreamingPhase = 'none' | 'polling' | 'aborted' | 'completed';
+export type StreamingPhase = 'none' | 'polling' | 'aborted' | 'interrupted' | 'completed';
 
 /** `none` covers the non-streaming path, which gets no annotation at all. */
 export const getStreamingPhase = (streaming?: StreamingQueryStatus): StreamingPhase => {
   if (!streaming) return 'none';
   if (streaming.isPolling) return 'polling';
-  return streaming.aborted ? 'aborted' : 'completed';
+  if (streaming.aborted) return 'aborted';
+  return streaming.interrupted ? 'interrupted' : 'completed';
 };
 
 /**
@@ -55,6 +56,17 @@ export const formatStreamingAnnotation = (streaming?: StreamingQueryStatus): str
       ? i18n.translate('explore.discover.hitsCounter.aborted', { defaultMessage: 'Stopped' })
       : i18n.translate('explore.discover.hitsCounter.abortedAtPercent', {
           defaultMessage: 'Stopped at {percent}%',
+          values: { percent },
+        });
+  }
+
+  if (phase === 'interrupted') {
+    return percent === undefined
+      ? i18n.translate('explore.discover.hitsCounter.interrupted', {
+          defaultMessage: 'Incomplete',
+        })
+      : i18n.translate('explore.discover.hitsCounter.interruptedAtPercent', {
+          defaultMessage: 'Incomplete at {percent}%',
           values: { percent },
         });
   }

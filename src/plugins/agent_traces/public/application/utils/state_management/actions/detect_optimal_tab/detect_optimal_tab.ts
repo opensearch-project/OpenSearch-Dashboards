@@ -13,10 +13,9 @@ import {
   AGENT_TRACES_VISUALIZATION_TAB_ID,
 } from '../../../../../../common';
 
-/**
- * Returns true when the user query contains a stats/aggregation pipe.
- */
-export const hasStatsPipe = (queryString: string): boolean => /\|\s*stats\s/i.test(queryString);
+import { hasStatsPipe, isVisualizationTabTarget } from './has_stats_pipe';
+
+export { hasStatsPipe, isVisualizationTabTarget };
 
 /**
  * Detect the optimal tab based on the current query and sets it as active.
@@ -33,7 +32,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const currentTabId = state.ui.activeTabId || savedTabId;
 
   let targetTabId: string;
-  if (hasStatsPipe(queryString)) {
+  if (isVisualizationTabTarget(queryString)) {
     targetTabId = AGENT_TRACES_VISUALIZATION_TAB_ID;
   } else if (!currentTabId || currentTabId === AGENT_TRACES_VISUALIZATION_TAB_ID) {
     targetTabId = AGENT_TRACES_TRACES_TAB_ID;

@@ -38,6 +38,7 @@ export * from './field_formats';
 export * from './field_mapping';
 export * from './index_patterns';
 export * from './osd_field_types';
+export * from './ppl';
 export * from './query';
 export * from './search';
 export * from './types';

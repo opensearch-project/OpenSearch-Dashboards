@@ -4,6 +4,7 @@
  */
 
 import {
+  isExecuteToolSpan,
   parseGenAiMessages,
   previewInputMessages,
   previewMessage,
@@ -169,6 +170,90 @@ describe('genai_message_preview', () => {
       };
       expect(previewSpanInput(nested)).toBe('{"q":"x"}');
       expect(previewSpanOutput(nested)).toBe('');
+    });
+
+    it('prefers tool call arguments/result over messages on execute_tool spans', () => {
+      // Strands with gen_ai_span_attributes_only puts tool_call / tool_call_response messages on
+      // tool spans; they carry no text and would preview as placeholders.
+      const row = {
+        input: JSON.stringify([
+          { role: 'tool', parts: [{ type: 'tool_call', id: 'c1', name: 'drive_application' }] },
+        ]),
+        output: JSON.stringify([
+          { role: 'tool', parts: [{ type: 'tool_call_response', id: 'c1', response: 'ok' }] },
+        ]),
+        rawDocument: {
+          attributes: {
+            gen_ai: {
+              operation: { name: 'execute_tool' },
+              tool: { call: { arguments: '{"selector":"#save"}', result: 'clicked #save' } },
+            },
+          },
+        },
+      };
+      expect(previewSpanInput(row)).toBe('{"selector":"#save"}');
+      expect(previewSpanOutput(row)).toBe('clicked #save');
+    });
+
+    it('falls back to messages on an execute_tool span without tool call attributes', () => {
+      const row = {
+        input: JSON.stringify([{ role: 'user', parts: [text('run it')] }]),
+        output: JSON.stringify([{ role: 'assistant', parts: [text('done')] }]),
+        rawDocument: { attributes: { 'gen_ai.operation.name': 'execute_tool' } },
+      };
+      expect(previewSpanInput(row)).toBe('run it');
+      expect(previewSpanOutput(row)).toBe('done');
+    });
+
+    it('uses messages for input and the result for output when a tool span has only a result', () => {
+      const row = {
+        input: JSON.stringify([{ role: 'user', parts: [text('look it up')] }]),
+        output: JSON.stringify([
+          { role: 'tool', parts: [{ type: 'tool_call_response', id: 'c1', response: 'ok' }] },
+        ]),
+        rawDocument: {
+          attributes: {
+            'gen_ai.operation.name': 'execute_tool',
+            'gen_ai.tool.call.result': '22C, sunny',
+          },
+        },
+      };
+      expect(previewSpanInput(row)).toBe('look it up');
+      expect(previewSpanOutput(row)).toBe('22C, sunny');
+    });
+
+    it('detects tool spans like the TOOL badge does: any case, or from the row kind', () => {
+      const tool = { 'gen_ai.tool.call.arguments': '{"x":1}', 'gen_ai.tool.call.result': 'r' };
+      const input = JSON.stringify([{ role: 'user', parts: [text('hello')] }]);
+
+      const mixedCase = {
+        input,
+        rawDocument: { attributes: { ...tool, 'gen_ai.operation.name': 'Execute_Tool' } },
+      };
+      expect(isExecuteToolSpan(mixedCase)).toBe(true);
+      expect(previewSpanInput(mixedCase)).toBe('{"x":1}');
+
+      const fromKind = { kind: 'execute_tool', input, rawDocument: { attributes: tool } };
+      expect(isExecuteToolSpan(fromKind)).toBe(true);
+      expect(previewSpanInput(fromKind)).toBe('{"x":1}');
+
+      expect(isExecuteToolSpan({ kind: 'chat', rawDocument: { attributes: tool } })).toBe(false);
+    });
+
+    it('keeps messages first on non-tool spans that also carry tool attributes', () => {
+      const row = {
+        input: JSON.stringify([{ role: 'user', parts: [text('hello')] }]),
+        output: JSON.stringify([{ role: 'assistant', parts: [text('hi')] }]),
+        rawDocument: {
+          attributes: {
+            'gen_ai.operation.name': 'chat',
+            'gen_ai.tool.call.arguments': '{"x":1}',
+            'gen_ai.tool.call.result': 'r',
+          },
+        },
+      };
+      expect(previewSpanInput(row)).toBe('hello');
+      expect(previewSpanOutput(row)).toBe('hi');
     });
   });
 });

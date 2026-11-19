@@ -51,7 +51,25 @@ function updateAt<T>(arr: T[], index: number, patch: (current: T) => T | null): 
   return copy;
 }
 
+// The result column an aggregation produces; the sort row offers these.
+export type AggregationColumnNamer = (agg: Aggregation) => string | null;
+
+// A reducer for a language whose aggregation columns `aggregationColumn` names, so that removing a
+// metric also drops a sort on its column.
+export function createBuilderReducer(aggregationColumn: AggregationColumnNamer) {
+  return (state: PPLBuilderState, action: BuilderAction): PPLBuilderState =>
+    reduceBuilder(state, action, aggregationColumn);
+}
+
 export function builderReducer(state: PPLBuilderState, action: BuilderAction): PPLBuilderState {
+  return reduceBuilder(state, action, compileAggregation);
+}
+
+function reduceBuilder(
+  state: PPLBuilderState,
+  action: BuilderAction,
+  aggregationColumn: AggregationColumnNamer
+): PPLBuilderState {
   switch (action.type) {
     case 'SET_SEARCH_EXPRESSION':
       return { ...state, searchExpression: action.searchExpression };
@@ -89,7 +107,7 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
         aggregations: state.aggregations.filter((_, i) => i !== action.index),
       };
       // Drop a sort chip left pointing at a removed metric; raw-field sorts stay valid.
-      if (isOrphanedAggregateSort(next)) {
+      if (isOrphanedAggregateSort(next, aggregationColumn, state)) {
         const { sort: _sort, ...rest } = next;
         return rest;
       }
@@ -193,9 +211,12 @@ function compileGroupBy(groupBy: GroupBy): string {
   return parts.join(', ');
 }
 
-export function sortableColumns(state: PPLBuilderState): string[] {
+export function sortableColumns(
+  state: PPLBuilderState,
+  aggregationColumn: AggregationColumnNamer = compileAggregation
+): string[] {
   if (state.aggregations.length === 0) return [];
-  const metrics = state.aggregations.map(compileAggregation).filter((c): c is string => c !== null);
+  const metrics = state.aggregations.map(aggregationColumn).filter((c): c is string => c !== null);
   return [...metrics, ...state.groupBy.fields.filter(Boolean)];
 }
 
@@ -205,10 +226,20 @@ function isAggregateColumn(column: string): boolean {
 }
 
 // True when the sort points at an aggregate metric the query no longer produces;
-// emitting it would make the backend reject an unknown field.
-function isOrphanedAggregateSort(state: PPLBuilderState): boolean {
+// emitting it would make the backend reject an unknown field. A metric column is one that looks
+// like PPL's (parens), or, given the state before an edit, one of that state's metric columns, so
+// a language whose columns are plain names (`count_1`) is covered too.
+function isOrphanedAggregateSort(
+  state: PPLBuilderState,
+  aggregationColumn: AggregationColumnNamer = compileAggregation,
+  previous?: PPLBuilderState
+): boolean {
   const { sort } = state;
-  return !!sort && isAggregateColumn(sort.column) && !sortableColumns(state).includes(sort.column);
+  if (!sort) return false;
+  const wasMetric =
+    isAggregateColumn(sort.column) ||
+    (!!previous && previous.aggregations.map(aggregationColumn).includes(sort.column));
+  return wasMetric && !sortableColumns(state, aggregationColumn).includes(sort.column);
 }
 
 function quoteSortColumn(column: string): string {

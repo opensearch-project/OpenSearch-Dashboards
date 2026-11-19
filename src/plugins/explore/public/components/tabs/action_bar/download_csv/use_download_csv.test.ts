@@ -15,13 +15,9 @@ import { AbortError, IndexPattern } from '../../../../../../data/common';
 import { setServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { discoverPluginMock } from '../../../../application/legacy/discover/mocks';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import {
-  formatRowsForCsv,
-  saveDataAsCsv,
-  useDiscoverDownloadCsv,
-  UseDiscoverDownloadCsvProps,
-} from './use_download_csv';
+import { useDiscoverDownloadCsv, UseDiscoverDownloadCsvProps } from './use_download_csv';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
+import { saveDataAsCsv, formatRowsForCsv } from './csv_utils';
 
 jest.mock('file-saver', () => ({
   saveAs: jest.fn(),
@@ -34,6 +30,12 @@ jest.mock('papaparse', () => ({
 jest.mock('../../../../application/legacy/discover/application/utils/state_management', () => ({
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
+}));
+
+// The Visualization tab exports the visualization's own table from data$
+let mockVisData: any;
+jest.mock('../../../visualizations/visualization_builder', () => ({
+  getVisualizationBuilder: () => ({ data$: { getValue: () => mockVisData } }),
 }));
 
 // Mock the useDisplayedColumnNames hook to avoid Redux context requirement
@@ -327,6 +329,49 @@ describe('useDiscoverDownloadCsv', () => {
       });
       expect(mockOnError).not.toHaveBeenCalled();
       expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    describe('on the Visualization tab', () => {
+      beforeEach(() => {
+        (useSelector as jest.MockedFunction<any>).mockImplementation(
+          () => 'explore_visualization_tab'
+        );
+        mockVisData = {
+          transformedData: [{ host: 'a', 'count()': 3 }],
+          categoricalColumns: [{ id: 0, name: 'host', column: 'host' }],
+          numericalColumns: [{ id: 1, name: 'count()', column: 'count()' }],
+          dateColumns: [],
+          unknownColumns: [],
+        };
+      });
+
+      afterEach(() => {
+        mockVisData = undefined;
+      });
+
+      it("exports the visualization's columns instead of the Logs table's", async () => {
+        const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
+        await act(async () => {
+          await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+        });
+        expect(unparse).toHaveBeenCalledWith(
+          { fields: ['host', 'count()'], data: [['a', '3']] },
+          expect.anything()
+        );
+        expect(saveAs).toHaveBeenCalled();
+      });
+
+      it('falls back to the Logs table columns while there is no visualization data', async () => {
+        mockVisData = undefined;
+        const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
+        await act(async () => {
+          await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+        });
+        expect(unparse).toHaveBeenCalledWith(
+          expect.objectContaining({ fields: mockDisplayedColumnNames }),
+          expect.anything()
+        );
+      });
     });
   });
 });

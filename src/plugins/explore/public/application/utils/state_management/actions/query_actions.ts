@@ -23,6 +23,7 @@ import {
   clearQueryStatusMapByKey,
   setHasUserInitiatedQuery,
   setIndividualQueryStatus,
+  setIsSelectionStale,
 } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -42,6 +43,7 @@ import { executeStreamingQuery, isStreamUnavailable } from './streaming_query_ac
 import {
   isCurrentStreamingRun,
   registerStreamingAbort,
+  supersedeOtherStreamingQueries,
   unregisterStreamingAbort,
 } from '../../streaming/streaming_abort_registry';
 import { findDateHistogramAggId, isStreamingEligible } from '../../streaming/streaming_config';
@@ -63,8 +65,14 @@ import {
   buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
-  queryHasAggregation,
+  queryIsAggregation,
+  queryIsBucketCountable,
 } from './utils';
+import {
+  ensurePatternsDefaultMode,
+  getPatternsDefaultMode,
+  patternsDefaultModeNeedsFetch,
+} from '../../languages/ppl/aggregation_commands';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { hasFieldValue } from '../../../../utils/has_field_value';
 import { ExploreFlavor } from '../../../../../common';
@@ -326,6 +334,8 @@ const getStreamingConfig = async (
     ) {
       return undefined;
     }
+    // Metrics shows only the Visualization tab, which would chart a partial table as complete.
+    if ((await getCurrentFlavor(services)) === ExploreFlavor.Metrics) return undefined;
 
     const timeFieldName = query.dataset?.timeFieldName;
     const timeRange = services.data.query.timefilter.timefilter.getTime();
@@ -337,6 +347,8 @@ const getStreamingConfig = async (
       timeFieldName,
       timeRange,
       engineType,
+      // Resolved by executeQueries before this runs.
+      patternsDefaultMode: getPatternsDefaultMode(query),
     });
 
     if (!timeFieldName || !query.dataset?.id) {
@@ -414,6 +426,21 @@ export const executeQueries = createAsyncThunk<
     return;
   }
 
+  // The results about to load are for the current selection (see the dataset change middleware).
+  if (state.queryEditor.isSelectionStale) {
+    dispatch(setIsSelectionStale(false));
+  }
+
+  // The cache keys below come from the stripped query, and whether a `patterns` without `mode=` is
+  // stripped depends on the cluster's default mode, so resolve it first. Awaited only when it must
+  // fetch (a `patterns` without `mode=`, once per data source; tab detection usually already has):
+  // the setup up to the run's abort registration below stays synchronous, so Stop takes effect
+  // from the moment the run starts.
+  if (patternsDefaultModeNeedsFetch(query)) {
+    await ensurePatternsDefaultMode(services.http, query);
+  }
+  const patternsDefaultMode = getPatternsDefaultMode(query);
+
   const defaultCacheKey = defaultPrepareQueryString(query);
   // Use separate cache keys for data table and histogram
   const dataTableCacheKey = defaultCacheKey;
@@ -477,12 +504,24 @@ export const executeQueries = createAsyncThunk<
   }
 
   const tabPromises = [];
+  let tablePromises: Promise<unknown> = Promise.resolve();
   try {
     const promises = [];
     // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
     let streamedHistogram = false;
+    let streamingTable = false;
+    let reportFirstRows: () => void = () => undefined;
+    const firstRows = new Promise<void>((resolve) => (reportFirstRows = resolve));
     // Execute query without aggregations
     if (needsDataTableQuery) {
+      // An earlier query's streams run under other keys, so registering this run replaces nothing.
+      for (const supersededKey of supersedeOtherStreamingQueries([
+        dataTableCacheKey,
+        histogramCacheKey,
+        prepareHistogramCacheKey(query),
+      ])) {
+        dispatch(clearQueryStatusMapByKey(supersededKey));
+      }
       // Streaming replaces the single-shot data-table fetch when enabled.
       const streamingConfig = await getStreamingConfig(state, services, getState);
       if (runController.signal.aborted) {
@@ -497,6 +536,7 @@ export const executeQueries = createAsyncThunk<
         // the thunk returns the promise.
         let abortTable: () => void = () => undefined;
         registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
+        streamingTable = true;
         const run = dispatch(
           executeStreamingQuery({
             services,
@@ -505,6 +545,7 @@ export const executeQueries = createAsyncThunk<
             indexName: query.dataset?.title,
             dataSourceId: query.dataset?.dataSource?.id,
             isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
+            onFirstRows: () => reportFirstRows(),
           })
         );
         abortTable = () => run.abort();
@@ -596,9 +637,14 @@ export const executeQueries = createAsyncThunk<
     }
 
     // Execute bucket count query for aggregation queries (non-blocking)
-    // This appends | stats count() to get the true total bucket count
+    // This appends | stats count() to get the true total bucket count. Gated on
+    // queryIsBucketCountable: `timewrap` and label-mode `patterns` are skipped because a count probe
+    // can't reproduce their rendered bucket count.
     const originalQueryString = typeof query.query === 'string' ? query.query : '';
-    if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
+    if (
+      query.language === 'PPL' &&
+      queryIsBucketCountable(originalQueryString, { patternsDefaultMode })
+    ) {
       const bucketCountCacheKey = prepareBucketCountCacheKey(query);
       const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
       const needsBucketCountQuery =
@@ -615,8 +661,9 @@ export const executeQueries = createAsyncThunk<
       }
     }
 
-    // Wait only for data table query to complete (not histogram)
-    await Promise.all(promises);
+    // Traces and tab queries read the table's first rows, not the whole stream.
+    tablePromises = Promise.all(promises);
+    await (streamingTable ? Promise.race([firstRows, tablePromises]) : tablePromises);
     if (runController.signal.aborted) {
       return;
     }
@@ -767,7 +814,7 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Wait for all tab queries to complete
-  await Promise.all(tabPromises);
+  await Promise.all([...tabPromises, tablePromises]);
 });
 
 /**
@@ -1008,7 +1055,11 @@ const executeQueryBase = async (
     // Async sources that return rows while still running hand them to `onPartialResults` on
     // each poll. Only row views stream them: an aggregation's running values reorder as the
     // scan proceeds, so aggregation views wait for the final result.
-    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+    const streamsPartialRows =
+      !isHistogramQuery &&
+      !queryIsAggregation(queryString, {
+        patternsDefaultMode: getPatternsDefaultMode(getState().query),
+      });
 
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
       // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer

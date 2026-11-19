@@ -25,6 +25,7 @@ import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
 import { ITransformationService } from '../data_transformations/types';
 import { TransformationService } from '../data_transformations/transformation_service';
+import type { VariableValue } from '../../../../dashboard/public';
 
 interface VisState {
   title?: string;
@@ -54,10 +55,18 @@ export class VisualizationBuilder {
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
+  /** The dashboard's current variable values, when editing a dashboard panel. */
+  variables$ = new BehaviorSubject<VariableValue[]>([]);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
+    }
+  }
+
+  setVariables(variables: VariableValue[]) {
+    if (!isEqual(variables, this.variables$.value)) {
+      this.variables$.next(variables);
     }
   }
 
@@ -553,6 +562,7 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
+    this.variables$.complete();
   }
 
   reset(): void {
@@ -562,6 +572,7 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.variables$ = new BehaviorSubject<VariableValue[]>([]);
     this.transformationService = new TransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
@@ -635,6 +646,7 @@ export class VisualizationBuilder {
       data$: this.data$,
       config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
+      variables$: this.variables$,
       timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),

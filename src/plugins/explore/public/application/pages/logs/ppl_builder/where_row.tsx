@@ -7,10 +7,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { BuilderAction, compileWhereFilter } from './build_ppl';
+import { BuilderAction } from './build_ppl';
 import { WhereFilter, WhereOperator } from './types';
 import { OPERATOR_DEF_MAP, operatorArity, operatorsForFieldType } from './where_operators';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
+import {
+  defaultFilterOperatorFor,
+  filterOperatorsFor,
+  useVisualBuilder,
+} from './visual_builder_language';
 import {
   ControlGroup,
   GhostAddButton,
@@ -22,9 +27,23 @@ interface WhereRowProps {
   filters: WhereFilter[];
   fieldNames: string[];
   getFieldType: (field: string) => string | undefined;
+  /** True for a field only the source's `getFields` lists, with no type: any operator applies. */
+  isUntypedSourceField?: (field: string) => boolean;
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }
+
+const NOT_FROM_SOURCE = () => false;
+
+/**
+ * The type operators are offered for: the field's own, any for an untyped source field, and
+ * string's otherwise (as for a field not picked yet).
+ */
+const operatorFieldType = (
+  field: string,
+  fieldType: string | undefined,
+  isUntypedSourceField: (field: string) => boolean
+): string | undefined => fieldType || (field && isUntypedSourceField(field) ? undefined : 'string');
 
 const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || fieldType === 'string';
 
@@ -99,11 +118,16 @@ const AddFilterMenu: React.FC<{
 const OperatorPopover: React.FC<{
   filter: WhereFilter;
   index: number;
-  fieldType?: string;
+  /** The type to offer operators for (see operatorFieldType); undefined offers them all. */
+  operatorType?: string;
   onChange: (operator: WhereOperator) => void;
-}> = ({ filter, index, fieldType, onChange }) => {
+}> = ({ filter, index, operatorType, onChange }) => {
+  const language = useVisualBuilder();
   const current = OPERATOR_DEF_MAP[filter.operator];
-  const options: SearchMenuOption[] = operatorsForFieldType(fieldType).map((def) => ({
+  const options: SearchMenuOption[] = operatorsForFieldType(
+    operatorType,
+    filterOperatorsFor(language)
+  ).map((def) => ({
     key: def.value,
     label: def.label,
     filterText: `${def.label} ${def.shortLabel}`,
@@ -280,6 +304,47 @@ const ChipTextInput: React.FC<{
   />
 );
 
+// `a, b` as values, and back. A value can't contain a comma here.
+const parseValueList = (text: string): string[] =>
+  text
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value !== '');
+
+/**
+ * Several typed values, comma-separated, for a source that can't suggest values. Keeps the text as
+ * typed (a trailing comma or space would be lost going through the values), and takes the values
+ * again when they change from outside, e.g. a reset on a field change.
+ */
+const ChipListInput: React.FC<{
+  values: string[];
+  ariaLabel: string;
+  onChange: (values: string[]) => void;
+  dataTestSubj: string;
+}> = ({ values, ariaLabel, onChange, dataTestSubj }) => {
+  const [text, setText] = useState(() => values.join(', '));
+  const joined = values.join('\u0000');
+  useEffect(() => {
+    if (parseValueList(text).join('\u0000') !== joined) setText(values.join(', '));
+    // Only an outside change to the values should reset the text.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [joined]);
+  return (
+    <ChipTextInput
+      value={text}
+      placeholder={i18n.translate('explore.pplBuilder.filterValuesListPlaceholder', {
+        defaultMessage: 'value, value',
+      })}
+      ariaLabel={ariaLabel}
+      onChange={(next) => {
+        setText(next);
+        onChange(parseValueList(next));
+      }}
+      dataTestSubj={dataTestSubj}
+    />
+  );
+};
+
 const ChipValues: React.FC<{
   filter: WhereFilter;
   index: number;
@@ -288,6 +353,8 @@ const ChipValues: React.FC<{
   onChange: (values: string[]) => void;
 }> = ({ filter, index, fieldType, getValues, onChange }) => {
   const arity = operatorArity(filter.operator);
+  // A source that can't suggest values gets text boxes, not a dropdown that only says "Type a value".
+  const typedOnly = useVisualBuilder().valueSuggestions === false;
 
   if (arity === 'none') return null;
 
@@ -325,7 +392,18 @@ const ChipValues: React.FC<{
     );
   }
 
-  if (arity === 'one' && !fieldSuggestsValues(fieldType)) {
+  if (arity === 'many' && typedOnly) {
+    return (
+      <ChipListInput
+        values={filter.values}
+        ariaLabel={valueForLabel(filter.field)}
+        onChange={onChange}
+        dataTestSubj={`pplBuilderFilterValues-${index}`}
+      />
+    );
+  }
+
+  if (arity === 'one' && (typedOnly || !fieldSuggestsValues(fieldType))) {
     return (
       <ChipTextInput
         value={filter.values[0] ?? ''}
@@ -361,23 +439,35 @@ const WhereChip: React.FC<{
   index: number;
   fieldType?: string;
   fieldNames: string[];
+  getFieldType: (field: string) => string | undefined;
+  isUntypedSourceField: (field: string) => boolean;
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
-}> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
-  // Use this chip's field type so the tooltip quotes values as buildPPL does.
-  const predicate = compileWhereFilter(filter, () => fieldType);
-  const tooltip = predicate
-    ? i18n.translate('explore.pplBuilder.filterChipTooltip', {
-        defaultMessage: 'where {predicate}',
-        values: { predicate },
-      })
-    : i18n.translate('explore.pplBuilder.filterChipIncomplete', {
-        defaultMessage: 'Finish this condition',
-      });
+}> = ({
+  filter,
+  index,
+  fieldType,
+  fieldNames,
+  getFieldType,
+  isUntypedSourceField,
+  getValues,
+  dispatch,
+}) => {
+  const language = useVisualBuilder();
+  // Use this chip's field type so the tooltip quotes values as the query does.
+  const tooltip =
+    language.filterText(filter, () => fieldType) ??
+    i18n.translate('explore.pplBuilder.filterChipIncomplete', {
+      defaultMessage: 'Finish this condition',
+    });
 
   const setField = (field: string) => {
     if (field === filter.field) return;
-    dispatch({ type: 'SET_FILTER', index, filter: { field, operator: 'is', values: [] } });
+    const operator = defaultFilterOperatorFor(
+      language,
+      operatorFieldType(field, getFieldType(field), isUntypedSourceField)
+    );
+    dispatch({ type: 'SET_FILTER', index, filter: { field, operator, values: [] } });
   };
   const setOperator = (operator: WhereOperator) => {
     const values = operatorArity(operator) === operatorArity(filter.operator) ? filter.values : [];
@@ -406,7 +496,12 @@ const WhereChip: React.FC<{
           </EuiToolTip>
         )}
       />
-      <OperatorPopover filter={filter} index={index} fieldType={fieldType} onChange={setOperator} />
+      <OperatorPopover
+        filter={filter}
+        index={index}
+        operatorType={operatorFieldType(filter.field, fieldType, isUntypedSourceField)}
+        onChange={setOperator}
+      />
       <ChipValues
         filter={filter}
         index={index}
@@ -431,11 +526,18 @@ export const WhereRow: React.FC<WhereRowProps> = ({
   filters,
   fieldNames,
   getFieldType,
+  isUntypedSourceField = NOT_FROM_SOURCE,
   getValues,
   dispatch,
 }) => {
-  const addFilter = (field: string) =>
-    dispatch({ type: 'ADD_FILTER', filter: { field, operator: 'is', values: [] } });
+  const language = useVisualBuilder();
+  const addFilter = (field: string) => {
+    const operator = defaultFilterOperatorFor(
+      language,
+      operatorFieldType(field, getFieldType(field), isUntypedSourceField)
+    );
+    dispatch({ type: 'ADD_FILTER', filter: { field, operator, values: [] } });
+  };
 
   if (filters.length === 0) {
     return (
@@ -468,6 +570,8 @@ export const WhereRow: React.FC<WhereRowProps> = ({
           index={index}
           fieldType={getFieldType(filter.field)}
           fieldNames={fieldNames}
+          getFieldType={getFieldType}
+          isUntypedSourceField={isUntypedSourceField}
           getValues={getValues}
           dispatch={dispatch}
         />

@@ -58,12 +58,6 @@ jest.mock('./metrics_page_tabs', () => ({
   MetricsPageTabs: () => <div data-test-subj="metrics-page-tabs">Metrics Page Tabs</div>,
 }));
 
-jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
-  NewExperienceBanner: () => (
-    <div data-test-subj="new-experience-banner">New Experience Banner</div>
-  ),
-}));
-
 jest.mock('../../../components/top_nav/top_nav', () => ({
   TopNav: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
     <div data-test-subj="top-nav">
@@ -237,7 +231,7 @@ describe('MetricsPage', () => {
     );
 
     expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
-    expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
+    expect(screen.queryByTestId('exploreNewExperienceBanner')).not.toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 

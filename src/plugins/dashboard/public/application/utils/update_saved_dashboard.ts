@@ -40,7 +40,8 @@ export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
   appState: DashboardAppState,
   timeFilter: TimefilterContract,
-  dashboard: Dashboard
+  // Omitted when filling a new, detached saved dashboard (save as new / clone).
+  dashboard?: Dashboard
 ) {
   savedDashboard.title = appState.title;
   savedDashboard.description = appState.description;
@@ -86,7 +87,7 @@ export function updateSavedDashboard(
   // save the queries
   savedDashboard.searchSource.setField('query', appState.query as Query);
 
-  dashboard.setState({
+  dashboard?.setState({
     title: appState.title,
     description: appState.description,
     timeRestore: appState.timeRestore,

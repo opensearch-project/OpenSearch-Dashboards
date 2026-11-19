@@ -112,6 +112,12 @@ export interface SearchSourceFields {
    * caller pin the query to a fixed (absolute) window.
    */
   timeRange?: TimeRange;
+  /**
+   * A row limit requested by the caller. Only the query_enhancements PPL interceptor reads it; when
+   * absent the server uses its own default. Do not set it on DSL searches, since the unknown key
+   * would be sent to OpenSearch in the request body.
+   */
+  fetchSize?: number;
 }
 
 export interface SearchSourceOptions {

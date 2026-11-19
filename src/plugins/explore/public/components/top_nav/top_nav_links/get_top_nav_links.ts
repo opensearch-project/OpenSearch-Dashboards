@@ -3,30 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataView as Dataset } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
 import { TopNavMenuData } from '../../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../../expressions';
 import { getNewButtonRun, newTopNavData } from './top_nav_new';
 import { getOpenButtonRun, openTopNavData } from './top_nav_open';
-import { getSaveButtonRun, saveTopNavData } from './top_nav_save';
+import { getSaveButtonRun, SaveStateProps, saveTopNavData } from './top_nav_save';
 import { getShareButtonRun, shareTopNavData } from './top_nav_share';
-import { TabState } from '../../../application/utils/state_management/slices';
-import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 import { useClearEditors } from '../../../application/hooks';
 
 export const getTopNavLinks = (
   services: ExploreServices,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
-  stateProps: {
-    dataset: Dataset | undefined;
-    tabState: TabState;
-    flavorId: string | null;
-    tabDefinition: TabDefinition | undefined;
-    activeTabId: string;
-  },
+  stateProps: SaveStateProps,
   clearEditors: ReturnType<typeof useClearEditors>,
   savedExplore?: SavedExplore
 ) => {

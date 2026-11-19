@@ -44,6 +44,12 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   ),
 }));
 
+import { prepareHistogramCacheKey } from '../../application/utils/state_management/actions/query_actions';
+import {
+  isCurrentStreamingRun,
+  registerStreamingAbort,
+} from '../../application/utils/streaming/streaming_abort_registry';
+
 describe('BreakdownFieldSelector', () => {
   const mockServices = {
     uiSettings: {
@@ -183,6 +189,30 @@ describe('BreakdownFieldSelector', () => {
     );
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'mock/executeHistogramQuery' })
+    );
+  });
+
+  // A streamed histogram for the old breakdown would keep writing into the plain histogram key.
+  it('stops a streamed histogram, and clears its status, when the field changes', () => {
+    const store = createMockStore();
+    const key = prepareHistogramCacheKey(store.getState().query, false);
+    const abort = jest.fn();
+    const token = {};
+    registerStreamingAbort(key, abort, token);
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+    render(
+      <Provider store={store}>
+        <BreakdownFieldSelector services={mockServices} />
+      </Provider>
+    );
+    fireEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    fireEvent.click(screen.getByText('Field 1'));
+
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(isCurrentStreamingRun(key, token)).toBe(false);
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'queryEditor/clearQueryStatusMapByKey', payload: key })
     );
   });
 

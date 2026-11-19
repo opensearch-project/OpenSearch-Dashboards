@@ -209,6 +209,8 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                       idSelected={row.mode}
                       onChange={handleModeChange}
                       buttonSize="compressed"
+                      // Primary, matching the Logs Code/Builder toggle.
+                      color="primary"
                     />
                   </EuiToolTip>
                 }

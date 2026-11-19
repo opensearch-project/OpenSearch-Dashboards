@@ -107,6 +107,40 @@ To enable the Discover Traces functionality, enable the following experimental s
 
 For detailed setup instructions and configuration guidance for the Discover Traces feature, please refer to the [Traces Setup Documentation](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/explore/public/application/pages/traces/README.md).
 
+## Visual query builder for a source type's language
+
+A plugin that registers a source type (`explore.sourceTypes.register(...)` in `setup`) can let one of its languages use the Logs page's visual builder: the Code / Builder toggle with search, filter, aggregation, group-by and sort rows. The builder keeps its own rows and controls; the language supplies the translation, as a `SourceTypeVisualBuilder` (exported from `explore/public`) on `languageSettings[<language>].visualBuilder`. PPL uses the same contract.
+
+```ts
+explore.sourceTypes.register({
+  id: 'my-source',
+  // ...
+  languageSettings: {
+    MyQL: {
+      visualBuilder: {
+        build: (state, getFieldType) => '...', // rows -> query text
+        parse: (query) => ({ canBuild: false, state }), // query text -> rows, or Code only
+        aggregationColumn: (agg) => '...', // a metric's result column, for sort
+        filterText: (filter, getFieldType) => '...', // one filter as written, for its tooltip
+        // Optional:
+        aggregations: ['count', 'sum', 'avg'], // narrow the menus
+        filterOperators: ['is', 'is_not', 'is_one_of', 'exists'],
+        timeBucketText: (field, interval) => '...', // a time bucket as written, for its tooltip
+        valueSuggestions: false, // typed filter values instead of suggestions
+        getFields: async (dataset) => [{ name: 'service', type: 'string' }],
+      },
+    },
+  },
+});
+```
+
+- `parse` returns `canBuild: false` for anything the rows can't show exactly, so switching to Builder never drops part of a query.
+- `build` gets values as typed: quote them unless `getFieldType` says the field is numeric. A time bucket's interval can be one the user typed; write the language's form of it or skip the bucket.
+- `getFields` adds fields the dataset doesn't list (called on open, on a dataset change and after each query). A field it returns without a type is offered for numeric aggregations and every filter operator.
+- Without `visualBuilder` (or `supportsVisualBuilder`, which uses PPL's translation), a language other than PPL stays code only. The search box has PPL autocomplete only for PPL.
+
+See the TSDoc in `public/services/source_type_registry/visual_builder.ts` for the full contract.
+
 ## Future Plans
 
 The long-term goal is for Explore to completely replace the Discover plugin. This transition will happen gradually while maintaining backward compatibility to ensure a smooth transition for users and developers who have built workflows around Discover.

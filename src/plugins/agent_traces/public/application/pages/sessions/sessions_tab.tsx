@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import moment from 'moment-timezone';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiEmptyPrompt, EuiSwitch } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../types';
-import { formatTimestamp } from '../traces/hooks/tree_utils';
+import { getTimestampFormatters } from '../traces/hooks/timestamp_formatters';
 import { DataTableInfoBar, TableLoadingState } from '../traces/table_shared';
 import '../traces/traces_table.scss';
 import { useSessions } from './hooks/use_sessions';
@@ -23,12 +22,11 @@ export const SessionsTab = () => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
   const uiSettings = services.uiSettings;
 
-  const timezone = useMemo(() => {
-    const tz = uiSettings?.get('dateFormat:tz');
-    if (tz && tz !== 'Browser') return tz;
-    return moment.tz.guess() || moment().format('Z');
-  }, [uiSettings]);
-  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
+  // Session rows keep full precision; the list's Time column is to the second.
+  const { formatTs, formatListTs } = useMemo(
+    () => getTimestampFormatters(uiSettings),
+    [uiSettings]
+  );
 
   const [onlyWithErrors, setOnlyWithErrors] = useState(false);
   const {
@@ -120,7 +118,7 @@ export const SessionsTab = () => {
       <div className="agentTracesTable__scrollContainer eui-xScrollWithShadows">
         <SessionsTable
           sessions={sessions}
-          formatTs={formatTs}
+          formatTs={formatListTs}
           wrapCellText={wrapCellText}
           onSessionClick={openSession}
           selectedSessionId={activeSessionId}

@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { Dataset } from '../../../../../data/common';
+import type {
+  SourceTypeDefinition,
+  SourceTypeLogsDrilldown,
+  SourceTypeLogsDrilldownScope,
+} from '../../../services/source_type_registry';
+
 /**
  * How an index is classified for the logs Explore canvas. Only the time-based vs
  * no-time-field distinction changes behavior (it gates the histogram preview), so it is
@@ -64,4 +71,30 @@ export interface ClassificationResult {
   /** The detected severity/level field (e.g. severityText, level), if any — used to stack the
    *  histogram and color the log-line level tokens. */
   severityField?: string;
+}
+
+/** The toolbar's action for a registered source's selected items. */
+export interface SourceBatchAction {
+  label: string;
+  onClick: () => void;
+  /** The action is running (e.g. opening the selection): the button shows it and can't repeat it. */
+  isLoading?: boolean;
+}
+
+/** How a registered source's cards are grouped. */
+export enum SourceGrouping {
+  ALPHABETICAL = 'alphabetical',
+  PREFIX = 'prefix',
+}
+
+/** A registered source type that offers the Explore logs page. */
+export type DrilldownSourceType = SourceTypeDefinition & { logsDrilldown: SourceTypeLogsDrilldown };
+
+/** The page's `_a` URL state. */
+export interface DrilldownAppState {
+  dataSource?: Dataset['dataSource'];
+  /** The source type id; absent means OpenSearch. */
+  sourceType?: string;
+  /** A registered source's scope (see `SourceTypeLogsDrilldownScope`). */
+  scope?: SourceTypeLogsDrilldownScope;
 }

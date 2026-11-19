@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { saveSavedExplore } from './save_explore'; // adjust path
 import { setSavedSearch } from '../application/utils/state_management/slices';
+import { takeSavedSearchOpenedBySave } from '../application/utils/saved_search_opened_by_save';
 
 jest.mock('../application/utils/state_management/slices', () => ({
   setSavedSearch: jest.fn(),
@@ -176,5 +177,44 @@ describe('saveSavedExplore', () => {
       })
     );
     expect(savedExplore.title).toBe('Old Title'); // title restored
+  });
+
+  it('marks the new saved search it opens, so opening it keeps the page as it is', async () => {
+    savedExplore.save.mockResolvedValue('456');
+    const pushMock = jest.fn(() => {
+      // The page initialization reads the mark when the URL changes.
+      expect(takeSavedSearchOpenedBySave('456')).toBe(true);
+    });
+    services.scopedHistory = { location: { hash: '#/' }, push: pushMock };
+
+    await saveSavedExplore({
+      savedExplore,
+      newTitle: 'New Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+    });
+
+    expect(pushMock).toHaveBeenCalled();
+  });
+
+  it('marks nothing when it saves the search the page already has open', async () => {
+    savedExplore.save.mockResolvedValue('123');
+    services.scopedHistory = { location: { hash: '#/view/123' }, push: jest.fn() };
+
+    await saveSavedExplore({
+      savedExplore,
+      newTitle: 'New Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+    });
+
+    expect(services.scopedHistory.push).not.toHaveBeenCalled();
+    expect(takeSavedSearchOpenedBySave('123')).toBe(false);
   });
 });

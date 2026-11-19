@@ -6,17 +6,15 @@
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
-import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
+import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
   TimeRange,
   FilterManager,
   getTime,
-  Query,
   UI_SETTINGS,
   IFieldType,
 } from '../../../data/public';
@@ -24,7 +22,9 @@ import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
 import {
   DashboardContainer,
   IVariableInterpolationService,
+  VariableValue,
   createNoOpVariableInterpolationService,
+  hasLoadingVariables,
 } from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
@@ -41,7 +41,7 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import { SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -70,6 +70,28 @@ import {
   registerAllTransformations,
 } from '../components/data_transformations';
 import { PanelDataService } from './panel_data_service';
+import { visDataToTabular } from '../components/visualizations/utils/vis_data_to_tabular';
+import { parseErrorEnvelope } from '../application/utils/parse_error_envelope';
+
+/**
+ * The text a failed fetch shows on the panel. A search strategy's error arrives as a serialised
+ * envelope in the message: show its details, else its reason, as Explore's error panel does, and
+ * never the raw JSON or the envelope's type (an internal code). A plain message is shown as it is.
+ */
+const getFetchErrorMessage = (error: unknown): string => {
+  const { body, message } = (error ?? {}) as {
+    body?: { message?: unknown };
+    message?: unknown;
+  };
+  for (const candidate of [body?.message, message]) {
+    if (typeof candidate !== 'string' || candidate === '') continue;
+    const envelope = parseErrorEnvelope(candidate);
+    if (!envelope) return candidate;
+    const text = envelope.details || envelope.reason;
+    if (text) return text;
+  }
+  return 'An error occurred';
+};
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -87,8 +109,8 @@ export interface SearchProps {
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  variables?: VariableValue[];
   axisColumnMappings?: AxisColumnMappings;
-  displayTimeColumn: boolean;
   title: string;
   columns?: string[];
   onSort?: (sort: SortOrder[]) => void;
@@ -160,10 +182,10 @@ export class ExploreEmbeddable
   private panelTitle: string = '';
   private filterManager: FilterManager;
   private services: ExploreServices;
-  private prevState = {
-    filters: undefined as Filter[] | undefined,
-    query: undefined as Query | undefined,
-    timeRange: undefined as TimeRange | undefined,
+  // The inputs of the last fetch, undefined until the first one.
+  private prevState?: {
+    filters: Filter[] | undefined;
+    timeRange: TimeRange | undefined;
   };
   private node?: HTMLElement;
   private root?: Root;
@@ -313,9 +335,7 @@ export class ExploreEmbeddable
         this.variableSubscription = dashboardContainer.variableService
           .getVariables$()
           .subscribe((variables) => {
-            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
-            if (hasLoading) return;
-
+            if (hasLoadingVariables(variables)) return;
             this.handleVariablesChange();
           });
       }
@@ -323,34 +343,46 @@ export class ExploreEmbeddable
   }
 
   /**
-   * Handle variable changes - interpolate query and refetch
+   * Handle variable changes. Table data links can use dashboard variables, so
+   * keep them in searchProps first. Then refetch when the interpolated query
+   * changes, and otherwise re-render only if the link variables changed.
+   * Variable option reloads (e.g. on a time range change) emit with the same
+   * values, and must not re-render the panel.
    */
   private handleVariablesChange() {
-    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
-      return;
+    const variables = this.interpolationService.getVariables();
+    let linkVariablesChanged = false;
+    if (this.searchProps && !isEqual(variables, this.searchProps.variables)) {
+      this.searchProps.variables = variables;
+      linkVariablesChanged = true;
     }
 
-    const { searchSource } = this.savedExplore;
-    const currentQuery = searchSource.getField('query');
-    const interpolatedQuery = this.interpolationService.interpolate(
-      this.originalQuery,
-      currentQuery?.language
-    );
+    if (this.originalQuery && this.interpolationService.hasVariables(this.originalQuery)) {
+      const { searchSource } = this.savedExplore;
+      const currentQuery = searchSource.getField('query');
+      const interpolatedQuery = this.interpolationService.interpolate(
+        this.originalQuery,
+        currentQuery?.language
+      );
 
-    if (interpolatedQuery === this.lastInterpolatedQuery) {
-      return;
+      if (interpolatedQuery !== this.lastInterpolatedQuery) {
+        this.lastInterpolatedQuery = interpolatedQuery;
+        if (currentQuery) {
+          searchSource.setField('query', {
+            ...currentQuery,
+            query: interpolatedQuery,
+          });
+        }
+        if (this.searchProps) {
+          // The refetch re-renders with the new variables.
+          this.updateHandler(this.searchProps, true);
+          return;
+        }
+      }
     }
-    this.lastInterpolatedQuery = interpolatedQuery;
 
-    if (currentQuery) {
-      searchSource.setField('query', {
-        ...currentQuery,
-        query: interpolatedQuery,
-      });
-    }
-
-    if (this.searchProps) {
-      this.updateHandler(this.searchProps, true);
+    if (linkVariablesChanged && this.node && this.searchProps) {
+      this.renderComponent(this.node, this.searchProps);
     }
   }
 
@@ -364,8 +396,8 @@ export class ExploreEmbeddable
       services: this.services,
       indexPattern,
       isLoading: false,
-      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
+      variables: this.interpolationService.getVariables(),
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -409,34 +441,35 @@ export class ExploreEmbeddable
       this.updateInput({ sort: newSort });
     };
 
+    // Column actions read this.searchProps, not the local object: updateHandler
+    // writes the current columns and sort onto whatever this.searchProps is now.
     searchProps.onAddColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = buildColumns(
-        columnActions.addColumn(searchProps.columns, { column: columnName })
-      );
+      const updatedColumns = buildColumns(columnActions.addColumn(columns, { column: columnName }));
       this.updateInput({ columns: updatedColumns });
     };
 
     searchProps.onRemoveColumn = (columnName: string) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const updatedColumns = columnActions.removeColumn(searchProps.columns, columnName);
-      const updatedSort =
-        searchProps.sort && searchProps.sort.length
-          ? searchProps.sort.filter((s) => s[0] !== columnName)
-          : [];
+      const sort = this.searchProps?.sort;
+      const updatedColumns = columnActions.removeColumn(columns, columnName);
+      const updatedSort = sort && sort.length ? sort.filter((s) => s[0] !== columnName) : [];
       this.updateInput({ sort: updatedSort, columns: updatedColumns });
     };
 
     searchProps.onMoveColumn = (columnName, newIndex: number) => {
-      if (!searchProps.columns) {
+      const columns = this.searchProps?.columns;
+      if (!columns) {
         return;
       }
-      const oldIndex = searchProps.columns.indexOf(columnName);
-      const updatedColumns = columnActions.reorderColumn(searchProps.columns, oldIndex, newIndex);
+      const oldIndex = columns.indexOf(columnName);
+      const updatedColumns = columnActions.reorderColumn(columns, oldIndex, newIndex);
       this.updateInput({ columns: updatedColumns });
     };
 
@@ -498,25 +531,28 @@ export class ExploreEmbeddable
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
-    // Pause fetching while not visible (e.g. a collapsed section); record the
-    // owed fetch (resumeFetch) and flush it once on resume. All fetch paths
-    // funnel through here. See EmbeddableInput.isVisible.
+    const { filters, timeRange } = this.input;
+    // The dashboard's query (DQL or Lucene) is not compared: the panel runs its own query, which
+    // the dashboard query can't be combined with, so a change to it alone returns the same rows.
+    const fetchRequested =
+      force ||
+      !this.prevState ||
+      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      !isEqual(timeRange, this.prevState.timeRange);
+
+    // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
+    // only when one was actually requested, so a visibility-only change (the
+    // collapse itself) does not trigger a refetch on expand. See
+    // EmbeddableInput.isVisible.
     if (this.input.isVisible === false) {
-      this.pendingFetchOnResume = true;
+      if (fetchRequested) this.pendingFetchOnResume = true;
       return;
     }
     const resumeFetch = this.pendingFetchOnResume;
     this.pendingFetchOnResume = false;
 
-    const { filters, query, timeRange } = this.input;
     // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
-    const needFetch =
-      this.node &&
-      (force ||
-        resumeFetch ||
-        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-        !isEqual(query, this.prevState.query) ||
-        !isEqual(timeRange, this.prevState.timeRange));
+    const needFetch = this.node && (fetchRequested || resumeFetch);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -525,7 +561,7 @@ export class ExploreEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
 
     if (needFetch) {
-      this.prevState = { filters, query, timeRange };
+      this.prevState = { filters, timeRange };
       this.searchProps = searchProps;
 
       // Apply dashboard filters to the SearchSource (same as PPL)
@@ -542,7 +578,7 @@ export class ExploreEmbeddable
         this.searchProps.isLoading = false;
         this.searchProps.error = {
           name: error?.body?.error || error?.name || 'Error',
-          message: error?.body?.message || error?.message || 'An error occurred',
+          message: getFetchErrorMessage(error),
         };
         this.updateOutput({
           loading: false,
@@ -737,38 +773,11 @@ export class ExploreEmbeddable
       });
     }
 
-    // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
-      const allColumns = [
-        ...(visualizationData.numericalColumns ?? []),
-        ...(visualizationData.categoricalColumns ?? []),
-        ...(visualizationData.dateColumns ?? []),
-        ...(visualizationData.unknownColumns ?? []),
-      ].sort((a, b) => a.id - b.id);
       const indexPattern = searchSource.getField('index');
 
       this.inspectorAdaptors.data.setTabularLoader(
-        () => ({
-          columns: allColumns.map((col) => ({
-            name: col.name,
-            field: col.column,
-          })),
-
-          // format data rows and transform into shape {raw, formatted}
-          rows: visualizationData.transformedData.map((row) => {
-            const formattedRow: Record<string, FormattedData> = {};
-            for (const col of allColumns) {
-              const value = row[col.column];
-              const field = indexPattern?.fields.getByName(col.name);
-              const formatted =
-                field && indexPattern?.getFormatterForField
-                  ? indexPattern.getFormatterForField(field).convert(value)
-                  : String(value ?? '');
-              formattedRow[col.column] = new FormattedData(value, formatted);
-            }
-            return formattedRow;
-          }),
-        }),
+        () => visDataToTabular(visualizationData, indexPattern),
         { returnsFormattedValues: true }
       );
     }
@@ -776,8 +785,7 @@ export class ExploreEmbeddable
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(<ExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {

@@ -857,6 +857,71 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('visualization');
     });
 
+    describe('initial load prefetch', () => {
+      const stateWithQuery = (q: string) => ({
+        query: { query: q, language: 'PPL', dataset: null },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+      const tabs = () => {
+        const traces = { id: 'traces', prepareQuery: jest.fn().mockReturnValue('traces-query') };
+        const visualization = {
+          id: 'visualization',
+          prepareQuery: jest.fn().mockReturnValue('visualization-query'),
+        };
+        (mockServices.tabRegistry.getAllTabs as jest.Mock).mockReturnValue([traces, visualization]);
+        return { traces, visualization };
+      };
+
+      afterEach(() => (mockServices.tabRegistry.getAllTabs as jest.Mock).mockReturnValue([]));
+
+      it('skips the Visualization query for a query that does not aggregate', async () => {
+        const { traces, visualization } = tabs();
+        mockGetState.mockReturnValue(stateWithQuery('source = spans | where status.code = 2'));
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(traces.prepareQuery).toHaveBeenCalled();
+        expect(visualization.prepareQuery).not.toHaveBeenCalled();
+      });
+
+      it('skips the Visualization query for an empty query', async () => {
+        const { visualization } = tabs();
+        mockGetState.mockReturnValue(stateWithQuery(''));
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(visualization.prepareQuery).not.toHaveBeenCalled();
+      });
+
+      it('prefetches the Visualization query for an aggregating query', async () => {
+        const { traces, visualization } = tabs();
+        mockGetState.mockReturnValue(
+          stateWithQuery('source = spans | stats count() by serviceName')
+        );
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(traces.prepareQuery).toHaveBeenCalled();
+        expect(visualization.prepareQuery).toHaveBeenCalled();
+      });
+
+      it('still runs the Visualization query when it is the active tab', async () => {
+        const { visualization } = tabs();
+        mockGetState.mockReturnValue({
+          ...stateWithQuery(''),
+          ui: { activeTabId: 'visualization' },
+        });
+        (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValueOnce(visualization);
+
+        await executeQueries({ services: mockServices })(mockDispatch, mockGetState, undefined);
+
+        expect(visualization.prepareQuery).toHaveBeenCalled();
+      });
+    });
+
     it('should handle missing tab registry gracefully', async () => {
       const mockState = {
         query: { query: 'source=logs', language: 'PPL', dataset: null },

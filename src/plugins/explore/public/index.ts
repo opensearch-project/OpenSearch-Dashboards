@@ -25,16 +25,40 @@ export type {
   SourceTypeDatasetSelectorProps,
   SourceTypeDefinition,
   SourceTypeDependencies,
+  SourceTypeEmptyStateLocation,
+  SourceTypeEmptyStateProps,
   SourceTypeHistogramColumns,
   SourceTypeHistogramConfig,
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
+  SourceTypeLogsDrilldown,
+  SourceTypeLogsDrilldownEmptyStateProps,
+  SourceTypeLogsDrilldownItem,
+  SourceTypeLogsDrilldownItemUnavailable,
+  SourceTypeLogsDrilldownItemPage,
+  SourceTypeLogsDrilldownQueryArgs,
+  SourceTypeLogsDrilldownScope,
+  SourceTypeLogsDrilldownScopeSelectorProps,
   SourceTypeMetricsResourceClient,
   SourceTypeMetricsTimeRange,
   SourceTypeQueryEditorProps,
   SourceTypeQueryStatus,
   SourceTypeRegistrySetup,
   SourceTypeSampleQuery,
+  SourceTypeVisualBuilder,
+  VisualBuilderAggregation,
+  VisualBuilderAggregationFunction,
+  VisualBuilderField,
+  VisualBuilderFieldTypeResolver,
+  VisualBuilderFilter,
+  VisualBuilderFilterOperator,
+  VisualBuilderFunctionCall,
+  VisualBuilderFunctionCategory,
+  VisualBuilderGroupBy,
+  VisualBuilderParseResult,
+  VisualBuilderSort,
+  VisualBuilderState,
+  VisualBuilderTimeBucket,
 } from './services/source_type_registry';
 export {
   ExploreFlavor,
@@ -60,6 +84,7 @@ export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create
 
 // Visualization system for use by other plugins
 export { VisualizationBuilder } from './components/visualizations/visualization_builder';
+export { toListTimePattern } from './components/data_table/list_time_format';
 export type { AxisColumnMappings } from './components/visualizations/types';
 
 // Trace-to-logs correlation (correlations saved objects) and its log views, for Agent Traces

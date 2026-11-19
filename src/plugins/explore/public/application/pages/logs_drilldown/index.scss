@@ -18,6 +18,11 @@
     max-width: 320px;
   }
 
+  // A registered source's scope picker: as wide as its controls, never squeezed by the search box.
+  &__toolbarScope {
+    flex-shrink: 0;
+  }
+
   &__toolbarTime {
     min-width: 260px;
   }

@@ -140,6 +140,8 @@ export class QueryBuilder {
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
   public lastExecutedInterpolatedQuery?: string;
+  // The query state of the last run (a page load runs the saved query): what the chart shows.
+  private lastRunQueryState?: QueryState;
   private onDatasetChangedCallback?: () => void;
 
   constructor(getServices: () => ExploreServices) {
@@ -578,6 +580,7 @@ export class QueryBuilder {
       return;
     }
     const currentQuery = this.queryState$.value;
+    this.lastRunQueryState = currentQuery;
     // prepare querystring for execution, add clause when query is '' for PPL
     let queryString = this.prepareQueryStringToCacheKey(currentQuery);
 
@@ -631,6 +634,10 @@ export class QueryBuilder {
     return this.queryEditorState$.value;
   }
 
+  getLastRunQueryState(): QueryState | undefined {
+    return this.lastRunQueryState;
+  }
+
   dispose(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     this.subscriptions = [];
@@ -660,6 +667,7 @@ export class QueryBuilder {
     });
     this.variableNames$ = new BehaviorSubject<string[]>([]);
     this.editorRef.current = null;
+    this.lastRunQueryState = undefined;
     this.isInitialized = false;
   }
 }

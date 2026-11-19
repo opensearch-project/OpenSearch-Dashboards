@@ -68,6 +68,8 @@ interface Props {
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  // Extra validation from the consumer; Save is disabled while it returns false.
+  isValid?: (state: SaveModalState) => boolean;
   description?: string;
   showDescription: boolean;
 }
@@ -213,9 +215,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
   };
 
+  private isValid = () => this.props.isValid?.(this.state) ?? true;
+
   private saveSavedObject = async () => {
-    if (this.state.isLoading) {
-      // ignore extra clicks
+    if (this.state.isLoading || !this.isValid()) {
+      // ignore extra clicks, and Enter while the form is invalid
       return;
     }
 
@@ -270,7 +274,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
-        isDisabled={title.length === 0}
+        isDisabled={title.length === 0 || !this.isValid()}
         type="submit"
         form="savedObjectSaveModalForm"
       >

@@ -24,7 +24,7 @@ import {
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { AGENT_TRACES_VISUALIZATION_TAB_ID, AgentTracesFlavor } from '../../../../common';
-import { hasStatsPipe } from '../state_management/actions/detect_optimal_tab/detect_optimal_tab';
+import { isVisualizationTabTarget } from '../state_management/actions/detect_optimal_tab/detect_optimal_tab';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
 
@@ -103,7 +103,7 @@ export const useInitPage = () => {
         // component instead of the "Start searching" placeholder.
         // A stats query only renders in Visualization, whatever tab the search was saved on.
         const uiState = savedAgentTraces.uiState;
-        if (hasStatsPipe(loadedQueryString)) {
+        if (isVisualizationTabTarget(loadedQueryString)) {
           dispatch(setActiveTab(AGENT_TRACES_VISUALIZATION_TAB_ID));
         } else if (uiState) {
           try {

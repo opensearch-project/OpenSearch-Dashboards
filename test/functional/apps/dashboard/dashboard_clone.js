@@ -96,5 +96,21 @@ export default function ({ getService, getPageObjects }) {
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardName + ' Copy', 2);
     });
+
+    it('Clone with Copy panels shows the copied panels', async function () {
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+      await PageObjects.dashboard.clickClone();
+      await PageObjects.dashboard.setClonedDashboardTitle(dashboardName + ' Panels Copy');
+      await PageObjects.dashboard.setCloneCopyPanels(true);
+      await PageObjects.dashboard.confirmClone();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await retry.try(async () => {
+        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitles).to.eql(
+          PageObjects.dashboard.getTestVisualizationNames().map((name) => `${name} (copy)`)
+        );
+      });
+    });
   });
 }

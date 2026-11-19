@@ -5,6 +5,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternsContract } from '../../../data/public';
+import { IndexPatternMissingIndices } from '../../../data/common/index_patterns/lib/errors';
 import { detectTraceData, detectTraceDataAcrossDataSources } from './auto_detect_trace_data';
 
 describe('detectTraceData', () => {
@@ -66,7 +67,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -78,6 +79,76 @@ describe('detectTraceData', () => {
     expect(mockIndexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: 'otel-v1-apm-span*',
       dataSourceId: undefined,
+    });
+  });
+
+  describe('otel v2 span template', () => {
+    const spanFields = [
+      { name: 'spanId', type: 'string' },
+      { name: 'traceId', type: 'string' },
+      { name: 'startTime', type: 'date', aggregatable: true },
+    ];
+
+    it('should detect otel-v2-apm-span* when only v2 indices exist', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*') return spanFields as any;
+        throw new IndexPatternMissingIndices('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracesDetected).toBe(true);
+      expect(result.tracePattern).toBe('otel-v2-apm-span*');
+      expect(result.traceTimeField).toBe('startTime');
+    });
+
+    it('should prefer otel-v2-apm-span* and skip the v1 probe when both exist', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*' || pattern === 'otel-v1-apm-span*') {
+          return spanFields as any;
+        }
+        throw new IndexPatternMissingIndices('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracePattern).toBe('otel-v2-apm-span*');
+      expect(mockIndexPatternsService.getFieldsForWildcard).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pattern: 'otel-v1-apm-span*' })
+      );
+    });
+
+    it('should not fall back to v1 when the v2 probe fails for another reason', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*') throw new Error('Request timed out');
+        if (pattern === 'otel-v1-apm-span*') return spanFields as any;
+        throw new IndexPatternMissingIndices('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracesDetected).toBe(false);
+      expect(result.tracePattern).toBeNull();
+      expect(mockIndexPatternsService.getFieldsForWildcard).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pattern: 'otel-v1-apm-span*' })
+      );
+    });
+
+    it('should fall back to otel-v1-apm-span* when v2 lacks required fields', async () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+        if (pattern === 'otel-v2-apm-span*') return [{ name: 'traceId', type: 'string' }] as any;
+        if (pattern === 'otel-v1-apm-span*') return spanFields as any;
+        throw new IndexPatternMissingIndices('No matching indices');
+      });
+
+      const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
+
+      expect(result.tracesDetected).toBe(true);
+      expect(result.tracePattern).toBe('otel-v1-apm-span*');
     });
   });
 
@@ -93,7 +164,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -114,7 +185,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -134,7 +205,7 @@ describe('detectTraceData', () => {
           { name: 'startTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -153,7 +224,7 @@ describe('detectTraceData', () => {
           { name: 'traceId', type: 'string' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -173,7 +244,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -194,7 +265,7 @@ describe('detectTraceData', () => {
           { name: 'time', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -220,7 +291,7 @@ describe('detectTraceData', () => {
           { name: 'time', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -248,7 +319,7 @@ describe('detectTraceData', () => {
           { name: 'time', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -264,7 +335,7 @@ describe('detectTraceData', () => {
   it('should return empty result when no matching indices exist', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
     mockIndexPatternsService.getFieldsForWildcard.mockRejectedValue(
-      new Error('No matching indices')
+      new IndexPatternMissingIndices('No matching indices')
     );
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -292,7 +363,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService, dataSourceId);
@@ -314,7 +385,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -340,7 +411,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -363,7 +434,7 @@ describe('detectTraceData', () => {
           { name: 'resource.attributes', type: 'object' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -387,7 +458,7 @@ describe('detectTraceData', () => {
           { name: 'attributes', type: 'object' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -420,7 +491,7 @@ describe('detectTraceData', () => {
           { name: 'time', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -451,7 +522,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     // Call with datasource-b, should NOT early return because trace dataset is from datasource-a
@@ -491,7 +562,7 @@ describe('detectTraceData', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     // For the remote data source the existing trace dataset is recognized -> skip detection
@@ -566,7 +637,7 @@ describe('detectTraceDataAcrossDataSources', () => {
           { name: 'endTime', type: 'date' },
         ] as any;
       }
-      throw new Error('No matching indices');
+      throw new IndexPatternMissingIndices('No matching indices');
     });
 
     const results = await detectTraceDataAcrossDataSources(
@@ -606,7 +677,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -658,7 +729,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -694,7 +765,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -733,7 +804,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -776,7 +847,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -804,7 +875,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -846,7 +917,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'time', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 
@@ -878,7 +949,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockRejectedValue(
-      new Error('No matching indices')
+      new IndexPatternMissingIndices('No matching indices')
     );
 
     const results = await detectTraceDataAcrossDataSources(
@@ -927,7 +998,7 @@ describe('detectTraceDataAcrossDataSources', () => {
             { name: 'endTime', type: 'date' },
           ] as any;
         }
-        throw new Error('No matching indices');
+        throw new IndexPatternMissingIndices('No matching indices');
       }
     );
 

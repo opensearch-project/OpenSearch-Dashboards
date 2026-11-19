@@ -37,13 +37,17 @@ export function showCloneModal(
   onClone: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
+    onTitleDuplicate: () => void,
+    copyPanels: { titleTemplate: string } | undefined,
+    signal: AbortSignal
   ) => Promise<{ id?: string } | { error: Error }>,
   title: string
 ) {
   const container = document.createElement('div');
   const root = createRoot(container);
   const closeModal = () => {
+    // A cancel can close the modal before the save settles; do not close it twice.
+    if (!container.parentNode) return;
     root.unmount();
     document.body.removeChild(container);
   };
@@ -51,9 +55,12 @@ export function showCloneModal(
   const onCloneConfirmed = async (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
+    onTitleDuplicate: () => void,
+    copyPanels: { titleTemplate: string } | undefined,
+    signal: AbortSignal
   ) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(
+    // Return the promise so Confirm stays loading until the clone finishes.
+    return onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate, copyPanels, signal).then(
       (response: { id?: string } | { error: Error }) => {
         // The only time you don't want to close the modal is if it's asking you
         // to confirm a duplicate title, in which case there will be no error and no id.

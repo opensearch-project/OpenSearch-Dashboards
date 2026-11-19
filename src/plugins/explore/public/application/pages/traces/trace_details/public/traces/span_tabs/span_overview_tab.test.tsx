@@ -16,7 +16,9 @@ Object.assign(navigator, {
 // Mock moment to have consistent time formatting in tests
 jest.mock('moment', () => {
   const actualMoment = jest.requireActual('moment');
-  return (date?: any) => {
+  // Keep moment's static API (version, tz, utc, ...) so modules that extend moment, such as
+  // moment-timezone, still load when this test imports them.
+  const mockMoment = (date?: any) => {
     if (date) {
       const momentInstance = actualMoment(date);
       // Mock specific format methods for consistent testing
@@ -29,6 +31,7 @@ jest.mock('moment', () => {
     }
     return actualMoment();
   };
+  return Object.assign(mockMoment, actualMoment);
 });
 
 // Mock helper functions

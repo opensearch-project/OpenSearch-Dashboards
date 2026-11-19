@@ -51,3 +51,10 @@ export enum HeaderVariant {
   PAGE = 'page',
   APPLICATION = 'application',
 }
+
+/**
+ * Attribute an app puts on the screen title it renders in the header action menu (the navigation
+ * plugin's TopNavMenu does). In the application header, the breadcrumbs read it so they don't show
+ * the same page name a second time.
+ */
+export const SCREEN_TITLE_ATTRIBUTE = 'data-osd-screen-title';

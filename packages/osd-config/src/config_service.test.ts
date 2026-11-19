@@ -261,6 +261,29 @@ test('tracks unhandled paths', async () => {
   expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
 });
 
+test('does not grow handled paths when the same path is read repeatedly', async () => {
+  const initialConfig = {
+    foo: 'value',
+    bar: { deep1: { key: '123' }, deep2: { key: '321' } },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+  await configService.setSchema('foo', schema.string());
+
+  // Simulates config being read on every page render.
+  for (let i = 0; i < 1000; i++) {
+    configService.atPath('foo');
+    configService.atPath(['bar', 'deep2']);
+    configService.atPath('bar.deep2');
+  }
+
+  // `setSchema` marks 'foo'; the reads add 'bar.deep2' once, in either path form.
+  expect((configService as any).handledPaths.size).toBe(2);
+  expect(await configService.getUsedPaths()).toEqual(['foo', 'bar.deep2.key']);
+  expect(await configService.getUnusedPaths()).toEqual(['bar.deep1.key']);
+});
+
 test('correctly passes context', async () => {
   const mockPackage = {
     branch: 'feature-v1',

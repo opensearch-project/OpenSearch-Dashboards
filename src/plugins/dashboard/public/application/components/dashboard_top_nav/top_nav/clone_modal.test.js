@@ -29,6 +29,7 @@
  */
 
 import sinon from 'sinon';
+import { act } from 'react-dom/test-utils';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -72,7 +73,65 @@ test('title', () => {
     <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
   );
   const event = { target: { value: 'a' } };
-  component.find('input').simulate('change', event);
+  component.find('input[data-test-subj="clonedDashboardTitle"]').simulate('change', event);
   findTestSubject(component, 'cloneConfirmButton').simulate('click');
   sinon.assert.calledWith(onClone, 'a');
+});
+
+test('clones without copying panels by default', async () => {
+  const component = mountWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  await act(async () => {
+    findTestSubject(component, 'cloneConfirmButton').simulate('click');
+  });
+  expect(onClone.firstCall.args[3]).toBeUndefined();
+});
+
+test('passes copy panels with the title template', () => {
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  component.setState({ copyPanels: true, panelTitleTemplate: '{{panelTitle}} - new' });
+  component.find('[data-test-subj="cloneConfirmButton"]').simulate('click');
+  expect(onClone.firstCall.args[3]).toEqual({ titleTemplate: '{{panelTitle}} - new' });
+});
+
+test('disables Confirm only when the title template is invalid', () => {
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  const disabled = () => component.find('[data-test-subj="cloneConfirmButton"]').prop('isDisabled');
+  component.setState({ copyPanels: true, panelTitleTemplate: '' });
+  expect(disabled()).toBe(true);
+  component.setState({ panelTitleTemplate: '{{panelTitle}}' });
+  expect(disabled()).toBe(false);
+  component.setState({ copyPanels: false, panelTitleTemplate: '' });
+  expect(disabled()).toBe(false);
+});
+
+test('cancel aborts the in-flight clone', async () => {
+  const component = mountWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
+  await act(async () => {
+    findTestSubject(component, 'cloneConfirmButton').simulate('click');
+  });
+  const signal = onClone.firstCall.args[4];
+  expect(signal.aborted).toBe(false);
+  findTestSubject(component, 'cloneCancelButton').simulate('click');
+  expect(signal.aborted).toBe(true);
+  sinon.assert.calledOnce(onClose);
+});
+
+test('Confirm stops loading when onClone rejects', async () => {
+  const failingClone = jest.fn(() => Promise.reject(new Error('boom')));
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={failingClone} />
+  );
+  await component
+    .instance()
+    .cloneDashboard()
+    .catch(() => {});
+  expect(component.state('isLoading')).toBe(false);
 });

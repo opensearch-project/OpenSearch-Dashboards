@@ -98,6 +98,7 @@ describe('ChatWindow', () => {
       getAvailableDataSources: jest
         .fn()
         .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
+      getRejectedDataSources: jest.fn().mockReturnValue([]),
       setDataSourceId: jest.fn(),
       clearConfirmedDataSourceId: jest.fn(),
       clearSessionDataSourceList: jest.fn(),

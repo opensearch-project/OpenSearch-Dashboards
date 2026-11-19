@@ -435,6 +435,20 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         if (!isValid) {
           if (compatibleDataSources.length >= 1) {
+            // Explain why the picker appears when a specific data source was rejected.
+            const rejected = chatService.getRejectedDataSources();
+            if (rejected.length > 0) {
+              const noticeMsg: SystemMessage = {
+                id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+                role: 'system',
+                content: i18n.translate('chat.dataSourceRejected', {
+                  defaultMessage:
+                    'The data source {ids} cannot be used. Choose a data source to continue.',
+                  values: { ids: rejected.map((r) => `"${r.id}"`).join(', ') },
+                }),
+              };
+              setTimelineSynced((prev) => [...prev, noticeMsg]);
+            }
             // Compatible data sources exist — prompt user to pick one.
             // User message is already in timeline; handleDataSourceSelect will continue.
             setPendingMessage(userMsg);

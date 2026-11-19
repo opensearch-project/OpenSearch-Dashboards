@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import './tabs.scss';
 import { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
@@ -22,15 +22,18 @@ import { RootState } from '../../application/utils/state_management/store';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { ErrorGuard } from './error_guard/error_guard';
 import {
+  EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_STATISTICS_TAB_ID,
 } from '../../../common';
 import { DEFAULT_DATA } from '../../../../data/common';
 import { DiscoverUninitialized } from '../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { DiscoverNoResults } from '../../application/legacy/discover/application/components/no_results/no_results';
 import { LoadingSpinner } from '../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { useIsNonTimeSeries } from '../../helpers/use_displayed_columns';
 import { useDatasetContext } from '../../application/context';
 import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_mode_context';
 import {
@@ -51,6 +54,11 @@ export const ExploreTabs = () => {
   const activeTabId = useSelector(selectActiveTab);
   const { dataset } = useDatasetContext();
   const metricsPageMode = useMetricsPageMode();
+  // Non-time-series mode: the dataset has no time field, or the query's source lacks the
+  // dataset's time field (e.g. a lookup). Drives the tab-set mode swap below.
+  const isNonTimeSeries = useIsNonTimeSeries();
+  // Results kept from the previous selection (see the dataset change middleware).
+  const isSelectionStale = useSelector((state: RootState) => !!state.queryEditor.isSelectionStale);
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
@@ -89,7 +97,7 @@ export const ExploreTabs = () => {
 
   const filteredTabs = useMemo(() => {
     if (flavorId == null) return [];
-    return registryTabs.filter((registryTab) => {
+    const tabs = registryTabs.filter((registryTab) => {
       const registeredFlavor = registryTab.flavor.includes(flavorId);
       const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
       const isFieldStatsTab = registryTab.id === EXPLORE_FIELD_STATS_TAB_ID;
@@ -118,7 +126,30 @@ export const ExploreTabs = () => {
       }
       return registeredFlavor;
     });
-  }, [flavorId, registryTabs, query, metricsPageMode]);
+
+    if (!isNonTimeSeries) return tabs;
+
+    // Non-time-series mode: when the results have no usable time field (a dataset without one, or
+    // a source such as a lookup lacking the dataset's time field), drop the tabs built around a
+    // timestamp: Logs (time column, histogram, time-sorted documents) and Patterns. Visualization
+    // and the rest render from the result schema, so they stay. The Statistics surface (a
+    // schema-driven table) takes over as the results table and is relabeled "Query Results" only
+    // in this mode.
+    const nonTimeSeriesTabs = tabs
+      .filter((tab) => tab.id !== EXPLORE_LOGS_TAB_ID && tab.id !== EXPLORE_PATTERNS_TAB_ID)
+      .map((tab) =>
+        tab.id === EXPLORE_STATISTICS_TAB_ID
+          ? {
+              ...tab,
+              label: i18n.translate('explore.queryResultsTab.label', {
+                defaultMessage: 'Query Results',
+              }),
+            }
+          : tab
+      );
+    // Never leave the tab bar empty: fall back to the normal list.
+    return nonTimeSeriesTabs.length > 0 ? nonTimeSeriesTabs : tabs;
+  }, [flavorId, registryTabs, query, metricsPageMode, isNonTimeSeries]);
 
   const activeRegistryTab = useMemo(() => {
     return filteredTabs.find((tab) => tab.id === activeTabId) || filteredTabs[0];
@@ -182,9 +213,23 @@ export const ExploreTabs = () => {
     }
 
     return (
-      <ErrorGuard registryTab={activeRegistryTab}>
-        <activeRegistryTab.component />
-      </ErrorGuard>
+      <>
+        {isSelectionStale && (
+          <EuiCallOut
+            size="s"
+            iconType="clock"
+            className="exploreTabs__staleSelectionCallout"
+            data-test-subj="exploreStaleSelectionCallout"
+            title={i18n.translate('explore.tabs.staleSelectionCallout', {
+              defaultMessage:
+                'Results are from the previous selection. Run the query to update them.',
+            })}
+          />
+        )}
+        <ErrorGuard registryTab={activeRegistryTab}>
+          <activeRegistryTab.component />
+        </ErrorGuard>
+      </>
     );
   };
 

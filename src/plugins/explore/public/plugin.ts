@@ -966,13 +966,16 @@ export class ExplorePlugin implements Plugin<
     }
 
     // Create saved explore loader so tool can use it
-    const savedExploreLoader = createSavedExploreLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: plugins.data.indexPatterns,
-      search: plugins.data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
+    const savedExploreLoader = createSavedExploreLoader(
+      {
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: plugins.data.indexPatterns,
+        search: plugins.data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      },
+      (type) => plugins.data.query.queryString.getDatasetService().getType(type)
+    );
 
     // Register disabled execute_ppl_query action as placeholder
     // This will be overridden when query panel mounts and restored when it unmounts
@@ -1079,6 +1082,12 @@ export class ExplorePlugin implements Plugin<
   private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
     const sqlSupportEnabled =
       this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    const visualizationEditorDescription = i18n.translate(
+      'explore.visualization.editor.description',
+      {
+        defaultMessage: 'Create and refine visualizations in one editor.',
+      }
+    );
     const appExtensions: VisTypeAlias['appExtensions'] = {
       visualizations: {
         docTypes: [SAVED_OBJECT_TYPE],
@@ -1174,11 +1183,15 @@ export class ExplorePlugin implements Plugin<
       aliasPath: '#/edit/',
       aliasApp: VISUALIZATION_EDITOR_APP_ID,
       title: i18n.translate('explore.visualization.editor.title', {
-        defaultMessage: 'Add visualization',
+        defaultMessage: 'Visualization editor',
       }),
-      description: i18n.translate('explore.visualization.editor.description', {
-        defaultMessage: 'Create visualization with visualization editor',
-      }),
+      description: visualizationEditorDescription,
+      promotion: {
+        description: visualizationEditorDescription,
+        buttonText: i18n.translate('explore.visualization.editor.promotionButton', {
+          defaultMessage: 'Create visualization',
+        }),
+      },
       icon: 'visualizeApp',
       stage: 'production',
       appExtensions,
@@ -1189,23 +1202,23 @@ export class ExplorePlugin implements Plugin<
     core: CoreStart,
     plugins: ExploreStartDependencies
   ) {
+    const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
+    const visTypes = plugins.visualizations.all();
+    const aliasTypes = plugins.visualizations.getAliases();
+    const allVisTypes = [...visTypes, ...aliasTypes];
+    dashboardVisActions.forEach((action) => {
+      const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
+      if (visOfAction && visOfAction.isClassic) {
+        action.grouping?.push({
+          id: 'others',
+          getDisplayName: () => 'More',
+          getIconType: () => 'boxesHorizontal',
+        });
+      }
+    });
+
     const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(core);
-    if (isExploreEnabledWorkspace) {
-      const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
-      const visTypes = plugins.visualizations.all();
-      const aliasTypes = plugins.visualizations.getAliases();
-      const allVisTypes = [...visTypes, ...aliasTypes];
-      dashboardVisActions.forEach((action) => {
-        const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
-        if (visOfAction && visOfAction.isClassic) {
-          action.grouping?.push({
-            id: 'others',
-            getDisplayName: () => 'More',
-            getIconType: () => 'boxesHorizontal',
-          });
-        }
-      });
-    } else {
+    if (!isExploreEnabledWorkspace) {
       plugins.visualizations
         .getAliases()
         .filter(

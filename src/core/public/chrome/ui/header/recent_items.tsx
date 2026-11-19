@@ -2,13 +2,14 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import * as Rx from 'rxjs';
 import moment from 'moment';
 import {
   EuiPanel,
   EuiListGroup,
   EuiListGroupItem,
+  EuiLoadingSpinner,
   EuiTitle,
   EuiPopoverTitle,
   EuiIcon,
@@ -66,32 +67,7 @@ type DetailedRecentlyAccessedItem = ChromeRecentlyAccessedHistoryItem &
     workspaceName?: string;
   };
 
-const bulkGetDetail = (savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>, http: HttpStart) => {
-  return Promise.all(
-    savedObjects.map((obj) =>
-      http
-        .get<SavedObjectWithMetadata>(
-          `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
-            obj.type
-          )}/${encodeURIComponent(obj.id)}`,
-          {
-            prependOptions: {
-              withoutClientBasePath: true,
-            },
-          }
-        )
-        .catch((error) => ({
-          id: obj.id,
-          type: obj.type,
-          error,
-          attributes: {},
-          references: [],
-          meta: {},
-          updated_at: '',
-        }))
-    )
-  );
-};
+const getSavedObjectKey = (type: string, id: string) => `${type}:${id}`;
 
 const recentsRadios = [
   {
@@ -125,8 +101,11 @@ export const RecentItems = ({
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
   const [recentsRadioIdSelected, setRecentsRadioIdSelected] = useState(recentsRadios[0].id);
   const workspaceList = useObservable(workspaceList$, []);
-  const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
-    []
+  const [savedObjectDetails, setSavedObjectDetails] = useState<SavedObjectWithMetadata[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const savedObjectRequests = useRef(new Map<string, Promise<SavedObjectWithMetadata>>());
+  const latestLoad = useRef<Promise<Array<PromiseSettledResult<SavedObjectWithMetadata>>> | null>(
+    null
   );
   const navLinks = useObservable(navLinks$, []);
   const loadingCount = useObservable(loadingCount$, 0);
@@ -192,7 +171,13 @@ export const RecentItems = ({
     'aria-label': i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
       defaultMessage: 'View recents',
     }),
-    onClick: () => setIsPopoverOpen((prev) => !prev),
+    onClick: () => {
+      // Load on opening so history updates while open wait until the next opening.
+      if (!isPopoverOpen) {
+        loadSavedObjectDetails();
+      }
+      setIsPopoverOpen((prev) => !prev);
+    },
     'data-test-subj': 'recentItemsSectionButton',
   };
   const recentButton = (
@@ -225,45 +210,114 @@ export const RecentItems = ({
     </EuiToolTip>
   );
 
-  useEffect(() => {
-    const savedObjects = recentlyAccessedItems
-      .filter(
-        (item) =>
-          item.meta?.type &&
+  const recentSavedObjects = useMemo(
+    () =>
+      recentlyAccessedItems.filter(
+        (item): item is ChromeRecentlyAccessedHistoryItem & { meta: { type: string } } =>
+          !!item.meta?.type &&
           (!item.workspaceId ||
             // If the workspace id is existing but the workspace is deleted, filter the item
-            (item.workspaceId &&
-              !!workspaceList.find((workspace) => workspace.id === item.workspaceId)))
-      )
-      .map((item) => ({
-        type: item.meta?.type || '',
-        id: item.id,
-      }));
-    if (savedObjects.length) {
-      bulkGetDetail(savedObjects, http).then((res) => {
-        const formatDetailedSavedObjects = res
-          .filter((obj) => !obj.error) // filter out saved objects has errors
-          .map((obj) => {
-            const recentAccessItem = recentlyAccessedItems.find(
-              (item) => item.id === obj.id
-            ) as ChromeRecentlyAccessedHistoryItem;
+            workspaceList.some((workspace) => workspace.id === item.workspaceId))
+      ),
+    [recentlyAccessedItems, workspaceList]
+  );
 
-            const findWorkspace = workspaceList.find(
-              (workspace) => workspace.id === recentAccessItem.workspaceId
-            );
-
-            return {
-              ...recentAccessItem,
-              ...obj,
-              ...recentAccessItem.meta,
-              updatedAt: moment(obj?.updated_at).valueOf(),
-              workspaceName: findWorkspace?.name,
-            };
+  const loadSavedObjectDetails = () => {
+    const requests = savedObjectRequests.current;
+    const promises = recentSavedObjects.map((item) => {
+      const type = item.meta.type;
+      const key = getSavedObjectKey(type, item.id);
+      let request = requests.get(key);
+      if (!request) {
+        request = http
+          .get<SavedObjectWithMetadata>(
+            `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
+              type
+            )}/${encodeURIComponent(item.id)}`,
+            {
+              prependOptions: {
+                withoutClientBasePath: true,
+              },
+            }
+          )
+          .then((object) => {
+            if (object.error) {
+              throw object.error;
+            }
+            return object;
+          })
+          .catch((error) => {
+            if (requests.get(key) === request) {
+              requests.delete(key);
+            }
+            throw error;
           });
-        setDetailedSavedObjects(formatDetailedSavedObjects);
-      });
+        requests.set(key, request);
+      }
+      return request;
+    });
+
+    const load = Promise.allSettled(promises);
+    latestLoad.current = load;
+    setIsLoading(promises.length > 0);
+    load.then((results) => {
+      // An older opening must not overwrite the latest list or hide the spinner
+      // while the newer opening is still waiting for added objects.
+      if (latestLoad.current !== load) {
+        return;
+      }
+      setSavedObjectDetails(
+        results.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []))
+      );
+      setIsLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    // Drop entries that leave recent history or belong to unavailable workspaces.
+    // This bounds the map; returning items are fetched again on the next opening.
+    const keys = new Set(
+      recentSavedObjects.map((item) => getSavedObjectKey(item.meta.type, item.id))
+    );
+    for (const key of savedObjectRequests.current.keys()) {
+      if (!keys.has(key)) {
+        savedObjectRequests.current.delete(key);
+      }
     }
-  }, [recentlyAccessedItems, http, workspaceList]);
+  }, [recentSavedObjects]);
+
+  useEffect(
+    () => () => {
+      // Closing retains requests; unmounting prevents their completions from updating state.
+      latestLoad.current = null;
+      savedObjectRequests.current.clear();
+    },
+    []
+  );
+
+  const detailedSavedObjects = useMemo<DetailedRecentlyAccessedItem[]>(
+    () =>
+      recentSavedObjects.flatMap((item) => {
+        const obj = savedObjectDetails.find(
+          (detail) => detail.type === item.meta.type && detail.id === item.id
+        );
+        if (!obj) {
+          return [];
+        }
+
+        return [
+          {
+            ...item,
+            ...obj,
+            ...item.meta,
+            updatedAt: moment(obj.updated_at).valueOf(),
+            workspaceName: workspaceList.find((workspace) => workspace.id === item.workspaceId)
+              ?.name,
+          },
+        ];
+      }),
+    [recentSavedObjects, savedObjectDetails, workspaceList]
+  );
 
   const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
@@ -298,7 +352,14 @@ export const RecentItems = ({
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {selectedRecentItems.length > 0 ? (
+        {isLoading ? (
+          <EuiLoadingSpinner
+            size="m"
+            aria-label={i18n.translate('core.header.recent.loading', {
+              defaultMessage: 'Loading recent items',
+            })}
+          />
+        ) : selectedRecentItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
             {selectedRecentItems.map((item) => (
               <EuiListGroupItem

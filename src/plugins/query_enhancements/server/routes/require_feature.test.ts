@@ -6,8 +6,17 @@
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { FEATURE_DISABLED_MESSAGE, requireFeature } from './require_feature';
 
-const createContext = (getConfig: jest.Mock, asyncLocalStore?: Map<string, any>) =>
-  ({ core: { dynamicConfig: { client: { getConfig }, asyncLocalStore } } }) as any;
+const createContext = (getConfig: jest.Mock, requestStore?: Map<string, any>) =>
+  ({
+    core: {
+      dynamicConfig: {
+        client: { getConfig },
+        createStoreFromRequest: jest.fn(() => requestStore),
+        // A different store, so a lookup through the ambient one is detectable.
+        asyncLocalStore: new Map([['ambient', true]]),
+      },
+    },
+  }) as any;
 
 const createResponse = () => ({
   ok: jest.fn((v) => v),
@@ -87,18 +96,33 @@ describe('requireFeature', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('passes the request async local store to the config lookup', async () => {
+  it('resolves the flag with a store built from the request', async () => {
     const getConfig = jest.fn().mockResolvedValue({ ppl: { streaming: { enabled: true } } });
     const store = new Map<string, any>([['request', 'x']]);
+    const context = createContext(getConfig, store);
+    const request = { headers: {} } as any;
 
     await requireFeature('pplStreaming', logger, jest.fn())(
-      createContext(getConfig, store),
+      context,
+      request,
+      createResponse() as any
+    );
+
+    expect(context.core.dynamicConfig.createStoreFromRequest).toHaveBeenCalledWith(request);
+    expect(getConfig).toHaveBeenCalledWith(expect.anything(), {
+      asyncLocalStorageContext: store,
+    });
+  });
+
+  it('omits the store when the request yields none', async () => {
+    const getConfig = jest.fn().mockResolvedValue({ ppl: { streaming: { enabled: true } } });
+
+    await requireFeature('pplStreaming', logger, jest.fn())(
+      createContext(getConfig),
       {} as any,
       createResponse() as any
     );
 
-    expect(getConfig).toHaveBeenCalledWith(expect.anything(), {
-      asyncLocalStorageContext: store,
-    });
+    expect(getConfig).toHaveBeenCalledWith(expect.anything(), undefined);
   });
 });

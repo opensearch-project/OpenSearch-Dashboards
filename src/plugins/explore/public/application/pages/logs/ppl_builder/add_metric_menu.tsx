@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { AggFn } from './types';
-import { AGG_FUNCTIONS } from './operations';
+import { aggregationsFor, useVisualBuilder } from './visual_builder_language';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
 interface AddMetricMenuProps {
@@ -25,9 +25,10 @@ export const AddMetricMenu: React.FC<AddMetricMenuProps> = ({
     defaultMessage: 'Aggregation',
   });
 
+  const language = useVisualBuilder();
   const options = useMemo<SearchMenuOption[]>(
     () =>
-      AGG_FUNCTIONS.map((agg) => ({
+      aggregationsFor(language).map((agg) => ({
         key: agg.id,
         label: agg.label,
         description: agg.description,
@@ -35,7 +36,7 @@ export const AddMetricMenu: React.FC<AddMetricMenuProps> = ({
         onSelect: () => onAdd(agg.id),
         dataTestSubj: `pplBuilderAddAggregationOption-${agg.id}`,
       })),
-    [onAdd]
+    [onAdd, language]
   );
 
   return (

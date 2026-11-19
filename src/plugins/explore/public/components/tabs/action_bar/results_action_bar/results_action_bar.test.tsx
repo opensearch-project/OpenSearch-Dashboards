@@ -23,13 +23,21 @@ const mockSetShowRawTable = jest.fn();
 // The count comes from the results cache and dataset context, neither of which this mock store
 // carries; the action bar's job here is only to pass it through to the hits counter.
 const mockUseHiddenColumnCount = jest.fn(() => 0);
+const mockUseIsNonTimeSeries = jest.fn(() => false);
 jest.mock('../../../../helpers/use_displayed_columns', () => ({
   ...jest.requireActual('../../../../helpers/use_displayed_columns'),
   useHiddenColumnCount: () => mockUseHiddenColumnCount(),
+  useIsNonTimeSeries: () => mockUseIsNonTimeSeries(),
 }));
 
+// jest.mock('../download_csv', () => ({
+//   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+// }));
+const mockDiscoverDownloadCsv = jest.fn((_props: any) => (
+  <div data-test-subj="discoverDownloadCsvButton" />
+));
 jest.mock('../download_csv', () => ({
-  DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+  DiscoverDownloadCsv: (props: any) => mockDiscoverDownloadCsv(props),
 }));
 jest.mock('../../../visualizations/add_to_dashboard_button', () => ({
   SaveAndAddButtonWithModal: () => <div data-test-subj="saveAndAddButtonWithModal" />,
@@ -76,6 +84,26 @@ describe('ResultsActionBar', () => {
     expect(screen.getByTestId('dscResultsActionBar')).toBeInTheDocument();
   });
 
+  test('shows the non-time-series badge when the result set is non-time-series', () => {
+    mockUseIsNonTimeSeries.mockReturnValue(true);
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.getByTestId('exploreNonTimeSeriesBadge')).toBeInTheDocument();
+    mockUseIsNonTimeSeries.mockReturnValue(false);
+  });
+
+  test('omits the non-time-series badge for time-series results', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.queryByTestId('exploreNonTimeSeriesBadge')).not.toBeInTheDocument();
+  });
+
   test('should render the hits counter component', () => {
     render(
       <Provider store={store}>
@@ -83,6 +111,71 @@ describe('ResultsActionBar', () => {
       </Provider>
     );
     expect(screen.getByTestId('dscResultCount')).toBeInTheDocument();
+  });
+
+  test('offers the Max export on the Logs tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} hits={459} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ hits: 459, shouldShowMaxExport: true })
+    );
+  });
+
+  test('does not offer the Max export on the Visualization tab', () => {
+    const visStore = mockStore({
+      ui: { ...initialState.ui, activeTabId: 'explore_visualization_tab' },
+    });
+    render(
+      <Provider store={visStore}>
+        <DiscoverResultsActionBar {...props} hits={459} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+      expect.objectContaining({ shouldShowMaxExport: false })
+    );
+  });
+
+  describe('Visible row count', () => {
+    const mockBuilderWithVisData = (rowCount: number) =>
+      jest.spyOn(visualizationBuilder, 'getVisualizationBuilder').mockReturnValue({
+        visConfig$: new BehaviorSubject<ChartConfig | undefined>(undefined),
+        showRawTable$: new BehaviorSubject<boolean>(false),
+        data$: new BehaviorSubject({
+          transformedData: Array.from({ length: rowCount }, () => ({})),
+        }),
+      } as unknown as visualizationBuilder.VisualizationBuilder);
+
+    test('counts the visualization table rows on the Visualization tab', () => {
+      const spy = mockBuilderWithVisData(3);
+      const visStore = mockStore({
+        ui: { ...initialState.ui, activeTabId: 'explore_visualization_tab' },
+      });
+      render(
+        <Provider store={visStore}>
+          <DiscoverResultsActionBar {...props} />
+        </Provider>
+      );
+      expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ visibleRowsCount: 3 })
+      );
+      spy.mockRestore();
+    });
+
+    test('leaves the count to the rows on the Logs tab', () => {
+      const spy = mockBuilderWithVisData(3);
+      render(
+        <Provider store={store}>
+          <DiscoverResultsActionBar {...props} />
+        </Provider>
+      );
+      expect(mockDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ visibleRowsCount: undefined })
+      );
+      spy.mockRestore();
+    });
   });
 
   test('should render the download CSV button when dataset and rows are available', () => {
@@ -93,6 +186,26 @@ describe('ResultsActionBar', () => {
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
+  });
+
+  test('holds the export back while the rows are still streaming', () => {
+    const { rerender } = render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} streaming={{ isPolling: true } as any} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStreaming: true })
+    );
+
+    rerender(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} streaming={{ isPolling: false } as any} />
+      </Provider>
+    );
+    expect(mockDiscoverDownloadCsv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStreaming: false })
+    );
   });
 
   test('should not render inspector button as it is commented out', () => {
@@ -249,6 +362,7 @@ describe('ResultsActionBar', () => {
           axesMapping: undefined,
         }),
         showRawTable$: new BehaviorSubject<boolean>(false),
+        data$: new BehaviorSubject(undefined),
         setShowRawTable: mockSetShowRawTable,
       } as unknown as visualizationBuilder.VisualizationBuilder);
 

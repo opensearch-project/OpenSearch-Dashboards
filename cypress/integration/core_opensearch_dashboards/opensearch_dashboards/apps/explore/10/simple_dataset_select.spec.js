@@ -103,7 +103,11 @@ export const runSimpleDatasetSelectorTests = () => {
         }
       });
 
-      it(`Validate non time-based Indexpattern are filtered when original language was ${config.language} from the simple dataset selector`, () => {
+      // Explore's dataset selector passes showNonTimeFieldDatasets={true}: PPL can query a dataset
+      // without a time field (Explore switches to its non-time-series tab set), so such datasets
+      // are listed alongside time-based ones rather than filtered out. INDEX_PATTERN only
+      // supports PPL here, so there is no DQL/Lucene variant that still filters.
+      it(`Validate non time-based Indexpattern are shown when original language was ${config.language} from the simple dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'explore/logs',
@@ -114,11 +118,18 @@ export const runSimpleDatasetSelectorTests = () => {
           .should('not.be.disabled')
           .click({ force: true });
 
-        cy.get('[data-test-subj*="datasetSelectOption"]').should('have.length', 1);
-        // Ensure no dataset options contain "data_logs_small_no_time_" text
-        cy.get('[data-test-subj*="datasetSelectOption"]').each(($el) => {
-          cy.wrap($el).should('not.contain.text', INDEX_PATTERN_WITH_NO_TIME);
-        });
+        // Both the time-based and the non-time-based dataset are offered.
+        cy.get('[data-test-subj*="datasetSelectOption"]')
+          .should('have.length', 2)
+          .then(($options) => {
+            const labels = [...$options].map((option) => option.textContent);
+            expect(
+              labels.filter((label) => label.includes(INDEX_PATTERN_WITH_NO_TIME))
+            ).to.have.length(1);
+            expect(
+              labels.filter((label) => label.includes(INDEX_PATTERN_WITH_TIME))
+            ).to.have.length(1);
+          });
       });
     });
   });

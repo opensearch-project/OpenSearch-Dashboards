@@ -15,7 +15,13 @@ import {
   navigateToTraceDetailsWithSpan,
   getStatusCodeColor,
   DurationTableCell,
+  AgentTracesTimeCell,
 } from './trace_utils';
+import {
+  TraceExpansionProvider,
+  TraceExpansionState,
+} from '../../../../application/pages/traces/trace_expansion_context';
+import { BaseRow } from '../../../../application/pages/traces/hooks/tree_utils';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
 const mockOpen = jest.fn();
@@ -314,7 +320,7 @@ describe('trace_utils', () => {
       const result = buildTraceDetailsUrl('span-123', 'trace-456', null as any);
 
       expect(result).toBe(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
       );
     });
 
@@ -323,7 +329,7 @@ describe('trace_utils', () => {
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
       );
     });
 
@@ -509,7 +515,7 @@ describe('trace_utils', () => {
       handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
         '_blank'
       );
     });
@@ -644,7 +650,7 @@ describe('trace_utils', () => {
       fireEvent.click(link);
 
       expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
+        "http://localhost:5601/app/agentTraces/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v*-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
         '_blank'
       );
     });
@@ -724,6 +730,49 @@ describe('trace_utils', () => {
       expect(getStatusCodeColor(300)).toBe('primary');
       expect(getStatusCodeColor(400)).toBe('warning');
       expect(getStatusCodeColor(500)).toBe('danger');
+    });
+  });
+
+  describe('AgentTracesTimeCell', () => {
+    const traceRow = {
+      startTime: 'Nov 11, 2026 @ 12:18:50.793',
+      rawStartTime: '2026-11-11 12:18:50.793',
+    } as unknown as BaseRow;
+    const renderCell = (extra: Partial<TraceExpansionState>) =>
+      render(
+        <TraceExpansionProvider
+          value={{
+            expandedRows: new Set(),
+            toggleExpansion: jest.fn(),
+            traceLoadingState: new Map(),
+            getRowMeta: () => ({ level: 0, isExpandable: false, traceRow }),
+            ...extra,
+          }}
+        >
+          <table>
+            <tbody>
+              <tr>
+                <AgentTracesTimeCell hitId="h1" />
+              </tr>
+            </tbody>
+          </table>
+        </TraceExpansionProvider>
+      );
+
+    it('formats the raw start time with the list formatter', () => {
+      const formatListTs = jest.fn(() => 'Nov 11, 2026 @ 12:18:50');
+      renderCell({ formatListTs });
+      expect(formatListTs).toHaveBeenCalledWith('2026-11-11 12:18:50.793');
+      expect(screen.getByTestId('agentTracesTimeLink')).toHaveTextContent(
+        'Nov 11, 2026 @ 12:18:50'
+      );
+    });
+
+    it("falls back to the row's start time without a list formatter", () => {
+      renderCell({});
+      expect(screen.getByTestId('agentTracesTimeLink')).toHaveTextContent(
+        'Nov 11, 2026 @ 12:18:50.793'
+      );
     });
   });
 });

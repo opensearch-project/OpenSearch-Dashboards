@@ -92,7 +92,14 @@ export const OPERATOR_DEF_MAP: Record<WhereOperator, OperatorDef> = indexBy(
 export const operatorArity = (operator: WhereOperator): OperatorArity =>
   OPERATOR_DEF_MAP[operator].arity;
 
-export function operatorsForFieldType(fieldType?: string): OperatorDef[] {
-  const type = fieldType || 'string';
-  return OPERATOR_DEFS.filter((def) => !def.fieldTypes || def.fieldTypes.includes(type));
+/**
+ * The operators a field of this type can use. A field of unknown type (a source's `getFields` can
+ * leave it unset) takes any value, so it gets every operator.
+ */
+export function operatorsForFieldType(
+  fieldType?: string,
+  defs: OperatorDef[] = OPERATOR_DEFS
+): OperatorDef[] {
+  if (!fieldType) return defs;
+  return defs.filter((def) => !def.fieldTypes || def.fieldTypes.includes(fieldType));
 }

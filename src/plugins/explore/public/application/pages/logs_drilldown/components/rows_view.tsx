@@ -24,7 +24,7 @@ import { BrowsableItem, IndexClassification } from '../types';
 import { deriveRowState, isDead, LogRowState } from '../row_state';
 import { useIndexList } from '../hooks/use_index_list';
 import { useDatasetList } from '../hooks/use_dataset_list';
-import { useConcurrentQueries } from '../../metrics/explore/hooks/use_concurrent_queries';
+import { useConcurrentQueries } from '../../../utils/hooks/use_concurrent_queries';
 import { fetchPreview, DEFAULT_PREVIEW_SIZE } from '../hooks/fetch_preview';
 import { fetchHistogram } from '../hooks/fetch_histogram';
 import { useCreateDataset } from '../hooks/use_create_dataset';

@@ -19,6 +19,18 @@ import { SupportLanguageType } from '../query_builder/query_builder';
 import { getRequiredSignalType } from '../query_builder/utils';
 import '../visualization_editor.scss';
 
+/**
+ * Whether the query names the dataset it runs on, whatever that dataset's title: a PPL source clause
+ * before the first pipe, or a SQL FROM. Such a query keeps running on what it names, so it can't
+ * move to another dataset (`source = logs-2026.01 | …` names its index even on `logs-*`).
+ */
+const namesItsDataset = (query: string, language: string | undefined): boolean =>
+  language === 'PPL'
+    ? /^[^|]*\bsource\s*=/i.test(query)
+    : language === 'SQL'
+      ? /\bfrom\b/i.test(query)
+      : false;
+
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
@@ -34,6 +46,21 @@ export const DatasetSelectWidget = () => {
   } = services;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // The languages the dataset's type can run, or undefined when its type isn't known.
+  const getTypeLanguages = useCallback(
+    (dataset: Dataset): string[] | undefined => {
+      try {
+        return queryString
+          .getDatasetService?.()
+          ?.getType(dataset.type)
+          ?.supportedLanguages(dataset);
+      } catch {
+        return undefined;
+      }
+    },
+    [queryString]
+  );
 
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset | undefined) => {
@@ -53,6 +80,29 @@ export const DatasetSelectWidget = () => {
         }
 
         const initialQuery = queryString.getInitialQueryByDataset(dataset);
+
+        // A dataset that runs the current language (e.g. other log groups of the same source) keeps
+        // the query, so the chart keeps the columns it is built on, and the editor keeps its text.
+        // A query that names the previous dataset (a PPL source or SQL FROM) is for that dataset
+        // only, and another language can't run it: those start from an empty query.
+        const currentQuery = queryState?.query ?? '';
+        const currentLanguage = queryState?.language;
+        const previousTitle = queryState?.dataset?.title;
+        const typeLanguages = getTypeLanguages(dataset);
+        const runsCurrentLanguage =
+          !!currentLanguage &&
+          (typeLanguages
+            ? typeLanguages.includes(currentLanguage)
+            : initialQuery.language === currentLanguage);
+        const namesPreviousDataset =
+          namesItsDataset(currentQuery, currentLanguage) ||
+          (!!previousTitle && currentQuery.includes(previousTitle));
+        if (runsCurrentLanguage && !namesPreviousDataset) {
+          queryBuilder.updateQueryState({ dataset });
+          queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+          return;
+        }
+
         queryBuilder.updateQueryState({
           ...initialQuery,
           query: EMPTY_QUERY.QUERY,
@@ -67,7 +117,14 @@ export const DatasetSelectWidget = () => {
         });
       }
     },
-    [queryString, clearEditor, queryBuilder, services.notifications?.toasts]
+    [
+      queryString,
+      clearEditor,
+      queryBuilder,
+      queryState,
+      getTypeLanguages,
+      services.notifications?.toasts,
+    ]
   );
 
   // The active dataset's source type decides the picker, as in Explore's main query panel: its own

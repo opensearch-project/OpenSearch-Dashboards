@@ -30,6 +30,14 @@ export const getTextColor = (backgroundColor: string): string => {
   return luminance < 0.5 ? '#FFFFFF' : '#000000';
 };
 
+/** The text a table cell shows for a value. Data links carry the same text. */
+export const cellValueText = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return typeof value === 'object' ? JSON.stringify(value) : String(value);
+};
+
 export const matchesFilter = (value: any, config: FilterConfig) => {
   const op = config.operator || FilterOperator.Contains;
   const hasValues = Array.isArray(config.values) && config.values.length > 0;

@@ -73,11 +73,17 @@ jest.mock('../../../../helpers/use_flavor_id', () => ({
 
 // Import components and hooks after mocks
 import { BottomRightContainer } from './bottom_right_container';
+import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
+import {
+  SourceTypeEmptyStateProps,
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -90,7 +96,8 @@ describe('BottomRightContainer', () => {
     status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED,
     results: Record<string, unknown> = {},
     progress?: Record<string, number>,
-    streaming?: Record<string, unknown>
+    streaming?: Record<string, unknown>,
+    query: Record<string, unknown> = {}
   ) => {
     const queryStatusMap =
       status === QueryExecutionStatus.LOADING
@@ -116,7 +123,7 @@ describe('BottomRightContainer', () => {
             lastExecutedPrompt: '',
           }
         ) => state,
-        query: (state = {}) => state,
+        query: (state = query) => state,
         results: (state = results) => state,
         tab: (state = {}) => state,
       },
@@ -357,5 +364,79 @@ describe('BottomRightContainer', () => {
 
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
+  });
+  describe("a registered source's empty state", () => {
+    const sourceDataset = { id: 'source-dataset', title: 'Source dataset', type: 'TEST_SOURCE' };
+    const SourceEmptyState = jest.fn(({ children, onRefresh }: SourceTypeEmptyStateProps) => (
+      <div data-test-subj="source-empty-state">
+        <button onClick={onRefresh}>Source refresh</button>
+        {children}
+      </div>
+    ));
+
+    const renderWithQuery = (status: QueryExecutionStatus, query: Record<string, unknown>) =>
+      render(
+        <Provider store={createMockStore(status, {}, undefined, undefined, query)}>
+          <BottomRightContainer />
+        </Provider>
+      );
+
+    beforeEach(() => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'test-source',
+        label: 'Test source',
+        datasetTypes: ['TEST_SOURCE'],
+        resolveDefaultDataset: async () => undefined,
+        emptyState: SourceEmptyState,
+      });
+      setSourceTypeRegistry(registry);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { timeFieldName: 'timestamp' } as any,
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    afterAll(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+    it("wraps the results area for the source's datasets, with Explore's content as children", () => {
+      renderWithQuery(QueryExecutionStatus.UNINITIALIZED, { dataset: sourceDataset });
+
+      expect(screen.getByTestId('source-empty-state')).toBeInTheDocument();
+      expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+      expect(SourceEmptyState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: 'logsResults',
+          dataset: sourceDataset,
+          data: mockServices.data,
+          flavor: ExploreFlavor.Logs,
+        }),
+        expect.anything()
+      );
+    });
+
+    it("passes Explore's refresh", () => {
+      renderWithQuery(QueryExecutionStatus.READY, { dataset: sourceDataset });
+
+      screen.getByText('Source refresh').click();
+      expect(executeQueries).toHaveBeenCalledWith({ services: mockServices });
+    });
+
+    it('renders nothing before any status applies, as without a source', () => {
+      const { container } = renderWithQuery('UNKNOWN_STATUS' as any, { dataset: sourceDataset });
+
+      expect(container).toBeEmptyDOMElement();
+      expect(SourceEmptyState).not.toHaveBeenCalled();
+    });
+
+    it("leaves other sources' datasets alone", () => {
+      renderWithQuery(QueryExecutionStatus.UNINITIALIZED, {
+        dataset: { id: 'logs-*', title: 'logs-*', type: 'INDEX_PATTERN' },
+      });
+
+      expect(screen.queryByTestId('source-empty-state')).not.toBeInTheDocument();
+      expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+    });
   });
 });

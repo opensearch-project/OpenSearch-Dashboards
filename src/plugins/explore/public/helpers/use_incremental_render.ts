@@ -63,6 +63,8 @@ export function useIncrementalRender({
   );
 
   const [count, setCount] = useState(pageSize);
+  const countRef = useRef(count);
+  countRef.current = count;
   // Both counters are clamped to the cap so the lookahead loop below always has a reachable
   // target; a lookahead larger than the cap would otherwise never be satisfied.
   const [desiredCount, setDesiredCount] = useState(() => clampToCap(Math.min(total, lookahead)));
@@ -86,16 +88,20 @@ export function useIncrementalRender({
     setSentinelElement(node);
   }, []);
 
+  // Re-observed as the count grows: an observer reports only visibility changes, so a sentinel that
+  // stays visible on a tall screen would otherwise stop the list growing.
+  const canGrow = count < total && (cap === undefined || count < cap);
   useEffect(() => {
-    if (!enabled || !sentinelElement) {
+    if (!enabled || !sentinelElement || !canGrow) {
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          // Render one page now and queue a lookahead for the frame-throttled loop below.
+          // Render one page now and queue a lookahead for the frame-throttled loop below. Set, not
+          // added to, since a sentinel that stays visible reports on every page.
           setCount((prev) => clampToCap(prev + pageSize));
-          setDesiredCount((prev) => clampToCap(prev + lookahead));
+          setDesiredCount((prev) => clampToCap(Math.max(prev, countRef.current + lookahead)));
         }
       },
       {
@@ -106,7 +112,7 @@ export function useIncrementalRender({
     );
     observer.observe(sentinelElement);
     return () => observer.unobserve(sentinelElement);
-  }, [enabled, sentinelElement, pageSize, lookahead, clampToCap]);
+  }, [enabled, sentinelElement, canGrow, count, pageSize, lookahead, clampToCap]);
 
   // Lazy lookahead: render another page per animation frame while frames are arriving fast
   // enough, so a healthy browser fills the queued lookahead without further scrolling.

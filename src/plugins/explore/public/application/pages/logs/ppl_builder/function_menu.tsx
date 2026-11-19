@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { ScalarCall } from './types';
-import { SCALAR_FN_CATEGORIES } from './operations';
+import { useVisualBuilder } from './visual_builder_language';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
 interface FunctionMenuProps {
@@ -20,9 +20,10 @@ export const FunctionMenu: React.FC<FunctionMenuProps> = ({ onAddFunction, dataT
     defaultMessage: 'Wrap in function',
   });
 
+  const { functions } = useVisualBuilder();
   const options = useMemo<SearchMenuOption[]>(
     () =>
-      SCALAR_FN_CATEGORIES.flatMap((cat) =>
+      (functions ?? []).flatMap((cat) =>
         cat.items.map((item) => ({
           key: item.id,
           label: `${item.name}()`,
@@ -32,7 +33,7 @@ export const FunctionMenu: React.FC<FunctionMenuProps> = ({ onAddFunction, dataT
           dataTestSubj: `pplBuilderFnOption-${item.id}`,
         }))
       ),
-    [onAddFunction]
+    [onAddFunction, functions]
   );
 
   return (

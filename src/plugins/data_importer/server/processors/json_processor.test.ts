@@ -8,6 +8,7 @@ import invalidJson from './test_utils/invalid_json.json';
 import { JSONProcessor } from './json_processor';
 import { opensearchServiceMock } from '../../../../core/server/mocks';
 import { Readable } from 'stream';
+import { bulkActions, bulkDocs, mockBulk } from './test_utils/bulk_test_utils';
 
 describe('JSONProcessor', () => {
   const processor = new JSONProcessor();
@@ -31,33 +32,40 @@ describe('JSONProcessor', () => {
 
   describe('ingestText()', () => {
     beforeEach(() => {
+      clientMock.bulk.mockReset();
       clientMock.index.mockClear();
+      mockBulk(clientMock);
     });
 
-    it('should ingest the document into OpenSearch', async () => {
+    it('should ingest the document into OpenSearch via _bulk', async () => {
       const response = await processor.ingestText(JSON.stringify(validJson), {
         client: clientMock,
         indexName: 'foo',
       });
 
       expect(response.total).toBe(1);
-      expect(clientMock.index).toHaveBeenCalledWith({
-        index: 'foo',
-        body: validJson,
-      });
+      expect(response.failedRows).toEqual([]);
+      expect(response.errorSummary).toEqual([]);
+      expect(clientMock.index).not.toHaveBeenCalled();
+      expect(bulkActions(clientMock)).toEqual([{ index: { _index: 'foo' } }]);
+      expect(bulkDocs(clientMock)).toEqual([validJson]);
     });
 
-    it('should handle OpenSearch errors and show the correct failedRow', async () => {
-      clientMock.index.mockRejectedValueOnce({});
+    it('should handle OpenSearch errors and report the cause', async () => {
+      mockBulk(clientMock, [1]);
 
       const response = await processor.ingestText(JSON.stringify(validJson), {
         client: clientMock,
         indexName: 'foo',
       });
 
-      expect(clientMock.index).toHaveBeenCalledTimes(1);
+      expect(clientMock.bulk).toHaveBeenCalledTimes(1);
       expect(response.total).toBe(1);
-      expect(response.failedRows).toMatchObject([1]);
+      expect(response.failedRows).toEqual([1]);
+      expect(response.message).toBe('Indexed 0 documents');
+      expect(response.errorSummary).toEqual([
+        expect.objectContaining({ type: 'mapper_parsing_exception', count: 1, sampleRows: [1] }),
+      ]);
     });
 
     it('should inject lookup field when lookupId and lookupField are provided', async () => {
@@ -71,19 +79,18 @@ describe('JSONProcessor', () => {
         lookupField,
       });
 
-      expect(clientMock.index).toHaveBeenCalledWith({
-        index: 'foo',
-        body: { ...validJson, [lookupField]: lookupId },
-      });
+      expect(bulkDocs(clientMock)).toEqual([{ ...validJson, [lookupField]: lookupId }]);
     });
   });
 
   describe('ingestFile()', () => {
     beforeEach(() => {
+      clientMock.bulk.mockReset();
       clientMock.index.mockClear();
+      mockBulk(clientMock);
     });
 
-    it('should ingest the document into OpenSearch', async () => {
+    it('should ingest the document into OpenSearch via _bulk', async () => {
       const validJsonFileStream = Readable.from([JSON.stringify(validJson)]);
       const response = await processor.ingestFile(validJsonFileStream, {
         client: clientMock,
@@ -91,13 +98,12 @@ describe('JSONProcessor', () => {
       });
 
       expect(response.total).toBe(1);
-      expect(clientMock.index).toHaveBeenCalledWith({
-        index: 'foo',
-        body: validJson,
-      });
+      expect(response.failedRows).toEqual([]);
+      expect(clientMock.index).not.toHaveBeenCalled();
+      expect(bulkDocs(clientMock)).toEqual([validJson]);
     });
 
-    it('should populate failedRows when attempting to ingest an invalid document into OpenSearch', async () => {
+    it('should populate failedRows and a parse_error summary for invalid JSON', async () => {
       const invalidJsonFileStream = Readable.from([invalidJsonString]);
       const response = await processor.ingestFile(invalidJsonFileStream, {
         client: clientMock,
@@ -105,9 +111,13 @@ describe('JSONProcessor', () => {
       });
       expect(response.total).toBe(1);
       expect(response.failedRows).toMatchObject([1]);
+      expect(response.errorSummary).toEqual([
+        expect.objectContaining({ type: 'parse_error', count: 1, sampleRows: [1] }),
+      ]);
+      expect(clientMock.bulk).not.toHaveBeenCalled();
     });
 
-    it('should populate failedRows when attempting to ingest the document with empty fields into OpenSearch', async () => {
+    it('should populate failedRows and NOT index a document with empty fields', async () => {
       const invalidJsonFileStream = Readable.from([JSON.stringify(invalidJson)]);
       const response = await processor.ingestFile(invalidJsonFileStream, {
         client: clientMock,
@@ -115,10 +125,14 @@ describe('JSONProcessor', () => {
       });
       expect(response.total).toBe(1);
       expect(response.failedRows).toMatchObject([1]);
+      expect(response.errorSummary).toEqual([
+        expect.objectContaining({ type: 'invalid_row', count: 1 }),
+      ]);
+      expect(clientMock.bulk).not.toHaveBeenCalled();
     });
 
-    it('should handle OpenSearch errors and show the correct failedRow', async () => {
-      clientMock.index.mockRejectedValueOnce({});
+    it('should handle OpenSearch errors and report the cause', async () => {
+      mockBulk(clientMock, [1]);
 
       const validJSONFileStream = Readable.from(JSON.stringify(validJson));
       const response = await processor.ingestFile(validJSONFileStream, {
@@ -126,9 +140,26 @@ describe('JSONProcessor', () => {
         indexName: 'foo',
       });
 
-      expect(clientMock.index).toHaveBeenCalledTimes(1);
+      expect(clientMock.bulk).toHaveBeenCalledTimes(1);
       expect(response.total).toBe(1);
       expect(response.failedRows).toMatchObject([1]);
+      expect(response.errorSummary).toEqual([
+        expect.objectContaining({ type: 'mapper_parsing_exception', count: 1 }),
+      ]);
+    });
+
+    it('should stringify numbers going into keyword fields of the target mapping', async () => {
+      const response = await processor.ingestFile(
+        Readable.from([JSON.stringify({ zip: 2134, age: 30 })]),
+        {
+          client: clientMock,
+          indexName: 'foo',
+          mapping: { properties: { zip: { type: 'keyword' }, age: { type: 'integer' } } },
+        }
+      );
+
+      expect(response.failedRows).toEqual([]);
+      expect(bulkDocs(clientMock)).toEqual([{ zip: '2134', age: 30 }]);
     });
 
     it('should inject lookup field when lookupId and lookupField are provided', async () => {
@@ -143,10 +174,7 @@ describe('JSONProcessor', () => {
         lookupField,
       });
 
-      expect(clientMock.index).toHaveBeenCalledWith({
-        index: 'foo',
-        body: { ...validJson, [lookupField]: lookupId },
-      });
+      expect(bulkDocs(clientMock)).toEqual([{ ...validJson, [lookupField]: lookupId }]);
     });
   });
 

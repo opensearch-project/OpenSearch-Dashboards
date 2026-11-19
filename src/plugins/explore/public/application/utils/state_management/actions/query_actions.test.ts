@@ -49,7 +49,8 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasAggregation: jest.fn(() => false),
+  queryIsAggregation: jest.fn(() => false),
+  queryIsBucketCountable: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -73,7 +74,12 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import * as utilsModule from './utils';
-import { queryHasAggregation } from './utils';
+import { queryIsAggregation, queryIsBucketCountable } from './utils';
+import * as streamingQueryActions from './streaming_query_actions';
+import {
+  abortAllStreamingQueries,
+  registerStreamingAbort,
+} from '../../streaming/streaming_abort_registry';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
 import {
@@ -120,6 +126,10 @@ jest.mock('../../languages', () => ({
 }));
 
 jest.mock('../../../../../../data/public', () => ({
+  // Real cache: executeQueries resolves the cluster's default patterns mode through it.
+  patternsModeCache: jest.requireActual(
+    '../../../../../../data/public/ppl_settings/patterns_mode_cache'
+  ).patternsModeCache,
   indexPatterns: {
     isDefault: jest.fn(),
   },
@@ -1251,6 +1261,28 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(flag.payload).toBe(true);
     });
 
+    it('clears the stale-selection flag, since the results that load are for the current selection', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {}, isSelectionStale: true },
+      });
+
+      await executeQueries({
+        services: { tabRegistry: { getTab: jest.fn() } } as unknown as ExploreServices,
+      })(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'queryEditor/setIsSelectionStale', payload: false })
+      );
+    });
+
     // Tab queries are dispatched only once the data table settles. Unless the run itself counts as
     // running until then, the overall status settles in between and Stop turns back into Run while
     // the tab query is still to come.
@@ -1498,6 +1530,171 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         expect(dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))).toBe(
           true
         );
+      });
+
+      it('does not stream on the Metrics page', async () => {
+        const flavorModule = jest.requireMock('../../../../helpers/get_flavor_from_app_id');
+        flavorModule.getCurrentFlavor.mockResolvedValue(ExploreFlavor.Metrics);
+        const streamSpy = jest.spyOn(streamingQueryActions, 'executeStreamingQuery');
+        mockGetState.mockReturnValue(stateWithPplDataset());
+        const dispatch: jest.Mock = jest.fn((action: any) =>
+          typeof action === 'function' ? action(dispatch, mockGetState, undefined) : action
+        );
+
+        try {
+          await executeQueries({ services: streamingServices() })(
+            dispatch as any,
+            mockGetState,
+            undefined
+          );
+
+          expect(streamSpy).not.toHaveBeenCalled();
+          const dispatchedTypes = dispatch.mock.calls
+            .map(([action]: any[]) => action?.type)
+            .filter(Boolean);
+          expect(
+            dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))
+          ).toBe(true);
+        } finally {
+          streamSpy.mockRestore();
+          flavorModule.getCurrentFlavor.mockResolvedValue('logs');
+        }
+      });
+    });
+
+    // A streamed table run lasts as long as its query, so dependants start on its first rows.
+    describe('while the table is still streaming', () => {
+      const flavorModule = jest.requireMock('../../../../helpers/get_flavor_from_app_id');
+      let streamSpy: jest.SpyInstance;
+      let finishTable: () => void;
+      let tableRows: 'some' | 'none';
+
+      const services = () =>
+        ({
+          uiSettings: { get: jest.fn((key: string) => key === 'explore:enableStreamingResults') },
+          capabilities: { queryEnhancements: { pplStreaming: true } },
+          data: {
+            query: {
+              timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } },
+            },
+            dataViews: { get: jest.fn().mockResolvedValue({ timeFieldName: 'endTime' }) },
+          },
+          tabRegistry: { getTab: jest.fn() },
+        }) as any;
+
+      const state: any = {};
+      const resetState = () =>
+        Object.assign(state, {
+          query: {
+            query: 'source=spans',
+            language: 'PPL',
+            dataset: {
+              id: 'ds',
+              title: 'spans',
+              type: 'INDEX_PATTERN',
+              timeFieldName: 'endTime',
+              dataSource: { engineType: 'OpenSearch' },
+            },
+          },
+          ui: { activeTabId: '' },
+          results: {},
+          legacy: { interval: '1h' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+
+      const types = (dispatch: jest.Mock) =>
+        dispatch.mock.calls.map(([a]: any[]) => a?.type).filter(Boolean);
+
+      beforeEach(() => {
+        resetState();
+        tableRows = 'some';
+        streamSpy = jest
+          .spyOn(streamingQueryActions, 'executeStreamingQuery')
+          // A stand-in thunk, so it cannot satisfy the real AsyncThunkAction type.
+          .mockImplementation(((args: any) => () => {
+            const done = new Promise((resolve) => (finishTable = () => resolve({})));
+            if (!args.asHistogram && tableRows === 'some') {
+              Promise.resolve().then(() => {
+                state.results['source=test-dataset'] = { hasResults: true };
+                args.onFirstRows?.();
+              });
+            }
+            return Object.assign(done, { abort: jest.fn() });
+          }) as any);
+        flavorModule.getCurrentFlavor.mockResolvedValue(ExploreFlavor.Traces);
+      });
+
+      afterEach(() => {
+        streamSpy.mockRestore();
+        abortAllStreamingQueries();
+        flavorModule.getCurrentFlavor.mockResolvedValue('logs');
+      });
+
+      const start = () => {
+        const dispatch: jest.Mock = jest.fn((action: any) =>
+          typeof action === 'function' ? action(dispatch, () => state, undefined) : action
+        );
+        let settled = false;
+        const promise = executeQueries({ services: services() })(
+          dispatch as any,
+          () => state,
+          undefined
+        ).then((r: unknown) => {
+          settled = true;
+          return r;
+        });
+        return { dispatch, promise, isSettled: () => settled };
+      };
+      const flush = async () => {
+        for (let i = 0; i < 20; i++) await Promise.resolve();
+      };
+
+      it('starts the Traces RED queries on the first rows, not when the stream ends', async () => {
+        const { dispatch, promise, isSettled } = start();
+        await flush();
+
+        expect(streamSpy).toHaveBeenCalled();
+        expect(types(dispatch)).toContain('query/executeRequestCountQuery/pending');
+        expect(types(dispatch)).toContain('query/executeErrorCountQuery/pending');
+        expect(types(dispatch)).toContain('query/executeLatencyQuery/pending');
+        // Callers awaiting executeQueries still see it settle only when the table does.
+        expect(isSettled()).toBe(false);
+
+        finishTable();
+        await promise;
+        expect(isSettled()).toBe(true);
+      });
+
+      it('still skips the RED queries when the streamed table has no rows', async () => {
+        tableRows = 'none';
+        const { dispatch, promise } = start();
+        await flush();
+        expect(types(dispatch)).not.toContain('query/executeRequestCountQuery/pending');
+
+        finishTable();
+        await promise;
+        expect(types(dispatch)).not.toContain('query/executeRequestCountQuery/pending');
+      });
+
+      // A changed query, dataset or time range has different keys, so the new run replaces nothing
+      // by registering; an earlier query left streaming would write into this one's page.
+      it("stops an earlier query's streams, which run under other keys", async () => {
+        const earlier = jest.fn();
+        registerStreamingAbort('source=earlier-query', earlier, {});
+
+        const { dispatch, promise } = start();
+        await flush();
+
+        expect(earlier).toHaveBeenCalledTimes(1);
+        // It can no longer publish, so its last "loading" status must go, or the page stays loading.
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'queryEditor/clearQueryStatusMapByKey',
+            payload: 'source=earlier-query',
+          })
+        );
+        finishTable();
+        await promise;
       });
     });
 
@@ -2541,7 +2738,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       mockDispatch = jest.fn();
       mockGetState.mockReturnValue(stateWithKey());
       (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
-      (queryHasAggregation as jest.Mock).mockReturnValue(false);
+      (queryIsAggregation as jest.Mock).mockReturnValue(false);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(false);
     });
 
     it('streams partial rows for a row query and reports scan progress', async () => {
@@ -2564,10 +2762,25 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
 
     it('does not stream partials for an aggregation query', async () => {
-      (queryHasAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(true);
       fetchWithOnePartial();
 
       await runDataTableQuery('source=logs | stats count() by host');
+
+      expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
+      expect(setResults).toHaveBeenCalledTimes(1); // the final result only
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('does not stream partials for an aggregation whose buckets cannot be counted', async () => {
+      // e.g. timewrap: an aggregation, but excluded from the bucket-count probe. Streaming is gated
+      // on queryIsAggregation, not queryIsBucketCountable.
+      (queryIsAggregation as jest.Mock).mockReturnValue(true);
+      (queryIsBucketCountable as jest.Mock).mockReturnValue(false);
+      fetchWithOnePartial();
+
+      await runDataTableQuery('source=logs | timechart span=1h count() | timewrap 1d');
 
       expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
       expect(setResults).toHaveBeenCalledTimes(1); // the final result only

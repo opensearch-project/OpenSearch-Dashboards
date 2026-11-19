@@ -23,6 +23,11 @@ import {
 import { LogActionMenu } from '../../log_action_menu';
 
 export interface ITableCellProps {
+  /**
+   * Shrink the column to its content (short categorical values such as a log
+   * severity), so the free width goes to wide columns like the message body.
+   */
+  fitContent?: boolean;
   columnId: string;
   index?: number;
   isTimeField?: boolean;
@@ -57,6 +62,7 @@ export const TableCellUI = ({
   isOnTracesPage,
   setIsRowSelected,
   wrapCellText,
+  fitContent,
 }: ITableCellProps) => {
   const { dataset: contextDataset } = useDatasetContext();
   // Prefer the explicitly-passed dataset; fall back to context for callers that
@@ -150,7 +156,7 @@ export const TableCellUI = ({
       data-test-subj="docTableField"
       className={`exploreDocTableCell ${
         isTimeField ? 'eui-textNoWrap' : wrapCellText ? '' : 'eui-textTruncate'
-      }`}
+      }${fitContent ? ' exploreDocTableCell--fitContent' : ''}`}
     >
       <div className="exploreDocTableCell__content">{content}</div>
     </td>

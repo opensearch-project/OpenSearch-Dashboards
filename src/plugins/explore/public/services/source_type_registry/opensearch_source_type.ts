@@ -62,6 +62,9 @@ export const openSearchSourceType: SourceTypeDefinition = {
   flavors: [ExploreFlavor.Logs, ExploreFlavor.Traces, ExploreFlavor.Metrics],
   order: 0,
   metricsResourceClientId: 'prometheus',
+  metricsEmptyHint: i18n.translate('explore.sourceType.prometheusEmptyHint', {
+    defaultMessage: 'Try adjusting the time range or verify the data source is scraping targets.',
+  }),
   // The workspace default if it fits the flavor, else the first dataset that does. The default
   // alone can be a traces pattern, which on the Logs page leaves the picker on "Select dataset"
   // while PPL runs against spans.

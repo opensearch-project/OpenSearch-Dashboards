@@ -310,6 +310,26 @@ describe('QueryBuilder', () => {
         })
       );
     });
+
+    it('remembers the query state it ran, which later edits to the query state do not change', async () => {
+      builder.setIsInitialized(true);
+      builder.datasetView$.next({
+        dataView: { id: 'logs', title: 'logs', fields: [] } as any,
+        isLoading: false,
+        error: null,
+      });
+      builder.updateQueryState({ query: 'stats count()', language: 'PPL' });
+      expect(builder.getLastRunQueryState()).toBeUndefined();
+
+      await builder.executeQuery();
+      builder.updateQueryState({ query: '' });
+
+      expect(builder.getLastRunQueryState()).toEqual(
+        expect.objectContaining({ query: 'stats count()', language: 'PPL' })
+      );
+      builder.reset();
+      expect(builder.getLastRunQueryState()).toBeUndefined();
+    });
   });
 
   describe('onQueryExecutionSubmit', () => {

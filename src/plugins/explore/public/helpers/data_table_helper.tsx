@@ -106,12 +106,17 @@ function getColumnDisplayName(column: string): string {
  * @param indexPattern
  * @param hideTimeField
  * @param isShortDots
+ * @param timeFieldPresent whether the dataset's time field is actually present in the result set.
+ *   Defaults to true to preserve legacy behavior. When false — e.g. querying `source=<lookup>`
+ *   over a time-based dataset, where the time field doesn't exist on the queried index — the time
+ *   column is dropped instead of rendering an empty "-" for every row.
  */
 export function getLegacyDisplayedColumns(
   columns: string[],
   indexPattern: IndexPattern | Dataset,
   isShortDots: boolean,
-  hideTimeField: boolean
+  hideTimeField: boolean,
+  timeFieldPresent: boolean = true
 ): LegacyDisplayedColumn[] {
   if (!Array.isArray(columns) || !indexPattern || !indexPattern.getFieldByName) {
     return [];
@@ -134,6 +139,7 @@ export function getLegacyDisplayedColumns(
 
   const shouldIncludeTimeField =
     !hideTimeField &&
+    timeFieldPresent &&
     typeof indexPattern.timeFieldName === 'string' &&
     !columns.includes(indexPattern.timeFieldName);
 

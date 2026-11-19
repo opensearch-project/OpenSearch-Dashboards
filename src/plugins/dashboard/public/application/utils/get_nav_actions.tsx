@@ -29,6 +29,7 @@ import {
   openAddPanelFlyout,
 } from '../../../../embeddable/public';
 import { saveDashboard } from '../utils';
+import { saveNewDashboard } from './save_new_dashboard';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { appendEmptySection, migrateAllPanelsToSection } from '../embeddable/section_layout_utils';
@@ -91,16 +92,35 @@ export const getNavActions = (
       newDescription,
       newCopyOnSave,
       newTimeRestore,
+      newCopyPanels,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
+      signal,
     }: {
       newTitle: string;
       newDescription: string;
       newCopyOnSave: boolean;
       newTimeRestore: boolean;
+      newCopyPanels?: { titleTemplate: string };
       isTitleDuplicateConfirmed: boolean;
       onTitleDuplicate: () => void;
+      signal: AbortSignal;
     }) => {
+      if (newCopyOnSave) {
+        return saveNewDashboard(
+          {
+            title: newTitle,
+            description: newDescription,
+            timeRestore: newTimeRestore,
+            copyPanels: newCopyPanels,
+            saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
+            signal,
+          },
+          stateContainer,
+          savedDashboard,
+          services
+        );
+      }
       stateContainer.transitions.setDashboard({
         title: newTitle,
         description: newDescription,
@@ -147,24 +167,21 @@ export const getNavActions = (
     const onClone = (
       newTitle: string,
       isTitleDuplicateConfirmed: boolean,
-      onTitleDuplicate: () => void
-    ) => {
-      savedDashboard.copyOnSave = true;
-      stateContainer.transitions.set('title', newTitle);
-      const saveOptions = {
-        confirmOverwrite: false,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
-      };
-      return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
-        // If the save wasn't successful, put the original title back.
-        if ((response as { error: Error }).error) {
-          stateContainer.transitions.set('title', currentTitle);
-        }
-        // updateNavBar();
-        return response;
-      });
-    };
+      onTitleDuplicate: () => void,
+      copyPanels: { titleTemplate: string } | undefined,
+      signal: AbortSignal
+    ) =>
+      saveNewDashboard(
+        {
+          title: newTitle,
+          copyPanels,
+          saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
+          signal,
+        },
+        stateContainer,
+        savedDashboard,
+        services
+      );
 
     showCloneModal(onClone, currentTitle);
   };

@@ -34,6 +34,8 @@ export interface PollStreamingQueryArgs {
   offset?: number;
   /** Capped by the cluster's `plugins.ppl.async.max_page_size` (default 10000). */
   count?: number;
+  /** The last sequence seen; the server holds the request until a newer one, terminal status or the wait. */
+  waitForSequence?: number;
   waitForCompletionTimeout?: string;
   keepAlive?: string;
   dataSourceId?: string;
@@ -83,6 +85,7 @@ export class PPLStreamService {
     id,
     offset,
     count,
+    waitForSequence,
     waitForCompletionTimeout,
     keepAlive,
     dataSourceId,
@@ -96,6 +99,7 @@ export class PPLStreamService {
           query: {
             ...(offset !== undefined && { offset }),
             ...(count !== undefined && { count }),
+            ...(waitForSequence !== undefined && { waitForSequence }),
             ...(waitForCompletionTimeout && { waitForCompletionTimeout }),
             ...(keepAlive && { keepAlive }),
             ...(dataSourceId && { dataSourceId }),

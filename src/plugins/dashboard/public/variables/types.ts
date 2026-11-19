@@ -178,3 +178,7 @@ export interface VariableState {
  * A variable combined with its runtime state, used by UI components.
  */
 export type VariableWithState = Variable & VariableState;
+
+/** True while any variable is still loading its options; values are not final yet. */
+export const hasLoadingVariables = (variables: VariableWithState[]): boolean =>
+  variables.some((v) => v.loading);

@@ -19,7 +19,6 @@ import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subs
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_metrics_dataset';
 import { useCurrentExploreId } from '../../utils/hooks/use_current_explore_id';
-import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { MetricsPageTabs } from './metrics_page_tabs';
@@ -88,7 +87,6 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
-            <NewExperienceBanner />
 
             <MetricsPageTabs />
           </EuiPageBody>

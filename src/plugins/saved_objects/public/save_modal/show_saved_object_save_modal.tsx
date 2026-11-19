@@ -58,6 +58,8 @@ export function showSaveModal(
   const container = document.createElement('div');
   const root = createRoot(container);
   const closeModal = () => {
+    // A cancel can close the modal before the save settles; do not close it twice.
+    if (!container.parentNode) return;
     root.unmount();
     document.body.removeChild(container);
   };

@@ -31,10 +31,11 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
-import { create as createSuite } from 'mocha/lib/suite';
-import Test from 'mocha/lib/test';
 
 import { filterSuitesByTags } from './filter_suites_by_tags';
+
+const { Suite, Test } = Mocha;
+const createSuite = (parent, title) => Suite.create(parent, title);
 
 function setup({ include, exclude }) {
   return new Promise((resolve) => {

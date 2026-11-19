@@ -93,6 +93,21 @@ describe('DefaultDiscoverTable', () => {
     });
   });
 
+  // A screen tall enough to fit every rendered row: the sentinel is visible whenever observed.
+  it('keeps loading rows while the sentinel stays visible, with nothing to scroll', async () => {
+    mockIntersectionObserver.mockImplementation((callback) => ({
+      observe: (target: Element) =>
+        callback([{ isIntersecting: target.isConnected, target }] as IntersectionObserverEntry[]),
+      unobserve: () => null,
+      disconnect: () => null,
+    }));
+    const { container } = render(getDataTable());
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('tbody tr').length).toBe(mockRows.length);
+    });
+  });
+
   it('should display the sample size callout when all rows are rendered', async () => {
     const { container } = render(getDataTable());
 
@@ -111,6 +126,12 @@ describe('DefaultDiscoverTable', () => {
       const callout = screen.getByTestId('discoverDocTableFooter');
       expect(callout).toBeInTheDocument();
     });
+    // A gray info note, not a callout banner.
+    const footer = screen.getByTestId('discoverDocTableFooter');
+    expect(footer.className).toMatch(/euiPanel--subdued/);
+    expect(footer.className).not.toMatch(/euiCallOut/);
+    expect(footer).toHaveTextContent('These are the first');
+    expect(footer).toHaveTextContent('Back to top.');
   });
 
   it('Should restart rendering when new data is available', async () => {
@@ -157,6 +178,29 @@ describe('DefaultDiscoverTable', () => {
 
     await user.click(screen.getAllByTestId('pagination-button-previous')[0]);
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
+  });
+
+  it('shows the new rows from the first page when the rows change', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(undefined, true));
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('51–100');
+
+    rerender(getDataTable(mockRows.slice(0, 20), true));
+
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(20);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('1–20');
+  });
+
+  it('keeps the current page when re-rendered with the same rows', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(getDataTable(undefined, true));
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
+
+    rerender(getDataTable(undefined, true));
+
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(50);
+    expect(screen.getAllByTestId('osdDocTablePagination')[0]).toHaveTextContent('51–100');
   });
 
   describe('Column Width Algorithm', () => {

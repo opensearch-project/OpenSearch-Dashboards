@@ -40,6 +40,13 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
+let mockStreaming: { isPolling: boolean; streaming?: Record<string, unknown> } = {
+  isPolling: false,
+};
+jest.mock('../streaming/use_streaming_status', () => ({
+  useStreamingStatus: () => mockStreaming,
+}));
+
 import { useSelector } from 'react-redux';
 import { useSetEditorTextWithQuery } from '../../application/hooks';
 import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
@@ -121,6 +128,26 @@ describe('QueryPanel', () => {
 
     renderWithProvider(<QueryPanel />);
     expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+  });
+
+  // The Traces page uses this panel, so a streamed run there reports progress as it does on Logs.
+  describe('while a streamed query runs', () => {
+    afterEach(() => {
+      mockStreaming = { isPolling: false };
+    });
+
+    it('shows the streaming bar and announces the run', () => {
+      mockUseSelector.mockReturnValue(true);
+      mockStreaming = { isPolling: true, streaming: { isPolling: true, fractionDone: 0.3 } };
+
+      renderWithProvider(<QueryPanel />);
+
+      expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('exploreStreamingAnnouncer')).toHaveTextContent(
+        'Query running, 25% done'
+      );
+    });
   });
 
   it('calls useSetEditorTextWithQuery hook', () => {

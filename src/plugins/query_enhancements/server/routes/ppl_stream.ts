@@ -134,6 +134,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           // Unbounded here: the ceiling is the cluster's plugins.ppl.async.max_page_size, which is
           // configurable, so the cluster is the only correct authority on it.
           count: schema.maybe(schema.number({ min: 1 })),
+          waitForSequence: schema.maybe(schema.number({ min: -1 })),
           waitForCompletionTimeout: schema.maybe(waitForCompletionTimeoutSchema),
           keepAlive: schema.maybe(keepAliveSchema),
           dataSourceId: schema.maybe(schema.string()),
@@ -148,6 +149,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         const {
           offset,
           count,
+          waitForSequence,
           waitForCompletionTimeout,
           keepAlive,
           dataSourceId,
@@ -168,6 +170,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           querystring: {
             offset: String(offset ?? 0),
             count: String(count ?? DEFAULT_COUNT),
+            ...(waitForSequence !== undefined && { wait_for_sequence: String(waitForSequence) }),
             ...(waitForCompletionTimeout && {
               wait_for_completion_timeout: waitForCompletionTimeout,
             }),

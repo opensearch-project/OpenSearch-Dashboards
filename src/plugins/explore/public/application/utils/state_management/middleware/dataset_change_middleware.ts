@@ -19,13 +19,18 @@ import {
   setActiveTab,
   setHideEmptyFields,
 } from '../slices';
-import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
+import {
+  clearQueryStatusMap,
+  setBreakdownField,
+  setIsQueryEditorDirty,
+  setIsSelectionStale,
+} from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 import { EXPLORE_NO_TAB_ID } from '../../../../../common';
-import { datasetRequiresExplicitRun } from '../../requires_explicit_run';
+import { datasetRequiresExplicitRun, isExplicitRunRefinement } from '../../requires_explicit_run';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -53,19 +58,32 @@ export const createDatasetChangeMiddleware = (
 
       if (isEqual(currentDataset, dataset)) return result;
 
+      const previousDataset = currentDataset;
       currentDataset = dataset;
 
-      store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
-      store.dispatch(clearResults());
-      store.dispatch(clearQueryStatusMap());
-      store.dispatch(clearLastExecutedData());
-      store.dispatch(setPatternsField(''));
-      store.dispatch(setUsingRegexPatterns(false));
-      // Which fields are empty is a property of the old dataset's results, so the opt-in doesn't
-      // carry over: a new dataset starts from every column shown.
-      store.dispatch(setHideEmptyFields(false));
-      store.dispatch(setBreakdownField(undefined));
-      store.dispatch(resetLegacyStateActionCreator(services) as unknown as AnyAction);
+      if (
+        action.meta?.refineSelection &&
+        isExplicitRunRefinement(queryString, previousDataset, dataset)
+      ) {
+        // The picker refined the selection (same type, explicit Run): keep the results and the
+        // view (columns, sort, breakdown, patterns) they're shown with until the user runs the
+        // query on the new selection, as for an edited query, and mark them as stale meanwhile.
+        store.dispatch(setIsQueryEditorDirty(true));
+        store.dispatch(setIsSelectionStale(true));
+      } else {
+        store.dispatch(setIsSelectionStale(false));
+        store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
+        store.dispatch(clearResults());
+        store.dispatch(clearQueryStatusMap());
+        store.dispatch(clearLastExecutedData());
+        store.dispatch(setPatternsField(''));
+        store.dispatch(setUsingRegexPatterns(false));
+        // Which fields are empty is a property of the old dataset's results, so the opt-in doesn't
+        // carry over: a new dataset starts from every column shown.
+        store.dispatch(setHideEmptyFields(false));
+        store.dispatch(setBreakdownField(undefined));
+        store.dispatch(resetLegacyStateActionCreator(services) as unknown as AnyAction);
+      }
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),
@@ -100,7 +118,7 @@ export const createDatasetChangeMiddleware = (
           }
 
           // A dataset type can require an explicit Run (meta.requiresExplicitRun): selecting or
-          // switching to it then only clears the old results.
+          // switching to it then doesn't run the query (see above for what it keeps).
           if (!datasetRequiresExplicitRun(queryString, currentDataset)) {
             await store.dispatch(executeQueries({ services }) as any);
           }

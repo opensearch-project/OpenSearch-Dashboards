@@ -1,0 +1,120 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { isStringFieldType, isValueCompatibleWithType } from './type_compatibility';
+
+describe('isValueCompatibleWithType', () => {
+  it.each([null, undefined, ''])('treats empty value %p as compatible', (value) => {
+    // OpenSearch indexes an empty string into a (coercing) numeric field as null.
+    expect(isValueCompatibleWithType(value, 'integer')).toBe(true);
+    expect(isValueCompatibleWithType(value, 'float')).toBe(true);
+    expect(isValueCompatibleWithType(value, 'boolean')).toBe(true);
+    expect(isValueCompatibleWithType(value, 'date')).toBe(true);
+  });
+
+  // Not-a-decimal strings that Number() would happily turn into a number. Whitespace-only is
+  // rejected by OpenSearch (number_format_exception), unlike the truly empty string.
+  const NON_DECIMAL_STRINGS = ['0x1F', '0b11', '0o7', '   ', ' ', 'Infinity', 'NaN'];
+
+  // OpenSearch trims numeric strings before parsing, so surrounding whitespace is accepted.
+  const PADDED_DECIMAL_STRINGS = [' 4', '4 ', ' 1.5 ', '\t-3\t'];
+
+  describe.each(['integer', 'long', 'short', 'byte', 'unsigned_long'])('%s', (type) => {
+    it('accepts integer-looking values', () => {
+      expect(isValueCompatibleWithType('4', type)).toBe(true);
+      expect(isValueCompatibleWithType('-3', type)).toBe(true);
+      expect(isValueCompatibleWithType(7, type)).toBe(true);
+    });
+
+    it('accepts decimals and exponents, which OpenSearch coerces (truncates) by default', () => {
+      expect(isValueCompatibleWithType('1.5', type)).toBe(true);
+      expect(isValueCompatibleWithType(1.5, type)).toBe(true);
+      expect(isValueCompatibleWithType('1e3', type)).toBe(true);
+    });
+
+    it('rejects letters', () => {
+      expect(isValueCompatibleWithType('A', type)).toBe(false);
+      expect(isValueCompatibleWithType('4x', type)).toBe(false);
+    });
+
+    it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(false);
+    });
+
+    it.each(PADDED_DECIMAL_STRINGS)('accepts whitespace-padded decimal %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(true);
+    });
+  });
+
+  describe.each(['float', 'double', 'half_float', 'scaled_float'])('%s', (type) => {
+    it('accepts any number', () => {
+      expect(isValueCompatibleWithType('4', type)).toBe(true);
+      expect(isValueCompatibleWithType('-1.25', type)).toBe(true);
+      expect(isValueCompatibleWithType('1.5', type)).toBe(true);
+      expect(isValueCompatibleWithType('-3', type)).toBe(true);
+      expect(isValueCompatibleWithType('1e3', type)).toBe(true);
+      expect(isValueCompatibleWithType(3.14, type)).toBe(true);
+    });
+
+    it('rejects non-numbers', () => {
+      expect(isValueCompatibleWithType('B', type)).toBe(false);
+      expect(isValueCompatibleWithType(true, type)).toBe(false);
+    });
+
+    it.each(NON_DECIMAL_STRINGS)('rejects non-decimal string %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(false);
+    });
+
+    it.each(PADDED_DECIMAL_STRINGS)('accepts whitespace-padded decimal %p', (value) => {
+      expect(isValueCompatibleWithType(value, type)).toBe(true);
+    });
+  });
+
+  it('boolean requires true/false', () => {
+    expect(isValueCompatibleWithType('true', 'boolean')).toBe(true);
+    expect(isValueCompatibleWithType('false', 'boolean')).toBe(true);
+    expect(isValueCompatibleWithType(false, 'boolean')).toBe(true);
+    expect(isValueCompatibleWithType('yes', 'boolean')).toBe(false);
+    expect(isValueCompatibleWithType(1, 'boolean')).toBe(false);
+  });
+
+  it.each(['keyword', 'text', 'match_only_text', 'wildcard', 'constant_keyword'])(
+    '%s accepts anything, including numbers',
+    (type) => {
+      expect(isValueCompatibleWithType('A', type)).toBe(true);
+      expect(isValueCompatibleWithType(42, type)).toBe(true);
+      expect(isValueCompatibleWithType('42', type)).toBe(true);
+      expect(isValueCompatibleWithType(true, type)).toBe(true);
+    }
+  );
+
+  it('date is lenient: parseable strings and epoch digits are accepted', () => {
+    expect(isValueCompatibleWithType('2024-01-15', 'date')).toBe(true);
+    expect(isValueCompatibleWithType('2024-01-15T10:00:00Z', 'date')).toBe(true);
+    expect(isValueCompatibleWithType('1700000000000', 'date')).toBe(true);
+    expect(isValueCompatibleWithType(1700000000000, 'date')).toBe(true);
+    expect(isValueCompatibleWithType('not a date', 'date')).toBe(false);
+  });
+
+  it('unknown or missing types are compatible', () => {
+    expect(isValueCompatibleWithType('A', 'ip')).toBe(true);
+    expect(isValueCompatibleWithType('A', 'geo_point')).toBe(true);
+    expect(isValueCompatibleWithType('A', undefined)).toBe(true);
+  });
+
+  it('checks every element of an array', () => {
+    expect(isValueCompatibleWithType(['1', '2'], 'integer')).toBe(true);
+    expect(isValueCompatibleWithType(['1', 'A'], 'integer')).toBe(false);
+  });
+});
+
+describe('isStringFieldType', () => {
+  it('recognizes string types', () => {
+    expect(isStringFieldType('keyword')).toBe(true);
+    expect(isStringFieldType('text')).toBe(true);
+    expect(isStringFieldType('integer')).toBe(false);
+    expect(isStringFieldType(undefined)).toBe(false);
+  });
+});

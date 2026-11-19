@@ -6,7 +6,11 @@
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { AxisRole, VisColumn, AggregationType } from '../types';
 import { getAxisConfig } from '../utils/utils';
-import { assembleHeatmapSpec, createHeatmapSeries } from './heatmap_chart_utils';
+import {
+  assembleHeatmapSpec,
+  createHeatmapSeries,
+  heatmapTooltipFormatter,
+} from './heatmap_chart_utils';
 
 import {
   pipe,
@@ -43,6 +47,7 @@ export const createRegularHeatmap = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: styles.addLegend },
+      tooltipFormatter: heatmapTooltipFormatter,
     }),
     buildAxisConfigs,
     buildVisMap({

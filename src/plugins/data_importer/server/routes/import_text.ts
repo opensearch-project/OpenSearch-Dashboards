@@ -4,12 +4,24 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
+import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { FileProcessorService } from '../processors/file_processor_service';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { IRouter } from '../../../../core/server';
 import { configSchema } from '../../config';
-import { decideClient, ALPHANUMERIC_REGEX_STRING, LOOKUP_FIELD } from '../utils/util';
+import {
+  decideClient,
+  checkIndexExists,
+  IndexAccessForbiddenError,
+  BulkIndexForbiddenError,
+  ALPHANUMERIC_REGEX_STRING,
+  LOOKUP_FIELD,
+} from '../utils/util';
+import { fetchIndexMapping } from '../utils/coerce_to_mapping';
+import { finishImport } from '../utils/import_result';
+import { ensureLookupField } from '../utils/lookup_alias';
+import { LookupFieldError } from '../utils/lookup_field_error';
 
 export function importTextRoute(
   router: IRouter,
@@ -74,28 +86,32 @@ export function importTextRoute(
       }
 
       try {
-        const indexExists = await client.indices.exists({
-          index: request.query.indexName,
-        });
+        const indexExists = await checkIndexExists(client, request.query.indexName);
 
-        if (!request.query.createMode && !indexExists.body) {
+        if (!request.query.createMode && !indexExists) {
           return response.notFound({
             body: `Index ${request.query.indexName} does not exist`,
           });
         }
-        if (request.query.createMode && indexExists.body) {
+        if (request.query.createMode && indexExists) {
           return response.badRequest({
             body: `Index ${request.query.indexName} already exists`,
           });
         }
       } catch (e) {
+        if (e instanceof IndexAccessForbiddenError) {
+          return response.forbidden({ body: e.message });
+        }
         return response.internalError({
-          body: `Error checking if index exists: ${e}`,
+          body: `Error checking if index exists: ${e.message || e}`,
         });
       }
 
       // Generate lookup ID if import identifier is provided
       const lookupId = request.query.importIdentifier ? uuidv4() : undefined;
+
+      // Resolved target mapping, used to coerce values bound for text/keyword fields to strings
+      let targetMapping: MappingTypeMapping | undefined;
 
       if (request.query.createMode) {
         const mapping = request.body.mapping;
@@ -131,6 +147,23 @@ export function importTextRoute(
             body: `Error creating index: ${e}`,
           });
         }
+        targetMapping =
+          Object.keys(mappingObj).length > 0 ? (mappingObj as MappingTypeMapping) : undefined;
+      } else {
+        try {
+          targetMapping = await fetchIndexMapping(
+            client,
+            request.query.indexName,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            context.dataImporter?.logger
+          );
+        } catch (mappingError) {
+          // Not fatal: import without coercion; any type mismatch is reported per row by _bulk
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
+          context.dataImporter?.logger.error(
+            `Failed to fetch mapping for ${request.query.indexName}, importing without type coercion: ${mappingError}`
+          );
+        }
       }
 
       let isValid;
@@ -150,6 +183,28 @@ export function importTextRoute(
         });
       }
 
+      // On an existing index, make the lookup field exact-match filterable before any row lands;
+      // otherwise it is dynamically mapped as text and the alias term filter matches nothing
+      let lookupFilterField: string | undefined;
+      if (request.query.importIdentifier && !request.query.createMode) {
+        try {
+          lookupFilterField = await ensureLookupField(
+            client,
+            request.query.indexName,
+            LOOKUP_FIELD
+          );
+        } catch (e) {
+          if (e instanceof LookupFieldError) {
+            return e.statusCode === 403
+              ? response.forbidden({ body: e.message })
+              : response.badRequest({ body: e.message });
+          }
+          return response.internalError({
+            body: `Error preparing the lookup field: ${e}`,
+          });
+        }
+      }
+
       try {
         const message = await processor.ingestText(request.body.text, {
           indexName: request.query.indexName,
@@ -158,44 +213,24 @@ export function importTextRoute(
           dataSourceId: request.query.dataSource,
           lookupId,
           lookupField: LOOKUP_FIELD,
+          mapping: targetMapping,
         });
-
-        // Create filtered alias if import identifier is provided
-        if (request.query.importIdentifier && lookupId && message.failedRows.length < 1) {
-          try {
-            await client.indices.updateAliases({
-              body: {
-                actions: [
-                  {
-                    add: {
-                      index: request.query.indexName,
-                      alias: request.query.importIdentifier,
-                      filter: {
-                        term: {
-                          [LOOKUP_FIELD]: lookupId,
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            });
-          } catch (aliasError) {
-            // Log error but don't fail the import
-            // @ts-expect-error TS2339 TODO(ts-error): fixme
-            context.dataImporter?.logger.error(
-              `Failed to create alias ${request.query.importIdentifier}: ${aliasError}`
-            );
-          }
-        }
 
         return response.ok({
-          body: {
-            message,
-            success: message.failedRows.length < 1,
-          },
+          body: await finishImport(message, {
+            client,
+            indexName: request.query.indexName,
+            importIdentifier: request.query.importIdentifier,
+            lookupId,
+            lookupFilterField,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            logger: context.dataImporter?.logger,
+          }),
         });
       } catch (e) {
+        if (e instanceof BulkIndexForbiddenError) {
+          return response.forbidden({ body: e.message });
+        }
         return response.internalError({
           body: `Error ingesting text: ${e}`,
         });
