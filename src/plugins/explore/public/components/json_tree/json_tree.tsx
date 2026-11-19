@@ -13,17 +13,35 @@ import { parse } from '@osd/std';
 
 type JsonObjectOrArray = Record<string, unknown> | unknown[];
 
-const isObjectOrArray = (value: unknown): value is JsonObjectOrArray =>
-  typeof value === 'object' && value !== null;
+// A JSON number kept as the text it was logged as, so 10.50, 1e3 and an integer past 2^53 show and
+// search as written. Only a number whose text would change when parsed gets one.
+export class JsonNumber {
+  constructor(public readonly source: string) {}
+}
 
-// Integers past 2^53 come back as bigint, so they keep every digit. A value nested deeper than the
-// parser can read throws, so it keeps the formatter's text.
+const isObjectOrArray = (value: unknown): value is JsonObjectOrArray =>
+  typeof value === 'object' && value !== null && !(value instanceof JsonNumber);
+
+// Chrome 114, Firefox 135 and Safari 18.4 give a JSON.parse reviver the source text of each string,
+// number, boolean and null in a third argument. Older browsers do not, so numbers there keep their
+// parsed form. The check below parses 1.0 once at load, since parsing changes its text.
+const keepNumberText = (key: string, value: unknown, context?: { source?: string }) =>
+  typeof value === 'number' && context?.source !== undefined && context.source !== String(value)
+    ? new JsonNumber(context.source)
+    : value;
+const reviverGetsSourceText = JSON.parse('1.0', keepNumberText) instanceof JsonNumber;
+
+// Where reviverGetsSourceText is false, parse from @osd/std reads integers past 2^53 as bigint, so
+// every digit still shows. A value nested too deep for the parser in use makes it throw, so the
+// value keeps the formatter's text.
 export const parseJsonObjectOrArray = (value: unknown): JsonObjectOrArray | undefined => {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return undefined;
   try {
-    const parsed: JsonObjectOrArray = parse(trimmed);
+    const parsed: JsonObjectOrArray = reviverGetsSourceText
+      ? JSON.parse(trimmed, keepNumberText)
+      : parse(trimmed);
     // An empty {} or [] has nothing to fold, so it keeps the formatter's output.
     if (sizeOf(parsed) === 0) return undefined;
     return parsed;
@@ -124,7 +142,11 @@ const entriesOf = (value: JsonObjectOrArray): Array<[string, unknown]> =>
 const bracketsOf = (value: JsonObjectOrArray) => (Array.isArray(value) ? ['[', ']'] : ['{', '}']);
 
 const leafText = (value: unknown) =>
-  typeof value === 'string' ? JSON.stringify(value) : String(value);
+  typeof value === 'string'
+    ? JSON.stringify(value)
+    : value instanceof JsonNumber
+      ? value.source
+      : String(value);
 
 // A branch below the root opens by itself, through Expand all, the expanded document or a
 // search match, only while its own entries fit in this many characters, with each nested branch

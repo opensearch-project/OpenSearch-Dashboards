@@ -6,6 +6,7 @@
 import { act, cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
   JsonTreeSettingsContext,
+  JsonNumber,
   JsonTree,
   extractHighlightTerms,
   parseJsonObjectOrArray,
@@ -75,8 +76,18 @@ describe('parseJsonObjectOrArray', () => {
     ['padded with whitespace', '  {"a":1}\n', { a: 1 }],
     ['an array', '[1,2]', [1, 2]],
     ['a nested value', '{"a":{"b":[1]}}', { a: { b: [1] } }],
+    [
+      'holding 10.50, kept as its text, and 10.5, left a number',
+      '{"a":10.50,"b":10.5}',
+      { a: new JsonNumber('10.50'), b: 10.5 },
+    ],
+    [
+      'holding an escaped string, a boolean and a null, left as parsed',
+      '{"s":"caf\\u00e9","t":true,"z":null}',
+      { s: 'café', t: true, z: null },
+    ],
   ])('parses a string %s', (_, value, expected) => {
-    expect(parseJsonObjectOrArray(value)).toEqual(expected);
+    expect(parseJsonObjectOrArray(value)).toStrictEqual(expected);
   });
 });
 
@@ -304,6 +315,44 @@ describe('JsonTree', () => {
   it('keeps every digit of an integer past 2^53', () => {
     renderTree('{"id":12345678901234567890}');
     expect(screen.getByText('12345678901234567890')).toBeInTheDocument();
+  });
+
+  it('draws a bigint leaf and 10.5 as the fallback parse returns them, marking the bigint and opening its branch', () => {
+    const raw = '{"order":{"id":12345678901234567890,"price":10.50}}';
+    const { container } = render(
+      <JsonTree
+        value={{ order: { id: BigInt('12345678901234567890'), price: 10.5 } }}
+        raw={raw}
+        highlightTerms={['12345678901234567890']}
+      />
+    );
+    expect(openStates(container)).toEqual([true, true]);
+    expect(Array.from(container.querySelectorAll('mark'), (mark) => mark.textContent)).toEqual([
+      '12345678901234567890',
+    ]);
+    expect(
+      Array.from(container.querySelectorAll('.exploreJsonTree__number'), (leaf) => leaf.textContent)
+    ).toEqual(['12345678901234567890', '10.5']);
+  });
+
+  it.each([
+    ['a trailing zero', '10.50'],
+    ['a whole number written with a decimal point', '1.0'],
+    ['an exponent', '1e3'],
+    ['a decimal with more digits than a double holds', '37.774929123456789'],
+    ['negative zero', '-0'],
+    ['a number past the double range', '1e400'],
+  ])('shows %s as written', (_, numberText) => {
+    const { container } = renderTree(`{"n":${numberText}}`);
+    expect(container.querySelector('.exploreJsonTree__number')?.textContent).toBe(numberText);
+  });
+
+  it('marks a number when a search term matches it as written, and opens the branch that holds it', () => {
+    const { container } = renderTree('{"order":{"price":10.50}}', ['10.50']);
+    expect(openStates(container)).toEqual([true, true]);
+    expect(Array.from(container.querySelectorAll('mark'), (mark) => mark.textContent)).toEqual([
+      '10.50',
+    ]);
   });
 
   it('renders markup inside values as text', () => {
@@ -590,7 +639,7 @@ describe('JsonTree', () => {
   });
 
   it('opens 15 levels by itself toward a search match at the bottom of 3,000 levels without overflowing the call stack', () => {
-    // Plain JSON.parse, since @osd/std parse throws before 3,000 levels in node.
+    // Plain JSON.parse, since JSON.parse with keepNumberText throws before 3,000 levels in node.
     const raw = chain(3000);
     const { container } = render(
       <JsonTree value={JSON.parse(raw)} raw={raw} highlightTerms={['deep']} />
@@ -745,5 +794,32 @@ describe('JsonTree around the 50,000 character raw limit', () => {
     await settle();
 
     expect(openStates(container)).toEqual([true, true, false]);
+  });
+});
+
+describe('parseJsonObjectOrArray where the reviver gets no source text', () => {
+  // The wrapper below drops the reviver's third argument, as browsers older than those named in
+  // json_tree.tsx do. The module loads again so reviverGetsSourceText is computed with the wrapper.
+  // Node 22 passes that argument, so parseJsonObjectOrArray takes the keepNumberText path
+  // everywhere else in this file.
+  it('reads numbers in parsed form and keeps every digit of an integer past 2^53', () => {
+    const originalParse = JSON.parse;
+    const spy = jest
+      .spyOn(JSON, 'parse')
+      .mockImplementation((text: string, reviver?: (key: string, value: unknown) => unknown) =>
+        originalParse(text, reviver && ((key: string, value: unknown) => reviver(key, value)))
+      );
+    try {
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { parseJsonObjectOrArray: parseWithoutSourceText } = require('./json_tree');
+        expect(parseWithoutSourceText('{"price":10.50,"id":12345678901234567890}')).toEqual({
+          price: 10.5,
+          id: BigInt('12345678901234567890'),
+        });
+      });
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
