@@ -404,6 +404,85 @@ describe('IndexPatterns', () => {
     });
   });
 
+  describe('updateSavedObject with field changes', () => {
+    const discovered = {
+      name: 'bytes',
+      type: 'number',
+      searchable: true,
+      aggregatable: true,
+      count: 1,
+    };
+    let apiClient: any;
+
+    beforeEach(() => {
+      setDocsourcePayload(null, {
+        id: 'foo',
+        version: 'v1',
+        attributes: { title: 'something', fields: JSON.stringify([discovered]) },
+      });
+      savedObjectsClient.update = jest.fn().mockResolvedValue({ id: 'foo', version: 'v2' });
+      apiClient = {
+        ...createFieldsFetcher(),
+        refreshFields: jest.fn(),
+        updateFields: jest.fn().mockResolvedValue({ version: 'v2' }),
+      };
+      indexPatterns = newService(apiClient);
+      indexPatterns.clearCache();
+    });
+
+    test('sends a popularity change without the field list', async () => {
+      const pattern = await indexPatterns.get('foo');
+      pattern.fields.getByName('bytes')!.count = 2;
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
+        version: 'v1',
+        attributes: {},
+        counts: { bytes: 2 },
+      });
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      expect(pattern.version).toBe('v2');
+    });
+
+    test('sends a new scripted field and its format in one request', async () => {
+      const pattern = await indexPatterns.get('foo');
+      await pattern.addScriptedField('kb', 'doc.bytes.value', 'number');
+      pattern.fieldFormatMap.kb = { toJSON: () => ({ id: 'number' }) };
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith(
+        'foo',
+        expect.objectContaining({
+          attributes: { fieldFormatMap: JSON.stringify({ kb: { id: 'number' } }) },
+          scripted: {
+            upsert: [expect.objectContaining({ name: 'kb', script: 'doc.bytes.value' })],
+          },
+        })
+      );
+    });
+
+    test('does not send fields refreshed in memory', async () => {
+      const pattern = await indexPatterns.get('foo');
+      pattern.fields.replaceAll([
+        { ...discovered, type: 'string' },
+        { name: 'new', type: 'string', searchable: true, aggregatable: true },
+      ]);
+      pattern.displayName = 'New';
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(apiClient.updateFields).not.toHaveBeenCalled();
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'index-pattern',
+        'foo',
+        { displayName: 'New' },
+        { version: 'v1' }
+      );
+    });
+  });
+
   test('createSavedObject makes the created attributes the baseline for updates', async () => {
     savedObjectsClient.find = jest.fn().mockResolvedValue([]);
     savedObjectsClient.create = jest.fn().mockResolvedValue({ id: 'new-id' });

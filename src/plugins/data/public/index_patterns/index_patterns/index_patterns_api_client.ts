@@ -34,6 +34,7 @@ import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   RefreshFieldsResponse,
+  UpdateFieldsRequest,
 } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
@@ -110,5 +111,13 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     const url = this._getUrl([id, '_refresh_fields']);
 
     return this._request(url, { meta_fields: options.metaFields }, 'POST');
+  }
+
+  updateFields(id: string, request: UpdateFieldsRequest): Promise<{ version: string }> {
+    // Errors are not wrapped like in _request: callers need the HTTP status to resolve conflicts.
+    return this.http.fetch(this._getUrl([id, '_update_fields']), {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
   }
 }

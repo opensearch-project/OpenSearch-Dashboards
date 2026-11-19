@@ -47,4 +47,15 @@ describe('DataViewsApiClient', () => {
       query: { meta_fields: ['_id'] },
     });
   });
+
+  test('posts field changes as JSON to the right URI', async function () {
+    const request = { version: 'v1', counts: { bytes: 2 } };
+
+    await dataViewsApiClient.updateFields('id', request);
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/id/_update_fields', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  });
 });

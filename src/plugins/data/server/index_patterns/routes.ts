@@ -34,11 +34,27 @@ import { schema } from '@osd/config-schema';
 import {
   HttpServiceSetup,
   LegacyAPICaller,
+  OpenSearchDashboardsResponseFactory,
   RequestHandlerContext,
 } from 'opensearch-dashboards/server';
 import { FieldSpec, IndexPatternAttributes, getDataSourceReference } from '../../common';
 import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
+
+// Objects written directly to the index by external tooling can store `fields` as an array.
+const readSavedFields = (attributes: IndexPatternAttributes): FieldSpec[] => {
+  const storedFields = attributes.fields;
+  return Array.isArray(storedFields) ? storedFields : JSON.parse(storedFields || '[]');
+};
+
+const boomErrorResponse = (response: OpenSearchDashboardsResponseFactory, error: Boom.Boom) =>
+  response.customError({
+    statusCode: error.output.statusCode,
+    body: { message: error.output.payload.message, attributes: error.output.payload },
+  });
+
+// Saved attributes `_update_fields` can change along with the fields; null clears one.
+const savedAttribute = schema.maybe(schema.oneOf([schema.string(), schema.literal(null)]));
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -189,11 +205,7 @@ export function registerRoutes(http: HttpServiceSetup) {
           id
         );
 
-        // Objects written directly to the index by external tooling can store `fields` as an array.
-        const storedFields = savedObject.attributes.fields;
-        const savedFields: FieldSpec[] = Array.isArray(storedFields)
-          ? storedFields
-          : JSON.parse(storedFields || '[]');
+        const savedFields = readSavedFields(savedObject.attributes);
 
         // Fields always come from the data source the pattern references, never from the request.
         const dataSourceId = getDataSourceReference(savedObject.references)?.id;
@@ -241,10 +253,114 @@ export function registerRoutes(http: HttpServiceSetup) {
         });
       } catch (error) {
         if (Boom.isBoom(error)) {
-          return response.customError({
-            statusCode: error.output.statusCode,
-            body: { message: error.output.payload.message, attributes: error.output.payload },
+          return boomErrorResponse(response, error);
+        }
+        throw error;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/index_patterns/{id}/_update_fields',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          version: schema.maybe(schema.string()),
+          attributes: schema.maybe(
+            schema.object({
+              title: savedAttribute,
+              displayName: savedAttribute,
+              description: savedAttribute,
+              signalType: savedAttribute,
+              timeFieldName: savedAttribute,
+              intervalName: savedAttribute,
+              sourceFilters: savedAttribute,
+              fieldFormatMap: savedAttribute,
+              type: savedAttribute,
+              typeMeta: savedAttribute,
+              schemaMappings: savedAttribute,
+            })
+          ),
+          scripted: schema.maybe(
+            schema.object({
+              upsert: schema.maybe(
+                schema.arrayOf(
+                  schema.object(
+                    {
+                      name: schema.string({ minLength: 1 }),
+                      type: schema.string(),
+                      script: schema.string(),
+                      scripted: schema.literal(true),
+                      searchable: schema.boolean(),
+                      aggregatable: schema.boolean(),
+                    },
+                    // Keep the rest of the field as the browser serialized it (count, lang, ...).
+                    { unknowns: 'allow' }
+                  )
+                )
+              ),
+              remove: schema.maybe(schema.arrayOf(schema.string())),
+            })
+          ),
+          counts: schema.maybe(schema.recordOf(schema.string(), schema.number({ min: 0 }))),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { id } = request.params;
+      const { version, attributes, scripted, counts } = request.body;
+
+      try {
+        const savedObject = await savedObjectsClient.get<IndexPatternAttributes>(
+          'index-pattern',
+          id
+        );
+        const savedFields = readSavedFields(savedObject.attributes);
+
+        // Discovered fields are written only by _refresh_fields, so a scripted field can't take
+        // the name of one.
+        const upserts: FieldSpec[] = scripted?.upsert ?? [];
+        const collision = upserts.find((upsert) =>
+          savedFields.some((field) => field.name === upsert.name && !field.scripted)
+        );
+        if (collision) {
+          return response.badRequest({
+            body: {
+              message: `[${collision.name}] is a discovered field of index pattern [${id}] and can't be replaced by a scripted field`,
+            },
           });
+        }
+
+        // Unknown names are ignored, so repeating a change is harmless.
+        const removed = new Set(scripted?.remove ?? []);
+        const upsertByName = new Map(upserts.map((field) => [field.name, field]));
+        const savedNames = new Set(savedFields.map((field) => field.name));
+        const countByName = new Map(Object.entries(counts ?? {}));
+        const fields = [
+          ...savedFields
+            .filter((field) => !(field.scripted && removed.has(field.name)))
+            .map((field) => upsertByName.get(field.name) ?? field),
+          ...Array.from(upsertByName.values()).filter((field) => !savedNames.has(field.name)),
+        ].map((field) => {
+          const count = countByName.get(field.name);
+          return count === undefined ? field : { ...field, count };
+        });
+
+        const { version: savedVersion } = await savedObjectsClient.update(
+          'index-pattern',
+          id,
+          { ...attributes, fields: JSON.stringify(fields) },
+          { version }
+        );
+
+        return response.ok({ body: { version: savedVersion } });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          return boomErrorResponse(response, error);
         }
         throw error;
       }

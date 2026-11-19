@@ -141,6 +141,20 @@ export interface IIndexPatternsApiClient {
     id: string,
     options: Pick<GetFieldsOptions, 'metaFields'>
   ) => Promise<RefreshFieldsResponse>;
+  updateFields: (id: string, request: UpdateFieldsRequest) => Promise<{ version: string }>;
+}
+
+/**
+ * Changes to a saved index pattern's field list, applied on the server so the list itself is not
+ * uploaded. Only scripted fields and popularity counts can change this way; discovered fields are
+ * written only by a field refresh. `attributes` are other changed saved attributes, saved in the
+ * same update.
+ */
+export interface UpdateFieldsRequest {
+  version?: string;
+  attributes?: Record<string, unknown>;
+  scripted?: { upsert?: FieldSpec[]; remove?: string[] };
+  counts?: Record<string, number>;
 }
 
 /**

@@ -25,7 +25,11 @@ import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
-import { isPayloadTooLargeError, getPayloadTooLargeToast } from '../../index_patterns/lib';
+import {
+  isPayloadTooLargeError,
+  getPayloadTooLargeToast,
+  getFieldChanges,
+} from '../../index_patterns/lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, MissingDataViewError } from '../errors';
 
@@ -797,18 +801,32 @@ export class DataViewsService {
     });
 
     // Send only the changed attributes: the update is partial, so the rest keep their saved
-    // values, and an unchanged field list is no longer uploaded. A cleared (undefined)
-    // attribute is still dropped from the request, as before.
+    // values. A cleared (undefined) attribute is still dropped from the request, as before.
     const bodyAttributes: Record<string, unknown> = body;
     const changedAttributes: Record<string, unknown> = {};
     originalChangedKeys.forEach((key) => {
-      changedAttributes[key] = bodyAttributes[key];
+      if (key !== 'fields') {
+        changedAttributes[key] = bodyAttributes[key];
+      }
     });
+    // The field list is one attribute, so a partial update would replace all of it. Only its
+    // scripted-field and popularity changes are sent, and the server applies them to the saved
+    // list; other differences are discovered metadata that only a field refresh writes.
+    const fieldChanges = originalChangedKeys.includes('fields')
+      ? getFieldChanges(originalBody.fields, body.fields)
+      : undefined;
+    const save: Promise<{ version?: string }> = fieldChanges
+      ? this.apiClient.updateFields(dataView.id, {
+          version: dataView.version,
+          attributes: changedAttributes,
+          ...fieldChanges,
+        })
+      : this.savedObjectsClient.update(savedObjectType, dataView.id, changedAttributes, {
+          version: dataView.version,
+        });
 
-    return this.savedObjectsClient
-      .update(savedObjectType, dataView.id, changedAttributes, { version: dataView.version })
+    return save
       .then((resp) => {
-        dataView.id = resp.id;
         dataView.version = resp.version;
         // What was just saved is now the baseline for the next save's changes.
         dataView.resetOriginalSavedObjectBody();

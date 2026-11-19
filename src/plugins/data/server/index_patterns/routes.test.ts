@@ -210,3 +210,135 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
     });
   });
 });
+
+describe('POST /api/index_patterns/{id}/_update_fields', () => {
+  const discovered = { name: 'bytes', type: 'number', searchable: true, aggregatable: true };
+  const scripted = {
+    name: 'kb',
+    type: 'number',
+    script: 'doc.bytes.value',
+    scripted: true,
+    searchable: true,
+    aggregatable: true,
+  };
+  const createContext = () => ({
+    core: {
+      savedObjects: {
+        client: { get: jest.fn(), update: jest.fn().mockResolvedValue({ version: 'v2' }) },
+      },
+    },
+  });
+
+  let routeConfig: PostRoute[0];
+  let handler: PostRoute[1];
+  let mockContext: ReturnType<typeof createContext>;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+  const callHandler = (body: Record<string, unknown>) =>
+    handler(
+      mockContext as unknown as RequestHandlerContext,
+      httpServerMock.createOpenSearchDashboardsRequest({ params: { id: 'id' }, body }),
+      mockResponse
+    );
+  const mockSavedFields = (fields: unknown) =>
+    mockContext.core.savedObjects.client.get.mockResolvedValue({
+      id: 'id',
+      version: 'v1',
+      references: [],
+      attributes: { title: 'logs-*', fields },
+    });
+  const savedFieldsArg = () =>
+    JSON.parse(mockContext.core.savedObjects.client.update.mock.calls[0][2].fields);
+
+  beforeEach(() => {
+    const router = httpServiceMock.createRouter();
+    const http = httpServiceMock.createSetupContract();
+    http.createRouter.mockReturnValue(router);
+    registerRoutes(http);
+    const route = router.post.mock.calls.find(
+      ([config]) => config.path === '/api/index_patterns/{id}/_update_fields'
+    );
+    if (!route) {
+      throw new Error('The _update_fields route was not registered');
+    }
+    [routeConfig, handler] = route;
+    mockResponse = httpServerMock.createResponseFactory();
+    mockContext = createContext();
+    mockSavedFields(JSON.stringify([discovered, scripted]));
+  });
+
+  it('applies the changes to the saved field list with the client version', async () => {
+    const added = { ...scripted, name: 'mb', script: 'doc.bytes.value / 1048576' };
+    const edited = { ...scripted, script: 'doc.bytes.value / 1000' };
+
+    await callHandler({
+      version: 'v1',
+      attributes: { fieldFormatMap: '{"kb":{"id":"number"}}' },
+      scripted: { upsert: [edited, added] },
+      counts: { bytes: 3 },
+    });
+
+    expect(mockContext.core.savedObjects.client.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'id',
+      expect.objectContaining({ fieldFormatMap: '{"kb":{"id":"number"}}' }),
+      { version: 'v1' }
+    );
+    expect(savedFieldsArg()).toEqual([{ ...discovered, count: 3 }, edited, added]);
+    expect(mockResponse.ok).toHaveBeenCalledWith({ body: { version: 'v2' } });
+  });
+
+  it('removes scripted fields only', async () => {
+    await callHandler({ version: 'v1', scripted: { remove: ['kb', 'bytes'] } });
+
+    expect(savedFieldsArg()).toEqual([discovered]);
+  });
+
+  it('adds a new scripted field once when the request repeats it', async () => {
+    const added = { ...scripted, name: 'mb', script: 'doc.bytes.value / 1048576' };
+
+    await callHandler({ version: 'v1', scripted: { upsert: [added, added] } });
+
+    expect(savedFieldsArg()).toEqual([discovered, scripted, added]);
+  });
+
+  it('ignores unknown field names', async () => {
+    await callHandler({ version: 'v1', scripted: { remove: ['gone'] }, counts: { gone: 2 } });
+
+    expect(savedFieldsArg()).toEqual([discovered, scripted]);
+  });
+
+  it('rejects a scripted field named like a discovered field', async () => {
+    await callHandler({ version: 'v1', scripted: { upsert: [{ ...scripted, name: 'bytes' }] } });
+
+    expect(mockResponse.badRequest).toHaveBeenCalled();
+    expect(mockContext.core.savedObjects.client.update).not.toHaveBeenCalled();
+  });
+
+  it('reads a saved field list stored as an array', async () => {
+    mockSavedFields([discovered]);
+
+    await callHandler({ version: 'v1', counts: { bytes: 1 } });
+
+    expect(savedFieldsArg()).toEqual([{ ...discovered, count: 1 }]);
+  });
+
+  it('returns a version conflict as 409', async () => {
+    mockContext.core.savedObjects.client.update.mockRejectedValue(Boom.conflict('conflict'));
+
+    await callHandler({ version: 'stale', counts: { bytes: 1 } });
+
+    expect(mockResponse.customError).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 409 })
+    );
+  });
+
+  it('only accepts scripted upserts and known attributes', () => {
+    const { body } = routeConfig.validate as { body: Type<unknown> };
+    expect(() =>
+      body.validate({ scripted: { upsert: [{ ...scripted, scripted: false }] } })
+    ).toThrow();
+    expect(() => body.validate({ attributes: { fields: '[]' } })).toThrow();
+    expect(() => body.validate({ attributes: { displayName: null } })).not.toThrow();
+  });
+});

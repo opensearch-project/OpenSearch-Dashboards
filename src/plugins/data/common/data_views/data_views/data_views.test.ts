@@ -225,6 +225,79 @@ describe('DataViews', () => {
     });
   });
 
+  describe('updateSavedObject with field changes', () => {
+    const discovered = {
+      name: 'bytes',
+      type: 'number',
+      searchable: true,
+      aggregatable: true,
+      count: 1,
+    };
+
+    beforeEach(() => {
+      setDocsourcePayload(null, {
+        id: 'foo',
+        version: 'v1',
+        attributes: { title: 'something', fields: JSON.stringify([discovered]) },
+      });
+      savedObjectsClient.update = jest.fn().mockResolvedValue({ id: 'foo', version: 'v2' });
+      apiClient.updateFields = jest.fn().mockResolvedValue({ version: 'v2' });
+      dataViews.clearCache();
+    });
+
+    test('sends a popularity change without the field list', async () => {
+      const dataView = await dataViews.get('foo');
+      dataView.fields.getByName('bytes')!.count = 2;
+
+      await dataViews.updateSavedObject(dataView);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
+        version: 'v1',
+        attributes: {},
+        counts: { bytes: 2 },
+      });
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      expect(dataView.version).toBe('v2');
+    });
+
+    test('sends a new scripted field and its format in one request', async () => {
+      const dataView = await dataViews.get('foo');
+      await dataView.addScriptedField('kb', 'doc.bytes.value', 'number');
+      dataView.fieldFormatMap.kb = { toJSON: () => ({ id: 'number' }) };
+
+      await dataViews.updateSavedObject(dataView);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith(
+        'foo',
+        expect.objectContaining({
+          attributes: { fieldFormatMap: JSON.stringify({ kb: { id: 'number' } }) },
+          scripted: {
+            upsert: [expect.objectContaining({ name: 'kb', script: 'doc.bytes.value' })],
+          },
+        })
+      );
+    });
+
+    test('does not send fields refreshed in memory', async () => {
+      const dataView = await dataViews.get('foo');
+      dataView.fields.replaceAll([
+        { ...discovered, type: 'string' },
+        { name: 'new', type: 'string', searchable: true, aggregatable: true },
+      ]);
+      dataView.displayName = 'New';
+
+      await dataViews.updateSavedObject(dataView);
+
+      expect(apiClient.updateFields).not.toHaveBeenCalled();
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'index-pattern',
+        'foo',
+        { displayName: 'New' },
+        { version: 'v1' }
+      );
+    });
+  });
+
   test('createSavedObject makes the created attributes the baseline for updates', async () => {
     savedObjectsClient.find = jest.fn().mockResolvedValue([]);
     savedObjectsClient.create = jest.fn().mockResolvedValue({ id: 'new-id' });

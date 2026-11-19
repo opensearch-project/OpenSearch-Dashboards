@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index_patterns/types';
+import {
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  UpdateFieldsRequest,
+} from '../../common/index_patterns/types';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   async getFieldsForTimePattern(options: GetFieldsOptions = {}) {
@@ -42,5 +46,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     options: Pick<GetFieldsOptions, 'metaFields'> = {}
   ): Promise<never> {
     throw new Error('IndexPatternsApiServer - refreshFields not defined');
+  }
+  async updateFields(id: string, request: UpdateFieldsRequest): Promise<never> {
+    throw new Error('IndexPatternsApiServer - updateFields not defined');
   }
 }
