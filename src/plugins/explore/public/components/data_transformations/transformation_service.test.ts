@@ -470,4 +470,47 @@ describe('TransformationService', () => {
       expect(completed).toBe(true);
     });
   });
+
+  describe('stepResults$', () => {
+    it('publishes each step result keyed by instance id', () => {
+      service.registerDefinition({
+        ...createMockDefinition('missing'),
+        createInstance: () => ({
+          instance_id: 'missing_1',
+          definition_id: 'missing',
+          config: {},
+          hide: false,
+          transformationMethod: (data: any[]) => ({
+            rows: data,
+            status: 'skipped',
+            issues: [{ code: 'missing_fields', fields: ['host'], message: 'missing' }],
+          }),
+          Editor: (() => null) as any,
+        }),
+      });
+      service.registerDefinition(createMockDefinition('limit'));
+      service.addInstance('missing');
+      service.addInstance('limit');
+
+      service.applyPipeline([createRow({ a: 1 })]);
+
+      const results = service.stepResults$.getValue();
+      expect(results.get('missing_1')).toMatchObject({
+        status: 'skipped',
+        issues: [expect.objectContaining({ code: 'missing_fields', fields: ['host'] })],
+      });
+      expect(results.size).toBe(2);
+    });
+
+    it('clears when the pipeline is empty', () => {
+      service.registerDefinition(createMockDefinition('limit'));
+      service.addInstance('limit');
+      service.applyPipeline([createRow({ a: 1 })]);
+      service.setPipeline([]);
+
+      service.applyPipeline([createRow({ a: 1 })]);
+
+      expect(service.stepResults$.getValue().size).toBe(0);
+    });
+  });
 });

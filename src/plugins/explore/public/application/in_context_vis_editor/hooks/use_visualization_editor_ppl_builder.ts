@@ -17,7 +17,7 @@ const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim()
 
 export const useVisualizationEditorPPLBuilder = (isPPLQueryMode: boolean) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, queryState, datasetView } = useQueryBuilderState();
+  const { queryBuilder, queryState, datasetView, container } = useQueryBuilderState();
 
   // parsePPL captures the `source = <index>` clause into state.sourceClause and
   // buildPPL re-emits it, so it round-trips without being an editable field.
@@ -76,9 +76,9 @@ export const useVisualizationEditorPPLBuilder = (isPPLQueryMode: boolean) => {
       if (query === lastSyncedQueryRef.current) return;
       lastSyncedQueryRef.current = query;
       queryBuilder.updateQueryState({ query });
-      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+      container.markStale();
     },
-    [queryBuilder]
+    [queryBuilder, container]
   );
 
   // Track live code text and seed the editor with the builder draft on a
@@ -152,13 +152,13 @@ export const useVisualizationEditorPPLBuilder = (isPPLQueryMode: boolean) => {
   );
 
   const handleBuilderRun = useCallback(() => {
-    queryBuilder.onQueryExecutionSubmit().catch((error) => {
+    container.executeAll().catch((error) => {
       services.notifications?.toasts.addError(error, {
         title: 'Query execution failed',
         toastLifeTimeMs: 2000,
       });
     });
-  }, [queryBuilder, services.notifications]);
+  }, [container, services.notifications]);
 
   const builderDisabled = mode === 'code' && !canSwitchToBuilder;
   const modeToggleTooltip = builderDisabled

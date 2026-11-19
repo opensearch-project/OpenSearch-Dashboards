@@ -46,8 +46,8 @@ export interface EditorCompletionProvider {
 
 export type PartialQueryEditorState = Pick<
   QueryEditorState,
-  'isQueryEditorDirty' | 'editorMode' | 'promptModeIsAvailable'
->;
+  'editorMode' | 'promptModeIsAvailable'
+> & { isQueryEditorDirty?: boolean };
 
 export interface QueryPanelRequiredServices {
   keyboardShortcut?: KeyboardShortcutStart;
@@ -73,7 +73,7 @@ export interface QueryEditorProps {
   onRun: (queryString: string) => void;
   // onSwitchMode:
   switchEditorMode: (editorMode: EditorMode) => void;
-  handleEditorChange: (updates: Partial<PartialQueryEditorState>) => void; // edit mode change
+  handleEditorChange?: (updates: Partial<PartialQueryEditorState>) => void; // edit mode change
 
   // Editor ref
   editorRef: MutableRefObject<IStandaloneCodeEditor | null>;

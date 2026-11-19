@@ -129,15 +129,21 @@ describe('filter_transformation', () => {
   });
 
   describe('execution diagnostics', () => {
-    it('treats rows without the filter field as non-matches', () => {
+    it('skips with a missing_fields issue when the filter field is not in the data', () => {
       const config = { field: 'removed_field', operator: 'equals' as const, value: 'active' };
       const data = [createRow({ status: 'active' })];
       const result = instance.transformationMethod(data, config);
 
       expect(result).toEqual({
-        rows: [],
-        status: 'applied',
-        issues: [],
+        rows: data,
+        status: 'skipped',
+        issues: [
+          {
+            code: 'missing_fields',
+            fields: ['removed_field'],
+            message: 'Field is unavailable in the current data: removed_field',
+          },
+        ],
       });
     });
 
@@ -153,6 +159,17 @@ describe('filter_transformation', () => {
         rows: [data[0]],
         status: 'applied',
         issues: [],
+      });
+    });
+
+    it('skips, keeping the rows, when no row has the field (an earlier step dropped it)', () => {
+      const config = { field: 'status', operator: 'equals' as const, value: 'active' };
+      const data = [createRow({ name: 'a' }), createRow({ name: 'b' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'missing_fields', fields: ['status'] }],
       });
     });
 

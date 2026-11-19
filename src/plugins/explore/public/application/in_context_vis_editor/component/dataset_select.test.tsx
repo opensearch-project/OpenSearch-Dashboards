@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DatasetSelectWidget } from './dataset_select';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
@@ -17,8 +16,12 @@ import {
 
 const mockUpdateQueryState = jest.fn();
 const mockUpdateQueryEditorState = jest.fn();
+const mockMarkStale = jest.fn();
 const mockGetInitialQueryByDataset = jest.fn();
 const mockClearEditor = jest.fn();
+const mockSetEditorText = jest.fn();
+const mockResetEditorMode = jest.fn();
+const mockGetInitialQueryString = jest.fn();
 const mockSetQuery = jest.fn();
 const mockGetQuery = jest.fn();
 const mockCacheDataset = jest.fn();
@@ -38,8 +41,11 @@ jest.mock('../hooks/use_editor_operations', () => ({
 jest.mock('../query_builder/query_builder', () => ({
   SupportLanguageType: { ppl: 'PPL', promQL: 'PROMQL', ai: 'AI' },
 }));
+const mockResolveDatasetLanguage = jest.fn();
 jest.mock('../query_builder/utils', () => ({
   getRequiredSignalType: jest.fn((lang) => (lang === 'PROMQL' ? 'metrics' : ['logs', 'traces'])),
+  resolveDatasetLanguage: (...args: unknown[]) => mockResolveDatasetLanguage(...args),
+  getInitialQueryString: (...args: unknown[]) => mockGetInitialQueryString(...args),
 }));
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -96,16 +102,27 @@ beforeEach(() => {
   jest.clearAllMocks();
   setSourceTypeRegistry(new SourceTypeRegistryService());
   mockGetInitialQueryByDataset.mockReturnValue({ query: '', language: 'PPL', dataset: undefined });
+  mockResolveDatasetLanguage.mockReturnValue('PPL');
+  mockGetInitialQueryString.mockReturnValue('');
+  // Prometheus is a registered dataset type in these tests.
+  mockGetType.mockReturnValue({ id: 'PROMETHEUS' });
 
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: buildServices() });
+
   (useQueryBuilderState as jest.Mock).mockReturnValue({
-    queryEditorState: { languageType: 'PPL' },
+    queryState: { query: '', language: 'PPL', dataset: undefined },
+    queryEditorState: {},
     queryBuilder: {
       updateQueryState: mockUpdateQueryState,
       updateQueryEditorState: mockUpdateQueryEditorState,
     },
+    container: { markStale: mockMarkStale },
   });
-  (useEditorOperations as jest.Mock).mockReturnValue({ clearEditor: mockClearEditor });
+  (useEditorOperations as jest.Mock).mockReturnValue({
+    clearEditor: mockClearEditor,
+    setEditorText: mockSetEditorText,
+    resetEditorMode: mockResetEditorMode,
+  });
 });
 
 describe('DatasetSelectWidget', () => {
@@ -117,29 +134,38 @@ describe('DatasetSelectWidget', () => {
   it('handles dataset selection correctly', async () => {
     render(<DatasetSelectWidget />);
 
+    mockGetInitialQueryString.mockReturnValue('SELECT * FROM ds1');
     fireEvent.click(screen.getByTestId('select-btn'));
-
     await waitFor(() => {
-      expect(mockGetInitialQueryByDataset).toHaveBeenCalledWith({
-        id: 'ds1',
-        type: 'INDEX_PATTERN',
-      });
-      expect(mockUpdateQueryState).toHaveBeenCalledWith(
-        expect.objectContaining({ query: '', dataset: { id: 'ds1', type: 'INDEX_PATTERN' } })
+      expect(mockGetInitialQueryString).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 'ds1', type: 'INDEX_PATTERN' },
+        'PPL'
       );
-      expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ isQueryEditorDirty: true });
-      expect(mockClearEditor).toHaveBeenCalled();
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'SELECT * FROM ds1',
+          dataset: { id: 'ds1', type: 'INDEX_PATTERN' },
+        })
+      );
+      // Picking a dataset is an edit: the button offers Update.
+      expect(mockMarkStale).toHaveBeenCalled();
+      // The new query is written into the editor even when the string didn't change.
+      expect(mockSetEditorText).toHaveBeenCalledWith('SELECT * FROM ds1');
+      expect(mockResetEditorMode).toHaveBeenCalled();
     });
   });
 
-  it('passes default supportedType array for PPL language', () => {
+  // The dataset decides the language, so the picker offers every type whatever the language.
+  it('passes all dataset types, including PROMETHEUS, for PPL', () => {
     render(<DatasetSelectWidget />);
-    expect(capturedSupportedTypes).toEqual(['INDEXES', 'INDEX_PATTERN']);
+    expect(capturedSupportedTypes).toEqual(['INDEXES', 'INDEX_PATTERN', 'PROMETHEUS']);
   });
 
-  it('passes PROMETHEUS supportedTypes for promQL language', () => {
+  it('passes the same dataset types for PromQL', () => {
     (useQueryBuilderState as jest.Mock).mockReturnValue({
-      queryEditorState: { languageType: 'PROMQL' },
+      queryState: { query: '', language: 'PROMQL', dataset: undefined },
+      queryEditorState: {},
       queryBuilder: {
         updateQueryState: mockUpdateQueryState,
         updateQueryEditorState: mockUpdateQueryEditorState,
@@ -147,25 +173,40 @@ describe('DatasetSelectWidget', () => {
     });
 
     render(<DatasetSelectWidget />);
-    expect(capturedSupportedTypes).toEqual(['PROMETHEUS']);
+    expect(capturedSupportedTypes).toEqual(['INDEXES', 'INDEX_PATTERN', 'PROMETHEUS']);
   });
 
-  it('passes logs and traces signalTypes from getRequiredSignalType', () => {
+  it('passes logs, traces and metrics signal types', () => {
     render(<DatasetSelectWidget />);
-    expect(capturedSignalType).toEqual(['logs', 'traces']);
+    expect(capturedSignalType).toEqual(['logs', 'traces', 'metrics']);
   });
 
-  it('passes metric signalType from getRequiredSignalType for promQL', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue({
-      queryEditorState: { languageType: 'PROMQL' },
-      queryBuilder: {
-        updateQueryState: mockUpdateQueryState,
-        updateQueryEditorState: mockUpdateQueryEditorState,
-      },
+  it('switches to a language the dataset can run when it carries none', async () => {
+    // getInitialQueryByDataset kept the current language (PPL) for a dataset without one.
+    mockResolveDatasetLanguage.mockReturnValue('PROMQL');
+    render(<DatasetSelectWidget />);
+    fireEvent.click(screen.getByTestId('select-btn'));
+    await waitFor(() => {
+      // The current language is preferred; the dataset decides when it can't run it.
+      expect(mockResolveDatasetLanguage).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 'ds1', type: 'INDEX_PATTERN' },
+        'PPL'
+      );
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({ language: 'PROMQL' })
+      );
     });
+  });
 
+  it('clears the previous language query options on dataset selection', async () => {
     render(<DatasetSelectWidget />);
-    expect(capturedSignalType).toBe('metrics');
+    fireEvent.click(screen.getByTestId('select-btn'));
+    await waitFor(() => {
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({ queryOptions: undefined })
+      );
+    });
   });
 
   describe('on a registered source type dataset', () => {
@@ -200,6 +241,7 @@ describe('DatasetSelectWidget', () => {
           updateQueryState: mockUpdateQueryState,
           updateQueryEditorState: mockUpdateQueryEditorState,
         },
+        container: { markStale: mockMarkStale },
       });
     };
 
@@ -227,7 +269,9 @@ describe('DatasetSelectWidget', () => {
             dataset: { ...SOURCE_DATASET, id: 'my-other-dataset' },
           })
         );
-        expect(mockClearEditor).toHaveBeenCalled();
+        expect(mockMarkStale).toHaveBeenCalled();
+        expect(mockSetEditorText).toHaveBeenCalledWith('');
+        expect(mockResetEditorMode).toHaveBeenCalled();
       });
     });
 
@@ -251,6 +295,7 @@ describe('DatasetSelectWidget', () => {
           updateQueryState: mockUpdateQueryState,
           updateQueryEditorState: mockUpdateQueryEditorState,
         },
+        container: { markStale: mockMarkStale },
       });
 
     const pick = async (dataset: Record<string, any>) => {
@@ -274,12 +319,7 @@ describe('DatasetSelectWidget', () => {
     };
 
     it('keeps the query and the editor when the new dataset runs the same language', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['my_language'] });
-      mockGetInitialQueryByDataset.mockReturnValue({
-        query: '',
-        language: 'my_language',
-        dataset: OTHER_LOG_GROUPS,
-      });
+      mockResolveDatasetLanguage.mockReturnValue('my_language');
       withQueryState({
         query: 'stats count(*) by bin(5m)',
         language: 'my_language',
@@ -290,17 +330,15 @@ describe('DatasetSelectWidget', () => {
 
       expect(mockUpdateQueryState).toHaveBeenCalledTimes(1);
       expect(mockUpdateQueryState).toHaveBeenCalledWith({ dataset: OTHER_LOG_GROUPS });
-      expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ isQueryEditorDirty: true });
+      // expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ isQueryEditorDirty: true });
+      expect(mockMarkStale).toHaveBeenCalled();
       expect(mockClearEditor).not.toHaveBeenCalled();
+      expect(mockSetEditorText).not.toHaveBeenCalled();
     });
 
     it('empties the query when the new dataset uses another language', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL'] });
-      mockGetInitialQueryByDataset.mockReturnValue({
-        query: '',
-        language: 'PPL',
-        dataset: { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' },
-      });
+      // The dataset can't run my_language: resolveDatasetLanguage falls back to its own (PPL).
+      mockResolveDatasetLanguage.mockReturnValue('PPL');
       withQueryState({
         query: 'stats count(*) by bin(5m)',
         language: 'my_language',
@@ -312,11 +350,13 @@ describe('DatasetSelectWidget', () => {
       expect(mockUpdateQueryState).toHaveBeenCalledWith(
         expect.objectContaining({ query: '', language: 'PPL' })
       );
-      expect(mockClearEditor).toHaveBeenCalled();
+
+      // The editor takes the new dataset's initial query.
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
     });
 
     it('keeps a PPL query that does not name its index', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
+      // mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: '| stats count() by status',
         language: 'PPL',
@@ -328,11 +368,11 @@ describe('DatasetSelectWidget', () => {
       expect(mockUpdateQueryState).toHaveBeenCalledWith({
         dataset: { id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' },
       });
+      expect(mockMarkStale).toHaveBeenCalled();
       expect(mockClearEditor).not.toHaveBeenCalled();
     });
 
     it('empties a PPL query that names the previous index, as before', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: 'source = `logs-a` | stats count() by status',
         language: 'PPL',
@@ -347,12 +387,13 @@ describe('DatasetSelectWidget', () => {
           dataset: { id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' },
         })
       );
-      expect(mockClearEditor).toHaveBeenCalled();
+      // expect(mockClearEditor).toHaveBeenCalled();
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
     });
 
     // A query that names its own index runs on it whatever the previous dataset's title was.
     it('empties a PPL query that names its own index, though not by the previous title', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
+      // mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: 'source = logs-2026.01 | stats count() by status',
         language: 'PPL',
@@ -364,7 +405,26 @@ describe('DatasetSelectWidget', () => {
       expect(mockUpdateQueryState).toHaveBeenCalledWith(
         expect.objectContaining({ query: '', dataset: expect.objectContaining({ id: 'logs-b' }) })
       );
-      expect(mockClearEditor).toHaveBeenCalled();
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
+    });
+
+    // A row without a query (a new row, or one whose dataset was cleared) has nothing to keep.
+    it('gives a row without a query the new dataset initial query', async () => {
+      mockGetInitialQueryString.mockReturnValue('source = logs-b | head 10');
+      withQueryState({ query: '', language: 'PPL', dataset: undefined });
+
+      await pick({ id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' });
+
+      expect(mockGetInitialQueryString).toHaveBeenCalled();
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'source = logs-b | head 10',
+          language: 'PPL',
+          dataset: { id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' },
+        })
+      );
+      expect(mockSetEditorText).toHaveBeenCalledWith('source = logs-b | head 10');
+      expect(mockResetEditorMode).toHaveBeenCalled();
     });
   });
 });

@@ -27,6 +27,7 @@ export interface SavedExplore extends Pick<
   queryState?: string; // Serialized query state
   version?: number;
   visualization?: string; // Serialized visualization state
+  queries?: string; // Serialized visualization editor rows and editor state
   type?: string;
   kibanaSavedObjectMeta?: {
     searchSourceJSON: string;
@@ -42,6 +43,7 @@ export interface SavedExploreAttributes {
   legacyState: string; // Serialized legacy state
   uiState: string; // Serialized UI state
   queryState: string; // Serialized query state
+  queries?: string; // Serialized visualization editor rows and editor state
   version: number;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;

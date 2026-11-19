@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useObservable } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -12,8 +13,13 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../visualization_editor.scss';
 
 export const RightStyleOptionsPanel = React.memo(() => {
-  const { queryEditorState } = useQueryBuilderState();
-  const queryStatus = queryEditorState.queryStatus;
+  const { container } = useQueryBuilderState();
+  const aggregateStatus$ = useMemo(() => container.getAggregateStatus$(), [container]);
+
+  const queryStatus = useObservable(aggregateStatus$, {
+    status: QueryExecutionStatus.UNINITIALIZED,
+    failedQueries: [],
+  });
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
 
   const displayEmptyState =

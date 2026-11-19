@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { RightStyleOptionsPanel } from './visualization_editor_right_container';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
@@ -34,9 +35,11 @@ jest.mock('../../utils/state_management/types', () => ({
 
 const mockRenderStylePanel = jest.fn().mockReturnValue(<div data-test-subj="style-panel" />);
 
-const buildState = (status: string, options?: any) => ({
-  queryEditorState: {
-    queryStatus: { status, error: options },
+// The panel follows the container's aggregate status (every visible query), not the selected row.
+const buildState = (status: string, selectedRowStatus: string = status) => ({
+  queryEditorState: { queryStatus: { status: selectedRowStatus } },
+  container: {
+    getAggregateStatus$: () => new BehaviorSubject({ status, failedQueries: [] }),
   },
 });
 
@@ -80,5 +83,13 @@ describe('RightStyleOptionsPanel', () => {
     render(<RightStyleOptionsPanel />);
     expect(screen.getByTestId('style-panel')).toBeInTheDocument();
     expect(mockRenderStylePanel).toHaveBeenCalledWith({ className: 'visStylePanelBody' });
+  });
+
+  it('shows the style panel when the selected row has no results but the vis has some', () => {
+    (useQueryBuilderState as jest.Mock).mockReturnValue(
+      buildState(QueryExecutionStatus.READY, QueryExecutionStatus.NO_RESULTS)
+    );
+    render(<RightStyleOptionsPanel />);
+    expect(screen.getByTestId('style-panel')).toBeInTheDocument();
   });
 });

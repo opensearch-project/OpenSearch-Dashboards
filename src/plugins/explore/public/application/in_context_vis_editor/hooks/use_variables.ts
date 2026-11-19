@@ -15,8 +15,8 @@ import {
 } from '../../../../../dashboard/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
-import { useQueryBuilderState } from './use_query_builder_state';
 import { useVisualizationBuilder } from './use_visualization_builder';
+import { useMultiQueryBuilder } from '../multi_query_builder/multi_query_builder_context';
 import { prepareQueryForLanguage } from '../../utils/languages';
 import { VARIABLE_VALUES_URL_KEY } from '../types';
 
@@ -30,8 +30,8 @@ import { VARIABLE_VALUES_URL_KEY } from '../types';
  */
 export const useVariables = (containerVariables?: Variable[]) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder } = useQueryBuilderState();
   const { visualizationBuilderForEditor } = useVisualizationBuilder();
+  const container = useMultiQueryBuilder();
 
   // Create service & interpolation
   const variableService = useMemo(() => {
@@ -54,9 +54,9 @@ export const useVariables = (containerVariables?: Variable[]) => {
   // Wire interpolation service into queryBuilder
   useEffect(() => {
     if (interpolationService) {
-      queryBuilder.setInterpolationService(interpolationService);
+      container.setInterpolationService(interpolationService);
     }
-  }, [queryBuilder, interpolationService]);
+  }, [container, interpolationService]);
 
   // Refresh variable options whenever their queries or the time range change.
   useEffect(() => {
@@ -83,18 +83,23 @@ export const useVariables = (containerVariables?: Variable[]) => {
 
       visualizationBuilderForEditor.setVariables(interpolationService.getVariables());
 
-      const queryState = queryBuilder.queryState$.getValue();
-      const currentQuery = prepareQueryForLanguage(queryState).query;
-      if (!currentQuery || !interpolationService.hasVariables(currentQuery)) return;
-
-      const interpolated = interpolationService.interpolate(currentQuery, queryState.language);
-      if (interpolated === queryBuilder.lastExecutedInterpolatedQuery) return;
-
-      queryBuilder.executeQuery();
+      const hasChangedRow = container
+        .getAllRows()
+        .filter((row) => !row.getQueryEditorState().isHidden)
+        .some((row) => {
+          const queryState = row.queryState$.getValue();
+          const currentQuery = prepareQueryForLanguage(queryState).query;
+          if (!currentQuery || !interpolationService.hasVariables(currentQuery)) return false;
+          const interpolated = interpolationService.interpolate(currentQuery, queryState.language);
+          return interpolated !== row.lastExecutedInterpolatedQuery;
+        });
+      if (hasChangedRow) {
+        container.executeAll({ userInitiated: false });
+      }
     });
 
     return () => sub.unsubscribe();
-  }, [variableService, interpolationService, queryBuilder, visualizationBuilderForEditor]);
+  }, [variableService, interpolationService, container, visualizationBuilderForEditor]);
 
   // Sync variable values to URL
   useEffect(() => {
