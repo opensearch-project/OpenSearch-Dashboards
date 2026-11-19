@@ -24,11 +24,11 @@
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
+ * specific language governing permissions and limitationsg
  * under the License.
  */
 
-import minimatch from 'minimatch';
+import { makeRe } from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask, normalizePath } from '../lib';
 
@@ -36,7 +36,7 @@ const TYPESCRIPT_REGEXPS: RegExp[] = [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/];
 
 const makeRegexps = (patterns: string[]) =>
   patterns.map((pattern) => {
-    const re = minimatch.makeRe(pattern, { nocase: true });
+    const re = makeRe(pattern, { nocase: true });
     // scanDelete matches against paths produced by `path.join`, which uses the OS native
     // separator (backslash on Windows). minimatch emits `/`-only regexes, which silently
     // miss on Windows. Relax every literal `/` in the pattern to match either separator
