@@ -61,6 +61,8 @@ import { configServiceMock } from '../config/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
 import { mockCoreContext } from '../core_context.mock';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
+import { UiPlugins } from '../plugins';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -221,6 +223,170 @@ describe('RenderingService', () => {
 
         expect(i18nLoader.isRegisteredLocale).toHaveBeenCalledWith('xx-XX');
         expect($elStyle.attr('lang')).toBe('en');
+      });
+    });
+
+    describe('render() plugin config exposure', () => {
+      const SERVER_ONLY_VALUE = 'server-only-value';
+
+      const discoveredPlugin = (id: string, configPath: string) => ({
+        id,
+        configPath,
+        requiredPlugins: [],
+        optionalPlugins: [],
+        requiredBundles: [],
+        requiredEnginePlugins: {},
+      });
+
+      const dynamicConfigs: Record<string, Record<string, unknown>> = {
+        // configPath equals snake_case(id): the dynamic service knows it by either identifier.
+        default_path: { enabled: true, exposedProp: 'dynamic exposed', serverOnly: SERVER_ONLY_VALUE },
+        // custom configPath: the dynamic service knows it ONLY by configPath.
+        custom_path: { enabled: true, exposedProp: 'dynamic exposed', serverOnly: SERVER_ONLY_VALUE },
+        // declares nothing in exposeToBrowser.
+        undeclared_path: { enabled: false, serverOnly: SERVER_ONLY_VALUE },
+      };
+
+      let getConfig: jest.Mock;
+      let uiPluginsFixture: UiPlugins;
+      let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
+
+      const renderPluginConfigs = async () => {
+        const dynamicConfig = dynamicConfigServiceMock.createInternalSetupContract();
+        dynamicConfig.getStartService.mockResolvedValue({
+          getClient: () => ({ getConfig, bulkGetConfigs: jest.fn(), listConfigs: jest.fn() }),
+          getAsyncLocalStore: () => new Map(),
+          createStoreFromRequest: () => new Map(),
+        } as any);
+
+        const { render } = await service.setup({
+          ...mockRenderingSetupDeps,
+          uiPlugins: uiPluginsFixture,
+          dynamicConfig,
+        });
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
+        const data = JSON.parse(load(content)('osd-injected-metadata').attr('data') || '');
+        return Object.fromEntries(
+          (data.uiPlugins as Array<{ id: string; config: unknown }>).map((p) => [p.id, p.config])
+        );
+      };
+
+      beforeEach(() => {
+        uiSettings = uiSettingsServiceMock.createClient();
+        uiSettings.getRegistered.mockReturnValue({});
+
+        getConfig = jest.fn(async (identifier: { name?: string; pluginConfigPath?: string }) => {
+          const path = identifier.pluginConfigPath ?? identifier.name!;
+          if (!(path in dynamicConfigs)) {
+            throw new Error(`no dynamic config for ${path}`);
+          }
+          return dynamicConfigs[path];
+        });
+
+        uiPluginsFixture = {
+          internal: new Map(),
+          public: new Map([
+            ['defaultPath', discoveredPlugin('defaultPath', 'default_path')],
+            ['customPath', discoveredPlugin('customPath', 'custom_path')],
+            ['undeclared', discoveredPlugin('undeclared', 'undeclared_path')],
+          ]),
+          browserConfigs: new Map([
+            ['defaultPath', new BehaviorSubject({ exposedProp: 'static exposed' })],
+            ['customPath', new BehaviorSubject({ exposedProp: 'static exposed' })],
+          ]),
+          exposedConfigKeys: new Map([
+            ['defaultPath', ['exposedProp']],
+            ['customPath', ['exposedProp']],
+            ['undeclared', []],
+          ]),
+        } as any;
+      });
+
+      it('resolves plugins through the dynamic config service by configPath, not plugin id', async () => {
+        // The dynamic config service only knows the plugin by its configPath; resolving by
+        // snake_case(id) would miss `customPath` and silently fall back to static config.
+        context.dynamicConfigService.hasDefaultConfigs.mockImplementation(
+          (identifier: any) => identifier.pluginConfigPath in dynamicConfigs
+        );
+
+        const configs = await renderPluginConfigs();
+
+        expect(context.dynamicConfigService.hasDefaultConfigs).toHaveBeenCalledWith({
+          pluginConfigPath: 'custom_path',
+        });
+        expect(getConfig).toHaveBeenCalledWith(
+          { pluginConfigPath: 'custom_path' },
+          expect.anything()
+        );
+        expect(configs.customPath).toEqual({ exposedProp: 'dynamic exposed' });
+        expect(configs.defaultPath).toEqual({ exposedProp: 'dynamic exposed' });
+      });
+
+      it('restricts dynamic config to the keys declared in exposeToBrowser', async () => {
+        context.dynamicConfigService.hasDefaultConfigs.mockReturnValue(true);
+
+        const configs = await renderPluginConfigs();
+
+        for (const id of ['defaultPath', 'customPath']) {
+          expect(configs[id]).toEqual({ exposedProp: 'dynamic exposed' });
+          expect(configs[id]).not.toHaveProperty('serverOnly');
+          expect(configs[id]).not.toHaveProperty('enabled');
+        }
+      });
+
+      it('restricts static config to the keys declared in exposeToBrowser', async () => {
+        context.dynamicConfigService.hasDefaultConfigs.mockReturnValue(false);
+
+        const configs = await renderPluginConfigs();
+
+        // No plugin config is read through the dynamic client on the static path. The
+        // render path makes unrelated core lookups (e.g. opensearchDashboards), so match
+        // on the plugin config paths rather than asserting zero calls.
+        for (const path of ['default_path', 'custom_path', 'undeclared_path']) {
+          expect(getConfig).not.toHaveBeenCalledWith(
+            expect.objectContaining({ pluginConfigPath: path }),
+            expect.anything()
+          );
+        }
+        expect(configs.defaultPath).toEqual({ exposedProp: 'static exposed' });
+        expect(configs.customPath).toEqual({ exposedProp: 'static exposed' });
+      });
+
+      it('sends an empty config for plugins that declare nothing, without reading their config', async () => {
+        context.dynamicConfigService.hasDefaultConfigs.mockReturnValue(true);
+
+        const configs = await renderPluginConfigs();
+
+        expect(configs.undeclared).toEqual({});
+        expect(getConfig).not.toHaveBeenCalledWith(
+          expect.objectContaining({ pluginConfigPath: 'undeclared_path' }),
+          expect.anything()
+        );
+      });
+
+      it('never serializes a server-only value to the page, from either config source', async () => {
+        context.dynamicConfigService.hasDefaultConfigs.mockImplementation(
+          (identifier: any) => identifier.pluginConfigPath === 'custom_path'
+        );
+
+        const dynamicConfig = dynamicConfigServiceMock.createInternalSetupContract();
+        dynamicConfig.getStartService.mockResolvedValue({
+          getClient: () => ({ getConfig, bulkGetConfigs: jest.fn(), listConfigs: jest.fn() }),
+          getAsyncLocalStore: () => new Map(),
+          createStoreFromRequest: () => new Map(),
+        } as any);
+        const { render } = await service.setup({
+          ...mockRenderingSetupDeps,
+          uiPlugins: uiPluginsFixture,
+          dynamicConfig,
+        });
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
+
+        expect(content).not.toContain(SERVER_ONLY_VALUE);
       });
     });
   });
