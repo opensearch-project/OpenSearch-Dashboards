@@ -68,6 +68,7 @@ import {
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
 import { PersistableState, SerializableState } from '../../opensearch_dashboards_utils/common';
+import { setChatService } from './lib/embeddables/chat_service_holder';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -149,6 +150,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     core: CoreStart,
     { data, uiActions, inspector }: EmbeddableStartDependencies
   ): EmbeddableStart {
+    // Make the chat service available for error embeddables to offer "Ask AI" functionality
+    setChatService(core.chat);
+
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
         def.type,

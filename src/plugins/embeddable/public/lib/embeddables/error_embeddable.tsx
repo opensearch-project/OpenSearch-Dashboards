@@ -28,12 +28,14 @@
  * under the License.
  */
 
-import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { createRoot, Root } from 'react-dom/client';
+import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
+import { getChatService } from './chat_service_holder';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
@@ -62,6 +64,25 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     if (!this.root) {
       this.root = createRoot(_dom);
     }
+
+    const chatService = getChatService();
+    const isChatAvailable = chatService?.isAvailable() ?? false;
+
+    const handleAskAI = async () => {
+      if (!chatService) return;
+      const errorMessage = typeof this.error === 'string' ? this.error : this.error.message;
+      const prompt = i18n.translate('embeddableApi.errorEmbeddable.askAIPrompt', {
+        defaultMessage:
+          'I encountered the following error on my OpenSearch Dashboard panel. Please help me find the potential root cause and how to fix it:\n\n```\n{errorMessage}\n```',
+        values: { errorMessage },
+      });
+      try {
+        await chatService.sendMessageWithWindow(prompt, [], { clearConversation: true });
+      } catch (e) {
+        // Silently fail - chat window may not be available
+      }
+    };
+
     this.root.render(
       // @ts-ignore
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
@@ -73,6 +94,21 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
             openLinksInNewTab={true}
             data-test-subj="errorMessageMarkdown"
           />
+          {isChatAvailable && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiButtonEmpty
+                size="xs"
+                iconType="editorComment"
+                onClick={handleAskAI}
+                data-test-subj="embeddableErrorAskAIButton"
+              >
+                {i18n.translate('embeddableApi.errorEmbeddable.askAIButton', {
+                  defaultMessage: 'Ask AI',
+                })}
+              </EuiButtonEmpty>
+            </>
+          )}
         </EuiText>
       </div>
     );
