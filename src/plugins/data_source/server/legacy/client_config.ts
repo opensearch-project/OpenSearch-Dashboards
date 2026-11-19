@@ -5,6 +5,7 @@
 
 import { ConfigOptions } from 'elasticsearch';
 import { checkServerIdentity } from 'tls';
+import { getLegacyNodeAgentFactory, Logger } from '../../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../../config';
 import { readCertificateAuthorities } from '../util/tls_settings_provider';
 
@@ -21,11 +22,14 @@ type LegacyDataSourceSSLConfigOptions = Partial<{
  *
  * @param config The config to generate the client options from.
  * @param endpoint endpoint url of data source
+ * @param registeredSchema registered API schema
+ * @param logger where the client's socket guard logs the errors it handles
  */
 export function parseClientOptions(
   config: DataSourcePluginConfigType,
   endpoint: string,
-  registeredSchema: any[]
+  registeredSchema: any[],
+  logger: Logger
 ): ConfigOptions {
   const sslConfig: LegacyDataSourceSSLConfigOptions = {
     rejectUnauthorized: true,
@@ -65,6 +69,8 @@ export function parseClientOptions(
     requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
     suggestCompression: config.globalOpenSearchConfig.requestCompression,
+    // Keeps pooled sockets from leaking or from crashing the process, see `getLegacyNodeAgentFactory`.
+    createNodeAgent: getLegacyNodeAgentFactory(logger),
   };
 
   return configOptions;
