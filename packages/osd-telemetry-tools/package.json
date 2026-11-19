@@ -9,8 +9,8 @@
   },
   "scripts": {
     "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts --source-maps=inline",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "osd:bootstrap": "npm run build",
+    "osd:watch": "npm run build -- --watch"
   },
   "devDependencies": {
     "lodash": "^4.18.0",

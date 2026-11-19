@@ -30,6 +30,7 @@
 
 import globSync from 'glob';
 import path from 'path';
+import { satisfies } from 'semver';
 import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
@@ -46,7 +47,10 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
     return [];
   }
 
-  const workspacesPathsPatterns: string[] = rootPkgJson.workspaces.packages;
+  // yarn uses `{ packages: [...] }`; npm also accepts a plain array.
+  const workspacesPathsPatterns: string[] = Array.isArray(rootPkgJson.workspaces)
+    ? rootPkgJson.workspaces
+    : rootPkgJson.workspaces.packages;
   let workspaceProjectsPaths: string[] = [];
 
   for (const pattern of workspacesPathsPatterns) {
@@ -64,6 +68,42 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
   }
 
   return workspaceProjectsPaths;
+}
+
+export interface WorkspacesInfo {
+  [name: string]: { location: string; workspaceDependencies: string[] };
+}
+
+/**
+ * Equivalent of `yarn workspaces info`, computed from the manifests so it works
+ * with any package manager: for each workspace, the other workspaces it depends
+ * on (excluding peer dependencies) with a range the workspace's version satisfies.
+ */
+export async function workspacesInfo(rootPath: string): Promise<WorkspacesInfo> {
+  const manifests = new Map<string, { dir: string; json: any }>();
+  for (const manifestPath of await workspacePackagePaths(rootPath)) {
+    const dir = path.dirname(manifestPath);
+    const json = await readPackageJson(dir);
+    manifests.set(json.name, { dir, json });
+  }
+
+  const info: WorkspacesInfo = {};
+  for (const [name, { dir, json }] of manifests) {
+    const workspaceDependencies = new Set<string>();
+    for (const type of ['devDependencies', 'dependencies', 'optionalDependencies']) {
+      for (const [dep, range] of Object.entries<string>(json[type] || {})) {
+        const target = manifests.get(dep);
+        if (target && satisfies(target.json.version, range)) {
+          workspaceDependencies.add(dep);
+        }
+      }
+    }
+    info[name] = {
+      location: path.relative(rootPath, dir).replace(/\\/g, '/'),
+      workspaceDependencies: [...workspaceDependencies],
+    };
+  }
+  return info;
 }
 
 export async function copyWorkspacePackages(rootPath: string): Promise<void> {

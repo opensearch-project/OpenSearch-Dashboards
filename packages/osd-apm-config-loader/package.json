@@ -7,8 +7,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "osd:bootstrap": "npm run build",
+    "osd:watch": "npm run build -- --watch"
   },
   "dependencies": {
     "@elastic/safer-lodash-set": "0.0.0",

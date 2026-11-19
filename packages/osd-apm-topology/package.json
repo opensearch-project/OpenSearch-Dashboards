@@ -8,9 +8,9 @@
   "scripts": {
     "build:babel:node": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --quiet",
     "build:babel:web": "babel src --env-name web --out-dir target/web --extensions .ts,.tsx --copy-files --quiet",
-    "build:babel": "yarn build:babel:node && yarn build:babel:web",
-    "build": "yarn build:babel",
-    "osd:bootstrap": "yarn build",
+    "build:babel": "npm run build:babel:node && npm run build:babel:web",
+    "build": "npm run build:babel",
+    "osd:bootstrap": "npm run build",
     "osd:watch": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --watch"
   },
   "dependencies": {

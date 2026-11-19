@@ -42,12 +42,15 @@ import {
   readPackageJson,
 } from './package_json';
 import {
+  addInDir,
   installInDir,
   patchFile,
   runScriptInPackage,
   runScriptInPackageStreaming,
-  yarnWorkspacesInfo,
+  syncLockfileInDir,
 } from './scripts';
+import { detectPackageManager, YARN_LOCKFILE } from './package_manager';
+import { workspacesInfo } from './workspaces';
 import { buildTargetedPackage, BuildTargets, BuildTargetTypes } from './targeted_build';
 
 interface BuildConfig {
@@ -253,7 +256,7 @@ export class Project {
   }
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
-    log.info(`[${this.name}] running yarn`);
+    log.info(`[${this.name}] running ${detectPackageManager(this.path).name}`);
 
     log.write('');
     await installInDir(this.path, extraArgs);
@@ -273,19 +276,17 @@ export class Project {
     dev: boolean = false,
     range?: string
   ) {
-    log.info(`[${this.name}] running yarn to install ${depName}@${version}`);
+    const pm = detectPackageManager(this.path);
+    log.info(`[${this.name}] running ${pm.name} to install ${depName}@${version}`);
 
     log.write('');
 
     const rangeToUse = range || `^${version}`;
 
-    const extraArgs = [`${depName}@${version}`];
-    if (dev) extraArgs.push('--dev');
-
-    if (this.isWorkspaceProject) {
+    if (this.isWorkspaceProject && pm.name === 'yarn') {
       await installInDir(this.path);
     } else {
-      await installInDir(this.path, extraArgs, true);
+      await addInDir(this.path, `${depName}@${version}`, dev);
     }
 
     log.info(`[${this.name}] updating manifests with ${depName}@${rangeToUse}`);
@@ -295,12 +296,18 @@ export class Project {
       `"${depName}": "${version}"`,
       `"${depName}": "${rangeToUse}"`
     );
-    // The lock-file of workspace packages are symlinked to the root project's and editing the one in the project suffices
-    await patchFile(
-      resolve(this.path, 'yarn.lock'),
-      `${depName}@${version}`,
-      `${depName}@${rangeToUse}`
-    );
+
+    if (pm.name === 'yarn') {
+      // The lock-file of workspace packages are symlinked to the root project's and editing the one in the project suffices
+      await patchFile(
+        resolve(this.path, YARN_LOCKFILE),
+        `${depName}@${version}`,
+        `${depName}@${rangeToUse}`
+      );
+    } else {
+      // npm keys its lockfile by path, so re-sync it with the widened range instead.
+      await syncLockfileInDir(this.path);
+    }
 
     log.write('');
 
@@ -308,7 +315,7 @@ export class Project {
   }
 
   /**
-   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * Workspaces symlink every workspace project into the root node_modules, even
    * when there is no depenency on the project. This results in unnecicary, and
    * often duplicated code in the build archives.
    */
@@ -318,12 +325,12 @@ export class Project {
       return;
     }
 
-    const workspacesInfo = await yarnWorkspacesInfo(this.path);
-    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
+    const info = await workspacesInfo(this.path);
+    const unusedWorkspaces = new Set(Object.keys(info));
 
     // check for any cross-project dependency
-    for (const name of Object.keys(workspacesInfo)) {
-      const workspace = workspacesInfo[name];
+    for (const name of Object.keys(info)) {
+      const workspace = info[name];
       workspace.workspaceDependencies.forEach((w) => unusedWorkspaces.delete(w));
     }
 

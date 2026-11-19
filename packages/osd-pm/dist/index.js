@@ -1,6 +1,6 @@
 (() => {
 var __webpack_modules__ = ({
-423(__unused_rspack_module, exports, __webpack_require__) {
+425(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -24,7 +24,7 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 
 },
-417(__unused_rspack_module, exports) {
+419(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -46,14 +46,14 @@ exports.IS_SUPPORT_READDIR_WITH_FILE_TYPES = IS_MATCHED_BY_MAJOR || IS_MATCHED_B
 
 
 },
-413(__unused_rspack_module, exports, __webpack_require__) {
+415(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Settings = exports.scandirSync = exports.scandir = void 0;
-const async = __webpack_require__(414);
-const sync = __webpack_require__(421);
-const settings_1 = __webpack_require__(422);
+const async = __webpack_require__(416);
+const sync = __webpack_require__(423);
+const settings_1 = __webpack_require__(424);
 exports.Settings = settings_1.default;
 function scandir(path, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -77,16 +77,16 @@ function getSettings(settingsOrOptions = {}) {
 
 
 },
-414(__unused_rspack_module, exports, __webpack_require__) {
+416(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readdir = exports.readdirWithFileTypes = exports.read = void 0;
-const fsStat = __webpack_require__(405);
-const rpl = __webpack_require__(415);
-const constants_1 = __webpack_require__(417);
-const utils = __webpack_require__(418);
-const common = __webpack_require__(420);
+const fsStat = __webpack_require__(407);
+const rpl = __webpack_require__(417);
+const constants_1 = __webpack_require__(419);
+const utils = __webpack_require__(420);
+const common = __webpack_require__(422);
 function read(directory, settings, callback) {
     if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
         readdirWithFileTypes(directory, settings, callback);
@@ -186,7 +186,7 @@ function callSuccessCallback(callback, result) {
 
 
 },
-420(__unused_rspack_module, exports) {
+422(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -204,15 +204,15 @@ exports.joinPathSegments = joinPathSegments;
 
 
 },
-421(__unused_rspack_module, exports, __webpack_require__) {
+423(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readdir = exports.readdirWithFileTypes = exports.read = void 0;
-const fsStat = __webpack_require__(405);
-const constants_1 = __webpack_require__(417);
-const utils = __webpack_require__(418);
-const common = __webpack_require__(420);
+const fsStat = __webpack_require__(407);
+const constants_1 = __webpack_require__(419);
+const utils = __webpack_require__(420);
+const common = __webpack_require__(422);
 function read(directory, settings) {
     if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
         return readdirWithFileTypes(directory, settings);
@@ -263,13 +263,13 @@ exports.readdir = readdir;
 
 
 },
-422(__unused_rspack_module, exports, __webpack_require__) {
+424(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path = __webpack_require__(7);
-const fsStat = __webpack_require__(405);
-const fs = __webpack_require__(423);
+const fsStat = __webpack_require__(407);
+const fs = __webpack_require__(425);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -292,7 +292,7 @@ exports["default"] = Settings;
 
 
 },
-419(__unused_rspack_module, exports) {
+421(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -316,17 +316,17 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 },
-418(__unused_rspack_module, exports, __webpack_require__) {
+420(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fs = void 0;
-const fs = __webpack_require__(419);
+const fs = __webpack_require__(421);
 exports.fs = fs;
 
 
 },
-409(__unused_rspack_module, exports, __webpack_require__) {
+411(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -348,14 +348,14 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 
 },
-405(__unused_rspack_module, exports, __webpack_require__) {
+407(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.statSync = exports.stat = exports.Settings = void 0;
-const async = __webpack_require__(406);
-const sync = __webpack_require__(407);
-const settings_1 = __webpack_require__(408);
+const async = __webpack_require__(408);
+const sync = __webpack_require__(409);
+const settings_1 = __webpack_require__(410);
 exports.Settings = settings_1.default;
 function stat(path, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -379,7 +379,7 @@ function getSettings(settingsOrOptions = {}) {
 
 
 },
-406(__unused_rspack_module, exports) {
+408(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -420,7 +420,7 @@ function callSuccessCallback(callback, result) {
 
 
 },
-407(__unused_rspack_module, exports) {
+409(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -448,11 +448,11 @@ exports.read = read;
 
 
 },
-408(__unused_rspack_module, exports, __webpack_require__) {
+410(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fs = __webpack_require__(409);
+const fs = __webpack_require__(411);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -469,15 +469,15 @@ exports["default"] = Settings;
 
 
 },
-410(__unused_rspack_module, exports, __webpack_require__) {
+412(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Settings = exports.walkStream = exports.walkSync = exports.walk = void 0;
-const async_1 = __webpack_require__(411);
-const stream_1 = __webpack_require__(428);
-const sync_1 = __webpack_require__(429);
-const settings_1 = __webpack_require__(431);
+const async_1 = __webpack_require__(413);
+const stream_1 = __webpack_require__(430);
+const sync_1 = __webpack_require__(431);
+const settings_1 = __webpack_require__(433);
 exports.Settings = settings_1.default;
 function walk(directory, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -508,11 +508,11 @@ function getSettings(settingsOrOptions = {}) {
 
 
 },
-411(__unused_rspack_module, exports, __webpack_require__) {
+413(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const async_1 = __webpack_require__(412);
+const async_1 = __webpack_require__(414);
 class AsyncProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -543,12 +543,12 @@ function callSuccessCallback(callback, entries) {
 
 
 },
-428(__unused_rspack_module, exports, __webpack_require__) {
+430(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const stream_1 = __webpack_require__(161);
-const async_1 = __webpack_require__(412);
+const async_1 = __webpack_require__(414);
 class StreamProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -582,11 +582,11 @@ exports["default"] = StreamProvider;
 
 
 },
-429(__unused_rspack_module, exports, __webpack_require__) {
+431(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const sync_1 = __webpack_require__(430);
+const sync_1 = __webpack_require__(432);
 class SyncProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -601,15 +601,15 @@ exports["default"] = SyncProvider;
 
 
 },
-412(__unused_rspack_module, exports, __webpack_require__) {
+414(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const events_1 = __webpack_require__(181);
-const fsScandir = __webpack_require__(413);
-const fastq = __webpack_require__(424);
-const common = __webpack_require__(426);
-const reader_1 = __webpack_require__(427);
+const fsScandir = __webpack_require__(415);
+const fastq = __webpack_require__(426);
+const common = __webpack_require__(428);
+const reader_1 = __webpack_require__(429);
 class AsyncReader extends reader_1.default {
     constructor(_root, _settings) {
         super(_root, _settings);
@@ -703,7 +703,7 @@ exports["default"] = AsyncReader;
 
 
 },
-426(__unused_rspack_module, exports) {
+428(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -739,11 +739,11 @@ exports.joinPathSegments = joinPathSegments;
 
 
 },
-427(__unused_rspack_module, exports, __webpack_require__) {
+429(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const common = __webpack_require__(426);
+const common = __webpack_require__(428);
 class Reader {
     constructor(_root, _settings) {
         this._root = _root;
@@ -755,13 +755,13 @@ exports["default"] = Reader;
 
 
 },
-430(__unused_rspack_module, exports, __webpack_require__) {
+432(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fsScandir = __webpack_require__(413);
-const common = __webpack_require__(426);
-const reader_1 = __webpack_require__(427);
+const fsScandir = __webpack_require__(415);
+const common = __webpack_require__(428);
+const reader_1 = __webpack_require__(429);
 class SyncReader extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -819,12 +819,12 @@ exports["default"] = SyncReader;
 
 
 },
-431(__unused_rspack_module, exports, __webpack_require__) {
+433(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path = __webpack_require__(7);
-const fsScandir = __webpack_require__(413);
+const fsScandir = __webpack_require__(415);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -850,7 +850,7 @@ exports["default"] = Settings;
 
 
 },
-355(module, __unused_rspack_exports, __webpack_require__) {
+356(module, __unused_rspack_exports, __webpack_require__) {
 module.exports =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -2407,7 +2407,7 @@ module.exports = invariant;
 /* 9 */
 /***/ (function(module, exports) {
 
-module.exports = __webpack_require__(353);
+module.exports = __webpack_require__(354);
 
 /***/ }),
 /* 10 */,
@@ -11126,11 +11126,11 @@ module.exports = process && support(supportLevel);
 /******/ ]);
 
 },
-454(module, __unused_rspack_exports, __webpack_require__) {
+456(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const indentString = __webpack_require__(455);
-const cleanStack = __webpack_require__(456);
+const indentString = __webpack_require__(457);
+const cleanStack = __webpack_require__(458);
 
 const cleanInternalStack = stack => stack.replace(/\s+at .*aggregate-error\/index.js:\d+:\d+\)?/g, '');
 
@@ -11178,7 +11178,7 @@ module.exports = AggregateError;
 
 
 },
-477(module) {
+479(module) {
 "use strict";
 
 
@@ -12391,7 +12391,7 @@ module.exports = function (fromModel) {
 
 
 },
-502(module) {
+504(module) {
 "use strict";
 
 
@@ -12404,7 +12404,7 @@ module.exports = arrayDiffer;
 
 
 },
-370(module) {
+372(module) {
 "use strict";
 
 
@@ -12414,7 +12414,7 @@ module.exports = (...arguments_) => {
 
 
 },
-503(module) {
+505(module) {
 "use strict";
 
 
@@ -12509,14 +12509,14 @@ function range(a, b, str) {
 
 
 },
-384(module, __unused_rspack_exports, __webpack_require__) {
+386(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const stringify = __webpack_require__(385);
-const compile = __webpack_require__(387);
-const expand = __webpack_require__(391);
-const parse = __webpack_require__(392);
+const stringify = __webpack_require__(387);
+const compile = __webpack_require__(389);
+const expand = __webpack_require__(393);
+const parse = __webpack_require__(394);
 
 /**
  * Expand the given pattern or create a regex-compatible string.
@@ -12684,12 +12684,12 @@ module.exports = braces;
 
 
 },
-387(module, __unused_rspack_exports, __webpack_require__) {
+389(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const fill = __webpack_require__(388);
-const utils = __webpack_require__(386);
+const fill = __webpack_require__(390);
+const utils = __webpack_require__(388);
 
 const compile = (ast, options = {}) => {
   const walk = (node, parent = {}) => {
@@ -12749,7 +12749,7 @@ module.exports = compile;
 
 
 },
-393(module) {
+395(module) {
 "use strict";
 
 
@@ -12811,13 +12811,13 @@ module.exports = {
 
 
 },
-391(module, __unused_rspack_exports, __webpack_require__) {
+393(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const fill = __webpack_require__(388);
-const stringify = __webpack_require__(385);
-const utils = __webpack_require__(386);
+const fill = __webpack_require__(390);
+const stringify = __webpack_require__(387);
+const utils = __webpack_require__(388);
 
 const append = (queue = '', stash = '', enclose = false) => {
   const result = [];
@@ -12929,11 +12929,11 @@ module.exports = expand;
 
 
 },
-392(module, __unused_rspack_exports, __webpack_require__) {
+394(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const stringify = __webpack_require__(385);
+const stringify = __webpack_require__(387);
 
 /**
  * Constants
@@ -12955,7 +12955,7 @@ const {
   CHAR_SINGLE_QUOTE, /* ' */
   CHAR_NO_BREAK_SPACE,
   CHAR_ZERO_WIDTH_NOBREAK_SPACE
-} = __webpack_require__(393);
+} = __webpack_require__(395);
 
 /**
  * parse
@@ -13265,11 +13265,11 @@ module.exports = parse;
 
 
 },
-385(module, __unused_rspack_exports, __webpack_require__) {
+387(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const utils = __webpack_require__(386);
+const utils = __webpack_require__(388);
 
 module.exports = (ast, options = {}) => {
   const stringify = (node, parent = {}) => {
@@ -13302,7 +13302,7 @@ module.exports = (ast, options = {}) => {
 
 
 },
-386(__unused_rspack_module, exports) {
+388(__unused_rspack_module, exports) {
 "use strict";
 
 
@@ -13846,7 +13846,7 @@ module.exports = {
 
 
 },
-456(module, __unused_rspack_exports, __webpack_require__) {
+458(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const os = __webpack_require__(132);
@@ -13891,10 +13891,10 @@ module.exports = (stack, options) => {
 
 
 },
-461(__unused_rspack_module, exports, __webpack_require__) {
+463(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
-const restoreCursor = __webpack_require__(462);
+const restoreCursor = __webpack_require__(464);
 
 let isHidden = false;
 
@@ -13931,11 +13931,11 @@ exports.toggle = (force, writableStream) => {
 
 
 },
-463(module, __unused_rspack_exports, __webpack_require__) {
+465(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const spinners = Object.assign({}, __webpack_require__(464)); // eslint-disable-line import/extensions
+const spinners = Object.assign({}, __webpack_require__(466)); // eslint-disable-line import/extensions
 
 const spinnersList = Object.keys(spinners);
 
@@ -14258,9 +14258,9 @@ function replaceDollarWithPercentPair(value) {
 
 
 },
-470(module, __unused_rspack_exports, __webpack_require__) {
+472(module, __unused_rspack_exports, __webpack_require__) {
 /* MIT license */
-var cssKeywords = __webpack_require__(471);
+var cssKeywords = __webpack_require__(473);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -15130,9 +15130,9 @@ convert.rgb.gray = function (rgb) {
 
 
 },
-469(module, __unused_rspack_exports, __webpack_require__) {
-var conversions = __webpack_require__(470);
-var route = __webpack_require__(472);
+471(module, __unused_rspack_exports, __webpack_require__) {
+var conversions = __webpack_require__(472);
+var route = __webpack_require__(474);
 
 var convert = {};
 
@@ -15212,7 +15212,7 @@ module.exports = convert;
 
 
 },
-471(module) {
+473(module) {
 "use strict";
 
 
@@ -15369,8 +15369,8 @@ module.exports = {
 
 
 },
-472(module, __unused_rspack_exports, __webpack_require__) {
-var conversions = __webpack_require__(470);
+474(module, __unused_rspack_exports, __webpack_require__) {
+var conversions = __webpack_require__(472);
 
 /*
 	this function routes a model to all other models.
@@ -15644,10 +15644,10 @@ var isArray = Array.isArray || function (xs) {
 
 
 },
-517(module, __unused_rspack_exports, __webpack_require__) {
+519(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const NestedError = __webpack_require__(518);
+const NestedError = __webpack_require__(520);
 
 class CpFileError extends NestedError {
 	constructor(message, nested) {
@@ -15661,14 +15661,14 @@ module.exports = CpFileError;
 
 
 },
-519(__unused_rspack_module, exports, __webpack_require__) {
+521(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 const {promisify} = __webpack_require__(124);
 const fs = __webpack_require__(157);
-const makeDir = __webpack_require__(520);
-const pEvent = __webpack_require__(514);
-const CpFileError = __webpack_require__(517);
+const makeDir = __webpack_require__(522);
+const pEvent = __webpack_require__(516);
+const CpFileError = __webpack_require__(519);
 
 const stat = promisify(fs.stat);
 const lstat = promisify(fs.lstat);
@@ -15765,15 +15765,15 @@ exports.copyFileSync = (source, destination, flags) => {
 
 
 },
-513(module, __unused_rspack_exports, __webpack_require__) {
+515(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const path = __webpack_require__(7);
 const {constants: fsConstants} = __webpack_require__(149);
-const pEvent = __webpack_require__(514);
-const CpFileError = __webpack_require__(517);
-const fs = __webpack_require__(519);
-const ProgressEmitter = __webpack_require__(521);
+const pEvent = __webpack_require__(516);
+const CpFileError = __webpack_require__(519);
+const fs = __webpack_require__(521);
+const ProgressEmitter = __webpack_require__(523);
 
 const cpFileAsync = async (source, destination, options, progressEmitter) => {
 	let readError;
@@ -15887,7 +15887,7 @@ module.exports.sync = (source, destination, options) => {
 
 
 },
-521(module, __unused_rspack_exports, __webpack_require__) {
+523(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const EventEmitter = __webpack_require__(181);
@@ -15926,10 +15926,10 @@ module.exports = ProgressEmitter;
 
 
 },
-525(module, __unused_rspack_exports, __webpack_require__) {
+527(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const NestedError = __webpack_require__(518);
+const NestedError = __webpack_require__(520);
 
 class CpyError extends NestedError {
 	constructor(message, nested) {
@@ -15943,20 +15943,20 @@ module.exports = CpyError;
 
 
 },
-506(module, __unused_rspack_exports, __webpack_require__) {
+508(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const EventEmitter = __webpack_require__(181);
 const path = __webpack_require__(7);
 const os = __webpack_require__(132);
-const pMap = __webpack_require__(507);
-const arrify = __webpack_require__(503);
-const globby = __webpack_require__(508);
-const hasGlob = __webpack_require__(511);
-const cpFile = __webpack_require__(513);
-const junk = __webpack_require__(522);
-const pFilter = __webpack_require__(523);
-const CpyError = __webpack_require__(525);
+const pMap = __webpack_require__(509);
+const arrify = __webpack_require__(505);
+const globby = __webpack_require__(510);
+const hasGlob = __webpack_require__(513);
+const cpFile = __webpack_require__(515);
+const junk = __webpack_require__(524);
+const pFilter = __webpack_require__(525);
+const CpyError = __webpack_require__(527);
 
 const defaultOptions = {
 	ignoreJunk: true
@@ -16107,15 +16107,15 @@ module.exports = (source, destination, {
 
 
 },
-509(module, __unused_rspack_exports, __webpack_require__) {
+511(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const {promisify} = __webpack_require__(124);
 const fs = __webpack_require__(149);
 const path = __webpack_require__(7);
-const fastGlob = __webpack_require__(372);
-const gitIgnore = __webpack_require__(447);
-const slash = __webpack_require__(448);
+const fastGlob = __webpack_require__(374);
+const gitIgnore = __webpack_require__(449);
+const slash = __webpack_require__(450);
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -16229,17 +16229,17 @@ module.exports.sync = options => {
 
 
 },
-508(module, __unused_rspack_exports, __webpack_require__) {
+510(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const fs = __webpack_require__(149);
-const arrayUnion = __webpack_require__(370);
-const merge2 = __webpack_require__(371);
+const arrayUnion = __webpack_require__(372);
+const merge2 = __webpack_require__(373);
 const glob = __webpack_require__(172);
-const fastGlob = __webpack_require__(372);
-const dirGlob = __webpack_require__(444);
-const gitignore = __webpack_require__(509);
-const {FilterStream, UniqueStream} = __webpack_require__(510);
+const fastGlob = __webpack_require__(374);
+const dirGlob = __webpack_require__(446);
+const gitignore = __webpack_require__(511);
+const {FilterStream, UniqueStream} = __webpack_require__(512);
 
 const DEFAULT_FILTER = () => false;
 
@@ -16412,7 +16412,7 @@ module.exports.gitignore = gitignore;
 
 
 },
-510(module, __unused_rspack_exports, __webpack_require__) {
+512(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const {Transform} = __webpack_require__(161);
@@ -16463,10 +16463,10 @@ module.exports = {
 
 
 },
-507(module, __unused_rspack_exports, __webpack_require__) {
+509(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const AggregateError = __webpack_require__(454);
+const AggregateError = __webpack_require__(456);
 
 module.exports = async (
 	iterable,
@@ -16954,8 +16954,8 @@ if (true) {
 
 
 },
-479(module, __unused_rspack_exports, __webpack_require__) {
-var clone = __webpack_require__(480);
+481(module, __unused_rspack_exports, __webpack_require__) {
+var clone = __webpack_require__(482);
 
 module.exports = function(options, defaults) {
   options = options || {};
@@ -16970,7 +16970,7 @@ module.exports = function(options, defaults) {
 };
 
 },
-480(module) {
+482(module) {
 var clone = (function() {
 'use strict';
 
@@ -17140,19 +17140,19 @@ if ( true && module.exports) {
 
 
 },
-368(module, __unused_rspack_exports, __webpack_require__) {
+370(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const {promisify} = __webpack_require__(124);
 const path = __webpack_require__(7);
-const globby = __webpack_require__(369);
-const isGlob = __webpack_require__(381);
-const slash = __webpack_require__(448);
+const globby = __webpack_require__(371);
+const isGlob = __webpack_require__(383);
+const slash = __webpack_require__(450);
 const gracefulFs = __webpack_require__(157);
-const isPathCwd = __webpack_require__(450);
-const isPathInside = __webpack_require__(451);
-const rimraf = __webpack_require__(452);
-const pMap = __webpack_require__(453);
+const isPathCwd = __webpack_require__(452);
+const isPathInside = __webpack_require__(453);
+const rimraf = __webpack_require__(454);
+const pMap = __webpack_require__(455);
 
 const rimrafP = promisify(rimraf);
 
@@ -17284,7 +17284,7 @@ module.exports.sync = (patterns, {force, dryRun, cwd = process.cwd(), ...options
 
 
 },
-452(module, __unused_rspack_exports, __webpack_require__) {
+454(module, __unused_rspack_exports, __webpack_require__) {
 const assert = __webpack_require__(163)
 const path = __webpack_require__(7)
 const fs = __webpack_require__(149)
@@ -17775,11 +17775,11 @@ module.exports = str => {
 
 
 },
-444(module, __unused_rspack_exports, __webpack_require__) {
+446(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const path = __webpack_require__(7);
-const pathType = __webpack_require__(445);
+const pathType = __webpack_require__(447);
 
 const getExtensions = extensions => extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0];
 
@@ -18190,7 +18190,7 @@ module.exports = errorEx;
 
 
 },
-467(module) {
+469(module) {
 "use strict";
 
 
@@ -18926,16 +18926,16 @@ module.exports = {
 
 
 },
-372(module, __unused_rspack_exports, __webpack_require__) {
+374(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const taskManager = __webpack_require__(373);
-const patternManager = __webpack_require__(402);
-const async_1 = __webpack_require__(403);
-const stream_1 = __webpack_require__(440);
-const sync_1 = __webpack_require__(441);
-const settings_1 = __webpack_require__(443);
-const utils = __webpack_require__(374);
+const taskManager = __webpack_require__(375);
+const patternManager = __webpack_require__(404);
+const async_1 = __webpack_require__(405);
+const stream_1 = __webpack_require__(442);
+const sync_1 = __webpack_require__(443);
+const settings_1 = __webpack_require__(445);
+const utils = __webpack_require__(376);
 async function FastGlob(source, options) {
     assertPatternsInput(source);
     const works = getWorks(source, async_1.default, options);
@@ -18999,7 +18999,7 @@ module.exports = FastGlob;
 
 
 },
-402(__unused_rspack_module, exports) {
+404(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19025,12 +19025,12 @@ exports.removeDuplicateSlashes = removeDuplicateSlashes;
 
 
 },
-373(__unused_rspack_module, exports, __webpack_require__) {
+375(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.convertPatternGroupToTask = exports.convertPatternGroupsToTasks = exports.groupPatternsByBaseDirectory = exports.getNegativePatternsAsPositive = exports.getPositivePatterns = exports.convertPatternsToTasks = exports.generate = void 0;
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(376);
 function generate(patterns, settings) {
     const positivePatterns = getPositivePatterns(patterns);
     const negativePatterns = getNegativePatternsAsPositive(patterns, settings.ignore);
@@ -19110,12 +19110,12 @@ exports.convertPatternGroupToTask = convertPatternGroupToTask;
 
 
 },
-403(__unused_rspack_module, exports, __webpack_require__) {
+405(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const stream_1 = __webpack_require__(404);
-const provider_1 = __webpack_require__(433);
+const stream_1 = __webpack_require__(406);
+const provider_1 = __webpack_require__(435);
 class ProviderAsync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -19143,12 +19143,12 @@ exports["default"] = ProviderAsync;
 
 
 },
-434(__unused_rspack_module, exports, __webpack_require__) {
+436(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils = __webpack_require__(374);
-const partial_1 = __webpack_require__(435);
+const utils = __webpack_require__(376);
+const partial_1 = __webpack_require__(437);
 class DeepFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -19210,11 +19210,11 @@ exports["default"] = DeepFilter;
 
 
 },
-437(__unused_rspack_module, exports, __webpack_require__) {
+439(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(376);
 class EntryFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -19275,11 +19275,11 @@ exports["default"] = EntryFilter;
 
 
 },
-438(__unused_rspack_module, exports, __webpack_require__) {
+440(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(376);
 class ErrorFilter {
     constructor(_settings) {
         this._settings = _settings;
@@ -19295,11 +19295,11 @@ exports["default"] = ErrorFilter;
 
 
 },
-436(__unused_rspack_module, exports, __webpack_require__) {
+438(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(376);
 class Matcher {
     constructor(_patterns, _settings, _micromatchOptions) {
         this._patterns = _patterns;
@@ -19350,11 +19350,11 @@ exports["default"] = Matcher;
 
 
 },
-435(__unused_rspack_module, exports, __webpack_require__) {
+437(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const matcher_1 = __webpack_require__(436);
+const matcher_1 = __webpack_require__(438);
 class PartialMatcher extends matcher_1.default {
     match(filepath) {
         const parts = filepath.split('/');
@@ -19393,15 +19393,15 @@ exports["default"] = PartialMatcher;
 
 
 },
-433(__unused_rspack_module, exports, __webpack_require__) {
+435(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path = __webpack_require__(7);
-const deep_1 = __webpack_require__(434);
-const entry_1 = __webpack_require__(437);
-const error_1 = __webpack_require__(438);
-const entry_2 = __webpack_require__(439);
+const deep_1 = __webpack_require__(436);
+const entry_1 = __webpack_require__(439);
+const error_1 = __webpack_require__(440);
+const entry_2 = __webpack_require__(441);
 class Provider {
     constructor(_settings) {
         this._settings = _settings;
@@ -19446,13 +19446,13 @@ exports["default"] = Provider;
 
 
 },
-440(__unused_rspack_module, exports, __webpack_require__) {
+442(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const stream_1 = __webpack_require__(161);
-const stream_2 = __webpack_require__(404);
-const provider_1 = __webpack_require__(433);
+const stream_2 = __webpack_require__(406);
+const provider_1 = __webpack_require__(435);
 class ProviderStream extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -19482,12 +19482,12 @@ exports["default"] = ProviderStream;
 
 
 },
-441(__unused_rspack_module, exports, __webpack_require__) {
+443(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const sync_1 = __webpack_require__(442);
-const provider_1 = __webpack_require__(433);
+const sync_1 = __webpack_require__(444);
+const provider_1 = __webpack_require__(435);
 class ProviderSync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -19510,11 +19510,11 @@ exports["default"] = ProviderSync;
 
 
 },
-439(__unused_rspack_module, exports, __webpack_require__) {
+441(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(376);
 class EntryTransformer {
     constructor(_settings) {
         this._settings = _settings;
@@ -19541,13 +19541,13 @@ exports["default"] = EntryTransformer;
 
 
 },
-432(__unused_rspack_module, exports, __webpack_require__) {
+434(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path = __webpack_require__(7);
-const fsStat = __webpack_require__(405);
-const utils = __webpack_require__(374);
+const fsStat = __webpack_require__(407);
+const utils = __webpack_require__(376);
 class Reader {
     constructor(_settings) {
         this._settings = _settings;
@@ -19579,14 +19579,14 @@ exports["default"] = Reader;
 
 
 },
-404(__unused_rspack_module, exports, __webpack_require__) {
+406(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const stream_1 = __webpack_require__(161);
-const fsStat = __webpack_require__(405);
-const fsWalk = __webpack_require__(410);
-const reader_1 = __webpack_require__(432);
+const fsStat = __webpack_require__(407);
+const fsWalk = __webpack_require__(412);
+const reader_1 = __webpack_require__(434);
 class ReaderStream extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -19639,13 +19639,13 @@ exports["default"] = ReaderStream;
 
 
 },
-442(__unused_rspack_module, exports, __webpack_require__) {
+444(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fsStat = __webpack_require__(405);
-const fsWalk = __webpack_require__(410);
-const reader_1 = __webpack_require__(432);
+const fsStat = __webpack_require__(407);
+const fsWalk = __webpack_require__(412);
+const reader_1 = __webpack_require__(434);
 class ReaderSync extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -19687,7 +19687,7 @@ exports["default"] = ReaderSync;
 
 
 },
-443(__unused_rspack_module, exports, __webpack_require__) {
+445(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19749,7 +19749,7 @@ exports["default"] = Settings;
 
 
 },
-375(__unused_rspack_module, exports) {
+377(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19776,7 +19776,7 @@ exports.splitWhen = splitWhen;
 
 
 },
-376(__unused_rspack_module, exports) {
+378(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19788,7 +19788,7 @@ exports.isEnoentCodeError = isEnoentCodeError;
 
 
 },
-377(__unused_rspack_module, exports) {
+379(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19812,29 +19812,29 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 },
-374(__unused_rspack_module, exports, __webpack_require__) {
+376(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.string = exports.stream = exports.pattern = exports.path = exports.fs = exports.errno = exports.array = void 0;
-const array = __webpack_require__(375);
+const array = __webpack_require__(377);
 exports.array = array;
-const errno = __webpack_require__(376);
+const errno = __webpack_require__(378);
 exports.errno = errno;
-const fs = __webpack_require__(377);
+const fs = __webpack_require__(379);
 exports.fs = fs;
-const path = __webpack_require__(378);
+const path = __webpack_require__(380);
 exports.path = path;
-const pattern = __webpack_require__(379);
+const pattern = __webpack_require__(381);
 exports.pattern = pattern;
-const stream = __webpack_require__(400);
+const stream = __webpack_require__(402);
 exports.stream = stream;
-const string = __webpack_require__(401);
+const string = __webpack_require__(403);
 exports.string = string;
 
 
 },
-378(__unused_rspack_module, exports, __webpack_require__) {
+380(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -19872,14 +19872,14 @@ exports.removeLeadingDotSegment = removeLeadingDotSegment;
 
 
 },
-379(__unused_rspack_module, exports, __webpack_require__) {
+381(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
 const path = __webpack_require__(7);
-const globParent = __webpack_require__(380);
-const micromatch = __webpack_require__(383);
+const globParent = __webpack_require__(382);
+const micromatch = __webpack_require__(385);
 const GLOBSTAR = '**';
 const ESCAPE_SYMBOL = '\\';
 const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
@@ -20046,12 +20046,12 @@ exports.matchAny = matchAny;
 
 
 },
-400(__unused_rspack_module, exports, __webpack_require__) {
+402(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.merge = void 0;
-const merge2 = __webpack_require__(371);
+const merge2 = __webpack_require__(373);
 function merge(streams) {
     const mergedStream = merge2(streams);
     streams.forEach((stream) => {
@@ -20068,7 +20068,7 @@ function propagateCloseEventToSources(streams) {
 
 
 },
-401(__unused_rspack_module, exports) {
+403(__unused_rspack_module, exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -20084,13 +20084,13 @@ exports.isEmpty = isEmpty;
 
 
 },
-424(module, __unused_rspack_exports, __webpack_require__) {
+426(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
 /* eslint-disable no-var */
 
-var reusify = __webpack_require__(425)
+var reusify = __webpack_require__(427)
 
 function fastqueue (context, worker, concurrency) {
   if (typeof context === 'function') {
@@ -20372,7 +20372,7 @@ module.exports.promise = queueAsPromised
 
 
 },
-388(module, __unused_rspack_exports, __webpack_require__) {
+390(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 /*!
  * fill-range <https://github.com/jonschlinkert/fill-range>
@@ -20384,7 +20384,7 @@ module.exports.promise = queueAsPromised
 
 
 const util = __webpack_require__(124);
-const toRegexRange = __webpack_require__(389);
+const toRegexRange = __webpack_require__(391);
 
 const isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 
@@ -21223,11 +21223,11 @@ module.exports.MaxBufferError = MaxBufferError;
 
 
 },
-380(module, __unused_rspack_exports, __webpack_require__) {
+382(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-var isGlob = __webpack_require__(381);
+var isGlob = __webpack_require__(383);
 var pathPosixDirname = (__webpack_require__(7)/* .posix.dirname */.posix.dirname);
 var isWin32 = (__webpack_require__(132)/* .platform */.platform)() === 'win32';
 
@@ -22821,15 +22821,15 @@ GlobSync.prototype._makeAbs = function (f) {
 
 
 },
-446(module, __unused_rspack_exports, __webpack_require__) {
+448(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const {promisify} = __webpack_require__(124);
 const fs = __webpack_require__(149);
 const path = __webpack_require__(7);
-const fastGlob = __webpack_require__(372);
-const gitIgnore = __webpack_require__(447);
-const slash = __webpack_require__(448);
+const fastGlob = __webpack_require__(374);
+const gitIgnore = __webpack_require__(449);
+const slash = __webpack_require__(450);
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -22946,16 +22946,16 @@ module.exports.sync = options => {
 
 
 },
-369(module, __unused_rspack_exports, __webpack_require__) {
+371(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const fs = __webpack_require__(149);
-const arrayUnion = __webpack_require__(370);
-const merge2 = __webpack_require__(371);
-const fastGlob = __webpack_require__(372);
-const dirGlob = __webpack_require__(444);
-const gitignore = __webpack_require__(446);
-const {FilterStream, UniqueStream} = __webpack_require__(449);
+const arrayUnion = __webpack_require__(372);
+const merge2 = __webpack_require__(373);
+const fastGlob = __webpack_require__(374);
+const dirGlob = __webpack_require__(446);
+const gitignore = __webpack_require__(448);
+const {FilterStream, UniqueStream} = __webpack_require__(451);
 
 const DEFAULT_FILTER = () => false;
 
@@ -23132,7 +23132,7 @@ module.exports.gitignore = gitignore;
 
 
 },
-449(module, __unused_rspack_exports, __webpack_require__) {
+451(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const {Transform} = __webpack_require__(161);
@@ -23889,7 +23889,7 @@ function patch (fs) {
         var backoff = 0;
         fs$rename(from, to, function CB (er) {
           if (er
-              && (er.code === "EACCES" || er.code === "EPERM")
+              && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY")
               && Date.now() - start < 60000) {
             setTimeout(function() {
               fs.stat(to, function (stater, st) {
@@ -24157,7 +24157,7 @@ module.exports = (flag, argv = process.argv) => {
 
 
 },
-511(module, __unused_rspack_exports, __webpack_require__) {
+513(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 /*!
  * has-glob <https://github.com/jonschlinkert/has-glob>
@@ -24168,7 +24168,7 @@ module.exports = (flag, argv = process.argv) => {
 
 
 
-var isGlob = __webpack_require__(512);
+var isGlob = __webpack_require__(514);
 
 module.exports = function hasGlob(val) {
   if (val == null) return false;
@@ -24188,7 +24188,7 @@ module.exports = function hasGlob(val) {
 
 
 },
-512(module, __unused_rspack_exports, __webpack_require__) {
+514(module, __unused_rspack_exports, __webpack_require__) {
 /*!
  * is-glob <https://github.com/jonschlinkert/is-glob>
  *
@@ -24196,7 +24196,7 @@ module.exports = function hasGlob(val) {
  * Licensed under the MIT License.
  */
 
-var isExtglob = __webpack_require__(382);
+var isExtglob = __webpack_require__(384);
 
 module.exports = function isGlob(str) {
   if (typeof str !== 'string' || str === '') {
@@ -24225,7 +24225,7 @@ var call = Function.prototype.call;
 var $hasOwn = Object.prototype.hasOwnProperty;
 var bind = __webpack_require__(277);
 
-/** @type {(o: {}, p: PropertyKey) => p is keyof o} */
+/** @type {import('.')} */
 module.exports = bind.call(call, $hasOwn);
 
 
@@ -25042,7 +25042,7 @@ return{name,number,description,supported,action,forced,standard};
 //# sourceMappingURL=signals.js.map
 
 },
-447(module) {
+449(module) {
 // A simple implementation of make-array
 function makeArray (subject) {
   return Array.isArray(subject)
@@ -25789,7 +25789,7 @@ if (
 
 
 },
-455(module) {
+457(module) {
 "use strict";
 
 
@@ -26020,7 +26020,7 @@ module.exports = function isCore(x, nodeVersion) {
 
 
 },
-382(module) {
+384(module) {
 /*!
  * is-extglob <https://github.com/jonschlinkert/is-extglob>
  *
@@ -26044,7 +26044,7 @@ module.exports = function isExtglob(str) {
 
 
 },
-381(module, __unused_rspack_exports, __webpack_require__) {
+383(module, __unused_rspack_exports, __webpack_require__) {
 /*!
  * is-glob <https://github.com/jonschlinkert/is-glob>
  *
@@ -26052,7 +26052,7 @@ module.exports = function isExtglob(str) {
  * Released under the MIT License.
  */
 
-var isExtglob = __webpack_require__(382);
+var isExtglob = __webpack_require__(384);
 var chars = { '{': '}', '(': ')', '[': ']'};
 var strictCheck = function(str) {
   if (str[0] === '!') {
@@ -26198,7 +26198,7 @@ module.exports = function isGlob(str, options) {
 
 
 },
-482(module) {
+484(module) {
 "use strict";
 
 
@@ -26212,7 +26212,7 @@ module.exports = ({stream = process.stdout} = {}) => {
 
 
 },
-390(module) {
+392(module) {
 "use strict";
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
@@ -26235,7 +26235,7 @@ module.exports = function(num) {
 
 
 },
-450(module, __unused_rspack_exports, __webpack_require__) {
+452(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const path = __webpack_require__(7);
@@ -26255,7 +26255,7 @@ module.exports = path_ => {
 
 
 },
-451(module, __unused_rspack_exports, __webpack_require__) {
+453(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const path = __webpack_require__(7);
@@ -26622,7 +26622,7 @@ parseJson.noExceptions = (txt, reviver) => {
 
 
 },
-522(module, exports) {
+524(module, exports) {
 "use strict";
 
 
@@ -26666,13 +26666,13 @@ exports["default"] = module.exports;
 
 
 },
-360(module, __unused_rspack_exports, __webpack_require__) {
+361(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const path = __webpack_require__(7);
 const {promisify} = __webpack_require__(124);
 const fs = __webpack_require__(157);
-const stripBom = __webpack_require__(361);
+const stripBom = __webpack_require__(362);
 const parseJson = __webpack_require__(196);
 
 const parse = (data, filePath, options = {}) => {
@@ -26690,7 +26690,7 @@ module.exports.sync = (filePath, options) => parse(fs.readFileSync(filePath, 'ut
 
 
 },
-520(module, __unused_rspack_exports, __webpack_require__) {
+522(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const fs = __webpack_require__(149);
@@ -26897,7 +26897,7 @@ module.exports = function (/*streams...*/) {
 
 
 },
-371(module, __unused_rspack_exports, __webpack_require__) {
+373(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 /*
@@ -27046,14 +27046,14 @@ function pauseStreams (streams, options) {
 
 
 },
-383(module, __unused_rspack_exports, __webpack_require__) {
+385(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
 const util = __webpack_require__(124);
-const braces = __webpack_require__(384);
-const picomatch = __webpack_require__(394);
-const utils = __webpack_require__(397);
+const braces = __webpack_require__(386);
+const picomatch = __webpack_require__(396);
+const utils = __webpack_require__(399);
 
 const isEmptyString = v => v === '' || v === './';
 const hasBraces = v => {
@@ -28564,6 +28564,40 @@ var escClose = '\0CLOSE'+Math.random()+'\0';
 var escComma = '\0COMMA'+Math.random()+'\0';
 var escPeriod = '\0PERIOD'+Math.random()+'\0';
 
+var EXPANSION_MAX = 100000
+
+// `EXPANSION_MAX` caps the *number* of expansions, but not their length. An
+// input like `'{a,b}'.repeat(1500)` stays under that count - its output is
+// truncated to 100k results - while making every result ~1500 characters
+// long. The result set, and the intermediate arrays built while combining
+// brace sets, then grow large enough to exhaust memory and crash the process
+// (CVE-2026-14257). `EXPANSION_MAX_LENGTH` bounds the total number of
+// characters the accumulator may hold at any point, so memory stays flat no
+// matter how many brace groups are chained. The limit sits well above any
+// realistic expansion (100k results hitting `EXPANSION_MAX` measure ~1M
+// characters) so legitimate input is unaffected.
+var EXPANSION_MAX_LENGTH = 4000000
+
+// `expand` recurses once per level of brace *nesting* - both when expanding a
+// set's comma members and when re-wrapping a set whose body is a single part.
+// The CVE-2026-14257 fix made the *tail* iterative (recursion on `m.post`, one
+// level per chained group), which left nesting depth unbounded: about 3,100
+// levels of `{{{...a,b...}}}` - only ~6KB of input - exhausted the native stack
+// and crashed the process. `EXPANSION_MAX_DEPTH` bounds how deep the parser
+// will follow nesting. It sits far above any realistic pattern and well below
+// the depth at which the stack runs out.
+var EXPANSION_MAX_DEPTH = 1000
+
+// Bash keeps a quirk where a brace group followed by a comma set still expands
+// (`{a},b}`). The parser implements it by rewriting the string and restarting
+// the scan, absorbing one `}` per pass. `n` trailing braces therefore cost `n`
+// full passes over a string that itself grows by one `escClose` sentinel each
+// time - quadratic in `n`, with a ~26x constant from the sentinel's length.
+// 128KB of `'{a}' + '}'.repeat(n) + ',z}'` blocked the event loop for 27
+// seconds to produce two results. `EXPANSION_MAX_REWRITES` bounds how many
+// times the scan may restart. Real `{a},b}` input needs a handful.
+var EXPANSION_MAX_REWRITES = 1000
+
 function numeric(str) {
   return parseInt(str, 10) == str
     ? parseInt(str, 10)
@@ -28587,39 +28621,65 @@ function unescapeBraces(str) {
 }
 
 
+// Like `target.push(...items)` but doesn't overflow the stack
+function pushAll(target, items) {
+  for (var i = 0; i < items.length; i++) {
+    target.push(items[i]);
+  }
+}
+
 // Basically just str.split(","), but handling cases
 // where we have nested braced sections, which should be
 // treated as individual members, like {a,{b,c},d}
 function parseCommaParts(str) {
-  if (!str)
-    return [''];
-
   var parts = [];
-  var m = balanced('{', '}', str);
 
-  if (!m)
-    return str.split(',');
+  // Walk the brace groups iteratively. Recursing on `post` once per group let a
+  // chain of them exhaust the stack - the parsing-side counterpart to
+  // the `expand` overflow fixed for CVE-2026-14257, and not something `max` or
+  // `maxLength` can bound, since it happens before expansion.
+  //
+  // The part the next chunk continues
+  var carry = '';
 
-  var pre = m.pre;
-  var body = m.body;
-  var post = m.post;
-  var p = pre.split(',');
+  for (;;) {
+    var m = balanced('{', '}', str);
 
-  p[p.length-1] += '{' + body + '}';
-  var postParts = parseCommaParts(post);
-  if (post.length) {
-    p[p.length-1] += postParts.shift();
-    p.push.apply(p, postParts);
+    if (!m) {
+      var tail = str.split(',');
+      tail[0] = carry + tail[0];
+      pushAll(parts, tail);
+      return parts;
+    }
+
+    var pre = m.pre;
+    var body = m.body;
+    var post = m.post;
+    var p = pre.split(',');
+
+    p[0] = carry + p[0];
+    p[p.length-1] += '{' + body + '}';
+
+    if (!post.length) {
+      pushAll(parts, p);
+      return parts;
+    }
+
+    carry = p.pop();
+    pushAll(parts, p);
+    str = post;
   }
-
-  parts.push.apply(parts, p);
-
-  return parts;
 }
 
-function expandTop(str) {
+function expandTop(str, options) {
   if (!str)
     return [];
+
+  options = options || {};
+  var max = options.max == null ? EXPANSION_MAX : options.max;
+  var maxLength = options.maxLength == null ? EXPANSION_MAX_LENGTH : options.maxLength;
+  var maxDepth = options.maxDepth == null ? EXPANSION_MAX_DEPTH : options.maxDepth;
+  var maxRewrites = options.maxRewrites == null ? EXPANSION_MAX_REWRITES : options.maxRewrites;
 
   // I don't know why Bash 4.3 does this, but it does.
   // Anything starting with {} will have the first two bytes preserved
@@ -28631,7 +28691,7 @@ function expandTop(str) {
     str = '\\{\\}' + str.substr(2);
   }
 
-  return expand(escapeBraces(str), true).map(unescapeBraces);
+  return expand(escapeBraces(str), max, maxLength, maxDepth, 0, maxRewrites, true).map(unescapeBraces);
 }
 
 function identity(e) {
@@ -28652,360 +28712,553 @@ function gte(i, y) {
   return i >= y;
 }
 
-function expand(str, isTop) {
-  var expansions = [];
-
-  var m = balanced('{', '}', str);
-  if (!m || /\$$/.test(m.pre)) return [str];
-
-  var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
-  var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
-  var isSequence = isNumericSequence || isAlphaSequence;
-  var isOptions = m.body.indexOf(',') >= 0;
-  if (!isSequence && !isOptions) {
-    // {a},b}
-    if (m.post.match(/,(?!,).*\}/)) {
-      str = m.pre + '{' + m.body + escClose + m.post;
-      return expand(str);
+// Build `{ acc[a] + pre + values[v] }` for every combination, capping the
+// number of results at `max` and the total number of characters at `maxLength`.
+// This is the one place output grows, so bounding it here keeps the single
+// accumulator - and therefore memory - flat regardless of how many brace groups
+// are combined (CVE-2026-14257).
+//
+// `base[a]` is the length of the part of `acc[a]` that predates the current
+// empty-drop baseline (see `expand`). The matching baselines for the results
+// are appended to `outBase`, which the caller carries forward alongside them.
+function combine(
+  acc,
+  base,
+  pre,
+  values,
+  max,
+  maxLength,
+  dropEmpties,
+  outBase
+) {
+  var out = []
+  var length = 0
+  for (var a = 0; a < acc.length; a++) {
+    for (var v = 0; v < values.length; v++) {
+      if (out.length >= max) return out
+      var expansion = acc[a] + pre + values[v]
+      // Bash drops empty results at the top level. Skip them before they count
+      // against `max`, so `max` bounds the number of *kept* results. "Empty"
+      // means "adds nothing past the baseline", not "empty overall".
+      if (dropEmpties && expansion.length === base[a]) continue
+      if (length + expansion.length > maxLength) return out
+      out.push(expansion)
+      outBase.push(base[a])
+      length += expansion.length
     }
-    return [str];
   }
+  return out
+}
 
-  var n;
-  if (isSequence) {
-    n = m.body.split(/\.\./);
-  } else {
-    n = parseCommaParts(m.body);
-    if (n.length === 1) {
-      // x{{a,b}}y ==> x{a}y x{b}y
-      n = expand(n[0], false).map(embrace);
-      if (n.length === 1) {
-        var post = m.post.length
-          ? expand(m.post, false)
-          : [''];
-        return post.map(function(p) {
-          return m.pre + n[0] + p;
-        });
+// The expansion values of a single numeric (`1..5`) or alphabetic (`a..e..2`)
+// sequence body.
+function expandSequence(
+  body,
+  isAlphaSequence,
+  max,
+  maxLength
+) {
+  var n = body.split(/\.\./)
+  var N = []
+  // A sequence body always splits into two or three parts, but the compiler
+  // can't know that.
+  /* c8 ignore start */
+  if (n[0] === undefined || n[1] === undefined) {
+    return N
+  }
+  /* c8 ignore stop */
+  var x = numeric(n[0])
+  var y = numeric(n[1])
+  var width = Math.max(n[0].length, n[1].length)
+  var incr =
+    n.length === 3 && n[2] !== undefined ?
+      Math.max(Math.abs(numeric(n[2])), 1)
+    : 1
+  var test = lte
+  var reverse = y < x
+  if (reverse) {
+    incr *= -1
+    test = gte
+  }
+  var pad = n.some(isPadded)
+
+  var length = 0
+  for (var i = x; test(i, y) && N.length < max; i += incr) {
+    var c
+    if (isAlphaSequence) {
+      c = String.fromCharCode(i)
+      if (c === '\\') {
+        c = ''
       }
-    }
-  }
-
-  // at this point, n is the parts, and we know it's not a comma set
-  // with a single entry.
-
-  // no need to expand pre, since it is guaranteed to be free of brace-sets
-  var pre = m.pre;
-  var post = m.post.length
-    ? expand(m.post, false)
-    : [''];
-
-  var N;
-
-  if (isSequence) {
-    var x = numeric(n[0]);
-    var y = numeric(n[1]);
-    var width = Math.max(n[0].length, n[1].length)
-    var incr = n.length == 3
-      ? Math.max(Math.abs(numeric(n[2])), 1)
-      : 1;
-    var test = lte;
-    var reverse = y < x;
-    if (reverse) {
-      incr *= -1;
-      test = gte;
-    }
-    var pad = n.some(isPadded);
-
-    N = [];
-
-    for (var i = x; test(i, y); i += incr) {
-      var c;
-      if (isAlphaSequence) {
-        c = String.fromCharCode(i);
-        if (c === '\\')
-          c = '';
-      } else {
-        c = String(i);
-        if (pad) {
-          var need = width - c.length;
-          if (need > 0) {
-            var z = new Array(need + 1).join('0');
-            if (i < 0)
-              c = '-' + z + c.slice(1);
-            else
-              c = z + c;
+    } else {
+      c = String(i)
+      if (pad) {
+        var need = width - c.length
+        if (need > 0) {
+          var z = new Array(need + 1).join('0')
+          if (i < 0) {
+            c = '-' + z + c.slice(1)
+          } else {
+            c = z + c
           }
         }
       }
-      N.push(c);
     }
-  } else {
-    N = concatMap(n, function(el) { return expand(el, false) });
+    if (length + c.length > maxLength) break
+    N.push(c)
+    length += c.length
+  }
+  return N
+}
+
+function expand(
+  str,
+  max,
+  maxLength,
+  maxDepth,
+  depth,
+  maxRewrites,
+  isTop
+) {
+  // Too deeply nested to keep following: treat the rest as literal, the same
+  // way a group that cannot expand is already handled. Truncating rather than
+  // throwing keeps expansion total, matching `max` and `maxLength`.
+  if (depth > maxDepth) {
+    return [str];
   }
 
-  for (var j = 0; j < N.length; j++) {
-    for (var k = 0; k < post.length; k++) {
-      var expansion = pre + N[j] + post[k];
-      if (!isTop || isSequence || expansion)
-        expansions.push(expansion);
+  // Consume the string's top-level brace groups left to right, threading a
+  // running set of combined prefixes (`acc`). Expanding the tail iteratively -
+  // rather than recursing on `m.post` once per group - keeps the native stack
+  // depth constant, so deeply chained input (`'{a,b}'.repeat(3000)`) can no
+  // longer overflow the stack, and leaves a single accumulator whose size
+  // `maxLength` bounds directly (CVE-2026-14257).
+  var acc = ['']
+
+  // Bash drops empty results, but only when the *first* group of the run is a
+  // comma set - a sequence like `{a..\}` may legitimately yield ''. The drop
+  // is on the final strings, so it is applied to whichever `combine` produces
+  // them (the one with no brace set left in the tail).
+  //
+  // The old implementation recursed on `m.post`, so the drop tested only the
+  // expansion of the current call's substring. The `{a},b}` rewrite below turns
+  // `isTop` back on part-way through a string, starting a fresh such run, so
+  // the drop must ignore whatever `acc` already holds from earlier groups.
+  // `accBase[a]` records how much of `acc[a]` predates the current run;
+  // `combine` treats an expansion as empty when it adds nothing past that.
+  var accBase = [0]
+  // How many times the `{a},b}` rewrite below has restarted the scan. Each pass
+  // re-reads the whole string, so leaving this unbounded is quadratic.
+  var rewrites = 0
+  var dropEmpties = false
+  var firstGroup = true
+  var nextBase
+
+  for (;;) {
+    var m = balanced('{', '}', str);
+
+    // No brace set left: the rest of the string is literal.
+    if (!m) {
+      return combine(acc, accBase, str, [''], max, maxLength, dropEmpties, [])
     }
+
+    // no need to expand pre, since it is guaranteed to be free of brace-sets
+    var pre = m.pre;
+
+    // For compatibility reasons, `${` is not eligible for brace expansion, and
+    // on the 1.x line it suppresses expansion of the rest of the string too:
+    // the whole remainder is literal. The 2.x and 5.x lines instead keep
+    // expanding the tail, which is what bash does, but changing that here would
+    // be a breaking change for 1.x consumers. Routed through `combine` so the
+    // result is still bounded by `max` and `maxLength`.
+    if (/\$$/.test(pre)) {
+      return combine(acc, accBase, str, [''], max, maxLength, dropEmpties, [])
+    }
+
+    var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
+    var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
+    var isSequence = isNumericSequence || isAlphaSequence;
+    var isOptions = m.body.indexOf(',') >= 0;
+    if (!isSequence && !isOptions) {
+      // {a},b}
+      if (rewrites < maxRewrites && m.post.match(/,(?!,).*\}/)) {
+        rewrites++;
+        str = m.pre + '{' + m.body + escClose + m.post;
+        // The rewritten string is expanded as if it were a fresh top-level one,
+        // so start a new empty-drop run: anchor the baseline at what `acc`
+        // holds now, and let the next expanding group decide whether to drop.
+        isTop = true
+        firstGroup = true
+        dropEmpties = false
+        accBase = []
+        for (var b = 0; b < acc.length; b++) {
+          accBase.push(acc[b].length)
+        }
+        continue
+      }
+      // Nothing here expands, so the whole remaining string is literal.
+      return combine(
+        acc,
+        accBase,
+        pre + '{' + m.body + '}' + m.post,
+        [''],
+        max,
+        maxLength,
+        dropEmpties,
+        []
+      )
+    }
+
+    if (firstGroup) {
+      dropEmpties = isTop && !isSequence
+      firstGroup = false
+    }
+
+    var values;
+    if (isSequence) {
+      values = expandSequence(m.body, isAlphaSequence, max, maxLength);
+    } else {
+      var n = parseCommaParts(m.body);
+      if (n.length === 1 && n[0] !== undefined) {
+        // x{{a,b}}y ==> x{a}y x{b}y
+        n = expand(n[0], max, maxLength, maxDepth, depth + 1, maxRewrites, false).map(embrace);
+        //XXX is this necessary? Can't seem to hit it in tests.
+        /* c8 ignore start */
+        if (n.length === 1) {
+          nextBase = []
+          acc = combine(
+            acc,
+            accBase,
+            pre + n[0],
+            [''],
+            max,
+            maxLength,
+            dropEmpties && !m.post.length,
+            nextBase
+          )
+          accBase = nextBase
+          if (!m.post.length) break
+          str = m.post
+          continue
+        }
+        /* c8 ignore stop */
+      }
+
+      // Values that `combine` is going to drop as empty produce no result, so
+      // they must not count against `max` - otherwise `{a,,b}` with `max: 2`
+      // would stop at `['a', '']` and yield one result instead of two. Skipping
+      // them outright keeps `values` bounded while leaving `max` a bound on
+      // *kept* results. A value is dropped when it adds nothing past the
+      // baseline, which is what `combine` tests.
+      var dropsEmpties = dropEmpties && !m.post.length && !pre
+      for (var d = 0; dropsEmpties && d < acc.length; d++) {
+        if (acc[d].length !== accBase[d]) {
+          dropsEmpties = false
+        }
+      }
+
+      values = []
+      var valuesLength = 0
+      outer: for (var j = 0; j < n.length; j++) {
+        var expanded = expand(n[j], max, maxLength, maxDepth, depth + 1, maxRewrites, false)
+        for (var k = 0; k < expanded.length; k++) {
+          var v = expanded[k]
+          if (dropsEmpties && !v) continue
+          if (values.length >= max || valuesLength + v.length > maxLength) {
+            break outer
+          }
+          values.push(v)
+          valuesLength += v.length
+        }
+      }
+    }
+
+    nextBase = []
+    acc = combine(
+      acc,
+      accBase,
+      pre,
+      values,
+      max,
+      maxLength,
+      dropEmpties && !m.post.length,
+      nextBase
+    )
+    accBase = nextBase
+    if (!m.post.length) break
+    str = m.post
   }
 
-  return expansions;
+  return acc
 }
 
 
 },
 346(module) {
+"use strict";
+
+
+function hasKey(obj, keys) {
+	var o = obj;
+	keys.slice(0, -1).forEach(function (key) {
+		o = o[key] || {};
+	});
+
+	var key = keys[keys.length - 1];
+	return key in o;
+}
+
+function isNumber(x) {
+	if (typeof x === 'number') { return true; }
+	if ((/^0x[0-9a-f]+$/i).test(x)) { return true; }
+	return (/^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/).test(x);
+}
+
+function isConstructorOrProto(obj, key) {
+	return (key === 'constructor' && typeof obj[key] === 'function') || key === '__proto__';
+}
+
 module.exports = function (args, opts) {
-    if (!opts) opts = {};
-    
-    var flags = { bools : {}, strings : {}, unknownFn: null };
+	if (!opts) { opts = {}; }
 
-    if (typeof opts['unknown'] === 'function') {
-        flags.unknownFn = opts['unknown'];
-    }
+	var flags = {
+		bools: {},
+		strings: {},
+		unknownFn: null,
+	};
 
-    if (typeof opts['boolean'] === 'boolean' && opts['boolean']) {
-      flags.allBools = true;
-    } else {
-      [].concat(opts['boolean']).filter(Boolean).forEach(function (key) {
-          flags.bools[key] = true;
-      });
-    }
-    
-    var aliases = {};
-    Object.keys(opts.alias || {}).forEach(function (key) {
-        aliases[key] = [].concat(opts.alias[key]);
-        aliases[key].forEach(function (x) {
-            aliases[x] = [key].concat(aliases[key].filter(function (y) {
-                return x !== y;
-            }));
-        });
-    });
+	if (typeof opts.unknown === 'function') {
+		flags.unknownFn = opts.unknown;
+	}
 
-    [].concat(opts.string).filter(Boolean).forEach(function (key) {
-        flags.strings[key] = true;
-        if (aliases[key]) {
-            flags.strings[aliases[key]] = true;
-        }
-     });
+	if (typeof opts.boolean === 'boolean' && opts.boolean) {
+		flags.allBools = true;
+	} else {
+		[].concat(opts.boolean).filter(Boolean).forEach(function (key) {
+			flags.bools[key] = true;
+		});
+	}
 
-    var defaults = opts['default'] || {};
-    
-    var argv = { _ : [] };
-    Object.keys(flags.bools).forEach(function (key) {
-        setArg(key, defaults[key] === undefined ? false : defaults[key]);
-    });
-    
-    var notFlags = [];
+	var aliases = {};
 
-    if (args.indexOf('--') !== -1) {
-        notFlags = args.slice(args.indexOf('--')+1);
-        args = args.slice(0, args.indexOf('--'));
-    }
+	function aliasIsBoolean(key) {
+		return aliases[key].some(function (x) {
+			return flags.bools[x];
+		});
+	}
 
-    function argDefined(key, arg) {
-        return (flags.allBools && /^--[^=]+$/.test(arg)) ||
-            flags.strings[key] || flags.bools[key] || aliases[key];
-    }
+	Object.keys(opts.alias || {}).forEach(function (key) {
+		aliases[key] = [].concat(opts.alias[key]);
+		aliases[key].forEach(function (x) {
+			aliases[x] = [key].concat(aliases[key].filter(function (y) {
+				return x !== y;
+			}));
+		});
+	});
 
-    function setArg (key, val, arg) {
-        if (arg && flags.unknownFn && !argDefined(key, arg)) {
-            if (flags.unknownFn(arg) === false) return;
-        }
+	[].concat(opts.string).filter(Boolean).forEach(function (key) {
+		flags.strings[key] = true;
+		if (aliases[key]) {
+			[].concat(aliases[key]).forEach(function (k) {
+				flags.strings[k] = true;
+			});
+		}
+	});
 
-        var value = !flags.strings[key] && isNumber(val)
-            ? Number(val) : val
-        ;
-        setKey(argv, key.split('.'), value);
-        
-        (aliases[key] || []).forEach(function (x) {
-            setKey(argv, x.split('.'), value);
-        });
-    }
+	var defaults = opts.default || {};
 
-    function setKey (obj, keys, value) {
-        var o = obj;
-        for (var i = 0; i < keys.length-1; i++) {
-            var key = keys[i];
-            if (isConstructorOrProto(o, key)) return;
-            if (o[key] === undefined) o[key] = {};
-            if (o[key] === Object.prototype || o[key] === Number.prototype
-                || o[key] === String.prototype) o[key] = {};
-            if (o[key] === Array.prototype) o[key] = [];
-            o = o[key];
-        }
+	var argv = { _: [] };
 
-        var key = keys[keys.length - 1];
-        if (isConstructorOrProto(o, key)) return;
-        if (o === Object.prototype || o === Number.prototype
-            || o === String.prototype) o = {};
-        if (o === Array.prototype) o = [];
-        if (o[key] === undefined || flags.bools[key] || typeof o[key] === 'boolean') {
-            o[key] = value;
-        }
-        else if (Array.isArray(o[key])) {
-            o[key].push(value);
-        }
-        else {
-            o[key] = [ o[key], value ];
-        }
-    }
-    
-    function aliasIsBoolean(key) {
-      return aliases[key].some(function (x) {
-          return flags.bools[x];
-      });
-    }
+	function argDefined(key, arg) {
+		return (flags.allBools && (/^--[^=]+$/).test(arg))
+			|| flags.strings[key]
+			|| flags.bools[key]
+			|| aliases[key];
+	}
 
-    for (var i = 0; i < args.length; i++) {
-        var arg = args[i];
-        
-        if (/^--.+=/.test(arg)) {
-            // Using [\s\S] instead of . because js doesn't support the
-            // 'dotall' regex modifier. See:
-            // http://stackoverflow.com/a/1068308/13216
-            var m = arg.match(/^--([^=]+)=([\s\S]*)$/);
-            var key = m[1];
-            var value = m[2];
-            if (flags.bools[key]) {
-                value = value !== 'false';
-            }
-            setArg(key, value, arg);
-        }
-        else if (/^--no-.+/.test(arg)) {
-            var key = arg.match(/^--no-(.+)/)[1];
-            setArg(key, false, arg);
-        }
-        else if (/^--.+/.test(arg)) {
-            var key = arg.match(/^--(.+)/)[1];
-            var next = args[i + 1];
-            if (next !== undefined && !/^-/.test(next)
-            && !flags.bools[key]
-            && !flags.allBools
-            && (aliases[key] ? !aliasIsBoolean(key) : true)) {
-                setArg(key, next, arg);
-                i++;
-            }
-            else if (/^(true|false)$/.test(next)) {
-                setArg(key, next === 'true', arg);
-                i++;
-            }
-            else {
-                setArg(key, flags.strings[key] ? '' : true, arg);
-            }
-        }
-        else if (/^-[^-]+/.test(arg)) {
-            var letters = arg.slice(1,-1).split('');
-            
-            var broken = false;
-            for (var j = 0; j < letters.length; j++) {
-                var next = arg.slice(j+2);
-                
-                if (next === '-') {
-                    setArg(letters[j], next, arg)
-                    continue;
-                }
-                
-                if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
-                    setArg(letters[j], next.split('=')[1], arg);
-                    broken = true;
-                    break;
-                }
-                
-                if (/[A-Za-z]/.test(letters[j])
-                && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
-                    setArg(letters[j], next, arg);
-                    broken = true;
-                    break;
-                }
-                
-                if (letters[j+1] && letters[j+1].match(/\W/)) {
-                    setArg(letters[j], arg.slice(j+2), arg);
-                    broken = true;
-                    break;
-                }
-                else {
-                    setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
-                }
-            }
-            
-            var key = arg.slice(-1)[0];
-            if (!broken && key !== '-') {
-                if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
-                && !flags.bools[key]
-                && (aliases[key] ? !aliasIsBoolean(key) : true)) {
-                    setArg(key, args[i+1], arg);
-                    i++;
-                }
-                else if (args[i+1] && /^(true|false)$/.test(args[i+1])) {
-                    setArg(key, args[i+1] === 'true', arg);
-                    i++;
-                }
-                else {
-                    setArg(key, flags.strings[key] ? '' : true, arg);
-                }
-            }
-        }
-        else {
-            if (!flags.unknownFn || flags.unknownFn(arg) !== false) {
-                argv._.push(
-                    flags.strings['_'] || !isNumber(arg) ? arg : Number(arg)
-                );
-            }
-            if (opts.stopEarly) {
-                argv._.push.apply(argv._, args.slice(i + 1));
-                break;
-            }
-        }
-    }
-    
-    Object.keys(defaults).forEach(function (key) {
-        if (!hasKey(argv, key.split('.'))) {
-            setKey(argv, key.split('.'), defaults[key]);
-            
-            (aliases[key] || []).forEach(function (x) {
-                setKey(argv, x.split('.'), defaults[key]);
-            });
-        }
-    });
-    
-    if (opts['--']) {
-        argv['--'] = new Array();
-        notFlags.forEach(function(key) {
-            argv['--'].push(key);
-        });
-    }
-    else {
-        notFlags.forEach(function(key) {
-            argv._.push(key);
-        });
-    }
+	function setKey(obj, keys, value) {
+		var o = obj;
+		for (var i = 0; i < keys.length - 1; i++) {
+			var key = keys[i];
+			if (isConstructorOrProto(o, key)) { return; }
+			if (o[key] === undefined) { o[key] = {}; }
+			if (
+				o[key] === Object.prototype
+				|| o[key] === Number.prototype
+				|| o[key] === String.prototype
+			) {
+				o[key] = {};
+			}
+			if (o[key] === Array.prototype) { o[key] = []; }
+			o = o[key];
+		}
 
-    return argv;
+		var lastKey = keys[keys.length - 1];
+		if (isConstructorOrProto(o, lastKey)) { return; }
+		if (
+			o === Object.prototype
+			|| o === Number.prototype
+			|| o === String.prototype
+		) {
+			o = {};
+		}
+		if (o === Array.prototype) { o = []; }
+		if (o[lastKey] === undefined || flags.bools[lastKey] || typeof o[lastKey] === 'boolean') {
+			o[lastKey] = value;
+		} else if (Array.isArray(o[lastKey])) {
+			o[lastKey].push(value);
+		} else {
+			o[lastKey] = [o[lastKey], value];
+		}
+	}
+
+	function setArg(key, val, arg) {
+		if (arg && flags.unknownFn && !argDefined(key, arg)) {
+			if (flags.unknownFn(arg) === false) { return; }
+		}
+
+		var value = !flags.strings[key] && isNumber(val)
+			? Number(val)
+			: val;
+		setKey(argv, key.split('.'), value);
+
+		(aliases[key] || []).forEach(function (x) {
+			setKey(argv, x.split('.'), value);
+		});
+	}
+
+	Object.keys(flags.bools).forEach(function (key) {
+		setArg(key, defaults[key] === undefined ? false : defaults[key]);
+	});
+
+	var notFlags = [];
+
+	if (args.indexOf('--') !== -1) {
+		notFlags = args.slice(args.indexOf('--') + 1);
+		args = args.slice(0, args.indexOf('--'));
+	}
+
+	for (var i = 0; i < args.length; i++) {
+		var arg = args[i];
+		var key;
+		var next;
+
+		if ((/^--.+=/).test(arg)) {
+			// Using [\s\S] instead of . because js doesn't support the
+			// 'dotall' regex modifier. See:
+			// http://stackoverflow.com/a/1068308/13216
+			var m = arg.match(/^--([^=]+)=([\s\S]*)$/);
+			key = m[1];
+			var value = m[2];
+			if (flags.bools[key]) {
+				value = value !== 'false';
+			}
+			setArg(key, value, arg);
+		} else if ((/^--no-.+/).test(arg)) {
+			key = arg.match(/^--no-(.+)/)[1];
+			setArg(key, false, arg);
+		} else if ((/^--.+/).test(arg)) {
+			key = arg.match(/^--(.+)/)[1];
+			next = args[i + 1];
+			if (
+				next !== undefined
+				&& !(/^(-|--)[^-]/).test(next)
+				&& !flags.bools[key]
+				&& !flags.allBools
+				&& (aliases[key] ? !aliasIsBoolean(key) : true)
+			) {
+				setArg(key, next, arg);
+				i += 1;
+			} else if ((/^(true|false)$/).test(next)) {
+				setArg(key, next === 'true', arg);
+				i += 1;
+			} else {
+				setArg(key, flags.strings[key] ? '' : true, arg);
+			}
+		} else if ((/^-[^-]+/).test(arg)) {
+			var letters = arg.slice(1, -1).split('');
+
+			var broken = false;
+			for (var j = 0; j < letters.length; j++) {
+				next = arg.slice(j + 2);
+
+				if (next === '-') {
+					setArg(letters[j], next, arg);
+					continue;
+				}
+
+				if ((/[A-Za-z]/).test(letters[j]) && next[0] === '=') {
+					setArg(letters[j], next.slice(1), arg);
+					broken = true;
+					break;
+				}
+
+				if (
+					(/[A-Za-z]/).test(letters[j])
+					&& (/-?\d+(\.\d*)?(e-?\d+)?$/).test(next)
+				) {
+					setArg(letters[j], next, arg);
+					broken = true;
+					break;
+				}
+
+				if (letters[j + 1] && letters[j + 1].match(/\W/)) {
+					setArg(letters[j], arg.slice(j + 2), arg);
+					broken = true;
+					break;
+				} else {
+					setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
+				}
+			}
+
+			key = arg.slice(-1)[0];
+			if (!broken && key !== '-') {
+				if (
+					args[i + 1]
+					&& !(/^(-|--)[^-]/).test(args[i + 1])
+					&& !flags.bools[key]
+					&& (aliases[key] ? !aliasIsBoolean(key) : true)
+				) {
+					setArg(key, args[i + 1], arg);
+					i += 1;
+				} else if (args[i + 1] && (/^(true|false)$/).test(args[i + 1])) {
+					setArg(key, args[i + 1] === 'true', arg);
+					i += 1;
+				} else {
+					setArg(key, flags.strings[key] ? '' : true, arg);
+				}
+			}
+		} else {
+			if (!flags.unknownFn || flags.unknownFn(arg) !== false) {
+				argv._.push(flags.strings._ || !isNumber(arg) ? arg : Number(arg));
+			}
+			if (opts.stopEarly) {
+				argv._.push.apply(argv._, args.slice(i + 1));
+				break;
+			}
+		}
+	}
+
+	Object.keys(defaults).forEach(function (k) {
+		if (!hasKey(argv, k.split('.'))) {
+			setKey(argv, k.split('.'), defaults[k]);
+
+			(aliases[k] || []).forEach(function (x) {
+				setKey(argv, x.split('.'), defaults[k]);
+			});
+		}
+	});
+
+	if (opts['--']) {
+		argv['--'] = notFlags.slice();
+	} else {
+		notFlags.forEach(function (k) {
+			argv._.push(k);
+		});
+	}
+
+	return argv;
 };
-
-function hasKey (obj, keys) {
-    var o = obj;
-    keys.slice(0,-1).forEach(function (key) {
-        o = (o[key] || {});
-    });
-
-    var key = keys[keys.length - 1];
-    return key in o;
-}
-
-function isNumber (x) {
-    if (typeof x === 'number') return true;
-    if (/^0x[0-9a-f]+$/i.test(x)) return true;
-    return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x);
-}
-
-
-function isConstructorOrProto (obj, key) {
-    return key === 'constructor' && typeof obj[key] === 'function' || key === '__proto__';
-}
 
 
 },
@@ -29115,13 +29368,13 @@ mkdirP.sync = function sync (p, opts, made) {
 
 
 },
-501(module, __unused_rspack_exports, __webpack_require__) {
+503(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const minimatch = __webpack_require__(175);
-const arrayUnion = __webpack_require__(370);
-const arrayDiffer = __webpack_require__(502);
-const arrify = __webpack_require__(503);
+const arrayUnion = __webpack_require__(372);
+const arrayDiffer = __webpack_require__(504);
+const arrify = __webpack_require__(505);
 
 module.exports = (list, patterns, options = {}) => {
 	list = arrify(list);
@@ -29145,7 +29398,7 @@ module.exports = (list, patterns, options = {}) => {
 
 
 },
-483(module, __unused_rspack_exports, __webpack_require__) {
+485(module, __unused_rspack_exports, __webpack_require__) {
 var Stream = __webpack_require__(161)
 
 module.exports = MuteStream
@@ -29559,7 +29812,7 @@ function ncp (source, dest, options, callback) {
 
 
 },
-518(module, __unused_rspack_exports, __webpack_require__) {
+520(module, __unused_rspack_exports, __webpack_require__) {
 var inherits = (__webpack_require__(124)/* .inherits */.inherits);
 
 var NestedError = function (message, nested) {
@@ -30270,18 +30523,18 @@ module.exports.callCount = function_ => {
 
 
 },
-457(module, __unused_rspack_exports, __webpack_require__) {
+459(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const readline = __webpack_require__(302);
-const chalk = __webpack_require__(458);
-const cliCursor = __webpack_require__(461);
-const cliSpinners = __webpack_require__(463);
-const logSymbols = __webpack_require__(465);
-const stripAnsi = __webpack_require__(476);
-const wcwidth = __webpack_require__(478);
-const isInteractive = __webpack_require__(482);
-const MuteStream = __webpack_require__(483);
+const chalk = __webpack_require__(460);
+const cliCursor = __webpack_require__(463);
+const cliSpinners = __webpack_require__(465);
+const logSymbols = __webpack_require__(467);
+const stripAnsi = __webpack_require__(478);
+const wcwidth = __webpack_require__(480);
+const isInteractive = __webpack_require__(484);
+const MuteStream = __webpack_require__(485);
 
 const TEXT = Symbol('text');
 const PREFIX_TEXT = Symbol('prefixText');
@@ -30634,7 +30887,7 @@ module.exports.promise = (action, options) => {
 
 
 },
-458(module, __unused_rspack_exports, __webpack_require__) {
+460(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const ansiStyles = __webpack_require__(126);
@@ -30642,7 +30895,7 @@ const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(131);
 const {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex
-} = __webpack_require__(459);
+} = __webpack_require__(461);
 
 // `supportsColor.level` → `ansiStyles.color[name]` mapping
 const levelMapping = [
@@ -30843,7 +31096,7 @@ const chalkTag = (chalk, ...strings) => {
 	}
 
 	if (template === undefined) {
-		template = __webpack_require__(460);
+		template = __webpack_require__(462);
 	}
 
 	return template(chalk, parts.join(''));
@@ -30872,7 +31125,7 @@ module.exports = chalk;
 
 
 },
-460(module) {
+462(module) {
 "use strict";
 
 const TEMPLATE_REGEX = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
@@ -31011,7 +31264,7 @@ module.exports = (chalk, temporary) => {
 
 
 },
-459(module) {
+461(module) {
 "use strict";
 
 
@@ -31055,7 +31308,7 @@ module.exports = {
 
 
 },
-474(module) {
+476(module) {
 "use strict";
 
 module.exports = (flag, argv) => {
@@ -31068,10 +31321,10 @@ module.exports = (flag, argv) => {
 
 
 },
-465(module, __unused_rspack_exports, __webpack_require__) {
+467(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const chalk = __webpack_require__(466);
+const chalk = __webpack_require__(468);
 
 const isSupported = process.platform !== 'win32' || process.env.CI || process.env.TERM === 'xterm-256color';
 
@@ -31093,11 +31346,11 @@ module.exports = isSupported ? main : fallbacks;
 
 
 },
-468(module, __unused_rspack_exports, __webpack_require__) {
+470(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 /* module decorator */ module = __webpack_require__.nmd(module);
 
-const colorConvert = __webpack_require__(469);
+const colorConvert = __webpack_require__(471);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -31264,14 +31517,14 @@ Object.defineProperty(module, 'exports', {
 
 
 },
-466(module, __unused_rspack_exports, __webpack_require__) {
+468(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(467);
-const ansiStyles = __webpack_require__(468);
-const stdoutColor = (__webpack_require__(473)/* .stdout */.stdout);
+const escapeStringRegexp = __webpack_require__(469);
+const ansiStyles = __webpack_require__(470);
+const stdoutColor = (__webpack_require__(475)/* .stdout */.stdout);
 
-const template = __webpack_require__(475);
+const template = __webpack_require__(477);
 
 const isSimpleWindowsTerm = process.platform === 'win32' && !(process.env.TERM || '').toLowerCase().startsWith('xterm');
 
@@ -31497,7 +31750,7 @@ module.exports["default"] = module.exports; // For TypeScript
 
 
 },
-475(module) {
+477(module) {
 "use strict";
 
 const TEMPLATE_REGEX = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
@@ -31630,11 +31883,11 @@ module.exports = (chalk, tmp) => {
 
 
 },
-473(module, __unused_rspack_exports, __webpack_require__) {
+475(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const os = __webpack_require__(132);
-const hasFlag = __webpack_require__(474);
+const hasFlag = __webpack_require__(476);
 
 const env = process.env;
 
@@ -31766,10 +32019,10 @@ module.exports = {
 
 
 },
-514(module, __unused_rspack_exports, __webpack_require__) {
+516(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const pTimeout = __webpack_require__(515);
+const pTimeout = __webpack_require__(517);
 
 const symbolAsyncIterator = Symbol.asyncIterator || '@@asyncIterator';
 
@@ -32062,10 +32315,10 @@ module.exports.TimeoutError = pTimeout.TimeoutError;
 
 
 },
-523(module, __unused_rspack_exports, __webpack_require__) {
+525(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const pMap = __webpack_require__(524);
+const pMap = __webpack_require__(526);
 
 const pFilter = async (iterable, filterer, options) => {
 	const values = await pMap(
@@ -32082,7 +32335,7 @@ module.exports["default"] = pFilter;
 
 
 },
-524(module) {
+526(module) {
 "use strict";
 
 
@@ -32159,7 +32412,7 @@ module.exports["default"] = pMap;
 
 
 },
-516(module) {
+518(module) {
 "use strict";
 
 module.exports = (promise, onFinally) => {
@@ -32179,10 +32432,10 @@ module.exports = (promise, onFinally) => {
 
 
 },
-453(module, __unused_rspack_exports, __webpack_require__) {
+455(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const AggregateError = __webpack_require__(454);
+const AggregateError = __webpack_require__(456);
 
 module.exports = async (
 	iterable,
@@ -32265,11 +32518,11 @@ module.exports = async (
 
 
 },
-515(module, __unused_rspack_exports, __webpack_require__) {
+517(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const pFinally = __webpack_require__(516);
+const pFinally = __webpack_require__(518);
 
 class TimeoutError extends Error {
 	constructor(message) {
@@ -32579,7 +32832,7 @@ module.exports.win32 = win32.parse;
 
 
 },
-445(__unused_rspack_module, exports, __webpack_require__) {
+447(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 const {promisify} = __webpack_require__(124);
@@ -32706,15 +32959,15 @@ module.exports.createColors = createColors
 
 
 },
-394(module, __unused_rspack_exports, __webpack_require__) {
+396(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-module.exports = __webpack_require__(395);
+module.exports = __webpack_require__(397);
 
 
 },
-398(module, __unused_rspack_exports, __webpack_require__) {
+400(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
@@ -32903,12 +33156,12 @@ module.exports = {
 
 
 },
-399(module, __unused_rspack_exports, __webpack_require__) {
+401(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const constants = __webpack_require__(398);
-const utils = __webpack_require__(397);
+const constants = __webpack_require__(400);
+const utils = __webpack_require__(399);
 
 /**
  * Constants
@@ -34300,15 +34553,15 @@ module.exports = parse;
 
 
 },
-395(module, __unused_rspack_exports, __webpack_require__) {
+397(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
 const path = __webpack_require__(7);
-const scan = __webpack_require__(396);
-const parse = __webpack_require__(399);
-const utils = __webpack_require__(397);
-const constants = __webpack_require__(398);
+const scan = __webpack_require__(398);
+const parse = __webpack_require__(401);
+const utils = __webpack_require__(399);
+const constants = __webpack_require__(400);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
 /**
@@ -34647,11 +34900,11 @@ module.exports = picomatch;
 
 
 },
-396(module, __unused_rspack_exports, __webpack_require__) {
+398(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-const utils = __webpack_require__(397);
+const utils = __webpack_require__(399);
 const {
   CHAR_ASTERISK,             /* * */
   CHAR_AT,                   /* @ */
@@ -34668,7 +34921,7 @@ const {
   CHAR_RIGHT_CURLY_BRACE,    /* } */
   CHAR_RIGHT_PARENTHESES,    /* ) */
   CHAR_RIGHT_SQUARE_BRACKET  /* ] */
-} = __webpack_require__(398);
+} = __webpack_require__(400);
 
 const isPathSeparator = code => {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
@@ -35043,7 +35296,7 @@ module.exports = scan;
 
 
 },
-397(__unused_rspack_module, exports, __webpack_require__) {
+399(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 
@@ -35054,7 +35307,7 @@ const {
   REGEX_REMOVE_BACKSLASH,
   REGEX_SPECIAL_CHARS,
   REGEX_SPECIAL_CHARS_GLOBAL
-} = __webpack_require__(398);
+} = __webpack_require__(400);
 
 exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
@@ -35271,7 +35524,7 @@ module.exports = pump
 
 
 },
-416(module) {
+418(module) {
 /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 let promise
 
@@ -35350,6 +35603,10 @@ var normalizeOptions = __webpack_require__(274);
 var isCore = __webpack_require__(275);
 
 var realpathFS = process.platform !== 'win32' && fs.realpath && typeof fs.realpath.native === 'function' ? fs.realpath.native : fs.realpath;
+
+var relativePathRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/;
+var windowsDriveRegex = /^\w:[/\\]*$/;
+var nodeModulesRegex = /[/\\]node_modules[/\\]*$/;
 
 var homedir = getHomedir();
 var defaultPaths = function () {
@@ -35467,10 +35724,10 @@ module.exports = function resolve(x, options, callback) {
 
     var res;
     function init(basedir) {
-        if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+        if (relativePathRegex.test(x)) {
             res = path.resolve(basedir, x);
             if (x === '.' || x === '..' || x.slice(-1) === '/') res += '/';
-            if ((/\/$/).test(x) && res === basedir) {
+            if (x.slice(-1) === '/' && res === basedir) {
                 loadAsDirectory(res, opts.package, onfile);
             } else loadAsFile(res, opts.package, onfile);
         } else if (includeCoreModules && isCore(x)) {
@@ -35558,10 +35815,10 @@ module.exports = function resolve(x, options, callback) {
 
     function loadpkg(dir, cb) {
         if (dir === '' || dir === '/') return cb(null);
-        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+        if (process.platform === 'win32' && windowsDriveRegex.test(dir)) {
             return cb(null);
         }
-        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return cb(null);
+        if (nodeModulesRegex.test(dir)) return cb(null);
 
         maybeRealpath(realpath, dir, opts, function (unwrapErr, pkgdir) {
             if (unwrapErr) return loadpkg(path.dirname(dir), cb);
@@ -35686,55 +35943,16 @@ module.exports = function () {
 
 },
 280(module, __unused_rspack_exports, __webpack_require__) {
-var current = (process.versions && process.versions.node && process.versions.node.split('.')) || [];
+"use strict";
 
-function specifierIncluded(specifier) {
-    var parts = specifier.split(' ');
-    var op = parts.length > 1 ? parts[0] : '=';
-    var versionParts = (parts.length > 1 ? parts[1] : parts[0]).split('.');
 
-    for (var i = 0; i < 3; ++i) {
-        var cur = parseInt(current[i] || 0, 10);
-        var ver = parseInt(versionParts[i] || 0, 10);
-        if (cur === ver) {
-            continue; // eslint-disable-line no-restricted-syntax, no-continue
-        }
-        if (op === '<') {
-            return cur < ver;
-        } else if (op === '>=') {
-            return cur >= ver;
-        }
-        return false;
-    }
-    return op === '>=';
-}
-
-function matchesRange(range) {
-    var specifiers = range.split(/ ?&& ?/);
-    if (specifiers.length === 0) { return false; }
-    for (var i = 0; i < specifiers.length; ++i) {
-        if (!specifierIncluded(specifiers[i])) { return false; }
-    }
-    return true;
-}
-
-function versionIncluded(specifierValue) {
-    if (typeof specifierValue === 'boolean') { return specifierValue; }
-    if (specifierValue && typeof specifierValue === 'object') {
-        for (var i = 0; i < specifierValue.length; ++i) {
-            if (matchesRange(specifierValue[i])) { return true; }
-        }
-        return false;
-    }
-    return matchesRange(specifierValue);
-}
-
+var isCoreModule = __webpack_require__(275);
 var data = __webpack_require__(281);
 
 var core = {};
 for (var mod in data) { // eslint-disable-line no-restricted-syntax
     if (Object.prototype.hasOwnProperty.call(data, mod)) {
-        core[mod] = versionIncluded(data[mod]);
+        core[mod] = isCoreModule(mod);
     }
 }
 module.exports = core;
@@ -35783,11 +36001,14 @@ module.exports = function isCore(x) {
 var path = __webpack_require__(7);
 var parse = path.parse || __webpack_require__(273); // eslint-disable-line global-require
 
+var driveLetterRegex = /^([A-Za-z]:)/;
+var uncPathRegex = /^\\\\/;
+
 var getNodeModulesDirs = function getNodeModulesDirs(absoluteStart, modules) {
     var prefix = '/';
-    if ((/^([A-Za-z]:)/).test(absoluteStart)) {
+    if (driveLetterRegex.test(absoluteStart)) {
         prefix = '';
-    } else if ((/^\\\\/).test(absoluteStart)) {
+    } else if (uncPathRegex.test(absoluteStart)) {
         prefix = '\\\\';
     }
 
@@ -35849,6 +36070,10 @@ var nodeModulesPaths = __webpack_require__(272);
 var normalizeOptions = __webpack_require__(274);
 
 var realpathFS = process.platform !== 'win32' && fs.realpathSync && typeof fs.realpathSync.native === 'function' ? fs.realpathSync.native : fs.realpathSync;
+
+var relativePathRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/;
+var windowsDriveRegex = /^\w:[/\\]*$/;
+var nodeModulesRegex = /[/\\]node_modules[/\\]*$/;
 
 var homedir = getHomedir();
 var defaultPaths = function () {
@@ -35938,7 +36163,7 @@ module.exports = function resolveSync(x, options) {
     // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
     var absoluteStart = maybeRealpathSync(realpathSync, path.resolve(basedir), opts);
 
-    if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+    if (relativePathRegex.test(x)) {
         var res = path.resolve(absoluteStart, x);
         if (x === '.' || x === '..' || x.slice(-1) === '/') res += '/';
         var m = loadAsFileSync(res) || loadAsDirectorySync(res);
@@ -35979,10 +36204,10 @@ module.exports = function resolveSync(x, options) {
 
     function loadpkg(dir) {
         if (dir === '' || dir === '/') return;
-        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+        if (process.platform === 'win32' && windowsDriveRegex.test(dir)) {
             return;
         }
-        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return;
+        if (nodeModulesRegex.test(dir)) return;
 
         var pkgfile = path.join(maybeRealpathSync(realpathSync, dir, opts), 'package.json');
 
@@ -36051,7 +36276,7 @@ module.exports = function resolveSync(x, options) {
 
 
 },
-462(module, __unused_rspack_exports, __webpack_require__) {
+464(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 const onetime = __webpack_require__(321);
@@ -36065,7 +36290,7 @@ module.exports = onetime(() => {
 
 
 },
-425(module) {
+427(module) {
 "use strict";
 
 
@@ -36103,11 +36328,11 @@ module.exports = reusify
 
 
 },
-415(module, __unused_rspack_exports, __webpack_require__) {
+417(module, __unused_rspack_exports, __webpack_require__) {
 /*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 module.exports = runParallel
 
-const queueMicrotask = __webpack_require__(416)
+const queueMicrotask = __webpack_require__(418)
 
 function runParallel (tasks, cb) {
   let results, pending, keys
@@ -39476,7 +39701,7 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
 
 
 },
-496(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+498(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -39552,7 +39777,7 @@ function concatAll() {
 
 
 },
-489(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+491(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -39602,7 +39827,7 @@ var DefaultIfEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-492(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+494(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -39610,7 +39835,7 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var tslib__rspack_import_3 = __webpack_require__(23);
 /* import */ var _scheduler_async__rspack_import_0 = __webpack_require__(66);
-/* import */ var _util_isDate__rspack_import_1 = __webpack_require__(493);
+/* import */ var _util_isDate__rspack_import_1 = __webpack_require__(495);
 /* import */ var _Subscriber__rspack_import_2 = __webpack_require__(22);
 /* import */ var _Notification__rspack_import_4 = __webpack_require__(53);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_Subscriber,_Notification PURE_IMPORTS_END */
@@ -39763,7 +39988,7 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-497(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+499(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -39801,7 +40026,7 @@ var FinallySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-487(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+489(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -39809,9 +40034,9 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var _util_EmptyError__rspack_import_5 = __webpack_require__(74);
 /* import */ var _filter__rspack_import_0 = __webpack_require__(116);
-/* import */ var _take__rspack_import_2 = __webpack_require__(488);
-/* import */ var _defaultIfEmpty__rspack_import_3 = __webpack_require__(489);
-/* import */ var _throwIfEmpty__rspack_import_4 = __webpack_require__(490);
+/* import */ var _take__rspack_import_2 = __webpack_require__(490);
+/* import */ var _defaultIfEmpty__rspack_import_3 = __webpack_require__(491);
+/* import */ var _throwIfEmpty__rspack_import_4 = __webpack_require__(492);
 /* import */ var _util_identity__rspack_import_1 = __webpack_require__(36);
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_take,_defaultIfEmpty,_throwIfEmpty,_util_identity PURE_IMPORTS_END */
 
@@ -40082,7 +40307,7 @@ var MapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-491(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+493(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -40412,7 +40637,7 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-488(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+490(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -40474,7 +40699,7 @@ var TakeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 },
-490(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+492(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -40540,7 +40765,7 @@ function defaultErrorFactory() {
 
 
 },
-494(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+496(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -40548,7 +40773,7 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var _scheduler_async__rspack_import_0 = __webpack_require__(66);
 /* import */ var _util_TimeoutError__rspack_import_3 = __webpack_require__(75);
-/* import */ var _timeoutWith__rspack_import_1 = __webpack_require__(495);
+/* import */ var _timeoutWith__rspack_import_1 = __webpack_require__(497);
 /* import */ var _observable_throwError__rspack_import_2 = __webpack_require__(60);
 /** PURE_IMPORTS_START _scheduler_async,_util_TimeoutError,_timeoutWith,_observable_throwError PURE_IMPORTS_END */
 
@@ -40565,7 +40790,7 @@ function timeout(due, scheduler) {
 
 
 },
-495(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+497(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -40573,7 +40798,7 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var tslib__rspack_import_3 = __webpack_require__(23);
 /* import */ var _scheduler_async__rspack_import_0 = __webpack_require__(66);
-/* import */ var _util_isDate__rspack_import_1 = __webpack_require__(493);
+/* import */ var _util_isDate__rspack_import_1 = __webpack_require__(495);
 /* import */ var _innerSubscribe__rspack_import_2 = __webpack_require__(101);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_innerSubscribe PURE_IMPORTS_END */
 
@@ -41783,7 +42008,7 @@ var isArrayLike = (function (x) { return x && typeof x.length === 'number' && ty
 
 
 },
-493(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+495(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -44565,6 +44790,450 @@ module.exports = LRUCache
 
 
 },
+243(module) {
+"use strict";
+
+module.exports = function (Yallist) {
+  Yallist.prototype[Symbol.iterator] = function* () {
+    for (let walker = this.head; walker; walker = walker.next) {
+      yield walker.value
+    }
+  }
+}
+
+
+},
+242(module, __unused_rspack_exports, __webpack_require__) {
+"use strict";
+
+module.exports = Yallist
+
+Yallist.Node = Node
+Yallist.create = Yallist
+
+function Yallist (list) {
+  var self = this
+  if (!(self instanceof Yallist)) {
+    self = new Yallist()
+  }
+
+  self.tail = null
+  self.head = null
+  self.length = 0
+
+  if (list && typeof list.forEach === 'function') {
+    list.forEach(function (item) {
+      self.push(item)
+    })
+  } else if (arguments.length > 0) {
+    for (var i = 0, l = arguments.length; i < l; i++) {
+      self.push(arguments[i])
+    }
+  }
+
+  return self
+}
+
+Yallist.prototype.removeNode = function (node) {
+  if (node.list !== this) {
+    throw new Error('removing node which does not belong to this list')
+  }
+
+  var next = node.next
+  var prev = node.prev
+
+  if (next) {
+    next.prev = prev
+  }
+
+  if (prev) {
+    prev.next = next
+  }
+
+  if (node === this.head) {
+    this.head = next
+  }
+  if (node === this.tail) {
+    this.tail = prev
+  }
+
+  node.list.length--
+  node.next = null
+  node.prev = null
+  node.list = null
+
+  return next
+}
+
+Yallist.prototype.unshiftNode = function (node) {
+  if (node === this.head) {
+    return
+  }
+
+  if (node.list) {
+    node.list.removeNode(node)
+  }
+
+  var head = this.head
+  node.list = this
+  node.next = head
+  if (head) {
+    head.prev = node
+  }
+
+  this.head = node
+  if (!this.tail) {
+    this.tail = node
+  }
+  this.length++
+}
+
+Yallist.prototype.pushNode = function (node) {
+  if (node === this.tail) {
+    return
+  }
+
+  if (node.list) {
+    node.list.removeNode(node)
+  }
+
+  var tail = this.tail
+  node.list = this
+  node.prev = tail
+  if (tail) {
+    tail.next = node
+  }
+
+  this.tail = node
+  if (!this.head) {
+    this.head = node
+  }
+  this.length++
+}
+
+Yallist.prototype.push = function () {
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    push(this, arguments[i])
+  }
+  return this.length
+}
+
+Yallist.prototype.unshift = function () {
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    unshift(this, arguments[i])
+  }
+  return this.length
+}
+
+Yallist.prototype.pop = function () {
+  if (!this.tail) {
+    return undefined
+  }
+
+  var res = this.tail.value
+  this.tail = this.tail.prev
+  if (this.tail) {
+    this.tail.next = null
+  } else {
+    this.head = null
+  }
+  this.length--
+  return res
+}
+
+Yallist.prototype.shift = function () {
+  if (!this.head) {
+    return undefined
+  }
+
+  var res = this.head.value
+  this.head = this.head.next
+  if (this.head) {
+    this.head.prev = null
+  } else {
+    this.tail = null
+  }
+  this.length--
+  return res
+}
+
+Yallist.prototype.forEach = function (fn, thisp) {
+  thisp = thisp || this
+  for (var walker = this.head, i = 0; walker !== null; i++) {
+    fn.call(thisp, walker.value, i, this)
+    walker = walker.next
+  }
+}
+
+Yallist.prototype.forEachReverse = function (fn, thisp) {
+  thisp = thisp || this
+  for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
+    fn.call(thisp, walker.value, i, this)
+    walker = walker.prev
+  }
+}
+
+Yallist.prototype.get = function (n) {
+  for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
+    // abort out of the list early if we hit a cycle
+    walker = walker.next
+  }
+  if (i === n && walker !== null) {
+    return walker.value
+  }
+}
+
+Yallist.prototype.getReverse = function (n) {
+  for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
+    // abort out of the list early if we hit a cycle
+    walker = walker.prev
+  }
+  if (i === n && walker !== null) {
+    return walker.value
+  }
+}
+
+Yallist.prototype.map = function (fn, thisp) {
+  thisp = thisp || this
+  var res = new Yallist()
+  for (var walker = this.head; walker !== null;) {
+    res.push(fn.call(thisp, walker.value, this))
+    walker = walker.next
+  }
+  return res
+}
+
+Yallist.prototype.mapReverse = function (fn, thisp) {
+  thisp = thisp || this
+  var res = new Yallist()
+  for (var walker = this.tail; walker !== null;) {
+    res.push(fn.call(thisp, walker.value, this))
+    walker = walker.prev
+  }
+  return res
+}
+
+Yallist.prototype.reduce = function (fn, initial) {
+  var acc
+  var walker = this.head
+  if (arguments.length > 1) {
+    acc = initial
+  } else if (this.head) {
+    walker = this.head.next
+    acc = this.head.value
+  } else {
+    throw new TypeError('Reduce of empty list with no initial value')
+  }
+
+  for (var i = 0; walker !== null; i++) {
+    acc = fn(acc, walker.value, i)
+    walker = walker.next
+  }
+
+  return acc
+}
+
+Yallist.prototype.reduceReverse = function (fn, initial) {
+  var acc
+  var walker = this.tail
+  if (arguments.length > 1) {
+    acc = initial
+  } else if (this.tail) {
+    walker = this.tail.prev
+    acc = this.tail.value
+  } else {
+    throw new TypeError('Reduce of empty list with no initial value')
+  }
+
+  for (var i = this.length - 1; walker !== null; i--) {
+    acc = fn(acc, walker.value, i)
+    walker = walker.prev
+  }
+
+  return acc
+}
+
+Yallist.prototype.toArray = function () {
+  var arr = new Array(this.length)
+  for (var i = 0, walker = this.head; walker !== null; i++) {
+    arr[i] = walker.value
+    walker = walker.next
+  }
+  return arr
+}
+
+Yallist.prototype.toArrayReverse = function () {
+  var arr = new Array(this.length)
+  for (var i = 0, walker = this.tail; walker !== null; i++) {
+    arr[i] = walker.value
+    walker = walker.prev
+  }
+  return arr
+}
+
+Yallist.prototype.slice = function (from, to) {
+  to = to || this.length
+  if (to < 0) {
+    to += this.length
+  }
+  from = from || 0
+  if (from < 0) {
+    from += this.length
+  }
+  var ret = new Yallist()
+  if (to < from || to < 0) {
+    return ret
+  }
+  if (from < 0) {
+    from = 0
+  }
+  if (to > this.length) {
+    to = this.length
+  }
+  for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
+    walker = walker.next
+  }
+  for (; walker !== null && i < to; i++, walker = walker.next) {
+    ret.push(walker.value)
+  }
+  return ret
+}
+
+Yallist.prototype.sliceReverse = function (from, to) {
+  to = to || this.length
+  if (to < 0) {
+    to += this.length
+  }
+  from = from || 0
+  if (from < 0) {
+    from += this.length
+  }
+  var ret = new Yallist()
+  if (to < from || to < 0) {
+    return ret
+  }
+  if (from < 0) {
+    from = 0
+  }
+  if (to > this.length) {
+    to = this.length
+  }
+  for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
+    walker = walker.prev
+  }
+  for (; walker !== null && i > from; i--, walker = walker.prev) {
+    ret.push(walker.value)
+  }
+  return ret
+}
+
+Yallist.prototype.splice = function (start, deleteCount, ...nodes) {
+  if (start > this.length) {
+    start = this.length - 1
+  }
+  if (start < 0) {
+    start = this.length + start;
+  }
+
+  for (var i = 0, walker = this.head; walker !== null && i < start; i++) {
+    walker = walker.next
+  }
+
+  var ret = []
+  for (var i = 0; walker && i < deleteCount; i++) {
+    ret.push(walker.value)
+    walker = this.removeNode(walker)
+  }
+  if (walker === null) {
+    walker = this.tail
+  }
+
+  if (walker !== this.head && walker !== this.tail) {
+    walker = walker.prev
+  }
+
+  for (var i = 0; i < nodes.length; i++) {
+    walker = insert(this, walker, nodes[i])
+  }
+  return ret;
+}
+
+Yallist.prototype.reverse = function () {
+  var head = this.head
+  var tail = this.tail
+  for (var walker = head; walker !== null; walker = walker.prev) {
+    var p = walker.prev
+    walker.prev = walker.next
+    walker.next = p
+  }
+  this.head = tail
+  this.tail = head
+  return this
+}
+
+function insert (self, node, value) {
+  var inserted = node === self.head ?
+    new Node(value, null, node, self) :
+    new Node(value, node, node.next, self)
+
+  if (inserted.next === null) {
+    self.tail = inserted
+  }
+  if (inserted.prev === null) {
+    self.head = inserted
+  }
+
+  self.length++
+
+  return inserted
+}
+
+function push (self, item) {
+  self.tail = new Node(item, self.tail, null, self)
+  if (!self.head) {
+    self.head = self.tail
+  }
+  self.length++
+}
+
+function unshift (self, item) {
+  self.head = new Node(item, null, self.head, self)
+  if (!self.tail) {
+    self.tail = self.head
+  }
+  self.length++
+}
+
+function Node (value, prev, next, list) {
+  if (!(this instanceof Node)) {
+    return new Node(value, prev, next, list)
+  }
+
+  this.list = list
+  this.value = value
+
+  if (prev) {
+    prev.next = this
+    this.prev = prev
+  } else {
+    this.prev = null
+  }
+
+  if (next) {
+    next.prev = this
+    this.next = next
+  } else {
+    this.next = null
+  }
+}
+
+try {
+  // add if support for Symbol.iterator is present
+  __webpack_require__(243)(Yallist)
+} catch (er) {}
+
+
+},
 251(module, __unused_rspack_exports, __webpack_require__) {
 // Determine if version is greater than all the versions possible in the range.
 const outside = __webpack_require__(250)
@@ -45421,7 +46090,7 @@ if (process.platform === 'linux') {
 
 
 },
-448(module) {
+450(module) {
 "use strict";
 
 module.exports = path => {
@@ -46157,16 +46826,16 @@ module.exports = function (source) {
 
 
 },
-476(module, __unused_rspack_exports, __webpack_require__) {
+478(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
-const ansiRegex = __webpack_require__(477);
+const ansiRegex = __webpack_require__(479);
 
 module.exports = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
 
 
 },
-361(module) {
+362(module) {
 "use strict";
 
 
@@ -46741,7 +47410,7 @@ function through (write, end, opts) {
 
 
 },
-389(module, __unused_rspack_exports, __webpack_require__) {
+391(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 /*!
  * to-regex-range <https://github.com/micromatch/to-regex-range>
@@ -46752,7 +47421,7 @@ function through (write, end, opts) {
 
 
 
-const isNumber = __webpack_require__(390);
+const isNumber = __webpack_require__(392);
 
 const toRegexRange = (min, max, options) => {
   if (isNumber(min) === false) {
@@ -47124,7 +47793,7 @@ module.exports = function(argument) {
 
 
 },
-481(module) {
+483(module) {
 module.exports = [
     [ 0x0300, 0x036F ], [ 0x0483, 0x0486 ], [ 0x0488, 0x0489 ],
     [ 0x0591, 0x05BD ], [ 0x05BF, 0x05BF ], [ 0x05C1, 0x05C2 ],
@@ -47178,12 +47847,12 @@ module.exports = [
 
 
 },
-478(module, __unused_rspack_exports, __webpack_require__) {
+480(module, __unused_rspack_exports, __webpack_require__) {
 "use strict";
 
 
-var defaults = __webpack_require__(479)
-var combining = __webpack_require__(481)
+var defaults = __webpack_require__(481)
+var combining = __webpack_require__(483)
 
 var DEFAULTS = {
   nul: 0,
@@ -47986,451 +48655,7 @@ module.exports.sync = (filePath, data, options) => {
 
 
 },
-243(module) {
-"use strict";
-
-module.exports = function (Yallist) {
-  Yallist.prototype[Symbol.iterator] = function* () {
-    for (let walker = this.head; walker; walker = walker.next) {
-      yield walker.value
-    }
-  }
-}
-
-
-},
-242(module, __unused_rspack_exports, __webpack_require__) {
-"use strict";
-
-module.exports = Yallist
-
-Yallist.Node = Node
-Yallist.create = Yallist
-
-function Yallist (list) {
-  var self = this
-  if (!(self instanceof Yallist)) {
-    self = new Yallist()
-  }
-
-  self.tail = null
-  self.head = null
-  self.length = 0
-
-  if (list && typeof list.forEach === 'function') {
-    list.forEach(function (item) {
-      self.push(item)
-    })
-  } else if (arguments.length > 0) {
-    for (var i = 0, l = arguments.length; i < l; i++) {
-      self.push(arguments[i])
-    }
-  }
-
-  return self
-}
-
-Yallist.prototype.removeNode = function (node) {
-  if (node.list !== this) {
-    throw new Error('removing node which does not belong to this list')
-  }
-
-  var next = node.next
-  var prev = node.prev
-
-  if (next) {
-    next.prev = prev
-  }
-
-  if (prev) {
-    prev.next = next
-  }
-
-  if (node === this.head) {
-    this.head = next
-  }
-  if (node === this.tail) {
-    this.tail = prev
-  }
-
-  node.list.length--
-  node.next = null
-  node.prev = null
-  node.list = null
-
-  return next
-}
-
-Yallist.prototype.unshiftNode = function (node) {
-  if (node === this.head) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var head = this.head
-  node.list = this
-  node.next = head
-  if (head) {
-    head.prev = node
-  }
-
-  this.head = node
-  if (!this.tail) {
-    this.tail = node
-  }
-  this.length++
-}
-
-Yallist.prototype.pushNode = function (node) {
-  if (node === this.tail) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var tail = this.tail
-  node.list = this
-  node.prev = tail
-  if (tail) {
-    tail.next = node
-  }
-
-  this.tail = node
-  if (!this.head) {
-    this.head = node
-  }
-  this.length++
-}
-
-Yallist.prototype.push = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    push(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.unshift = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    unshift(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.pop = function () {
-  if (!this.tail) {
-    return undefined
-  }
-
-  var res = this.tail.value
-  this.tail = this.tail.prev
-  if (this.tail) {
-    this.tail.next = null
-  } else {
-    this.head = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.shift = function () {
-  if (!this.head) {
-    return undefined
-  }
-
-  var res = this.head.value
-  this.head = this.head.next
-  if (this.head) {
-    this.head.prev = null
-  } else {
-    this.tail = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.forEach = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.head, i = 0; walker !== null; i++) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.next
-  }
-}
-
-Yallist.prototype.forEachReverse = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.prev
-  }
-}
-
-Yallist.prototype.get = function (n) {
-  for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.next
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.getReverse = function (n) {
-  for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.prev
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.map = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.head; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.next
-  }
-  return res
-}
-
-Yallist.prototype.mapReverse = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.tail; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.prev
-  }
-  return res
-}
-
-Yallist.prototype.reduce = function (fn, initial) {
-  var acc
-  var walker = this.head
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.head) {
-    walker = this.head.next
-    acc = this.head.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = 0; walker !== null; i++) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.next
-  }
-
-  return acc
-}
-
-Yallist.prototype.reduceReverse = function (fn, initial) {
-  var acc
-  var walker = this.tail
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.tail) {
-    walker = this.tail.prev
-    acc = this.tail.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = this.length - 1; walker !== null; i--) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.prev
-  }
-
-  return acc
-}
-
-Yallist.prototype.toArray = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.head; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.next
-  }
-  return arr
-}
-
-Yallist.prototype.toArrayReverse = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.tail; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.prev
-  }
-  return arr
-}
-
-Yallist.prototype.slice = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
-    walker = walker.next
-  }
-  for (; walker !== null && i < to; i++, walker = walker.next) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.sliceReverse = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
-    walker = walker.prev
-  }
-  for (; walker !== null && i > from; i--, walker = walker.prev) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.splice = function (start, deleteCount, ...nodes) {
-  if (start > this.length) {
-    start = this.length - 1
-  }
-  if (start < 0) {
-    start = this.length + start;
-  }
-
-  for (var i = 0, walker = this.head; walker !== null && i < start; i++) {
-    walker = walker.next
-  }
-
-  var ret = []
-  for (var i = 0; walker && i < deleteCount; i++) {
-    ret.push(walker.value)
-    walker = this.removeNode(walker)
-  }
-  if (walker === null) {
-    walker = this.tail
-  }
-
-  if (walker !== this.head && walker !== this.tail) {
-    walker = walker.prev
-  }
-
-  for (var i = 0; i < nodes.length; i++) {
-    walker = insert(this, walker, nodes[i])
-  }
-  return ret;
-}
-
-Yallist.prototype.reverse = function () {
-  var head = this.head
-  var tail = this.tail
-  for (var walker = head; walker !== null; walker = walker.prev) {
-    var p = walker.prev
-    walker.prev = walker.next
-    walker.next = p
-  }
-  this.head = tail
-  this.tail = head
-  return this
-}
-
-function insert (self, node, value) {
-  var inserted = node === self.head ?
-    new Node(value, null, node, self) :
-    new Node(value, node, node.next, self)
-
-  if (inserted.next === null) {
-    self.tail = inserted
-  }
-  if (inserted.prev === null) {
-    self.head = inserted
-  }
-
-  self.length++
-
-  return inserted
-}
-
-function push (self, item) {
-  self.tail = new Node(item, self.tail, null, self)
-  if (!self.head) {
-    self.head = self.tail
-  }
-  self.length++
-}
-
-function unshift (self, item) {
-  self.head = new Node(item, null, self.head, self)
-  if (!self.tail) {
-    self.tail = self.head
-  }
-  self.length++
-}
-
-function Node (value, prev, next, list) {
-  if (!(this instanceof Node)) {
-    return new Node(value, prev, next, list)
-  }
-
-  this.list = list
-  this.value = value
-
-  if (prev) {
-    prev.next = this
-    this.prev = prev
-  } else {
-    this.prev = null
-  }
-
-  if (next) {
-    next.prev = this
-    this.next = next
-  } else {
-    this.next = null
-  }
-}
-
-try {
-  // add if support for Symbol.iterator is present
-  __webpack_require__(243)(Yallist)
-} catch (er) {}
-
-
-},
-356(__unused_rspack_module, exports, __webpack_require__) {
+357(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 /*
@@ -48440,13 +48665,13 @@ try {
     value: true
 }));
 var tslib_1 = __webpack_require__(18);
-tslib_1.__exportStar(__webpack_require__(357), exports);
 tslib_1.__exportStar(__webpack_require__(358), exports);
 tslib_1.__exportStar(__webpack_require__(359), exports);
+tslib_1.__exportStar(__webpack_require__(360), exports);
 
 
 },
-357(__unused_rspack_module, exports, __webpack_require__) {
+358(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 /*
@@ -48578,7 +48803,7 @@ exports.realShortPathSync = realShortPathSync;
 
 
 },
-358(__unused_rspack_module, exports, __webpack_require__) {
+359(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 /*
@@ -48588,7 +48813,7 @@ exports.realShortPathSync = realShortPathSync;
     value: true
 }));
 exports.PROCESS_POSIX_WORKING_DIR = exports.PROCESS_WORKING_DIR = void 0;
-var path_1 = __webpack_require__(357);
+var path_1 = __webpack_require__(358);
 /**
  * The full pathname of the working directory of the process
  * @constant
@@ -48602,7 +48827,7 @@ var path_1 = __webpack_require__(357);
 
 
 },
-359(__unused_rspack_module, exports, __webpack_require__) {
+360(__unused_rspack_module, exports, __webpack_require__) {
 "use strict";
 
 /*
@@ -48637,8 +48862,8 @@ var tslib_1 = __webpack_require__(18);
  * specific language governing permissions and limitations
  * under the License.
  */ var path_1 = __webpack_require__(7);
-var load_json_file_1 = tslib_1.__importDefault(__webpack_require__(360));
-var path_2 = __webpack_require__(357);
+var load_json_file_1 = tslib_1.__importDefault(__webpack_require__(361));
+var path_2 = __webpack_require__(358);
 var readOpenSearchDashboardsPkgJson = function readOpenSearchDashboardsPkgJson(dir) {
     try {
         var path = (0, path_1.resolve)(dir, 'package.json');
@@ -49209,7 +49434,7 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var path__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_2);
 /* import */ var _osd_dev_utils_tooling_log__rspack_import_3 = __webpack_require__(8);
 /* import */ var _commands__rspack_import_4 = __webpack_require__(147);
-/* import */ var _run__rspack_import_5 = __webpack_require__(498);
+/* import */ var _run__rspack_import_5 = __webpack_require__(500);
 /* import */ var _utils_log__rspack_import_6 = __webpack_require__(168);
 
 
@@ -49346,20 +49571,21 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   BootstrapCommand: () => (BootstrapCommand)
 });
-/* import */ var _swc_helpers_async_to_generator__rspack_import_10 = __webpack_require__(2);
-/* import */ var _swc_helpers_to_consumable_array__rspack_import_12 = __webpack_require__(12);
-/* import */ var _swc_helpers_ts_generator__rspack_import_11 = __webpack_require__(4);
+/* import */ var _swc_helpers_async_to_generator__rspack_import_11 = __webpack_require__(2);
+/* import */ var _swc_helpers_to_consumable_array__rspack_import_13 = __webpack_require__(12);
+/* import */ var _swc_helpers_ts_generator__rspack_import_12 = __webpack_require__(4);
 /* import */ var fs__rspack_import_0 = __webpack_require__(149);
 /* import */ var fs__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_0);
 /* import */ var _utils_link_project_executables__rspack_import_1 = __webpack_require__(150);
 /* import */ var _utils_log__rspack_import_2 = __webpack_require__(168);
 /* import */ var _utils_parallelize__rspack_import_3 = __webpack_require__(170);
 /* import */ var _utils_projects__rspack_import_4 = __webpack_require__(171);
-/* import */ var _utils_project_checksums__rspack_import_5 = __webpack_require__(351);
-/* import */ var _utils_bootstrap_cache_file__rspack_import_6 = __webpack_require__(362);
-/* import */ var _utils_yarn_lock__rspack_import_7 = __webpack_require__(354);
-/* import */ var _utils_validate_dependencies__rspack_import_8 = __webpack_require__(363);
-/* import */ var _utils_bootstrap_fingerprint__rspack_import_9 = __webpack_require__(366);
+/* import */ var _utils_project_checksums__rspack_import_5 = __webpack_require__(352);
+/* import */ var _utils_bootstrap_cache_file__rspack_import_6 = __webpack_require__(364);
+/* import */ var _utils_yarn_lock__rspack_import_7 = __webpack_require__(355);
+/* import */ var _utils_package_manager__rspack_import_8 = __webpack_require__(348);
+/* import */ var _utils_validate_dependencies__rspack_import_9 = __webpack_require__(365);
+/* import */ var _utils_bootstrap_fingerprint__rspack_import_10 = __webpack_require__(368);
 
 
 
@@ -49399,13 +49625,14 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 
+
 var BootstrapCommand = {
     description: 'Install dependencies and crosslink projects',
     name: 'bootstrap',
     run: function run(_0, _1, _2) {
-        return (0,_swc_helpers_async_to_generator__rspack_import_10._)(function(projects, projectGraph, param) {
+        return (0,_swc_helpers_async_to_generator__rspack_import_11._)(function(projects, projectGraph, param) {
             var options, osd, _options_singleversion_toLowerCase, _options_singleversion, fastPathEligible, previous, current, integrityOk, yarnLock, checksums, staleProject, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, project, cacheFile, _options_singleversion_toLowerCase1, _options_singleversion1, singleVersion, batchedProjectsByWorkspace, batchedProjects, extraArgs, _iteratorNormalCompletion1, _didIteratorError1, _iteratorError1, _iterator1, _step1, batch, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, project1, err, err, yarnLock1, checksums1, caches, cachedProjectCount, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, project2, file, valid;
-            return (0,_swc_helpers_ts_generator__rspack_import_11._)(this, function(_state) {
+            return (0,_swc_helpers_ts_generator__rspack_import_12._)(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         options = param.options, osd = param.osd;
@@ -49421,17 +49648,17 @@ var BootstrapCommand = {
                             3,
                             7
                         ];
-                        previous = (0,_utils_bootstrap_fingerprint__rspack_import_9.readFingerprint)(osd);
-                        current = (0,_utils_bootstrap_fingerprint__rspack_import_9.computeFingerprint)(osd, projects);
-                        integrityOk = fs__rspack_import_0_default().existsSync(osd.getAbsolute('node_modules/.yarn-integrity'));
-                        _utils_log__rspack_import_2.log.verbose("[fingerprint] previous=".concat(previous ? 'present' : 'absent', " match=").concat(previous ? (0,_utils_bootstrap_fingerprint__rspack_import_9.fingerprintsEqual)(previous, current) : false, " integrity=").concat(integrityOk));
-                        if (!(previous && (0,_utils_bootstrap_fingerprint__rspack_import_9.fingerprintsEqual)(previous, current) && integrityOk)) return [
+                        previous = (0,_utils_bootstrap_fingerprint__rspack_import_10.readFingerprint)(osd);
+                        current = (0,_utils_bootstrap_fingerprint__rspack_import_10.computeFingerprint)(osd, projects);
+                        integrityOk = fs__rspack_import_0_default().existsSync(osd.getAbsolute('node_modules', (0,_utils_package_manager__rspack_import_8.detectPackageManager)(osd.getAbsolute()).integrityMarker));
+                        _utils_log__rspack_import_2.log.verbose("[fingerprint] previous=".concat(previous ? 'present' : 'absent', " match=").concat(previous ? (0,_utils_bootstrap_fingerprint__rspack_import_10.fingerprintsEqual)(previous, current) : false, " integrity=").concat(integrityOk));
+                        if (!(previous && (0,_utils_bootstrap_fingerprint__rspack_import_10.fingerprintsEqual)(previous, current) && integrityOk)) return [
                             3,
                             7
                         ];
                         return [
                             4,
-                            (0,_utils_yarn_lock__rspack_import_7.readYarnLock)(osd)
+                            (0,_utils_yarn_lock__rspack_import_7.readLockfile)(osd)
                         ];
                     case 1:
                         yarnLock = _state.sent();
@@ -49492,13 +49719,13 @@ var BootstrapCommand = {
                         // conflicts — doing that silently behind a "fast path success"
                         // log would be confusing, so defer those to a full bootstrap.
                         singleVersion = (_options_singleversion1 = options['single-version']) === null || _options_singleversion1 === void 0 ? void 0 : (_options_singleversion_toLowerCase1 = _options_singleversion1.toLowerCase) === null || _options_singleversion_toLowerCase1 === void 0 ? void 0 : _options_singleversion_toLowerCase1.call(_options_singleversion1);
-                        if (!!(0,_utils_validate_dependencies__rspack_import_8.isMutatingSingleVersionMode)(singleVersion)) return [
+                        if (!!(0,_utils_validate_dependencies__rspack_import_9.isMutatingSingleVersionMode)(singleVersion)) return [
                             3,
                             5
                         ];
                         return [
                             4,
-                            (0,_utils_validate_dependencies__rspack_import_8.validateDependencies)(osd, yarnLock, singleVersion)
+                            (0,_utils_validate_dependencies__rspack_import_9.validateDependencies)(osd, yarnLock, singleVersion)
                         ];
                     case 4:
                         _state.sent();
@@ -49516,9 +49743,9 @@ var BootstrapCommand = {
                             batchByWorkspace: true
                         });
                         batchedProjects = (0,_utils_projects__rspack_import_4.topologicallyBatchProjects)(projects, projectGraph);
-                        extraArgs = (0,_swc_helpers_to_consumable_array__rspack_import_12._)(options['frozen-lockfile'] === true ? [
+                        extraArgs = (0,_swc_helpers_to_consumable_array__rspack_import_13._)(options['frozen-lockfile'] === true ? [
                             '--frozen-lockfile'
-                        ] : []).concat((0,_swc_helpers_to_consumable_array__rspack_import_12._)(options['prefer-offline'] === true ? [
+                        ] : []).concat((0,_swc_helpers_to_consumable_array__rspack_import_13._)(options['prefer-offline'] === true ? [
                             '--prefer-offline'
                         ] : []));
                         _iteratorNormalCompletion1 = true, _didIteratorError1 = false, _iteratorError1 = undefined;
@@ -49642,13 +49869,13 @@ var BootstrapCommand = {
                     case 21:
                         return [
                             4,
-                            (0,_utils_yarn_lock__rspack_import_7.readYarnLock)(osd)
+                            (0,_utils_yarn_lock__rspack_import_7.readLockfile)(osd)
                         ];
                     case 22:
                         yarnLock1 = _state.sent();
                         return [
                             4,
-                            (0,_utils_validate_dependencies__rspack_import_8.validateDependencies)(osd, yarnLock1, (_options_singleversion = options['single-version']) === null || _options_singleversion === void 0 ? void 0 : (_options_singleversion_toLowerCase = _options_singleversion.toLowerCase) === null || _options_singleversion_toLowerCase === void 0 ? void 0 : _options_singleversion_toLowerCase.call(_options_singleversion))
+                            (0,_utils_validate_dependencies__rspack_import_9.validateDependencies)(osd, yarnLock1, (_options_singleversion = options['single-version']) === null || _options_singleversion === void 0 ? void 0 : (_options_singleversion_toLowerCase = _options_singleversion.toLowerCase) === null || _options_singleversion_toLowerCase === void 0 ? void 0 : _options_singleversion_toLowerCase.call(_options_singleversion))
                         ];
                     case 23:
                         _state.sent();
@@ -49703,9 +49930,9 @@ var BootstrapCommand = {
                         return [
                             4,
                             (0,_utils_parallelize__rspack_import_3.parallelizeBatches)(batchedProjects, function(project) {
-                                return (0,_swc_helpers_async_to_generator__rspack_import_10._)(function() {
+                                return (0,_swc_helpers_async_to_generator__rspack_import_11._)(function() {
                                     var cache;
-                                    return (0,_swc_helpers_ts_generator__rspack_import_11._)(this, function(_state) {
+                                    return (0,_swc_helpers_ts_generator__rspack_import_12._)(this, function(_state) {
                                         switch(_state.label){
                                             case 0:
                                                 cache = caches.get(project);
@@ -49763,7 +49990,7 @@ var BootstrapCommand = {
                         // so partial/scoped runs don't clobber the fingerprint captured by a full
                         // successful bootstrap.
                         if (fastPathEligible) {
-                            (0,_utils_bootstrap_fingerprint__rspack_import_9.writeFingerprint)(osd, (0,_utils_bootstrap_fingerprint__rspack_import_9.computeFingerprint)(osd, projects));
+                            (0,_utils_bootstrap_fingerprint__rspack_import_10.writeFingerprint)(osd, (0,_utils_bootstrap_fingerprint__rspack_import_10.computeFingerprint)(osd, projects));
                         }
                         return [
                             2
@@ -49776,7 +50003,7 @@ var BootstrapCommand = {
 
 
 },
-367(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+369(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -49784,15 +50011,15 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var _swc_helpers_async_to_generator__rspack_import_6 = __webpack_require__(2);
 /* import */ var _swc_helpers_ts_generator__rspack_import_7 = __webpack_require__(4);
-/* import */ var del__rspack_import_0 = __webpack_require__(368);
+/* import */ var del__rspack_import_0 = __webpack_require__(370);
 /* import */ var del__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(del__rspack_import_0);
-/* import */ var ora__rspack_import_1 = __webpack_require__(457);
+/* import */ var ora__rspack_import_1 = __webpack_require__(459);
 /* import */ var ora__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(ora__rspack_import_1);
 /* import */ var path__rspack_import_2 = __webpack_require__(7);
 /* import */ var path__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_2);
 /* import */ var _utils_fs__rspack_import_3 = __webpack_require__(155);
 /* import */ var _utils_log__rspack_import_4 = __webpack_require__(168);
-/* import */ var _utils_bootstrap_fingerprint__rspack_import_5 = __webpack_require__(366);
+/* import */ var _utils_bootstrap_fingerprint__rspack_import_5 = __webpack_require__(368);
 
 
 /*
@@ -50039,9 +50266,9 @@ __webpack_require__.d(__webpack_exports__, {
   commands: () => (commands)
 });
 /* import */ var _bootstrap__rspack_import_0 = __webpack_require__(148);
-/* import */ var _clean__rspack_import_1 = __webpack_require__(367);
-/* import */ var _run__rspack_import_2 = __webpack_require__(484);
-/* import */ var _watch__rspack_import_3 = __webpack_require__(485);
+/* import */ var _clean__rspack_import_1 = __webpack_require__(369);
+/* import */ var _run__rspack_import_2 = __webpack_require__(486);
+/* import */ var _watch__rspack_import_3 = __webpack_require__(487);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50081,7 +50308,7 @@ var commands = {
 
 
 },
-484(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+486(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -50185,7 +50412,7 @@ var RunCommand = {
 
 
 },
-485(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+487(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -50197,7 +50424,7 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _utils_log__rspack_import_1 = __webpack_require__(168);
 /* import */ var _utils_parallelize__rspack_import_2 = __webpack_require__(170);
 /* import */ var _utils_projects__rspack_import_3 = __webpack_require__(171);
-/* import */ var _utils_watch__rspack_import_4 = __webpack_require__(486);
+/* import */ var _utils_watch__rspack_import_4 = __webpack_require__(488);
 
 
 /*
@@ -50400,7 +50627,7 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 },
-505(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+507(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -50409,9 +50636,9 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _swc_helpers_async_to_generator__rspack_import_8 = __webpack_require__(2);
 /* import */ var _swc_helpers_to_consumable_array__rspack_import_10 = __webpack_require__(12);
 /* import */ var _swc_helpers_ts_generator__rspack_import_9 = __webpack_require__(4);
-/* import */ var cpy__rspack_import_0 = __webpack_require__(506);
+/* import */ var cpy__rspack_import_0 = __webpack_require__(508);
 /* import */ var cpy__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(cpy__rspack_import_0);
-/* import */ var del__rspack_import_1 = __webpack_require__(368);
+/* import */ var del__rspack_import_1 = __webpack_require__(370);
 /* import */ var del__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(del__rspack_import_1);
 /* import */ var path__rspack_import_2 = __webpack_require__(7);
 /* import */ var path__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_2);
@@ -50787,13 +51014,13 @@ function buildProject(project) {
 
 
 },
-504(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+506(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   buildProductionProjects: () => (/* reexport safe */ _build_production_projects__rspack_import_0.buildProductionProjects)
 });
-/* import */ var _build_production_projects__rspack_import_0 = __webpack_require__(505);
+/* import */ var _build_production_projects__rspack_import_0 = __webpack_require__(507);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50824,7 +51051,7 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 },
-498(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+500(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -50833,14 +51060,14 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _swc_helpers_async_to_generator__rspack_import_5 = __webpack_require__(2);
 /* import */ var _swc_helpers_instanceof__rspack_import_9 = __webpack_require__(123);
 /* import */ var _swc_helpers_object_spread__rspack_import_8 = __webpack_require__(193);
-/* import */ var _swc_helpers_object_spread_props__rspack_import_7 = __webpack_require__(499);
+/* import */ var _swc_helpers_object_spread_props__rspack_import_7 = __webpack_require__(501);
 /* import */ var _swc_helpers_sliced_to_array__rspack_import_10 = __webpack_require__(151);
 /* import */ var _swc_helpers_ts_generator__rspack_import_6 = __webpack_require__(4);
 /* import */ var _utils_errors__rspack_import_0 = __webpack_require__(188);
 /* import */ var _utils_log__rspack_import_1 = __webpack_require__(168);
 /* import */ var _utils_projects__rspack_import_2 = __webpack_require__(171);
-/* import */ var _utils_projects_tree__rspack_import_3 = __webpack_require__(365);
-/* import */ var _utils_opensearch_dashboards__rspack_import_4 = __webpack_require__(500);
+/* import */ var _utils_projects_tree__rspack_import_3 = __webpack_require__(367);
+/* import */ var _utils_opensearch_dashboards__rspack_import_4 = __webpack_require__(502);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50967,7 +51194,7 @@ function toArray(value) {
 
 
 },
-362(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+364(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -51087,7 +51314,7 @@ var BootstrapCacheFile = /*#__PURE__*/ function() {
 
 
 },
-366(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+368(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -51097,13 +51324,14 @@ __webpack_require__.d(__webpack_exports__, {
   readFingerprint: () => (readFingerprint),
   writeFingerprint: () => (writeFingerprint)
 });
-/* import */ var _swc_helpers_type_of__rspack_import_3 = __webpack_require__(144);
-/* import */ var crypto__rspack_import_0 = __webpack_require__(353);
+/* import */ var _swc_helpers_type_of__rspack_import_4 = __webpack_require__(144);
+/* import */ var crypto__rspack_import_0 = __webpack_require__(354);
 /* import */ var crypto__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(crypto__rspack_import_0);
 /* import */ var fs__rspack_import_1 = __webpack_require__(149);
 /* import */ var fs__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_1);
 /* import */ var path__rspack_import_2 = __webpack_require__(7);
 /* import */ var path__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_2);
+/* import */ var _package_manager__rspack_import_3 = __webpack_require__(348);
 
 /*
  * Copyright OpenSearch Contributors
@@ -51111,7 +51339,8 @@ __webpack_require__.d(__webpack_exports__, {
  */ 
 
 
-var FINGERPRINT_VERSION = 1;
+
+var FINGERPRINT_VERSION = 2;
 var FINGERPRINT_FILENAME = '.osd-bootstrap-fingerprint';
 var STRING_FIELDS = [
     'rootLockfile',
@@ -51120,17 +51349,8 @@ var STRING_FIELDS = [
     'externalPluginLockfiles',
     'osdPmDist',
     'nodeVersion',
-    'yarnVersion'
+    'packageManagerVersion'
 ];
-// yarn 1.x exposes its version via npm_config_user_agent when it invokes a
-// script, e.g. "yarn/1.22.19 npm/? node/v22.22.0 darwin arm64". Falls back to
-// empty string when bootstrap is invoked outside a yarn script (e.g. directly
-// via scripts/osd).
-var getYarnVersion = function getYarnVersion() {
-    var ua = process.env.npm_config_user_agent || '';
-    var m = ua.match(/\byarn\/([^\s,]+)/);
-    return m ? m[1] : '';
-};
 var sha1 = function sha1(buf) {
     return crypto__rspack_import_0_default().createHash('sha1').update(buf).digest('hex');
 };
@@ -51146,6 +51366,18 @@ var readOrEmpty = function readOrEmpty(p) {
         if ((e === null || e === void 0 ? void 0 : e.code) === 'ENOENT') return Buffer.alloc(0);
         throw e;
     }
+};
+// A directory is owned by at most one lockfile type, so hashing both keeps the
+// fingerprint valid whichever package manager is in use.
+var lockfilesDigest = function lockfilesDigest(dir) {
+    return sha1(Buffer.concat([
+        readOrEmpty(path__rspack_import_2_default().join(dir, _package_manager__rspack_import_3.YARN_LOCKFILE)),
+        Buffer.from('\0'),
+        readOrEmpty(path__rspack_import_2_default().join(dir, _package_manager__rspack_import_3.NPM_LOCKFILE))
+    ]));
+};
+var hasOwnLockfile = function hasOwnLockfile(dir) {
+    return fs__rspack_import_1_default().existsSync(path__rspack_import_2_default().join(dir, _package_manager__rspack_import_3.YARN_LOCKFILE)) || fs__rspack_import_1_default().existsSync(path__rspack_import_2_default().join(dir, _package_manager__rspack_import_3.NPM_LOCKFILE));
 };
 var fingerprintPath = function fingerprintPath(osd) {
     return path__rspack_import_2_default().join(osd.getAbsolute(), FINGERPRINT_FILENAME);
@@ -51164,16 +51396,15 @@ function computeFingerprint(osd, projects) {
             var rel = normalizeRelativePath(osd.getRelative(project.path));
             manifestParts.push("".concat(rel, ":").concat(sha1(readOrEmpty(project.packageJsonLocation))));
             // External plugins (./plugins/*, ../opensearch-dashboards-extra/*) run
-            // their own yarn install against their own yarn.lock, so any change to
-            // that lockfile must invalidate the fingerprint. Workspace projects have
-            // their yarn.lock symlinked to the root lockfile and are already covered
-            // by rootLockfile, so they're skipped here to avoid double-counting.
+            // their own install against their own lockfile, so any change to that
+            // lockfile must invalidate the fingerprint. Workspace projects share the
+            // root lockfile and are already covered by rootLockfile, so they're
+            // skipped here to avoid double-counting.
             // Newly cloned plugins are caught via projectManifests because their
             // package.json is a new entry in the sorted manifest list.
             if (!project.isWorkspaceProject && !project.isWorkspaceRoot) {
-                var lockBuf = readOrEmpty(path__rspack_import_2_default().join(project.path, 'yarn.lock'));
-                if (lockBuf.length > 0) {
-                    lockParts.push("".concat(rel, ":").concat(sha1(lockBuf)));
+                if (hasOwnLockfile(project.path)) {
+                    lockParts.push("".concat(rel, ":").concat(lockfilesDigest(project.path)));
                 }
             }
         }
@@ -51193,20 +51424,20 @@ function computeFingerprint(osd, projects) {
     }
     return {
         version: FINGERPRINT_VERSION,
-        rootLockfile: sha1(readOrEmpty(path__rspack_import_2_default().join(root, 'yarn.lock'))),
+        rootLockfile: lockfilesDigest(root),
         rootPackageJson: sha1(readOrEmpty(path__rspack_import_2_default().join(root, 'package.json'))),
         projectManifests: sha1(manifestParts.join('\n')),
         externalPluginLockfiles: sha1(lockParts.join('\n')),
         osdPmDist: sha1(readOrEmpty(path__rspack_import_2_default().join(root, 'packages/osd-pm/dist/index.js'))),
         nodeVersion: process.version,
-        yarnVersion: getYarnVersion()
+        packageManagerVersion: (0,_package_manager__rspack_import_3.getRunningPackageManagerVersion)()
     };
 }
 function readFingerprint(osd) {
     try {
         var raw = fs__rspack_import_1_default().readFileSync(fingerprintPath(osd), 'utf8');
         var parsed = JSON.parse(raw);
-        if (!parsed || (typeof parsed === "undefined" ? "undefined" : (0,_swc_helpers_type_of__rspack_import_3._)(parsed)) !== 'object' || parsed.version !== FINGERPRINT_VERSION || !STRING_FIELDS.every(function(k) {
+        if (!parsed || (typeof parsed === "undefined" ? "undefined" : (0,_swc_helpers_type_of__rspack_import_4._)(parsed)) !== 'object' || parsed.version !== FINGERPRINT_VERSION || !STRING_FIELDS.every(function(k) {
             return typeof parsed[k] === 'string';
         })) {
             return null;
@@ -51237,7 +51468,7 @@ function deleteFingerprint(osd) {
     }
 }
 function fingerprintsEqual(a, b) {
-    return a.version === b.version && a.rootLockfile === b.rootLockfile && a.rootPackageJson === b.rootPackageJson && a.projectManifests === b.projectManifests && a.externalPluginLockfiles === b.externalPluginLockfiles && a.osdPmDist === b.osdPmDist && a.nodeVersion === b.nodeVersion && a.yarnVersion === b.yarnVersion;
+    return a.version === b.version && a.rootLockfile === b.rootLockfile && a.rootPackageJson === b.rootPackageJson && a.projectManifests === b.projectManifests && a.externalPluginLockfiles === b.externalPluginLockfiles && a.osdPmDist === b.osdPmDist && a.nodeVersion === b.nodeVersion && a.packageManagerVersion === b.packageManagerVersion;
 }
 
 
@@ -51976,7 +52207,6 @@ __webpack_require__.d(__webpack_exports__, {
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   Log: () => (Log),
-  LogLevel: () => (/* reexport safe */ _osd_dev_utils_tooling_log__rspack_import_0.LogLevel),
   log: () => (log)
 });
 /* import */ var _swc_helpers_call_super__rspack_import_3 = __webpack_require__(140);
@@ -52054,7 +52284,111 @@ var log = new Log();
 
 
 },
-500(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+363(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+__webpack_require__.d(__webpack_exports__, {
+  npmLockToYarnLock: () => (npmLockToYarnLock)
+});
+/* import */ var _swc_helpers_object_spread__rspack_import_1 = __webpack_require__(193);
+/* import */ var _swc_helpers_sliced_to_array__rspack_import_0 = __webpack_require__(151);
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */ 
+
+var NODE_MODULES = 'node_modules/';
+/** Resolve `name` from the package at `fromPath` the way Node walks node_modules. */ function resolveFrom(packages, fromPath, name) {
+    var base = fromPath;
+    while(true){
+        var candidate = base ? "".concat(base, "/").concat(NODE_MODULES).concat(name) : "".concat(NODE_MODULES).concat(name);
+        if (packages[candidate]) return {
+            path: candidate,
+            entry: packages[candidate]
+        };
+        if (!base) return undefined;
+        // Drop the innermost `node_modules/<pkg>`; a top-level package or a
+        // workspace folder falls back to the root node_modules.
+        var idx = base.lastIndexOf("/".concat(NODE_MODULES));
+        base = idx >= 0 ? base.slice(0, idx) : '';
+    }
+}
+/**
+ * Convert an npm v2/v3 lockfile into the `name@range` keyed shape osd-pm
+ * already uses for yarn.lock. Each dependency edge in the lock becomes a key
+ * pointing at the version that edge resolves to. When the same `name@range`
+ * resolves differently in two subtrees the first one wins, which only affects
+ * the bootstrap cache checksum and the lodash/single-version diagnostics.
+ */ function npmLockToYarnLock(contents) {
+    var _lock_lockfileVersion;
+    var lock = JSON.parse(contents);
+    if (!lock.packages || ((_lock_lockfileVersion = lock.lockfileVersion) !== null && _lock_lockfileVersion !== void 0 ? _lock_lockfileVersion : 0) < 2) {
+        throw new Error('package-lock.json must be lockfileVersion 2 or newer');
+    }
+    var packages = lock.packages;
+    var result = {};
+    var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
+    try {
+        for(var _iterator = Object.entries(packages)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
+            var _step_value = (0,_swc_helpers_sliced_to_array__rspack_import_0._)(_step.value, 2), fromPath = _step_value[0], entry = _step_value[1];
+            if (entry.link) continue;
+            var edges = (0,_swc_helpers_object_spread__rspack_import_1._)({}, entry.devDependencies, entry.optionalDependencies, entry.dependencies);
+            var _iteratorNormalCompletion1 = true, _didIteratorError1 = false, _iteratorError1 = undefined;
+            try {
+                for(var _iterator1 = Object.entries(edges)[Symbol.iterator](), _step1; !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done); _iteratorNormalCompletion1 = true){
+                    var _step_value1 = (0,_swc_helpers_sliced_to_array__rspack_import_0._)(_step1.value, 2), name = _step_value1[0], range = _step_value1[1];
+                    var key = "".concat(name, "@").concat(range);
+                    if (result[key]) continue;
+                    var target = resolveFrom(packages, fromPath, name);
+                    if (!target) continue; // optional dependency not installed for this platform
+                    var dep = target.entry;
+                    // Links are workspace projects, which osd-pm resolves itself.
+                    if (dep.link || !dep.version) continue;
+                    result[key] = (0,_swc_helpers_object_spread__rspack_import_1._)({
+                        version: dep.version,
+                        resolved: dep.resolved || '',
+                        integrity: dep.integrity || ''
+                    }, dep.dependencies ? {
+                        dependencies: dep.dependencies
+                    } : {}, dep.optionalDependencies ? {
+                        optionalDependencies: dep.optionalDependencies
+                    } : {});
+                }
+            } catch (err) {
+                _didIteratorError1 = true;
+                _iteratorError1 = err;
+            } finally{
+                try {
+                    if (!_iteratorNormalCompletion1 && _iterator1.return != null) {
+                        _iterator1.return();
+                    }
+                } finally{
+                    if (_didIteratorError1) {
+                        throw _iteratorError1;
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally{
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return != null) {
+                _iterator.return();
+            }
+        } finally{
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+    return result;
+}
+
+
+},
+502(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -52065,16 +52399,16 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _swc_helpers_create_class__rspack_import_8 = __webpack_require__(11);
 /* import */ var _swc_helpers_define_property__rspack_import_7 = __webpack_require__(169);
 /* import */ var _swc_helpers_object_spread__rspack_import_11 = __webpack_require__(193);
-/* import */ var _swc_helpers_object_spread_props__rspack_import_10 = __webpack_require__(499);
+/* import */ var _swc_helpers_object_spread_props__rspack_import_10 = __webpack_require__(501);
 /* import */ var _swc_helpers_to_consumable_array__rspack_import_9 = __webpack_require__(12);
 /* import */ var _swc_helpers_ts_generator__rspack_import_13 = __webpack_require__(4);
 /* import */ var path__rspack_import_0 = __webpack_require__(7);
 /* import */ var path__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_0);
-/* import */ var multimatch__rspack_import_1 = __webpack_require__(501);
+/* import */ var multimatch__rspack_import_1 = __webpack_require__(503);
 /* import */ var multimatch__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(multimatch__rspack_import_1);
-/* import */ var is_path_inside__rspack_import_2 = __webpack_require__(451);
+/* import */ var is_path_inside__rspack_import_2 = __webpack_require__(453);
 /* import */ var is_path_inside__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(is_path_inside__rspack_import_2);
-/* import */ var _yarn_lock__rspack_import_3 = __webpack_require__(354);
+/* import */ var _yarn_lock__rspack_import_3 = __webpack_require__(355);
 /* import */ var _projects__rspack_import_4 = __webpack_require__(171);
 /* import */ var _config__rspack_import_5 = __webpack_require__(350);
 
@@ -52348,6 +52682,198 @@ var isLinkDependency = function isLinkDependency(depVersion) {
 
 
 },
+348(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+__webpack_require__.d(__webpack_exports__, {
+  NPM_LOCKFILE: () => (NPM_LOCKFILE),
+  YARN_LOCKFILE: () => (YARN_LOCKFILE),
+  detectPackageManager: () => (detectPackageManager),
+  findLockfile: () => (findLockfile),
+  getRunningPackageManagerVersion: () => (getRunningPackageManagerVersion),
+  packageManagers: () => (packageManagers)
+});
+/* import */ var _swc_helpers_to_consumable_array__rspack_import_3 = __webpack_require__(12);
+/* import */ var fs__rspack_import_0 = __webpack_require__(149);
+/* import */ var fs__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_0);
+/* import */ var path__rspack_import_1 = __webpack_require__(7);
+/* import */ var path__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_1);
+/* import */ var _log__rspack_import_2 = __webpack_require__(168);
+
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */ 
+
+
+var YARN_LOCKFILE = 'yarn.lock';
+var NPM_LOCKFILE = 'package-lock.json';
+// Used when no lockfile is found anywhere up the tree. Stays `yarn` until the
+// repository itself switches to npm, so this change is behavior-neutral.
+var DEFAULT_PACKAGE_MANAGER = 'yarn';
+var execpath = function execpath() {
+    return process.env.npm_execpath || '';
+};
+var yarn = {
+    name: 'yarn',
+    lockfileName: YARN_LOCKFILE,
+    integrityMarker: '.yarn-integrity',
+    command: function command() {
+        // Reuse the yarn binary that invoked us so the pinned version is used.
+        var current = execpath();
+        return {
+            file: /yarn/i.test((0,path__rspack_import_1.basename)(current)) ? current : 'yarn',
+            prefixArgs: []
+        };
+    },
+    installArgs: function installArgs() {
+        var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref_extraArgs = _ref.extraArgs, extraArgs = _ref_extraArgs === void 0 ? [] : _ref_extraArgs;
+        return [
+            'install',
+            '--non-interactive'
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(extraArgs));
+    },
+    addArgs: function addArgs(spec, dev) {
+        return [
+            'add',
+            '--non-interactive',
+            spec
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(dev ? [
+            '--dev'
+        ] : []));
+    },
+    runArgs: function runArgs(script, args) {
+        return [
+            'run',
+            script
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(args));
+    },
+    syncLockfileArgs: function syncLockfileArgs() {
+        return undefined;
+    }
+};
+var NPM_FLAG_MAP = {
+    '--frozen-lockfile': [],
+    '--pure-lockfile': [],
+    '--non-interactive': [],
+    '--production': [
+        '--omit=dev'
+    ],
+    '--ignore-optional': [
+        '--omit=optional'
+    ],
+    '--prefer-offline': [
+        '--prefer-offline'
+    ],
+    '--no-bin-links': [
+        '--no-bin-links'
+    ]
+};
+var npm = {
+    name: 'npm',
+    lockfileName: NPM_LOCKFILE,
+    integrityMarker: '.package-lock.json',
+    command: function command() {
+        // Run npm-cli.js with the current node so we don't depend on a shim on PATH
+        // (and pick up the npm bundled with the node version OSD selected).
+        var current = execpath();
+        if (/npm-cli\.js$/.test(current)) return {
+            file: process.execPath,
+            prefixArgs: [
+                current
+            ]
+        };
+        return {
+            file: 'npm',
+            prefixArgs: []
+        };
+    },
+    installArgs: function installArgs() {
+        var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref_extraArgs = _ref.extraArgs, extraArgs = _ref_extraArgs === void 0 ? [] : _ref_extraArgs;
+        // yarn's lockfile-respecting install flags map onto `npm ci`.
+        var frozen = extraArgs.includes('--frozen-lockfile') || extraArgs.includes('--pure-lockfile');
+        var translated = extraArgs.flatMap(function(arg) {
+            if (arg in NPM_FLAG_MAP) return NPM_FLAG_MAP[arg];
+            _log__rspack_import_2.log.warning("[npm] passing through unrecognized install flag: ".concat(arg));
+            return [
+                arg
+            ];
+        });
+        return [
+            frozen ? 'ci' : 'install'
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(translated));
+    },
+    addArgs: function addArgs(spec, dev) {
+        return [
+            'install',
+            spec,
+            '--save-exact'
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(dev ? [
+            '--save-dev'
+        ] : []));
+    },
+    runArgs: function runArgs(script, args) {
+        return args.length ? [
+            'run',
+            script,
+            '--'
+        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_3._)(args)) : [
+            'run',
+            script
+        ];
+    },
+    syncLockfileArgs: function syncLockfileArgs() {
+        return [
+            'install',
+            '--package-lock-only',
+            '--ignore-scripts'
+        ];
+    }
+};
+var packageManagers = {
+    yarn: yarn,
+    npm: npm
+};
+/**
+ * Find the lockfile that owns `directory`: the nearest directory at or above it
+ * holding one. Workspace packages therefore inherit the root's lockfile, and
+ * external plugins with their own lockfile keep theirs.
+ */ function findLockfile(directory) {
+    var current = (0,path__rspack_import_1.resolve)(directory);
+    while(true){
+        var npmPath = (0,path__rspack_import_1.join)(current, NPM_LOCKFILE);
+        var yarnPath = (0,path__rspack_import_1.join)(current, YARN_LOCKFILE);
+        var hasNpm = (0,fs__rspack_import_0.existsSync)(npmPath);
+        var hasYarn = (0,fs__rspack_import_0.existsSync)(yarnPath);
+        if (hasNpm && hasYarn) {
+            throw new Error("Both ".concat(NPM_LOCKFILE, " and ").concat(YARN_LOCKFILE, " exist in ").concat(current, "; remove the one that is not in use."));
+        }
+        if (hasNpm) return {
+            packageManager: npm,
+            path: npmPath
+        };
+        if (hasYarn) return {
+            packageManager: yarn,
+            path: yarnPath
+        };
+        var parent = (0,path__rspack_import_1.dirname)(current);
+        if (parent === current) return undefined;
+        current = parent;
+    }
+}
+function detectPackageManager(directory) {
+    var _ref;
+    var _findLockfile;
+    return (_ref = (_findLockfile = findLockfile(directory)) === null || _findLockfile === void 0 ? void 0 : _findLockfile.packageManager) !== null && _ref !== void 0 ? _ref : packageManagers[DEFAULT_PACKAGE_MANAGER];
+}
+/** `name/version` of the package manager running this process, e.g. `yarn/1.22.19` */ function getRunningPackageManagerVersion() {
+    var ua = process.env.npm_config_user_agent || '';
+    var m = ua.match(/^(yarn|npm)\/(\S+)/);
+    return m ? "".concat(m[1], "/").concat(m[2]) : '';
+}
+
+
+},
 170(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -52535,13 +53061,13 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   Project: () => (Project)
 });
-/* import */ var _swc_helpers_async_to_generator__rspack_import_13 = __webpack_require__(2);
-/* import */ var _swc_helpers_class_call_check__rspack_import_8 = __webpack_require__(10);
-/* import */ var _swc_helpers_create_class__rspack_import_11 = __webpack_require__(11);
-/* import */ var _swc_helpers_define_property__rspack_import_9 = __webpack_require__(169);
-/* import */ var _swc_helpers_object_spread__rspack_import_10 = __webpack_require__(193);
-/* import */ var _swc_helpers_type_of__rspack_import_12 = __webpack_require__(144);
-/* import */ var _swc_helpers_ts_generator__rspack_import_14 = __webpack_require__(4);
+/* import */ var _swc_helpers_async_to_generator__rspack_import_15 = __webpack_require__(2);
+/* import */ var _swc_helpers_class_call_check__rspack_import_10 = __webpack_require__(10);
+/* import */ var _swc_helpers_create_class__rspack_import_13 = __webpack_require__(11);
+/* import */ var _swc_helpers_define_property__rspack_import_11 = __webpack_require__(169);
+/* import */ var _swc_helpers_object_spread__rspack_import_12 = __webpack_require__(193);
+/* import */ var _swc_helpers_type_of__rspack_import_14 = __webpack_require__(144);
+/* import */ var _swc_helpers_ts_generator__rspack_import_16 = __webpack_require__(4);
 /* import */ var fs__rspack_import_0 = __webpack_require__(149);
 /* import */ var fs__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_0);
 /* import */ var path__rspack_import_1 = __webpack_require__(7);
@@ -52552,7 +53078,9 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _log__rspack_import_4 = __webpack_require__(168);
 /* import */ var _package_json__rspack_import_5 = __webpack_require__(194);
 /* import */ var _scripts__rspack_import_6 = __webpack_require__(300);
-/* import */ var _targeted_build__rspack_import_7 = __webpack_require__(348);
+/* import */ var _package_manager__rspack_import_7 = __webpack_require__(348);
+/* import */ var _workspaces__rspack_import_8 = __webpack_require__(349);
+/* import */ var _targeted_build__rspack_import_9 = __webpack_require__(351);
 
 
 
@@ -52594,24 +53122,26 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 
+
+
 var Project = /*#__PURE__*/ function() {
     "use strict";
     function Project(packageJson, projectPath) {
-        (0,_swc_helpers_class_call_check__rspack_import_8._)(this, Project);
-        /** parsed package.json */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "json", void 0);
-        /** absolute path to the package.json file in the project */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "packageJsonLocation", void 0);
-        /** absolute path to the node_modules in the project (might not actually exist) */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "nodeModulesLocation", void 0);
-        /** absolute path to the target directory in the project (might not actually exist) */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "targetLocation", void 0);
-        /** absolute path to the directory containing the project */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "path", void 0);
-        /** the version of the project */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "version", void 0);
-        /** merged set of dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "allDependencies", void 0);
-        /** regular dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "productionDependencies", void 0);
-        /** development dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "devDependencies", void 0);
-        /** scripts defined in the package.json file for the project [name => body] */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "scripts", void 0);
-        /** custom definitions for the project, @osd/pm: { key: value } */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "customDefinitions", void 0);
-        /** build targets from the custom definitions, @osd/pm: { node: true, web: true } */ (0,_swc_helpers_define_property__rspack_import_9._)(this, "buildTargets", void 0);
-        (0,_swc_helpers_define_property__rspack_import_9._)(this, "isWorkspaceRoot", false);
-        (0,_swc_helpers_define_property__rspack_import_9._)(this, "isWorkspaceProject", false);
+        (0,_swc_helpers_class_call_check__rspack_import_10._)(this, Project);
+        /** parsed package.json */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "json", void 0);
+        /** absolute path to the package.json file in the project */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "packageJsonLocation", void 0);
+        /** absolute path to the node_modules in the project (might not actually exist) */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "nodeModulesLocation", void 0);
+        /** absolute path to the target directory in the project (might not actually exist) */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "targetLocation", void 0);
+        /** absolute path to the directory containing the project */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "path", void 0);
+        /** the version of the project */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "version", void 0);
+        /** merged set of dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "allDependencies", void 0);
+        /** regular dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "productionDependencies", void 0);
+        /** development dependencies of the project, [name => version range] */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "devDependencies", void 0);
+        /** scripts defined in the package.json file for the project [name => body] */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "scripts", void 0);
+        /** custom definitions for the project, @osd/pm: { key: value } */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "customDefinitions", void 0);
+        /** build targets from the custom definitions, @osd/pm: { node: true, web: true } */ (0,_swc_helpers_define_property__rspack_import_11._)(this, "buildTargets", void 0);
+        (0,_swc_helpers_define_property__rspack_import_11._)(this, "isWorkspaceRoot", false);
+        (0,_swc_helpers_define_property__rspack_import_11._)(this, "isWorkspaceProject", false);
         this.json = Object.freeze(packageJson);
         this.path = projectPath;
         this.packageJsonLocation = (0,path__rspack_import_1.resolve)(this.path, 'package.json');
@@ -52620,14 +53150,14 @@ var Project = /*#__PURE__*/ function() {
         this.version = this.json.version;
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
-        this.allDependencies = (0,_swc_helpers_object_spread__rspack_import_10._)({}, this.devDependencies, this.productionDependencies);
+        this.allDependencies = (0,_swc_helpers_object_spread__rspack_import_12._)({}, this.devDependencies, this.productionDependencies);
         this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
         this.scripts = this.json.scripts || {};
         this.customDefinitions = this.json['@osd/pm'] || {};
         this.buildTargets = [];
         var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
         try {
-            for(var _iterator = _targeted_build__rspack_import_7.BuildTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
+            for(var _iterator = _targeted_build__rspack_import_9.BuildTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
                 var target = _step.value;
                 if (this.customDefinitions[target]) this.buildTargets.push(target);
             }
@@ -52646,7 +53176,7 @@ var Project = /*#__PURE__*/ function() {
             }
         }
     }
-    (0,_swc_helpers_create_class__rspack_import_11._)(Project, [
+    (0,_swc_helpers_create_class__rspack_import_13._)(Project, [
         {
             key: "name",
             get: function get() {
@@ -52731,9 +53261,9 @@ var Project = /*#__PURE__*/ function() {
                     return {};
                 }
                 if (typeof raw === 'string') {
-                    return (0,_swc_helpers_define_property__rspack_import_9._)({}, this.name, (0,path__rspack_import_1.resolve)(this.path, raw));
+                    return (0,_swc_helpers_define_property__rspack_import_11._)({}, this.name, (0,path__rspack_import_1.resolve)(this.path, raw));
                 }
-                if ((typeof raw === "undefined" ? "undefined" : (0,_swc_helpers_type_of__rspack_import_12._)(raw)) === 'object') {
+                if ((typeof raw === "undefined" ? "undefined" : (0,_swc_helpers_type_of__rspack_import_14._)(raw)) === 'object') {
                     var binsConfig = {};
                     var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
                     try {
@@ -52766,10 +53296,10 @@ var Project = /*#__PURE__*/ function() {
         {
             key: "runScript",
             value: function runScript(_0) {
-                return (0,_swc_helpers_async_to_generator__rspack_import_13._)(function(scriptName) {
+                return (0,_swc_helpers_async_to_generator__rspack_import_15._)(function(scriptName) {
                     var args;
                     var _arguments = arguments;
-                    return (0,_swc_helpers_ts_generator__rspack_import_14._)(this, function(_state) {
+                    return (0,_swc_helpers_ts_generator__rspack_import_16._)(this, function(_state) {
                         args = _arguments.length > 1 && _arguments[1] !== void 0 ? _arguments[1] : [];
                         _log__rspack_import_4.log.info("Running script [".concat(scriptName, "] in [").concat(this.name, "]:"));
                         return [
@@ -52800,7 +53330,7 @@ var Project = /*#__PURE__*/ function() {
                     _log__rspack_import_4.log.warning("There are no build targets defined for [".concat(this.name, "]"));
                     return false;
                 }
-                return (0,_targeted_build__rspack_import_7.buildTargetedPackage)({
+                return (0,_targeted_build__rspack_import_9.buildTargetedPackage)({
                     pkg: this,
                     sourceMaps: options.sourceMaps
                 });
@@ -52815,13 +53345,13 @@ var Project = /*#__PURE__*/ function() {
         {
             key: "installDependencies",
             value: function installDependencies(_0) {
-                return (0,_swc_helpers_async_to_generator__rspack_import_13._)(function(param) {
+                return (0,_swc_helpers_async_to_generator__rspack_import_15._)(function(param) {
                     var extraArgs;
-                    return (0,_swc_helpers_ts_generator__rspack_import_14._)(this, function(_state) {
+                    return (0,_swc_helpers_ts_generator__rspack_import_16._)(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 extraArgs = param.extraArgs;
-                                _log__rspack_import_4.log.info("[".concat(this.name, "] running yarn"));
+                                _log__rspack_import_4.log.info("[".concat(this.name, "] running ").concat((0,_package_manager__rspack_import_7.detectPackageManager)(this.path).name));
                                 _log__rspack_import_4.log.write('');
                                 return [
                                     4,
@@ -52852,19 +53382,16 @@ var Project = /*#__PURE__*/ function() {
    * placed in the package.json with intentionally no validation.
    */ function installDependencyVersion(depName, version) {
                 var dev = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false, range = arguments.length > 3 ? arguments[3] : void 0;
-                return (0,_swc_helpers_async_to_generator__rspack_import_13._)(function() {
-                    var rangeToUse, extraArgs;
-                    return (0,_swc_helpers_ts_generator__rspack_import_14._)(this, function(_state) {
+                return (0,_swc_helpers_async_to_generator__rspack_import_15._)(function() {
+                    var pm, rangeToUse;
+                    return (0,_swc_helpers_ts_generator__rspack_import_16._)(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _log__rspack_import_4.log.info("[".concat(this.name, "] running yarn to install ").concat(depName, "@").concat(version));
+                                pm = (0,_package_manager__rspack_import_7.detectPackageManager)(this.path);
+                                _log__rspack_import_4.log.info("[".concat(this.name, "] running ").concat(pm.name, " to install ").concat(depName, "@").concat(version));
                                 _log__rspack_import_4.log.write('');
                                 rangeToUse = range || "^".concat(version);
-                                extraArgs = [
-                                    "".concat(depName, "@").concat(version)
-                                ];
-                                if (dev) extraArgs.push('--dev');
-                                if (!this.isWorkspaceProject) return [
+                                if (!(this.isWorkspaceProject && pm.name === 'yarn')) return [
                                     3,
                                     2
                                 ];
@@ -52881,7 +53408,7 @@ var Project = /*#__PURE__*/ function() {
                             case 2:
                                 return [
                                     4,
-                                    (0,_scripts__rspack_import_6.installInDir)(this.path, extraArgs, true)
+                                    (0,_scripts__rspack_import_6.addInDir)(this.path, "".concat(depName, "@").concat(version), dev)
                                 ];
                             case 3:
                                 _state.sent();
@@ -52894,19 +53421,37 @@ var Project = /*#__PURE__*/ function() {
                                 ];
                             case 5:
                                 _state.sent();
+                                if (!(pm.name === 'yarn')) return [
+                                    3,
+                                    7
+                                ];
                                 // The lock-file of workspace packages are symlinked to the root project's and editing the one in the project suffices
                                 return [
                                     4,
-                                    (0,_scripts__rspack_import_6.patchFile)((0,path__rspack_import_1.resolve)(this.path, 'yarn.lock'), "".concat(depName, "@").concat(version), "".concat(depName, "@").concat(rangeToUse))
+                                    (0,_scripts__rspack_import_6.patchFile)((0,path__rspack_import_1.resolve)(this.path, _package_manager__rspack_import_7.YARN_LOCKFILE), "".concat(depName, "@").concat(version), "".concat(depName, "@").concat(rangeToUse))
                                 ];
                             case 6:
                                 _state.sent();
+                                return [
+                                    3,
+                                    9
+                                ];
+                            case 7:
+                                // npm keys its lockfile by path, so re-sync it with the widened range instead.
+                                return [
+                                    4,
+                                    (0,_scripts__rspack_import_6.syncLockfileInDir)(this.path)
+                                ];
+                            case 8:
+                                _state.sent();
+                                _state.label = 9;
+                            case 9:
                                 _log__rspack_import_4.log.write('');
                                 return [
                                     4,
                                     this.removeExtraneousNodeModules()
                                 ];
-                            case 7:
+                            case 10:
                                 _state.sent();
                                 return [
                                     2
@@ -52919,13 +53464,13 @@ var Project = /*#__PURE__*/ function() {
         {
             key: "removeExtraneousNodeModules",
             value: /**
-   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * Workspaces symlink every workspace project into the root node_modules, even
    * when there is no depenency on the project. This results in unnecicary, and
    * often duplicated code in the build archives.
    */ function removeExtraneousNodeModules() {
-                return (0,_swc_helpers_async_to_generator__rspack_import_13._)(function() {
-                    var _this, workspacesInfo, unusedWorkspaces, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, name, workspace;
-                    return (0,_swc_helpers_ts_generator__rspack_import_14._)(this, function(_state) {
+                return (0,_swc_helpers_async_to_generator__rspack_import_15._)(function() {
+                    var _this, info, unusedWorkspaces, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, name, workspace;
+                    return (0,_swc_helpers_ts_generator__rspack_import_16._)(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _this = this;
@@ -52937,17 +53482,17 @@ var Project = /*#__PURE__*/ function() {
                                 }
                                 return [
                                     4,
-                                    (0,_scripts__rspack_import_6.yarnWorkspacesInfo)(this.path)
+                                    (0,_workspaces__rspack_import_8.workspacesInfo)(this.path)
                                 ];
                             case 1:
-                                workspacesInfo = _state.sent();
-                                unusedWorkspaces = new Set(Object.keys(workspacesInfo));
+                                info = _state.sent();
+                                unusedWorkspaces = new Set(Object.keys(info));
                                 _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
                                 try {
                                     // check for any cross-project dependency
-                                    for(_iterator = Object.keys(workspacesInfo)[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
+                                    for(_iterator = Object.keys(info)[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
                                         name = _step.value;
-                                        workspace = workspacesInfo[name];
+                                        workspace = info[name];
                                         workspace.workspaceDependencies.forEach(function(w) {
                                             return unusedWorkspaces.delete(w);
                                         });
@@ -52988,9 +53533,9 @@ var Project = /*#__PURE__*/ function() {
         {
             key: "fromPath",
             value: function fromPath(path) {
-                return (0,_swc_helpers_async_to_generator__rspack_import_13._)(function() {
+                return (0,_swc_helpers_async_to_generator__rspack_import_15._)(function() {
                     var pkgJson;
-                    return (0,_swc_helpers_ts_generator__rspack_import_14._)(this, function(_state) {
+                    return (0,_swc_helpers_ts_generator__rspack_import_16._)(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 return [
@@ -53018,7 +53563,7 @@ function normalizePath(path) {
 
 
 },
-351(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+352(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -53026,16 +53571,16 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var _swc_helpers_async_to_generator__rspack_import_4 = __webpack_require__(2);
 /* import */ var _swc_helpers_sliced_to_array__rspack_import_8 = __webpack_require__(151);
-/* import */ var _swc_helpers_to_array__rspack_import_7 = __webpack_require__(352);
+/* import */ var _swc_helpers_to_array__rspack_import_7 = __webpack_require__(353);
 /* import */ var _swc_helpers_to_consumable_array__rspack_import_6 = __webpack_require__(12);
 /* import */ var _swc_helpers_ts_generator__rspack_import_5 = __webpack_require__(4);
 /* import */ var fs_promises__rspack_import_0 = __webpack_require__(166);
 /* import */ var fs_promises__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(fs_promises__rspack_import_0);
-/* import */ var crypto__rspack_import_1 = __webpack_require__(353);
+/* import */ var crypto__rspack_import_1 = __webpack_require__(354);
 /* import */ var crypto__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(crypto__rspack_import_1);
 /* import */ var execa__rspack_import_2 = __webpack_require__(304);
 /* import */ var execa__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(execa__rspack_import_2);
-/* import */ var _yarn_lock__rspack_import_3 = __webpack_require__(354);
+/* import */ var _yarn_lock__rspack_import_3 = __webpack_require__(355);
 
 
 
@@ -53801,7 +54346,7 @@ function includeTransitiveProjects(subsetOfProjects, allProjects) {
 
 
 },
-365(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+367(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -53810,12 +54355,12 @@ __webpack_require__.d(__webpack_exports__, {
 });
 /* import */ var _swc_helpers_sliced_to_array__rspack_import_4 = __webpack_require__(151);
 /* import */ var _swc_helpers_tagged_template_literal__rspack_import_3 = __webpack_require__(3);
-/* import */ var _swc_helpers_to_array__rspack_import_5 = __webpack_require__(352);
+/* import */ var _swc_helpers_to_array__rspack_import_5 = __webpack_require__(353);
 /* import */ var chalk__rspack_import_0 = __webpack_require__(125);
 /* import */ var chalk__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(chalk__rspack_import_0);
 /* import */ var path__rspack_import_1 = __webpack_require__(7);
 /* import */ var path__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_1);
-/* import */ var _osd_cross_platform__rspack_import_2 = __webpack_require__(356);
+/* import */ var _osd_cross_platform__rspack_import_2 = __webpack_require__(357);
 /* import */ var _osd_cross_platform__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(_osd_cross_platform__rspack_import_2);
 
 
@@ -54007,21 +54552,25 @@ function addProjectToTree(tree, pathParts, project) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
+  addInDir: () => (addInDir),
   installInDir: () => (installInDir),
   patchFile: () => (patchFile),
   runScriptInPackage: () => (runScriptInPackage),
   runScriptInPackageStreaming: () => (runScriptInPackageStreaming),
-  yarnWorkspacesInfo: () => (yarnWorkspacesInfo)
+  syncLockfileInDir: () => (syncLockfileInDir)
 });
-/* import */ var _swc_helpers_async_iterator__rspack_import_6 = __webpack_require__(301);
-/* import */ var _swc_helpers_async_to_generator__rspack_import_3 = __webpack_require__(2);
-/* import */ var _swc_helpers_to_consumable_array__rspack_import_5 = __webpack_require__(12);
-/* import */ var _swc_helpers_ts_generator__rspack_import_4 = __webpack_require__(4);
+/* import */ var _swc_helpers_async_iterator__rspack_import_7 = __webpack_require__(301);
+/* import */ var _swc_helpers_async_to_generator__rspack_import_5 = __webpack_require__(2);
+/* import */ var _swc_helpers_sliced_to_array__rspack_import_8 = __webpack_require__(151);
+/* import */ var _swc_helpers_to_consumable_array__rspack_import_4 = __webpack_require__(12);
+/* import */ var _swc_helpers_ts_generator__rspack_import_6 = __webpack_require__(4);
 /* import */ var fs__rspack_import_0 = __webpack_require__(149);
 /* import */ var fs__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_0);
 /* import */ var readline__rspack_import_1 = __webpack_require__(302);
 /* import */ var readline__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(readline__rspack_import_1);
 /* import */ var _child_process__rspack_import_2 = __webpack_require__(303);
+/* import */ var _package_manager__rspack_import_3 = __webpack_require__(348);
+
 
 
 
@@ -54055,28 +54604,35 @@ __webpack_require__.d(__webpack_exports__, {
  */ 
 
 
-var YARN_EXEC = process.env.npm_execpath || 'yarn';
+
+function pmSpawnArgs(pm, args) {
+    var _pm_command = pm.command(), file = _pm_command.file, prefixArgs = _pm_command.prefixArgs;
+    return [
+        file,
+        (0,_swc_helpers_to_consumable_array__rspack_import_4._)(prefixArgs).concat((0,_swc_helpers_to_consumable_array__rspack_import_4._)(args))
+    ];
+}
 /**
- * Install all dependencies in the given directory
+ * Install all dependencies in the given directory, using the package manager
+ * that owns the directory's lockfile. `extraArgs` are yarn-style flags.
  */ function installInDir(_0) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_3._)(function(directory) {
-        var extraArgs, useAdd, options;
+    return (0,_swc_helpers_async_to_generator__rspack_import_5._)(function(directory) {
+        var extraArgs, pm;
         var _arguments = arguments;
-        return (0,_swc_helpers_ts_generator__rspack_import_4._)(this, function(_state) {
+        return (0,_swc_helpers_ts_generator__rspack_import_6._)(this, function(_state) {
             switch(_state.label){
                 case 0:
-                    extraArgs = _arguments.length > 1 && _arguments[1] !== void 0 ? _arguments[1] : [], useAdd = _arguments.length > 2 && _arguments[2] !== void 0 ? _arguments[2] : false;
-                    options = [
-                        useAdd ? 'add' : 'install',
-                        '--non-interactive'
-                    ].concat((0,_swc_helpers_to_consumable_array__rspack_import_5._)(extraArgs));
-                    // We pass the mutex flag to ensure only one instance of yarn runs at any
-                    // given time (e.g. to avoid conflicts).
+                    extraArgs = _arguments.length > 1 && _arguments[1] !== void 0 ? _arguments[1] : [];
+                    pm = (0,_package_manager__rspack_import_3.detectPackageManager)(directory);
                     return [
                         4,
-                        (0,_child_process__rspack_import_2.spawn)(YARN_EXEC, options, {
-                            cwd: directory
-                        })
+                        _child_process__rspack_import_2.spawn.apply(void 0, (0,_swc_helpers_to_consumable_array__rspack_import_4._)(pmSpawnArgs(pm, pm.installArgs({
+                            extraArgs: extraArgs
+                        }))).concat([
+                            {
+                                cwd: directory
+                            }
+                        ]))
                     ];
                 case 1:
                     _state.sent();
@@ -54088,12 +54644,74 @@ var YARN_EXEC = process.env.npm_execpath || 'yarn';
     }).apply(this, arguments);
 }
 /**
+ * Add a dependency at an exact version in the given directory.
+ */ function addInDir(directory, spec) {
+    var dev = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+    return (0,_swc_helpers_async_to_generator__rspack_import_5._)(function() {
+        var pm;
+        return (0,_swc_helpers_ts_generator__rspack_import_6._)(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    pm = (0,_package_manager__rspack_import_3.detectPackageManager)(directory);
+                    return [
+                        4,
+                        _child_process__rspack_import_2.spawn.apply(void 0, (0,_swc_helpers_to_consumable_array__rspack_import_4._)(pmSpawnArgs(pm, pm.addArgs(spec, dev))).concat([
+                            {
+                                cwd: directory
+                            }
+                        ]))
+                    ];
+                case 1:
+                    _state.sent();
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+}
+/**
+ * Re-sync the lockfile after a manifest edit, when the package manager needs it.
+ * Returns the package manager so callers can decide on lockfile patching.
+ */ function syncLockfileInDir(directory) {
+    return (0,_swc_helpers_async_to_generator__rspack_import_5._)(function() {
+        var pm, args;
+        return (0,_swc_helpers_ts_generator__rspack_import_6._)(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    pm = (0,_package_manager__rspack_import_3.detectPackageManager)(directory);
+                    args = pm.syncLockfileArgs();
+                    if (!args) return [
+                        3,
+                        2
+                    ];
+                    return [
+                        4,
+                        _child_process__rspack_import_2.spawn.apply(void 0, (0,_swc_helpers_to_consumable_array__rspack_import_4._)(pmSpawnArgs(pm, args)).concat([
+                            {
+                                cwd: directory
+                            }
+                        ]))
+                    ];
+                case 1:
+                    _state.sent();
+                    _state.label = 2;
+                case 2:
+                    return [
+                        2,
+                        pm
+                    ];
+            }
+        });
+    })();
+}
+/**
  * Patch a file by replacing a given string
  */ function patchFile(filePath, searchValue, replacement) {
     return new Promise(function(resolve, reject) {
-        return (0,_swc_helpers_async_to_generator__rspack_import_3._)(function() {
+        return (0,_swc_helpers_async_to_generator__rspack_import_5._)(function() {
             var patchWriter, fileReader, _iteratorAbruptCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, line, err;
-            return (0,_swc_helpers_ts_generator__rspack_import_4._)(this, function(_state) {
+            return (0,_swc_helpers_ts_generator__rspack_import_6._)(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         patchWriter = (0,fs__rspack_import_0.createWriteStream)("".concat(filePath, ".patched"), {
@@ -54112,7 +54730,7 @@ var YARN_EXEC = process.env.npm_execpath || 'yarn';
                             7,
                             12
                         ]);
-                        _iterator = (0,_swc_helpers_async_iterator__rspack_import_6._)(fileReader);
+                        _iterator = (0,_swc_helpers_async_iterator__rspack_import_7._)(fileReader);
                         _state.label = 2;
                     case 2:
                         return [
@@ -54205,20 +54823,19 @@ var YARN_EXEC = process.env.npm_execpath || 'yarn';
 /**
  * Run script in the given directory
  */ function runScriptInPackage(script, args, pkg) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_3._)(function() {
-        var execOpts;
-        return (0,_swc_helpers_ts_generator__rspack_import_4._)(this, function(_state) {
+    return (0,_swc_helpers_async_to_generator__rspack_import_5._)(function() {
+        var pm;
+        return (0,_swc_helpers_ts_generator__rspack_import_6._)(this, function(_state) {
             switch(_state.label){
                 case 0:
-                    execOpts = {
-                        cwd: pkg.path
-                    };
+                    pm = (0,_package_manager__rspack_import_3.detectPackageManager)(pkg.path);
                     return [
                         4,
-                        (0,_child_process__rspack_import_2.spawn)(YARN_EXEC, [
-                            'run',
-                            script
-                        ].concat((0,_swc_helpers_to_consumable_array__rspack_import_5._)(args)), execOpts)
+                        _child_process__rspack_import_2.spawn.apply(void 0, (0,_swc_helpers_to_consumable_array__rspack_import_4._)(pmSpawnArgs(pm, pm.runArgs(script, args))).concat([
+                            {
+                                cwd: pkg.path
+                            }
+                        ]))
                     ];
                 case 1:
                     _state.sent();
@@ -54233,55 +54850,19 @@ var YARN_EXEC = process.env.npm_execpath || 'yarn';
  * Run script in the given directory
  */ function runScriptInPackageStreaming(param) {
     var script = param.script, args = param.args, pkg = param.pkg, debug = param.debug;
-    var execOpts = {
+    var pm = (0,_package_manager__rspack_import_3.detectPackageManager)(pkg.path);
+    var _pmSpawnArgs = (0,_swc_helpers_sliced_to_array__rspack_import_8._)(pmSpawnArgs(pm, pm.runArgs(script, args)), 2), file = _pmSpawnArgs[0], spawnArgs = _pmSpawnArgs[1];
+    return (0,_child_process__rspack_import_2.spawnStreaming)(file, spawnArgs, {
         cwd: pkg.path
-    };
-    return (0,_child_process__rspack_import_2.spawnStreaming)(YARN_EXEC, [
-        'run',
-        script
-    ].concat((0,_swc_helpers_to_consumable_array__rspack_import_5._)(args)), execOpts, {
+    }, {
         prefix: pkg.name,
         debug: debug
     });
 }
-function yarnWorkspacesInfo(directory) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_3._)(function() {
-        var stdout;
-        return (0,_swc_helpers_ts_generator__rspack_import_4._)(this, function(_state) {
-            switch(_state.label){
-                case 0:
-                    return [
-                        4,
-                        (0,_child_process__rspack_import_2.spawn)(YARN_EXEC, [
-                            '--json',
-                            'workspaces',
-                            'info'
-                        ], {
-                            cwd: directory,
-                            stdio: 'pipe'
-                        })
-                    ];
-                case 1:
-                    stdout = _state.sent().stdout;
-                    try {
-                        return [
-                            2,
-                            JSON.parse(JSON.parse(stdout).data)
-                        ];
-                    } catch (error) {
-                        throw new Error("'yarn workspaces info --json' produced unexpected output: \n".concat(stdout));
-                    }
-                    return [
-                        2
-                    ];
-            }
-        });
-    })();
-}
 
 
 },
-348(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+351(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -54384,7 +54965,7 @@ var BuildTargets = Object.keys(BuildTargetPresets);
 
 
 },
-363(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+365(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -54396,22 +54977,20 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var _swc_helpers_tagged_template_literal__rspack_import_9 = __webpack_require__(3);
 /* import */ var _swc_helpers_to_consumable_array__rspack_import_14 = __webpack_require__(12);
 /* import */ var _swc_helpers_ts_generator__rspack_import_11 = __webpack_require__(4);
-/* import */ var _swc_helpers_ts_values__rspack_import_13 = __webpack_require__(364);
-/* import */ var _yarnpkg_lockfile__rspack_import_0 = __webpack_require__(355);
+/* import */ var _swc_helpers_ts_values__rspack_import_13 = __webpack_require__(366);
+/* import */ var _yarnpkg_lockfile__rspack_import_0 = __webpack_require__(356);
 /* import */ var _yarnpkg_lockfile__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(_yarnpkg_lockfile__rspack_import_0);
 /* import */ var dedent__rspack_import_1 = __webpack_require__(5);
 /* import */ var dedent__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(dedent__rspack_import_1);
 /* import */ var chalk__rspack_import_2 = __webpack_require__(125);
 /* import */ var chalk__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(chalk__rspack_import_2);
-/* import */ var path__rspack_import_3 = __webpack_require__(7);
-/* import */ var path__rspack_import_3_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_3);
-/* import */ var fs__rspack_import_4 = __webpack_require__(149);
-/* import */ var fs__rspack_import_4_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_4);
-/* import */ var semver__rspack_import_5 = __webpack_require__(209);
-/* import */ var semver__rspack_import_5_default = /*#__PURE__*/__webpack_require__.n(semver__rspack_import_5);
-/* import */ var _fs__rspack_import_6 = __webpack_require__(155);
+/* import */ var semver__rspack_import_3 = __webpack_require__(209);
+/* import */ var semver__rspack_import_3_default = /*#__PURE__*/__webpack_require__.n(semver__rspack_import_3);
+/* import */ var _fs__rspack_import_4 = __webpack_require__(155);
+/* import */ var _yarn_lock__rspack_import_5 = __webpack_require__(355);
+/* import */ var _package_manager__rspack_import_6 = __webpack_require__(348);
 /* import */ var _log__rspack_import_7 = __webpack_require__(168);
-/* import */ var _projects_tree__rspack_import_8 = __webpack_require__(365);
+/* import */ var _projects_tree__rspack_import_8 = __webpack_require__(367);
 
 
 
@@ -54420,7 +54999,9 @@ __webpack_require__.d(__webpack_exports__, {
 
 function _templateObject() {
     var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
-        '\n\n      Multiple version of lodash v4 were detected, so they have been removed\n      from the yarn.lock file. Please rerun yarn osd bootstrap to coalese the\n      lodash versions installed.\n\n      If you still see this error when you re-bootstrap then you might need\n      to force a new dependency to use the latest version of lodash via the\n      "resolutions" field in package.json.\n\n      If you have questions about this please reach out to the operations team.\n\n    '
+        '\n\n      Multiple version of lodash v4 were detected in package-lock.json. Run\n      `npm dedupe lodash` and then rerun osd bootstrap.\n\n      If the versions still don\'t coalesce, force a single version of lodash via\n      the "overrides" field in package.json.\n\n    '
+    ], [
+        '\n\n      Multiple version of lodash v4 were detected in package-lock.json. Run\n      \\`npm dedupe lodash\\` and then rerun osd bootstrap.\n\n      If the versions still don\'t coalesce, force a single version of lodash via\n      the "overrides" field in package.json.\n\n    '
     ]);
     _templateObject = function _templateObject() {
         return data;
@@ -54429,7 +55010,7 @@ function _templateObject() {
 }
 function _templateObject1() {
     var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
-        "\n\n      Due to changes in the yarn.lock file and/or package.json files a version of\n      lodash 3 is now included in the production dependencies. To reduce the size of\n      our distributable and especially our front-end bundles we have decided to\n      prevent adding any new instances of lodash 3.\n\n      Please inspect the changes to yarn.lock or package.json files to identify where\n      the lodash 3 version is coming from and remove it.\n\n      If you have questions about this please reack out to the operations team.\n\n    "
+        '\n\n      Multiple version of lodash v4 were detected, so they have been removed\n      from the yarn.lock file. Please rerun yarn osd bootstrap to coalese the\n      lodash versions installed.\n\n      If you still see this error when you re-bootstrap then you might need\n      to force a new dependency to use the latest version of lodash via the\n      "resolutions" field in package.json.\n\n      If you have questions about this please reach out to the operations team.\n\n    '
     ]);
     _templateObject1 = function _templateObject() {
         return data;
@@ -54438,10 +55019,7 @@ function _templateObject1() {
 }
 function _templateObject2() {
     var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
-        '\n\n            [single_version_dependencies] Multiple version ranges for package "',
-        '"\n            were found across different package.json files. A suitable version, v',
-        ", was\n            identified and installed.\n\n            The conflicting version ranges are:\n              ",
-        "\n          "
+        "\n\n      Due to changes in the yarn.lock file and/or package.json files a version of\n      lodash 3 is now included in the production dependencies. To reduce the size of\n      our distributable and especially our front-end bundles we have decided to\n      prevent adding any new instances of lodash 3.\n\n      Please inspect the changes to yarn.lock or package.json files to identify where\n      the lodash 3 version is coming from and remove it.\n\n      If you have questions about this please reack out to the operations team.\n\n    "
     ]);
     _templateObject2 = function _templateObject() {
         return data;
@@ -54449,6 +55027,18 @@ function _templateObject2() {
     return data;
 }
 function _templateObject3() {
+    var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
+        '\n\n            [single_version_dependencies] Multiple version ranges for package "',
+        '"\n            were found across different package.json files. A suitable version, v',
+        ", was\n            identified and installed.\n\n            The conflicting version ranges are:\n              ",
+        "\n          "
+    ]);
+    _templateObject3 = function _templateObject() {
+        return data;
+    };
+    return data;
+}
+function _templateObject4() {
     var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
         '\n\n            [single_version_dependencies] Multiple version ranges for package "',
         '"\n            were found across different package.json files. A version, v',
@@ -54464,16 +55054,6 @@ function _templateObject3() {
         "\\`.\n\n            The conflicting version ranges are:\n              ",
         "\n          "
     ]);
-    _templateObject3 = function _templateObject() {
-        return data;
-    };
-    return data;
-}
-function _templateObject4() {
-    var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
-        "\n\n      [single_version_dependencies] Multiple version ranges for the same dependency\n      were found declared across different package.json files. Please consolidate\n      those to match across all package.json files. Different versions for the\n      same dependency is not supported.\n\n      If you have questions about this please reach out to the operations team.\n\n      The conflicting dependencies are:\n\n        ",
-        "\n    "
-    ]);
     _templateObject4 = function _templateObject() {
         return data;
     };
@@ -54481,10 +55061,20 @@ function _templateObject4() {
 }
 function _templateObject5() {
     var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
-        '\n      Some of the packages in the production dependency chain for OpenSearch Dashboards are\n      flagged with "opensearchDashboards.devOnly" in their package.json. Please check changes made to\n      packages and their dependencies to ensure they don\'t end up in production.\n\n      The devOnly dependencies that are being dependend on in production are:\n\n        ',
+        "\n\n      [single_version_dependencies] Multiple version ranges for the same dependency\n      were found declared across different package.json files. Please consolidate\n      those to match across all package.json files. Different versions for the\n      same dependency is not supported.\n\n      If you have questions about this please reach out to the operations team.\n\n      The conflicting dependencies are:\n\n        ",
         "\n    "
     ]);
     _templateObject5 = function _templateObject() {
+        return data;
+    };
+    return data;
+}
+function _templateObject6() {
+    var data = (0,_swc_helpers_tagged_template_literal__rspack_import_9._)([
+        '\n      Some of the packages in the production dependency chain for OpenSearch Dashboards are\n      flagged with "opensearchDashboards.devOnly" in their package.json. Please check changes made to\n      packages and their dependencies to ensure they don\'t end up in production.\n\n      The devOnly dependencies that are being dependend on in production are:\n\n        ',
+        "\n    "
+    ]);
+    _templateObject6 = function _templateObject() {
         return data;
     };
     return data;
@@ -54571,7 +55161,7 @@ function validateDependencies(osd, yarnLock) {
    *          dependencies, but it does not terminate the script.
    */ singleVersionResolution = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "ignore";
     return (0,_swc_helpers_async_to_generator__rspack_import_10._)(function() {
-        var lodash4Versions, lodash4Reqs, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _step_value, req, dep, _iteratorNormalCompletion1, _didIteratorError1, _iteratorError1, _iterator1, _step1, req1, prodDependencies, lodash3Versions, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, dep1, hasIssues, depRanges, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, project, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _loop, _iterator4, _step4, cachedManifests, violatingSingleVersionDepRanges, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, _step_value1, depName, ranges, installedVersions, installedDepVersionsCache, desiredRanges, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, _step_value2, range, projects, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, project1, _deps_, _cachedManifests_get, deps, sortedInstalledVersion, rangePatterns, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _loop1, _iterator8, _step8, _ret, err, sortedInstalledVersion1, suitableVersion, suitableRange, _iteratorNormalCompletion9, _didIteratorError9, _iteratorError9, _iterator9, _step9, projects1, _iteratorNormalCompletion10, _didIteratorError10, _iteratorError10, _iterator10, _step10, project2, err, err, conflictingRanges, err, duplicateRanges, devOnlyProjectsInProduction;
+        var lodash4Versions, lodash4Reqs, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _step_value, req, dep, _iteratorNormalCompletion1, _didIteratorError1, _iteratorError1, _iterator1, _step1, req1, prodDependencies, lodash3Versions, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, dep1, hasIssues, depRanges, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, project, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _loop, _iterator4, _step4, cachedManifests, violatingSingleVersionDepRanges, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, _step_value1, depName, ranges, installedVersions, installedDepVersionsCache, desiredRanges, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, _step_value2, range, projects, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, project1, _deps_, deps, sortedInstalledVersion, rangePatterns, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _loop1, _iterator8, _step8, _ret, err, sortedInstalledVersion1, suitableVersion, suitableRange, _iteratorNormalCompletion9, _didIteratorError9, _iteratorError9, _iterator9, _step9, projects1, _iteratorNormalCompletion10, _didIteratorError10, _iteratorError10, _iterator10, _step10, project2, err, err, conflictingRanges, err, duplicateRanges, devOnlyProjectsInProduction;
         return (0,_swc_helpers_ts_generator__rspack_import_11._)(this, function(_state) {
             switch(_state.label){
                 case 0:
@@ -54602,6 +55192,13 @@ function validateDependencies(osd, yarnLock) {
                             }
                         }
                     }
+                    // if we find more than one lodash v4 version installed then delete
+                    // lodash v4 requests from the yarn.lock file and prompt the user to
+                    // retry bootstrap so that a single v4 version will be installed
+                    if (lodash4Versions.size > 1 && (0,_package_manager__rspack_import_6.detectPackageManager)(osd.getAbsolute()).name === 'npm') {
+                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject()));
+                        process.exit(1);
+                    }
                     if (!(lodash4Versions.size > 1)) return [
                         3,
                         2
@@ -54628,11 +55225,11 @@ function validateDependencies(osd, yarnLock) {
                     }
                     return [
                         4,
-                        (0,_fs__rspack_import_6.writeFile)(osd.getAbsolute('yarn.lock'), (0,_yarnpkg_lockfile__rspack_import_0.stringify)(yarnLock), 'utf8')
+                        (0,_fs__rspack_import_4.writeFile)(osd.getAbsolute('yarn.lock'), (0,_yarnpkg_lockfile__rspack_import_0.stringify)(yarnLock), 'utf8')
                     ];
                 case 1:
                     _state.sent();
-                    _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject()));
+                    _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject1()));
                     process.exit(1);
                     _state.label = 2;
                 case 2:
@@ -54665,7 +55262,7 @@ function validateDependencies(osd, yarnLock) {
                     }
                     // if any lodash v3 packages were found we abort and tell the user to fix things
                     if (lodash3Versions.size) {
-                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject1()));
+                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject2()));
                         process.exit(1);
                     }
                     hasIssues = false;
@@ -54773,8 +55370,8 @@ function validateDependencies(osd, yarnLock) {
                                     project1 = _step7.value;
                                     ;
                                     if (!cachedManifests.has(project1.path)) cachedManifests.set(project1.path, // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
-                                    (0,_yarnpkg_lockfile__rspack_import_0.parse)((0,fs__rspack_import_4.readFileSync)(path__rspack_import_3_default().join(project1.path, 'yarn.lock'), 'utf8')));
-                                    _cachedManifests_get = cachedManifests.get(project1.path), deps = _cachedManifests_get.object;
+                                    (0,_yarn_lock__rspack_import_5.readProjectLockfile)(project1.path));
+                                    deps = cachedManifests.get(project1.path);
                                     if (deps === null || deps === void 0 ? void 0 : (_deps_ = deps["".concat(depName, "@").concat(range)]) === null || _deps_ === void 0 ? void 0 : _deps_.version) {
                                         installedVersions.add(deps["".concat(depName, "@").concat(range)].version);
                                         installedDepVersionsCache.set("".concat(project1.name, "#").concat(depName), deps["".concat(depName, "@").concat(range)].version);
@@ -54839,7 +55436,7 @@ function validateDependencies(osd, yarnLock) {
                             29
                         ]; // go to the next depRange
                     }
-                    sortedInstalledVersion = Array.from(installedVersions).sort(semver__rspack_import_5.rcompare);
+                    sortedInstalledVersion = Array.from(installedVersions).sort(semver__rspack_import_3.rcompare);
                     rangePatterns = Array.from(desiredRanges.keys());
                     _iteratorNormalCompletion8 = true, _didIteratorError8 = false, _iteratorError8 = undefined;
                     _state.label = 5;
@@ -54857,7 +55454,7 @@ function validateDependencies(osd, yarnLock) {
                                 case 0:
                                     installedVersion = _step8.value;
                                     if (!rangePatterns.every(function(range) {
-                                        return (0,semver__rspack_import_5.satisfies)(installedVersion, range);
+                                        return (0,semver__rspack_import_3.satisfies)(installedVersion, range);
                                     })) return [
                                         3,
                                         15
@@ -54981,7 +55578,7 @@ function validateDependencies(osd, yarnLock) {
                                             return p.name;
                                         }).join(', '));
                                     }).join('\n              ');
-                                    _log__rspack_import_7.log.warning(dedent__rspack_import_1_default()(_templateObject2(), depName, installedVersion, conflictingRanges));
+                                    _log__rspack_import_7.log.warning(dedent__rspack_import_1_default()(_templateObject3(), depName, installedVersion, conflictingRanges));
                                     // A usable version was identified so no need to check the lower versions
                                     return [
                                         2,
@@ -55064,7 +55661,7 @@ function validateDependencies(osd, yarnLock) {
                         3,
                         28
                     ];
-                    sortedInstalledVersion1 = Array.from(installedVersions).sort(semver__rspack_import_5.rcompare);
+                    sortedInstalledVersion1 = Array.from(installedVersions).sort(semver__rspack_import_3.rcompare);
                     hasIssues = true;
                     suitableVersion = sortedInstalledVersion1[0];
                     suitableRange = "^".concat(suitableVersion);
@@ -55180,7 +55777,7 @@ function validateDependencies(osd, yarnLock) {
                             return p.name;
                         }).join(', '));
                     }).join('\n              ');
-                    _log__rspack_import_7.log.warning(dedent__rspack_import_1_default()(_templateObject3(), depName, suitableVersion, depName, suitableRange, conflictingRanges));
+                    _log__rspack_import_7.log.warning(dedent__rspack_import_1_default()(_templateObject4(), depName, suitableVersion, depName, suitableRange, conflictingRanges));
                     return [
                         3,
                         29
@@ -55234,7 +55831,7 @@ function validateDependencies(osd, yarnLock) {
                                 }).join(', '));
                             })));
                         }, []).join('\n        ');
-                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject4(), duplicateRanges));
+                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject5(), duplicateRanges));
                         if (singleVersionResolution !== "ignore") {
                             process.exit(1);
                         }
@@ -55243,7 +55840,7 @@ function validateDependencies(osd, yarnLock) {
                     // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
                     devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
                     if (devOnlyProjectsInProduction) {
-                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject5(), (0,_projects_tree__rspack_import_8.treeToString)(devOnlyProjectsInProduction).split('\n').join('\n        ')));
+                        _log__rspack_import_7.log.error(dedent__rspack_import_1_default()(_templateObject6(), (0,_projects_tree__rspack_import_8.treeToString)(devOnlyProjectsInProduction).split('\n').join('\n        ')));
                         process.exit(1);
                     }
                     _log__rspack_import_7.log.success(hasIssues ? 'yarn.lock analysis completed' : 'yarn.lock analysis completed without any issues');
@@ -55276,7 +55873,7 @@ function getDevOnlyProductionDepsTree(osd, projectName) {
 
 
 },
-486(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+488(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -55285,14 +55882,14 @@ __webpack_require__.d(__webpack_exports__, {
 /* import */ var rxjs__rspack_import_3 = __webpack_require__(55);
 /* import */ var rxjs__rspack_import_7 = __webpack_require__(38);
 /* import */ var rxjs__rspack_import_8 = __webpack_require__(117);
-/* import */ var rxjs_operators__rspack_import_0 = __webpack_require__(487);
+/* import */ var rxjs_operators__rspack_import_0 = __webpack_require__(489);
 /* import */ var rxjs_operators__rspack_import_1 = __webpack_require__(77);
-/* import */ var rxjs_operators__rspack_import_2 = __webpack_require__(491);
-/* import */ var rxjs_operators__rspack_import_4 = __webpack_require__(492);
-/* import */ var rxjs_operators__rspack_import_5 = __webpack_require__(494);
-/* import */ var rxjs_operators__rspack_import_6 = __webpack_require__(496);
+/* import */ var rxjs_operators__rspack_import_2 = __webpack_require__(493);
+/* import */ var rxjs_operators__rspack_import_4 = __webpack_require__(494);
+/* import */ var rxjs_operators__rspack_import_5 = __webpack_require__(496);
+/* import */ var rxjs_operators__rspack_import_6 = __webpack_require__(498);
 /* import */ var rxjs_operators__rspack_import_9 = __webpack_require__(93);
-/* import */ var rxjs_operators__rspack_import_10 = __webpack_require__(497);
+/* import */ var rxjs_operators__rspack_import_10 = __webpack_require__(499);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -55387,20 +55984,27 @@ function waitUntilWatchIsReady(stream) {
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   copyWorkspacePackages: () => (copyWorkspacePackages),
-  workspacePackagePaths: () => (workspacePackagePaths)
+  workspacePackagePaths: () => (workspacePackagePaths),
+  workspacesInfo: () => (workspacesInfo)
 });
-/* import */ var _swc_helpers_async_to_generator__rspack_import_7 = __webpack_require__(2);
-/* import */ var _swc_helpers_ts_generator__rspack_import_8 = __webpack_require__(4);
+/* import */ var _swc_helpers_async_to_generator__rspack_import_8 = __webpack_require__(2);
+/* import */ var _swc_helpers_sliced_to_array__rspack_import_10 = __webpack_require__(151);
+/* import */ var _swc_helpers_to_consumable_array__rspack_import_11 = __webpack_require__(12);
+/* import */ var _swc_helpers_ts_generator__rspack_import_9 = __webpack_require__(4);
 /* import */ var glob__rspack_import_0 = __webpack_require__(172);
 /* import */ var glob__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(glob__rspack_import_0);
 /* import */ var path__rspack_import_1 = __webpack_require__(7);
 /* import */ var path__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_1);
-/* import */ var util__rspack_import_2 = __webpack_require__(124);
-/* import */ var util__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(util__rspack_import_2);
-/* import */ var _config__rspack_import_3 = __webpack_require__(350);
-/* import */ var _fs__rspack_import_4 = __webpack_require__(155);
-/* import */ var _package_json__rspack_import_5 = __webpack_require__(194);
-/* import */ var _projects__rspack_import_6 = __webpack_require__(171);
+/* import */ var semver__rspack_import_2 = __webpack_require__(209);
+/* import */ var semver__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(semver__rspack_import_2);
+/* import */ var util__rspack_import_3 = __webpack_require__(124);
+/* import */ var util__rspack_import_3_default = /*#__PURE__*/__webpack_require__.n(util__rspack_import_3);
+/* import */ var _config__rspack_import_4 = __webpack_require__(350);
+/* import */ var _fs__rspack_import_5 = __webpack_require__(155);
+/* import */ var _package_json__rspack_import_6 = __webpack_require__(194);
+/* import */ var _projects__rspack_import_7 = __webpack_require__(171);
+
+
 
 
 /*
@@ -55436,16 +56040,17 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 
-var glob = (0,util__rspack_import_2.promisify)((glob__rspack_import_0_default()));
+
+var glob = (0,util__rspack_import_3.promisify)((glob__rspack_import_0_default()));
 function workspacePackagePaths(rootPath) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_7._)(function() {
+    return (0,_swc_helpers_async_to_generator__rspack_import_8._)(function() {
         var rootPkgJson, workspacesPathsPatterns, workspaceProjectsPaths, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, pattern, _, err, _iteratorNormalCompletion1, _didIteratorError1, _iteratorError1, _loop, _iterator1, _step1;
-        return (0,_swc_helpers_ts_generator__rspack_import_8._)(this, function(_state) {
+        return (0,_swc_helpers_ts_generator__rspack_import_9._)(this, function(_state) {
             switch(_state.label){
                 case 0:
                     return [
                         4,
-                        (0,_package_json__rspack_import_5.readPackageJson)(rootPath)
+                        (0,_package_json__rspack_import_6.readPackageJson)(rootPath)
                     ];
                 case 1:
                     rootPkgJson = _state.sent();
@@ -55455,7 +56060,8 @@ function workspacePackagePaths(rootPath) {
                             []
                         ];
                     }
-                    workspacesPathsPatterns = rootPkgJson.workspaces.packages;
+                    // yarn uses `{ packages: [...] }`; npm also accepts a plain array.
+                    workspacesPathsPatterns = Array.isArray(rootPkgJson.workspaces) ? rootPkgJson.workspaces : rootPkgJson.workspaces.packages;
                     workspaceProjectsPaths = [];
                     _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
                     _state.label = 2;
@@ -55555,18 +56161,159 @@ function workspacePackagePaths(rootPath) {
         });
     })();
 }
-function copyWorkspacePackages(rootPath) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_7._)(function() {
-        var projectPaths, projects, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, project, dest, err;
-        return (0,_swc_helpers_ts_generator__rspack_import_8._)(this, function(_state) {
+/**
+ * Equivalent of `yarn workspaces info`, computed from the manifests so it works
+ * with any package manager: for each workspace, the other workspaces it depends
+ * on (excluding peer dependencies) with a range the workspace's version satisfies.
+ */ function workspacesInfo(rootPath) {
+    return (0,_swc_helpers_async_to_generator__rspack_import_8._)(function() {
+        var manifests, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, manifestPath, dir, json, err, info, _iteratorNormalCompletion1, _didIteratorError1, _iteratorError1, _iterator1, _step1, _step_value, name, _step_value_, dir1, json1, workspaceDependencies, _i, _iter, type, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, _step_value1, dep, range, target;
+        return (0,_swc_helpers_ts_generator__rspack_import_9._)(this, function(_state) {
             switch(_state.label){
                 case 0:
-                    projectPaths = (0,_config__rspack_import_3.getProjectPaths)({
+                    manifests = new Map();
+                    _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
+                    _state.label = 1;
+                case 1:
+                    _state.trys.push([
+                        1,
+                        7,
+                        8,
+                        9
+                    ]);
+                    return [
+                        4,
+                        workspacePackagePaths(rootPath)
+                    ];
+                case 2:
+                    _iterator = _state.sent()[Symbol.iterator]();
+                    _state.label = 3;
+                case 3:
+                    if (!!(_iteratorNormalCompletion = (_step = _iterator.next()).done)) return [
+                        3,
+                        6
+                    ];
+                    manifestPath = _step.value;
+                    dir = path__rspack_import_1_default().dirname(manifestPath);
+                    return [
+                        4,
+                        (0,_package_json__rspack_import_6.readPackageJson)(dir)
+                    ];
+                case 4:
+                    json = _state.sent();
+                    manifests.set(json.name, {
+                        dir: dir,
+                        json: json
+                    });
+                    _state.label = 5;
+                case 5:
+                    _iteratorNormalCompletion = true;
+                    return [
+                        3,
+                        3
+                    ];
+                case 6:
+                    return [
+                        3,
+                        9
+                    ];
+                case 7:
+                    err = _state.sent();
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                    return [
+                        3,
+                        9
+                    ];
+                case 8:
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return != null) {
+                            _iterator.return();
+                        }
+                    } finally{
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                    return [
+                        7
+                    ];
+                case 9:
+                    info = {};
+                    _iteratorNormalCompletion1 = true, _didIteratorError1 = false, _iteratorError1 = undefined;
+                    try {
+                        for(_iterator1 = manifests[Symbol.iterator](); !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done); _iteratorNormalCompletion1 = true){
+                            _step_value = (0,_swc_helpers_sliced_to_array__rspack_import_10._)(_step1.value, 2), name = _step_value[0], _step_value_ = _step_value[1], dir1 = _step_value_.dir, json1 = _step_value_.json;
+                            workspaceDependencies = new Set();
+                            for(_i = 0, _iter = [
+                                'devDependencies',
+                                'dependencies',
+                                'optionalDependencies'
+                            ]; _i < _iter.length; _i++){
+                                type = _iter[_i];
+                                _iteratorNormalCompletion2 = true, _didIteratorError2 = false, _iteratorError2 = undefined;
+                                try {
+                                    for(_iterator2 = Object.entries(json1[type] || {})[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true){
+                                        _step_value1 = (0,_swc_helpers_sliced_to_array__rspack_import_10._)(_step2.value, 2), dep = _step_value1[0], range = _step_value1[1];
+                                        target = manifests.get(dep);
+                                        if (target && (0,semver__rspack_import_2.satisfies)(target.json.version, range)) {
+                                            workspaceDependencies.add(dep);
+                                        }
+                                    }
+                                } catch (err) {
+                                    _didIteratorError2 = true;
+                                    _iteratorError2 = err;
+                                } finally{
+                                    try {
+                                        if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+                                            _iterator2.return();
+                                        }
+                                    } finally{
+                                        if (_didIteratorError2) {
+                                            throw _iteratorError2;
+                                        }
+                                    }
+                                }
+                            }
+                            info[name] = {
+                                location: path__rspack_import_1_default().relative(rootPath, dir1).replace(/\\/g, '/'),
+                                workspaceDependencies: (0,_swc_helpers_to_consumable_array__rspack_import_11._)(workspaceDependencies)
+                            };
+                        }
+                    } catch (err) {
+                        _didIteratorError1 = true;
+                        _iteratorError1 = err;
+                    } finally{
+                        try {
+                            if (!_iteratorNormalCompletion1 && _iterator1.return != null) {
+                                _iterator1.return();
+                            }
+                        } finally{
+                            if (_didIteratorError1) {
+                                throw _iteratorError1;
+                            }
+                        }
+                    }
+                    return [
+                        2,
+                        info
+                    ];
+            }
+        });
+    })();
+}
+function copyWorkspacePackages(rootPath) {
+    return (0,_swc_helpers_async_to_generator__rspack_import_8._)(function() {
+        var projectPaths, projects, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, project, dest, err;
+        return (0,_swc_helpers_ts_generator__rspack_import_9._)(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    projectPaths = (0,_config__rspack_import_4.getProjectPaths)({
                         rootPath: rootPath
                     });
                     return [
                         4,
-                        (0,_projects__rspack_import_6.getProjects)(rootPath, projectPaths)
+                        (0,_projects__rspack_import_7.getProjects)(rootPath, projectPaths)
                     ];
                 case 1:
                     projects = _state.sent();
@@ -55590,7 +56337,7 @@ function copyWorkspacePackages(rootPath) {
                     dest = path__rspack_import_1_default().resolve(rootPath, 'node_modules', project.name);
                     return [
                         4,
-                        (0,_fs__rspack_import_4.isSymlink)(dest)
+                        (0,_fs__rspack_import_5.isSymlink)(dest)
                     ];
                 case 4:
                     if (_state.sent() === false) {
@@ -55602,14 +56349,14 @@ function copyWorkspacePackages(rootPath) {
                     // Remove the symlink
                     return [
                         4,
-                        (0,_fs__rspack_import_4.unlink)(dest)
+                        (0,_fs__rspack_import_5.unlink)(dest)
                     ];
                 case 5:
                     _state.sent();
                     // Copy in the package
                     return [
                         4,
-                        (0,_fs__rspack_import_4.copyDirectory)(project.path, dest)
+                        (0,_fs__rspack_import_5.copyDirectory)(project.path, dest)
                     ];
                 case 6:
                     _state.sent();
@@ -55671,26 +56418,32 @@ function packagesFromGlobPattern(param) {
 
 
 },
-354(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
+355(__unused_rspack_module, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
+  readLockfile: () => (readLockfile),
+  readProjectLockfile: () => (readProjectLockfile),
   readYarnLock: () => (readYarnLock),
   resolveDepsForProject: () => (resolveDepsForProject)
 });
-/* import */ var _swc_helpers_async_to_generator__rspack_import_4 = __webpack_require__(2);
-/* import */ var _swc_helpers_object_spread__rspack_import_6 = __webpack_require__(193);
-/* import */ var _swc_helpers_sliced_to_array__rspack_import_9 = __webpack_require__(151);
-/* import */ var _swc_helpers_to_array__rspack_import_7 = __webpack_require__(352);
-/* import */ var _swc_helpers_to_consumable_array__rspack_import_8 = __webpack_require__(12);
-/* import */ var _swc_helpers_ts_generator__rspack_import_5 = __webpack_require__(4);
-/* import */ var _yarnpkg_lockfile__rspack_import_0 = __webpack_require__(355);
+/* import */ var _swc_helpers_async_to_generator__rspack_import_7 = __webpack_require__(2);
+/* import */ var _swc_helpers_object_spread__rspack_import_9 = __webpack_require__(193);
+/* import */ var _swc_helpers_sliced_to_array__rspack_import_12 = __webpack_require__(151);
+/* import */ var _swc_helpers_to_array__rspack_import_10 = __webpack_require__(353);
+/* import */ var _swc_helpers_to_consumable_array__rspack_import_11 = __webpack_require__(12);
+/* import */ var _swc_helpers_ts_generator__rspack_import_8 = __webpack_require__(4);
+/* import */ var _yarnpkg_lockfile__rspack_import_0 = __webpack_require__(356);
 /* import */ var _yarnpkg_lockfile__rspack_import_0_default = /*#__PURE__*/__webpack_require__.n(_yarnpkg_lockfile__rspack_import_0);
-/* import */ var _osd_cross_platform__rspack_import_1 = __webpack_require__(356);
+/* import */ var _osd_cross_platform__rspack_import_1 = __webpack_require__(357);
 /* import */ var _osd_cross_platform__rspack_import_1_default = /*#__PURE__*/__webpack_require__.n(_osd_cross_platform__rspack_import_1);
-/* import */ var path__rspack_import_2 = __webpack_require__(7);
-/* import */ var path__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_2);
-/* import */ var _utils_fs__rspack_import_3 = __webpack_require__(155);
+/* import */ var fs__rspack_import_2 = __webpack_require__(149);
+/* import */ var fs__rspack_import_2_default = /*#__PURE__*/__webpack_require__.n(fs__rspack_import_2);
+/* import */ var path__rspack_import_3 = __webpack_require__(7);
+/* import */ var path__rspack_import_3_default = /*#__PURE__*/__webpack_require__.n(path__rspack_import_3);
+/* import */ var _utils_fs__rspack_import_4 = __webpack_require__(155);
+/* import */ var _npm_lock__rspack_import_5 = __webpack_require__(363);
+/* import */ var _package_manager__rspack_import_6 = __webpack_require__(348);
 
 
 
@@ -55728,10 +56481,13 @@ __webpack_require__.d(__webpack_exports__, {
 
 
 
+
+
+
 function readYarnLock(osd) {
-    return (0,_swc_helpers_async_to_generator__rspack_import_4._)(function() {
+    return (0,_swc_helpers_async_to_generator__rspack_import_7._)(function() {
         var contents, yarnLock, error;
-        return (0,_swc_helpers_ts_generator__rspack_import_5._)(this, function(_state) {
+        return (0,_swc_helpers_ts_generator__rspack_import_8._)(this, function(_state) {
             switch(_state.label){
                 case 0:
                     _state.trys.push([
@@ -55742,7 +56498,7 @@ function readYarnLock(osd) {
                     ]);
                     return [
                         4,
-                        (0,_utils_fs__rspack_import_3.readFile)(osd.getAbsolute('yarn.lock'), 'utf8')
+                        (0,_utils_fs__rspack_import_4.readFile)(osd.getAbsolute('yarn.lock'), 'utf8')
                     ];
                 case 1:
                     contents = _state.sent();
@@ -55773,6 +56529,49 @@ function readYarnLock(osd) {
     })();
 }
 /**
+ * Read the root lockfile, whichever package manager owns the repository, in
+ * the `name@range` shape used by the rest of osd-pm.
+ */ function readLockfile(osd) {
+    return (0,_swc_helpers_async_to_generator__rspack_import_7._)(function() {
+        var found;
+        return (0,_swc_helpers_ts_generator__rspack_import_8._)(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    found = (0,_package_manager__rspack_import_6.findLockfile)(osd.getAbsolute());
+                    if (!((found === null || found === void 0 ? void 0 : found.packageManager.name) === 'npm')) return [
+                        3,
+                        2
+                    ];
+                    return [
+                        4,
+                        (0,_utils_fs__rspack_import_4.readFile)(found.path, 'utf8')
+                    ];
+                case 1:
+                    return [
+                        2,
+                        _npm_lock__rspack_import_5.npmLockToYarnLock.apply(void 0, [
+                            _state.sent()
+                        ])
+                    ];
+                case 2:
+                    return [
+                        2,
+                        readYarnLock(osd)
+                    ];
+            }
+        });
+    })();
+}
+/** Read the lockfile that owns `projectPath` (its own, or the nearest one above it). */ function readProjectLockfile(projectPath) {
+    var found = (0,_package_manager__rspack_import_6.findLockfile)(projectPath);
+    if (!found) throw new Error("No lockfile found for ".concat(projectPath));
+    var contents = (0,fs__rspack_import_2.readFileSync)(found.path, 'utf8');
+    if (found.packageManager.name === 'npm') return (0,_npm_lock__rspack_import_5.npmLockToYarnLock)(contents);
+    var parsed = (0,_yarnpkg_lockfile__rspack_import_0.parse)(contents);
+    if (parsed.type !== 'success') throw new Error("unable to parse ".concat(found.path));
+    return parsed.object;
+}
+/**
  * Converts relative `file:` paths to absolute paths
  * Yarn parsing method converts all file URIs to relative paths and this
  * breaks the single-version requirement as dependencies to the same path
@@ -55783,17 +56582,17 @@ function readYarnLock(osd) {
         return key.includes(fileLinkDelimiter);
     });
     if (linkedKeys.length === 0) return yarnLock;
-    var updatedYarnLock = (0,_swc_helpers_object_spread__rspack_import_6._)({}, yarnLock);
+    var updatedYarnLock = (0,_swc_helpers_object_spread__rspack_import_9._)({}, yarnLock);
     var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
     try {
         for(var _iterator = linkedKeys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
             var key = _step.value;
-            var _key_split = (0,_swc_helpers_to_array__rspack_import_7._)(key.split(fileLinkDelimiter)), keyName = _key_split[0], keyPath = _key_split[1], rest = _key_split.slice(2);
-            if (!(0,path__rspack_import_2.isAbsolute)(keyPath)) {
+            var _key_split = (0,_swc_helpers_to_array__rspack_import_10._)(key.split(fileLinkDelimiter)), keyName = _key_split[0], keyPath = _key_split[1], rest = _key_split.slice(2);
+            if (!(0,path__rspack_import_3.isAbsolute)(keyPath)) {
                 var updatedKeyName = [
                     keyName,
-                    (0,_osd_cross_platform__rspack_import_1.standardize)((0,path__rspack_import_2.resolve)(projectRoot, keyPath))
-                ].concat((0,_swc_helpers_to_consumable_array__rspack_import_8._)(rest)).join(fileLinkDelimiter);
+                    (0,_osd_cross_platform__rspack_import_1.standardize)((0,path__rspack_import_3.resolve)(projectRoot, keyPath))
+                ].concat((0,_swc_helpers_to_consumable_array__rspack_import_11._)(rest)).join(fileLinkDelimiter);
                 updatedYarnLock[updatedKeyName] = updatedYarnLock[key];
             }
         }
@@ -55835,7 +56634,7 @@ function readYarnLock(osd) {
         var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
         try {
             for(var _iterator = projectDeps[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
-                var _step_value = (0,_swc_helpers_sliced_to_array__rspack_import_9._)(_step.value, 2), name = _step_value[0], versionRange = _step_value[1];
+                var _step_value = (0,_swc_helpers_sliced_to_array__rspack_import_12._)(_step.value, 2), name = _step_value[0], versionRange = _step_value[1];
                 depQueue.push([
                     name,
                     versionRange
@@ -55856,7 +56655,7 @@ function readYarnLock(osd) {
             }
         }
         while(depQueue.length){
-            var _depQueue_shift = (0,_swc_helpers_sliced_to_array__rspack_import_9._)(depQueue.shift(), 2), name1 = _depQueue_shift[0], versionRange1 = _depQueue_shift[1];
+            var _depQueue_shift = (0,_swc_helpers_sliced_to_array__rspack_import_12._)(depQueue.shift(), 2), name1 = _depQueue_shift[0], versionRange1 = _depQueue_shift[1];
             var req = "".concat(name1, "@").concat(versionRange1);
             if (resolved.has(req)) {
                 continue;
@@ -55874,11 +56673,11 @@ function readYarnLock(osd) {
                     name: name1,
                     version: pkg.version
                 });
-                var allDepsEntries = (0,_swc_helpers_to_consumable_array__rspack_import_8._)(Object.entries(pkg.dependencies || {})).concat((0,_swc_helpers_to_consumable_array__rspack_import_8._)(Object.entries(pkg.optionalDependencies || {})));
+                var allDepsEntries = (0,_swc_helpers_to_consumable_array__rspack_import_11._)(Object.entries(pkg.dependencies || {})).concat((0,_swc_helpers_to_consumable_array__rspack_import_11._)(Object.entries(pkg.optionalDependencies || {})));
                 var _iteratorNormalCompletion1 = true, _didIteratorError1 = false, _iteratorError1 = undefined;
                 try {
                     for(var _iterator1 = allDepsEntries[Symbol.iterator](), _step1; !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done); _iteratorNormalCompletion1 = true){
-                        var _step_value1 = (0,_swc_helpers_sliced_to_array__rspack_import_9._)(_step1.value, 2), childName = _step_value1[0], childVersionRange = _step_value1[1];
+                        var _step_value1 = (0,_swc_helpers_sliced_to_array__rspack_import_12._)(_step1.value, 2), childName = _step_value1[0], childVersionRange = _step_value1[1];
                         depQueue.push([
                             childName,
                             childVersionRange
@@ -55931,7 +56730,7 @@ module.exports = require("child_process");
 module.exports = require("constants");
 
 },
-353(module) {
+354(module) {
 "use strict";
 module.exports = require("crypto");
 
@@ -56867,7 +57666,7 @@ function _object_spread(target) {
 
 
 },
-499(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
+501(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -56980,7 +57779,7 @@ function _tagged_template_literal(strings, raw) {
 
 
 },
-352(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
+353(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -57139,7 +57938,7 @@ function _wrap_native_super(Class) {
 
 
 },
-364(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
+366(__unused_rspack___webpack_module__, __webpack_exports__, __webpack_require__) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
@@ -58193,49 +58992,49 @@ const write = function (out, key, value, aliases, unknown) {
 
 
 },
-464(module) {
+466(module) {
 "use strict";
-module.exports = JSON.parse('{"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]},"dots2":{"interval":80,"frames":["⣾","⣽","⣻","⢿","⡿","⣟","⣯","⣷"]},"dots3":{"interval":80,"frames":["⠋","⠙","⠚","⠞","⠖","⠦","⠴","⠲","⠳","⠓"]},"dots4":{"interval":80,"frames":["⠄","⠆","⠇","⠋","⠙","⠸","⠰","⠠","⠰","⠸","⠙","⠋","⠇","⠆"]},"dots5":{"interval":80,"frames":["⠋","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋"]},"dots6":{"interval":80,"frames":["⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠴","⠲","⠒","⠂","⠂","⠒","⠚","⠙","⠉","⠁"]},"dots7":{"interval":80,"frames":["⠈","⠉","⠋","⠓","⠒","⠐","⠐","⠒","⠖","⠦","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈"]},"dots8":{"interval":80,"frames":["⠁","⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈","⠈"]},"dots9":{"interval":80,"frames":["⢹","⢺","⢼","⣸","⣇","⡧","⡗","⡏"]},"dots10":{"interval":80,"frames":["⢄","⢂","⢁","⡁","⡈","⡐","⡠"]},"dots11":{"interval":100,"frames":["⠁","⠂","⠄","⡀","⢀","⠠","⠐","⠈"]},"dots12":{"interval":80,"frames":["⢀⠀","⡀⠀","⠄⠀","⢂⠀","⡂⠀","⠅⠀","⢃⠀","⡃⠀","⠍⠀","⢋⠀","⡋⠀","⠍⠁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⢈⠩","⡀⢙","⠄⡙","⢂⠩","⡂⢘","⠅⡘","⢃⠨","⡃⢐","⠍⡐","⢋⠠","⡋⢀","⠍⡁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⠈⠩","⠀⢙","⠀⡙","⠀⠩","⠀⢘","⠀⡘","⠀⠨","⠀⢐","⠀⡐","⠀⠠","⠀⢀","⠀⡀"]},"dots8Bit":{"interval":80,"frames":["⠀","⠁","⠂","⠃","⠄","⠅","⠆","⠇","⡀","⡁","⡂","⡃","⡄","⡅","⡆","⡇","⠈","⠉","⠊","⠋","⠌","⠍","⠎","⠏","⡈","⡉","⡊","⡋","⡌","⡍","⡎","⡏","⠐","⠑","⠒","⠓","⠔","⠕","⠖","⠗","⡐","⡑","⡒","⡓","⡔","⡕","⡖","⡗","⠘","⠙","⠚","⠛","⠜","⠝","⠞","⠟","⡘","⡙","⡚","⡛","⡜","⡝","⡞","⡟","⠠","⠡","⠢","⠣","⠤","⠥","⠦","⠧","⡠","⡡","⡢","⡣","⡤","⡥","⡦","⡧","⠨","⠩","⠪","⠫","⠬","⠭","⠮","⠯","⡨","⡩","⡪","⡫","⡬","⡭","⡮","⡯","⠰","⠱","⠲","⠳","⠴","⠵","⠶","⠷","⡰","⡱","⡲","⡳","⡴","⡵","⡶","⡷","⠸","⠹","⠺","⠻","⠼","⠽","⠾","⠿","⡸","⡹","⡺","⡻","⡼","⡽","⡾","⡿","⢀","⢁","⢂","⢃","⢄","⢅","⢆","⢇","⣀","⣁","⣂","⣃","⣄","⣅","⣆","⣇","⢈","⢉","⢊","⢋","⢌","⢍","⢎","⢏","⣈","⣉","⣊","⣋","⣌","⣍","⣎","⣏","⢐","⢑","⢒","⢓","⢔","⢕","⢖","⢗","⣐","⣑","⣒","⣓","⣔","⣕","⣖","⣗","⢘","⢙","⢚","⢛","⢜","⢝","⢞","⢟","⣘","⣙","⣚","⣛","⣜","⣝","⣞","⣟","⢠","⢡","⢢","⢣","⢤","⢥","⢦","⢧","⣠","⣡","⣢","⣣","⣤","⣥","⣦","⣧","⢨","⢩","⢪","⢫","⢬","⢭","⢮","⢯","⣨","⣩","⣪","⣫","⣬","⣭","⣮","⣯","⢰","⢱","⢲","⢳","⢴","⢵","⢶","⢷","⣰","⣱","⣲","⣳","⣴","⣵","⣶","⣷","⢸","⢹","⢺","⢻","⢼","⢽","⢾","⢿","⣸","⣹","⣺","⣻","⣼","⣽","⣾","⣿"]},"line":{"interval":130,"frames":["-","\\\\","|","/"]},"line2":{"interval":100,"frames":["⠂","-","–","—","–","-"]},"pipe":{"interval":100,"frames":["┤","┘","┴","└","├","┌","┬","┐"]},"simpleDots":{"interval":400,"frames":[".  ",".. ","...","   "]},"simpleDotsScrolling":{"interval":200,"frames":[".  ",".. ","..."," ..","  .","   "]},"star":{"interval":70,"frames":["✶","✸","✹","✺","✹","✷"]},"star2":{"interval":80,"frames":["+","x","*"]},"flip":{"interval":70,"frames":["_","_","_","-","`","`","\'","´","-","_","_","_"]},"hamburger":{"interval":100,"frames":["☱","☲","☴"]},"growVertical":{"interval":120,"frames":["▁","▃","▄","▅","▆","▇","▆","▅","▄","▃"]},"growHorizontal":{"interval":120,"frames":["▏","▎","▍","▌","▋","▊","▉","▊","▋","▌","▍","▎"]},"balloon":{"interval":140,"frames":[" ",".","o","O","@","*"," "]},"balloon2":{"interval":120,"frames":[".","o","O","°","O","o","."]},"noise":{"interval":100,"frames":["▓","▒","░"]},"bounce":{"interval":120,"frames":["⠁","⠂","⠄","⠂"]},"boxBounce":{"interval":120,"frames":["▖","▘","▝","▗"]},"boxBounce2":{"interval":100,"frames":["▌","▀","▐","▄"]},"triangle":{"interval":50,"frames":["◢","◣","◤","◥"]},"arc":{"interval":100,"frames":["◜","◠","◝","◞","◡","◟"]},"circle":{"interval":120,"frames":["◡","⊙","◠"]},"squareCorners":{"interval":180,"frames":["◰","◳","◲","◱"]},"circleQuarters":{"interval":120,"frames":["◴","◷","◶","◵"]},"circleHalves":{"interval":50,"frames":["◐","◓","◑","◒"]},"squish":{"interval":100,"frames":["╫","╪"]},"toggle":{"interval":250,"frames":["⊶","⊷"]},"toggle2":{"interval":80,"frames":["▫","▪"]},"toggle3":{"interval":120,"frames":["□","■"]},"toggle4":{"interval":100,"frames":["■","□","▪","▫"]},"toggle5":{"interval":100,"frames":["▮","▯"]},"toggle6":{"interval":300,"frames":["ဝ","၀"]},"toggle7":{"interval":80,"frames":["⦾","⦿"]},"toggle8":{"interval":100,"frames":["◍","◌"]},"toggle9":{"interval":100,"frames":["◉","◎"]},"toggle10":{"interval":100,"frames":["㊂","㊀","㊁"]},"toggle11":{"interval":50,"frames":["⧇","⧆"]},"toggle12":{"interval":120,"frames":["☗","☖"]},"toggle13":{"interval":80,"frames":["=","*","-"]},"arrow":{"interval":100,"frames":["←","↖","↑","↗","→","↘","↓","↙"]},"arrow2":{"interval":80,"frames":["⬆️ ","↗️ ","➡️ ","↘️ ","⬇️ ","↙️ ","⬅️ ","↖️ "]},"arrow3":{"interval":120,"frames":["▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"]},"bouncingBar":{"interval":80,"frames":["[    ]","[=   ]","[==  ]","[=== ]","[ ===]","[  ==]","[   =]","[    ]","[   =]","[  ==]","[ ===]","[====]","[=== ]","[==  ]","[=   ]"]},"bouncingBall":{"interval":80,"frames":["( ●    )","(  ●   )","(   ●  )","(    ● )","(     ●)","(    ● )","(   ●  )","(  ●   )","( ●    )","(●     )"]},"smiley":{"interval":200,"frames":["😄 ","😝 "]},"monkey":{"interval":300,"frames":["🙈 ","🙈 ","🙉 ","🙊 "]},"hearts":{"interval":100,"frames":["💛 ","💙 ","💜 ","💚 ","❤️ "]},"clock":{"interval":100,"frames":["🕛 ","🕐 ","🕑 ","🕒 ","🕓 ","🕔 ","🕕 ","🕖 ","🕗 ","🕘 ","🕙 ","🕚 "]},"earth":{"interval":180,"frames":["🌍 ","🌎 ","🌏 "]},"material":{"interval":17,"frames":["█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁","███████▁▁▁▁▁▁▁▁▁▁▁▁▁","████████▁▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","██████████▁▁▁▁▁▁▁▁▁▁","███████████▁▁▁▁▁▁▁▁▁","█████████████▁▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁▁██████████████▁▁▁▁","▁▁▁██████████████▁▁▁","▁▁▁▁█████████████▁▁▁","▁▁▁▁██████████████▁▁","▁▁▁▁██████████████▁▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁▁██████████████","▁▁▁▁▁▁██████████████","▁▁▁▁▁▁▁█████████████","▁▁▁▁▁▁▁█████████████","▁▁▁▁▁▁▁▁████████████","▁▁▁▁▁▁▁▁████████████","▁▁▁▁▁▁▁▁▁███████████","▁▁▁▁▁▁▁▁▁███████████","▁▁▁▁▁▁▁▁▁▁██████████","▁▁▁▁▁▁▁▁▁▁██████████","▁▁▁▁▁▁▁▁▁▁▁▁████████","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁██████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","███▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","████▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","██████▁▁▁▁▁▁▁▁▁▁▁▁▁█","████████▁▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","███████████▁▁▁▁▁▁▁▁▁","████████████▁▁▁▁▁▁▁▁","████████████▁▁▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁▁▁█████████████▁▁▁▁","▁▁▁▁▁████████████▁▁▁","▁▁▁▁▁████████████▁▁▁","▁▁▁▁▁▁███████████▁▁▁","▁▁▁▁▁▁▁▁█████████▁▁▁","▁▁▁▁▁▁▁▁█████████▁▁▁","▁▁▁▁▁▁▁▁▁█████████▁▁","▁▁▁▁▁▁▁▁▁█████████▁▁","▁▁▁▁▁▁▁▁▁▁█████████▁","▁▁▁▁▁▁▁▁▁▁▁████████▁","▁▁▁▁▁▁▁▁▁▁▁████████▁","▁▁▁▁▁▁▁▁▁▁▁▁███████▁","▁▁▁▁▁▁▁▁▁▁▁▁███████▁","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁"]},"moon":{"interval":80,"frames":["🌑 ","🌒 ","🌓 ","🌔 ","🌕 ","🌖 ","🌗 ","🌘 "]},"runner":{"interval":140,"frames":["🚶 ","🏃 "]},"pong":{"interval":80,"frames":["▐⠂       ▌","▐⠈       ▌","▐ ⠂      ▌","▐ ⠠      ▌","▐  ⡀     ▌","▐  ⠠     ▌","▐   ⠂    ▌","▐   ⠈    ▌","▐    ⠂   ▌","▐    ⠠   ▌","▐     ⡀  ▌","▐     ⠠  ▌","▐      ⠂ ▌","▐      ⠈ ▌","▐       ⠂▌","▐       ⠠▌","▐       ⡀▌","▐      ⠠ ▌","▐      ⠂ ▌","▐     ⠈  ▌","▐     ⠂  ▌","▐    ⠠   ▌","▐    ⡀   ▌","▐   ⠠    ▌","▐   ⠂    ▌","▐  ⠈     ▌","▐  ⠂     ▌","▐ ⠠      ▌","▐ ⡀      ▌","▐⠠       ▌"]},"shark":{"interval":120,"frames":["▐|\\\\____________▌","▐_|\\\\___________▌","▐__|\\\\__________▌","▐___|\\\\_________▌","▐____|\\\\________▌","▐_____|\\\\_______▌","▐______|\\\\______▌","▐_______|\\\\_____▌","▐________|\\\\____▌","▐_________|\\\\___▌","▐__________|\\\\__▌","▐___________|\\\\_▌","▐____________|\\\\▌","▐____________/|▌","▐___________/|_▌","▐__________/|__▌","▐_________/|___▌","▐________/|____▌","▐_______/|_____▌","▐______/|______▌","▐_____/|_______▌","▐____/|________▌","▐___/|_________▌","▐__/|__________▌","▐_/|___________▌","▐/|____________▌"]},"dqpb":{"interval":100,"frames":["d","q","p","b"]},"weather":{"interval":100,"frames":["☀️ ","☀️ ","☀️ ","🌤 ","⛅️ ","🌥 ","☁️ ","🌧 ","🌨 ","🌧 ","🌨 ","🌧 ","🌨 ","⛈ ","🌨 ","🌧 ","🌨 ","☁️ ","🌥 ","⛅️ ","🌤 ","☀️ ","☀️ "]},"christmas":{"interval":400,"frames":["🌲","🎄"]},"grenade":{"interval":80,"frames":["،  ","′  "," ´ "," ‾ ","  ⸌","  ⸊","  |","  ⁎","  ⁕"," ෴ ","  ⁓","   ","   ","   "]},"point":{"interval":125,"frames":["∙∙∙","●∙∙","∙●∙","∙∙●","∙∙∙"]},"layer":{"interval":150,"frames":["-","=","≡"]},"betaWave":{"interval":80,"frames":["ρββββββ","βρβββββ","ββρββββ","βββρβββ","ββββρββ","βββββρβ","ββββββρ"]},"fingerDance":{"interval":160,"frames":["🤘 ","🤟 ","🖖 ","✋ ","🤚 ","👆 "]},"fistBump":{"interval":80,"frames":["🤜　　　　🤛 ","🤜　　　　🤛 ","🤜　　　　🤛 ","　🤜　　🤛　 ","　　🤜🤛　　 ","　🤜✨🤛　　 ","🤜　✨　🤛　 "]},"soccerHeader":{"interval":80,"frames":[" 🧑⚽️       🧑 ","🧑  ⚽️      🧑 ","🧑   ⚽️     🧑 ","🧑    ⚽️    🧑 ","🧑     ⚽️   🧑 ","🧑      ⚽️  🧑 ","🧑       ⚽️🧑  ","🧑      ⚽️  🧑 ","🧑     ⚽️   🧑 ","🧑    ⚽️    🧑 ","🧑   ⚽️     🧑 ","🧑  ⚽️      🧑 "]},"mindblown":{"interval":160,"frames":["😐 ","😐 ","😮 ","😮 ","😦 ","😦 ","😧 ","😧 ","🤯 ","💥 ","✨ ","　 ","　 ","　 "]},"speaker":{"interval":160,"frames":["🔈 ","🔉 ","🔊 ","🔉 "]},"orangePulse":{"interval":100,"frames":["🔸 ","🔶 ","🟠 ","🟠 ","🔶 "]},"bluePulse":{"interval":100,"frames":["🔹 ","🔷 ","🔵 ","🔵 ","🔷 "]},"orangeBluePulse":{"interval":100,"frames":["🔸 ","🔶 ","🟠 ","🟠 ","🔶 ","🔹 ","🔷 ","🔵 ","🔵 ","🔷 "]},"timeTravel":{"interval":100,"frames":["🕛 ","🕚 ","🕙 ","🕘 ","🕗 ","🕖 ","🕕 ","🕔 ","🕓 ","🕒 ","🕑 ","🕐 "]},"aesthetic":{"interval":80,"frames":["▰▱▱▱▱▱▱","▰▰▱▱▱▱▱","▰▰▰▱▱▱▱","▰▰▰▰▱▱▱","▰▰▰▰▰▱▱","▰▰▰▰▰▰▱","▰▰▰▰▰▰▰","▰▱▱▱▱▱▱"]}}')
+module.exports = /*#__PURE__*/JSON.parse('{"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]},"dots2":{"interval":80,"frames":["⣾","⣽","⣻","⢿","⡿","⣟","⣯","⣷"]},"dots3":{"interval":80,"frames":["⠋","⠙","⠚","⠞","⠖","⠦","⠴","⠲","⠳","⠓"]},"dots4":{"interval":80,"frames":["⠄","⠆","⠇","⠋","⠙","⠸","⠰","⠠","⠰","⠸","⠙","⠋","⠇","⠆"]},"dots5":{"interval":80,"frames":["⠋","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋"]},"dots6":{"interval":80,"frames":["⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠴","⠲","⠒","⠂","⠂","⠒","⠚","⠙","⠉","⠁"]},"dots7":{"interval":80,"frames":["⠈","⠉","⠋","⠓","⠒","⠐","⠐","⠒","⠖","⠦","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈"]},"dots8":{"interval":80,"frames":["⠁","⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈","⠈"]},"dots9":{"interval":80,"frames":["⢹","⢺","⢼","⣸","⣇","⡧","⡗","⡏"]},"dots10":{"interval":80,"frames":["⢄","⢂","⢁","⡁","⡈","⡐","⡠"]},"dots11":{"interval":100,"frames":["⠁","⠂","⠄","⡀","⢀","⠠","⠐","⠈"]},"dots12":{"interval":80,"frames":["⢀⠀","⡀⠀","⠄⠀","⢂⠀","⡂⠀","⠅⠀","⢃⠀","⡃⠀","⠍⠀","⢋⠀","⡋⠀","⠍⠁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⢈⠩","⡀⢙","⠄⡙","⢂⠩","⡂⢘","⠅⡘","⢃⠨","⡃⢐","⠍⡐","⢋⠠","⡋⢀","⠍⡁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⠈⠩","⠀⢙","⠀⡙","⠀⠩","⠀⢘","⠀⡘","⠀⠨","⠀⢐","⠀⡐","⠀⠠","⠀⢀","⠀⡀"]},"dots8Bit":{"interval":80,"frames":["⠀","⠁","⠂","⠃","⠄","⠅","⠆","⠇","⡀","⡁","⡂","⡃","⡄","⡅","⡆","⡇","⠈","⠉","⠊","⠋","⠌","⠍","⠎","⠏","⡈","⡉","⡊","⡋","⡌","⡍","⡎","⡏","⠐","⠑","⠒","⠓","⠔","⠕","⠖","⠗","⡐","⡑","⡒","⡓","⡔","⡕","⡖","⡗","⠘","⠙","⠚","⠛","⠜","⠝","⠞","⠟","⡘","⡙","⡚","⡛","⡜","⡝","⡞","⡟","⠠","⠡","⠢","⠣","⠤","⠥","⠦","⠧","⡠","⡡","⡢","⡣","⡤","⡥","⡦","⡧","⠨","⠩","⠪","⠫","⠬","⠭","⠮","⠯","⡨","⡩","⡪","⡫","⡬","⡭","⡮","⡯","⠰","⠱","⠲","⠳","⠴","⠵","⠶","⠷","⡰","⡱","⡲","⡳","⡴","⡵","⡶","⡷","⠸","⠹","⠺","⠻","⠼","⠽","⠾","⠿","⡸","⡹","⡺","⡻","⡼","⡽","⡾","⡿","⢀","⢁","⢂","⢃","⢄","⢅","⢆","⢇","⣀","⣁","⣂","⣃","⣄","⣅","⣆","⣇","⢈","⢉","⢊","⢋","⢌","⢍","⢎","⢏","⣈","⣉","⣊","⣋","⣌","⣍","⣎","⣏","⢐","⢑","⢒","⢓","⢔","⢕","⢖","⢗","⣐","⣑","⣒","⣓","⣔","⣕","⣖","⣗","⢘","⢙","⢚","⢛","⢜","⢝","⢞","⢟","⣘","⣙","⣚","⣛","⣜","⣝","⣞","⣟","⢠","⢡","⢢","⢣","⢤","⢥","⢦","⢧","⣠","⣡","⣢","⣣","⣤","⣥","⣦","⣧","⢨","⢩","⢪","⢫","⢬","⢭","⢮","⢯","⣨","⣩","⣪","⣫","⣬","⣭","⣮","⣯","⢰","⢱","⢲","⢳","⢴","⢵","⢶","⢷","⣰","⣱","⣲","⣳","⣴","⣵","⣶","⣷","⢸","⢹","⢺","⢻","⢼","⢽","⢾","⢿","⣸","⣹","⣺","⣻","⣼","⣽","⣾","⣿"]},"line":{"interval":130,"frames":["-","\\\\","|","/"]},"line2":{"interval":100,"frames":["⠂","-","–","—","–","-"]},"pipe":{"interval":100,"frames":["┤","┘","┴","└","├","┌","┬","┐"]},"simpleDots":{"interval":400,"frames":[".  ",".. ","...","   "]},"simpleDotsScrolling":{"interval":200,"frames":[".  ",".. ","..."," ..","  .","   "]},"star":{"interval":70,"frames":["✶","✸","✹","✺","✹","✷"]},"star2":{"interval":80,"frames":["+","x","*"]},"flip":{"interval":70,"frames":["_","_","_","-","`","`","\'","´","-","_","_","_"]},"hamburger":{"interval":100,"frames":["☱","☲","☴"]},"growVertical":{"interval":120,"frames":["▁","▃","▄","▅","▆","▇","▆","▅","▄","▃"]},"growHorizontal":{"interval":120,"frames":["▏","▎","▍","▌","▋","▊","▉","▊","▋","▌","▍","▎"]},"balloon":{"interval":140,"frames":[" ",".","o","O","@","*"," "]},"balloon2":{"interval":120,"frames":[".","o","O","°","O","o","."]},"noise":{"interval":100,"frames":["▓","▒","░"]},"bounce":{"interval":120,"frames":["⠁","⠂","⠄","⠂"]},"boxBounce":{"interval":120,"frames":["▖","▘","▝","▗"]},"boxBounce2":{"interval":100,"frames":["▌","▀","▐","▄"]},"triangle":{"interval":50,"frames":["◢","◣","◤","◥"]},"arc":{"interval":100,"frames":["◜","◠","◝","◞","◡","◟"]},"circle":{"interval":120,"frames":["◡","⊙","◠"]},"squareCorners":{"interval":180,"frames":["◰","◳","◲","◱"]},"circleQuarters":{"interval":120,"frames":["◴","◷","◶","◵"]},"circleHalves":{"interval":50,"frames":["◐","◓","◑","◒"]},"squish":{"interval":100,"frames":["╫","╪"]},"toggle":{"interval":250,"frames":["⊶","⊷"]},"toggle2":{"interval":80,"frames":["▫","▪"]},"toggle3":{"interval":120,"frames":["□","■"]},"toggle4":{"interval":100,"frames":["■","□","▪","▫"]},"toggle5":{"interval":100,"frames":["▮","▯"]},"toggle6":{"interval":300,"frames":["ဝ","၀"]},"toggle7":{"interval":80,"frames":["⦾","⦿"]},"toggle8":{"interval":100,"frames":["◍","◌"]},"toggle9":{"interval":100,"frames":["◉","◎"]},"toggle10":{"interval":100,"frames":["㊂","㊀","㊁"]},"toggle11":{"interval":50,"frames":["⧇","⧆"]},"toggle12":{"interval":120,"frames":["☗","☖"]},"toggle13":{"interval":80,"frames":["=","*","-"]},"arrow":{"interval":100,"frames":["←","↖","↑","↗","→","↘","↓","↙"]},"arrow2":{"interval":80,"frames":["⬆️ ","↗️ ","➡️ ","↘️ ","⬇️ ","↙️ ","⬅️ ","↖️ "]},"arrow3":{"interval":120,"frames":["▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"]},"bouncingBar":{"interval":80,"frames":["[    ]","[=   ]","[==  ]","[=== ]","[ ===]","[  ==]","[   =]","[    ]","[   =]","[  ==]","[ ===]","[====]","[=== ]","[==  ]","[=   ]"]},"bouncingBall":{"interval":80,"frames":["( ●    )","(  ●   )","(   ●  )","(    ● )","(     ●)","(    ● )","(   ●  )","(  ●   )","( ●    )","(●     )"]},"smiley":{"interval":200,"frames":["😄 ","😝 "]},"monkey":{"interval":300,"frames":["🙈 ","🙈 ","🙉 ","🙊 "]},"hearts":{"interval":100,"frames":["💛 ","💙 ","💜 ","💚 ","❤️ "]},"clock":{"interval":100,"frames":["🕛 ","🕐 ","🕑 ","🕒 ","🕓 ","🕔 ","🕕 ","🕖 ","🕗 ","🕘 ","🕙 ","🕚 "]},"earth":{"interval":180,"frames":["🌍 ","🌎 ","🌏 "]},"material":{"interval":17,"frames":["█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁","██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁","███████▁▁▁▁▁▁▁▁▁▁▁▁▁","████████▁▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","██████████▁▁▁▁▁▁▁▁▁▁","███████████▁▁▁▁▁▁▁▁▁","█████████████▁▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁▁██████████████▁▁▁▁","▁▁▁██████████████▁▁▁","▁▁▁▁█████████████▁▁▁","▁▁▁▁██████████████▁▁","▁▁▁▁██████████████▁▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁██████████████▁","▁▁▁▁▁▁██████████████","▁▁▁▁▁▁██████████████","▁▁▁▁▁▁▁█████████████","▁▁▁▁▁▁▁█████████████","▁▁▁▁▁▁▁▁████████████","▁▁▁▁▁▁▁▁████████████","▁▁▁▁▁▁▁▁▁███████████","▁▁▁▁▁▁▁▁▁███████████","▁▁▁▁▁▁▁▁▁▁██████████","▁▁▁▁▁▁▁▁▁▁██████████","▁▁▁▁▁▁▁▁▁▁▁▁████████","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁██████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","███▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","████▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","██████▁▁▁▁▁▁▁▁▁▁▁▁▁█","████████▁▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","█████████▁▁▁▁▁▁▁▁▁▁▁","███████████▁▁▁▁▁▁▁▁▁","████████████▁▁▁▁▁▁▁▁","████████████▁▁▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","██████████████▁▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁██████████████▁▁▁▁▁","▁▁▁█████████████▁▁▁▁","▁▁▁▁▁████████████▁▁▁","▁▁▁▁▁████████████▁▁▁","▁▁▁▁▁▁███████████▁▁▁","▁▁▁▁▁▁▁▁█████████▁▁▁","▁▁▁▁▁▁▁▁█████████▁▁▁","▁▁▁▁▁▁▁▁▁█████████▁▁","▁▁▁▁▁▁▁▁▁█████████▁▁","▁▁▁▁▁▁▁▁▁▁█████████▁","▁▁▁▁▁▁▁▁▁▁▁████████▁","▁▁▁▁▁▁▁▁▁▁▁████████▁","▁▁▁▁▁▁▁▁▁▁▁▁███████▁","▁▁▁▁▁▁▁▁▁▁▁▁███████▁","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁███████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁","▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁"]},"moon":{"interval":80,"frames":["🌑 ","🌒 ","🌓 ","🌔 ","🌕 ","🌖 ","🌗 ","🌘 "]},"runner":{"interval":140,"frames":["🚶 ","🏃 "]},"pong":{"interval":80,"frames":["▐⠂       ▌","▐⠈       ▌","▐ ⠂      ▌","▐ ⠠      ▌","▐  ⡀     ▌","▐  ⠠     ▌","▐   ⠂    ▌","▐   ⠈    ▌","▐    ⠂   ▌","▐    ⠠   ▌","▐     ⡀  ▌","▐     ⠠  ▌","▐      ⠂ ▌","▐      ⠈ ▌","▐       ⠂▌","▐       ⠠▌","▐       ⡀▌","▐      ⠠ ▌","▐      ⠂ ▌","▐     ⠈  ▌","▐     ⠂  ▌","▐    ⠠   ▌","▐    ⡀   ▌","▐   ⠠    ▌","▐   ⠂    ▌","▐  ⠈     ▌","▐  ⠂     ▌","▐ ⠠      ▌","▐ ⡀      ▌","▐⠠       ▌"]},"shark":{"interval":120,"frames":["▐|\\\\____________▌","▐_|\\\\___________▌","▐__|\\\\__________▌","▐___|\\\\_________▌","▐____|\\\\________▌","▐_____|\\\\_______▌","▐______|\\\\______▌","▐_______|\\\\_____▌","▐________|\\\\____▌","▐_________|\\\\___▌","▐__________|\\\\__▌","▐___________|\\\\_▌","▐____________|\\\\▌","▐____________/|▌","▐___________/|_▌","▐__________/|__▌","▐_________/|___▌","▐________/|____▌","▐_______/|_____▌","▐______/|______▌","▐_____/|_______▌","▐____/|________▌","▐___/|_________▌","▐__/|__________▌","▐_/|___________▌","▐/|____________▌"]},"dqpb":{"interval":100,"frames":["d","q","p","b"]},"weather":{"interval":100,"frames":["☀️ ","☀️ ","☀️ ","🌤 ","⛅️ ","🌥 ","☁️ ","🌧 ","🌨 ","🌧 ","🌨 ","🌧 ","🌨 ","⛈ ","🌨 ","🌧 ","🌨 ","☁️ ","🌥 ","⛅️ ","🌤 ","☀️ ","☀️ "]},"christmas":{"interval":400,"frames":["🌲","🎄"]},"grenade":{"interval":80,"frames":["،  ","′  "," ´ "," ‾ ","  ⸌","  ⸊","  |","  ⁎","  ⁕"," ෴ ","  ⁓","   ","   ","   "]},"point":{"interval":125,"frames":["∙∙∙","●∙∙","∙●∙","∙∙●","∙∙∙"]},"layer":{"interval":150,"frames":["-","=","≡"]},"betaWave":{"interval":80,"frames":["ρββββββ","βρβββββ","ββρββββ","βββρβββ","ββββρββ","βββββρβ","ββββββρ"]},"fingerDance":{"interval":160,"frames":["🤘 ","🤟 ","🖖 ","✋ ","🤚 ","👆 "]},"fistBump":{"interval":80,"frames":["🤜　　　　🤛 ","🤜　　　　🤛 ","🤜　　　　🤛 ","　🤜　　🤛　 ","　　🤜🤛　　 ","　🤜✨🤛　　 ","🤜　✨　🤛　 "]},"soccerHeader":{"interval":80,"frames":[" 🧑⚽️       🧑 ","🧑  ⚽️      🧑 ","🧑   ⚽️     🧑 ","🧑    ⚽️    🧑 ","🧑     ⚽️   🧑 ","🧑      ⚽️  🧑 ","🧑       ⚽️🧑  ","🧑      ⚽️  🧑 ","🧑     ⚽️   🧑 ","🧑    ⚽️    🧑 ","🧑   ⚽️     🧑 ","🧑  ⚽️      🧑 "]},"mindblown":{"interval":160,"frames":["😐 ","😐 ","😮 ","😮 ","😦 ","😦 ","😧 ","😧 ","🤯 ","💥 ","✨ ","　 ","　 ","　 "]},"speaker":{"interval":160,"frames":["🔈 ","🔉 ","🔊 ","🔉 "]},"orangePulse":{"interval":100,"frames":["🔸 ","🔶 ","🟠 ","🟠 ","🔶 "]},"bluePulse":{"interval":100,"frames":["🔹 ","🔷 ","🔵 ","🔵 ","🔷 "]},"orangeBluePulse":{"interval":100,"frames":["🔸 ","🔶 ","🟠 ","🟠 ","🔶 ","🔹 ","🔷 ","🔵 ","🔵 ","🔷 "]},"timeTravel":{"interval":100,"frames":["🕛 ","🕚 ","🕙 ","🕘 ","🕗 ","🕖 ","🕕 ","🕔 ","🕓 ","🕒 ","🕑 ","🕐 "]},"aesthetic":{"interval":80,"frames":["▰▱▱▱▱▱▱","▰▰▱▱▱▱▱","▰▰▰▱▱▱▱","▰▰▰▰▱▱▱","▰▰▰▰▰▱▱","▰▰▰▰▰▰▱","▰▰▰▰▰▰▰","▰▱▱▱▱▱▱"]}}')
 
 },
 279(module) {
 "use strict";
-module.exports = JSON.parse('{"assert":true,"node:assert":[">= 14.18 && < 15",">= 16"],"assert/strict":">= 15","node:assert/strict":">= 16","async_hooks":">= 8","node:async_hooks":[">= 14.18 && < 15",">= 16"],"buffer_ieee754":">= 0.5 && < 0.9.7","buffer":true,"node:buffer":[">= 14.18 && < 15",">= 16"],"child_process":true,"node:child_process":[">= 14.18 && < 15",">= 16"],"cluster":">= 0.5","node:cluster":[">= 14.18 && < 15",">= 16"],"console":true,"node:console":[">= 14.18 && < 15",">= 16"],"constants":true,"node:constants":[">= 14.18 && < 15",">= 16"],"crypto":true,"node:crypto":[">= 14.18 && < 15",">= 16"],"_debug_agent":">= 1 && < 8","_debugger":"< 8","dgram":true,"node:dgram":[">= 14.18 && < 15",">= 16"],"diagnostics_channel":[">= 14.17 && < 15",">= 15.1"],"node:diagnostics_channel":[">= 14.18 && < 15",">= 16"],"dns":true,"node:dns":[">= 14.18 && < 15",">= 16"],"dns/promises":">= 15","node:dns/promises":">= 16","domain":">= 0.7.12","node:domain":[">= 14.18 && < 15",">= 16"],"events":true,"node:events":[">= 14.18 && < 15",">= 16"],"freelist":"< 6","fs":true,"node:fs":[">= 14.18 && < 15",">= 16"],"fs/promises":[">= 10 && < 10.1",">= 14"],"node:fs/promises":[">= 14.18 && < 15",">= 16"],"_http_agent":">= 0.11.1","node:_http_agent":[">= 14.18 && < 15",">= 16"],"_http_client":">= 0.11.1","node:_http_client":[">= 14.18 && < 15",">= 16"],"_http_common":">= 0.11.1","node:_http_common":[">= 14.18 && < 15",">= 16"],"_http_incoming":">= 0.11.1","node:_http_incoming":[">= 14.18 && < 15",">= 16"],"_http_outgoing":">= 0.11.1","node:_http_outgoing":[">= 14.18 && < 15",">= 16"],"_http_server":">= 0.11.1","node:_http_server":[">= 14.18 && < 15",">= 16"],"http":true,"node:http":[">= 14.18 && < 15",">= 16"],"http2":">= 8.8","node:http2":[">= 14.18 && < 15",">= 16"],"https":true,"node:https":[">= 14.18 && < 15",">= 16"],"inspector":">= 8","node:inspector":[">= 14.18 && < 15",">= 16"],"inspector/promises":[">= 19"],"node:inspector/promises":[">= 19"],"_linklist":"< 8","module":true,"node:module":[">= 14.18 && < 15",">= 16"],"net":true,"node:net":[">= 14.18 && < 15",">= 16"],"node-inspect/lib/_inspect":">= 7.6 && < 12","node-inspect/lib/internal/inspect_client":">= 7.6 && < 12","node-inspect/lib/internal/inspect_repl":">= 7.6 && < 12","os":true,"node:os":[">= 14.18 && < 15",">= 16"],"path":true,"node:path":[">= 14.18 && < 15",">= 16"],"path/posix":">= 15.3","node:path/posix":">= 16","path/win32":">= 15.3","node:path/win32":">= 16","perf_hooks":">= 8.5","node:perf_hooks":[">= 14.18 && < 15",">= 16"],"process":">= 1","node:process":[">= 14.18 && < 15",">= 16"],"punycode":">= 0.5","node:punycode":[">= 14.18 && < 15",">= 16"],"querystring":true,"node:querystring":[">= 14.18 && < 15",">= 16"],"readline":true,"node:readline":[">= 14.18 && < 15",">= 16"],"readline/promises":">= 17","node:readline/promises":">= 17","repl":true,"node:repl":[">= 14.18 && < 15",">= 16"],"smalloc":">= 0.11.5 && < 3","_stream_duplex":">= 0.9.4","node:_stream_duplex":[">= 14.18 && < 15",">= 16"],"_stream_transform":">= 0.9.4","node:_stream_transform":[">= 14.18 && < 15",">= 16"],"_stream_wrap":">= 1.4.1","node:_stream_wrap":[">= 14.18 && < 15",">= 16"],"_stream_passthrough":">= 0.9.4","node:_stream_passthrough":[">= 14.18 && < 15",">= 16"],"_stream_readable":">= 0.9.4","node:_stream_readable":[">= 14.18 && < 15",">= 16"],"_stream_writable":">= 0.9.4","node:_stream_writable":[">= 14.18 && < 15",">= 16"],"stream":true,"node:stream":[">= 14.18 && < 15",">= 16"],"stream/consumers":">= 16.7","node:stream/consumers":">= 16.7","stream/promises":">= 15","node:stream/promises":">= 16","stream/web":">= 16.5","node:stream/web":">= 16.5","string_decoder":true,"node:string_decoder":[">= 14.18 && < 15",">= 16"],"sys":[">= 0.4 && < 0.7",">= 0.8"],"node:sys":[">= 14.18 && < 15",">= 16"],"test/reporters":">= 19.9 && < 20.2","node:test/reporters":[">= 18.17 && < 19",">= 19.9",">= 20"],"node:test":[">= 16.17 && < 17",">= 18"],"timers":true,"node:timers":[">= 14.18 && < 15",">= 16"],"timers/promises":">= 15","node:timers/promises":">= 16","_tls_common":">= 0.11.13","node:_tls_common":[">= 14.18 && < 15",">= 16"],"_tls_legacy":">= 0.11.3 && < 10","_tls_wrap":">= 0.11.3","node:_tls_wrap":[">= 14.18 && < 15",">= 16"],"tls":true,"node:tls":[">= 14.18 && < 15",">= 16"],"trace_events":">= 10","node:trace_events":[">= 14.18 && < 15",">= 16"],"tty":true,"node:tty":[">= 14.18 && < 15",">= 16"],"url":true,"node:url":[">= 14.18 && < 15",">= 16"],"util":true,"node:util":[">= 14.18 && < 15",">= 16"],"util/types":">= 15.3","node:util/types":">= 16","v8/tools/arguments":">= 10 && < 12","v8/tools/codemap":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/consarray":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/csvparser":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/logreader":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/profile_view":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/splaytree":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8":">= 1","node:v8":[">= 14.18 && < 15",">= 16"],"vm":true,"node:vm":[">= 14.18 && < 15",">= 16"],"wasi":[">= 13.4 && < 13.5",">= 18.17 && < 19",">= 20"],"node:wasi":[">= 18.17 && < 19",">= 20"],"worker_threads":">= 11.7","node:worker_threads":[">= 14.18 && < 15",">= 16"],"zlib":">= 0.5","node:zlib":[">= 14.18 && < 15",">= 16"]}')
+module.exports = /*#__PURE__*/JSON.parse('{"assert":true,"node:assert":[">= 14.18 && < 15",">= 16"],"assert/strict":">= 15","node:assert/strict":">= 16","async_hooks":">= 8","node:async_hooks":[">= 14.18 && < 15",">= 16"],"buffer_ieee754":">= 0.5 && < 0.9.7","buffer":true,"node:buffer":[">= 14.18 && < 15",">= 16"],"child_process":true,"node:child_process":[">= 14.18 && < 15",">= 16"],"cluster":">= 0.5","node:cluster":[">= 14.18 && < 15",">= 16"],"console":true,"node:console":[">= 14.18 && < 15",">= 16"],"constants":true,"node:constants":[">= 14.18 && < 15",">= 16"],"crypto":true,"node:crypto":[">= 14.18 && < 15",">= 16"],"_debug_agent":">= 1 && < 8","_debugger":"< 8","dgram":true,"node:dgram":[">= 14.18 && < 15",">= 16"],"diagnostics_channel":[">= 14.17 && < 15",">= 15.1"],"node:diagnostics_channel":[">= 14.18 && < 15",">= 16"],"dns":true,"node:dns":[">= 14.18 && < 15",">= 16"],"dns/promises":">= 15","node:dns/promises":">= 16","domain":">= 0.7.12","node:domain":[">= 14.18 && < 15",">= 16"],"events":true,"node:events":[">= 14.18 && < 15",">= 16"],"freelist":"< 6","fs":true,"node:fs":[">= 14.18 && < 15",">= 16"],"fs/promises":[">= 10 && < 10.1",">= 14"],"node:fs/promises":[">= 14.18 && < 15",">= 16"],"_http_agent":">= 0.11.1","node:_http_agent":[">= 14.18 && < 15",">= 16"],"_http_client":">= 0.11.1","node:_http_client":[">= 14.18 && < 15",">= 16"],"_http_common":">= 0.11.1","node:_http_common":[">= 14.18 && < 15",">= 16"],"_http_incoming":">= 0.11.1","node:_http_incoming":[">= 14.18 && < 15",">= 16"],"_http_outgoing":">= 0.11.1","node:_http_outgoing":[">= 14.18 && < 15",">= 16"],"_http_server":">= 0.11.1","node:_http_server":[">= 14.18 && < 15",">= 16"],"http":true,"node:http":[">= 14.18 && < 15",">= 16"],"http2":">= 8.8","node:http2":[">= 14.18 && < 15",">= 16"],"https":true,"node:https":[">= 14.18 && < 15",">= 16"],"inspector":">= 8","node:inspector":[">= 14.18 && < 15",">= 16"],"inspector/promises":[">= 19"],"node:inspector/promises":[">= 19"],"_linklist":"< 8","module":true,"node:module":[">= 14.18 && < 15",">= 16"],"net":true,"node:net":[">= 14.18 && < 15",">= 16"],"node-inspect/lib/_inspect":">= 7.6 && < 12","node-inspect/lib/internal/inspect_client":">= 7.6 && < 12","node-inspect/lib/internal/inspect_repl":">= 7.6 && < 12","os":true,"node:os":[">= 14.18 && < 15",">= 16"],"path":true,"node:path":[">= 14.18 && < 15",">= 16"],"path/posix":">= 15.3","node:path/posix":">= 16","path/win32":">= 15.3","node:path/win32":">= 16","perf_hooks":">= 8.5","node:perf_hooks":[">= 14.18 && < 15",">= 16"],"process":">= 1","node:process":[">= 14.18 && < 15",">= 16"],"punycode":">= 0.5","node:punycode":[">= 14.18 && < 15",">= 16"],"querystring":true,"node:querystring":[">= 14.18 && < 15",">= 16"],"readline":true,"node:readline":[">= 14.18 && < 15",">= 16"],"readline/promises":">= 17","node:readline/promises":">= 17","repl":true,"node:repl":[">= 14.18 && < 15",">= 16"],"node:sea":[">= 20.12 && < 21",">= 21.7"],"smalloc":">= 0.11.5 && < 3","node:sqlite":[">= 22.13 && < 23",">= 23.4"],"_stream_duplex":">= 0.9.4","node:_stream_duplex":[">= 14.18 && < 15",">= 16"],"_stream_transform":">= 0.9.4","node:_stream_transform":[">= 14.18 && < 15",">= 16"],"_stream_wrap":">= 1.4.1","node:_stream_wrap":[">= 14.18 && < 15",">= 16"],"_stream_passthrough":">= 0.9.4","node:_stream_passthrough":[">= 14.18 && < 15",">= 16"],"_stream_readable":">= 0.9.4","node:_stream_readable":[">= 14.18 && < 15",">= 16"],"_stream_writable":">= 0.9.4","node:_stream_writable":[">= 14.18 && < 15",">= 16"],"stream":true,"node:stream":[">= 14.18 && < 15",">= 16"],"stream/consumers":">= 16.7","node:stream/consumers":">= 16.7","stream/promises":">= 15","node:stream/promises":">= 16","stream/web":">= 16.5","node:stream/web":">= 16.5","string_decoder":true,"node:string_decoder":[">= 14.18 && < 15",">= 16"],"sys":[">= 0.4 && < 0.7",">= 0.8"],"node:sys":[">= 14.18 && < 15",">= 16"],"test/reporters":">= 19.9 && < 20.2","node:test/reporters":[">= 18.17 && < 19",">= 19.9",">= 20"],"test/mock_loader":">= 22.3 && < 22.7","node:test/mock_loader":">= 22.3 && < 22.7","node:test":[">= 16.17 && < 17",">= 18"],"timers":true,"node:timers":[">= 14.18 && < 15",">= 16"],"timers/promises":">= 15","node:timers/promises":">= 16","_tls_common":">= 0.11.13","node:_tls_common":[">= 14.18 && < 15",">= 16"],"_tls_legacy":">= 0.11.3 && < 10","_tls_wrap":">= 0.11.3","node:_tls_wrap":[">= 14.18 && < 15",">= 16"],"tls":true,"node:tls":[">= 14.18 && < 15",">= 16"],"trace_events":">= 10","node:trace_events":[">= 14.18 && < 15",">= 16"],"tty":true,"node:tty":[">= 14.18 && < 15",">= 16"],"url":true,"node:url":[">= 14.18 && < 15",">= 16"],"util":true,"node:util":[">= 14.18 && < 15",">= 16"],"util/types":">= 15.3","node:util/types":">= 16","v8/tools/arguments":">= 10 && < 12","v8/tools/codemap":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/consarray":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/csvparser":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/logreader":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/profile_view":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/splaytree":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8":">= 1","node:v8":[">= 14.18 && < 15",">= 16"],"vm":true,"node:vm":[">= 14.18 && < 15",">= 16"],"wasi":[">= 13.4 && < 13.5",">= 18.17 && < 19",">= 20"],"node:wasi":[">= 18.17 && < 19",">= 20"],"worker_threads":">= 11.7","node:worker_threads":[">= 14.18 && < 15",">= 16"],"zlib":">= 0.5","node:zlib":[">= 14.18 && < 15",">= 16"]}')
 
 },
 285(module) {
 "use strict";
-module.exports = JSON.parse('{"topLevel":{"dependancies":"dependencies","dependecies":"dependencies","depdenencies":"dependencies","devEependencies":"devDependencies","depends":"dependencies","dev-dependencies":"devDependencies","devDependences":"devDependencies","devDepenencies":"devDependencies","devdependencies":"devDependencies","repostitory":"repository","repo":"repository","prefereGlobal":"preferGlobal","hompage":"homepage","hampage":"homepage","autohr":"author","autor":"author","contributers":"contributors","publicationConfig":"publishConfig","script":"scripts"},"bugs":{"web":"url","name":"url"},"script":{"server":"start","tests":"test"}}')
+module.exports = /*#__PURE__*/JSON.parse('{"topLevel":{"dependancies":"dependencies","dependecies":"dependencies","depdenencies":"dependencies","devEependencies":"devDependencies","depends":"dependencies","dev-dependencies":"devDependencies","devDependences":"devDependencies","devDepenencies":"devDependencies","devdependencies":"devDependencies","repostitory":"repository","repo":"repository","prefereGlobal":"preferGlobal","hompage":"homepage","hampage":"homepage","autohr":"author","autor":"author","contributers":"contributors","publicationConfig":"publishConfig","script":"scripts"},"bugs":{"web":"url","name":"url"},"script":{"server":"start","tests":"test"}}')
 
 },
 287(module) {
 "use strict";
-module.exports = JSON.parse('{"repositories":"\'repositories\' (plural) Not supported. Please pick one as the \'repository\' field","missingRepository":"No repository field.","brokenGitUrl":"Probably broken git url: %s","nonObjectScripts":"scripts must be an object","nonStringScript":"script values must be string commands","nonArrayFiles":"Invalid \'files\' member","invalidFilename":"Invalid filename in \'files\' list: %s","nonArrayBundleDependencies":"Invalid \'bundleDependencies\' list. Must be array of package names","nonStringBundleDependency":"Invalid bundleDependencies member: %s","nonDependencyBundleDependency":"Non-dependency in bundleDependencies: %s","nonObjectDependencies":"%s field must be an object","nonStringDependency":"Invalid dependency: %s %s","deprecatedArrayDependencies":"specifying %s as array is deprecated","deprecatedModules":"modules field is deprecated","nonArrayKeywords":"keywords should be an array of strings","nonStringKeyword":"keywords should be an array of strings","conflictingName":"%s is also the name of a node core module.","nonStringDescription":"\'description\' field should be a string","missingDescription":"No description","missingReadme":"No README data","missingLicense":"No license field.","nonEmailUrlBugsString":"Bug string field must be url, email, or {email,url}","nonUrlBugsUrlField":"bugs.url field must be a string url. Deleted.","nonEmailBugsEmailField":"bugs.email field must be a string email. Deleted.","emptyNormalizedBugs":"Normalized value of bugs field is an empty object. Deleted.","nonUrlHomepage":"homepage field must be a string url. Deleted.","invalidLicense":"license should be a valid SPDX license expression","typo":"%s should probably be %s."}')
+module.exports = /*#__PURE__*/JSON.parse('{"repositories":"\'repositories\' (plural) Not supported. Please pick one as the \'repository\' field","missingRepository":"No repository field.","brokenGitUrl":"Probably broken git url: %s","nonObjectScripts":"scripts must be an object","nonStringScript":"script values must be string commands","nonArrayFiles":"Invalid \'files\' member","invalidFilename":"Invalid filename in \'files\' list: %s","nonArrayBundleDependencies":"Invalid \'bundleDependencies\' list. Must be array of package names","nonStringBundleDependency":"Invalid bundleDependencies member: %s","nonDependencyBundleDependency":"Non-dependency in bundleDependencies: %s","nonObjectDependencies":"%s field must be an object","nonStringDependency":"Invalid dependency: %s %s","deprecatedArrayDependencies":"specifying %s as array is deprecated","deprecatedModules":"modules field is deprecated","nonArrayKeywords":"keywords should be an array of strings","nonStringKeyword":"keywords should be an array of strings","conflictingName":"%s is also the name of a node core module.","nonStringDescription":"\'description\' field should be a string","missingDescription":"No description","missingReadme":"No README data","missingLicense":"No license field.","nonEmailUrlBugsString":"Bug string field must be url, email, or {email,url}","nonUrlBugsUrlField":"bugs.url field must be a string url. Deleted.","nonEmailBugsEmailField":"bugs.email field must be a string email. Deleted.","emptyNormalizedBugs":"Normalized value of bugs field is an empty object. Deleted.","nonUrlHomepage":"homepage field must be a string url. Deleted.","invalidLicense":"license should be a valid SPDX license expression","typo":"%s should probably be %s."}')
 
 },
 281(module) {
 "use strict";
-module.exports = JSON.parse('{"assert":true,"node:assert":[">= 14.18 && < 15",">= 16"],"assert/strict":">= 15","node:assert/strict":">= 16","async_hooks":">= 8","node:async_hooks":[">= 14.18 && < 15",">= 16"],"buffer_ieee754":">= 0.5 && < 0.9.7","buffer":true,"node:buffer":[">= 14.18 && < 15",">= 16"],"child_process":true,"node:child_process":[">= 14.18 && < 15",">= 16"],"cluster":">= 0.5","node:cluster":[">= 14.18 && < 15",">= 16"],"console":true,"node:console":[">= 14.18 && < 15",">= 16"],"constants":true,"node:constants":[">= 14.18 && < 15",">= 16"],"crypto":true,"node:crypto":[">= 14.18 && < 15",">= 16"],"_debug_agent":">= 1 && < 8","_debugger":"< 8","dgram":true,"node:dgram":[">= 14.18 && < 15",">= 16"],"diagnostics_channel":[">= 14.17 && < 15",">= 15.1"],"node:diagnostics_channel":[">= 14.18 && < 15",">= 16"],"dns":true,"node:dns":[">= 14.18 && < 15",">= 16"],"dns/promises":">= 15","node:dns/promises":">= 16","domain":">= 0.7.12","node:domain":[">= 14.18 && < 15",">= 16"],"events":true,"node:events":[">= 14.18 && < 15",">= 16"],"freelist":"< 6","fs":true,"node:fs":[">= 14.18 && < 15",">= 16"],"fs/promises":[">= 10 && < 10.1",">= 14"],"node:fs/promises":[">= 14.18 && < 15",">= 16"],"_http_agent":">= 0.11.1","node:_http_agent":[">= 14.18 && < 15",">= 16"],"_http_client":">= 0.11.1","node:_http_client":[">= 14.18 && < 15",">= 16"],"_http_common":">= 0.11.1","node:_http_common":[">= 14.18 && < 15",">= 16"],"_http_incoming":">= 0.11.1","node:_http_incoming":[">= 14.18 && < 15",">= 16"],"_http_outgoing":">= 0.11.1","node:_http_outgoing":[">= 14.18 && < 15",">= 16"],"_http_server":">= 0.11.1","node:_http_server":[">= 14.18 && < 15",">= 16"],"http":true,"node:http":[">= 14.18 && < 15",">= 16"],"http2":">= 8.8","node:http2":[">= 14.18 && < 15",">= 16"],"https":true,"node:https":[">= 14.18 && < 15",">= 16"],"inspector":">= 8","node:inspector":[">= 14.18 && < 15",">= 16"],"_linklist":"< 8","module":true,"node:module":[">= 14.18 && < 15",">= 16"],"net":true,"node:net":[">= 14.18 && < 15",">= 16"],"node-inspect/lib/_inspect":">= 7.6 && < 12","node-inspect/lib/internal/inspect_client":">= 7.6 && < 12","node-inspect/lib/internal/inspect_repl":">= 7.6 && < 12","os":true,"node:os":[">= 14.18 && < 15",">= 16"],"path":true,"node:path":[">= 14.18 && < 15",">= 16"],"path/posix":">= 15.3","node:path/posix":">= 16","path/win32":">= 15.3","node:path/win32":">= 16","perf_hooks":">= 8.5","node:perf_hooks":[">= 14.18 && < 15",">= 16"],"process":">= 1","node:process":[">= 14.18 && < 15",">= 16"],"punycode":">= 0.5","node:punycode":[">= 14.18 && < 15",">= 16"],"querystring":true,"node:querystring":[">= 14.18 && < 15",">= 16"],"readline":true,"node:readline":[">= 14.18 && < 15",">= 16"],"readline/promises":">= 17","node:readline/promises":">= 17","repl":true,"node:repl":[">= 14.18 && < 15",">= 16"],"smalloc":">= 0.11.5 && < 3","_stream_duplex":">= 0.9.4","node:_stream_duplex":[">= 14.18 && < 15",">= 16"],"_stream_transform":">= 0.9.4","node:_stream_transform":[">= 14.18 && < 15",">= 16"],"_stream_wrap":">= 1.4.1","node:_stream_wrap":[">= 14.18 && < 15",">= 16"],"_stream_passthrough":">= 0.9.4","node:_stream_passthrough":[">= 14.18 && < 15",">= 16"],"_stream_readable":">= 0.9.4","node:_stream_readable":[">= 14.18 && < 15",">= 16"],"_stream_writable":">= 0.9.4","node:_stream_writable":[">= 14.18 && < 15",">= 16"],"stream":true,"node:stream":[">= 14.18 && < 15",">= 16"],"stream/consumers":">= 16.7","node:stream/consumers":">= 16.7","stream/promises":">= 15","node:stream/promises":">= 16","stream/web":">= 16.5","node:stream/web":">= 16.5","string_decoder":true,"node:string_decoder":[">= 14.18 && < 15",">= 16"],"sys":[">= 0.4 && < 0.7",">= 0.8"],"node:sys":[">= 14.18 && < 15",">= 16"],"node:test":">= 18","timers":true,"node:timers":[">= 14.18 && < 15",">= 16"],"timers/promises":">= 15","node:timers/promises":">= 16","_tls_common":">= 0.11.13","node:_tls_common":[">= 14.18 && < 15",">= 16"],"_tls_legacy":">= 0.11.3 && < 10","_tls_wrap":">= 0.11.3","node:_tls_wrap":[">= 14.18 && < 15",">= 16"],"tls":true,"node:tls":[">= 14.18 && < 15",">= 16"],"trace_events":">= 10","node:trace_events":[">= 14.18 && < 15",">= 16"],"tty":true,"node:tty":[">= 14.18 && < 15",">= 16"],"url":true,"node:url":[">= 14.18 && < 15",">= 16"],"util":true,"node:util":[">= 14.18 && < 15",">= 16"],"util/types":">= 15.3","node:util/types":">= 16","v8/tools/arguments":">= 10 && < 12","v8/tools/codemap":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/consarray":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/csvparser":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/logreader":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/profile_view":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/splaytree":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8":">= 1","node:v8":[">= 14.18 && < 15",">= 16"],"vm":true,"node:vm":[">= 14.18 && < 15",">= 16"],"wasi":">= 13.4 && < 13.5","worker_threads":">= 11.7","node:worker_threads":[">= 14.18 && < 15",">= 16"],"zlib":">= 0.5","node:zlib":[">= 14.18 && < 15",">= 16"]}')
+module.exports = /*#__PURE__*/JSON.parse('{"assert":true,"node:assert":[">= 14.18 && < 15",">= 16"],"assert/strict":">= 15","node:assert/strict":">= 16","async_hooks":">= 8","node:async_hooks":[">= 14.18 && < 15",">= 16"],"buffer_ieee754":">= 0.5 && < 0.9.7","buffer":true,"node:buffer":[">= 14.18 && < 15",">= 16"],"child_process":true,"node:child_process":[">= 14.18 && < 15",">= 16"],"cluster":">= 0.5","node:cluster":[">= 14.18 && < 15",">= 16"],"console":true,"node:console":[">= 14.18 && < 15",">= 16"],"constants":true,"node:constants":[">= 14.18 && < 15",">= 16"],"crypto":true,"node:crypto":[">= 14.18 && < 15",">= 16"],"_debug_agent":">= 1 && < 8","_debugger":"< 8","dgram":true,"node:dgram":[">= 14.18 && < 15",">= 16"],"diagnostics_channel":[">= 14.17 && < 15",">= 15.1"],"node:diagnostics_channel":[">= 14.18 && < 15",">= 16"],"dns":true,"node:dns":[">= 14.18 && < 15",">= 16"],"dns/promises":">= 15","node:dns/promises":">= 16","domain":">= 0.7.12","node:domain":[">= 14.18 && < 15",">= 16"],"events":true,"node:events":[">= 14.18 && < 15",">= 16"],"freelist":"< 6","fs":true,"node:fs":[">= 14.18 && < 15",">= 16"],"fs/promises":[">= 10 && < 10.1",">= 14"],"node:fs/promises":[">= 14.18 && < 15",">= 16"],"_http_agent":">= 0.11.1","node:_http_agent":[">= 14.18 && < 15",">= 16"],"_http_client":">= 0.11.1","node:_http_client":[">= 14.18 && < 15",">= 16"],"_http_common":">= 0.11.1","node:_http_common":[">= 14.18 && < 15",">= 16"],"_http_incoming":">= 0.11.1","node:_http_incoming":[">= 14.18 && < 15",">= 16"],"_http_outgoing":">= 0.11.1","node:_http_outgoing":[">= 14.18 && < 15",">= 16"],"_http_server":">= 0.11.1","node:_http_server":[">= 14.18 && < 15",">= 16"],"http":true,"node:http":[">= 14.18 && < 15",">= 16"],"http2":">= 8.8","node:http2":[">= 14.18 && < 15",">= 16"],"https":true,"node:https":[">= 14.18 && < 15",">= 16"],"inspector":">= 8","node:inspector":[">= 14.18 && < 15",">= 16"],"inspector/promises":[">= 19"],"node:inspector/promises":[">= 19"],"_linklist":"< 8","module":true,"node:module":[">= 14.18 && < 15",">= 16"],"net":true,"node:net":[">= 14.18 && < 15",">= 16"],"node-inspect/lib/_inspect":">= 7.6 && < 12","node-inspect/lib/internal/inspect_client":">= 7.6 && < 12","node-inspect/lib/internal/inspect_repl":">= 7.6 && < 12","os":true,"node:os":[">= 14.18 && < 15",">= 16"],"path":true,"node:path":[">= 14.18 && < 15",">= 16"],"path/posix":">= 15.3","node:path/posix":">= 16","path/win32":">= 15.3","node:path/win32":">= 16","perf_hooks":">= 8.5","node:perf_hooks":[">= 14.18 && < 15",">= 16"],"process":">= 1","node:process":[">= 14.18 && < 15",">= 16"],"punycode":">= 0.5","node:punycode":[">= 14.18 && < 15",">= 16"],"querystring":true,"node:querystring":[">= 14.18 && < 15",">= 16"],"readline":true,"node:readline":[">= 14.18 && < 15",">= 16"],"readline/promises":">= 17","node:readline/promises":">= 17","repl":true,"node:repl":[">= 14.18 && < 15",">= 16"],"node:sea":[">= 20.12 && < 21",">= 21.7"],"smalloc":">= 0.11.5 && < 3","node:sqlite":[">= 22.13 && < 23",">= 23.4"],"_stream_duplex":">= 0.9.4","node:_stream_duplex":[">= 14.18 && < 15",">= 16"],"_stream_transform":">= 0.9.4","node:_stream_transform":[">= 14.18 && < 15",">= 16"],"_stream_wrap":">= 1.4.1","node:_stream_wrap":[">= 14.18 && < 15",">= 16"],"_stream_passthrough":">= 0.9.4","node:_stream_passthrough":[">= 14.18 && < 15",">= 16"],"_stream_readable":">= 0.9.4","node:_stream_readable":[">= 14.18 && < 15",">= 16"],"_stream_writable":">= 0.9.4","node:_stream_writable":[">= 14.18 && < 15",">= 16"],"stream":true,"node:stream":[">= 14.18 && < 15",">= 16"],"stream/consumers":">= 16.7","node:stream/consumers":">= 16.7","stream/promises":">= 15","node:stream/promises":">= 16","stream/web":">= 16.5","node:stream/web":">= 16.5","string_decoder":true,"node:string_decoder":[">= 14.18 && < 15",">= 16"],"sys":[">= 0.4 && < 0.7",">= 0.8"],"node:sys":[">= 14.18 && < 15",">= 16"],"test/reporters":">= 19.9 && < 20.2","node:test/reporters":[">= 18.17 && < 19",">= 19.9",">= 20"],"test/mock_loader":">= 22.3 && < 22.7","node:test/mock_loader":">= 22.3 && < 22.7","node:test":[">= 16.17 && < 17",">= 18"],"timers":true,"node:timers":[">= 14.18 && < 15",">= 16"],"timers/promises":">= 15","node:timers/promises":">= 16","_tls_common":">= 0.11.13","node:_tls_common":[">= 14.18 && < 15",">= 16"],"_tls_legacy":">= 0.11.3 && < 10","_tls_wrap":">= 0.11.3","node:_tls_wrap":[">= 14.18 && < 15",">= 16"],"tls":true,"node:tls":[">= 14.18 && < 15",">= 16"],"trace_events":">= 10","node:trace_events":[">= 14.18 && < 15",">= 16"],"tty":true,"node:tty":[">= 14.18 && < 15",">= 16"],"url":true,"node:url":[">= 14.18 && < 15",">= 16"],"util":true,"node:util":[">= 14.18 && < 15",">= 16"],"util/types":">= 15.3","node:util/types":">= 16","v8/tools/arguments":">= 10 && < 12","v8/tools/codemap":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/consarray":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/csvparser":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/logreader":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/profile_view":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8/tools/splaytree":[">= 4.4 && < 5",">= 5.2 && < 12"],"v8":">= 1","node:v8":[">= 14.18 && < 15",">= 16"],"vm":true,"node:vm":[">= 14.18 && < 15",">= 16"],"wasi":[">= 13.4 && < 13.5",">= 18.17 && < 19",">= 20"],"node:wasi":[">= 18.17 && < 19",">= 20"],"worker_threads":">= 11.7","node:worker_threads":[">= 14.18 && < 15",">= 16"],"zlib":">= 0.5","node:zlib":[">= 14.18 && < 15",">= 16"]}')
 
 },
 261(module) {
 "use strict";
-module.exports = JSON.parse('["389-exception","Autoconf-exception-2.0","Autoconf-exception-3.0","Bison-exception-2.2","Bootloader-exception","Classpath-exception-2.0","CLISP-exception-2.0","DigiRule-FOSS-exception","eCos-exception-2.0","Fawkes-Runtime-exception","FLTK-exception","Font-exception-2.0","freertos-exception-2.0","GCC-exception-2.0","GCC-exception-3.1","gnu-javamail-exception","GPL-3.0-linking-exception","GPL-3.0-linking-source-exception","GPL-CC-1.0","i2p-gpl-java-exception","Libtool-exception","Linux-syscall-note","LLVM-exception","LZMA-exception","mif-exception","Nokia-Qt-exception-1.1","OCaml-LGPL-linking-exception","OCCT-exception-1.0","OpenJDK-assembly-exception-1.0","openvpn-openssl-exception","PS-or-PDF-font-exception-20170817","Qt-GPL-exception-1.0","Qt-LGPL-exception-1.1","Qwt-exception-1.0","Swift-exception","u-boot-exception-2.0","Universal-FOSS-exception-1.0","WxWindows-exception-3.1"]')
+module.exports = /*#__PURE__*/JSON.parse('["389-exception","Autoconf-exception-2.0","Autoconf-exception-3.0","Bison-exception-2.2","Bootloader-exception","Classpath-exception-2.0","CLISP-exception-2.0","DigiRule-FOSS-exception","eCos-exception-2.0","Fawkes-Runtime-exception","FLTK-exception","Font-exception-2.0","freertos-exception-2.0","GCC-exception-2.0","GCC-exception-3.1","gnu-javamail-exception","GPL-3.0-linking-exception","GPL-3.0-linking-source-exception","GPL-CC-1.0","i2p-gpl-java-exception","Libtool-exception","Linux-syscall-note","LLVM-exception","LZMA-exception","mif-exception","Nokia-Qt-exception-1.1","OCaml-LGPL-linking-exception","OCCT-exception-1.0","OpenJDK-assembly-exception-1.0","openvpn-openssl-exception","PS-or-PDF-font-exception-20170817","Qt-GPL-exception-1.0","Qt-LGPL-exception-1.1","Qwt-exception-1.0","Swift-exception","u-boot-exception-2.0","Universal-FOSS-exception-1.0","WxWindows-exception-3.1"]')
 
 },
 260(module) {
 "use strict";
-module.exports = JSON.parse('["AGPL-1.0","AGPL-3.0","BSD-2-Clause-FreeBSD","BSD-2-Clause-NetBSD","GFDL-1.1","GFDL-1.2","GFDL-1.3","GPL-1.0","GPL-2.0","GPL-2.0-with-GCC-exception","GPL-2.0-with-autoconf-exception","GPL-2.0-with-bison-exception","GPL-2.0-with-classpath-exception","GPL-2.0-with-font-exception","GPL-3.0","GPL-3.0-with-GCC-exception","GPL-3.0-with-autoconf-exception","LGPL-2.0","LGPL-2.1","LGPL-3.0","Nunit","StandardML-NJ","eCos-2.0","wxWindows"]')
+module.exports = /*#__PURE__*/JSON.parse('["AGPL-1.0","AGPL-3.0","BSD-2-Clause-FreeBSD","BSD-2-Clause-NetBSD","GFDL-1.1","GFDL-1.2","GFDL-1.3","GPL-1.0","GPL-2.0","GPL-2.0-with-GCC-exception","GPL-2.0-with-autoconf-exception","GPL-2.0-with-bison-exception","GPL-2.0-with-classpath-exception","GPL-2.0-with-font-exception","GPL-3.0","GPL-3.0-with-GCC-exception","GPL-3.0-with-autoconf-exception","LGPL-2.0","LGPL-2.1","LGPL-3.0","Nunit","StandardML-NJ","eCos-2.0","wxWindows"]')
 
 },
 259(module) {
 "use strict";
-module.exports = JSON.parse('["0BSD","AAL","ADSL","AFL-1.1","AFL-1.2","AFL-2.0","AFL-2.1","AFL-3.0","AGPL-1.0-only","AGPL-1.0-or-later","AGPL-3.0-only","AGPL-3.0-or-later","AMDPLPA","AML","AMPAS","ANTLR-PD","ANTLR-PD-fallback","APAFML","APL-1.0","APSL-1.0","APSL-1.1","APSL-1.2","APSL-2.0","Abstyles","Adobe-2006","Adobe-Glyph","Afmparse","Aladdin","Apache-1.0","Apache-1.1","Apache-2.0","Artistic-1.0","Artistic-1.0-Perl","Artistic-1.0-cl8","Artistic-2.0","BSD-1-Clause","BSD-2-Clause","BSD-2-Clause-Patent","BSD-2-Clause-Views","BSD-3-Clause","BSD-3-Clause-Attribution","BSD-3-Clause-Clear","BSD-3-Clause-LBNL","BSD-3-Clause-Modification","BSD-3-Clause-No-Military-License","BSD-3-Clause-No-Nuclear-License","BSD-3-Clause-No-Nuclear-License-2014","BSD-3-Clause-No-Nuclear-Warranty","BSD-3-Clause-Open-MPI","BSD-4-Clause","BSD-4-Clause-Shortened","BSD-4-Clause-UC","BSD-Protection","BSD-Source-Code","BSL-1.0","BUSL-1.1","Bahyph","Barr","Beerware","BitTorrent-1.0","BitTorrent-1.1","BlueOak-1.0.0","Borceux","C-UDA-1.0","CAL-1.0","CAL-1.0-Combined-Work-Exception","CATOSL-1.1","CC-BY-1.0","CC-BY-2.0","CC-BY-2.5","CC-BY-2.5-AU","CC-BY-3.0","CC-BY-3.0-AT","CC-BY-3.0-DE","CC-BY-3.0-NL","CC-BY-3.0-US","CC-BY-4.0","CC-BY-NC-1.0","CC-BY-NC-2.0","CC-BY-NC-2.5","CC-BY-NC-3.0","CC-BY-NC-3.0-DE","CC-BY-NC-4.0","CC-BY-NC-ND-1.0","CC-BY-NC-ND-2.0","CC-BY-NC-ND-2.5","CC-BY-NC-ND-3.0","CC-BY-NC-ND-3.0-DE","CC-BY-NC-ND-3.0-IGO","CC-BY-NC-ND-4.0","CC-BY-NC-SA-1.0","CC-BY-NC-SA-2.0","CC-BY-NC-SA-2.0-FR","CC-BY-NC-SA-2.0-UK","CC-BY-NC-SA-2.5","CC-BY-NC-SA-3.0","CC-BY-NC-SA-3.0-DE","CC-BY-NC-SA-3.0-IGO","CC-BY-NC-SA-4.0","CC-BY-ND-1.0","CC-BY-ND-2.0","CC-BY-ND-2.5","CC-BY-ND-3.0","CC-BY-ND-3.0-DE","CC-BY-ND-4.0","CC-BY-SA-1.0","CC-BY-SA-2.0","CC-BY-SA-2.0-UK","CC-BY-SA-2.1-JP","CC-BY-SA-2.5","CC-BY-SA-3.0","CC-BY-SA-3.0-AT","CC-BY-SA-3.0-DE","CC-BY-SA-4.0","CC-PDDC","CC0-1.0","CDDL-1.0","CDDL-1.1","CDL-1.0","CDLA-Permissive-1.0","CDLA-Permissive-2.0","CDLA-Sharing-1.0","CECILL-1.0","CECILL-1.1","CECILL-2.0","CECILL-2.1","CECILL-B","CECILL-C","CERN-OHL-1.1","CERN-OHL-1.2","CERN-OHL-P-2.0","CERN-OHL-S-2.0","CERN-OHL-W-2.0","CNRI-Jython","CNRI-Python","CNRI-Python-GPL-Compatible","COIL-1.0","CPAL-1.0","CPL-1.0","CPOL-1.02","CUA-OPL-1.0","Caldera","ClArtistic","Community-Spec-1.0","Condor-1.1","Crossword","CrystalStacker","Cube","D-FSL-1.0","DOC","DRL-1.0","DSDP","Dotseqn","ECL-1.0","ECL-2.0","EFL-1.0","EFL-2.0","EPICS","EPL-1.0","EPL-2.0","EUDatagrid","EUPL-1.0","EUPL-1.1","EUPL-1.2","Entessa","ErlPL-1.1","Eurosym","FDK-AAC","FSFAP","FSFUL","FSFULLR","FTL","Fair","Frameworx-1.0","FreeBSD-DOC","FreeImage","GD","GFDL-1.1-invariants-only","GFDL-1.1-invariants-or-later","GFDL-1.1-no-invariants-only","GFDL-1.1-no-invariants-or-later","GFDL-1.1-only","GFDL-1.1-or-later","GFDL-1.2-invariants-only","GFDL-1.2-invariants-or-later","GFDL-1.2-no-invariants-only","GFDL-1.2-no-invariants-or-later","GFDL-1.2-only","GFDL-1.2-or-later","GFDL-1.3-invariants-only","GFDL-1.3-invariants-or-later","GFDL-1.3-no-invariants-only","GFDL-1.3-no-invariants-or-later","GFDL-1.3-only","GFDL-1.3-or-later","GL2PS","GLWTPL","GPL-1.0-only","GPL-1.0-or-later","GPL-2.0-only","GPL-2.0-or-later","GPL-3.0-only","GPL-3.0-or-later","Giftware","Glide","Glulxe","HPND","HPND-sell-variant","HTMLTIDY","HaskellReport","Hippocratic-2.1","IBM-pibs","ICU","IJG","IPA","IPL-1.0","ISC","ImageMagick","Imlib2","Info-ZIP","Intel","Intel-ACPI","Interbase-1.0","JPNIC","JSON","JasPer-2.0","LAL-1.2","LAL-1.3","LGPL-2.0-only","LGPL-2.0-or-later","LGPL-2.1-only","LGPL-2.1-or-later","LGPL-3.0-only","LGPL-3.0-or-later","LGPLLR","LPL-1.0","LPL-1.02","LPPL-1.0","LPPL-1.1","LPPL-1.2","LPPL-1.3a","LPPL-1.3c","Latex2e","Leptonica","LiLiQ-P-1.1","LiLiQ-R-1.1","LiLiQ-Rplus-1.1","Libpng","Linux-OpenIB","Linux-man-pages-copyleft","MIT","MIT-0","MIT-CMU","MIT-Modern-Variant","MIT-advertising","MIT-enna","MIT-feh","MIT-open-group","MITNFA","MPL-1.0","MPL-1.1","MPL-2.0","MPL-2.0-no-copyleft-exception","MS-PL","MS-RL","MTLL","MakeIndex","MirOS","Motosoto","MulanPSL-1.0","MulanPSL-2.0","Multics","Mup","NAIST-2003","NASA-1.3","NBPL-1.0","NCGL-UK-2.0","NCSA","NGPL","NIST-PD","NIST-PD-fallback","NLOD-1.0","NLOD-2.0","NLPL","NOSL","NPL-1.0","NPL-1.1","NPOSL-3.0","NRL","NTP","NTP-0","Naumen","Net-SNMP","NetCDF","Newsletr","Nokia","Noweb","O-UDA-1.0","OCCT-PL","OCLC-2.0","ODC-By-1.0","ODbL-1.0","OFL-1.0","OFL-1.0-RFN","OFL-1.0-no-RFN","OFL-1.1","OFL-1.1-RFN","OFL-1.1-no-RFN","OGC-1.0","OGDL-Taiwan-1.0","OGL-Canada-2.0","OGL-UK-1.0","OGL-UK-2.0","OGL-UK-3.0","OGTSL","OLDAP-1.1","OLDAP-1.2","OLDAP-1.3","OLDAP-1.4","OLDAP-2.0","OLDAP-2.0.1","OLDAP-2.1","OLDAP-2.2","OLDAP-2.2.1","OLDAP-2.2.2","OLDAP-2.3","OLDAP-2.4","OLDAP-2.5","OLDAP-2.6","OLDAP-2.7","OLDAP-2.8","OML","OPL-1.0","OPUBL-1.0","OSET-PL-2.1","OSL-1.0","OSL-1.1","OSL-2.0","OSL-2.1","OSL-3.0","OpenSSL","PDDL-1.0","PHP-3.0","PHP-3.01","PSF-2.0","Parity-6.0.0","Parity-7.0.0","Plexus","PolyForm-Noncommercial-1.0.0","PolyForm-Small-Business-1.0.0","PostgreSQL","Python-2.0","QPL-1.0","Qhull","RHeCos-1.1","RPL-1.1","RPL-1.5","RPSL-1.0","RSA-MD","RSCPL","Rdisc","Ruby","SAX-PD","SCEA","SGI-B-1.0","SGI-B-1.1","SGI-B-2.0","SHL-0.5","SHL-0.51","SISSL","SISSL-1.2","SMLNJ","SMPPL","SNIA","SPL-1.0","SSH-OpenSSH","SSH-short","SSPL-1.0","SWL","Saxpath","Sendmail","Sendmail-8.23","SimPL-2.0","Sleepycat","Spencer-86","Spencer-94","Spencer-99","SugarCRM-1.1.3","TAPR-OHL-1.0","TCL","TCP-wrappers","TMate","TORQUE-1.1","TOSL","TU-Berlin-1.0","TU-Berlin-2.0","UCL-1.0","UPL-1.0","Unicode-DFS-2015","Unicode-DFS-2016","Unicode-TOU","Unlicense","VOSTROM","VSL-1.0","Vim","W3C","W3C-19980720","W3C-20150513","WTFPL","Watcom-1.0","Wsuipa","X11","XFree86-1.1","XSkat","Xerox","Xnet","YPL-1.0","YPL-1.1","ZPL-1.1","ZPL-2.0","ZPL-2.1","Zed","Zend-2.0","Zimbra-1.3","Zimbra-1.4","Zlib","blessing","bzip2-1.0.5","bzip2-1.0.6","copyleft-next-0.3.0","copyleft-next-0.3.1","curl","diffmark","dvipdfm","eGenix","etalab-2.0","gSOAP-1.3b","gnuplot","iMatix","libpng-2.0","libselinux-1.0","libtiff","mpich2","psfrag","psutils","xinetd","xpp","zlib-acknowledgement"]')
+module.exports = /*#__PURE__*/JSON.parse('["0BSD","AAL","ADSL","AFL-1.1","AFL-1.2","AFL-2.0","AFL-2.1","AFL-3.0","AGPL-1.0-only","AGPL-1.0-or-later","AGPL-3.0-only","AGPL-3.0-or-later","AMDPLPA","AML","AMPAS","ANTLR-PD","ANTLR-PD-fallback","APAFML","APL-1.0","APSL-1.0","APSL-1.1","APSL-1.2","APSL-2.0","Abstyles","Adobe-2006","Adobe-Glyph","Afmparse","Aladdin","Apache-1.0","Apache-1.1","Apache-2.0","Artistic-1.0","Artistic-1.0-Perl","Artistic-1.0-cl8","Artistic-2.0","BSD-1-Clause","BSD-2-Clause","BSD-2-Clause-Patent","BSD-2-Clause-Views","BSD-3-Clause","BSD-3-Clause-Attribution","BSD-3-Clause-Clear","BSD-3-Clause-LBNL","BSD-3-Clause-Modification","BSD-3-Clause-No-Military-License","BSD-3-Clause-No-Nuclear-License","BSD-3-Clause-No-Nuclear-License-2014","BSD-3-Clause-No-Nuclear-Warranty","BSD-3-Clause-Open-MPI","BSD-4-Clause","BSD-4-Clause-Shortened","BSD-4-Clause-UC","BSD-Protection","BSD-Source-Code","BSL-1.0","BUSL-1.1","Bahyph","Barr","Beerware","BitTorrent-1.0","BitTorrent-1.1","BlueOak-1.0.0","Borceux","C-UDA-1.0","CAL-1.0","CAL-1.0-Combined-Work-Exception","CATOSL-1.1","CC-BY-1.0","CC-BY-2.0","CC-BY-2.5","CC-BY-2.5-AU","CC-BY-3.0","CC-BY-3.0-AT","CC-BY-3.0-DE","CC-BY-3.0-NL","CC-BY-3.0-US","CC-BY-4.0","CC-BY-NC-1.0","CC-BY-NC-2.0","CC-BY-NC-2.5","CC-BY-NC-3.0","CC-BY-NC-3.0-DE","CC-BY-NC-4.0","CC-BY-NC-ND-1.0","CC-BY-NC-ND-2.0","CC-BY-NC-ND-2.5","CC-BY-NC-ND-3.0","CC-BY-NC-ND-3.0-DE","CC-BY-NC-ND-3.0-IGO","CC-BY-NC-ND-4.0","CC-BY-NC-SA-1.0","CC-BY-NC-SA-2.0","CC-BY-NC-SA-2.0-FR","CC-BY-NC-SA-2.0-UK","CC-BY-NC-SA-2.5","CC-BY-NC-SA-3.0","CC-BY-NC-SA-3.0-DE","CC-BY-NC-SA-3.0-IGO","CC-BY-NC-SA-4.0","CC-BY-ND-1.0","CC-BY-ND-2.0","CC-BY-ND-2.5","CC-BY-ND-3.0","CC-BY-ND-3.0-DE","CC-BY-ND-4.0","CC-BY-SA-1.0","CC-BY-SA-2.0","CC-BY-SA-2.0-UK","CC-BY-SA-2.1-JP","CC-BY-SA-2.5","CC-BY-SA-3.0","CC-BY-SA-3.0-AT","CC-BY-SA-3.0-DE","CC-BY-SA-4.0","CC-PDDC","CC0-1.0","CDDL-1.0","CDDL-1.1","CDL-1.0","CDLA-Permissive-1.0","CDLA-Permissive-2.0","CDLA-Sharing-1.0","CECILL-1.0","CECILL-1.1","CECILL-2.0","CECILL-2.1","CECILL-B","CECILL-C","CERN-OHL-1.1","CERN-OHL-1.2","CERN-OHL-P-2.0","CERN-OHL-S-2.0","CERN-OHL-W-2.0","CNRI-Jython","CNRI-Python","CNRI-Python-GPL-Compatible","COIL-1.0","CPAL-1.0","CPL-1.0","CPOL-1.02","CUA-OPL-1.0","Caldera","ClArtistic","Community-Spec-1.0","Condor-1.1","Crossword","CrystalStacker","Cube","D-FSL-1.0","DOC","DRL-1.0","DSDP","Dotseqn","ECL-1.0","ECL-2.0","EFL-1.0","EFL-2.0","EPICS","EPL-1.0","EPL-2.0","EUDatagrid","EUPL-1.0","EUPL-1.1","EUPL-1.2","Entessa","ErlPL-1.1","Eurosym","FDK-AAC","FSFAP","FSFUL","FSFULLR","FTL","Fair","Frameworx-1.0","FreeBSD-DOC","FreeImage","GD","GFDL-1.1-invariants-only","GFDL-1.1-invariants-or-later","GFDL-1.1-no-invariants-only","GFDL-1.1-no-invariants-or-later","GFDL-1.1-only","GFDL-1.1-or-later","GFDL-1.2-invariants-only","GFDL-1.2-invariants-or-later","GFDL-1.2-no-invariants-only","GFDL-1.2-no-invariants-or-later","GFDL-1.2-only","GFDL-1.2-or-later","GFDL-1.3-invariants-only","GFDL-1.3-invariants-or-later","GFDL-1.3-no-invariants-only","GFDL-1.3-no-invariants-or-later","GFDL-1.3-only","GFDL-1.3-or-later","GL2PS","GLWTPL","GPL-1.0-only","GPL-1.0-or-later","GPL-2.0-only","GPL-2.0-or-later","GPL-3.0-only","GPL-3.0-or-later","Giftware","Glide","Glulxe","HPND","HPND-sell-variant","HTMLTIDY","HaskellReport","Hippocratic-2.1","IBM-pibs","ICU","IJG","IPA","IPL-1.0","ISC","ImageMagick","Imlib2","Info-ZIP","Intel","Intel-ACPI","Interbase-1.0","JPNIC","JSON","JasPer-2.0","LAL-1.2","LAL-1.3","LGPL-2.0-only","LGPL-2.0-or-later","LGPL-2.1-only","LGPL-2.1-or-later","LGPL-3.0-only","LGPL-3.0-or-later","LGPLLR","LPL-1.0","LPL-1.02","LPPL-1.0","LPPL-1.1","LPPL-1.2","LPPL-1.3a","LPPL-1.3c","Latex2e","Leptonica","LiLiQ-P-1.1","LiLiQ-R-1.1","LiLiQ-Rplus-1.1","Libpng","Linux-OpenIB","Linux-man-pages-copyleft","MIT","MIT-0","MIT-CMU","MIT-Modern-Variant","MIT-advertising","MIT-enna","MIT-feh","MIT-open-group","MITNFA","MPL-1.0","MPL-1.1","MPL-2.0","MPL-2.0-no-copyleft-exception","MS-PL","MS-RL","MTLL","MakeIndex","MirOS","Motosoto","MulanPSL-1.0","MulanPSL-2.0","Multics","Mup","NAIST-2003","NASA-1.3","NBPL-1.0","NCGL-UK-2.0","NCSA","NGPL","NIST-PD","NIST-PD-fallback","NLOD-1.0","NLOD-2.0","NLPL","NOSL","NPL-1.0","NPL-1.1","NPOSL-3.0","NRL","NTP","NTP-0","Naumen","Net-SNMP","NetCDF","Newsletr","Nokia","Noweb","O-UDA-1.0","OCCT-PL","OCLC-2.0","ODC-By-1.0","ODbL-1.0","OFL-1.0","OFL-1.0-RFN","OFL-1.0-no-RFN","OFL-1.1","OFL-1.1-RFN","OFL-1.1-no-RFN","OGC-1.0","OGDL-Taiwan-1.0","OGL-Canada-2.0","OGL-UK-1.0","OGL-UK-2.0","OGL-UK-3.0","OGTSL","OLDAP-1.1","OLDAP-1.2","OLDAP-1.3","OLDAP-1.4","OLDAP-2.0","OLDAP-2.0.1","OLDAP-2.1","OLDAP-2.2","OLDAP-2.2.1","OLDAP-2.2.2","OLDAP-2.3","OLDAP-2.4","OLDAP-2.5","OLDAP-2.6","OLDAP-2.7","OLDAP-2.8","OML","OPL-1.0","OPUBL-1.0","OSET-PL-2.1","OSL-1.0","OSL-1.1","OSL-2.0","OSL-2.1","OSL-3.0","OpenSSL","PDDL-1.0","PHP-3.0","PHP-3.01","PSF-2.0","Parity-6.0.0","Parity-7.0.0","Plexus","PolyForm-Noncommercial-1.0.0","PolyForm-Small-Business-1.0.0","PostgreSQL","Python-2.0","QPL-1.0","Qhull","RHeCos-1.1","RPL-1.1","RPL-1.5","RPSL-1.0","RSA-MD","RSCPL","Rdisc","Ruby","SAX-PD","SCEA","SGI-B-1.0","SGI-B-1.1","SGI-B-2.0","SHL-0.5","SHL-0.51","SISSL","SISSL-1.2","SMLNJ","SMPPL","SNIA","SPL-1.0","SSH-OpenSSH","SSH-short","SSPL-1.0","SWL","Saxpath","Sendmail","Sendmail-8.23","SimPL-2.0","Sleepycat","Spencer-86","Spencer-94","Spencer-99","SugarCRM-1.1.3","TAPR-OHL-1.0","TCL","TCP-wrappers","TMate","TORQUE-1.1","TOSL","TU-Berlin-1.0","TU-Berlin-2.0","UCL-1.0","UPL-1.0","Unicode-DFS-2015","Unicode-DFS-2016","Unicode-TOU","Unlicense","VOSTROM","VSL-1.0","Vim","W3C","W3C-19980720","W3C-20150513","WTFPL","Watcom-1.0","Wsuipa","X11","XFree86-1.1","XSkat","Xerox","Xnet","YPL-1.0","YPL-1.1","ZPL-1.1","ZPL-2.0","ZPL-2.1","Zed","Zend-2.0","Zimbra-1.3","Zimbra-1.4","Zlib","blessing","bzip2-1.0.5","bzip2-1.0.6","copyleft-next-0.3.0","copyleft-next-0.3.1","curl","diffmark","dvipdfm","eGenix","etalab-2.0","gSOAP-1.3b","gnuplot","iMatix","libpng-2.0","libselinux-1.0","libtiff","mpich2","psfrag","psutils","xinetd","xpp","zlib-acknowledgement"]')
 
 },
 347(module) {
 "use strict";
-module.exports = JSON.parse('{"name":"strong-log-transformer","version":"2.1.0","description":"Stream transformer that prefixes lines with timestamps and other things.","author":"Ryan Graham <ryan@strongloop.com>","license":"Apache-2.0","repository":{"type":"git","url":"git://github.com/strongloop/strong-log-transformer"},"keywords":["logging","streams"],"bugs":{"url":"https://github.com/strongloop/strong-log-transformer/issues"},"homepage":"https://github.com/strongloop/strong-log-transformer","directories":{"test":"test"},"bin":{"sl-log-transformer":"bin/sl-log-transformer.js"},"main":"index.js","scripts":{"test":"tap --100 test/test-*"},"dependencies":{"duplexer":"^0.1.1","minimist":"^1.2.0","through":"^2.3.4"},"devDependencies":{"tap":"^12.0.1"},"engines":{"node":">=4"}}')
+module.exports = /*#__PURE__*/JSON.parse('{"name":"strong-log-transformer","version":"2.1.0","description":"Stream transformer that prefixes lines with timestamps and other things.","author":"Ryan Graham <ryan@strongloop.com>","license":"Apache-2.0","repository":{"type":"git","url":"git://github.com/strongloop/strong-log-transformer"},"keywords":["logging","streams"],"bugs":{"url":"https://github.com/strongloop/strong-log-transformer/issues"},"homepage":"https://github.com/strongloop/strong-log-transformer","directories":{"test":"test"},"bin":{"sl-log-transformer":"bin/sl-log-transformer.js"},"main":"index.js","scripts":{"test":"tap --100 test/test-*"},"dependencies":{"duplexer":"^0.1.1","minimist":"^1.2.0","through":"^2.3.4"},"devDependencies":{"tap":"^12.0.1"},"engines":{"node":">=4"}}')
 
 },
 
@@ -58253,15 +59052,11 @@ return cachedModule.exports;
 }
 // Create a new module (and put it into the cache)
 var module = (__webpack_module_cache__[moduleId] = {
-id: moduleId,
-loaded: false,
 exports: {}
 });
 // Execute the module function
 __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 
-// Flag the module as loaded
-module.loaded = true;
 // Return the exports of the module
 return module.exports;
 
@@ -58281,12 +59076,16 @@ __webpack_require__.n = (module) => {
 })();
 // webpack/runtime/define_property_getters
 (() => {
-__webpack_require__.d = (exports, definition) => {
-	for(var key in definition) {
-        if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-            Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-        }
-    }
+__webpack_require__.d = (exports, getters, values) => {
+	var define = (defs, kind) => {
+		for(var key in defs) {
+			if(__webpack_require__.o(defs, key) && !__webpack_require__.o(exports, key)) {
+				Object.defineProperty(exports, key, { enumerable: true, [kind]: defs[key] });
+			}
+		}
+	};
+	define(getters, "get");
+	define(values, "value");
 };
 })();
 // webpack/runtime/has_own_property
@@ -58325,7 +59124,7 @@ __webpack_require__.d(__webpack_exports__, {
   run: () => (/* reexport safe */ _cli__rspack_import_0.run)
 });
 /* import */ var _cli__rspack_import_0 = __webpack_require__(1);
-/* import */ var _production__rspack_import_1 = __webpack_require__(504);
+/* import */ var _production__rspack_import_1 = __webpack_require__(506);
 /* import */ var _utils_projects__rspack_import_2 = __webpack_require__(171);
 /* import */ var _utils_project__rspack_import_3 = __webpack_require__(192);
 /* import */ var _utils_workspaces__rspack_import_4 = __webpack_require__(349);
@@ -58368,4 +59167,3 @@ __webpack_require__.d(__webpack_exports__, {
 module.exports = __webpack_exports__;
 })()
 ;
-//# sourceMappingURL=index.js.map
