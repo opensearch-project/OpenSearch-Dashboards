@@ -736,6 +736,8 @@ export class DataViewsService {
         references,
       });
       dataView.id = response.id;
+      // What was just created is the baseline for the first update's changes.
+      dataView.resetOriginalSavedObjectBody();
       this.patterns.saveToCache(dataView.id, dataView);
       return dataView;
     } catch (err) {
@@ -794,11 +796,22 @@ export class DataViewsService {
       }
     });
 
+    // Send only the changed attributes: the update is partial, so the rest keep their saved
+    // values, and an unchanged field list is no longer uploaded. A cleared (undefined)
+    // attribute is still dropped from the request, as before.
+    const bodyAttributes: Record<string, unknown> = body;
+    const changedAttributes: Record<string, unknown> = {};
+    originalChangedKeys.forEach((key) => {
+      changedAttributes[key] = bodyAttributes[key];
+    });
+
     return this.savedObjectsClient
-      .update(savedObjectType, dataView.id, body, { version: dataView.version })
+      .update(savedObjectType, dataView.id, changedAttributes, { version: dataView.version })
       .then((resp) => {
         dataView.id = resp.id;
         dataView.version = resp.version;
+        // What was just saved is now the baseline for the next save's changes.
+        dataView.resetOriginalSavedObjectBody();
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {

@@ -351,6 +351,83 @@ describe('IndexPatterns', () => {
     expect(result.res.status).toBe(409);
   });
 
+  describe('updateSavedObject sends only changed attributes', () => {
+    beforeEach(() => {
+      setDocsourcePayload(null, {
+        id: 'foo',
+        version: 'v1',
+        attributes: {
+          title: 'something',
+          displayName: 'Old',
+          fields: JSON.stringify([
+            { name: 'a', type: 'string', searchable: true, aggregatable: true },
+          ]),
+        },
+      });
+      savedObjectsClient.update = jest
+        .fn()
+        .mockImplementation(async (type, id, body, { version }) => ({
+          id,
+          version: `${version}a`,
+        }));
+      indexPatterns.clearCache();
+    });
+
+    test('sends only the attributes that changed', async () => {
+      const pattern = await indexPatterns.get('foo');
+      pattern.displayName = 'New';
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'index-pattern',
+        'foo',
+        { displayName: 'New' },
+        { version: 'v1' }
+      );
+    });
+
+    test('does not resend attributes saved earlier', async () => {
+      const pattern = await indexPatterns.get('foo');
+      pattern.displayName = 'New';
+      await indexPatterns.updateSavedObject(pattern);
+      pattern.timeFieldName = 'a';
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+        'index-pattern',
+        'foo',
+        { timeFieldName: 'a' },
+        { version: 'v1a' }
+      );
+    });
+  });
+
+  test('createSavedObject makes the created attributes the baseline for updates', async () => {
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ id: 'new-id' });
+    savedObjectsClient.update = jest.fn().mockResolvedValue({ id: 'new-id', version: 'v2' });
+    const pattern = await indexPatterns.create(
+      {
+        title: 'new-title',
+        fields: { a: { name: 'a', type: 'string', searchable: true, aggregatable: true } },
+      },
+      true
+    );
+    await indexPatterns.createSavedObject(pattern);
+    pattern.displayName = 'Named';
+
+    await indexPatterns.updateSavedObject(pattern);
+
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'new-id',
+      { displayName: 'Named' },
+      { version: undefined }
+    );
+  });
+
   test('create', async () => {
     const title = 'opensearch-dashboards-*';
     indexPatterns.refreshFields = jest.fn();

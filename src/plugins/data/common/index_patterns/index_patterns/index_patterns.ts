@@ -768,6 +768,8 @@ export class IndexPatternsService {
         throw err;
       });
     indexPattern.id = response.id;
+    // What was just created is the baseline for the first update's changes.
+    indexPattern.resetOriginalSavedObjectBody();
     indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
   }
@@ -805,11 +807,24 @@ export class IndexPatternsService {
       }
     });
 
+    // Send only the changed attributes: the update is partial, so the rest keep their saved
+    // values, and an unchanged field list is no longer uploaded. A cleared (undefined)
+    // attribute is still dropped from the request, as before.
+    const bodyAttributes: Record<string, unknown> = body;
+    const changedAttributes: Record<string, unknown> = {};
+    originalChangedKeys.forEach((key) => {
+      changedAttributes[key] = bodyAttributes[key];
+    });
+
     return this.savedObjectsClient
-      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
+      .update(savedObjectType, indexPattern.id, changedAttributes, {
+        version: indexPattern.version,
+      })
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
+        // What was just saved is now the baseline for the next save's changes.
+        indexPattern.resetOriginalSavedObjectBody();
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
