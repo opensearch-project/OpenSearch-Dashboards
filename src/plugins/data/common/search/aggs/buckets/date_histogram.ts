@@ -263,7 +263,11 @@ export const getDateHistogramBucketAgg = ({
             // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
             const detectedTimezone = moment.tz.guess();
             const tzOffset = moment().format('Z');
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
+            const configuredTz = getConfig('dateFormat:tz');
+            tz =
+              isDefaultTimezone() || configuredTz === 'Browser'
+                ? detectedTimezone || tzOffset
+                : configuredTz;
           }
           output.params.time_zone = tz;
         },

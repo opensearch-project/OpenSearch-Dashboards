@@ -117,7 +117,11 @@ export const getDateRangeBucketAgg = ({
             const detectedTimezone = moment.tz.guess();
             const tzOffset = moment().format('Z');
 
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
+            const configuredTz = getConfig('dateFormat:tz');
+            tz =
+              isDefaultTimezone() || configuredTz === 'Browser'
+                ? detectedTimezone || tzOffset
+                : configuredTz;
           }
           output.params.time_zone = tz;
         },
