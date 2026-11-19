@@ -140,7 +140,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== prevState.query?.query) {
+    if (
+      nextProps.query &&
+      nextProps.query.query !== get(prevState, 'currentProps.query.query') &&
+      nextProps.query.query !== prevState.query?.query
+    ) {
+      // Sync the draft only when the query prop itself changed (e.g. a saved query was loaded).
+      // Re-renders that keep the same submitted query (e.g. auto-refresh ticks) must not
+      // overwrite what the user is currently typing.
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
