@@ -135,8 +135,8 @@ const autoTabDetectTestSuite = () => {
       });
     });
 
-    describe('Statistics tab hides action bar buttons', () => {
-      it('hides Add to Dashboard and Export CSV buttons on Statistics tab', () => {
+    describe('Statistics tab action bar buttons', () => {
+      it('hides Add to Dashboard and shows Export CSV on Statistics tab', () => {
         const statsQuery = `source = ${indexPattern} | stats count() by category`;
         cy.explore.setQueryEditor(statsQuery);
         cy.osd.waitForLoader(true);
@@ -149,7 +149,7 @@ const autoTabDetectTestSuite = () => {
         // Add to Dashboard button should not be visible
         cy.get('[data-test-subj="dscResultsActionBar"]').within(() => {
           cy.get('[data-test-subj="addToDashboardButton"]').should('not.exist');
-          cy.get('[data-test-subj="downloadCsvButton"]').should('not.exist');
+          cy.get('[data-test-subj="dscDownloadCsvButton"]').should('exist');
         });
       });
     });
