@@ -559,6 +559,46 @@ describe('PPLSearchInterceptor', () => {
       (mockCoreStart.application.currentAppId$ as BehaviorSubject<string>).next('dashboards');
     });
 
+    describe('$__interval', () => {
+      const requestFor = (query: string, timeRange?: { from: string; to: string }) => ({
+        params: {
+          body: {
+            query: { queries: [{ language: 'PPL', query, dataset: { type: 'DEFAULT' } }] },
+            ...(timeRange && { timeRange }),
+          },
+        },
+      });
+
+      beforeEach(() => {
+        mockIsPPLSearchQuery.mockReturnValue(true);
+        (mockCoreStart.uiSettings.get as jest.Mock).mockImplementation((key: string) => {
+          if (key === UI_SETTINGS.HISTOGRAM_BAR_TARGET) return 50;
+          if (key === UI_SETTINGS.HISTOGRAM_MAX_BARS) return 100;
+          if (key === 'dateFormat:scaled') return [];
+          return undefined;
+        });
+      });
+
+      it('is replaced with the Auto interval over the global time range', async () => {
+        // 24h (from the beforeEach time range) / 50 bars -> 30m.
+        const result = await (pplSearchInterceptor as any).buildQuery(
+          requestFor('source=logs | stats count() by span(@timestamp, $__interval)')
+        );
+        expect(result.query).toBe('source=logs | stats count() by span(@timestamp, 30m)');
+      });
+
+      it("follows the request's own time range", async () => {
+        // 1h / 50 bars -> 1m.
+        const result = await (pplSearchInterceptor as any).buildQuery(
+          requestFor('source=logs | stats count() by span(@timestamp, ${__interval})', {
+            from: '2024-05-05T00:00:00Z',
+            to: '2024-05-05T01:00:00Z',
+          })
+        );
+        expect(result.query).toBe('source=logs | stats count() by span(@timestamp, 1m)');
+      });
+    });
+
     it('should return query as-is for non-PPL search queries', async () => {
       const mockQuery = {
         language: 'PPL',
