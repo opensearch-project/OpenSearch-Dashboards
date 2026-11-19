@@ -165,9 +165,11 @@ export class IndexPattern implements IIndexPattern {
 
   /**
    * Reset last saved saved object fields. used after saving
+   * @param savedBody what was saved; pass the body a save sent, so edits made while it was in
+   * flight still count as unsaved. Defaults to the current state.
    */
-  resetOriginalSavedObjectBody = () => {
-    this.originalSavedObjectBody = this.getAsSavedObjectBody();
+  resetOriginalSavedObjectBody = (savedBody: SavedObjectBody = this.getAsSavedObjectBody()) => {
+    this.originalSavedObjectBody = { ...savedBody };
   };
 
   /**

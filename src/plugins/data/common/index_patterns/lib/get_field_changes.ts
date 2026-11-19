@@ -33,12 +33,11 @@ export const getFieldChanges = (
   const remove = saved
     .filter((field) => field.scripted && !currentScriptedNames.has(field.name))
     .map((field) => field.name);
-  const counts: Record<string, number> = {};
-  current.forEach((field) => {
-    if (!field.scripted && (field.count ?? 0) !== (savedByName.get(field.name)?.count ?? 0)) {
-      counts[field.name] = field.count ?? 0;
-    }
-  });
+  const counts = current
+    .filter(
+      (field) => !field.scripted && (field.count ?? 0) !== (savedByName.get(field.name)?.count ?? 0)
+    )
+    .map((field) => ({ name: field.name, count: field.count ?? 0 }));
 
   const changes: FieldChanges = {};
   if (upsert.length || remove.length) {
@@ -47,7 +46,7 @@ export const getFieldChanges = (
       ...(remove.length ? { remove } : {}),
     };
   }
-  if (Object.keys(counts).length) {
+  if (counts.length) {
     changes.counts = counts;
   }
   return Object.keys(changes).length ? changes : undefined;

@@ -32,7 +32,16 @@ describe('getFieldChanges', () => {
   });
 
   it('sends a changed popularity count', () => {
-    expect(changes([regular], [{ ...regular, count: 5 }])).toEqual({ counts: { bytes: 5 } });
+    expect(changes([regular], [{ ...regular, count: 5 }])).toEqual({
+      counts: [{ name: 'bytes', count: 5 }],
+    });
+  });
+
+  it('sends a changed count for a field named __proto__', () => {
+    const proto = { ...regular, name: '__proto__' };
+    expect(changes([proto], [{ ...proto, count: 3 }])).toEqual({
+      counts: [{ name: '__proto__', count: 3 }],
+    });
   });
 
   it('sends a new or edited scripted field', () => {
@@ -56,7 +65,7 @@ describe('getFieldChanges', () => {
   it('treats a missing saved list as empty', () => {
     expect(getFieldChanges(undefined, JSON.stringify([regular, scripted]))).toEqual({
       scripted: { upsert: [scripted] },
-      counts: { bytes: 1 },
+      counts: [{ name: 'bytes', count: 1 }],
     });
   });
 });

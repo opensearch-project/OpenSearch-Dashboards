@@ -102,7 +102,7 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
 
     await callHandler();
 
-    const fields = [{ name: 'new', type: 'string' }, scriptedField];
+    const fields = [{ name: 'new', type: 'string', count: 0, scripted: false }, scriptedField];
     expect(IndexPatternsFetcher).toHaveBeenCalledWith(localCaller);
     expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({
       pattern: 'logs-*',
@@ -141,8 +141,8 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
     await callHandler();
 
     expect(savedFieldsArg()).toEqual([
-      { name: 'kept', type: 'string', count: 3 },
-      { name: 'new', type: 'string' },
+      { name: 'kept', type: 'string', count: 3, scripted: false },
+      { name: 'new', type: 'string', count: 0, scripted: false },
       { ...scriptedField, count: 2 },
     ]);
   });
@@ -184,7 +184,10 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
 
     await callHandler();
 
-    expect(savedFieldsArg()).toEqual([{ name: 'new', type: 'string' }, scriptedField]);
+    expect(savedFieldsArg()).toEqual([
+      { name: 'new', type: 'string', count: 0, scripted: false },
+      scriptedField,
+    ]);
   });
 
   it('saves only discovered fields when the pattern has no saved fields', async () => {
@@ -192,7 +195,7 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
 
     await callHandler();
 
-    expect(savedFieldsArg()).toEqual([{ name: 'new', type: 'string' }]);
+    expect(savedFieldsArg()).toEqual([{ name: 'new', type: 'string', count: 0, scripted: false }]);
   });
 
   it('returns the boom error status and payload', async () => {
@@ -275,7 +278,7 @@ describe('POST /api/index_patterns/{id}/_update_fields', () => {
       version: 'v1',
       attributes: { fieldFormatMap: '{"kb":{"id":"number"}}' },
       scripted: { upsert: [edited, added] },
-      counts: { bytes: 3 },
+      counts: [{ name: 'bytes', count: 3 }],
     });
 
     expect(mockContext.core.savedObjects.client.update).toHaveBeenCalledWith(
@@ -302,8 +305,21 @@ describe('POST /api/index_patterns/{id}/_update_fields', () => {
     expect(savedFieldsArg()).toEqual([discovered, scripted, added]);
   });
 
+  it('sets the count of a field named __proto__', async () => {
+    const proto = { ...discovered, name: '__proto__' };
+    mockSavedFields(JSON.stringify([proto]));
+
+    await callHandler({ version: 'v1', counts: [{ name: '__proto__', count: 4 }] });
+
+    expect(savedFieldsArg()).toEqual([{ ...proto, count: 4 }]);
+  });
+
   it('ignores unknown field names', async () => {
-    await callHandler({ version: 'v1', scripted: { remove: ['gone'] }, counts: { gone: 2 } });
+    await callHandler({
+      version: 'v1',
+      scripted: { remove: ['gone'] },
+      counts: [{ name: 'gone', count: 2 }],
+    });
 
     expect(savedFieldsArg()).toEqual([discovered, scripted]);
   });
@@ -318,7 +334,7 @@ describe('POST /api/index_patterns/{id}/_update_fields', () => {
   it('reads a saved field list stored as an array', async () => {
     mockSavedFields([discovered]);
 
-    await callHandler({ version: 'v1', counts: { bytes: 1 } });
+    await callHandler({ version: 'v1', counts: [{ name: 'bytes', count: 1 }] });
 
     expect(savedFieldsArg()).toEqual([{ ...discovered, count: 1 }]);
   });
@@ -326,7 +342,7 @@ describe('POST /api/index_patterns/{id}/_update_fields', () => {
   it('returns a version conflict as 409', async () => {
     mockContext.core.savedObjects.client.update.mockRejectedValue(Boom.conflict('conflict'));
 
-    await callHandler({ version: 'stale', counts: { bytes: 1 } });
+    await callHandler({ version: 'stale', counts: [{ name: 'bytes', count: 1 }] });
 
     expect(mockResponse.customError).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 409 })

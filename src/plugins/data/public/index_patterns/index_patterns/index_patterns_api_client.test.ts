@@ -74,7 +74,7 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('posts field changes as JSON to the right URI', async function () {
-    const request = { version: 'v1', counts: { bytes: 2 } };
+    const request = { version: 'v1', counts: [{ name: 'bytes', count: 2 }] };
 
     await indexPatternsApiClient.updateFields('id', request);
 

@@ -233,11 +233,13 @@ export function registerRoutes(http: HttpServiceSetup) {
           pattern: savedObject.attributes.title,
           metaFields: parsedFields,
         });
+        // Saved in the shape the browser writes, so every field has a count (0 if never used).
         const fields: FieldSpec[] = [
-          ...discoveredFields.map((field) => {
-            const count = savedCounts.get(field.name);
-            return count ? { ...field, count } : field;
-          }),
+          ...discoveredFields.map((field) => ({
+            ...field,
+            count: savedCounts.get(field.name) ?? 0,
+            scripted: false,
+          })),
           ...savedFields.filter((field) => field.scripted),
         ];
 
@@ -305,7 +307,11 @@ export function registerRoutes(http: HttpServiceSetup) {
               remove: schema.maybe(schema.arrayOf(schema.string())),
             })
           ),
-          counts: schema.maybe(schema.recordOf(schema.string(), schema.number({ min: 0 }))),
+          counts: schema.maybe(
+            schema.arrayOf(
+              schema.object({ name: schema.string(), count: schema.number({ min: 0 }) })
+            )
+          ),
         }),
       },
     },
@@ -339,7 +345,7 @@ export function registerRoutes(http: HttpServiceSetup) {
         const removed = new Set(scripted?.remove ?? []);
         const upsertByName = new Map(upserts.map((field) => [field.name, field]));
         const savedNames = new Set(savedFields.map((field) => field.name));
-        const countByName = new Map(Object.entries(counts ?? {}));
+        const countByName = new Map((counts ?? []).map(({ name, count }) => [name, count]));
         const fields = [
           ...savedFields
             .filter((field) => !(field.scripted && removed.has(field.name)))

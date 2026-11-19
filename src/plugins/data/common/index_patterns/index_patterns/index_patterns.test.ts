@@ -387,6 +387,34 @@ describe('IndexPatterns', () => {
       );
     });
 
+    test('keeps an edit made while a save is in flight', async () => {
+      let finishFirstSave: () => void = () => {};
+      savedObjectsClient.update = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishFirstSave = () => resolve({ id: 'foo', version: 'v2' });
+            })
+        )
+        .mockResolvedValue({ id: 'foo', version: 'v3' });
+      const pattern = await indexPatterns.get('foo');
+      pattern.displayName = 'New';
+      const firstSave = indexPatterns.updateSavedObject(pattern);
+      pattern.description = 'typed while saving';
+      finishFirstSave();
+      await firstSave;
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+        'index-pattern',
+        'foo',
+        { description: 'typed while saving' },
+        { version: 'v2' }
+      );
+    });
+
     test('does not resend attributes saved earlier', async () => {
       const pattern = await indexPatterns.get('foo');
       pattern.displayName = 'New';
@@ -439,7 +467,7 @@ describe('IndexPatterns', () => {
       expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
         version: 'v1',
         attributes: {},
-        counts: { bytes: 2 },
+        counts: [{ name: 'bytes', count: 2 }],
       });
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
       expect(pattern.version).toBe('v2');

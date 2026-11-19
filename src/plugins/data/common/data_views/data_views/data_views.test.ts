@@ -208,6 +208,34 @@ describe('DataViews', () => {
       );
     });
 
+    test('keeps an edit made while a save is in flight', async () => {
+      let finishFirstSave: () => void = () => {};
+      savedObjectsClient.update = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishFirstSave = () => resolve({ id: 'foo', version: 'v2' });
+            })
+        )
+        .mockResolvedValue({ id: 'foo', version: 'v3' });
+      const dataView = await dataViews.get('foo');
+      dataView.displayName = 'New';
+      const firstSave = dataViews.updateSavedObject(dataView);
+      dataView.description = 'typed while saving';
+      finishFirstSave();
+      await firstSave;
+
+      await dataViews.updateSavedObject(dataView);
+
+      expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+        'index-pattern',
+        'foo',
+        { description: 'typed while saving' },
+        { version: 'v2' }
+      );
+    });
+
     test('does not resend attributes saved earlier', async () => {
       const dataView = await dataViews.get('foo');
       dataView.displayName = 'New';
@@ -254,7 +282,7 @@ describe('DataViews', () => {
       expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
         version: 'v1',
         attributes: {},
-        counts: { bytes: 2 },
+        counts: [{ name: 'bytes', count: 2 }],
       });
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
       expect(dataView.version).toBe('v2');

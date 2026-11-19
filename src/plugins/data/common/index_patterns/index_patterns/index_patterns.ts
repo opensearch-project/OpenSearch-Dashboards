@@ -770,7 +770,7 @@ export class IndexPatternsService {
       });
     indexPattern.id = response.id;
     // What was just created is the baseline for the first update's changes.
-    indexPattern.resetOriginalSavedObjectBody();
+    indexPattern.resetOriginalSavedObjectBody(body);
     indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
   }
@@ -836,8 +836,8 @@ export class IndexPatternsService {
     return save
       .then((resp) => {
         indexPattern.version = resp.version;
-        // What was just saved is now the baseline for the next save's changes.
-        indexPattern.resetOriginalSavedObjectBody();
+        // What this request sent is now saved; later edits stay pending for the next save.
+        indexPattern.resetOriginalSavedObjectBody(body);
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {

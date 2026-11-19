@@ -154,7 +154,8 @@ export interface UpdateFieldsRequest {
   version?: string;
   attributes?: Record<string, unknown>;
   scripted?: { upsert?: FieldSpec[]; remove?: string[] };
-  counts?: Record<string, number>;
+  // A list rather than a name-keyed object, so any field name survives JSON and validation.
+  counts?: Array<{ name: string; count: number }>;
 }
 
 /**
