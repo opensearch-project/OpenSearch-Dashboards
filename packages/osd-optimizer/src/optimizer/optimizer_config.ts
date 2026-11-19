@@ -31,7 +31,15 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig, ThemeTag, ThemeTags, parseThemeTags, BundleRef } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  ThemeTag,
+  ThemeTags,
+  parseThemeTags,
+  BundleRef,
+  BundleRefs,
+} from '../common';
 
 import {
   findOpenSearchDashboardsPlatformPlugins,
@@ -236,8 +244,14 @@ export class OptimizerConfig {
       ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
 
+    const filteredBundles = filterById(options.filters, bundles);
+    const excludedBundles = bundles.filter((bundle) => !filteredBundles.includes(bundle));
+    const bundleRefs = BundleRefs.fromBundles(excludedBundles)
+      .addRefs(options.bundleRefs)
+      .getRefs();
+
     return new OptimizerConfig(
-      filterById(options.filters, bundles),
+      filteredBundles,
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -248,7 +262,7 @@ export class OptimizerConfig {
       options.profileRspack,
       options.themeTags,
       readLimits(),
-      options.bundleRefs
+      bundleRefs
     );
   }
 
