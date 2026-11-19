@@ -72,6 +72,24 @@ describe('IndicesList', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should call onIndexClick with the index name when a row is clicked', () => {
+    const onIndexClick = jest.fn();
+    const component = shallow(
+      <IndicesList indices={indices} query="" onIndexClick={onIndexClick} />
+    );
+
+    component.find('EuiTableRow').first().simulate('click');
+
+    expect(onIndexClick).toHaveBeenCalledTimes(1);
+    expect(onIndexClick).toHaveBeenCalledWith('opensearch-dashboards');
+  });
+
+  it('should not make rows clickable when onIndexClick is not provided', () => {
+    const component = shallow(<IndicesList indices={indices} query="" />);
+
+    expect(component.find('EuiTableRow').first().prop('onClick')).toBeUndefined();
+  });
+
   describe('updating props', () => {
     it('should render all new indices', () => {
       const component = shallow(<IndicesList indices={indices} query="" />);
