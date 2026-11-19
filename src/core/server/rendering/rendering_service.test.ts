@@ -240,9 +240,17 @@ describe('RenderingService', () => {
 
       const dynamicConfigs: Record<string, Record<string, unknown>> = {
         // configPath equals snake_case(id): the dynamic service knows it by either identifier.
-        default_path: { enabled: true, exposedProp: 'dynamic exposed', serverOnly: SERVER_ONLY_VALUE },
+        default_path: {
+          enabled: true,
+          exposedProp: 'dynamic exposed',
+          serverOnly: SERVER_ONLY_VALUE,
+        },
         // custom configPath: the dynamic service knows it ONLY by configPath.
-        custom_path: { enabled: true, exposedProp: 'dynamic exposed', serverOnly: SERVER_ONLY_VALUE },
+        custom_path: {
+          enabled: true,
+          exposedProp: 'dynamic exposed',
+          serverOnly: SERVER_ONLY_VALUE,
+        },
         // declares nothing in exposeToBrowser.
         undeclared_path: { enabled: false, serverOnly: SERVER_ONLY_VALUE },
       };
