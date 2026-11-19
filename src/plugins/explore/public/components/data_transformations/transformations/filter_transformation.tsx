@@ -22,7 +22,9 @@ import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 import {
   createAppliedResult,
   createInvalidConfigResult,
+  createMissingFieldsResult,
   getRowFieldValue,
+  rowHasField,
   isDateField,
   isNumericalField,
 } from '../transformation_utils';
@@ -133,6 +135,12 @@ export function createFilterTransformation(): TransformationInstance<FilterConfi
 
       if (!isConfigComplete({ field, operator, value })) {
         return createInvalidConfigResult(data, 'Filter configuration is incomplete.');
+      }
+      // The field is gone from every row (e.g. an earlier step dropped it): skip, keeping the rows,
+      // and say so, rather than filter everything out. Rows that lack it among rows that have it
+      // still count as not matching.
+      if (data.length > 0 && !data.some((row) => rowHasField(row, field!))) {
+        return createMissingFieldsResult(data, [field!]);
       }
       const filtered = data.filter((row) => {
         const fieldValue = getRowFieldValue(row, field!);
