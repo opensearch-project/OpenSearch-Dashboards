@@ -53,6 +53,8 @@ export interface QueryRowProps {
   isDragging: boolean;
   dragHandleProps: DragHandleProps;
   stepReadout: RowStepReadout;
+  // Show the left label / drag handle column (default true), false when only one query
+  showLabel?: boolean;
 }
 
 export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
@@ -72,6 +74,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     isDragging,
     dragHandleProps,
     stepReadout,
+    showLabel = true,
   }) => {
     const [showCodeConfirm, setShowCodeConfirm] = useState(false);
 
@@ -123,28 +126,35 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
         data-test-subj={`queryRow-${positionLabel}`}
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" direction="column" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" className="mqpRowLabel">
-                  {label}
-                </EuiText>
-              </EuiFlexItem>
-              {canRemove && (
+          {showLabel && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                gutterSize="xs"
+                direction="column"
+                alignItems="center"
+                responsive={false}
+              >
                 <EuiFlexItem grow={false}>
-                  <div
-                    {...dragHandleProps}
-                    aria-label={i18n.translate('explore.metricsQueryPanel.dragToReorder', {
-                      defaultMessage: 'Drag to reorder',
-                    })}
-                    className="mqpDragHandle"
-                  >
-                    <EuiIcon type="grab" size="s" />
-                  </div>
+                  <EuiText size="xs" className="mqpRowLabel">
+                    {label}
+                  </EuiText>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {canRemove && (
+                  <EuiFlexItem grow={false}>
+                    <div
+                      {...dragHandleProps}
+                      aria-label={i18n.translate('explore.metricsQueryPanel.dragToReorder', {
+                        defaultMessage: 'Drag to reorder',
+                      })}
+                      className="mqpDragHandle"
+                    >
+                      <EuiIcon type="grab" size="s" />
+                    </div>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem className="mqpRowEditor">
             {row.mode === 'builder' && row.builderState ? (

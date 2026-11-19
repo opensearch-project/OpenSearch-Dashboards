@@ -46,6 +46,10 @@ export interface QueryEditorExtensionDependencies {
    */
   query: Query;
   /**
+   * User provided query to evaluate instead of the global query
+   */
+  userProvidedQuery?: Query;
+  /**
    * Fetch status for the currently running query
    */
   fetchStatus?: ResultStatus;
