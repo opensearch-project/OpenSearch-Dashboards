@@ -830,6 +830,99 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 10,
     });
+    // When all aggregation queries fail, aggs must remain undefined so Explore does not
+    // take the histogram branch with an empty aggregations object.
+    expect((result.body as any).aggs).toBeUndefined();
     expect(usage.trackSuccess).toHaveBeenCalledWith(10);
+  });
+
+  it('should accumulate all keys when aggConfig.qs has multiple entries', async () => {
+    // Primary search response
+    const mockPrimaryResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 10,
+    };
+    // Per-key agg responses: key '1' → bucketA, key '2' → bucketB
+    const mockAggResponse1 = {
+      success: true,
+      data: {
+        datarows: [
+          [10, '2024-01-01'],
+          [20, '2024-01-02'],
+        ],
+      },
+    };
+    const mockAggResponse2 = {
+      success: true,
+      data: {
+        datarows: [
+          [30, '2024-01-01'],
+          [40, '2024-01-02'],
+        ],
+      },
+    };
+    const mockDescribeQuery = jest
+      .fn()
+      .mockResolvedValueOnce(mockPrimaryResponse)
+      .mockResolvedValueOnce(mockAggResponse1)
+      .mockResolvedValueOnce(mockAggResponse2);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const originalQuery = 'source = my_table';
+    const mockRawRequest = { headers: { authorization: 'Bearer token' } };
+    const searchRequest = {
+      body: {
+        query: { query: originalQuery, dataset: { id: 'test-dataset' } },
+        aggConfig: {
+          qs: {
+            '1': 'source = my_table | stats count() by span(ts, 1h)',
+            '2': 'source = my_table | stats avg(val) by span(ts, 1h)',
+          },
+        },
+      },
+      rawRequest: mockRawRequest,
+    } as unknown as IOpenSearchDashboardsSearchRequest<unknown>;
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(mockRequestHandlerContext, searchRequest, {});
+
+    // Both keys must be present — neither should overwrite the other
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    expect(result.body.aggs).toEqual({
+      '1': [
+        { key: '2024-01-01', value: 10 },
+        { key: '2024-01-02', value: 20 },
+      ],
+      '2': [
+        { key: '2024-01-01', value: 30 },
+        { key: '2024-01-02', value: 40 },
+      ],
+    });
+
+    // The original request must not be mutated
+    expect(searchRequest.body.query.query).toBe(originalQuery);
+
+    expect(mockDescribeQuery.mock.calls[1][1].body.query.query).toBe(
+      'source = my_table | stats count() by span(ts, 1h)'
+    );
+    expect(mockDescribeQuery.mock.calls[2][1].body.query.query).toBe(
+      'source = my_table | stats avg(val) by span(ts, 1h)'
+    );
+    // rawRequest must be preserved so auth headers are retained
+    expect(mockDescribeQuery.mock.calls[1][1].rawRequest).toBe(mockRawRequest);
+    expect(mockDescribeQuery.mock.calls[2][1].rawRequest).toBe(mockRawRequest);
+    // The two agg calls must receive independent request objects (not the same reference)
+    expect(mockDescribeQuery.mock.calls[1][1]).not.toBe(mockDescribeQuery.mock.calls[2][1]);
+    expect(mockDescribeQuery.mock.calls[1][1].body).not.toBe(
+      mockDescribeQuery.mock.calls[2][1].body
+    );
   });
 });
