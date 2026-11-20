@@ -4,7 +4,7 @@
  */
 
 import { indexPatterns, IndexPattern, IndexPatternField } from '../../../data/public';
-import { IIndexPatternFieldList } from '../../../data/common';
+import { IIndexPatternFieldList, StringFormat } from '../../../data/common';
 
 // Initial data of index pattern fields
 const fieldsData = [
@@ -55,6 +55,7 @@ export const indexPatternInitialMock = {
   formatField: undefined,
   metaFields: ['_id', '_index', '_source'],
   getFieldByName: () => ({}),
+  getFormatterForField: () => new StringFormat(),
 } as unknown as IndexPattern;
 
 // Add a flattenHit method to the initial index pattern mock using flattenHitWrapper

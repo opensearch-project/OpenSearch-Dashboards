@@ -15,6 +15,8 @@ export const config: PluginConfigDescriptor<ChatConfigType> = {
   exposeToBrowser: {
     enabled: true,
     agUiUrl: true,
+    // Read in public/plugin.ts to decide whether to register the agentic memory provider.
+    mlCommonsAgentId: true,
   },
 };
 

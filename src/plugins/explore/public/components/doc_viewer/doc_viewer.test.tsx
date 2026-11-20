@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { indexPatternMock } from '../../__mock__/index_pattern_mock';
@@ -102,5 +102,52 @@ describe('DocViewer', () => {
 
     const osdJsonCodeBlock = screen.queryByTestId('osdJsonCodeBlock');
     expect(osdJsonCodeBlock).toBeInTheDocument();
+  });
+
+  it('pages document fields, preserving the page until the PPL hit changes', () => {
+    const docViewsRegistry = new DocViewsRegistry();
+    docViewsRegistry.addDocView({ title: 'Table', order: 10, component: DocViewTable });
+    const source = Object.fromEntries(
+      Array.from({ length: 21 }, (_, index) => [
+        `field${String(index).padStart(3, '0')}`,
+        `value${index}`,
+      ])
+    );
+    // PPL hits can omit _id even though the shared hit type requires it.
+    const hit = {
+      _index: 'test-index',
+      _score: null,
+      _source: source,
+    } as DocViewRenderProps['hit'];
+    const renderProps = { hit, columns: ['_source'], indexPattern: indexPatternMock };
+    const { rerender } = render(
+      <DocViewer renderProps={renderProps} docViewsRegistry={docViewsRegistry} />
+    );
+    expect(screen.getAllByRole('row')).toHaveLength(20);
+    expect(screen.queryByTestId('tableDocViewRow-field020-value')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    expect(screen.getAllByRole('row')).toHaveLength(3);
+    expect(screen.getByTestId('tableDocViewRow-field020-value')).toHaveTextContent('value20');
+    expect(screen.getByText('21–23 of 23')).toBeInTheDocument();
+    expect(screen.queryByText(/Refine your search/)).not.toBeInTheDocument();
+
+    const updatedProps = { ...renderProps, columns: ['_source', 'field000'] };
+    rerender(<DocViewer renderProps={updatedProps} docViewsRegistry={docViewsRegistry} />);
+    expect(screen.getByTestId('tableDocViewRow-field020-value')).toHaveTextContent('value20');
+    expect(screen.queryByTestId('tableDocViewRow-field000-value')).not.toBeInTheDocument();
+
+    const nextHit = {
+      ...hit,
+      _source: Object.fromEntries(Object.keys(source).map((field) => [field, 'replacement'])),
+    };
+    rerender(
+      <DocViewer
+        renderProps={{ ...updatedProps, hit: nextHit, columns: [...updatedProps.columns] }}
+        docViewsRegistry={docViewsRegistry}
+      />
+    );
+    expect(screen.getByTestId('tableDocViewRow-field000-value')).toHaveTextContent('replacement');
+    expect(screen.queryByTestId('tableDocViewRow-field020-value')).not.toBeInTheDocument();
   });
 });

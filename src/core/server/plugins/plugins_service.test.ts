@@ -541,6 +541,48 @@ describe('PluginsService', () => {
           "sharedProp": "sharedProp default value",
         }
       `);
+      expect(uiPlugins.exposedConfigKeys.get('plugin-with-expose')).toEqual(['sharedProp']);
+    });
+
+    it('lists only the keys marked true in `exposeToBrowser`', async () => {
+      jest.doMock(
+        join('plugin-with-partial-expose', 'server'),
+        () => ({
+          config: {
+            exposeToBrowser: {
+              exposedProp: true,
+              hiddenProp: false,
+            },
+            schema: schema.object({
+              exposedProp: schema.string({ defaultValue: 'exposed' }),
+              hiddenProp: schema.string({ defaultValue: 'hidden' }),
+              serverProp: schema.string({ defaultValue: 'server only' }),
+            }),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+      const plugin = createPlugin('plugin-with-partial-expose', {
+        path: 'plugin-with-partial-expose',
+        configPath: 'path',
+      });
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([plugin]),
+      });
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
+
+      const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+      expect(uiPlugins.exposedConfigKeys.get('plugin-with-partial-expose')).toEqual([
+        'exposedProp',
+      ]);
+      const uiConfig = await uiPlugins.browserConfigs
+        .get('plugin-with-partial-expose')!
+        .pipe(take(1))
+        .toPromise();
+      expect(uiConfig).toEqual({ exposedProp: 'exposed' });
     });
 
     it('does not generate config for plugins not exposing to client', async () => {
@@ -569,6 +611,7 @@ describe('PluginsService', () => {
 
       const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
       expect([...uiPlugins.browserConfigs.entries()]).toHaveLength(0);
+      expect(uiPlugins.exposedConfigKeys.get('plugin-without-expose')).toEqual([]);
     });
   });
 

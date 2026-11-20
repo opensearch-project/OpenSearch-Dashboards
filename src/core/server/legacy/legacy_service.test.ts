@@ -131,6 +131,7 @@ beforeEach(() => {
         ],
       ]),
       browserConfigs: new Map(),
+      exposedConfigKeys: new Map(),
     },
   };
 
