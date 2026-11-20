@@ -32,6 +32,8 @@ import { ParseResult } from './grammar';
 import { monaco } from '../monaco';
 import { XJsonWorker } from './worker';
 import { ID } from './constants';
+import { getWorker } from '../monaco_environment';
+import { WorkerLabels } from '../worker_config';
 
 export class WorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<XJsonWorker> | undefined;
@@ -46,7 +48,9 @@ export class WorkerProxyService {
   }
 
   public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: ID, moduleId: '' });
+    this.worker = monaco.editor.createWebWorker<XJsonWorker>({
+      worker: getWorker(ID as WorkerLabels),
+    });
   }
 
   public stop() {

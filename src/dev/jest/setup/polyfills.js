@@ -64,3 +64,11 @@ global.ResizeObserver = require('../mocks/resize_observer_mock');
 // reports elements as intersecting so lazy-loading components render in tests.
 // Tests that need fine-grained control can override window.IntersectionObserver.
 global.IntersectionObserver = require('../mocks/intersection_observer_mock');
+
+if (typeof document !== 'undefined' && !document.queryCommandSupported) {
+  document.queryCommandSupported = () => false;
+}
+
+if (typeof global.crypto === 'undefined') {
+  global.crypto = require('crypto').webcrypto;
+}

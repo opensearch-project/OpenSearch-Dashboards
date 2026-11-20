@@ -39,6 +39,7 @@ const { getSwcLoaderConfig } = require('@osd/utils');
 const UiSharedDeps = require('./index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+const MONACO_DOMPURIFY_SHIM = Path.resolve(__dirname, 'monaco_dompurify.js');
 
 const targets = ['last 2 versions', 'ie >= 11'];
 
@@ -103,7 +104,7 @@ exports.getRspackConfig = ({ dev = false } = {}) => ({
       // Special handling for Monaco's codicon CSS
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
         type: 'javascript/auto',
       },
       // Handle Monaco's codicon font files
@@ -202,6 +203,11 @@ exports.getRspackConfig = ({ dev = false } = {}) => ({
   },
 
   plugins: [
+    new rspack.NormalModuleReplacementPlugin(/[\/\\]dompurify[\/\\]dompurify\.js$/, (resource) => {
+      if (/[\/\\]node_modules[\/\\]monaco-editor[\/\\]/.test(resource.context)) {
+        resource.request = MONACO_DOMPURIFY_SHIM;
+      }
+    }),
     new rspack.CssExtractRspackPlugin({}),
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',

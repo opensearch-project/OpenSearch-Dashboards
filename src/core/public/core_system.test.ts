@@ -63,10 +63,10 @@ import {
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
-import * as monaco from '@osd/monaco';
+import * as monaco from '@osd/monaco/environment';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
-jest.mock('@osd/monaco', () => ({
+jest.mock('@osd/monaco/environment', () => ({
   setBuildHash: jest.fn(),
 }));
 

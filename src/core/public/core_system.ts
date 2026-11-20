@@ -29,7 +29,7 @@
  */
 
 import { pick } from '@osd/std';
-import { setBuildHash } from '@osd/monaco';
+import { setBuildHash } from '@osd/monaco/environment';
 import { CoreSetup, CoreStart } from '.';
 import { CoreId } from '../server';
 import { EnvironmentMode, PackageInfo } from '../server/types';
