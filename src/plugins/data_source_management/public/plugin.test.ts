@@ -138,6 +138,30 @@ describe('#dataSourceManagement', () => {
     );
   });
 
+  it('can register a data connections experience in setup, once', () => {
+    const { setup } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    expect(setup.registerDataConnectionsExperience).toBeInstanceOf(Function);
+    expect(() => setup.registerDataConnectionsExperience({ isEnabled: () => true })).not.toThrow();
+    expect(() => setup.registerDataConnectionsExperience({ isEnabled: () => true })).toThrow(
+      'A data connections experience is already registered'
+    );
+  });
+
+  it('refuses a data connections experience without isEnabled', () => {
+    const { setup } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    expect(() => setup.registerDataConnectionsExperience({} as any)).toThrow(
+      'A data connections experience must provide an isEnabled function'
+    );
+  });
+
+  it('should throw error if registering a data connections experience after startup', () => {
+    const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    doStart();
+    expect(() => setup.registerDataConnectionsExperience({ isEnabled: () => true })).toThrow(
+      'cannot call `registerDataConnectionsExperience` after data source management startup.'
+    );
+  });
+
   it('should register application in the management section', () => {
     const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {

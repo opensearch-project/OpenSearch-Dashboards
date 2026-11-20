@@ -100,6 +100,11 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     setBreadcrumbs = jest.fn();
     registry = new DirectQueryConnectionFlowRegistry();
     core = coreMock.createStart();
+    // A flow requires data source management unless it says otherwise.
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      dataSource: { canManage: true },
+    };
   });
 
   afterEach(() => {
@@ -507,5 +512,54 @@ describe('DirectQueryConnectionFlowMountPoint', () => {
     expect(flowAb.mount).toHaveBeenCalledTimes(1);
     expect(heard).toEqual([]);
     expect(() => paramsA.history.location).toThrow();
+  });
+
+  describe('for a user who cannot manage data sources', () => {
+    beforeEach(() => {
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        dataSource: { canManage: false },
+      };
+    });
+
+    const notAvailable = (component: ReactWrapper) =>
+      component.find('[data-test-subj="directQueryConnectionFlowNotFound"]').exists();
+
+    it.each([
+      ['by default', {}],
+      ['when it says so', { requiresDataSourceManagement: true }],
+    ])(
+      'shows "not available" for a flow that requires data source management %s, without asking isVisible',
+      async (_name, overrides) => {
+        const isVisible = jest.fn(async () => true);
+        const flow = createFlow({ ...overrides, isVisible });
+        registry.registerDirectQueryConnectionFlow(flow);
+        const component = await render('/flows/flowA');
+        expect(notAvailable(component)).toBe(true);
+        expect(component.find('EuiLoadingSpinner').exists()).toBe(false);
+        expect(isVisible).not.toHaveBeenCalled();
+        expect(flow.mount).not.toHaveBeenCalled();
+      }
+    );
+
+    it('mounts a flow that does not require data source management', async () => {
+      const flow = createFlow({ requiresDataSourceManagement: false });
+      registry.registerDirectQueryConnectionFlow(flow);
+      const component = await render('/flows/flowA/manage/so-1');
+      expect(notAvailable(component)).toBe(false);
+      expect(flow.mount).toHaveBeenCalledTimes(1);
+      expect((flow.mount as jest.Mock).mock.calls[0][0].path).toBe('/manage/so-1');
+    });
+
+    it('still lets isVisible hide a flow that does not require data source management', async () => {
+      const flow = createFlow({
+        requiresDataSourceManagement: false,
+        isVisible: async () => false,
+      });
+      registry.registerDirectQueryConnectionFlow(flow);
+      const component = await render('/flows/flowA');
+      expect(notAvailable(component)).toBe(true);
+      expect(flow.mount).not.toHaveBeenCalled();
+    });
   });
 });

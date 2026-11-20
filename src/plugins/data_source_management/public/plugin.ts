@@ -36,6 +36,7 @@ import {
   DirectQueryConnectionFlow,
   DirectQueryConnectionFlowRegistry,
 } from './direct_query_connection_flow_registry';
+import { DataConnectionsExperience } from './components/data_connections_experience';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
@@ -93,6 +94,13 @@ export interface DataSourceManagementPluginSetup {
    * `isVisible`.
    */
   registerDirectQueryConnectionFlow: (flow: DirectQueryConnectionFlow) => void;
+  /**
+   * Registers the data connections experience of the data sources app: one table for every
+   * connection, and a Create data connection page with a card per type. Its `isEnabled` decides per
+   * session, from the capabilities, when the app mounts. Must be called during setup; throws after
+   * data source management startup, and when an experience is already registered.
+   */
+  registerDataConnectionsExperience: (experience: DataConnectionsExperience) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
     getDataSourceMenu: <T>() => React.ComponentType<
@@ -122,6 +130,7 @@ export class DataSourceManagementPlugin implements Plugin<
   private started: boolean = false;
   private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
   private directQueryConnectionFlowRegistry = new DirectQueryConnectionFlowRegistry();
+  private dataConnectionsExperience?: DataConnectionsExperience;
   private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
   private bannerId: string | null = null;
@@ -170,7 +179,8 @@ export class DataSourceManagementPlugin implements Plugin<
           params,
           this.authMethodsRegistry,
           this.featureFlagStatus,
-          this.directQueryConnectionFlowRegistry
+          this.directQueryConnectionFlowRegistry,
+          this.dataConnectionsExperience
         );
       },
     });
@@ -199,7 +209,8 @@ export class DataSourceManagementPlugin implements Plugin<
             },
             this.authMethodsRegistry,
             this.featureFlagStatus,
-            this.directQueryConnectionFlowRegistry
+            this.directQueryConnectionFlowRegistry,
+            this.dataConnectionsExperience
           );
         },
       });
@@ -239,6 +250,21 @@ export class DataSourceManagementPlugin implements Plugin<
       this.directQueryConnectionFlowRegistry.registerDirectQueryConnectionFlow(flow);
     };
 
+    const registerDataConnectionsExperience = (experience: DataConnectionsExperience) => {
+      if (this.started) {
+        throw new Error(
+          'cannot call `registerDataConnectionsExperience` after data source management startup.'
+        );
+      }
+      if (this.dataConnectionsExperience) {
+        throw new Error('A data connections experience is already registered');
+      }
+      if (typeof experience?.isEnabled !== 'function') {
+        throw new Error('A data connections experience must provide an isEnabled function');
+      }
+      this.dataConnectionsExperience = Object.freeze({ ...experience });
+    };
+
     if (dataSource!.noAuthenticationTypeEnabled) {
       registerAuthenticationMethod(noAuthCredentialAuthMethod);
     }
@@ -256,6 +282,7 @@ export class DataSourceManagementPlugin implements Plugin<
     return {
       registerAuthenticationMethod,
       registerDirectQueryConnectionFlow,
+      registerDataConnectionsExperience,
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {

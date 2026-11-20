@@ -11,6 +11,7 @@ import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'src/core/public';
 import {
   DirectQueryConnectionFlow,
   IDirectQueryConnectionFlowRegistry,
+  isDirectQueryConnectionFlowAllowed,
 } from '../../direct_query_connection_flow_registry';
 import {
   DIRECT_QUERY_CONNECTIONS_LIST_LOCATION,
@@ -53,8 +54,15 @@ export const DirectQueryConnectionFlowMountPoint = ({
 }: DirectQueryConnectionFlowMountPointProps) => {
   const location = useLocation();
   const parsed = parseDirectQueryConnectionFlowPath(location.pathname);
-  const flow: DirectQueryConnectionFlow | undefined =
+  const registered: DirectQueryConnectionFlow | undefined =
     parsed && registry ? registry.getFlow(parsed.flowId) : undefined;
+  // A flow that requires data source management is not there for a user who can't manage data
+  // sources: the same "not available" callout as an unknown flow.
+  const canManageDataSources = !!core.application.capabilities?.dataSource?.canManage;
+  const flow =
+    registered && isDirectQueryConnectionFlowAllowed(registered, canManageDataSources)
+      ? registered
+      : undefined;
   const path = parsed?.path ?? '';
 
   const containerRef = useRef<HTMLDivElement>(null);
