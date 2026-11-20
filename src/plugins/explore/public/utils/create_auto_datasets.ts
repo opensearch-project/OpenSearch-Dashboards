@@ -14,35 +14,13 @@ export interface CreateDatasetsResult {
   correlationId: string | null;
 }
 
-// Pre-fetch the field list ourselves before saving the index pattern.
-async function fetchFieldsForPattern(
-  dataViews: DataViewsContract,
-  pattern: string,
-  dataSourceId?: string
-) {
-  try {
-    const fields = await dataViews.getFieldsForWildcard({ pattern, dataSourceId });
-    if (!Array.isArray(fields) || fields.length === 0) {
-      // eslint-disable-next-line no-console
-      console.warn(`No fields returned for pattern "${pattern}" (dataSource: ${dataSourceId})`);
-      return undefined;
-    }
-    return dataViews.fieldArrayToMap(fields);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn(`Failed to fetch fields for pattern "${pattern}":`, error);
-    return undefined;
-  }
-}
-
-// Force-refresh an existing index pattern's field list and persist it. Recovers index
+// Have the server discover and save an index pattern's field list. Also recovers index
 // patterns left empty by the prior buggy version of this code.
 async function refreshAndPersistFields(dataViews: DataViewsContract, id: string): Promise<void> {
   try {
     dataViews.clearCache(id);
     const view = await dataViews.get(id);
-    await dataViews.refreshFields(view);
-    await dataViews.updateSavedObject(view);
+    await dataViews.refreshFieldsAndSave(view);
     dataViews.clearCache(id);
   } catch {
     // best-effort
@@ -70,18 +48,12 @@ async function createOrReuseDataView(
     return existingId;
   }
 
-  // Pre-fetch fields and embed them in the spec so the saved object lands with a
-  // populated field list on disk regardless of whether refreshFields silently fails.
-  const fields = await fetchFieldsForPattern(
-    dataViews,
-    spec.title as string,
-    effectiveDataSourceId
-  );
-
   let createdId: string | null = null;
   try {
     // Skip createAndSave so it doesn't silently flip the workspace's default index pattern.
-    const dataView = await dataViews.create({ ...spec, fields }, /* skipFetchFields */ true);
+    // The pattern is created without fields; refreshAndPersistFields below has the server
+    // discover and save them, so the field list is never uploaded from the browser.
+    const dataView = await dataViews.create(spec, /* skipFetchFields */ true);
     // reuseExisting: a legacy engine-typed dataset with the same title/data source is reused
     // instead of throwing, so re-running detection over it still resolves an id (for correlation).
     const saved = await dataViews.createSavedObject(dataView, false, true);

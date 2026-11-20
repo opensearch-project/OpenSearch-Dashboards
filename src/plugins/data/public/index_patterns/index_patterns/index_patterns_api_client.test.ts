@@ -63,4 +63,24 @@ describe('IndexPatternsApiClient', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
+
+  test('posts to the right URI to refresh fields', async function () {
+    await indexPatternsApiClient.refreshFields('id', { metaFields: ['_id'] });
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/id/_refresh_fields', {
+      method: 'POST',
+      query: { meta_fields: ['_id'] },
+    });
+  });
+
+  test('posts field changes as JSON to the right URI', async function () {
+    const request = { version: 'v1', counts: [{ name: 'bytes', count: 2 }] };
+
+    await indexPatternsApiClient.updateFields('id', request);
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/id/_update_fields', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  });
 });

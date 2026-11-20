@@ -27,17 +27,12 @@ describe('createAutoDetectedDatasets', () => {
       createAndSave: jest.fn(),
       setDefault: jest.fn(),
       get: jest.fn().mockImplementation((id: string) => Promise.resolve(makeDataView(id))),
-      refreshFields: jest.fn().mockResolvedValue(undefined),
-      updateSavedObject: jest.fn().mockResolvedValue(undefined),
+      refreshFieldsAndSave: jest.fn().mockResolvedValue(undefined),
+      // The browser must not fetch or upload the field list itself; asserted below.
+      getFieldsForWildcard: jest.fn(),
+      refreshFields: jest.fn(),
+      updateSavedObject: jest.fn(),
       clearCache: jest.fn(),
-      getFieldsForWildcard: jest.fn().mockResolvedValue([
-        { name: 'endTime', type: 'date', searchable: true, aggregatable: true },
-        { name: 'traceId', type: 'string', searchable: true, aggregatable: true },
-        { name: 'spanId', type: 'string', searchable: true, aggregatable: true },
-      ]),
-      fieldArrayToMap: jest.fn((fields: any[]) =>
-        fields.reduce((acc, f) => ({ ...acc, [f.name]: f }), {})
-      ),
     } as any;
   });
 
@@ -45,7 +40,7 @@ describe('createAutoDetectedDatasets', () => {
     jest.clearAllMocks();
   });
 
-  it('pre-fetches fields and embeds them in the spec; uses create()/createSavedObject() (no setDefault)', async () => {
+  it('creates the dataset without fields and has the server save them (no setDefault)', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -66,40 +61,35 @@ describe('createAutoDetectedDatasets', () => {
 
     expect(result.traceDatasetId).toBe('trace-dataset-id');
 
-    // Pre-fetch happens.
-    expect(mockDataViews.getFieldsForWildcard).toHaveBeenCalledWith({
-      pattern: 'otel-v1-apm-span*',
-      dataSourceId: 'datasource-id',
-    });
-
-    // Spec passed to create() carries the fields, and skipFetchFields=true so
-    // DataViewsService.create() doesn't re-fetch the field list.
+    // The spec passed to create() carries no fields, and skipFetchFields=true so
+    // DataViewsService.create() doesn't fetch them in the browser either.
     expect(mockDataViews.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'otel-v1-apm-span*',
         timeFieldName: 'endTime',
         signalType: 'traces',
-        fields: expect.objectContaining({
-          endTime: expect.objectContaining({ name: 'endTime' }),
-          traceId: expect.objectContaining({ name: 'traceId' }),
-        }),
       }),
       true
     );
+    expect(mockDataViews.create.mock.calls[0][0].fields).toBeUndefined();
     expect(mockDataViews.createSavedObject).toHaveBeenCalled();
+    expect(mockDataViews.getFieldsForWildcard).not.toHaveBeenCalled();
 
     // Auto-creation must NOT touch the user's default index pattern. createAndSave
     // calls setDefault() internally; we sidestep both.
     expect(mockDataViews.createAndSave).not.toHaveBeenCalled();
     expect(mockDataViews.setDefault).not.toHaveBeenCalled();
 
-    // Belt-and-suspenders post-save refresh.
+    // The server discovers and saves the fields after the pattern is created.
     expect(mockDataViews.get).toHaveBeenCalledWith('trace-dataset-id');
-    expect(mockDataViews.refreshFields).toHaveBeenCalled();
-    expect(mockDataViews.updateSavedObject).toHaveBeenCalled();
+    expect(mockDataViews.refreshFieldsAndSave).toHaveBeenCalledWith(
+      makeDataView('trace-dataset-id')
+    );
+    expect(mockDataViews.refreshFields).not.toHaveBeenCalled();
+    expect(mockDataViews.updateSavedObject).not.toHaveBeenCalled();
   });
 
-  it('creates the dataset even when the field pre-fetch returns nothing', async () => {
+  it('still returns the new id when the server field refresh fails', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -109,8 +99,8 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: null,
     };
 
-    (mockDataViews.getFieldsForWildcard as jest.Mock).mockResolvedValue([]);
     mockDataViews.create.mockResolvedValue(makeDataView('trace-dataset-id'));
+    mockDataViews.refreshFieldsAndSave.mockRejectedValueOnce(new Error('boom'));
 
     const result = await createAutoDetectedDatasets(
       mockSavedObjectsClient,
@@ -119,10 +109,6 @@ describe('createAutoDetectedDatasets', () => {
     );
 
     expect(result.traceDatasetId).toBe('trace-dataset-id');
-    expect(mockDataViews.create).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'otel-v1-apm-span*', fields: undefined }),
-      true
-    );
   });
 
   it('creates a log dataset with schema mappings', async () => {
@@ -198,8 +184,7 @@ describe('createAutoDetectedDatasets', () => {
 
     expect(mockDataViews.create).toHaveBeenCalledTimes(2);
     expect(mockDataViews.createSavedObject).toHaveBeenCalledTimes(2);
-    expect(mockDataViews.refreshFields).toHaveBeenCalledTimes(2);
-    expect(mockDataViews.updateSavedObject).toHaveBeenCalledTimes(2);
+    expect(mockDataViews.refreshFieldsAndSave).toHaveBeenCalledTimes(2);
 
     expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
       'correlations',
@@ -280,8 +265,7 @@ describe('createAutoDetectedDatasets', () => {
 
     // Refresh existing pattern so previously-broken ones recover their field list.
     expect(mockDataViews.get).toHaveBeenCalledWith('existing-trace-dataset-id');
-    expect(mockDataViews.refreshFields).toHaveBeenCalledWith(existingDataView);
-    expect(mockDataViews.updateSavedObject).toHaveBeenCalledWith(existingDataView);
+    expect(mockDataViews.refreshFieldsAndSave).toHaveBeenCalledWith(existingDataView);
     expect(mockDataViews.clearCache).toHaveBeenCalledWith('existing-trace-dataset-id');
   });
 

@@ -137,6 +137,36 @@ export interface GetFieldsOptions {
 export interface IIndexPatternsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptions) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  refreshFields: (
+    id: string,
+    options: Pick<GetFieldsOptions, 'metaFields'>
+  ) => Promise<RefreshFieldsResponse>;
+  updateFields: (id: string, request: UpdateFieldsRequest) => Promise<{ version: string }>;
+}
+
+/**
+ * Changes to a saved index pattern's field list, applied on the server so the list itself is not
+ * uploaded. Only scripted fields and popularity counts can change this way; discovered fields are
+ * written only by a field refresh. `attributes` are other changed saved attributes, saved in the
+ * same update.
+ */
+export interface UpdateFieldsRequest {
+  version?: string;
+  attributes?: Record<string, unknown>;
+  scripted?: { upsert?: FieldSpec[]; remove?: string[] };
+  // A list rather than a name-keyed object, so any field name survives JSON and validation.
+  counts?: Array<{ name: string; count: number }>;
+}
+
+/**
+ * Result of refreshing a saved index pattern's fields on the server. `attributes` are the saved
+ * attributes other than `fields` at the time of the write, so callers can catch up with changes
+ * made elsewhere.
+ */
+export interface RefreshFieldsResponse {
+  fields: FieldSpec[];
+  version: string;
+  attributes: Omit<IndexPatternAttributes, 'fields'>;
 }
 
 export type { SavedObject };
