@@ -62,6 +62,7 @@ export const useSessionDetail = (
           title: datasetParam.title,
           type: datasetParam.type,
           ...(datasetParam.dataSource && { dataSource: datasetParam.dataSource }),
+          ...(datasetParam.schemaMappings && { schemaMappings: datasetParam.schemaMappings }),
         };
         const source = getSourceCommand(baseQueryString);
         const response = await pplService.executeQuery(
