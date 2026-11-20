@@ -156,6 +156,7 @@ describe('sample data install route', () => {
     expect(mockClient.mock.calls[1][1].body.settings).toMatchObject({
       index: { number_of_shards: 1 },
     });
+    expect(mockClient.mock.calls[1][1].body.mappings.properties['@timestamp']).toBeUndefined();
 
     expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
@@ -348,6 +349,50 @@ describe('sample data install route', () => {
     expect(mockResponse.internalError).toHaveBeenCalled();
     expect(mockResponse.internalError.mock.calls[0][0]).toMatchObject({
       body: expect.stringContaining('Unknown error'),
+    });
+  });
+
+  it('adds the @timestamp alias for OpenSearch Serverless data sources', async () => {
+    const mockClient = jest.fn().mockResolvedValue(true);
+    const mockSOClient = {
+      bulkCreate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      get: jest.fn().mockResolvedValue({
+        id: 'dataSource',
+        attributes: { title: 'serverless', dataSourceEngineType: 'OpenSearch Serverless' },
+      }),
+    };
+    const mockContext = {
+      dataSource: {
+        opensearch: { legacy: { getClient: () => ({ callAPI: mockClient }) } },
+      },
+      core: { savedObjects: { client: mockSOClient } },
+    };
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: { id: 'flights' },
+      query: { data_source_id: 'dataSource' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createInstallRoute(
+      mockCoreSetup.http.createRouter(),
+      sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
+      mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
+      mockUsageTracker
+    );
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.post.mock.calls[0][1];
+
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+
+    const createCall = mockClient.mock.calls.find(([endpoint]) => endpoint === 'indices.create');
+    expect(createCall[1].body.mappings.properties['@timestamp']).toEqual({
+      type: 'alias',
+      path: 'timestamp',
+    });
+    expect(mockClient).toHaveBeenCalledWith('indices.getSettings', {
+      index: 'opensearch_dashboards_sample_data_flights',
     });
   });
 });
