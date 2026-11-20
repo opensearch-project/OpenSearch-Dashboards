@@ -157,11 +157,16 @@ const checkFilteredFieldsForAllLanguages = () => {
 
 const checkSidebarPanelBehavior = () => {
   const checkPanelVisibility = (shouldBeVisible) => {
-    cy.getElementByTestId('dscBottomLeftCanvas').should(
-      shouldBeVisible ? 'exist' : 'not.be.visible'
+    cy.getElementByTestId('fieldList-collapse-button').should(
+      shouldBeVisible ? 'be.visible' : 'not.exist'
     );
   };
 
+  checkPanelVisibility(false);
+  cy.getElementByTestId('exploreFieldsToggle')
+    .should('be.visible')
+    .and('have.attr', 'aria-expanded', 'false');
+  sideBar.clickSidebarCollapseBtn(false);
   checkPanelVisibility(true);
   sideBar.clickSidebarCollapseBtn();
   checkPanelVisibility(false);
@@ -319,6 +324,7 @@ export const runSideBarTests = () => {
         });
 
         it('fields should be filtered by type', () => {
+          sideBar.ensureSidebarOpen();
           cy.getElementByTestId('toggleFieldFilterButton').click();
 
           sideBar.selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber(

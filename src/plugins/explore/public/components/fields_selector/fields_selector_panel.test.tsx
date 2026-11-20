@@ -39,7 +39,6 @@ jest.mock('../../application/utils/state_management/slices', () => ({
   addColumn: jest.fn(),
   removeColumn: jest.fn(),
   moveColumn: jest.fn(),
-  setColumns: jest.fn((columns) => ({ type: 'setColumns', payload: columns })),
   resultsCache: new Map(),
 }));
 
@@ -55,10 +54,6 @@ jest.mock('../../application/utils/state_management/selectors', () => {
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   defaultResultsProcessor: jest.fn(),
   defaultPrepareQueryString: jest.fn(() => 'cache-key'),
-}));
-
-jest.mock('../../application/legacy/discover/application/utils/columns', () => ({
-  buildColumns: jest.fn((cols) => cols),
 }));
 
 jest.mock('.', () => ({

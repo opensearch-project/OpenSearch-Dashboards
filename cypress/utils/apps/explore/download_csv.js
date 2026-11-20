@@ -7,6 +7,7 @@ import { DatasetTypes, DATASOURCE_NAME, INDEX_WITH_TIME_1, QueryLanguages } from
 import path from 'path';
 import moment from 'moment';
 import { setDatePickerDatesIfRelevant } from './shared';
+import { selectFieldFromSidebar } from './sidebar';
 
 /**
  * The configurations needed for saved search/queries tests
@@ -230,6 +231,6 @@ export const prepareDiscoverPageForDownload = (config, workspaceName) => {
  * Toggles fields for CSV Download. Used for both selecting and cleanup
  */
 export const toggleFieldsForCsvDownload = () => {
-  cy.getElementByTestId('fieldToggle-bytes_transferred').click();
-  cy.getElementByTestId('fieldToggle-personal.name').click();
+  selectFieldFromSidebar('bytes_transferred');
+  selectFieldFromSidebar('personal.name');
 };

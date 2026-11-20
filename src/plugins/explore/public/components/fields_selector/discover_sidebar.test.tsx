@@ -225,6 +225,17 @@ describe('discover sidebar', function () {
     expect(props.onCollapse).toHaveBeenCalled();
   });
 
+  it('keeps the collapse control available before a dataset is ready', () => {
+    const onCollapse = jest.fn();
+    render(
+      <DiscoverSidebar {...getCompProps()} selectedDataSet={undefined} onCollapse={onCollapse} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse fields panel' }));
+    expect(onCollapse).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
   it('should render fields in appropriate sections', function () {
     spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
       missing: false,

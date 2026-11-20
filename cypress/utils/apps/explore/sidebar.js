@@ -9,10 +9,24 @@
  */
 export const clickSidebarCollapseBtn = (collapse = true) => {
   if (collapse) {
-    cy.getElementByTestId('fieldList-collapse-button').click({ force: true });
+    cy.getElementByTestId('fieldList-collapse-button').click();
   } else {
-    cy.get('.euiResizableToggleButton').click({ force: true });
+    cy.getElementByTestId('exploreFieldsToggle').click();
   }
+};
+
+/**
+ * Open Fields before interacting with its contents, keeping an open panel open.
+ */
+export const ensureSidebarOpen = () => {
+  cy.get(
+    '[data-test-subj="exploreFieldsToggle"], [data-test-subj="fieldList-collapse-button"]'
+  ).then(($controls) => {
+    if ($controls.is('[data-test-subj="exploreFieldsToggle"][aria-expanded="false"]')) {
+      clickSidebarCollapseBtn(false);
+    }
+  });
+  return cy.getElementByTestId('fieldList-collapse-button').should('be.visible');
 };
 
 /**
@@ -21,6 +35,7 @@ export const clickSidebarCollapseBtn = (collapse = true) => {
  * @param {string} assertion the type of assertion that is going to be performed. Example: 'eq', 'include'. If an assertion is not passed, a negative test is performend.
  */
 export const checkSidebarFilterBarResults = (search, assertion) => {
+  ensureSidebarOpen();
   cy.getElementByTestId('fieldFilterSearchInput').type(search, { force: true });
   if (assertion) {
     // Get all sidebar fields and iterate over all of them
@@ -43,6 +58,7 @@ export const checkSidebarFilterBarResults = (search, assertion) => {
  * Removes all currently selected fields from the sidebar
  */
 export const removeAllSelectedFields = () => {
+  ensureSidebarOpen();
   cy.get('[data-test-subj="fieldList-selected"]').then(($list) => {
     if ($list.find('[data-test-subj^="field-"]').length > 0) {
       // Remove all selected fields
@@ -61,6 +77,7 @@ export const removeAllSelectedFields = () => {
  * selectFieldFromSidebar('timestamp')
  */
 export const selectFieldFromSidebar = (field) => {
+  ensureSidebarOpen();
   cy.getElementByTestId(`fieldToggle-${field}`).click();
 };
 
@@ -72,6 +89,7 @@ export const selectFieldFromSidebar = (field) => {
  * selectFieldFromSidebar('timestamp')
  */
 export const showSidebarFieldDetails = (field) => {
+  ensureSidebarOpen();
   cy.getElementByTestId(`field-${field}-showDetails`).click();
 };
 
