@@ -6,9 +6,10 @@
 import { mount } from 'enzyme';
 import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiTextArea } from '@elastic/eui';
+import { EuiCompressedSelect, EuiTextArea } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
+import { setOAuth2AuthEnabled } from '../../../utils';
 
 // Mock fetchDataSources function
 jest.mock('../name_row', () => ({
@@ -118,6 +119,33 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
   it('renders correctly', () => {
     const wrapper = mountComponent();
     expect(wrapper).toMatchSnapshot();
+  });
+
+  describe('OAuth2 auth method availability', () => {
+    afterEach(() => {
+      // Restore the config schema default for the other tests in this file.
+      setOAuth2AuthEnabled(true);
+    });
+
+    it('offers OAuth2 when data_source.authTypes.OAuth2.enabled is true', () => {
+      setOAuth2AuthEnabled(true);
+      const wrapper = mountComponent();
+      const options = wrapper.find(EuiCompressedSelect).first().prop('options');
+      expect(options).toEqual(expect.arrayContaining([{ value: 'oauth2', text: 'OAuth2 / OIDC' }]));
+    });
+
+    it('hides OAuth2 when data_source.authTypes.OAuth2.enabled is false', () => {
+      setOAuth2AuthEnabled(false);
+      const wrapper = mountComponent();
+      const options = wrapper.find(EuiCompressedSelect).first().prop('options');
+      expect(options).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ value: 'oauth2' })])
+      );
+      // The built-in methods stay available.
+      expect(options).toEqual(
+        expect.arrayContaining([expect.objectContaining({ value: 'basicauth' })])
+      );
+    });
   });
 
   it('updates details state on change', async () => {

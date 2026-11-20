@@ -61,6 +61,13 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [region, setRegion] = useState('');
+  // OAuth2 state variables for OAuth2 authentication
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [tokenUrl, setTokenUrl] = useState('');
+  const [scopes, setScopes] = useState('');
+  const [audience, setAudience] = useState('');
+  const [grantType, setGrantType] = useState('client_credentials');
   const [roles, setRoles] = useState<Role[]>([]);
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
@@ -125,13 +132,24 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
                   'prometheus.auth.username': username,
                   'prometheus.auth.password': password,
                 }
-              : {
-                  'prometheus.uri': storeURI,
-                  'prometheus.auth.type': authMethod,
-                  'prometheus.auth.access_key': accessKey,
-                  'prometheus.auth.secret_key': secretKey,
-                  'prometheus.auth.region': region,
-                };
+              : authMethod === 'oauth2'
+                ? {
+                    'prometheus.uri': storeURI,
+                    'prometheus.auth.type': 'oauth2',
+                    'prometheus.auth.client_id': clientId,
+                    'prometheus.auth.client_secret': clientSecret,
+                    'prometheus.auth.token_url': tokenUrl,
+                    'prometheus.auth.scopes': scopes,
+                    'prometheus.auth.audience': audience,
+                    'prometheus.auth.grant_type': grantType,
+                  }
+                : {
+                    'prometheus.uri': storeURI,
+                    'prometheus.auth.type': authMethod,
+                    'prometheus.auth.access_key': accessKey,
+                    'prometheus.auth.secret_key': secretKey,
+                    'prometheus.auth.region': region,
+                  };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,
@@ -170,6 +188,13 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     accessKey,
     secretKey,
     region,
+    // OAuth2 dependencies for OAuth2 authentication
+    clientId,
+    clientSecret,
+    tokenUrl,
+    scopes,
+    audience,
+    grantType,
     history,
   ]);
 
@@ -261,6 +286,19 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
             setSecretKeyForRequest={setSecretKey}
             currentRegion={region}
             setRegionForRequest={setRegion}
+            // OAuth2 props for OAuth2 authentication
+            currentClientId={clientId}
+            setClientIdForRequest={setClientId}
+            currentClientSecret={clientSecret}
+            setClientSecretForRequest={setClientSecret}
+            currentTokenUrl={tokenUrl}
+            setTokenUrlForRequest={setTokenUrl}
+            currentScopes={scopes}
+            setScopesForRequest={setScopes}
+            currentAudience={audience}
+            setAudienceForRequest={setAudience}
+            currentGrantType={grantType}
+            setGrantTypeForRequest={setGrantType}
             currentAuthMethod={authMethod}
             setAuthMethodForRequest={setAuthMethod}
             hasSecurityAccess={hasSecurityAccess}

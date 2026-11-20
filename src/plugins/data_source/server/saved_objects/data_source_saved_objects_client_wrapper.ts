@@ -23,6 +23,7 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   AuthType,
   DataSourceAttributes,
+  OAuth2Content,
   SigV4Content,
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
@@ -218,6 +219,12 @@ export class DataSourceSavedObjectsClientWrapper {
           ...attributes,
           auth: await this.encryptSigV4Credential(auth, { endpoint }),
         };
+      case AuthType.OAuth2:
+        // Signing the client secret with the endpoint, as for the other auth types
+        return {
+          ...attributes,
+          auth: await this.encryptOAuth2Credential(auth, { endpoint }),
+        };
       default:
         if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
           return attributes;
@@ -290,6 +297,44 @@ export class DataSourceSavedObjectsClientWrapper {
           }
           return attributes;
         }
+      case AuthType.OAuth2: {
+        // Only re-encrypt when a new secret is supplied; the other OAuth2 fields are
+        // stored in plain text and can be updated on their own.
+        if (credentials?.clientSecret) {
+          this.validateEncryptionContext(encryptionContext, existingDataSourceAttr);
+          return {
+            ...attributes,
+            auth: await this.encryptOAuth2Credential(auth, encryptionContext),
+          };
+        }
+
+        // Changing an existing data source to OAuth2 has to carry a secret: there is no stored
+        // OAuth2 secret to fall back on, and validateAuth only runs on create. Accepting a
+        // blank one here would store a data source that can never authenticate
+        // (extractOAuth2Config rejects it) and can never be repaired either, because the next
+        // update reads its encryption context out of the ciphertext that is now missing.
+        if (existingDataSourceAttr.auth?.type !== AuthType.OAuth2) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.clientSecret" is required when changing a data source to OAuth2'
+          );
+        }
+
+        // No new secret supplied, so the stored one must survive untouched. Saved object
+        // updates merge recursively: an absent clientSecret keeps the stored ciphertext, but
+        // an empty string overwrites it. Credentials are stripped on read, so an edit form
+        // round trip submits blank strings - drop the key here instead of relying on callers
+        // to omit it.
+        const { clientSecret: blankClientSecret, ...credentialsToKeep } = (credentials ??
+          {}) as Record<string, unknown>;
+
+        return {
+          ...attributes,
+          auth: {
+            ...auth,
+            credentials: credentialsToKeep,
+          },
+        };
+      }
       default:
         if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
           return attributes;
@@ -406,6 +451,33 @@ export class DataSourceSavedObjectsClientWrapper {
           );
         }
         break;
+      case AuthType.OAuth2:
+        if (!credentials) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials" attribute is required'
+          );
+        }
+
+        const { clientId, clientSecret, tokenUrl } = credentials as OAuth2Content;
+
+        if (!clientId) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.clientId" attribute is required'
+          );
+        }
+
+        if (!clientSecret) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.clientSecret" attribute is required'
+          );
+        }
+
+        if (!tokenUrl) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.tokenUrl" attribute is required'
+          );
+        }
+        break;
       default:
         if (await this.isAuthTypeAvailableInRegistry(type)) {
           break;
@@ -476,6 +548,17 @@ export class DataSourceSavedObjectsClientWrapper {
           );
         }
         encryptionContext = accessKeyEncryptionContext;
+        break;
+      case AuthType.OAuth2:
+        // The client secret is the only encrypted OAuth2 field, so it carries the context.
+        const { clientSecret: storedClientSecret } = auth.credentials as OAuth2Content;
+
+        if (!storedClientSecret) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Failed to update existing data source: "auth.credentials.clientSecret" missing. Please delete and create another data source.'
+          );
+        }
+        encryptionContext = await this.getEncryptionContextFromCipher(storedClientSecret);
         break;
       default:
         if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
@@ -560,6 +643,38 @@ export class DataSourceSavedObjectsClientWrapper {
         accessKey: await this.cryptography.encryptAndEncode(accessKey, encryptionContext),
         secretKey: await this.cryptography.encryptAndEncode(secretKey, encryptionContext),
         service,
+      },
+    };
+  }
+
+  /**
+   * Encrypts the OAuth2 client secret before it is persisted. Only the client secret is
+   * sensitive: clientId, tokenUrl, scopes, audience and grantType stay in plain text so
+   * they remain usable for token requests and cache keys without a decryption round trip.
+   *
+   * The fields are listed explicitly rather than spread, matching the basicauth and sigv4
+   * helpers. That drops anything else the caller sent — in particular OAuth2Content.token,
+   * a live bearer token which is never read back from the saved object and so must not be
+   * written to it at all.
+   */
+  private async encryptOAuth2Credential<T = unknown>(
+    auth: T,
+    encryptionContext: EncryptionContext
+  ) {
+    const {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      credentials: { clientId, clientSecret, tokenUrl, scopes, audience, grantType },
+    } = auth;
+
+    return {
+      ...auth,
+      credentials: {
+        clientId,
+        clientSecret: await this.cryptography.encryptAndEncode(clientSecret, encryptionContext),
+        tokenUrl,
+        scopes,
+        audience,
+        grantType,
       },
     };
   }

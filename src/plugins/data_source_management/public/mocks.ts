@@ -624,6 +624,7 @@ export const testDataSourceManagementPlugin = (
       noAuthenticationTypeEnabled: true,
       usernamePasswordAuthEnabled: true,
       awsSigV4AuthEnabled: true,
+      oauth2AuthEnabled: true,
     },
   });
   const doStart = () => {
@@ -651,6 +652,7 @@ export const mockDataSourcePluginSetupWithShowLocalCluster: DataSourcePluginSetu
   noAuthenticationTypeEnabled: true,
   usernamePasswordAuthEnabled: true,
   awsSigV4AuthEnabled: true,
+  oauth2AuthEnabled: true,
 };
 
 export const mockDataSourcePluginSetupWithHideLocalCluster: DataSourcePluginSetup = {

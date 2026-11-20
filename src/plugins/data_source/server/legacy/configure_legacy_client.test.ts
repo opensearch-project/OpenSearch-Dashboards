@@ -738,4 +738,81 @@ describe('configureLegacyClient', () => {
       });
     });
   });
+
+  test('configureLegacyClient should attach the bearer token for OAuth2 auth type', async () => {
+    const oauth2Credentials = {
+      clientId: 'test-client-id',
+      clientSecret: 'encrypted-secret',
+      tokenUrl: 'https://auth.example.com/token',
+      token: 'test-bearer-token',
+    };
+    authRegistryCredentialProviderMock.mockReturnValue({
+      authType: AuthType.OAuth2,
+      endpoint: dataSourceAttr.endpoint,
+      cacheKeySuffix: 'oauth2:key',
+      credentials: oauth2Credentials,
+    });
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.OAuth2,
+          credentials: oauth2Credentials,
+        },
+      },
+      references: [],
+    });
+
+    await configureLegacyClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    // Without an OAuth2 case this switch fell through to `default:` and threw
+    // "oauth2 is not a supported auth type for data source".
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        authorization: 'Bearer test-bearer-token',
+      },
+    });
+  });
+
+  test('configureLegacyClient should reject OAuth2 credentials without a token', async () => {
+    const oauth2Credentials = {
+      clientId: 'test-client-id',
+      clientSecret: 'encrypted-secret',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    authRegistryCredentialProviderMock.mockReturnValue({
+      authType: AuthType.OAuth2,
+      endpoint: dataSourceAttr.endpoint,
+      cacheKeySuffix: 'oauth2:key',
+      credentials: oauth2Credentials,
+    });
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: { type: AuthType.OAuth2, credentials: oauth2Credentials },
+      },
+      references: [],
+    });
+
+    await expect(
+      configureLegacyClient(
+        { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+        callApiParams,
+        clientPoolSetup,
+        config,
+        logger
+      )
+    ).rejects.toThrow('OAuth2 Bearer token not available in credentials');
+  });
 });
