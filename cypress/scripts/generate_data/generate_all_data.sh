@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright OpenSearch Contributors
+# SPDX-License-Identifier: Apache-2.0
 # Array of configurations
 declare -a configs=(
     "data_logs_small_time_2 --doc-count 10000"
