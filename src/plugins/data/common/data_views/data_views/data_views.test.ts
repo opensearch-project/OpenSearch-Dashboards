@@ -306,6 +306,27 @@ describe('DataViews', () => {
       );
     });
 
+    test('creates a scripted field with the name of a mapped field', async () => {
+      const dataView = await dataViews.get('foo');
+      await dataView.addScriptedField('bytes', 'doc.bytes.value * 8', 'number');
+
+      await dataViews.updateSavedObject(dataView);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
+        version: 'v1',
+        attributes: {},
+        scripted: {
+          upsert: [
+            expect.objectContaining({
+              name: 'bytes',
+              scripted: true,
+              script: 'doc.bytes.value * 8',
+            }),
+          ],
+        },
+      });
+    });
+
     test('does not send fields refreshed in memory', async () => {
       const dataView = await dataViews.get('foo');
       dataView.fields.replaceAll([

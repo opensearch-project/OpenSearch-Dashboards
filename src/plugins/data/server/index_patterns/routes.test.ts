@@ -147,6 +147,15 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
     ]);
   });
 
+  it('saves one definition when a discovered field has the name of a scripted field', async () => {
+    const shadowing = { ...scriptedField, name: 'new' };
+    mockSavedObject({ attributes: { fields: JSON.stringify([shadowing]) } });
+
+    await callHandler();
+
+    expect(savedFieldsArg()).toEqual([shadowing]);
+  });
+
   it('fetches fields from the data source the saved object references', async () => {
     mockSavedObject({
       references: [{ id: 'ds-1', type: 'data-source', name: 'dataSource' }],
@@ -324,11 +333,23 @@ describe('POST /api/index_patterns/{id}/_update_fields', () => {
     expect(savedFieldsArg()).toEqual([discovered, scripted]);
   });
 
-  it('rejects a scripted field named like a discovered field', async () => {
-    await callHandler({ version: 'v1', scripted: { upsert: [{ ...scripted, name: 'bytes' }] } });
+  it('lets a scripted field replace a mapped field of the same name', async () => {
+    const shadowing = { ...scripted, name: 'bytes', script: 'doc.bytes.value * 8' };
 
-    expect(mockResponse.badRequest).toHaveBeenCalled();
-    expect(mockContext.core.savedObjects.client.update).not.toHaveBeenCalled();
+    await callHandler({ version: 'v1', scripted: { upsert: [shadowing] } });
+
+    expect(savedFieldsArg()).toEqual([shadowing, scripted]);
+  });
+
+  it('edits a scripted field saved alongside a mapped field of the same name', async () => {
+    const shadowing = { ...scripted, name: 'bytes' };
+    mockSavedFields(JSON.stringify([discovered, scripted, shadowing]));
+    const edited = { ...shadowing, script: 'doc.bytes.value * 8' };
+
+    await callHandler({ version: 'v1', scripted: { upsert: [edited] } });
+
+    expect(mockResponse.ok).toHaveBeenCalled();
+    expect(savedFieldsArg()).toEqual([edited, scripted]);
   });
 
   it('reads a saved field list stored as an array', async () => {

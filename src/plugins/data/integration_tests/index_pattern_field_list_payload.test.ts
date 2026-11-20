@@ -43,6 +43,8 @@ describe('index pattern saves with a field list larger than the request limit', 
   // Body sizes of every request the browser-side code sends.
   let requests: Array<{ path: string; bytes: number; status: number }>;
   let errors: Error[];
+  // field_caps on the test cluster; a test can change what a refresh discovers.
+  let fieldCaps: jest.Mock;
 
   const storedFields = () => JSON.parse(store.attributes.fields as string);
 
@@ -68,7 +70,8 @@ describe('index pattern saves with a field list larger than the request limit', 
       store = { version: store.version + 1, attributes: { ...store.attributes, ...attributes } };
       return { id, type, version: `v${store.version}`, attributes, references: [] };
     });
-    handlerContext.opensearch.legacy.client.callAsCurrentUser.mockResolvedValue(fieldCapsResponse);
+    fieldCaps = handlerContext.opensearch.legacy.client.callAsCurrentUser as jest.Mock;
+    fieldCaps.mockResolvedValue(fieldCapsResponse);
 
     registerRoutes({ createRouter: () => httpSetup.createRouter('') } as any);
     await server.start({
@@ -210,5 +213,107 @@ describe('index pattern saves with a field list larger than the request limit', 
       1
     );
     expect(Math.max(...requests.map(({ bytes }) => bytes))).toBeLessThan(MAX_PAYLOAD_BYTES);
+  });
+
+  describe('a scripted field with the name of a mapped field', () => {
+    interface StoredField {
+      name: string;
+      scripted?: boolean;
+      script?: string;
+    }
+    const entries = (name: string) =>
+      storedFields().filter((field: StoredField) => field.name === name);
+    const scriptedEntry = (script: string) => expect.objectContaining({ scripted: true, script });
+
+    it('is saved in place of the mapped field', async () => {
+      const pattern = await service.createAndSave({ id: ID, title: 'logs-*' });
+      const name = FIELD_NAMES[0];
+
+      await pattern.addScriptedField(name, 'return 1;', 'number');
+      await service.updateSavedObject(pattern);
+
+      expect(errors).toEqual([]);
+      expect(entries(name)).toEqual([scriptedEntry('return 1;')]);
+      expect(storedFields()).toHaveLength(FIELD_NAMES.length + 2);
+    });
+
+    it('can be edited after a refresh discovers a field with its name', async () => {
+      const pattern = await service.createAndSave({ id: ID, title: 'logs-*' });
+      await pattern.addScriptedField('added_later', 'return 1;', 'number');
+      await service.updateSavedObject(pattern);
+      fieldCaps.mockResolvedValue({
+        ...fieldCapsResponse,
+        fields: {
+          ...fieldCapsResponse.fields,
+          added_later: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+
+      await service.refreshFieldsAndSave(pattern);
+      expect(entries('added_later')).toEqual([scriptedEntry('return 1;')]);
+
+      pattern.fields.update({
+        ...pattern.fields.getByName('added_later')!.spec,
+        script: 'return 2;',
+      });
+      await service.updateSavedObject(pattern);
+
+      expect(errors).toEqual([]);
+      expect(entries('added_later')).toEqual([scriptedEntry('return 2;')]);
+    });
+
+    it('keeps the mapped field when an earlier save put it after the scripted one', async () => {
+      await service.createAndSave({ id: ID, title: 'logs-*' });
+      const name = FIELD_NAMES[0];
+      store.attributes.fields = JSON.stringify([
+        {
+          name,
+          type: 'number',
+          script: 'return 1;',
+          lang: 'painless',
+          scripted: true,
+          searchable: true,
+          aggregatable: true,
+          count: 0,
+        },
+        ...storedFields(),
+      ]);
+      service.clearCache(ID);
+      const pattern = await service.get(ID);
+      expect(pattern.fields.getByName(name)!.scripted).toBe(false);
+
+      await pattern.addScriptedField('unrelated', 'return 3;', 'number');
+      await service.updateSavedObject(pattern);
+
+      expect(errors).toEqual([]);
+      expect(entries(name)).toEqual([expect.objectContaining({ scripted: false })]);
+      expect(entries('unrelated')).toEqual([scriptedEntry('return 3;')]);
+    });
+
+    it('can be edited when an earlier save kept both entries', async () => {
+      await service.createAndSave({ id: ID, title: 'logs-*' });
+      const name = FIELD_NAMES[0];
+      store.attributes.fields = JSON.stringify([
+        ...storedFields(),
+        {
+          name,
+          type: 'number',
+          script: 'return 1;',
+          lang: 'painless',
+          scripted: true,
+          searchable: true,
+          aggregatable: true,
+          count: 0,
+        },
+      ]);
+      service.clearCache(ID);
+      const pattern = await service.get(ID);
+
+      pattern.fields.update({ ...pattern.fields.getByName(name)!.spec, script: 'return 2;' });
+      await service.updateSavedObject(pattern);
+
+      expect(errors).toEqual([]);
+      expect(entries(name)).toEqual([scriptedEntry('return 2;')]);
+    });
   });
 });

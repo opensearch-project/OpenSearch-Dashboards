@@ -4,6 +4,7 @@
  */
 
 import { FieldSpec, UpdateFieldsRequest } from '../types';
+import { getEffectiveFields } from './get_effective_fields';
 
 type FieldChanges = Pick<UpdateFieldsRequest, 'scripted' | 'counts'>;
 
@@ -18,8 +19,9 @@ export const getFieldChanges = (
   savedFields: string | undefined,
   currentFields: string | undefined
 ): FieldChanges | undefined => {
-  const saved: FieldSpec[] = JSON.parse(savedFields || '[]');
-  const current: FieldSpec[] = JSON.parse(currentFields || '[]');
+  // A scripted field can shadow a mapped field of the same name; compare what each name means.
+  const saved = getEffectiveFields<FieldSpec>(JSON.parse(savedFields || '[]'));
+  const current = getEffectiveFields<FieldSpec>(JSON.parse(currentFields || '[]'));
   const savedByName = new Map(saved.map((field) => [field.name, field]));
   const currentScriptedNames = new Set(
     current.filter((field) => field.scripted).map((field) => field.name)

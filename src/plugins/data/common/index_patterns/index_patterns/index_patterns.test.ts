@@ -491,6 +491,27 @@ describe('IndexPatterns', () => {
       );
     });
 
+    test('creates a scripted field with the name of a mapped field', async () => {
+      const pattern = await indexPatterns.get('foo');
+      await pattern.addScriptedField('bytes', 'doc.bytes.value * 8', 'number');
+
+      await indexPatterns.updateSavedObject(pattern);
+
+      expect(apiClient.updateFields).toHaveBeenCalledWith('foo', {
+        version: 'v1',
+        attributes: {},
+        scripted: {
+          upsert: [
+            expect.objectContaining({
+              name: 'bytes',
+              scripted: true,
+              script: 'doc.bytes.value * 8',
+            }),
+          ],
+        },
+      });
+    });
+
     test('does not send fields refreshed in memory', async () => {
       const pattern = await indexPatterns.get('foo');
       pattern.fields.replaceAll([

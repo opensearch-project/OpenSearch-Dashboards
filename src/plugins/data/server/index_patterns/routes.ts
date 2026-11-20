@@ -37,7 +37,12 @@ import {
   OpenSearchDashboardsResponseFactory,
   RequestHandlerContext,
 } from 'opensearch-dashboards/server';
-import { FieldSpec, IndexPatternAttributes, getDataSourceReference } from '../../common';
+import {
+  FieldSpec,
+  IndexPatternAttributes,
+  getDataSourceReference,
+  getEffectiveFields,
+} from '../../common';
 import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
 
@@ -234,14 +239,15 @@ export function registerRoutes(http: HttpServiceSetup) {
           metaFields: parsedFields,
         });
         // Saved in the shape the browser writes, so every field has a count (0 if never used).
-        const fields: FieldSpec[] = [
+        // A scripted field shadows a mapped field of the same name, so only one is saved.
+        const fields: FieldSpec[] = getEffectiveFields([
           ...discoveredFields.map((field) => ({
             ...field,
             count: savedCounts.get(field.name) ?? 0,
             scripted: false,
           })),
           ...savedFields.filter((field) => field.scripted),
-        ];
+        ]);
 
         const { version } = await savedObjectsClient.update(
           'index-pattern',
@@ -327,31 +333,15 @@ export function registerRoutes(http: HttpServiceSetup) {
         );
         const savedFields = readSavedFields(savedObject.attributes);
 
-        // Discovered fields are written only by _refresh_fields, so a scripted field can't take
-        // the name of one.
-        const upserts: FieldSpec[] = scripted?.upsert ?? [];
-        const collision = upserts.find((upsert) =>
-          savedFields.some((field) => field.name === upsert.name && !field.scripted)
-        );
-        if (collision) {
-          return response.badRequest({
-            body: {
-              message: `[${collision.name}] is a discovered field of index pattern [${id}] and can't be replaced by a scripted field`,
-            },
-          });
-        }
-
-        // Unknown names are ignored, so repeating a change is harmless.
+        // Unknown names are ignored, so repeating a change is harmless. A scripted field may reuse
+        // the name of a mapped field and then replaces it, so the saved list keeps one definition
+        // per name. That also cleans up lists saved earlier with both entries.
         const removed = new Set(scripted?.remove ?? []);
-        const upsertByName = new Map(upserts.map((field) => [field.name, field]));
-        const savedNames = new Set(savedFields.map((field) => field.name));
         const countByName = new Map((counts ?? []).map(({ name, count }) => [name, count]));
-        const fields = [
-          ...savedFields
-            .filter((field) => !(field.scripted && removed.has(field.name)))
-            .map((field) => upsertByName.get(field.name) ?? field),
-          ...Array.from(upsertByName.values()).filter((field) => !savedNames.has(field.name)),
-        ].map((field) => {
+        const fields = getEffectiveFields<FieldSpec>([
+          ...savedFields.filter((field) => !(field.scripted && removed.has(field.name))),
+          ...(scripted?.upsert ?? []),
+        ]).map((field) => {
           const count = countByName.get(field.name);
           return count === undefined ? field : { ...field, count };
         });

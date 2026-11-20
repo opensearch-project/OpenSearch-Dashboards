@@ -50,6 +50,18 @@ describe('getFieldChanges', () => {
     expect(changes([scripted], [edited])).toEqual({ scripted: { upsert: [edited] } });
   });
 
+  it('sends a scripted field that shadows a mapped field, without a count for the mapped one', () => {
+    const shadowing = { ...scripted, name: 'bytes' };
+    expect(changes([regular], [regular, shadowing])).toEqual({
+      scripted: { upsert: [shadowing] },
+    });
+  });
+
+  it('ignores the mapped field behind a scripted field of the same name', () => {
+    const shadowing = { ...scripted, name: 'bytes' };
+    expect(changes([regular, shadowing], [{ ...regular, count: 9 }, shadowing])).toBeUndefined();
+  });
+
   it('sends the name of a removed scripted field', () => {
     expect(changes([regular, scripted], [regular])).toEqual({ scripted: { remove: ['kb'] } });
   });
