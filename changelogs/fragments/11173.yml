@@ -1,0 +1,2 @@
+fix:
+- Distinguish missing OpenSearch SQL plugin from an empty Direct Query connections list ([#11173](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11173))

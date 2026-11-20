@@ -5,6 +5,7 @@
 
 import './direct_query_table.scss';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
@@ -50,12 +51,15 @@ import {
   DataConnectionType,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../../../../data_source/common';
+import { isQueryDatasourcesUnavailable } from './direct_query_fetch_errors';
 import { getDirectQueryConnectionFlowManagePath } from '../../direct_query_connection_flow/constants';
 import { useVisibleDirectQueryConnectionFlows } from '../../direct_query_connection_flow/use_visible_direct_query_connection_flows';
 import {
   DirectQueryConnectionFlow,
   findOwningDirectQueryConnectionFlow,
 } from '../../../direct_query_connection_flow_registry';
+
+type DirectQueryLoadError = 'unavailable' | 'error' | null;
 
 const EMPTY_WORKSPACE_LIST$ = of<WorkspaceObject[]>([]);
 
@@ -174,6 +178,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     Record<string, React.ReactNode>
   >({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<DirectQueryLoadError>(null);
 
   /* Table selection handlers */
   const onSelectionChange = (selected: DataSourceTableItem[]) => {
@@ -189,6 +194,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
 
   const fetchDataSources = useCallback(() => {
     setIsLoading(true);
+    setLoadError(null);
 
     const fetchOpenSearchConnections = async (): Promise<DataSourceTableItem[]> => {
       const fetchConnections = featureFlagStatus
@@ -223,7 +229,13 @@ export const ManageDirectQueryDataConnectionsTable = ({
             ? finalData.filter((item: any) => item.relatedConnections?.length > 0)
             : finalData;
         })
-        .catch(() => {
+        .catch((err) => {
+          if (isQueryDatasourcesUnavailable(err)) {
+            setLoadError('unavailable');
+            return [];
+          }
+
+          setLoadError('error');
           notifications.toasts.addDanger(
             i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
               defaultMessage: 'Could not fetch data sources',
@@ -679,6 +691,26 @@ export const ManageDirectQueryDataConnectionsTable = ({
               <EuiSpacer size="m" />
               <EuiText>Loading direct query data connections...</EuiText>
             </div>
+          ) : loadError === 'unavailable' && data.length === 0 ? (
+            <EuiEmptyPrompt
+              data-test-subj="directQueryDataSourcesUnavailable"
+              iconType="alert"
+              title={
+                <h2>
+                  {i18n.translate('dataSourcesManagement.directQueryConnections.unavailableTitle', {
+                    defaultMessage: 'Direct query connections are unavailable',
+                  })}
+                </h2>
+              }
+              body={
+                <p>
+                  {i18n.translate('dataSourcesManagement.directQueryConnections.unavailableBody', {
+                    defaultMessage:
+                      'This cluster does not support direct query connections because the OpenSearch SQL plugin is not installed or enabled.',
+                  })}
+                </p>
+              }
+            />
           ) : (
             <EuiInMemoryTable
               items={rows}
@@ -703,6 +735,13 @@ export const ManageDirectQueryDataConnectionsTable = ({
               selection={selection}
               search={customSearchBar}
               className="direct-query-table"
+              message={
+                loadError === null && data.length === 0
+                  ? i18n.translate('dataSourcesManagement.directQueryConnections.empty', {
+                      defaultMessage: 'No direct query connections found.',
+                    })
+                  : undefined
+              }
             />
           )}
         </EuiFlexItem>
