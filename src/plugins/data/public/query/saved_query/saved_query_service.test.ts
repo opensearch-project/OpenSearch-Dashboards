@@ -415,57 +415,47 @@ describe('saved query service', () => {
       expect(response.attributes.query.query).toEqual('"Men\'s Shoes"');
     });
 
-    it('should keep saved queries for 3rd-party plugins when language declares supported app name as wildcard', async () => {
-      mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [
-          {
-            id: 'foo',
-            attributes: {
-              ...savedQueryAttributes,
-              query: {
-                language: 'kuery',
-                query: 'response:200',
-              },
-            },
-          },
-        ],
-        total: 1,
-      });
-
-      const application = applicationServiceMock.createStartContract();
-      application.currentAppId$ = of('thirdPartyApp');
-      const queryStringManager = {
-        getLanguageService: () => ({
-          getLanguage: () => ({
-            supportedAppNames: ['*'],
-          }),
-        }),
+    describe('language-based filtering', () => {
+      const kueryQueryAttributes = {
+        ...savedQueryAttributes,
+        query: { language: 'kuery', query: 'response:200' },
       };
 
-      const { findSavedQueries: findSavedQueriesWithLanguageFilter } = createSavedQueryService(
-        // @ts-ignore
-        mockSavedObjectsClient,
-        {
-          application,
-          uiSettings: uiSettingsServiceMock.createStartContract(),
-        },
-        // @ts-ignore
-        queryStringManager
-      );
+      const findWithLanguage = (language: { supportedAppNames?: string[] } | undefined) => {
+        mockSavedObjectsClient.find.mockReturnValue({
+          savedObjects: [{ id: 'bar', attributes: kueryQueryAttributes }],
+          total: 1,
+        });
 
-      const response = await findSavedQueriesWithLanguageFilter();
-      expect(response.queries).toEqual([
-        {
-          id: 'foo',
-          attributes: {
-            ...savedQueryAttributes,
-            query: {
-              language: 'kuery',
-              query: 'response:200',
-            },
-          },
-        },
-      ]);
+        const application = applicationServiceMock.createStartContract();
+        application.currentAppId$ = of('thirdPartyApp');
+        const queryStringManager = {
+          getLanguageService: () => ({ getLanguage: () => language }),
+        };
+
+        const { findSavedQueries: findSavedQueriesWithLanguageFilter } = createSavedQueryService(
+          // @ts-ignore
+          mockSavedObjectsClient,
+          { application, uiSettings: uiSettingsServiceMock.createStartContract() },
+          // @ts-ignore
+          queryStringManager
+        );
+        return findSavedQueriesWithLanguageFilter();
+      };
+
+      it.each([
+        ['declares the wildcard app name', { supportedAppNames: ['*'] }, 1],
+        ['declares the current app', { supportedAppNames: ['thirdPartyApp'] }, 1],
+        ['does not declare the current app', { supportedAppNames: ['discover'] }, 0],
+        ['does not declare supported app names', {}, 1],
+        ['is not registered', undefined, 1],
+      ])('keeps queries as expected when language %s', async (_desc, language, expectedCount) => {
+        const response = await findWithLanguage(language);
+        expect(response.queries).toHaveLength(expectedCount);
+        if (expectedCount) {
+          expect(response.queries[0]).toEqual({ id: 'bar', attributes: kueryQueryAttributes });
+        }
+      });
     });
   });
 
