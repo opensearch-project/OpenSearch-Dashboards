@@ -159,6 +159,22 @@ describe('executeStreamingQuery', () => {
     expect(hits.map((h: any) => h._source.event_id)).toEqual([0, 1, 2, 3, 4]);
   });
 
+  // A query that falls back to the legacy engine drops the rows it has sent and returns none until
+  // it finishes.
+  it('clears the rows shown when a running snapshot drops them', async () => {
+    const rows = (n: number) => [...Array(n).keys()].map((i) => ['2026-09-15 10:00:00', i]);
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', datarows: rows(3), size: 3, total: 3 }));
+    mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
+      .mockResolvedValueOnce(
+        snapshot({ id: 'job-1', status: 'SUCCEEDED', datarows: rows(2), size: 2, total: 2 })
+      );
+
+    const { results } = await run();
+
+    expect(results.map((r) => r.results.hits.hits.length)).toEqual([3, 0, 2]);
+  });
+
   it('reports the total the engine found, not the rows held', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockResolvedValueOnce(
@@ -494,6 +510,25 @@ describe('executeStreamingQuery', () => {
     expect(final.error?.message.type).toBe('SemanticCheckException');
     expect(final.error?.message.reason).toBe('Invalid Query');
     expect(final.error?.message.details).toContain("can't resolve Symbol");
+  });
+
+  // A FAILED body has `error` and no rows, so reading it as a snapshot must not throw or publish.
+  it('reports a job that fails after rendering rows as an error', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
+    mockPoll.mockResolvedValue({
+      status: 'FAILED',
+      progress: { fraction_done: 0.3 },
+      error: { type: 'IllegalArgumentException', reason: 'boom', code: 'FIELD_NOT_FOUND' },
+    });
+
+    const { results, statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
+
+    expect(results).toHaveLength(1);
+    expect(final.status).toBe('error');
+    expect(final.error?.message.reason).toBe('boom');
   });
 
   it('treats a job cancelled elsewhere as stopped, keeping what was rendered', async () => {

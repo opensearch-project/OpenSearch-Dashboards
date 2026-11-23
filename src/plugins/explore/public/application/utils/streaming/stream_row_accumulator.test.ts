@@ -44,12 +44,14 @@ describe('StreamRowAccumulator', () => {
     expect(ids(acc)).toEqual([900, 901]);
   });
 
-  it('keeps the rows shown when a snapshot has none yet', () => {
+  // The backend drops a query's rows when it falls back to the legacy engine.
+  it('drops the held rows when a snapshot has none', () => {
     const acc = new StreamRowAccumulator(100);
     acc.absorb(firstRows(10));
 
-    expect(acc.absorb(firstRows(0))).toBe(10);
-    expect(acc.heldRows).toHaveLength(10);
+    expect(acc.absorb(firstRows(0))).toBe(0);
+    expect(acc.heldRows).toEqual([]);
+    expect(acc.rowGeneration).toBe(1);
   });
 
   describe('row generation', () => {

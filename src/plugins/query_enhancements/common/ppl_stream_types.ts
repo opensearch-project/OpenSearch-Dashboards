@@ -19,10 +19,15 @@ export interface PPLStreamProgress {
   fraction_done: number;
 }
 
+/** The fields a synchronous PPL request returns for the same failure. */
 export interface PPLStreamError {
   type: string;
   reason: string;
   details?: string;
+  code?: string;
+  context?: Record<string, unknown>;
+  location?: string[];
+  suggestion?: string;
 }
 
 export interface PPLStreamSnapshot {
@@ -36,12 +41,9 @@ export interface PPLStreamSnapshot {
   datarows: unknown[][];
   size: number;
   total: number;
-  start_time_in_millis?: number;
-  expiration_time_in_millis?: number;
   /** Total execution time, terminal snapshots only. */
   took?: number;
   error?: PPLStreamError;
-  /** Not yet sent on the async envelope; declared so the client surfaces them when it is. */
   warnings?: Array<{ message: string; detail?: string }>;
   /** Requested with `profile: true`; `thread_pool` tells the UI it ran on the complex pool. */
   profile?: { thread_pool?: string };

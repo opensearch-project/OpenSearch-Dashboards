@@ -318,7 +318,6 @@ export const executeStreamingQuery = createAsyncThunk<
           dataSourceId,
           signal,
         });
-        if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
           release();
@@ -331,6 +330,8 @@ export const executeStreamingQuery = createAsyncThunk<
           return;
         }
 
+        // FAILED and CANCELLED bodies carry no rows, so only the snapshots past them are absorbed.
+        if (!asHistogram) rows.absorb(snapshot);
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
         publish(snapshot, !terminal);
         if (terminal) {

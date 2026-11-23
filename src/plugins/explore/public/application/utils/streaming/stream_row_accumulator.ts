@@ -42,10 +42,9 @@ export class StreamRowAccumulator {
 
   /** Replaces the held rows with the snapshot's. Returns the number of rows held. */
   absorb(snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>): number {
+    // An empty snapshot is taken as it is too: the backend drops the rows it has sent when a query
+    // falls back to the legacy engine, and they must not stay on screen.
     const incoming = snapshotRowsToObjects(snapshot, this.formatter());
-    // A snapshot without rows yet (e.g. a step that needs all its input first) says nothing about
-    // the rows already shown.
-    if (incoming.length === 0) return this.rows.length;
     const { highlights = [] } = splitHighlightColumn(snapshot);
 
     const next = incoming.slice(0, this.maxRows);

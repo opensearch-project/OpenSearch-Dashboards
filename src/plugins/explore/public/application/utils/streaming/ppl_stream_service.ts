@@ -42,8 +42,7 @@ const isNotFound = (error: unknown): boolean =>
 /**
  * Client for the asynchronous PPL partial-results routes.
  *
- * Transport only: it holds no polling state and makes no decisions about windowing or cadence, so
- * the caller owns the `APPEND`/`REPLACE` strategy.
+ * Transport only: it holds no polling state and makes no decisions about cadence.
  */
 export class PPLStreamService {
   constructor(private readonly http: HttpSetup) {}
