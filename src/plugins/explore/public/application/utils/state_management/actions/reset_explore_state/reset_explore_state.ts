@@ -14,10 +14,11 @@ import {
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
 import { executeQueries } from '../query_actions';
-import { AppDispatch } from '../../store';
+import { AppDispatch, RootState } from '../../store';
 import { useClearEditors } from '../../../../hooks';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 import { datasetRequiresExplicitRun } from '../../../requires_explicit_run';
+import { refreshAiAvailability } from '../../middleware/ai_availability_middleware';
 
 /**
  * Redux Thunk for resetting the Explore state to its preloaded state.
@@ -25,8 +26,22 @@ import { datasetRequiresExplicitRun } from '../../../requires_explicit_run';
  */
 export const resetExploreStateActionCreator =
   (services: ExploreServices, clearEditors: ReturnType<typeof useClearEditors>) =>
-  async (dispatch: AppDispatch) => {
+  async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = await getPreloadedState(services);
+    // The preloaded state has the AI flags off; keep the current ones until the refresh lands,
+    // but only when they were probed for the same data source.
+    const sameDataSource =
+      (getState().query?.dataset?.dataSource?.id || '') ===
+      (state.query?.dataset?.dataSource?.id || '');
+    const currentQueryEditor =
+      state.query?.dataset && sameDataSource ? getState().queryEditor : undefined;
+    const queryEditorState = currentQueryEditor
+      ? {
+          ...state.queryEditor,
+          promptModeIsAvailable: currentQueryEditor.promptModeIsAvailable,
+          summaryAgentIsAvailable: currentQueryEditor.summaryAgentIsAvailable,
+        }
+      : state.queryEditor;
 
     clearEditors();
     dispatch(setUiState(state.ui));
@@ -34,7 +49,10 @@ export const resetExploreStateActionCreator =
     dispatch(setTabState(state.tab));
     dispatch(setLegacyState(state.legacy));
     dispatch(setQueryState(state.query));
-    dispatch(setQueryEditorState(state.queryEditor));
+    dispatch(setQueryEditorState(queryEditorState));
+    if (state.query?.dataset) {
+      dispatch(refreshAiAvailability());
+    }
     await dispatch(detectAndSetOptimalTab({ services }));
     // A dataset type that requires an explicit Run waits for the user.
     if (datasetRequiresExplicitRun(services.data?.query?.queryString, state.query?.dataset)) return;

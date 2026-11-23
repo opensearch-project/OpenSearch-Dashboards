@@ -108,18 +108,15 @@ export const ExploreLogsChart = ({
   );
 
   const [summary, setSummary] = useState('');
-  const { toggleIdSelected, updateToggleId } = usePersistedChartState('histogram');
+  const { toggleIdSelected: savedToggleId, updateToggleId } = usePersistedChartState('histogram');
 
   const assistantEnabled = services.core.application.capabilities?.assistant?.enabled;
   const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
   const isSummaryAvailable = isSummaryAgentAvailable && Boolean(assistantEnabled);
 
-  // Reset to histogram if summary is not available but toggle is set to summary
-  React.useEffect(() => {
-    if (!isSummaryAvailable && toggleIdSelected === 'summary') {
-      updateToggleId('histogram');
-    }
-  }, [isSummaryAvailable, toggleIdSelected, updateToggleId]);
+  // The summary check runs in the background, so it may not have passed yet. Show the histogram
+  // meanwhile, but keep the saved choice so the summary comes back once it is available.
+  const toggleIdSelected = isSummaryAvailable ? savedToggleId : 'histogram';
 
   const usageCollection = getUsageCollector();
   const { reportMetric, reportCountMetric } = useMetrics(usageCollection);
@@ -191,12 +188,7 @@ export const ExploreLogsChart = ({
     </EuiFlexGroup>
   );
 
-  // Show histogram if the current toggle is histogram or no summary feature available but toggle
-  // previously selected summary
-  const displayHistogram =
-    chartData &&
-    ((showHistogram && toggleIdSelected === 'histogram') ||
-      (showHistogram && toggleIdSelected === 'summary' && !isSummaryAvailable));
+  const displayHistogram = chartData && showHistogram && toggleIdSelected === 'histogram';
 
   const displayResultsSummary =
     chartData && showHistogram && isSummaryAvailable && toggleIdSelected === 'summary';
