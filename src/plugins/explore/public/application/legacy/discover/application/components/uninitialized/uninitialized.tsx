@@ -34,9 +34,15 @@ import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } 
 
 interface Props {
   onRefresh: () => void;
+  /**
+   * The dataset's type runs queries only when the user asks (DatasetTypeConfig
+   * meta.requiresExplicitRun): the copy says so, and the button reads
+   * "Update", like the query bar's run button.
+   */
+  requiresExplicitRun?: boolean;
 }
 
-export const DiscoverUninitialized = ({ onRefresh }: Props) => {
+export const DiscoverUninitialized = ({ onRefresh, requiresExplicitRun }: Props) => {
   return (
     <I18nProvider>
       <EuiPage style={{ height: '100%' }}>
@@ -54,10 +60,17 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               }
               body={
                 <p>
-                  <FormattedMessage
-                    id="explore.discover.uninitializedText"
-                    defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
-                  />
+                  {requiresExplicitRun ? (
+                    <FormattedMessage
+                      id="explore.discover.uninitializedExplicitRunText"
+                      defaultMessage="Write a query, then select Update. This data source runs queries only when you start them."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="explore.discover.uninitializedText"
+                      defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
+                    />
+                  )}
                 </p>
               }
               actions={
@@ -67,10 +80,17 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
                   onClick={onRefresh}
                   data-test-subj="discover-refreshDataButton"
                 >
-                  <FormattedMessage
-                    id="explore.discover.uninitializedRefreshButtonText"
-                    defaultMessage="Refresh data"
-                  />
+                  {requiresExplicitRun ? (
+                    <FormattedMessage
+                      id="explore.discover.uninitializedUpdateButtonText"
+                      defaultMessage="Update"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="explore.discover.uninitializedRefreshButtonText"
+                      defaultMessage="Refresh data"
+                    />
+                  )}
                 </EuiSmallButton>
               }
             />

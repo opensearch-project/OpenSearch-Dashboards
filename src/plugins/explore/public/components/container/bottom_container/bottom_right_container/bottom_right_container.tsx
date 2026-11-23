@@ -27,6 +27,7 @@ import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
 import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
 import { SourceEmptyState } from '../../../source_empty_state/source_empty_state';
+import { datasetRequiresExplicitRun } from '../../../../application/utils/requires_explicit_run';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -99,7 +100,15 @@ export const BottomRightContainer = () => {
     }
 
     if (status === QueryExecutionStatus.UNINITIALIZED) {
-      return <DiscoverUninitialized onRefresh={onRefresh} />;
+      return (
+        <DiscoverUninitialized
+          onRefresh={onRefresh}
+          requiresExplicitRun={
+            flavorId === ExploreFlavor.Logs &&
+            datasetRequiresExplicitRun(services?.data?.query?.queryString, query?.dataset)
+          }
+        />
+      );
     }
 
     if (

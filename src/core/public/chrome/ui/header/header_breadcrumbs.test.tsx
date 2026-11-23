@@ -170,3 +170,44 @@ describe('EuiSimplifiedBreadcrumbs', () => {
     expect(wrapper.find('.euiSimplifiedBreadcrumbs')).toMatchSnapshot();
   });
 });
+
+describe('application header: an app that sets no breadcrumbs', () => {
+  const CRUMBS = '[data-test-subj~="breadcrumb"]';
+  const workspaceEnricher = (crumbs: ChromeBreadcrumb[]) =>
+    crumbs.length ? [{ text: 'Data connections demo' }, ...crumbs] : crumbs;
+
+  const mountAppHeader = (screenTitle?: string) =>
+    mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('Overview')}
+        breadcrumbs$={new BehaviorSubject<ChromeBreadcrumb[]>([])}
+        breadcrumbsEnricher$={new BehaviorSubject(workspaceEnricher)}
+        useUpdatedHeader
+        renderFullLength
+        screenTitle={screenTitle}
+      />
+    );
+
+  it('uses the screen title, not the default "Overview" app title: "Workspace / Logs"', () => {
+    const wrapper = mountAppHeader('Logs');
+    expect(wrapper.text()).not.toContain('Overview');
+    const crumbs = wrapper.find(CRUMBS).hostNodes();
+    expect(crumbs.map((crumb) => crumb.text())).toEqual(['Data connections demo', 'Logs']);
+    // The title rendered next to the trail names the page, so its crumb is for screen readers
+    // only, and the separator before it leads into the title.
+    expect(
+      wrapper.find('[data-test-subj~="last"]').hostNodes().hasClass('euiScreenReaderOnly')
+    ).toBe(true);
+    expect(wrapper.find('.euiBreadcrumbSeparator').hostNodes()).toHaveLength(1);
+  });
+
+  it('keeps the app title when there is no screen title', () => {
+    const wrapper = mountAppHeader(undefined);
+    expect(
+      wrapper
+        .find(CRUMBS)
+        .hostNodes()
+        .map((crumb) => crumb.text())
+    ).toEqual(['Data connections demo', 'Overview']);
+  });
+});
