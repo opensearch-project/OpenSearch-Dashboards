@@ -29,17 +29,18 @@
  */
 
 import Boom from '@hapi/boom';
-import { omit } from 'lodash';
 import { schema } from '@osd/config-schema';
 import {
   HttpServiceSetup,
   LegacyAPICaller,
   OpenSearchDashboardsResponseFactory,
   RequestHandlerContext,
+  SavedObjectsClientContract,
 } from 'opensearch-dashboards/server';
 import {
   FieldSpec,
   IndexPatternAttributes,
+  UpdateFieldsRequest,
   getDataSourceReference,
   getEffectiveFields,
 } from '../../common';
@@ -47,9 +48,71 @@ import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
 
 // Objects written directly to the index by external tooling can store `fields` as an array.
-const readSavedFields = (attributes: IndexPatternAttributes): FieldSpec[] => {
-  const storedFields = attributes.fields;
-  return Array.isArray(storedFields) ? storedFields : JSON.parse(storedFields || '[]');
+const readSavedFields = (
+  storedFields: IndexPatternAttributes['fields'] | FieldSpec[]
+): FieldSpec[] => (Array.isArray(storedFields) ? storedFields : JSON.parse(storedFields || '[]'));
+
+// Async functions can keep dead locals alive across awaits, so these parse field lists in their own
+// frame and return only what the routes keep.
+const readSavedPatternForRefresh = async (client: SavedObjectsClientContract, id: string) => {
+  const {
+    version,
+    references,
+    attributes: { fields: storedFields, ...attributes },
+  } = await client.get<IndexPatternAttributes>('index-pattern', id);
+  // Popularity is the only user setting stored on discovered fields; keep it across refreshes.
+  const counts = new Map<string, number>();
+  const scriptedFields: FieldSpec[] = [];
+  readSavedFields(storedFields).forEach((field) => {
+    if (field.scripted) {
+      scriptedFields.push(field);
+    } else if (field.count) {
+      counts.set(field.name, field.count);
+    }
+  });
+  return { version, references, attributes, counts, scriptedFields };
+};
+
+const discoverFieldsJson = async (
+  fetcher: IndexPatternsFetcher,
+  options: { pattern: string; metaFields: string[] },
+  { counts, scriptedFields }: { counts: Map<string, number>; scriptedFields: FieldSpec[] }
+): Promise<string> => {
+  const discoveredFields = await fetcher.getFieldsForWildcard(options);
+  // Saved in the shape the browser writes, so every field has a count (0 if never used). A
+  // scripted field shadows a mapped field of the same name, so only one is saved.
+  return JSON.stringify(
+    getEffectiveFields<FieldSpec>([
+      ...discoveredFields.map((field) =>
+        Object.assign(field, { count: counts.get(field.name) ?? 0, scripted: false })
+      ),
+      ...scriptedFields,
+    ])
+  );
+};
+
+const readUpdatedFieldsJson = async (
+  client: SavedObjectsClientContract,
+  id: string,
+  { scripted, counts }: Pick<UpdateFieldsRequest, 'scripted' | 'counts'>
+): Promise<string> => {
+  const { attributes } = await client.get<IndexPatternAttributes>('index-pattern', id);
+  // Unknown names are ignored, so repeating a change is harmless. A scripted field may reuse the
+  // name of a mapped field and then replaces it, so the saved list keeps one definition per name.
+  // That also cleans up lists saved earlier with both entries.
+  const removed = new Set(scripted?.remove ?? []);
+  const countByName = new Map((counts ?? []).map(({ name, count }) => [name, count]));
+  return JSON.stringify(
+    getEffectiveFields<FieldSpec>([
+      ...readSavedFields(attributes.fields).filter(
+        (field) => !(field.scripted && removed.has(field.name))
+      ),
+      ...(scripted?.upsert ?? []),
+    ]).map((field) => {
+      const count = countByName.get(field.name);
+      return count === undefined ? field : { ...field, count };
+    })
+  );
 };
 
 const boomErrorResponse = (response: OpenSearchDashboardsResponseFactory, error: Boom.Boom) =>
@@ -205,15 +268,10 @@ export function registerRoutes(http: HttpServiceSetup) {
       }
 
       try {
-        const savedObject = await savedObjectsClient.get<IndexPatternAttributes>(
-          'index-pattern',
-          id
-        );
-
-        const savedFields = readSavedFields(savedObject.attributes);
+        const saved = await readSavedPatternForRefresh(savedObjectsClient, id);
 
         // Fields always come from the data source the pattern references, never from the request.
-        const dataSourceId = getDataSourceReference(savedObject.references)?.id;
+        const dataSourceId = getDataSourceReference(saved.references)?.id;
         if (dataSourceId && !context.dataSource) {
           return response.badRequest({
             body: {
@@ -226,38 +284,25 @@ export function registerRoutes(http: HttpServiceSetup) {
               .callAPI as LegacyAPICaller)
           : context.core.opensearch.legacy.client.callAsCurrentUser;
 
-        // Popularity is the only user setting stored on discovered fields; keep it across refreshes.
-        const savedCounts = new Map<string, number>();
-        savedFields.forEach(({ name, scripted, count }) => {
-          if (!scripted && count) {
-            savedCounts.set(name, count);
-          }
-        });
-        const fetcher = new IndexPatternsFetcher(callAsCurrentUser);
-        const discoveredFields = await fetcher.getFieldsForWildcard({
-          pattern: savedObject.attributes.title,
-          metaFields: parsedFields,
-        });
-        // Saved in the shape the browser writes, so every field has a count (0 if never used).
-        // A scripted field shadows a mapped field of the same name, so only one is saved.
-        const fields: FieldSpec[] = getEffectiveFields([
-          ...discoveredFields.map((field) => ({
-            ...field,
-            count: savedCounts.get(field.name) ?? 0,
-            scripted: false,
-          })),
-          ...savedFields.filter((field) => field.scripted),
-        ]);
+        const fields = await discoverFieldsJson(
+          new IndexPatternsFetcher(callAsCurrentUser),
+          { pattern: saved.attributes.title, metaFields: parsedFields },
+          saved
+        );
 
         const { version } = await savedObjectsClient.update(
           'index-pattern',
           id,
-          { fields: JSON.stringify(fields) },
-          { version: savedObject.version }
+          { fields },
+          { version: saved.version }
         );
 
+        // Reuses the serialized list; returning an object would serialize the list a second time.
         return response.ok({
-          body: { fields, version, attributes: omit(savedObject.attributes, 'fields') },
+          headers: { 'content-type': 'application/json' },
+          body: `{"fields":${fields},"version":${JSON.stringify(version)},"attributes":${JSON.stringify(
+            saved.attributes
+          )}}`,
         });
       } catch (error) {
         if (Boom.isBoom(error)) {
@@ -324,32 +369,15 @@ export function registerRoutes(http: HttpServiceSetup) {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const { id } = request.params;
-      const { version, attributes, scripted, counts } = request.body;
+      const { version, attributes } = request.body;
 
       try {
-        const savedObject = await savedObjectsClient.get<IndexPatternAttributes>(
-          'index-pattern',
-          id
-        );
-        const savedFields = readSavedFields(savedObject.attributes);
-
-        // Unknown names are ignored, so repeating a change is harmless. A scripted field may reuse
-        // the name of a mapped field and then replaces it, so the saved list keeps one definition
-        // per name. That also cleans up lists saved earlier with both entries.
-        const removed = new Set(scripted?.remove ?? []);
-        const countByName = new Map((counts ?? []).map(({ name, count }) => [name, count]));
-        const fields = getEffectiveFields<FieldSpec>([
-          ...savedFields.filter((field) => !(field.scripted && removed.has(field.name))),
-          ...(scripted?.upsert ?? []),
-        ]).map((field) => {
-          const count = countByName.get(field.name);
-          return count === undefined ? field : { ...field, count };
-        });
+        const fields = await readUpdatedFieldsJson(savedObjectsClient, id, request.body);
 
         const { version: savedVersion } = await savedObjectsClient.update(
           'index-pattern',
           id,
-          { ...attributes, fields: JSON.stringify(fields) },
+          { ...attributes, fields },
           { version }
         );
 

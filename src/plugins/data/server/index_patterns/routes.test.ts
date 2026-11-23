@@ -115,11 +115,13 @@ describe('POST /api/index_patterns/{id}/_refresh_fields', () => {
       { version: 'v1' }
     );
     expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: {
-        fields,
-        version: 'v2',
-        attributes: { title: 'logs-*', timeFieldName: '@timestamp' },
-      },
+      headers: { 'content-type': 'application/json' },
+      body: expect.any(String),
+    });
+    expect(JSON.parse(mockResponse.ok.mock.calls[0][0]?.body as string)).toEqual({
+      fields,
+      version: 'v2',
+      attributes: { title: 'logs-*', timeFieldName: '@timestamp' },
     });
   });
 
