@@ -35,6 +35,10 @@ import { createTimefilterSyncMiddleware } from './middleware/timefilter_sync_mid
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
 import { createDatasetChangeMiddleware } from './middleware/dataset_change_middleware';
+import {
+  createAiAvailabilityMiddleware,
+  refreshAiAvailability,
+} from './middleware/ai_availability_middleware';
 import { ExploreServices } from '../../../types';
 
 const resetState = createAction<RootState>('app/resetState');
@@ -110,6 +114,7 @@ export const configurePreloadedStore = (
             .concat(createQuerySyncMiddleware(services))
             .concat(createTimefilterSyncMiddleware(services))
             .concat(createDatasetChangeMiddleware(services))
+            .concat(createAiAvailabilityMiddleware(services))
             .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware().concat(createResultsCacheMiddleware());
     },
@@ -122,6 +127,9 @@ export const getPreloadedStore = async (services: ExploreServices) => {
     const store = configurePreloadedStore(preloadedState, services);
     const initialState = store.getState();
     const reset = () => store.dispatch(resetState(initialState));
+    if (preloadedState.query?.dataset) {
+      store.dispatch(refreshAiAvailability());
+    }
 
     // Listen to browser history changes to sync URL state back to Redux
     const historyUnsubscribe = services.scopedHistory?.listen(async (location, historyAction) => {
@@ -161,7 +169,24 @@ export const getPreloadedStore = async (services: ExploreServices) => {
           store.dispatch(setIsInitialized(false));
           // Only hydrate app state if it actually changed
           if (appStateChanged) {
-            store.dispatch(hydrateState(urlAppState));
+            if (urlAppState.query?.dataset) {
+              // URL state does not carry the AI flags: keep the current ones until the refresh lands.
+              const { promptModeIsAvailable, summaryAgentIsAvailable } =
+                currentAppState.queryEditor;
+              store.dispatch(
+                hydrateState({
+                  ...urlAppState,
+                  queryEditor: {
+                    ...urlAppState.queryEditor,
+                    promptModeIsAvailable,
+                    summaryAgentIsAvailable,
+                  },
+                })
+              );
+              store.dispatch(refreshAiAvailability());
+            } else {
+              store.dispatch(hydrateState(urlAppState));
+            }
           }
         }
       } catch (error) {

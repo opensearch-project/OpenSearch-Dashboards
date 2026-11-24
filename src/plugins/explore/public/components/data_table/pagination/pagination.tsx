@@ -15,7 +15,8 @@ interface Props {
   startItem: number;
   endItem: number;
   totalItems?: number;
-  sampleSize: number;
+  sampleSize?: number;
+  'data-test-subj'?: string;
 }
 
 export const Pagination = ({
@@ -26,15 +27,16 @@ export const Pagination = ({
   endItem,
   totalItems = 0,
   sampleSize,
+  'data-test-subj': dataTestSubj = 'osdDocTablePagination',
 }: Props) => {
   return (
     <EuiFlexGroup
       className="exploreDocTable_pagination"
       alignItems="center"
       justifyContent="flexEnd"
-      data-test-subj="osdDocTablePagination"
+      data-test-subj={dataTestSubj}
     >
-      {endItem >= sampleSize && (
+      {sampleSize !== undefined && endItem >= sampleSize && (
         <EuiFlexItem grow={false} data-test-subj="osdPaginationLimitsHitMessage">
           <EuiTextColor color="subdued">
             <FormattedMessage

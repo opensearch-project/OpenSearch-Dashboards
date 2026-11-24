@@ -24,8 +24,6 @@ import {
   ExploreFlavor,
   EXPLORE_DEFAULT_LANGUAGE,
 } from '../../../../../common';
-import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
-import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
@@ -366,18 +364,6 @@ const getPreloadedQueryEditorState = async (
   services: ExploreServices,
   queryState?: QueryState
 ): Promise<QueryEditorSliceState> => {
-  let promptModeIsAvailable = false;
-  let summaryAgentIsAvailable = false;
-  if (queryState?.dataset) {
-    const results = await Promise.allSettled([
-      getPromptModeIsAvailable(services),
-      getSummaryAgentIsAvailable(services, queryState.dataset.dataSource?.id ?? ''),
-    ]);
-
-    promptModeIsAvailable = results[0].status === 'fulfilled' ? Boolean(results[0].value) : false;
-    summaryAgentIsAvailable = results[1].status === 'fulfilled' ? Boolean(results[1].value) : false;
-  }
-
   // @ts-expect-error TS2741 TODO(ts-error): fixme
   return {
     queryStatusMap: {},
@@ -387,11 +373,12 @@ const getPreloadedQueryEditorState = async (
       startTime: undefined,
       error: undefined,
     },
-    promptModeIsAvailable,
+    // The AI availability probes run in the background after the store is created.
+    promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
     editorMode: DEFAULT_EDITOR_MODE,
     lastExecutedTranslatedQuery: '',
-    summaryAgentIsAvailable,
+    summaryAgentIsAvailable: false,
     lastExecutedPrompt: '',
     queryExecutionButtonStatus: 'REFRESH',
     isQueryEditorDirty: false,
