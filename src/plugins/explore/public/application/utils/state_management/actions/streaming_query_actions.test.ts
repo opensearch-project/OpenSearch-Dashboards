@@ -341,6 +341,42 @@ describe('executeStreamingQuery', () => {
     expect(results[results.length - 1].results.hits.total).toBe(270588);
   });
 
+  const histogramSnapshot = (status: string, datarows: unknown[][]) => ({
+    id: 'job-1',
+    status,
+    schema: [
+      { name: 'count()', type: 'bigint' },
+      { name: 'span(`@timestamp`,1h)', type: 'timestamp' },
+    ],
+    datarows,
+    size: datarows.length,
+    total: datarows.length,
+  });
+
+  // At the start of a run, an empty set would blank the previous run's chart.
+  it('does not publish an empty bucket set before any bucket is shown', async () => {
+    mockSubmit.mockResolvedValue(histogramSnapshot('RUNNING', []));
+    mockPoll
+      .mockResolvedValueOnce(histogramSnapshot('RUNNING', []))
+      .mockResolvedValueOnce(histogramSnapshot('SUCCEEDED', [[5, '2026-09-14 19:00:00']]));
+
+    const { results } = await run({ asHistogram: { aggId: '2' } });
+
+    expect(results.map((r) => r.results.aggregations['2'].buckets.length)).toEqual([1]);
+  });
+
+  // The backend drops a query's buckets when it falls back to the legacy engine.
+  it('clears the buckets shown when a running snapshot drops them', async () => {
+    mockSubmit.mockResolvedValue(histogramSnapshot('RUNNING', [[5, '2026-09-14 19:00:00']]));
+    mockPoll
+      .mockResolvedValueOnce(histogramSnapshot('RUNNING', []))
+      .mockResolvedValueOnce(histogramSnapshot('SUCCEEDED', [[7, '2026-09-14 19:00:00']]));
+
+    const { results } = await run({ asHistogram: { aggId: '2' } });
+
+    expect(results.map((r) => r.results.aggregations['2'].buckets.length)).toEqual([1, 0, 1]);
+  });
+
   it('leaves aggregations alone when no histogram is configured', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
@@ -349,8 +385,10 @@ describe('executeStreamingQuery', () => {
     expect(results[results.length - 1].results.aggregations).toBeUndefined();
   });
 
-  it('marks the result incomplete when the job has expired, rather than finished', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+  it('marks the result incomplete when the job is lost after rows are shown', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
 
     const { statuses } = await run();
@@ -359,6 +397,16 @@ describe('executeStreamingQuery', () => {
     expect(final.status).toBe('ready');
     expect(final.streaming).toMatchObject({ isPolling: false, interrupted: true });
     expect(final.streaming?.aborted).toBe(false);
+  });
+
+  it('falls back when the job is lost before any row is shown, without releasing it', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
+
+    const { action } = await run();
+
+    expect(isStreamUnavailable(action)).toBe(true);
+    expect(mockCancel).not.toHaveBeenCalled();
   });
 
   it('stays LOADING while polling and marks isPolling so partial rows are still rendered', async () => {
@@ -707,7 +755,9 @@ describe('executeStreamingQuery', () => {
 
   // A malformed response or a bug of ours has no status either, but fails the same way on retry.
   it('does not retry an error that never reached the network layer', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
 
     const { statuses } = await run();
@@ -717,7 +767,9 @@ describe('executeStreamingQuery', () => {
   });
 
   it('does not retry a client error, which would fail again', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue({ response: { status: 400 } });
 
     const { statuses } = await run();
@@ -797,6 +849,26 @@ describe('executeStreamingQuery', () => {
 
       expect(isStreamUnavailable(action)).toBe(true);
       expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    });
+
+    // A user allowed to submit but not to fetch gets a job id, then 403 on every poll.
+    it('falls back when polling is refused before any row is shown', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockRejectedValue({ response: { status: 403 }, body: { statusCode: 403 } });
+
+      const { action } = await run();
+
+      expect(isStreamUnavailable(action)).toBe(true);
+      expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+    });
+
+    it('falls back when a histogram job fails before any bucket is shown', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockRejectedValue({ response: { status: 403 }, body: { statusCode: 403 } });
+
+      const { action } = await run({ asHistogram: { aggId: '2' } });
+
+      expect(isStreamUnavailable(action)).toBe(true);
     });
 
     // A superseded run must stay silent: its successor owns the cache key.

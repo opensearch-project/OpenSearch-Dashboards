@@ -84,13 +84,13 @@ export const snapshotRowsToObjects = (
 
 export interface SnapshotToSearchResultArgs {
   snapshot: PPLStreamSnapshot;
-  /** Rows held by the client, which may span more snapshots than `snapshot.datarows`. */
+  /** Rows held by the client: the snapshot's rows up to the held-row cap. */
   rows: Array<Record<string, unknown>>;
   indexName?: string;
   elapsedMs: number;
   /**
    * Distinguishes one generation of rows from the next, so synthesised `_id`s stay stable while rows
-   * append but change when a REPLACE snapshot supersedes them.
+   * are added but change when a snapshot's rows are not an extension of the held ones.
    */
   rowGeneration?: number;
   /** Per-row search highlights, positionally aligned with `rows`. */
@@ -118,11 +118,12 @@ export const snapshotToSearchResult = ({
   highlights,
 }: SnapshotToSearchResultArgs): ISearchResult => {
   const result = {
-    took: snapshot.took ?? elapsedMs,
+    // The API reports no execution time, so this is measured from submit.
+    took: elapsedMs,
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
-      // The accumulator size, not `rows.length`: report how many rows exist, show a window.
+      // The engine's count, not `rows.length`, which stops at the held-row cap.
       total: totalOverride ?? snapshot.total ?? rows.length,
       max_score: 0,
       // PPL hits carry no document id and the table falls back to row position as its React key,

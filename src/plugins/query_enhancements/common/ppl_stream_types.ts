@@ -36,15 +36,17 @@ export interface PPLStreamSnapshot {
   /** Absent on a result that finished within the submit wait, which uses the synchronous body. */
   status?: PPLStreamStatus;
   progress?: PPLStreamProgress;
-  schema: Array<{ name: string; type: string }>;
-  /** Every row found so far: each response replaces the previous one, it is not an increment. */
-  datarows: unknown[][];
-  size: number;
-  total: number;
-  /** Total execution time, terminal snapshots only. */
-  took?: number;
+  /**
+   * Every row found so far: each response replaces the previous one, it is not an increment.
+   * Absent, with `size` and `total`, on FAILED and CANCELLED bodies.
+   */
+  schema?: Array<{ name: string; type: string }>;
+  datarows?: unknown[][];
+  size?: number;
+  total?: number;
   error?: PPLStreamError;
-  warnings?: Array<{ message: string; detail?: string }>;
+  /** Same shape as the synchronous response's, so the results banner titles them by `type`. */
+  warnings?: Array<{ type: string; message: string; detail?: string }>;
   /** Requested with `profile: true`; `thread_pool` tells the UI it ran on the complex pool. */
   profile?: { thread_pool?: string };
 }

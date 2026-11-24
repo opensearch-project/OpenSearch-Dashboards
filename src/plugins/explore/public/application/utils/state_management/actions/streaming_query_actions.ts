@@ -121,6 +121,7 @@ export const executeStreamingQuery = createAsyncThunk<
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;
     let firstRowsReported = false;
+    let bucketsShown = false;
 
     const publish = (snapshot: PPLStreamSnapshot, isPolling: boolean) => {
       if (isCurrent && !isCurrent()) return;
@@ -128,8 +129,11 @@ export const executeStreamingQuery = createAsyncThunk<
 
       if (asHistogram) {
         const buckets = snapshotToHistogramBuckets(snapshot);
-        // Publishing an empty bucket set would blank a chart that already has data.
-        if (buckets.length > 0) {
+        // An empty bucket set is published only to clear buckets this run showed, which the backend
+        // drops when a query falls back to the legacy engine. Before then it would blank the
+        // previous run's chart.
+        if (buckets.length > 0 || bucketsShown) {
+          bucketsShown = buckets.length > 0;
           dispatch(
             setResults({
               cacheKey,
@@ -330,7 +334,7 @@ export const executeStreamingQuery = createAsyncThunk<
           return;
         }
 
-        // FAILED and CANCELLED bodies carry no rows, so only the snapshots past them are absorbed.
+        // Absorbed only after the FAILED and CANCELLED checks, since those bodies carry no rows.
         if (!asHistogram) rows.absorb(snapshot);
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
         publish(snapshot, !terminal);
@@ -350,17 +354,20 @@ export const executeStreamingQuery = createAsyncThunk<
         finalise(true);
         return;
       }
+      // When nothing is on screen, the caller can re-run on the non-streaming path instead of showing
+      // a failure. A job can publish snapshots without rows for a while, e.g. a sort that returns
+      // rows only at the end, or a user allowed to submit but not to fetch (403 on every poll).
+      const onScreen = asHistogram ? bucketsShown : rows.heldRows.length > 0;
+      const canFallBack = !onScreen && (!isCurrent || isCurrent());
       if (error instanceof PPLStreamJobNotFoundError) {
-        // Expired or lost with its node: the query did not finish.
+        // Lost with its node, since `keep_alive` only starts once a job finishes. Already gone, so
+        // there is nothing to release.
+        if (canFallBack) throw new PPLStreamUnavailableError(error);
         finalise(false, true);
         return;
       }
       release();
-      // Nothing reached the screen, so the caller can re-run on the non-streaming path instead of
-      // showing a failure. `lastStreaming` is only set by `publish`, so it doubles as "rendered".
-      if (!lastStreaming && (!isCurrent || isCurrent())) {
-        throw new PPLStreamUnavailableError(error);
-      }
+      if (canFallBack) throw new PPLStreamUnavailableError(error);
       // Re-running would replace the rows on screen, so keep them and mark the result incomplete.
       // eslint-disable-next-line no-console
       console.warn('[STREAMING] Polling failed; keeping the rows already shown:', error);

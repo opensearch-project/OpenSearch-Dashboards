@@ -28,7 +28,7 @@ export interface HistogramBucket {
 }
 
 /** Identifies the bucket column by schema type, falling back to the non-numeric column. */
-const findBucketColumnIndex = (schema: PPLStreamSnapshot['schema']): number => {
+const findBucketColumnIndex = (schema: NonNullable<PPLStreamSnapshot['schema']>): number => {
   const byType = schema.findIndex((column) => /timestamp|date/i.test(column.type ?? ''));
   if (byType >= 0) return byType;
   const bySpan = schema.findIndex((column) => /span\s*\(/i.test(column.name ?? ''));

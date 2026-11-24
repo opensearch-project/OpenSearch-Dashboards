@@ -53,8 +53,8 @@ export interface StreamingQueryStatus {
   /** Rows the client holds and renders: `total`, up to the held-row cap. */
   rowsFetched: number;
   /**
-   * `0`–`1`, or `-1` when unknown. Only populated for queries with an explicit `head`; clamped to
-   * the maximum seen so a bar cannot move backwards.
+   * `0`–`1`, or `-1` when unknown: the backend's estimate from the index scans it has completed,
+   * clamped to the maximum seen so a bar cannot move backwards.
    */
   fractionDone: number;
   isPolling: boolean;
