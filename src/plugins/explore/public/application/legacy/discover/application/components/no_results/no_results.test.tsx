@@ -119,3 +119,66 @@ describe('DiscoverNoResults PromQL branch', () => {
     expect(screen.queryByText('Sample PromQL queries')).not.toBeInTheDocument();
   });
 });
+
+describe('DiscoverNoResults sample queries', () => {
+  const languageSamples = [{ title: 'Language sample', query: 'language query' }];
+
+  const makeSampleDeps = (getSampleQueries?: jest.Mock) => {
+    const { queryString, savedQuery } = makeDeps();
+    queryString.getLanguageService.mockReturnValue({
+      getLanguage: () => ({ sampleQueries: languageSamples }),
+    });
+    queryString.getDatasetService.mockReturnValue({
+      getType: () => (getSampleQueries ? { getSampleQueries } : {}),
+    });
+    return { queryString, savedQuery };
+  };
+
+  const renderWith = (deps: ReturnType<typeof makeDeps>) =>
+    render(
+      <DiscoverNoResults
+        queryString={deps.queryString}
+        savedQuery={deps.savedQuery}
+        query={
+          {
+            query: 'no match',
+            language: 'MY_LANGUAGE',
+            dataset: { id: 'd', title: 'd', type: 'MY_TYPE' },
+          } as any
+        }
+      />
+    );
+
+  it("shows the language's samples when the dataset type has none", async () => {
+    renderWith(makeSampleDeps());
+
+    expect(await screen.findByText('Sample Queries')).toBeInTheDocument();
+    expect(screen.getByText('Language sample')).toBeInTheDocument();
+    expect(screen.getByText('language query')).toBeInTheDocument();
+  });
+
+  it("lists the dataset type's samples before the language's", async () => {
+    const getSampleQueries = jest
+      .fn()
+      .mockReturnValue([{ title: 'Dataset sample', query: 'dataset query' }]);
+    renderWith(makeSampleDeps(getSampleQueries));
+
+    expect(await screen.findByText('Dataset sample')).toBeInTheDocument();
+    expect(getSampleQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'MY_TYPE' }),
+      'MY_LANGUAGE'
+    );
+    const titles = screen.getAllByText(/^(Dataset|Language) sample$/).map((el) => el.textContent);
+    expect(titles).toEqual(['Dataset sample', 'Language sample']);
+  });
+
+  it("adds the dataset type's asynchronous samples to the language's", async () => {
+    const getSampleQueries = jest
+      .fn()
+      .mockResolvedValue([{ title: 'Async dataset sample', query: 'async query' }]);
+    renderWith(makeSampleDeps(getSampleQueries));
+
+    expect(await screen.findByText('Async dataset sample')).toBeInTheDocument();
+    expect(screen.getByText('Language sample')).toBeInTheDocument();
+  });
+});

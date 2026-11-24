@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { LogsDrilldownPage } from './logs_drilldown_page';
 
@@ -139,12 +139,21 @@ const makeUrlStateStorage = (
     store,
   };
 };
-const makeServices = (urlStateStorage?: any, { mds = false }: { mds?: boolean } = {}) =>
+const navigateToApp = jest.fn();
+const makeServices = (
+  urlStateStorage?: any,
+  {
+    mds = false,
+    dataSourceTotal = 1,
+    isDashboardAdmin,
+  }: { mds?: boolean; dataSourceTotal?: number; isDashboardAdmin?: boolean } = {}
+) =>
   ({
     chrome: { setBreadcrumbs: jest.fn() },
+    core: { application: { navigateToApp, capabilities: { dashboards: { isDashboardAdmin } } } },
     // MDS on: the data source picker exists, and the OpenSearch list waits for it to resolve.
     dataSourceManagement: mds ? { ui: { DataSourceSelector: () => null } } : undefined,
-    savedObjects: { client: { find: jest.fn().mockResolvedValue({ total: 1 }) } },
+    savedObjects: { client: { find: jest.fn().mockResolvedValue({ total: dataSourceTotal }) } },
     uiSettings: { get: jest.fn() },
     osdUrlStateStorage: urlStateStorage,
     data: {
@@ -380,5 +389,52 @@ describe('LogsDrilldownPage source types', () => {
     expect(url.store._a.dataSource).toEqual({ id: 'ds-1', title: 'one' });
     expect(url.store._a.sourceType).toBeUndefined();
     expect(screen.getByTestId('mock-rows-view')).toBeInTheDocument();
+  });
+
+  describe('when the workspace has no OpenSearch data sources', () => {
+    const renderEmpty = (isDashboardAdmin?: boolean) =>
+      render(
+        <LogsDrilldownPage
+          services={makeServices(undefined, { mds: true, dataSourceTotal: 0, isDashboardAdmin })}
+        />
+      );
+
+    it('with other source types, says OpenSearch has none and points to the Source picker', async () => {
+      renderEmpty(true);
+      expect(await screen.findByText('No OpenSearch data sources available')).toBeInTheDocument();
+      expect(screen.getByText(/Choose another type in the Source picker/)).toBeInTheDocument();
+      expect(screen.getByTestId('mock-source-type-control')).toBeInTheDocument();
+      expect(screen.getByTestId('logsDrilldownAssociateDataSource')).toHaveTextContent(
+        'Associate an OpenSearch data source'
+      );
+      // It doesn't offer another source itself: that source's own page says whether it works.
+      expect(screen.queryByTestId(/logsDrilldownExploreSource-/)).not.toBeInTheDocument();
+    });
+
+    it('with other source types, asks a non-admin to contact an administrator', async () => {
+      renderEmpty(false);
+      expect(
+        await screen.findByText(/or ask a workspace administrator to associate an OpenSearch/)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownAssociateDataSource')).not.toBeInTheDocument();
+    });
+
+    it('with no other source types, says there are no data sources at all', async () => {
+      mockRegistered = [mockOpenSearch, mockSourceWithoutDrilldown];
+      renderEmpty(true);
+      expect(await screen.findByText('No data sources available')).toBeInTheDocument();
+      expect(screen.getByText(/Associate a data source to explore/)).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('logsDrilldownAssociateDataSource'));
+      expect(navigateToApp).toHaveBeenCalledWith('dataSources');
+    });
+
+    it('with no other source types, asks a non-admin to contact an administrator', async () => {
+      mockRegistered = [mockOpenSearch, mockSourceWithoutDrilldown];
+      renderEmpty(false);
+      expect(
+        await screen.findByText(/Ask a workspace administrator to associate one/)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('logsDrilldownAssociateDataSource')).not.toBeInTheDocument();
+    });
   });
 });

@@ -112,4 +112,23 @@ describe('SaveVisModal', () => {
       expect(screen.getByTestId('titleDuplicateWarnMsg')).toBeInTheDocument();
     });
   });
+
+  it("says that the editor's unrun edits won't be saved", () => {
+    render(
+      <SaveVisModal
+        savedExploreId={undefined}
+        onConfirm={mockOnConfirm}
+        onCancel={mockOnCancel}
+        unrunQueryEdit={{ savedQuery: 'stats count()', editorQuery: 'fields @message' }}
+      />
+    );
+    expect(screen.getByTestId('unrunQueryEditCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('unrunQueryEditSavedQuery')).toHaveTextContent('stats count()');
+    expect(screen.getByTestId('unrunQueryEditEditorQuery')).toHaveTextContent('fields @message');
+  });
+
+  it('shows no unrun-edit warning without unrun edits', () => {
+    renderModal();
+    expect(screen.queryByTestId('unrunQueryEditCallout')).toBeNull();
+  });
 });

@@ -966,13 +966,16 @@ export class ExplorePlugin implements Plugin<
     }
 
     // Create saved explore loader so tool can use it
-    const savedExploreLoader = createSavedExploreLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: plugins.data.indexPatterns,
-      search: plugins.data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
+    const savedExploreLoader = createSavedExploreLoader(
+      {
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: plugins.data.indexPatterns,
+        search: plugins.data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      },
+      (type) => plugins.data.query.queryString.getDatasetService().getType(type)
+    );
 
     // Register disabled execute_ppl_query action as placeholder
     // This will be overridden when query panel mounts and restored when it unmounts

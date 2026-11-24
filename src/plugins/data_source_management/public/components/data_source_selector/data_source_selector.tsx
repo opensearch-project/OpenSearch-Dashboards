@@ -27,6 +27,13 @@ import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
 
+// The selector lists OpenSearch-type data sources only, so say that rather than "no connected
+// data source": a workspace can have other kinds of data connected.
+const getNoDataSourceWarning = () =>
+  i18n.translate('dataSourcesManagement.dataSourceSelector.noOpenSearchDataSource', {
+    defaultMessage: 'No OpenSearch data sources available.',
+  });
+
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSourcesManagement.localCluster', {
     defaultMessage: 'Local cluster',
@@ -129,7 +136,7 @@ export class DataSourceSelector extends React.Component<
 
     // No active option, did not find valid option
     if (selectedDataSource.length === 0) {
-      this.props.notifications.addWarning('No connected data source available.');
+      this.props.notifications.addWarning(getNoDataSourceWarning());
       this.onSelectedDataSource([]);
       return;
     }
@@ -170,7 +177,7 @@ export class DataSourceSelector extends React.Component<
 
       // 4. Error state if filter filters out everything
       if (!dataSourceOptions.length) {
-        this.props.notifications.addWarning('No connected data source available.');
+        this.props.notifications.addWarning(getNoDataSourceWarning());
         this.onSelectedDataSource([]);
         return;
       }

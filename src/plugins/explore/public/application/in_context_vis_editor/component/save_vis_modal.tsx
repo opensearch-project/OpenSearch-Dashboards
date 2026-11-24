@@ -24,6 +24,7 @@ import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 
 import { SavedExplore } from '../../../saved_explore';
 import { ComplexQueryWarningCallout } from '../../../helpers/complex_query_warning';
+import { UnrunQueryEdit, UnrunQueryEditCallout } from '../../../helpers/unrun_query_edit';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -38,6 +39,8 @@ interface SaveVisModalProps {
   savedExploreId: string | undefined;
   initialTitle?: string;
   showComplexQueryWarning?: boolean;
+  /** The editor's unrun edits, which the save doesn't store. */
+  unrunQueryEdit?: UnrunQueryEdit;
 }
 
 export const SaveVisModal: React.FC<SaveVisModalProps> = ({
@@ -46,6 +49,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
   onConfirm,
   onCancel,
   showComplexQueryWarning,
+  unrunQueryEdit,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -124,6 +128,12 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
           alignItems="flexStart"
           gutterSize="s"
         >
+          {unrunQueryEdit && (
+            <EuiFlexItem style={{ width: '100%' }}>
+              <UnrunQueryEditCallout edit={unrunQueryEdit} objectType="visualization" />
+            </EuiFlexItem>
+          )}
+
           {showComplexQueryWarning && (
             <EuiFlexItem style={{ width: '100%' }}>
               <ComplexQueryWarningCallout />

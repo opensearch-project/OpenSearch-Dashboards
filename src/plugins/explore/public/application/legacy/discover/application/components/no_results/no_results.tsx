@@ -203,6 +203,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         newSampleQueries.push(...languageSampleQueries);
       }
     }
+    // Shown on their own unless the dataset type adds its samples below (a language can define
+    // samples while its dataset type defines none).
+    setSampleQueries(newSampleQueries);
 
     // Samples for the dataset type
     if (query?.dataset?.type) {

@@ -15,7 +15,6 @@ import {
   TimeRange,
   FilterManager,
   getTime,
-  Query,
   UI_SETTINGS,
   IFieldType,
 } from '../../../data/public';
@@ -42,7 +41,7 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
+import { SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -112,7 +111,6 @@ export interface SearchProps {
   styleOptions?: StyleOptions;
   variables?: VariableValue[];
   axisColumnMappings?: AxisColumnMappings;
-  displayTimeColumn: boolean;
   title: string;
   columns?: string[];
   onSort?: (sort: SortOrder[]) => void;
@@ -184,10 +182,10 @@ export class ExploreEmbeddable
   private panelTitle: string = '';
   private filterManager: FilterManager;
   private services: ExploreServices;
-  private prevState = {
-    filters: undefined as Filter[] | undefined,
-    query: undefined as Query | undefined,
-    timeRange: undefined as TimeRange | undefined,
+  // The inputs of the last fetch, undefined until the first one.
+  private prevState?: {
+    filters: Filter[] | undefined;
+    timeRange: TimeRange | undefined;
   };
   private node?: HTMLElement;
   private root?: Root;
@@ -398,7 +396,6 @@ export class ExploreEmbeddable
       services: this.services,
       indexPattern,
       isLoading: false,
-      displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
       variables: this.interpolationService.getVariables(),
     };
@@ -534,11 +531,13 @@ export class ExploreEmbeddable
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
-    const { filters, query, timeRange } = this.input;
+    const { filters, timeRange } = this.input;
+    // The dashboard's query (DQL or Lucene) is not compared: the panel runs its own query, which
+    // the dashboard query can't be combined with, so a change to it alone returns the same rows.
     const fetchRequested =
       force ||
+      !this.prevState ||
       !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-      !isEqual(query, this.prevState.query) ||
       !isEqual(timeRange, this.prevState.timeRange);
 
     // Pause fetching while not visible (e.g. a collapsed section). Owe a fetch
@@ -562,7 +561,7 @@ export class ExploreEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
 
     if (needFetch) {
-      this.prevState = { filters, query, timeRange };
+      this.prevState = { filters, timeRange };
       this.searchProps = searchProps;
 
       // Apply dashboard filters to the SearchSource (same as PPL)

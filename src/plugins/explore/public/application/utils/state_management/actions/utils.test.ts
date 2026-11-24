@@ -168,6 +168,9 @@ describe('Utils - Histogram Breakdown Support', () => {
       // Unlike queryIsBucketCountable, timewrap is still an aggregation: its running values change as
       // an async scan proceeds, so its partial results must not stream.
       'source=logs | timechart span=1h count() | timewrap 1d',
+      // Languages whose query can start with a command.
+      'stats count(*) by host',
+      '\n  stats count(*) by host',
     ])('treats %s as an aggregation', (query) => {
       expect(utils.queryIsAggregation(query)).toBe(true);
     });
@@ -179,6 +182,7 @@ describe('Utils - Histogram Breakdown Support', () => {
       'source=logs | patterns message mode=label',
       "source=logs | where msg = '| timewrap 1d'",
       'source=logs | where id in [source=other | stats count()]',
+      "filter msg = 'stats count()'",
       '',
     ])('does not treat %s as an aggregation', (query) => {
       expect(utils.queryIsAggregation(query)).toBe(false);

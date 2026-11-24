@@ -177,16 +177,19 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
   dataset: DataView
 ): ProcessedSearchResults => {
-  const fieldCounts: Record<string, number> = {};
+  // Mapped field names can collide with Object.prototype members.
+  const fieldCounts: Record<string, number> = Object.create(null);
   // Counts only occurrences that carry an actual value. Tabular responses (e.g. PPL)
   // include every field of the schema on every row, with null for the ones a document
   // doesn't populate, so fieldCounts alone can't tell a populated field from an empty
   // one. Kept separate from fieldCounts because the fields sidebar relies on the
   // latter's "present in the response" meaning.
-  const nonEmptyFieldCounts: Record<string, number> = {};
+  const nonEmptyFieldCounts: Record<string, number> = Object.create(null);
   if (rawResults.hits && rawResults.hits.hits && dataset) {
+    const flattenedHits: Array<Record<string, unknown>> = [];
     for (const hit of rawResults.hits.hits) {
       const flattened = dataset.flattenHit(hit);
+      flattenedHits.push(flattened);
       for (const fieldName of Object.keys(flattened)) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
         if (hasFieldValue(flattened[fieldName])) {
@@ -196,7 +199,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
     }
 
     // Update topAggValues for valid fields when we have search results
-    updateFieldTopQueryValues(rawResults.hits.hits, dataset);
+    updateFieldTopQueryValues(rawResults.hits.hits, dataset, flattenedHits, nonEmptyFieldCounts);
   }
 
   const result: ProcessedSearchResults = {
@@ -220,16 +223,23 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
  * Updates topAggValues for string fields based on search results
  * This removes the cold start issue in autocomplete
  */
-const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
+const updateFieldTopQueryValues = (
+  hits: ISearchResult['hits']['hits'],
+  dataset: DataView,
+  flattenedHits: Array<Record<string, unknown>>,
+  nonEmptyFieldCounts: Record<string, number>
+): void => {
   if (!hits.length || !dataset) return;
 
   // Get string fields that don't already have topQueryValues
   const stringFields = dataset.fields.filter(
     (field) =>
-      field.isSuggestionAvailable() && !field.subType && !field.spec?.suggestions?.topValues
+      nonEmptyFieldCounts[field.name] > 0 &&
+      field.isSuggestionAvailable() &&
+      !field.subType &&
+      !field.spec?.suggestions?.topValues
   );
 
-  // Limit to prevent performance issues
   const fieldUpdates: Array<{ field: IndexPatternField; topValues: string[] }> = [];
 
   // Gather field values for all fields first
@@ -237,6 +247,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
     try {
       const result = getFieldValueCounts({
         hits,
+        flattenedHits,
         field: field as any,
         dataSet: dataset, // DataView extends IndexPattern
         count: 5,

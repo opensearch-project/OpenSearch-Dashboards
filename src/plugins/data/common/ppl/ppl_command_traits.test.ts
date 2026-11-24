@@ -67,6 +67,43 @@ describe('buildPPLCommandRegex', () => {
     expect(regex.test('source=x | where topic = 1')).toBe(false);
   });
 
+  it('matches a command that starts the query, for languages without a source clause', () => {
+    const regex = buildPPLCommandRegex(['stats']);
+    expect(regex.test('stats count(*) by host')).toBe(true);
+    expect(regex.test('\n  STATS count(*)')).toBe(true);
+    expect(regex.test('statsfield = 1')).toBe(false);
+    expect(regex.test('fields stats')).toBe(false);
+  });
+
+  it('does not match a leading field of the same name used in a search expression', () => {
+    // Explore runs editor text without a source clause as `source = <dataset> <text>`, so these
+    // are filters on a field, not commands.
+    const regex = buildPPLCommandRegex(['stats', 'top', 'table', 'timechart']);
+    expect(regex.test('top > 10')).toBe(false);
+    expect(regex.test('stats = 1')).toBe(false);
+    expect(regex.test("table = 'orders'")).toBe(false);
+    expect(regex.test('top<=10')).toBe(false);
+    // A field path, or a field before `in`, `like` or `is`.
+    expect(regex.test("table.name = 'checkout'")).toBe(false);
+    expect(regex.test('top[0] > 1')).toBe(false);
+    expect(regex.test('top in (1, 2)')).toBe(false);
+    expect(regex.test("table like 'orders%'")).toBe(false);
+    expect(regex.test('stats is null')).toBe(false);
+    // Still commands.
+    expect(regex.test('timechart span=1d count()')).toBe(true);
+    expect(regex.test('top 5 host')).toBe(true);
+    expect(regex.test('stats count(*) by host')).toBe(true);
+    expect(regex.test('table a, b')).toBe(true);
+    expect(regex.test('source=x | top 5 host')).toBe(true);
+  });
+
+  it('with toEnd, does not match a command that starts the query', () => {
+    // Cutting there would leave an empty query.
+    expect(buildPPLCommandRegex(['stats'], { toEnd: true }).test('stats count(*) by host')).toBe(
+      false
+    );
+  });
+
   it('with toEnd, matches from the whitespace before the pipe to the end', () => {
     const query = 'source=x | where a > 1  | stats count()\n| head 5';
     const match = query.match(buildPPLCommandRegex(['stats'], { toEnd: true }));

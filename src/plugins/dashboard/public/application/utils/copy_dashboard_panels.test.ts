@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { cloneDeep } from 'lodash';
 import {
   copyDashboardPanels,
   isPanelTitleTemplateValid,
@@ -12,7 +13,9 @@ import {
 const panel = (panelIndex: string, id?: string, type = 'visualization') =>
   ({ panelIndex, id, type, gridData: { x: 0, y: 0, w: 1, h: 1, i: panelIndex } }) as any;
 
-const createClient = () => ({
+const createClient = (
+  attributesOf = (id: string): Record<string, unknown> => ({ title: `T-${id}` })
+) => ({
   bulkGet: jest.fn(async (objects: Array<{ type: string; id: string }>) => ({
     savedObjects: objects.map(({ type, id }) =>
       id.startsWith('missing')
@@ -20,7 +23,7 @@ const createClient = () => ({
         : {
             type,
             id,
-            attributes: { title: `T-${id}` },
+            attributes: attributesOf(id),
             references: [{ id: 'ip' }],
             migrationVersion: { visualization: '7.10.0' },
           }
@@ -70,6 +73,100 @@ describe('copyDashboardPanels', () => {
     expect(result.panels[0].id).toBe('new-T-a (copy)');
     expect(result.panels[1].id).toBeUndefined();
     expect(result.failures).toEqual([]);
+  });
+
+  it('applies the template to custom panel titles of copied panels only', async () => {
+    const client = createClient();
+    const result = await copyDashboardPanels(
+      client as any,
+      [
+        { ...panel('1', 'a'), title: 'Custom A' },
+        { ...panel('2', 'a'), title: 'Custom B' },
+        { ...panel('3', 'a'), title: '' },
+        { ...panel('4', 'missing'), title: 'Custom M' },
+      ],
+      options
+    );
+    expect(result.panels.map((p) => p.title)).toEqual([
+      'Custom A (copy)',
+      'Custom B (copy)',
+      '',
+      'Custom M',
+    ]);
+  });
+
+  it('applies the template to a custom title kept in embeddableConfig', async () => {
+    const client = createClient();
+    const panels = [
+      { ...panel('1', 'a'), embeddableConfig: { title: 'Old', hidePanelTitles: false } },
+      { ...panel('2', 'a'), title: 'Top', embeddableConfig: { title: 'Config' } },
+      { ...panel('3', 'missing'), embeddableConfig: { title: 'Kept' } },
+    ];
+    const before = cloneDeep(panels);
+    const result = await copyDashboardPanels(client as any, panels, options);
+
+    expect(result.panels[0].embeddableConfig).toEqual({
+      title: 'Old (copy)',
+      hidePanelTitles: false,
+    });
+    expect(result.panels[1].title).toBe('Top (copy)');
+    expect(result.panels[1].embeddableConfig).toEqual({ title: 'Config (copy)' });
+    expect(result.panels[2]).toEqual(before[2]);
+    expect(panels).toEqual(before);
+  });
+
+  it('applies the template to the chart title of an explore object only', async () => {
+    const vis = (title: string) => JSON.stringify({ title, chartType: 'line' });
+    const visById: Record<string, string> = {
+      e1: vis('Chart'),
+      e2: vis(''),
+      e3: '{bad',
+      e4: 'null',
+      e5: '[]',
+      e6: '5',
+      v1: vis('Chart'),
+    };
+    const client = createClient((id) => ({ title: `T-${id}`, visualization: visById[id] }));
+    await copyDashboardPanels(
+      client as any,
+      [
+        ...['e1', 'e2', 'e3', 'e4', 'e5', 'e6'].map((id) => panel(id, id, 'explore')),
+        panel('v1', 'v1', 'visualization'),
+      ],
+      options
+    );
+    const created = client.bulkCreate.mock.calls[0][0].map((o: any) => o.attributes);
+    expect(created[0]).toEqual({ title: 'T-e1 (copy)', visualization: vis('Chart (copy)') });
+    expect(created.slice(1).map((a: any) => a.visualization)).toEqual([
+      vis(''),
+      '{bad',
+      'null',
+      '[]',
+      '5',
+      vis('Chart'),
+    ]);
+  });
+
+  it('names failed panels by their custom title when they have one', async () => {
+    const client = createClient();
+    const result = await copyDashboardPanels(
+      client as any,
+      [
+        { ...panel('1', 'missing'), title: 'My panel' },
+        { ...panel('2', 'bad'), embeddableConfig: { title: 'Legacy' } },
+        { ...panel('3', 'missing2'), title: '' },
+        { ...panel('4', 'missing3'), title: 'Top', embeddableConfig: { title: 'Shown' } },
+        { ...panel('5', 'missing4'), title: 'Hidden', embeddableConfig: { title: '' } },
+      ],
+      options
+    );
+    expect(result.failures).toEqual([
+      'My panel',
+      'Legacy',
+      'visualization:missing2',
+      'Shown',
+      'visualization:missing4',
+    ]);
   });
 
   it('copies an object once when several panels share it', async () => {

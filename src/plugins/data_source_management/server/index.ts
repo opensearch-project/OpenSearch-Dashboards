@@ -15,6 +15,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    directQuerySyncEnabled: true,
+  },
   schema: configSchema,
 };
 

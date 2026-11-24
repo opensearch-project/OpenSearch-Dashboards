@@ -15,8 +15,23 @@ import {
 import { DataTable } from '../components/data_table/data_table';
 import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
-import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
+import { processDisplayedColumns } from '../helpers/use_displayed_columns';
 import { SAMPLE_SIZE_SETTING } from '../../common';
+
+/** How many rows carry each field, as Discover counts them for its fields list. */
+const getFieldCounts = (rows: any[], indexPattern: NonNullable<SearchProps['indexPattern']>) => {
+  const fieldCounts: Record<string, number> = {};
+  for (const row of rows) {
+    const flattened =
+      typeof indexPattern.flattenHit === 'function'
+        ? indexPattern.flattenHit(row)
+        : (row?._source ?? {});
+    for (const fieldName of Object.keys(flattened)) {
+      fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+    }
+  }
+  return fieldCounts;
+};
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
@@ -28,18 +43,22 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
   // Get docViewsRegistry for DataTable
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
 
-  // Convert columns to LegacyDisplayedColumn format for DataTable
+  // Process the saved columns the way Discover's table does: drop columns that neither the
+  // dataset nor the returned rows have, falling back to _source, so a panel never shows only "-".
+  // The embeddable updates one searchProps object in place and renders it again, so the memo
+  // depends on the fields it reads, not on the object.
+  const { columns, indexPattern, rows } = searchProps;
   const displayedColumns = useMemo(() => {
-    if (!searchProps.columns || !searchProps.indexPattern) {
+    if (!columns || !indexPattern) {
       return [];
     }
-    return getLegacyDisplayedColumns(
-      searchProps.columns,
-      searchProps.indexPattern,
-      !searchProps.displayTimeColumn,
-      false // isShortDots
+    return processDisplayedColumns(
+      columns,
+      indexPattern,
+      services.uiSettings,
+      rows?.length ? { fieldCounts: getFieldCounts(rows, indexPattern) } : undefined
     );
-  }, [searchProps.columns, searchProps.indexPattern, searchProps.displayTimeColumn]);
+  }, [columns, indexPattern, rows, services.uiSettings]);
 
   // Get sample size from UI settings
   const sampleSize = services.uiSettings.get(SAMPLE_SIZE_SETTING);

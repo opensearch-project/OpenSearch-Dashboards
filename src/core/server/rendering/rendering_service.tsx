@@ -31,11 +31,13 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@osd/i18n';
+import { pick } from '@osd/std';
 import { Agent as HttpsAgent } from 'https';
 
 import Axios from 'axios';
 
-import { UiPlugins } from '../plugins';
+import { DiscoveredPlugin, UiPlugins } from '../plugins';
+import { ConfigIdentifier, InternalDynamicConfigServiceStart } from '../config';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
@@ -135,15 +137,12 @@ export class RenderingService {
               [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
                 plugin,
-                // TODO Scope the client so that only exposedToBrowser configs are exposed
-                config: this.coreContext.dynamicConfigService.hasDefaultConfigs({ name: id })
-                  ? await dynamicConfigStartServices.getClient().getConfig(
-                      { name: id },
-                      {
-                        asyncLocalStorageContext: dynamicConfigStartServices.getAsyncLocalStore()!,
-                      }
-                    )
-                  : await this.getUiConfig(uiPlugins, id),
+                config: await this.getUiPluginConfig(
+                  uiPlugins,
+                  id,
+                  plugin,
+                  dynamicConfigStartServices
+                ),
               }))
             ),
             legacyMetadata: {
@@ -320,6 +319,38 @@ export class RenderingService {
 
     return brandingValidation;
   };
+
+  /**
+   * Resolves the config a plugin is allowed to see in the browser.
+   *
+   * The result is always restricted to the keys the plugin declares in
+   * `exposeToBrowser`; a plugin that declares nothing receives `{}` and its
+   * server config is never read. Within that allow-list, the dynamic config
+   * store wins when it has a schema for the plugin's config path, otherwise
+   * the static config observable is used.
+   */
+  private async getUiPluginConfig(
+    uiPlugins: UiPlugins,
+    pluginId: string,
+    plugin: DiscoveredPlugin,
+    dynamicConfigStartServices: InternalDynamicConfigServiceStart
+  ): Promise<Record<string, any>> {
+    const exposedKeys = uiPlugins.exposedConfigKeys.get(pluginId) ?? [];
+    if (exposedKeys.length === 0) {
+      return {};
+    }
+
+    // Plugins are registered with the dynamic config service by configPath, which only
+    // equals snake_case(id) when the manifest does not set a custom configPath.
+    const configIdentifier: ConfigIdentifier = { pluginConfigPath: plugin.configPath };
+    const config = this.coreContext.dynamicConfigService.hasDefaultConfigs(configIdentifier)
+      ? await dynamicConfigStartServices.getClient().getConfig(configIdentifier, {
+          asyncLocalStorageContext: dynamicConfigStartServices.getAsyncLocalStore()!,
+        })
+      : await this.getUiConfig(uiPlugins, pluginId);
+
+    return pick(config || {}, exposedKeys);
+  }
 
   private async getUiConfig(uiPlugins: UiPlugins, pluginId: string) {
     const browserConfig = uiPlugins.browserConfigs.get(pluginId);

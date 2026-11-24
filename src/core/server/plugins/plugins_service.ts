@@ -76,6 +76,14 @@ export interface UiPlugins {
    * Configuration for plugins to be exposed to the client-side.
    */
   browserConfigs: Map<PluginName, Observable<unknown>>;
+
+  /**
+   * The config keys each plugin declares in `exposeToBrowser`. Plugins that declare
+   * nothing are present with an empty list. Any config handed to the browser, whether
+   * read from the static config or from the dynamic config store, must be restricted
+   * to these keys.
+   */
+  exposedConfigKeys: Map<PluginName, string[]>;
 }
 
 /** @internal */
@@ -134,6 +142,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         internal: this.uiPluginInternalInfo,
         public: uiPlugins,
         browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+        exposedConfigKeys: this.generateExposedConfigKeys(uiPlugins),
       },
       requiredEnginePlugins: this.openSearchPluginInfo,
     };
@@ -170,33 +179,41 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.pluginsSystem.stopPlugins();
   }
 
+  /**
+   * The keys a plugin's `PluginConfigDescriptor.exposeToBrowser` marks as `true`.
+   * Returns an empty list when the plugin has no descriptor or declares nothing.
+   */
+  private getExposedConfigKeys(pluginId: PluginName): string[] {
+    const exposeToBrowser = this.pluginConfigDescriptors.get(pluginId)?.exposeToBrowser;
+    if (!exposeToBrowser) {
+      return [];
+    }
+    return Object.entries(exposeToBrowser)
+      .filter(([_, exposed]) => exposed)
+      .map(([key, _]) => key);
+  }
+
+  private generateExposedConfigKeys(
+    uiPlugins: Map<string, DiscoveredPlugin>
+  ): Map<PluginName, string[]> {
+    return new Map(
+      [...uiPlugins.keys()].map((pluginId) => [pluginId, this.getExposedConfigKeys(pluginId)])
+    );
+  }
+
   private generateUiPluginsConfigs(
     uiPlugins: Map<string, DiscoveredPlugin>
   ): Map<PluginName, Observable<unknown>> {
     return new Map(
       [...uiPlugins]
-        .filter(([pluginId, _]) => {
-          const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
-          return (
-            configDescriptor &&
-            configDescriptor.exposeToBrowser &&
-            Object.values(configDescriptor?.exposeToBrowser).some((exposed) => exposed)
-          );
-        })
+        .filter(([pluginId, _]) => this.getExposedConfigKeys(pluginId).length > 0)
         .map(([pluginId, plugin]) => {
-          const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
+          const exposedKeys = this.getExposedConfigKeys(pluginId);
           return [
             pluginId,
-            this.configService.atPath(plugin.configPath).pipe(
-              map((config: any) =>
-                pick(
-                  config || {},
-                  Object.entries(configDescriptor.exposeToBrowser!)
-                    .filter(([_, exposed]) => exposed)
-                    .map(([key, _]) => key)
-                )
-              )
-            ),
+            this.configService
+              .atPath(plugin.configPath)
+              .pipe(map((config: any) => pick(config || {}, exposedKeys))),
           ];
         })
     );

@@ -25,6 +25,7 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_t
 import { isSourceColumn } from '../../../helpers/is_source_column';
 import { formatListTime } from '../list_time_format';
 import { normalizeSeverityText, SEVERITY_TEXT_FIELDS } from '../../../helpers/severity_text';
+import { getOsdFieldOverrides } from '../../../../../data/common';
 
 const DATE_FORMATTER_IDS = new Set(['date', 'date_nanos']);
 
@@ -39,11 +40,19 @@ const usesDateFormatter = (dataset: IndexPattern | Dataset, fieldInfo: FieldInfo
 type FieldInfo = ReturnType<(IndexPattern | Dataset)['fields']['getByName']>;
 
 /**
+ * Whether a column's field is non-filterable. A column without field info (e.g. a field only
+ * present in the result rows) follows the query language's field setting, as the dataset's own
+ * fields do.
+ */
+const isNonFilterableField = (fieldInfo: FieldInfo) =>
+  fieldInfo ? fieldInfo.filterable === false : getOsdFieldOverrides().filterable === false;
+
+/**
  * Whether a column is rendered by `NonFilterableTableCell` (plain text, no tree). On the Traces
  * page every cell goes through `TableCell`, see the comment in the row below.
  */
 const isNonFilterableCell = (fieldInfo: FieldInfo, isOnTracesPage: boolean) =>
-  fieldInfo?.filterable === false && !isOnTracesPage;
+  !isOnTracesPage && isNonFilterableField(fieldInfo);
 
 const NO_JSON_VALUES: ReadonlyMap<string, JsonContainer> = new Map();
 
@@ -176,7 +185,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         // timestamp is broken (timezone-shifted display vs. raw value, and it
         // effectively never matches). Time filtering is owned by the time picker.
         const isDateField = fieldInfo?.type === 'date' || fieldInfo?.type === 'date_nanos';
-        const disableValueFilter = isTimeField || isDateField || fieldInfo?.filterable === false;
+        const disableValueFilter = isTimeField || isDateField || isNonFilterableField(fieldInfo);
 
         if (shouldShowEmptyCell(row, null)) {
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;

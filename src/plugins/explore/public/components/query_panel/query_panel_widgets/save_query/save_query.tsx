@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
@@ -34,6 +34,10 @@ import {
   stageQueryForExplicitRun,
 } from '../../../../application/utils/requires_explicit_run';
 import { useEditorText, useSetEditorTextWithQuery } from '../../../../application/hooks';
+import {
+  getDatasetForSavedQuery,
+  getStoredSavedQueryDataset,
+} from '../../../../application/utils/saved_query_dataset';
 import './save_query.scss';
 
 export const SaveQueryButton = () => {
@@ -49,6 +53,8 @@ export const SaveQueryButton = () => {
 
   // Get current saved query ID from Redux state
   const currentSavedQueryId = useSelector((state: RootState) => state.legacy.savedQuery);
+  const store = useStore();
+  const latestLoadRef = useRef(0);
 
   // Get the actual saved query object if we have an ID
   const [currentSavedQuery, setCurrentSavedQuery] = useState<SavedQuery | undefined>();
@@ -78,6 +84,9 @@ export const SaveQueryButton = () => {
       if (!query) return;
       const clonedQuery = cloneDeep(query);
       delete clonedQuery.dataset;
+      // An index pattern's or index's query is saved without its dataset; another type's keeps it.
+      const datasetToSave = getDatasetForSavedQuery(query.dataset);
+      if (datasetToSave) clonedQuery.dataset = datasetToSave;
 
       const editorText = getEditorText();
       const queryToSave = {
@@ -131,18 +140,49 @@ export const SaveQueryButton = () => {
   };
 
   const handleLoadSavedQuery = useCallback(
-    (savedQuery: SavedQuery) => {
-      dispatch(setSavedQuery(savedQuery.id));
-      dispatch(setQueryState(savedQuery.attributes.query));
-      dispatch(
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
-        loadQueryActionCreator(
-          services,
-          setEditorTextWithQuery,
-          savedQuery.attributes.query.query as string,
-          savedQuery.attributes.query?.dataset
-        )
+    async (savedQuery: SavedQuery) => {
+      const queryString = services.data?.query?.queryString;
+      // A load reads the saved object again before it applies anything, so a later pick can resolve
+      // first: only the latest pick applies, and the dataset on screen is read once it resolves.
+      const loadId = ++latestLoadRef.current;
+      // A query saved with its dataset (not an index pattern or index) loads on that dataset, in
+      // its language. Others load on the dataset on screen, as before.
+      const storedDataset = await getStoredSavedQueryDataset(
+        savedQueryService,
+        queryString,
+        savedQuery
       );
+      if (loadId !== latestLoadRef.current) return;
+      const currentDataset = (store.getState() as RootState).query?.dataset;
+      const switchesDataset =
+        !!storedDataset &&
+        (storedDataset.id !== currentDataset?.id || storedDataset.type !== currentDataset?.type);
+      // Only a switch takes the stored dataset. The stored copy holds just the fields the saved
+      // query mapping has, so for the dataset already on screen the live one is kept: replacing it
+      // with the copy would be taken for a dataset change (clearing the results and re-running)
+      // and would drop the fields the copy doesn't carry.
+      const loadedDataset =
+        storedDataset && !switchesDataset
+          ? (currentDataset ?? storedDataset)
+          : (storedDataset ?? savedQuery.attributes.query?.dataset);
+
+      dispatch(setSavedQuery(savedQuery.id));
+      dispatch(setQueryState({ ...savedQuery.attributes.query, dataset: loadedDataset }));
+      if (switchesDataset) {
+        // The dataset change clears the results and runs the query, unless the dataset requires
+        // an explicit Run (see the dataset change middleware): only the editor is set here.
+        setEditorTextWithQuery(savedQuery.attributes.query.query as string);
+      } else {
+        dispatch(
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
+          loadQueryActionCreator(
+            services,
+            setEditorTextWithQuery,
+            savedQuery.attributes.query.query as string,
+            loadedDataset
+          )
+        );
+      }
 
       if (savedQuery.attributes.timefilter && timeFilter) {
         dispatch(
@@ -157,21 +197,26 @@ export const SaveQueryButton = () => {
       }
 
       setIsPopoverOpen(false);
-      dispatch(clearResults());
       // A dataset type that requires an explicit Run waits for the user.
-      if (
-        datasetRequiresExplicitRun(
-          services.data?.query?.queryString,
-          savedQuery.attributes.query?.dataset
-        )
-      ) {
+      if (datasetRequiresExplicitRun(queryString, loadedDataset)) {
+        // Nothing runs to apply the saved time range to the time picker: apply it here, so the
+        // picker shows the range the staged query runs on.
+        if (savedQuery.attributes.timefilter && typeof timeFilter?.setTime === 'function') {
+          timeFilter.setTime({
+            from: savedQuery.attributes.timefilter.from,
+            to: savedQuery.attributes.timefilter.to,
+          });
+        }
+        dispatch(clearResults());
         stageQueryForExplicitRun(dispatch);
         return;
       }
+      if (switchesDataset) return;
+      dispatch(clearResults());
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
-    [dispatch, services, setEditorTextWithQuery, timeFilter]
+    [dispatch, services, setEditorTextWithQuery, timeFilter, savedQueryService, store]
   );
 
   const handleClearSavedQuery = useCallback(() => {

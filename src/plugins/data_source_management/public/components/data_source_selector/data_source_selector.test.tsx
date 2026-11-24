@@ -213,7 +213,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalledWith('No OpenSearch data sources available.');
   });
 
   it('should get default datasource if uiSettings exists', async () => {

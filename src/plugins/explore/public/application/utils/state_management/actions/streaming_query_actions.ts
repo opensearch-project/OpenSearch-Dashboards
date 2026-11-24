@@ -433,6 +433,7 @@ export const executeStreamingQuery = createAsyncThunk<
       }
 
       // Reached only when the loop condition saw `signal.aborted`, so the run was aborted.
+      release();
       finalise(signal.aborted);
     } catch (error) {
       if (isAbort(error)) {

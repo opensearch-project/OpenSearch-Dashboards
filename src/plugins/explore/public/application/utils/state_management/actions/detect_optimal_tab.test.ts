@@ -57,6 +57,11 @@ describe('detectAndSetOptimalTab', () => {
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
     });
 
+    it('switches to Statistics when the query starts with stats (no source clause)', async () => {
+      const tab = await runDetect('stats count(*) by host', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
     it('switches to Statistics when query contains | table', async () => {
       const tab = await runDetect('source = idx | table col1, col2', EXPLORE_LOGS_TAB_ID);
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
