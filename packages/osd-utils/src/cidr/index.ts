@@ -75,9 +75,57 @@ class IPCIDR {
         addr = address;
       }
 
-      return addr.isInSubnet(this.address);
+      if (addr.isInSubnet(this.address)) {
+        return true;
+      }
     } catch {
-      return false;
+      // fall through to the embedded IPv4 check below
+    }
+
+    // An IPv6 address can carry an IPv4 address (mapped, NAT64, 6to4, compatible). A client that
+    // connects to such an address reaches the embedded IPv4 host, so test that address as well.
+    if (this.ipAddressType === Address4) {
+      const embedded = IPCIDR.embeddedIPv4(address);
+      return embedded !== null && embedded.isInSubnet(this.address);
+    }
+    return false;
+  }
+
+  /**
+   * Extracts the IPv4 address carried inside an IPv6 address, for the forms a connection to the
+   * IPv6 address delivers to that IPv4 host: IPv4-mapped (::ffff:0:0/96), IPv4-translated
+   * (::ffff:0:0:0/96), NAT64 (64:ff9b::/96), 6to4 (2002::/16) and IPv4-compatible (::/96, except
+   * :: and ::1). Teredo is not handled. Returns null for any other input.
+   */
+  private static embeddedIPv4(address: string | bigint | IPAddress): Address4 | null {
+    try {
+      let v6: Address6;
+      if (address instanceof Address6) {
+        v6 = address;
+      } else if (typeof address === 'string' && address.includes(':')) {
+        v6 = new Address6(address.split('/')[0]);
+      } else {
+        return null;
+      }
+
+      const value = v6.bigInt();
+      const low32 = value & 0xffffffffn;
+      const upper96 = value >> 32n;
+      let v4: bigint | null = null;
+
+      if (upper96 === 0xffffn || upper96 === 0xffffn << 16n) {
+        v4 = low32; // ::ffff:a.b.c.d and ::ffff:0:a.b.c.d
+      } else if (upper96 === 0x0064ff9bn << 64n) {
+        v4 = low32; // 64:ff9b::a.b.c.d
+      } else if (upper96 === 0n && value > 1n) {
+        v4 = low32; // ::a.b.c.d, but not :: or ::1
+      } else if (value >> 112n === 0x2002n) {
+        v4 = (value >> 80n) & 0xffffffffn; // 2002:AABB:CCDD::
+      }
+
+      return v4 === null ? null : Address4.fromBigInt(v4);
+    } catch {
+      return null;
     }
   }
 

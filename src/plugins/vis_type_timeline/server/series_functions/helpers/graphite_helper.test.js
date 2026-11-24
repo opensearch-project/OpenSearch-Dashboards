@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dns from 'dns';
 import * as helper from './graphite_helper';
 
 describe('graphite_helper', function () {
@@ -148,5 +149,55 @@ describe('graphite_helper', function () {
     expect(
       await helper.isValidConfig(['127.0.0.0/8'], ['https://127.0.0.1'], 'https://127.0.0.1')
     ).toEqual(false);
+  });
+
+  describe('createGuardedLookup', () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    const mockDns = (addresses) =>
+      jest.spyOn(dns, 'lookup').mockImplementation((host, opts, cb) => cb(null, addresses));
+    const run = (lookup, options) =>
+      new Promise((resolve) => lookup('example.test', options, (...args) => resolve(args)));
+
+    it('should refuse when every answer is denied', async () => {
+      mockDns([{ address: '169.254.169.254', family: 4 }]);
+      const [err] = await run(helper.createGuardedLookup(['169.254.0.0/16']), {});
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('should refuse a hex IPv4-mapped form of a denied address', async () => {
+      mockDns([{ address: '::ffff:a9fe:a9fe', family: 6 }]);
+      const [err] = await run(helper.createGuardedLookup(['169.254.0.0/16']), {});
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('should drop a denied address and use the allowed one', async () => {
+      mockDns([
+        { address: '169.254.169.254', family: 4 },
+        { address: '93.184.216.34', family: 4 },
+      ]);
+      const lookup = helper.createGuardedLookup(['169.254.0.0/16']);
+      const [err, address, family] = await run(lookup, {});
+      expect(err).toBeNull();
+      expect(address).toEqual('93.184.216.34');
+      expect(family).toEqual(4);
+      const [, all] = await run(lookup, { all: true });
+      expect(all).toEqual([{ address: '93.184.216.34', family: 4 }]);
+    });
+
+    it('should return the answer unchanged when nothing is denied', async () => {
+      const addresses = [{ address: '93.184.216.34', family: 4 }];
+      mockDns(addresses);
+      const [err, out] = await run(helper.createGuardedLookup(['169.254.0.0/16']), { all: true });
+      expect(err).toBeNull();
+      expect(out).toEqual(addresses);
+    });
+
+    it('should pass lookup errors through', async () => {
+      const error = new Error('ENOTFOUND');
+      jest.spyOn(dns, 'lookup').mockImplementation((host, opts, cb) => cb(error));
+      const [err] = await run(helper.createGuardedLookup(['169.254.0.0/16']), {});
+      expect(err).toBe(error);
+    });
   });
 });

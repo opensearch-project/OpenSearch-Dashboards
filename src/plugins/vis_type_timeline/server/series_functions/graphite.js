@@ -28,12 +28,28 @@
  * under the License.
  */
 
+import http from 'http';
+import https from 'https';
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
-import { isValidConfig } from './helpers/graphite_helper';
+import { createGuardedLookup, isValidConfig } from './helpers/graphite_helper';
+
+// One agent per protocol and denylist, so connections are reused as they are with the default agent.
+const guardedAgents = new Map();
+const getGuardedAgent = (blockedIPs, protocol) => {
+  const key = `${protocol}${JSON.stringify(blockedIPs)}`;
+  if (!guardedAgents.has(key)) {
+    const options = { keepAlive: true, lookup: createGuardedLookup(blockedIPs) };
+    guardedAgents.set(
+      key,
+      protocol === 'https:' ? new https.Agent(options) : new http.Agent(options)
+    );
+  }
+  return guardedAgents.get(key);
+};
 
 export default new Datasource('graphite', {
   args: [
@@ -91,7 +107,14 @@ export default new Datasource('graphite', {
       '&target=' +
       config.metric;
 
-    return fetch(GRAPHITE_URL, { redirect: 'error' })
+    const fetchOptions = { redirect: 'error' };
+    if (blockedIPs.length > 0) {
+      // Check the address again when connecting, so a name that changed its DNS answer after
+      // isValidConfig ran cannot reach a denied address.
+      fetchOptions.agent = (parsedUrl) => getGuardedAgent(blockedIPs, parsedUrl.protocol);
+    }
+
+    return fetch(GRAPHITE_URL, fetchOptions)
       .then(function (resp) {
         return resp.json();
       })

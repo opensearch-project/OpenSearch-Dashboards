@@ -9,6 +9,8 @@ import { Sha256 } from '@aws-crypto/sha256-js';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { createGunzip, createInflate } from 'zlib';
+import http from 'http';
+import https from 'https';
 
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
 
@@ -28,6 +30,15 @@ class HttpAmazonESConnector extends HttpConnector {
 
     this.awsConfig = config.awsConfig || {};
     this.httpOptions = config.httpOptions || {};
+    if (config.guardedLookup) {
+      // Resolve the host name through the guarded lookup, see createGuardedLookup.
+      const lookup = config.guardedLookup;
+      this.httpOptions = {
+        ...this.httpOptions,
+        httpAgent: new http.Agent({ keepAlive: true, maxSockets: 50, lookup }),
+        httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 50, lookup }),
+      };
+    }
     this.httpClient = new NodeHttpHandler(this.httpOptions);
     this.service = config.service || 'es';
   }

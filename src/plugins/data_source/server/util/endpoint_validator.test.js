@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dns from 'dns';
 import * as validator from './endpoint_validator';
 
 describe('endpoint_validator', function () {
@@ -145,6 +146,23 @@ describe('endpoint_validator', function () {
       expect(result.error).toContain('169.254.1.1');
     });
 
+    it.each([
+      ['hex IPv4-mapped', 'http://[::ffff:a9fe:a9fe]'],
+      ['dotted IPv4-mapped (URL parser output is hex)', 'http://[::ffff:169.254.169.254]'],
+      ['NAT64', 'http://[64:ff9b::a9fe:a9fe]'],
+      ['6to4', 'http://[2002:a9fe:a9fe::1]'],
+      ['IPv4-compatible', 'http://[::a9fe:a9fe]'],
+    ])('should block %s form of a denied IPv4 address', async (_name, endpoint) => {
+      const result = await validator.isValidURL(endpoint, ['169.254.0.0/16']);
+      expect(result.valid).toEqual(false);
+      expect(result.userMessage).toEqual('Endpoint IP address is not allowed');
+    });
+
+    it('should allow hex IPv4-mapped form of a public IPv4 address', async () => {
+      const result = await validator.isValidURL('http://[::ffff:0808:0808]', ['169.254.0.0/16']);
+      expect(result.valid).toEqual(true);
+    });
+
     it('should block IPv6 loopback address', async () => {
       const result = await validator.isValidURL('http://[::1]', ['::1/128']);
       expect(result.valid).toEqual(false);
@@ -260,6 +278,80 @@ describe('endpoint_validator', function () {
       expect(result.valid).toEqual(false);
       expect(result.error).toBeDefined();
       expect(result.userMessage).toEqual('Endpoint IP address is not allowed');
+    });
+  });
+
+  describe('createGuardedLookup', () => {
+    const answer = (addresses) =>
+      jest.spyOn(dns, 'lookup').mockImplementation((host, opts, cb) => cb(null, addresses));
+    const run = (lookup, host, options) =>
+      new Promise((resolve) => lookup(host, options, (...args) => resolve(args)));
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('should refuse when every answer is denied', async () => {
+      answer([{ address: '10.1.2.3', family: 4 }]);
+      const [err] = await run(validator.createGuardedLookup(['10.0.0.0/8']), 'example.test', {});
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('should refuse a hex IPv4-mapped form of a denied address', async () => {
+      answer([{ address: '::ffff:a00:1', family: 6 }]);
+      const [err] = await run(validator.createGuardedLookup(['10.0.0.0/8']), 'example.test', {});
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('should drop a denied address and use the allowed one', async () => {
+      answer([
+        { address: '10.1.2.3', family: 4 },
+        { address: '93.184.216.34', family: 4 },
+      ]);
+      const lookup = validator.createGuardedLookup(['10.0.0.0/8']);
+      const [err, address, family] = await run(lookup, 'example.test', {});
+      expect(err).toBeNull();
+      expect(address).toEqual('93.184.216.34');
+      expect(family).toEqual(4);
+      const [, all] = await run(lookup, 'example.test', { all: true });
+      expect(all).toEqual([{ address: '93.184.216.34', family: 4 }]);
+    });
+
+    it('should return the answer unchanged when nothing is denied', async () => {
+      const addresses = [
+        { address: '93.184.216.34', family: 4 },
+        { address: '2606:2800:220:1::1', family: 6 },
+      ];
+      answer(addresses);
+      const [err, out] = await run(validator.createGuardedLookup(['10.0.0.0/8']), 'example.test', {
+        all: true,
+      });
+      expect(err).toBeNull();
+      expect(out).toEqual(addresses);
+    });
+
+    it('should use the normal lookup for an allowlisted host', async () => {
+      const spy = answer([{ address: '10.1.2.3', family: 4 }]);
+      const lookup = validator.createGuardedLookup(['10.0.0.0/8'], ['.es.amazonaws.com']);
+      const [err] = await run(lookup, 'a.es.amazonaws.com', {});
+      expect(err).toBeNull();
+      expect(spy).toHaveBeenCalledWith('a.es.amazonaws.com', {}, expect.any(Function));
+    });
+
+    it('should skip a malformed denylist entry instead of throwing', async () => {
+      answer([{ address: '10.1.2.3', family: 4 }]);
+      const lookup = validator.createGuardedLookup(['not-a-cidr', '10.0.0.0/8']);
+      const [err] = await run(lookup, 'example.test', {});
+      expect(err).toBeInstanceOf(Error);
+      answer([{ address: '93.184.216.34', family: 4 }]);
+      const [okErr, address] = await run(lookup, 'example.test', {});
+      expect(okErr).toBeNull();
+      expect(address).toEqual('93.184.216.34');
+    });
+
+    it('should pass lookup errors through', async () => {
+      const error = new Error('ENOTFOUND');
+      jest.spyOn(dns, 'lookup').mockImplementation((host, opts, cb) => cb(error));
+      const [err] = await run(validator.createGuardedLookup(['10.0.0.0/8']), 'example.test', {});
+      expect(err).toBe(error);
     });
   });
 });
