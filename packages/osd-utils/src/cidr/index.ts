@@ -108,19 +108,21 @@ class IPCIDR {
         return null;
       }
 
+      // Plain BigInt arithmetic, so the shifts are written as division and multiplication.
+      const pow = (bits: bigint) => 2n ** bits;
       const value = v6.bigInt();
-      const low32 = value & 0xffffffffn;
-      const upper96 = value >> 32n;
+      const low32 = value % pow(32n);
+      const upper96 = value / pow(32n);
       let v4: bigint | null = null;
 
-      if (upper96 === 0xffffn || upper96 === 0xffffn << 16n) {
+      if (upper96 === 0xffffn || upper96 === 0xffffn * pow(16n)) {
         v4 = low32; // ::ffff:a.b.c.d and ::ffff:0:a.b.c.d
-      } else if (upper96 === 0x0064ff9bn << 64n) {
+      } else if (upper96 === 0x0064ff9bn * pow(64n)) {
         v4 = low32; // 64:ff9b::a.b.c.d
       } else if (upper96 === 0n && value > 1n) {
         v4 = low32; // ::a.b.c.d, but not :: or ::1
-      } else if (value >> 112n === 0x2002n) {
-        v4 = (value >> 80n) & 0xffffffffn; // 2002:AABB:CCDD::
+      } else if (value / pow(112n) === 0x2002n) {
+        v4 = (value / pow(80n)) % pow(32n); // 2002:AABB:CCDD::
       }
 
       return v4 === null ? null : Address4.fromBigInt(v4);

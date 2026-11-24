@@ -1,0 +1,2 @@
+fix:
+- Apply IP denylists to IPv6 forms of IPv4 addresses and when connecting ([#13255](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/13255))
