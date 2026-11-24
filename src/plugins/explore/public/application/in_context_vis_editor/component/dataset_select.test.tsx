@@ -273,8 +273,11 @@ describe('DatasetSelectWidget', () => {
       await waitFor(() => expect(mockUpdateQueryState).toHaveBeenCalled());
     };
 
+    // Only a dataset type that needs an explicit Run keeps the query.
+    const EXPLICIT_RUN = { meta: { requiresExplicitRun: true } };
+
     it('keeps the query and the editor when the new dataset runs the same language', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['my_language'] });
+      mockGetType.mockReturnValue({ ...EXPLICIT_RUN, supportedLanguages: () => ['my_language'] });
       mockGetInitialQueryByDataset.mockReturnValue({
         query: '',
         language: 'my_language',
@@ -315,8 +318,29 @@ describe('DatasetSelectWidget', () => {
       expect(mockClearEditor).toHaveBeenCalled();
     });
 
+    it('empties the query of a dataset type that does not need an explicit Run, as before', async () => {
+      mockGetType.mockReturnValue({ supportedLanguages: () => ['my_language'] });
+      mockGetInitialQueryByDataset.mockReturnValue({
+        query: '',
+        language: 'my_language',
+        dataset: OTHER_LOG_GROUPS,
+      });
+      withQueryState({
+        query: 'stats count(*) by bin(5m)',
+        language: 'my_language',
+        dataset: LOG_GROUPS,
+      });
+
+      await pick(OTHER_LOG_GROUPS);
+
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({ query: '', dataset: OTHER_LOG_GROUPS })
+      );
+      expect(mockClearEditor).toHaveBeenCalled();
+    });
+
     it('keeps a PPL query that does not name its index', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
+      mockGetType.mockReturnValue({ ...EXPLICIT_RUN, supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: '| stats count() by status',
         language: 'PPL',
@@ -331,8 +355,27 @@ describe('DatasetSelectWidget', () => {
       expect(mockClearEditor).not.toHaveBeenCalled();
     });
 
-    it('empties a PPL query that names the previous index, as before', async () => {
+    it('empties a PPL query on an OpenSearch index pattern, as before', async () => {
       mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
+      withQueryState({
+        query: '| stats count() by status',
+        language: 'PPL',
+        dataset: { id: 'logs-a', title: 'logs-a', type: 'INDEX_PATTERN' },
+      });
+
+      await pick({ id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' });
+
+      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: '',
+          dataset: { id: 'logs-b', title: 'logs-b', type: 'INDEX_PATTERN' },
+        })
+      );
+      expect(mockClearEditor).toHaveBeenCalled();
+    });
+
+    it('empties a PPL query that names the previous index, as before', async () => {
+      mockGetType.mockReturnValue({ ...EXPLICIT_RUN, supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: 'source = `logs-a` | stats count() by status',
         language: 'PPL',
@@ -352,7 +395,7 @@ describe('DatasetSelectWidget', () => {
 
     // A query that names its own index runs on it whatever the previous dataset's title was.
     it('empties a PPL query that names its own index, though not by the previous title', async () => {
-      mockGetType.mockReturnValue({ supportedLanguages: () => ['PPL', 'SQL'] });
+      mockGetType.mockReturnValue({ ...EXPLICIT_RUN, supportedLanguages: () => ['PPL', 'SQL'] });
       withQueryState({
         query: 'source = logs-2026.01 | stats count() by status',
         language: 'PPL',

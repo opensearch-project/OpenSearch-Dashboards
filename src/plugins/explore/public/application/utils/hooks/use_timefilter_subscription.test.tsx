@@ -23,6 +23,7 @@ import {
   QueryState,
 } from '../state_management/slices';
 import { Subject, Subscription } from 'rxjs';
+import { QueryExecutionStatus } from '../state_management/types';
 
 // Mock the query actions
 jest.mock('../state_management/actions/query_actions', () => ({
@@ -178,6 +179,59 @@ describe('useTimefilterSubscription', () => {
     });
   });
 
+  // A tick that superseded the running queries meant nothing rendered with an interval shorter than
+  // the query, and every restart scanned the source again.
+  describe('while a query is still running', () => {
+    const withStatuses = (queryStatusMap: Record<string, unknown>) =>
+      ({
+        query: {
+          ...queryInitialState,
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+        },
+        queryEditor: { queryStatusMap },
+      }) as any;
+
+    it.each([
+      ['the results query runs', { 'results-key': { status: QueryExecutionStatus.LOADING } }],
+      [
+        'the histogram still runs after the results settled',
+        {
+          'results-key': { status: QueryExecutionStatus.READY },
+          'histogram-key': { status: QueryExecutionStatus.LOADING },
+        },
+      ],
+      [
+        'the run is between its queries',
+        { 'executeQueries:1': { status: QueryExecutionStatus.LOADING } },
+      ],
+    ])('ignores the tick while %s', (_label, statusMap) => {
+      renderHookWithProvider(mockServices, withStatuses(statusMap));
+
+      autoRefreshSubject.next({});
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['returned results', QueryExecutionStatus.READY],
+      ['returned nothing', QueryExecutionStatus.NO_RESULTS],
+      ['failed', QueryExecutionStatus.ERROR],
+      ['was stopped', QueryExecutionStatus.UNINITIALIZED],
+    ])('refreshes on a tick once the run %s', (_label, status) => {
+      renderHookWithProvider(
+        mockServices,
+        withStatuses({
+          'results-key': { status },
+          'histogram-key': { status: QueryExecutionStatus.READY },
+        })
+      );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // A refresh interval shorter than the query would otherwise supersede every run before it renders.
   describe('while the results query is still streaming', () => {
     const withStreaming = (streaming: Record<string, unknown>) =>
@@ -251,6 +305,28 @@ describe('useTimefilterSubscription', () => {
         mockServices,
         withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 })
       );
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+    });
+
+    // Past the cap only the table stops holding refreshes back: a histogram or tab query still
+    // loading would be restarted by the tick.
+    it('past the row cap, still skips while another of the page’s queries is loading', () => {
+      const state = withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 });
+      state.queryEditor.queryStatusMap['results-key'].status = QueryExecutionStatus.LOADING;
+      state.queryEditor.queryStatusMap['histogram-key'] = { status: QueryExecutionStatus.LOADING };
+      const { unmount } = renderHookWithProvider(mockServices, state);
+
+      autoRefreshSubject.next({});
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it('past the row cap, refreshes while only the table itself is still loading', () => {
+      const state = withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 });
+      state.queryEditor.queryStatusMap['results-key'].status = QueryExecutionStatus.LOADING;
+      renderHookWithProvider(mockServices, state);
 
       autoRefreshSubject.next({});
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);

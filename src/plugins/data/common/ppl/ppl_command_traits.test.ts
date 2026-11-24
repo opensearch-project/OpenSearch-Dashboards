@@ -67,18 +67,24 @@ describe('buildPPLCommandRegex', () => {
     expect(regex.test('source=x | where topic = 1')).toBe(false);
   });
 
-  it('matches a command that starts the query, for languages without a source clause', () => {
-    const regex = buildPPLCommandRegex(['stats']);
+  it('does not match a command that starts the query by default', () => {
+    expect(buildPPLCommandRegex(['stats']).test('stats count() by host')).toBe(false);
+  });
+
+  it('with leadingCommand, matches a command that starts the query', () => {
+    const regex = buildPPLCommandRegex(['stats'], { leadingCommand: true });
     expect(regex.test('stats count(*) by host')).toBe(true);
     expect(regex.test('\n  STATS count(*)')).toBe(true);
     expect(regex.test('statsfield = 1')).toBe(false);
     expect(regex.test('fields stats')).toBe(false);
   });
 
-  it('does not match a leading field of the same name used in a search expression', () => {
+  it('with leadingCommand, does not match a leading field of that name', () => {
     // Explore runs editor text without a source clause as `source = <dataset> <text>`, so these
     // are filters on a field, not commands.
-    const regex = buildPPLCommandRegex(['stats', 'top', 'table', 'timechart']);
+    const regex = buildPPLCommandRegex(['stats', 'top', 'table', 'timechart'], {
+      leadingCommand: true,
+    });
     expect(regex.test('top > 10')).toBe(false);
     expect(regex.test('stats = 1')).toBe(false);
     expect(regex.test("table = 'orders'")).toBe(false);
@@ -149,6 +155,14 @@ describe('maskedPPLQueryHasTrait', () => {
     );
     expect(maskedPPLQueryHasTrait('source=x | patterns m', isAggregation)).toBe(false);
     expect(maskedPPLQueryHasTrait('source=x | table a', isAggregation)).toBe(false);
+  });
+
+  it('matches a leading command only with leadingCommand', () => {
+    const isAggregation = (t: PPLCommandTraits) => t.isAggregation;
+    expect(maskedPPLQueryHasTrait('stats count() by host', isAggregation)).toBe(false);
+    expect(
+      maskedPPLQueryHasTrait('stats count() by host', isAggregation, { leadingCommand: true })
+    ).toBe(true);
   });
 
   it('is false for any query when no command has the trait', () => {

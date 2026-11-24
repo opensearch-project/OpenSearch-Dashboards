@@ -141,11 +141,14 @@ describe('top_nav_save', () => {
       // A refined selection keeps the previous results, marked stale, and sets the query state to
       // the editor's draft without running it.
       isSelectionStale = false,
+      // Whether the dataset's type needs an explicit Run; the checks below are only for those.
+      explicitRun = true,
     }: {
       editorMode?: string;
       queryStringQuery?: string;
       hasRun?: boolean;
       isSelectionStale?: boolean;
+      explicitRun?: boolean;
     } = {}) =>
       ({
         ...mockServices,
@@ -165,6 +168,9 @@ describe('top_nav_save', () => {
           query: {
             queryString: {
               getQuery: () => ({ query: queryStringQuery, language: 'PPL', dataset: DATASET }),
+              getDatasetService: () => ({
+                getType: () => ({ meta: { requiresExplicitRun: explicitRun } }),
+              }),
             },
           },
         },
@@ -325,6 +331,26 @@ describe('top_nav_save', () => {
       });
       expect(services.notifications.toasts.addWarning).not.toHaveBeenCalled();
       expect(saveSavedExplore).toHaveBeenCalled();
+    });
+
+    it('on an OpenSearch dataset, says nothing and saves the search context, as before', async () => {
+      const { saveSavedExplore } = jest.requireMock('../../../../helpers/save_explore');
+      const services = servicesWith({ explicitRun: false, hasRun: false });
+      const props = openSaveModal(services, () => 'source = logs | head 4');
+      renderOptions(props.options);
+      expect(screen.queryByTestId('unrunQueryEditCallout')).toBeNull();
+
+      await props.onSave({
+        newTitle: 'Saved',
+        newCopyOnSave: false,
+        isTitleDuplicateConfirmed: false,
+        onTitleDuplicate: jest.fn(),
+      });
+      expect(services.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(saveSavedExplore.mock.calls[0][0].searchContext).toEqual({
+        ...mockSearchContext,
+        query: { query: LAST_RUN, language: 'PPL' },
+      });
     });
 
     it('says nothing in prompt mode, where the editor holds a prompt', () => {

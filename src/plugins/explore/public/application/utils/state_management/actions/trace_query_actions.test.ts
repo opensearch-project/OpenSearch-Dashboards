@@ -50,6 +50,7 @@ jest.mock('./utils', () => ({
 import {
   prepareTraceCacheKeys,
   abortAllTraceQueries,
+  supersedeAllTraceQueries,
   executeTraceAggregationQueries,
   executeRequestCountQuery,
   executeErrorCountQuery,
@@ -455,6 +456,56 @@ describe('Trace Query Actions - Test Suite', () => {
         abortAllTraceQueries();
 
         expect(mockAbortController.abort).toHaveBeenCalledTimes(1);
+      });
+
+      // A new search clears the statuses: a stopped query's late UNINITIALIZED (or rows) would land
+      // on the new search's.
+      it.each([
+        ['is answered anyway', (settle: any) => settle.resolve({ hits: { hits: [{}] } })],
+        [
+          'settles as aborted',
+          (settle: any) =>
+            settle.reject(Object.assign(new Error('Aborted'), { name: 'AbortError' })),
+        ],
+      ])(
+        'reports nothing once superseded by a new search, when its fetch %s',
+        async (_label, settleWith) => {
+          const settle: any = {};
+          mockSearchSource.fetch.mockReturnValue(
+            new Promise((resolve, reject) => Object.assign(settle, { resolve, reject }))
+          );
+          const run = executeRequestCountQuery({
+            services: mockServices,
+            cacheKey: 'trace-requests:source=traces',
+            baseQuery: 'source=traces',
+            config: createTraceConfig(),
+          })(mockDispatch, mockGetState, undefined);
+          await new Promise((resolve) => setTimeout(resolve, 0));
+          mockDispatch.mockClear();
+
+          supersedeAllTraceQueries();
+          expect(mockAbortController.abort).toHaveBeenCalledTimes(1);
+          settleWith(settle);
+          await run;
+
+          // Only the thunk's own settle action.
+          expect(mockDispatch.mock.calls.map(([action]) => action?.type)).toEqual([
+            'query/executeRequestCountQuery/fulfilled',
+          ]);
+        }
+      );
+
+      // Stopped or superseded while its data view loaded: the query must not reach the server.
+      it('sends nothing for a run stopped before its fetch', async () => {
+        mockAbortController.signal.aborted = true;
+        await executeRequestCountQuery({
+          services: mockServices,
+          cacheKey: 'trace-requests:source=traces',
+          baseQuery: 'source=traces',
+          config: createTraceConfig(),
+        })(mockDispatch, mockGetState, undefined);
+
+        expect(mockSearchSource.fetch).not.toHaveBeenCalled();
       });
 
       it('should execute request count query successfully', async () => {

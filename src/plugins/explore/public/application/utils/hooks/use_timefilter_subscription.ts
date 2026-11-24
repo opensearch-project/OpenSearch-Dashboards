@@ -13,27 +13,44 @@ import {
 } from '../state_management/actions/query_actions';
 import { STREAMING_MAX_HELD_ROWS } from '../state_management/actions/streaming_query_actions';
 import { clearQueryStatusMap, clearResults } from '../state_management/slices';
+import { QueryExecutionStatus } from '../state_management/types';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { isStreamingQueryAbortable } from '../streaming/streaming_abort_registry';
 
-// A refresh would supersede the run, and with an interval shorter than the query nothing would
-// ever render. Past the row cap the run only polls for status, so refreshes may resume.
-const isTableStillFilling = (state: RootState): boolean => {
+// The streamed results table's key and progress, while its run is still polling.
+const getPollingStreamedTable = (state: RootState) => {
   let cacheKey: string;
   try {
     cacheKey = defaultPrepareQueryString(state.query);
   } catch {
-    return false;
+    return undefined;
   }
-  if (!isStreamingQueryAbortable(cacheKey)) return false;
+  if (!isStreamingQueryAbortable(cacheKey)) return undefined;
   const streaming = state.queryEditor?.queryStatusMap?.[cacheKey]?.streaming;
-  if (!streaming?.isPolling) return false;
-  // `total` counts only the rows produced so far, so a client that has caught up is not done.
-  return streaming.rowsFetched < STREAMING_MAX_HELD_ROWS;
+  return streaming?.isPolling ? { cacheKey, streaming } : undefined;
+};
+
+// A refresh would supersede the queries still running, and with an interval shorter than the
+// query nothing would ever render, while every restart scans the source again. The run itself,
+// the table, the histogram and the tab queries each report LOADING until they settle.
+const isRunInFlight = (state: RootState): boolean => {
+  const streamedTable = getPollingStreamedTable(state);
+  // Past the row cap the table's run only polls for status, so it doesn't hold refreshes back;
+  // the page's other queries still do. `total` counts only the rows produced so far, so a client
+  // that has caught up is not done.
+  if (streamedTable && streamedTable.streaming.rowsFetched < STREAMING_MAX_HELD_ROWS) return true;
+  return Object.entries(state.queryEditor?.queryStatusMap ?? {}).some(
+    ([cacheKey, status]) =>
+      cacheKey !== streamedTable?.cacheKey && status?.status === QueryExecutionStatus.LOADING
+  );
 };
 
 /**
  * Hook to handle auto-refresh subscription only.
+ *
+ * A tick does nothing while the page's queries are still running; the next tick after they
+ * settle refreshes. A Refresh or a change of the query, time range or dataset is not a tick and
+ * still replaces the running queries.
  *
  * For a dataset type that requires an explicit Run (meta.requiresExplicitRun), a tick refreshes
  * only a query the user has run: one whose results are shown and that wasn't edited since. A
@@ -59,7 +76,7 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
     const subscription = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
       .subscribe(() => {
-        if (!query.dataset || isTableStillFilling(store.getState())) return;
+        if (!query.dataset || isRunInFlight(store.getState())) return;
         if (
           !hasRunCurrentQueryRef.current &&
           datasetRequiresExplicitRun(services.data.query.queryString, query.dataset)
