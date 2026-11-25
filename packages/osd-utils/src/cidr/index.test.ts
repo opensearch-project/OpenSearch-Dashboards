@@ -101,6 +101,50 @@ describe('IPCIDR', () => {
     });
   });
 
+  describe('contains with IPv4 embedded in IPv6', () => {
+    const linkLocal = new IPCIDR('169.254.0.0/16');
+    const loopback = new IPCIDR('127.0.0.0/8');
+
+    it.each([
+      ['hex IPv4-mapped', '::ffff:a9fe:a9fe'],
+      ['dotted IPv4-mapped', '::ffff:169.254.169.254'],
+      ['uppercase hex IPv4-mapped', '::FFFF:A9FE:A9FE'],
+      ['expanded IPv4-mapped', '0:0:0:0:0:ffff:a9fe:a9fe'],
+      ['IPv4-translated', '::ffff:0:a9fe:a9fe'],
+      ['NAT64', '64:ff9b::a9fe:a9fe'],
+      ['dotted NAT64', '64:ff9b::169.254.169.254'],
+      ['6to4', '2002:a9fe:a9fe::1'],
+      ['dotted 6to4 tail', '2002:a9fe:a9fe::1.2.3.4'],
+      ['IPv4-compatible', '::a9fe:a9fe'],
+    ])('should contain the link-local address in %s form', (_name, text) => {
+      expect(linkLocal.contains(text)).toBe(true);
+      expect(linkLocal.contains(new Address6(text))).toBe(true);
+    });
+
+    it('should contain loopback in hex IPv4-mapped form', () => {
+      expect(loopback.contains('::ffff:7f00:1')).toBe(true);
+      expect(loopback.contains('64:ff9b::7f00:1')).toBe(true);
+    });
+
+    it.each([
+      ['hex IPv4-mapped public', '::ffff:0808:0808'],
+      ['NAT64 public', '64:ff9b::0808:0808'],
+      ['6to4 public', '2002:0808:0808::1'],
+      ['IPv4-compatible public', '::0808:0808'],
+      ['global IPv6', '2606:4700:4700::1111'],
+      ['IPv6 loopback', '::1'],
+      ['IPv6 unspecified', '::'],
+      ['unparseable', '::ffff:zzzz:zzzz'],
+    ])('should not contain %s', (_name, text) => {
+      expect(linkLocal.contains(text)).toBe(false);
+      expect(loopback.contains(text)).toBe(false);
+    });
+
+    it('should not apply the embedded check to IPv6 ranges', () => {
+      expect(new IPCIDR('2001:db8::/32').contains('::ffff:a9fe:a9fe')).toBe(false);
+    });
+  });
+
   describe('toString', () => {
     it('should return CIDR string for IPv4', () => {
       const cidr = new IPCIDR('192.168.1.0/24');

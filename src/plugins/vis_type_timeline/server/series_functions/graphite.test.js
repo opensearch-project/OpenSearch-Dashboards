@@ -36,28 +36,35 @@ const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.ym
 
 const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. Please update your config from OpenSearch Dashboards' Advanced Settings.`;
 
-jest.mock('node-fetch', () => (url) => {
-  if (url.includes('redirect')) {
-    return Promise.reject(new Error('maximum redirect reached at: ' + url));
-  }
-  return Promise.resolve({
-    json: function () {
-      return [
-        {
-          target: '__beer__',
-          datapoints: [
-            [3, 1000],
-            [14, 2000],
-            [1.5, 3000],
-            [92.6535, 4000],
-          ],
-        },
-      ];
-    },
-  });
+jest.mock('node-fetch', () => {
+  const mockFetch = (url, options) => {
+    mockFetch.lastOptions = options;
+    if (url.includes('redirect')) {
+      return Promise.reject(new Error('maximum redirect reached at: ' + url));
+    }
+    return Promise.resolve({
+      json: function () {
+        return [
+          {
+            target: '__beer__',
+            datapoints: [
+              [3, 1000],
+              [14, 2000],
+              [1.5, 3000],
+              [92.6535, 4000],
+            ],
+          },
+        ];
+      },
+    });
+  };
+  return mockFetch;
 });
 
+import https from 'https';
+import http from 'http';
 import invoke from './helpers/invoke_series_fn.js';
+const mockFetch = require('node-fetch');
 
 describe('graphite', function () {
   it('should wrap the graphite response up in a seriesList', function () {
@@ -211,6 +218,33 @@ describe('graphite', function () {
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
       expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  describe('connect-time guard', () => {
+    it('should pass a guarded agent to fetch when a denylist is set', function () {
+      return invoke(fn, [], {
+        allowedGraphiteUrls: [],
+        blockedGraphiteIPs: ['127.0.0.0/8'],
+      }).then(function () {
+        const { agent } = mockFetch.lastOptions;
+        expect(agent).to.be.a('function');
+        const httpsAgent = agent(new URL('https://example.test'));
+        expect(httpsAgent).to.be.instanceOf(https.Agent);
+        expect(httpsAgent.options.lookup).to.be.a('function');
+        expect(agent(new URL('https://example.test'))).to.equal(httpsAgent);
+        expect(agent(new URL('http://example.test'))).to.be.instanceOf(http.Agent);
+      });
+    });
+
+    it('should not pass an agent to fetch when only an allowlist is set', function () {
+      return invoke(fn, [], {
+        allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+        blockedGraphiteIPs: [],
+      }).then(function () {
+        expect(mockFetch.lastOptions.agent).to.equal(undefined);
+        expect(mockFetch.lastOptions.redirect).to.equal('error');
+      });
     });
   });
 });

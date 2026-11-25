@@ -6,7 +6,12 @@ import { duration } from 'moment';
 import { DataSourcePluginConfigType } from '../../config';
 import { parseClientOptions } from './client_config';
 
-jest.mock('fs');
+// Keep the real fs module, because importing the endpoint validator loads @osd/utils, which reads
+// the file system at import time. readFileSync calls the real one until a test resets the mock.
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return { ...actual, readFileSync: jest.fn(actual.readFileSync) };
+});
 const mockReadFileSync: jest.Mock = jest.requireMock('fs').readFileSync;
 
 const TEST_DATA_SOURCE_ENDPOINT = 'http://test.com/';
