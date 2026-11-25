@@ -61,14 +61,12 @@ export const API = {
 
 export const URI = {
   PPL: '/_plugins/_ppl',
-  // Asynchronous PPL job lifecycle: GET to poll a snapshot, DELETE to cancel and release.
-  // Append `/{id}`.
-  PPL_JOBS: '/_plugins/_ppl/jobs',
   SQL: '/_plugins/_sql',
   // Open Distro endpoints used for legacy Elasticsearch data sources (SQL/PPL live here on ES
   // domains that support them) when legacyElasticsearchCompatibility is enabled.
   PPL_OPENDISTRO: '/_opendistro/_ppl',
   SQL_OPENDISTRO: '/_opendistro/_sql',
+  // Shared by Spark async queries and asynchronous PPL jobs: GET `/{id}` to poll, DELETE to cancel.
   ASYNC_QUERY: '/_plugins/_async_query',
   DIRECT_QUERY: {
     QUERY: '/_plugins/_directquery/_query',

@@ -17,9 +17,8 @@ import { parseRowTimestamp } from './parse_row_timestamp';
  * Counts are the engine's own, over every matching document, not derived from the rows the client
  * happened to fetch.
  *
- * Snapshots are always `REPLACE`, at every offset, so each supersedes the last. A histogram sized
- * for a bar target yields only one: the engine publishes once its output rows cross a threshold,
- * and a few dozen buckets never do. An aggregation large enough does publish while running.
+ * Each snapshot carries every bucket so far and supersedes the last. A small aggregation may only
+ * appear in the final snapshot; a large one also publishes while it runs.
  */
 
 export interface HistogramBucket {
@@ -29,7 +28,7 @@ export interface HistogramBucket {
 }
 
 /** Identifies the bucket column by schema type, falling back to the non-numeric column. */
-const findBucketColumnIndex = (schema: PPLStreamSnapshot['schema']): number => {
+const findBucketColumnIndex = (schema: NonNullable<PPLStreamSnapshot['schema']>): number => {
   const byType = schema.findIndex((column) => /timestamp|date/i.test(column.type ?? ''));
   if (byType >= 0) return byType;
   const bySpan = schema.findIndex((column) => /span\s*\(/i.test(column.name ?? ''));

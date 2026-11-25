@@ -48,15 +48,13 @@ export interface StreamingQueryStatus {
   jobId?: string;
   /** The job's cluster, so release-on-unload can target a remote data source rather than local. */
   dataSourceId?: string;
-  sequence?: number;
-  updateMode?: 'APPEND' | 'REPLACE';
-  /** Accumulator size: rows the engine has committed, i.e. "rows found so far". */
+  /** Rows the engine has found so far. */
   total: number;
-  /** Rows the client currently holds and is rendering, which trails `total`. */
+  /** Rows the client holds and renders. */
   rowsFetched: number;
   /**
-   * `0`–`1`, or `-1` when unknown. Only populated for queries with an explicit `head`; clamped to
-   * the maximum seen so a bar cannot move backwards.
+   * `0`–`1`, or `-1` when unknown: the backend's estimate from the index scans it has completed,
+   * clamped to the maximum seen so a bar cannot move backwards.
    */
   fractionDone: number;
   isPolling: boolean;
