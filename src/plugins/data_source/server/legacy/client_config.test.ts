@@ -3,13 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { duration } from 'moment';
+import { loggingSystemMock } from '../../../../core/server/mocks';
 import { DataSourcePluginConfigType } from '../../config';
 import { parseClientOptions } from './client_config';
 
-jest.mock('fs');
+// Only readFileSync, which reads the CA files; importing core needs the rest of fs as it is.
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  readFileSync: jest.fn(jest.requireActual('fs').readFileSync),
+}));
 const mockReadFileSync: jest.Mock = jest.requireMock('fs').readFileSync;
 
 const TEST_DATA_SOURCE_ENDPOINT = 'http://test.com/';
+const logger = loggingSystemMock.createLogger();
 
 describe('parseClientOptions', () => {
   test('include the ssl client configs as defaults', () => {
@@ -24,7 +30,7 @@ describe('parseClientOptions', () => {
       },
     } as DataSourcePluginConfigType;
 
-    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [])).toEqual(
+    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger)).toEqual(
       expect.objectContaining({
         host: TEST_DATA_SOURCE_ENDPOINT,
         ssl: {
@@ -32,6 +38,7 @@ describe('parseClientOptions', () => {
         },
         requestTimeout: 10000,
         pingTimeout: 20000,
+        createNodeAgent: expect.any(Function),
       })
     );
   });
@@ -50,7 +57,7 @@ describe('parseClientOptions', () => {
         pingTimeout: duration(20, 'seconds'),
       },
     } as DataSourcePluginConfigType;
-    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [])).toEqual(
+    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger)).toEqual(
       expect.objectContaining({
         host: TEST_DATA_SOURCE_ENDPOINT,
         ssl: {
@@ -80,7 +87,7 @@ describe('parseClientOptions', () => {
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger);
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -116,7 +123,7 @@ describe('parseClientOptions', () => {
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger);
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -148,7 +155,7 @@ describe('parseClientOptions', () => {
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger);
     expect(mockReadFileSync).toHaveBeenCalledTimes(0);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -180,7 +187,7 @@ describe('parseClientOptions', () => {
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger);
     expect(mockReadFileSync).toHaveBeenCalledTimes(0);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -209,7 +216,7 @@ describe('parseClientOptions', () => {
       },
     } as DataSourcePluginConfigType;
 
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [], logger);
     expect(parsedConfig.suggestCompression).toBe(true);
   });
 });

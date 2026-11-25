@@ -57,6 +57,7 @@ test('parses minimally specified config', () => {
   ).toMatchInlineSnapshot(`
     Object {
       "apiVersion": "main",
+      "createNodeAgent": [Function],
       "hosts": Array [
         Object {
           "headers": Object {
@@ -119,6 +120,7 @@ test('parses fully specified config', () => {
   expect(opensearchClientConfig).toMatchInlineSnapshot(`
     Object {
       "apiVersion": "v7.0.0",
+      "createNodeAgent": [Function],
       "hosts": Array [
         Object {
           "auth": "opensearch:changeme",
@@ -201,6 +203,7 @@ test('parses config timeouts of moment.Duration type', () => {
   ).toMatchInlineSnapshot(`
     Object {
       "apiVersion": "main",
+      "createNodeAgent": [Function],
       "hosts": Array [
         Object {
           "headers": Object {
@@ -247,6 +250,7 @@ describe('#auth', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -299,6 +303,7 @@ describe('#auth', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -340,6 +345,7 @@ describe('#auth', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -532,6 +538,7 @@ describe('#ssl', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -580,6 +587,7 @@ describe('#ssl', () => {
     expect(clientConfig).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -624,6 +632,7 @@ describe('#ssl', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
@@ -694,6 +703,7 @@ describe('#ssl', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "apiVersion": "v7.0.0",
+        "createNodeAgent": [Function],
         "hosts": Array [
           Object {
             "headers": Object {
