@@ -50,7 +50,7 @@ export interface StreamingQueryStatus {
   dataSourceId?: string;
   /** Rows the engine has found so far. */
   total: number;
-  /** Rows the client holds and renders: `total`, up to the held-row cap. */
+  /** Rows the client holds and renders. */
   rowsFetched: number;
   /**
    * `0`–`1`, or `-1` when unknown: the backend's estimate from the index scans it has completed,

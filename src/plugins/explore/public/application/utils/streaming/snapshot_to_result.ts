@@ -84,7 +84,7 @@ export const snapshotRowsToObjects = (
 
 export interface SnapshotToSearchResultArgs {
   snapshot: PPLStreamSnapshot;
-  /** Rows held by the client: the snapshot's rows up to the held-row cap. */
+  /** Rows held by the client: the snapshot's rows. */
   rows: Array<Record<string, unknown>>;
   indexName?: string;
   elapsedMs: number;
@@ -123,7 +123,7 @@ export const snapshotToSearchResult = ({
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
-      // The engine's count, not `rows.length`, which stops at the held-row cap.
+      // The engine's count of rows found so far.
       total: totalOverride ?? snapshot.total ?? rows.length,
       max_score: 0,
       // PPL hits carry no document id and the table falls back to row position as its React key,

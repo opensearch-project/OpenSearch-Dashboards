@@ -34,9 +34,6 @@ import { streamJobError } from '../../streaming/stream_error_status';
  */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
 
-/** Rows held client-side; `total` still reports the real size. */
-export const STREAMING_MAX_HELD_ROWS = 100_000;
-
 export interface ExecuteStreamingQueryArgs {
   services: ExploreServices;
   cacheKey: string;
@@ -116,7 +113,7 @@ export const executeStreamingQuery = createAsyncThunk<
     const startedAt = Date.now();
     let formatter: FieldValueFormatter | undefined;
 
-    const rows = new StreamRowAccumulator(STREAMING_MAX_HELD_ROWS, () => formatter);
+    const rows = new StreamRowAccumulator(() => formatter);
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;

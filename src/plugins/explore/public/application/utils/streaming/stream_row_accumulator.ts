@@ -12,7 +12,8 @@ import {
 } from './snapshot_to_result';
 
 /**
- * Holds the rows of a streaming query, capped at `maxRows`.
+ * Holds the rows of a streaming query. Their number is bounded by the query's `fetch_size`
+ * (`discover:sampleSize`), which the backend applies.
  *
  * Every snapshot carries all the rows found so far, so each one replaces what is held. The row
  * generation changes only when the new rows are not an extension of the held ones, so the table
@@ -24,7 +25,6 @@ export class StreamRowAccumulator {
   private generation = 0;
 
   constructor(
-    private readonly maxRows: number,
     private readonly formatter: () => FieldValueFormatter | undefined = () => undefined
   ) {}
 
@@ -44,13 +44,12 @@ export class StreamRowAccumulator {
   absorb(snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>): number {
     // An empty snapshot is taken as it is too: the backend drops the rows it has sent when a query
     // falls back to the legacy engine, and they must not stay on screen.
-    const incoming = snapshotRowsToObjects(snapshot, this.formatter());
+    const next = snapshotRowsToObjects(snapshot, this.formatter());
     const { highlights = [] } = splitHighlightColumn(snapshot);
 
-    const next = incoming.slice(0, this.maxRows);
     if (!isEqual(this.rows, next.slice(0, this.rows.length))) this.generation += 1;
     this.rows = next;
-    this.highlights = highlights.slice(0, this.maxRows);
+    this.highlights = highlights;
     return this.rows.length;
   }
 }
