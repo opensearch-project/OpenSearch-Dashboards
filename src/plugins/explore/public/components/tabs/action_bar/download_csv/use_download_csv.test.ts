@@ -85,6 +85,7 @@ const mockOnError = jest.fn();
 // this is a mock of index pattern that has just the things needed for this test
 const mockIndexPattern = {
   formatHit: (row: OpenSearchSearchHit) => row._source,
+  flattenHit: (row: OpenSearchSearchHit) => row._source,
   fields: {
     getByName: (columnName: string) => {
       if (columnName === '_source') {
