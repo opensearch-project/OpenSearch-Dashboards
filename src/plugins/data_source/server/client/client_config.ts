@@ -7,6 +7,7 @@ import { ClientOptions } from '@opensearch-project/opensearch';
 import { checkServerIdentity } from 'tls';
 import { DataSourcePluginConfigType } from '../../config';
 import { readCertificateAuthorities } from '../util/tls_settings_provider';
+import { createGuardedLookup } from '../util/endpoint_validator';
 
 /** @internal */
 type DataSourceSSLConfigOptions = Partial<{
@@ -70,6 +71,14 @@ export function parseClientOptions(
       ? { 'accept-encoding': 'gzip, deflate' }
       : {},
   };
+
+  if (config.endpointDeniedIPs?.length) {
+    // Check every address the endpoint resolves to when connecting, not only when it was saved.
+    // `lookup` is passed on to net.connect, but is missing from the AgentOptions type.
+    clientOptions.agent = {
+      lookup: createGuardedLookup(config.endpointDeniedIPs, config.endpointAllowlistedSuffixes),
+    } as ClientOptions['agent'];
+  }
 
   return clientOptions;
 }

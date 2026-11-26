@@ -10,8 +10,6 @@ import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_sl
 import {
   executeStreamingQuery,
   isStreamUnavailable,
-  streamingPollCount,
-  STREAMING_LONG_POLL_WAIT,
   STREAMING_POLL_INTERVAL_MS,
 } from './streaming_query_actions';
 
@@ -48,7 +46,7 @@ const services = {
   },
 } as any;
 
-const snapshot = ({ at = 0, ...overrides }: Record<string, any> = {}) => ({
+const snapshot = (overrides: Record<string, any> = {}) => ({
   status: 'RUNNING',
   schema: [
     { name: '@timestamp', type: 'timestamp' },
@@ -57,9 +55,6 @@ const snapshot = ({ at = 0, ...overrides }: Record<string, any> = {}) => ({
   datarows: [],
   size: 0,
   total: 0,
-  // The real engine always echoes the window it served, and rows are placed by it. `at` is the
-  // offset these rows start at.
-  window: { offset: at, count: 10_000 },
   ...overrides,
 });
 
@@ -100,16 +95,6 @@ const run = async (args: Record<string, unknown> = {}) => {
 /** How the http client reports a connection that never got a response. */
 const networkError = () =>
   Object.assign(new TypeError('Failed to fetch'), { request: { url: '/api/job' } });
-
-const exhausted = (total: number) =>
-  snapshot({
-    id: 'job-1',
-    status: 'SUCCEEDED',
-    update_mode: 'APPEND',
-    datarows: [],
-    size: 0,
-    total,
-  });
 
 describe('executeStreamingQuery', () => {
   beforeEach(() => {
@@ -159,56 +144,48 @@ describe('executeStreamingQuery', () => {
     expect(final.streaming).toBeUndefined();
   });
 
-  it('accumulates APPEND rows across polls and advances the offset', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
+  it('replaces the rows with each snapshot, which carries every row found so far', async () => {
+    const rows = (n: number) => [...Array(n).keys()].map((i) => ['2026-09-15 10:00:00', i]);
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1', datarows: rows(2), size: 2, total: 2 }))
       .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          sequence: 1,
-          update_mode: 'APPEND',
-          datarows: [['2026-09-15 10:00:00', 1]],
-          size: 1,
-          total: 100,
-        })
-      )
-      .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          sequence: 2,
-          status: 'SUCCEEDED',
-          update_mode: 'APPEND',
-          at: 1,
-          datarows: [['2026-09-15 10:01:00', 2]],
-          size: 1,
-          total: 200,
-        })
-      )
-      .mockResolvedValue(exhausted(200));
+        snapshot({ id: 'job-1', status: 'SUCCEEDED', datarows: rows(5), size: 5, total: 5 })
+      );
 
     const { results } = await run();
 
-    expect(mockPoll).toHaveBeenNthCalledWith(1, expect.objectContaining({ offset: 0 }));
-    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 1 }));
-    // Rows from both snapshots are retained.
-    expect(results[results.length - 1].results.hits.hits).toHaveLength(2);
+    const hits = results[results.length - 1].results.hits.hits;
+    expect(hits.map((h: any) => h._source.event_id)).toEqual([0, 1, 2, 3, 4]);
   });
 
-  it('reports the accumulator total, not the rows held', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
+  // A query that falls back to the legacy engine drops the rows it has sent and returns none until
+  // it finishes.
+  it('clears the rows shown when a running snapshot drops them', async () => {
+    const rows = (n: number) => [...Array(n).keys()].map((i) => ['2026-09-15 10:00:00', i]);
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', datarows: rows(3), size: 3, total: 3 }));
     mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1' }))
       .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          sequence: 1,
-          status: 'SUCCEEDED',
-          update_mode: 'APPEND',
-          datarows: [['2026-09-15 10:00:00', 1]],
-          size: 1,
-          total: 480954,
-        })
-      )
-      .mockResolvedValue(exhausted(480954));
+        snapshot({ id: 'job-1', status: 'SUCCEEDED', datarows: rows(2), size: 2, total: 2 })
+      );
+
+    const { results } = await run();
+
+    expect(results.map((r) => r.results.hits.hits.length)).toEqual([3, 0, 2]);
+  });
+
+  it('reports the total the engine found, not the rows held', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValueOnce(
+      snapshot({
+        id: 'job-1',
+        status: 'SUCCEEDED',
+        datarows: [['2026-09-15 10:00:00', 1]],
+        size: 1,
+        total: 480954,
+      })
+    );
 
     const { results, statuses } = await run();
 
@@ -218,49 +195,14 @@ describe('executeStreamingQuery', () => {
     expect(streaming.rowsFetched).toBe(1);
   });
 
-  it('always re-reads from offset 0 for REPLACE and discards prior rows', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
-    mockPoll
-      .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          sequence: 1,
-          update_mode: 'REPLACE',
-          datarows: [['2026-09-15 10:00:00', 1]],
-          size: 1,
-          total: 1,
-        })
-      )
-      .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          sequence: 2,
-          status: 'SUCCEEDED',
-          update_mode: 'REPLACE',
-          datarows: [['2026-09-15 11:00:00', 9]],
-          size: 1,
-          total: 1,
-        })
-      );
-
-    const { results } = await run();
-
-    expect(mockPoll).toHaveBeenNthCalledWith(1, expect.objectContaining({ offset: 0 }));
-    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 0 }));
-    const finalHits = results[results.length - 1].results.hits.hits;
-    expect(finalHits).toHaveLength(1);
-    expect(finalHits[0]._source.event_id).toBe(9);
-  });
-
-  it('always absorbs REPLACE snapshots, since values can change while total and size do not', async () => {
-    // A histogram keeps 25 buckets throughout while the counts inside them move, so REPLACE must
+  it('absorbs every snapshot, since values can change while total and size do not', async () => {
+    // A histogram keeps 25 buckets throughout while the counts inside them move, so a snapshot must
     // not be skipped on an unchanged total/size.
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll
       .mockResolvedValueOnce(
         snapshot({
           id: 'job-1',
-          update_mode: 'REPLACE',
           datarows: [['2026-09-15 10:00:00', 1]],
           size: 1,
           total: 1,
@@ -270,7 +212,6 @@ describe('executeStreamingQuery', () => {
         snapshot({
           id: 'job-1',
           status: 'SUCCEEDED',
-          update_mode: 'REPLACE',
           datarows: [['2026-09-15 10:00:00', 999]],
           size: 1,
           total: 1,
@@ -338,37 +279,10 @@ describe('executeStreamingQuery', () => {
 
   // `total` plateaus as soon as the engine finishes scanning, so gating on its growth stranded the
   // client on its first page and silently discarded the rest.
-  it('keeps paging after the engine stops reporting growth', async () => {
+  it('does not double-count a repeated snapshot', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    const page = (n: number) =>
-      snapshot({
-        id: 'job-1',
-        update_mode: 'APPEND',
-        at: n - 1,
-        datarows: [[`2026-09-15 10:00:0${n}`, n]],
-        size: 1,
-        // Committed up front and unchanging, as a completed scan reports it.
-        total: 3,
-      });
-    mockPoll
-      .mockResolvedValueOnce(page(1))
-      .mockResolvedValueOnce(page(2))
-      .mockResolvedValueOnce(page(3))
-      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 3 }));
-
-    const { results } = await run();
-
-    expect(results[results.length - 1].results.hits.hits).toHaveLength(3);
-    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 1 }));
-    expect(mockPoll).toHaveBeenNthCalledWith(3, expect.objectContaining({ offset: 2 }));
-  });
-
-  it('does not double-count a repeated APPEND snapshot', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
     const repeated = snapshot({
       id: 'job-1',
-      sequence: 1,
-      update_mode: 'APPEND',
       datarows: [['2026-09-15 10:00:00', 1]],
       size: 1,
       total: 1,
@@ -376,7 +290,7 @@ describe('executeStreamingQuery', () => {
     mockPoll
       .mockResolvedValueOnce(repeated)
       .mockResolvedValueOnce(repeated)
-      .mockResolvedValueOnce(snapshot({ id: 'job-1', sequence: 2, status: 'SUCCEEDED', total: 1 }));
+      .mockResolvedValueOnce({ ...repeated, status: 'SUCCEEDED' });
 
     const { results } = await run();
 
@@ -385,16 +299,12 @@ describe('executeStreamingQuery', () => {
   });
 
   it('clamps fractionDone so it cannot move backwards', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll
+      .mockResolvedValueOnce(snapshot({ id: 'job-1', progress: { fraction_done: 0.42 } }))
+      .mockResolvedValueOnce(snapshot({ id: 'job-1', progress: { fraction_done: -1 } }))
       .mockResolvedValueOnce(
-        snapshot({ id: 'job-1', sequence: 1, progress: { fraction_done: 0.42 } })
-      )
-      .mockResolvedValueOnce(
-        snapshot({ id: 'job-1', sequence: 2, progress: { fraction_done: -1 } })
-      )
-      .mockResolvedValueOnce(
-        snapshot({ id: 'job-1', sequence: 3, status: 'SUCCEEDED', progress: { fraction_done: 1 } })
+        snapshot({ id: 'job-1', status: 'SUCCEEDED', progress: { fraction_done: 1 } })
       );
 
     const { statuses } = await run();
@@ -410,7 +320,6 @@ describe('executeStreamingQuery', () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockResolvedValue({
       status: 'SUCCEEDED',
-      update_mode: 'REPLACE',
       schema: [
         { name: 'count()', type: 'bigint' },
         { name: 'span(`@timestamp`,1h)', type: 'timestamp' },
@@ -432,16 +341,54 @@ describe('executeStreamingQuery', () => {
     expect(results[results.length - 1].results.hits.total).toBe(270588);
   });
 
+  const histogramSnapshot = (status: string, datarows: unknown[][]) => ({
+    id: 'job-1',
+    status,
+    schema: [
+      { name: 'count()', type: 'bigint' },
+      { name: 'span(`@timestamp`,1h)', type: 'timestamp' },
+    ],
+    datarows,
+    size: datarows.length,
+    total: datarows.length,
+  });
+
+  // At the start of a run, an empty set would blank the previous run's chart.
+  it('does not publish an empty bucket set before any bucket is shown', async () => {
+    mockSubmit.mockResolvedValue(histogramSnapshot('RUNNING', []));
+    mockPoll
+      .mockResolvedValueOnce(histogramSnapshot('RUNNING', []))
+      .mockResolvedValueOnce(histogramSnapshot('SUCCEEDED', [[5, '2026-09-14 19:00:00']]));
+
+    const { results } = await run({ asHistogram: { aggId: '2' } });
+
+    expect(results.map((r) => r.results.aggregations['2'].buckets.length)).toEqual([1]);
+  });
+
+  // The backend drops a query's buckets when it falls back to the legacy engine.
+  it('clears the buckets shown when a running snapshot drops them', async () => {
+    mockSubmit.mockResolvedValue(histogramSnapshot('RUNNING', [[5, '2026-09-14 19:00:00']]));
+    mockPoll
+      .mockResolvedValueOnce(histogramSnapshot('RUNNING', []))
+      .mockResolvedValueOnce(histogramSnapshot('SUCCEEDED', [[7, '2026-09-14 19:00:00']]));
+
+    const { results } = await run({ asHistogram: { aggId: '2' } });
+
+    expect(results.map((r) => r.results.aggregations['2'].buckets.length)).toEqual([1, 0, 1]);
+  });
+
   it('leaves aggregations alone when no histogram is configured', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
-    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1, status: 'SUCCEEDED' }));
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
 
     const { results } = await run();
     expect(results[results.length - 1].results.aggregations).toBeUndefined();
   });
 
-  it('marks the result incomplete when the job has expired, rather than finished', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
+  it('marks the result incomplete when the job is lost after rows are shown', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
 
     const { statuses } = await run();
@@ -452,16 +399,24 @@ describe('executeStreamingQuery', () => {
     expect(final.streaming?.aborted).toBe(false);
   });
 
+  it('falls back when the job is lost before any row is shown, without releasing it', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
+
+    const { action } = await run();
+
+    expect(isStreamUnavailable(action)).toBe(true);
+    expect(mockCancel).not.toHaveBeenCalled();
+  });
+
   it('stays LOADING while polling and marks isPolling so partial rows are still rendered', async () => {
     // `isPolling`, not a premature READY, is what tells bottom_right_container to render partial
     // results instead of the loading spinner. READY must continue to mean "finished".
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll
       .mockResolvedValueOnce(
         snapshot({
           id: 'job-1',
-          sequence: 1,
-          update_mode: 'APPEND',
           datarows: [['2026-09-15 10:00:00', 1]],
           size: 1,
           total: 500000,
@@ -470,16 +425,15 @@ describe('executeStreamingQuery', () => {
       .mockResolvedValueOnce(
         snapshot({
           id: 'job-1',
-          sequence: 2,
           status: 'SUCCEEDED',
-          update_mode: 'APPEND',
-          at: 1,
-          datarows: [['2026-09-15 10:01:00', 2]],
-          size: 1,
+          datarows: [
+            ['2026-09-15 10:00:00', 1],
+            ['2026-09-15 10:01:00', 2],
+          ],
+          size: 2,
           total: 500000,
         })
-      )
-      .mockResolvedValue(exhausted(500000));
+      );
 
     const { statuses } = await run();
     const inFlight = statuses.filter((s) => s.status.streaming?.isPolling === true);
@@ -495,16 +449,16 @@ describe('executeStreamingQuery', () => {
   });
 
   it('reports LOADING before any rows arrive', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
-    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1, status: 'SUCCEEDED' }));
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
 
     const { statuses } = await run();
     expect(statuses[0].status.status).toBe('loading');
   });
 
   it('marks polling false once terminal so the UI can stop the spinner', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
-    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1, status: 'SUCCEEDED' }));
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
 
     const { statuses } = await run();
     const streamingStates = statuses
@@ -521,7 +475,6 @@ describe('executeStreamingQuery', () => {
     mockSubmit.mockResolvedValue(
       snapshot({
         id: 'job-1',
-        update_mode: 'APPEND',
         datarows: [['2026-09-15 10:00:00', 1]],
         size: 1,
         total: 900,
@@ -555,7 +508,6 @@ describe('executeStreamingQuery', () => {
     mockSubmit.mockResolvedValue(
       snapshot({
         id: 'job-1',
-        update_mode: 'APPEND',
         datarows: [['2026-09-15 10:00:00', 1]],
         size: 1,
         total: 42,
@@ -608,11 +560,29 @@ describe('executeStreamingQuery', () => {
     expect(final.error?.message.details).toContain("can't resolve Symbol");
   });
 
+  // A FAILED body has `error` and no rows, so reading it as a snapshot must not throw or publish.
+  it('reports a job that fails after rendering rows as an error', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
+    mockPoll.mockResolvedValue({
+      status: 'FAILED',
+      progress: { fraction_done: 0.3 },
+      error: { type: 'IllegalArgumentException', reason: 'boom', code: 'FIELD_NOT_FOUND' },
+    });
+
+    const { results, statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
+
+    expect(results).toHaveLength(1);
+    expect(final.status).toBe('error');
+    expect(final.error?.message.reason).toBe('boom');
+  });
+
   it('treats a job cancelled elsewhere as stopped, keeping what was rendered', async () => {
     mockSubmit.mockResolvedValue(
       snapshot({
         id: 'job-1',
-        update_mode: 'APPEND',
         datarows: [['2026-09-15 10:00:00', 1]],
         size: 1,
         total: 7,
@@ -700,8 +670,8 @@ describe('executeStreamingQuery', () => {
       const onFirstRows = jest.fn();
       mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
       mockPoll
-        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
-        .mockResolvedValueOnce(rowsSnap({ id: 'job-1', update_mode: 'REPLACE' }))
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1' }))
+        .mockResolvedValueOnce(rowsSnap({ id: 'job-1' }))
         .mockResolvedValue(rowsSnap({ id: 'job-1', status: 'SUCCEEDED' }));
 
       await run({ onFirstRows });
@@ -719,29 +689,6 @@ describe('executeStreamingQuery', () => {
       expect(onFirstRows).not.toHaveBeenCalled();
     });
 
-    // A job that finishes in the first poll still has its tail paged in afterwards, and that can
-    // take seconds the dependent queries should not wait out.
-    it('fires before the tail of a completed job is paged in', async () => {
-      let pollsWhenFired: number | undefined;
-      const onFirstRows = jest.fn(() => (pollsWhenFired = mockPoll.mock.calls.length));
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-      mockPoll
-        .mockResolvedValueOnce(
-          snapshot({
-            id: 'job-1',
-            status: 'SUCCEEDED',
-            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
-            total: 25,
-          })
-        )
-        .mockResolvedValue(exhausted(25));
-
-      await run({ onFirstRows });
-
-      expect(pollsWhenFired).toBe(1);
-      expect(mockPoll.mock.calls.length).toBeGreaterThan(1);
-    });
-
     it('does not fire for a histogram job', async () => {
       const onFirstRows = jest.fn();
       mockSubmit.mockResolvedValue(rowsSnap({ status: 'SUCCEEDED' }));
@@ -752,78 +699,44 @@ describe('executeStreamingQuery', () => {
     });
   });
 
-  describe('long polling', () => {
-    it('waits on the server for a snapshot newer than the last one seen', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 3 }));
-      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', sequence: 4 }));
+  it('polls with only the job id, its data source and the long-numerals flag', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
 
-      await run();
+    await run({ dataSourceId: 'ds-1' });
 
-      expect(mockPoll.mock.calls[0][0]).toMatchObject({
-        waitForSequence: 3,
-        waitForCompletionTimeout: STREAMING_LONG_POLL_WAIT,
-      });
-    });
+    const { signal, ...args } = mockPoll.mock.calls[0][0];
+    expect(args).toEqual({ id: 'job-1', dataSourceId: 'ds-1', withLongNumeralsSupport: false });
+    expect(signal).toBeInstanceOf(AbortSignal);
+  });
 
-    it('polls without waiting when the backend reports no sequence', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+  it('follows a slow poll at once but never starts two polls within the interval', async () => {
+    const starts: number[] = [];
+    const t0 = Date.now();
+    const respond = (ms: number, snap: object) => () => {
+      starts.push(Date.now() - t0);
+      return new Promise((resolve) => setTimeout(() => resolve(snap), ms));
+    };
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      .mockImplementationOnce(respond(5_000, snapshot({ id: 'job-1' })))
+      .mockImplementationOnce(respond(0, snapshot({ id: 'job-1' })))
+      .mockImplementation(respond(0, snapshot({ id: 'job-1', status: 'SUCCEEDED' })));
+    const dispatch: jest.Mock = jest.fn((action: any) =>
+      typeof action === 'function' ? action(dispatch, () => ({})) : action
+    );
 
-      await run();
+    const promise = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+    } as any)(dispatch, () => ({}) as any, undefined);
+    await jest.advanceTimersByTimeAsync(10_000);
+    await promise;
 
-      expect(mockPoll.mock.calls[0][0].waitForSequence).toBeUndefined();
-      expect(mockPoll.mock.calls[0][0].waitForCompletionTimeout).toBeUndefined();
-    });
-
-    // A newer sequence may never come once the engine has committed everything, so waiting here
-    // would stall paging until the wait lapses.
-    it('does not wait while committed rows are still unread', async () => {
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
-      mockPoll
-        .mockResolvedValueOnce(
-          snapshot({
-            id: 'job-1',
-            sequence: 2,
-            update_mode: 'APPEND',
-            datarows: [...Array(10).keys()].map((n) => ['2026-09-15 10:00:00', n]),
-            total: 25,
-          })
-        )
-        .mockResolvedValue(exhausted(25));
-
-      await run();
-
-      expect(mockPoll.mock.calls[1][0]).toMatchObject({ offset: 10 });
-      expect(mockPoll.mock.calls[1][0].waitForSequence).toBeUndefined();
-    });
-
-    it('follows a long poll at once but never starts two polls within the interval', async () => {
-      const starts: number[] = [];
-      const t0 = Date.now();
-      const respond = (ms: number, snap: object) => () => {
-        starts.push(Date.now() - t0);
-        return new Promise((resolve) => setTimeout(() => resolve(snap), ms));
-      };
-      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1 }));
-      mockPoll
-        .mockImplementationOnce(respond(5_000, snapshot({ id: 'job-1', sequence: 2 })))
-        .mockImplementationOnce(respond(0, snapshot({ id: 'job-1', sequence: 3 })))
-        .mockImplementation(respond(0, snapshot({ id: 'job-1', status: 'SUCCEEDED' })));
-      const dispatch: jest.Mock = jest.fn((action: any) =>
-        typeof action === 'function' ? action(dispatch, () => ({})) : action
-      );
-
-      const promise = executeStreamingQuery({
-        services,
-        cacheKey: 'ck',
-        queryString: 'source=logs',
-      } as any)(dispatch, () => ({}) as any, undefined);
-      await jest.advanceTimersByTimeAsync(10_000);
-      await promise;
-
-      // The 5s long poll is followed immediately; the instant one after it still waits the interval.
-      expect(starts).toEqual([1_000, 6_000, 7_000]);
-    });
+    // A large result can take seconds to come back; the next poll follows it without a further
+    // wait, and the quick one after that still waits the interval.
+    expect(starts).toEqual([1_000, 6_000, 7_000]);
   });
 
   it('keeps polling while the tab is hidden', async () => {
@@ -842,7 +755,9 @@ describe('executeStreamingQuery', () => {
 
   // A malformed response or a bug of ours has no status either, but fails the same way on retry.
   it('does not retry an error that never reached the network layer', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
 
     const { statuses } = await run();
@@ -852,7 +767,9 @@ describe('executeStreamingQuery', () => {
   });
 
   it('does not retry a client error, which would fail again', async () => {
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockSubmit.mockResolvedValue(
+      snapshot({ id: 'job-1', datarows: [['2026-09-15 10:00:00', 1]], size: 1, total: 1 })
+    );
     mockPoll.mockRejectedValue({ response: { status: 400 } });
 
     const { statuses } = await run();
@@ -932,6 +849,26 @@ describe('executeStreamingQuery', () => {
 
       expect(isStreamUnavailable(action)).toBe(true);
       expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    });
+
+    // A user allowed to submit but not to fetch gets a job id, then 403 on every poll.
+    it('falls back when polling is refused before any row is shown', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockRejectedValue({ response: { status: 403 }, body: { statusCode: 403 } });
+
+      const { action } = await run();
+
+      expect(isStreamUnavailable(action)).toBe(true);
+      expect(mockCancel).toHaveBeenCalledWith('job-1', undefined);
+    });
+
+    it('falls back when a histogram job fails before any bucket is shown', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockRejectedValue({ response: { status: 403 }, body: { statusCode: 403 } });
+
+      const { action } = await run({ asHistogram: { aggId: '2' } });
+
+      expect(isStreamUnavailable(action)).toBe(true);
     });
 
     // A superseded run must stay silent: its successor owns the cache key.
@@ -1050,83 +987,7 @@ describe('executeStreamingQuery', () => {
     await promise;
   });
 
-  // A finished job is served as one REPLACE snapshot carrying only the requested window, so without
-  // paging the table showed ROWS_PER_POLL rows and silently dropped the rest.
-  it('pages through rows the terminal snapshot did not serve', async () => {
-    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
-    const full = (ids: number[]) =>
-      snapshot({
-        id: 'job-1',
-        status: 'SUCCEEDED',
-        update_mode: 'REPLACE',
-        at: ids[0],
-        datarows: ids.map(row),
-        size: ids.length,
-        total: 25,
-      });
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll
-      // The terminal snapshot: 10 of 25 rows.
-      .mockResolvedValueOnce(full([...Array(10).keys()]))
-      // Paging asks for the next windows.
-      .mockResolvedValueOnce(full([...Array(10).keys()].map((n) => n + 10)))
-      .mockResolvedValueOnce(full([20, 21, 22, 23, 24]))
-      .mockResolvedValue(exhausted(25));
-
-    const { results } = await run();
-
-    expect(results[results.length - 1].results.hits.hits).toHaveLength(25);
-    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 10 }));
-    expect(mockPoll).toHaveBeenNthCalledWith(3, expect.objectContaining({ offset: 20 }));
-  });
-
-  // A flaky poll while paging the tail of an already-completed query must not discard the rows
-  // already held or flip the successful result to an error.
-  it('keeps the completed result when paging the tail fails', async () => {
-    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
-    const terminal = snapshot({
-      id: 'job-1',
-      status: 'SUCCEEDED',
-      update_mode: 'REPLACE',
-      at: 0,
-      datarows: [...Array(10).keys()].map(row),
-      size: 10,
-      total: 25,
-    });
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(networkError());
-
-    const { results, statuses } = await run();
-
-    expect(statuses[statuses.length - 1].status.status).toBe('ready');
-    expect(results[results.length - 1].results.hits.hits).toHaveLength(10);
-    expect(statuses.some((s) => s.status.status === 'error')).toBe(false);
-    // 10 of 25 rows: the query finished, but the result shown is not all of it.
-    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
-  });
-
-  it('marks the result incomplete when the job expires while its tail is paged', async () => {
-    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
-    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
-    mockPoll
-      .mockResolvedValueOnce(
-        snapshot({
-          id: 'job-1',
-          status: 'SUCCEEDED',
-          update_mode: 'REPLACE',
-          datarows: [...Array(10).keys()].map(row),
-          size: 10,
-          total: 25,
-        })
-      )
-      .mockRejectedValue(new PPLStreamJobNotFoundError('job-1'));
-
-    const { statuses } = await run();
-
-    expect(statuses[statuses.length - 1].status.streaming?.interrupted).toBe(true);
-  });
-
-  it('leaves a result that was paged in full unmarked', async () => {
+  it('leaves a completed result unmarked', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
     mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0 }));
 
@@ -1157,9 +1018,9 @@ describe('executeStreamingQuery', () => {
 });
 
 describe('executeStreamingQuery against a stateful engine', () => {
-  // Per-call mocks cannot express "a window is served from the offset the client asked for", which
-  // is where every streaming bug found in manual testing actually lived. Driving the real thunk
-  // against an engine that honours offset/count covers the lifecycle end to end.
+  // Per-call mocks cannot express a result that grows across polls, which is where most streaming
+  // bugs found in manual testing lived. Driving the real thunk against a stateful engine covers the
+  // lifecycle end to end.
   const drive = async (engine: FakeStreamEngine, args: Record<string, unknown> = {}) => {
     mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
     mockPoll.mockImplementation((a: any) => engine.poll(a));
@@ -1171,25 +1032,15 @@ describe('executeStreamingQuery against a stateful engine', () => {
     jest.useFakeTimers();
   });
 
-  it('accumulates every committed row across the run, not just the last window', async () => {
+  it('ends with every row the engine found, in order', async () => {
     const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
 
     const { results } = await drive(engine);
 
     const hits = results[results.length - 1].results.hits.hits;
     expect(hits).toHaveLength(40);
-    // Each row carries its absolute index, so a dropped or repeated window is visible here.
+    // Each row carries its index, so a dropped or repeated row is visible here.
     expect(hits.map((h: any) => h._source.event_id)).toEqual([...Array(40).keys()]);
-  });
-
-  it('asks for successive windows rather than re-reading the first', async () => {
-    const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
-
-    await drive(engine);
-
-    const offsets = engine.servedWindows.map((w) => w.offset);
-    expect(offsets).toEqual([...new Set(offsets)]);
-    expect(Math.max(...offsets)).toBeGreaterThan(0);
   });
 
   it('keeps the rows it holds when the user stops mid-run', async () => {
@@ -1198,7 +1049,7 @@ describe('executeStreamingQuery against a stateful engine', () => {
     abortError.name = 'AbortError';
     let polls = 0;
     mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
-    // Two windows arrive, then the user presses Stop.
+    // Two snapshots arrive, then the user presses Stop.
     mockPoll.mockImplementation((a: any) => {
       if (++polls > 2) return Promise.reject(abortError);
       return engine.poll(a);
@@ -1293,17 +1144,5 @@ describe('executeStreamingQuery against a stateful engine', () => {
 
     expect(results[results.length - 1].results.hits.total).toBe(40);
     expect(statuses[statuses.length - 1].status.streaming.total).toBe(40);
-  });
-});
-
-describe('streamingPollCount', () => {
-  it('asks for a full row window while the held-row cap has not been reached', () => {
-    expect(streamingPollCount(10_000, false)).toBe(10_000);
-  });
-
-  // Past the cap the accumulator keeps nothing, so fetching a full window every interval is pure
-  // waste; shrink to the smallest window the route allows and poll only for status/progress.
-  it('shrinks to a status-only window once the held-row cap is reached', () => {
-    expect(streamingPollCount(10_000, true)).toBe(1);
   });
 });

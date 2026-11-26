@@ -11,13 +11,13 @@ import {
   defaultPrepareQueryString,
   executeQueries,
 } from '../state_management/actions/query_actions';
-import { STREAMING_MAX_HELD_ROWS } from '../state_management/actions/streaming_query_actions';
 import { clearQueryStatusMap, clearResults } from '../state_management/slices';
 import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { isStreamingQueryAbortable } from '../streaming/streaming_abort_registry';
 
 // A refresh would supersede the run, and with an interval shorter than the query nothing would
-// ever render. Past the row cap the run only polls for status, so refreshes may resume.
+// ever render. So refreshes wait while the run is still polling: rows may still arrive, even when
+// the client has caught up with what the query has produced so far.
 const isTableStillFilling = (state: RootState): boolean => {
   let cacheKey: string;
   try {
@@ -26,10 +26,7 @@ const isTableStillFilling = (state: RootState): boolean => {
     return false;
   }
   if (!isStreamingQueryAbortable(cacheKey)) return false;
-  const streaming = state.queryEditor?.queryStatusMap?.[cacheKey]?.streaming;
-  if (!streaming?.isPolling) return false;
-  // `total` counts only the rows produced so far, so a client that has caught up is not done.
-  return streaming.rowsFetched < STREAMING_MAX_HELD_ROWS;
+  return Boolean(state.queryEditor?.queryStatusMap?.[cacheKey]?.streaming?.isPolling);
 };
 
 /**

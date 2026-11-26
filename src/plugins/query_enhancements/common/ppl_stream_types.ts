@@ -4,67 +4,49 @@
  */
 
 /**
- * Types for the asynchronous PPL partial-results API (opensearch-project/sql#5765).
- * Shared by the server proxy routes and the client polling hook.
+ * Types for the asynchronous PPL query API (opensearch-project/sql#5765): submit through
+ * `POST /_plugins/_ppl`, then `GET`/`DELETE /_plugins/_async_query/{id}`. Shared by the server proxy
+ * routes and the client polling loop.
  */
 
 export type PPLStreamStatus = 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED';
-
-/**
- * `APPEND`: rows at the requested offset are committed and will not be revised.
- * `REPLACE`: the result set is provisional and may be revised, so it is re-read from the start.
- *
- * This describes what to request next, not where returned rows belong: a completed job reports
- * REPLACE while serving only the window asked for, so placement follows `window`.
- */
-export type PPLStreamUpdateMode = 'APPEND' | 'REPLACE';
 
 /** Any counter may be this when the engine cannot supply it for a given plan. */
 export const PPL_STREAM_UNKNOWN = -1;
 
 export interface PPLStreamProgress {
-  /**
-   * `0.0`–`1.0`. Source completion contributes at most 0.8, the rest reserved for coordinator work,
-   * so a running query cannot report 1. Scaled to the whole scan, not to any row limit.
-   */
+  /** `0.0`–`1.0`; never decreases between polls, and stays below 1 until the job succeeds. */
   fraction_done: number;
-  /** Absent on newer backends; optional so a snapshot from either parses. */
-  shards_total?: number;
-  shards_completed?: number;
 }
 
+/** The fields a synchronous PPL request returns for the same failure. */
 export interface PPLStreamError {
   type: string;
   reason: string;
   details?: string;
+  code?: string;
+  context?: Record<string, unknown>;
+  location?: string[];
+  suggestion?: string;
 }
 
 export interface PPLStreamSnapshot {
   /** Absent when the query completed within `wait_for_completion_timeout` (nothing to poll). */
   id?: string;
-  status: PPLStreamStatus;
-  /**
-   * Monotonic snapshot version, absent on newer backends. Detect a changed snapshot from
-   * `total`/`size` instead.
-   */
-  sequence?: number;
-  update_mode?: PPLStreamUpdateMode;
+  /** Absent on a result that finished within the submit wait, which uses the synchronous body. */
+  status?: PPLStreamStatus;
   progress?: PPLStreamProgress;
-  /** Window actually served, echoing the requested `offset`/`count`. */
-  window?: { offset: number; count: number };
-  schema: Array<{ name: string; type: string }>;
-  datarows: unknown[][];
-  /** Rows in this response (`datarows.length`). */
-  size: number;
-  /** Size of the whole accumulator, not of this response. Drives the "rows found so far" readout. */
-  total: number;
-  start_time_in_millis?: number;
-  expiration_time_in_millis?: number;
-  /** Total execution time, terminal snapshots only. */
-  took?: number;
+  /**
+   * Every row found so far: each response replaces the previous one, it is not an increment.
+   * Absent, with `size` and `total`, on FAILED and CANCELLED bodies.
+   */
+  schema?: Array<{ name: string; type: string }>;
+  datarows?: unknown[][];
+  size?: number;
+  total?: number;
   error?: PPLStreamError;
-  /** Not yet sent on the async envelope; declared so the client surfaces them when it is. */
-  warnings?: Array<{ message: string; detail?: string }>;
+  /** Same shape as the synchronous response's, so the results banner titles them by `type`. */
+  warnings?: Array<{ type: string; message: string; detail?: string }>;
   /** Requested with `profile: true`; `thread_pool` tells the UI it ran on the complex pool. */
   profile?: { thread_pool?: string };
 }
@@ -75,7 +57,8 @@ const TERMINAL: ReadonlySet<PPLStreamStatus> = new Set<PPLStreamStatus>([
   'CANCELLED',
 ]);
 
-export const isTerminalPPLStreamStatus = (status: PPLStreamStatus): boolean => TERMINAL.has(status);
+export const isTerminalPPLStreamStatus = (status?: PPLStreamStatus): boolean =>
+  status !== undefined && TERMINAL.has(status);
 
 /** Terminal does not imply success, so callers must check for `SUCCEEDED` specifically. */
 export const isPPLStreamProgressKnown = (progress?: PPLStreamProgress): boolean =>

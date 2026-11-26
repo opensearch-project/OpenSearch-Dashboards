@@ -19,9 +19,9 @@ export class PPLStreamJobNotFoundError extends Error {
 export const PPL_STREAM_UNAVAILABLE_ERROR_NAME = 'PPLStreamUnavailableError';
 
 /**
- * A run that failed before publishing anything, so nothing is on screen and the query can be re-run
- * on the non-streaming path. Usually an engine that does not serve the async PPL API, which cannot
- * be detected in advance. Distinct from a mid-stream failure, where rows are already rendered.
+ * A run that failed before showing any row or bucket, so the query can be re-run on the
+ * non-streaming path. Usually an engine that does not serve the async PPL API, which cannot be
+ * detected in advance. Distinct from a mid-stream failure, where rows are already rendered.
  */
 export class PPLStreamUnavailableError extends Error {
   constructor(public readonly cause: unknown) {

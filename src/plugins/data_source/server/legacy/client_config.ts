@@ -7,6 +7,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { checkServerIdentity } from 'tls';
 import { DataSourcePluginConfigType } from '../../config';
 import { readCertificateAuthorities } from '../util/tls_settings_provider';
+import { createGuardedLookup } from '../util/endpoint_validator';
 
 /** @internal */
 type LegacyDataSourceSSLConfigOptions = Partial<{
@@ -66,6 +67,25 @@ export function parseClientOptions(
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
     suggestCompression: config.globalOpenSearchConfig.requestCompression,
   };
+
+  if (config.endpointDeniedIPs?.length) {
+    // Check every address the endpoint resolves to when connecting, not only when it was saved.
+    const lookup = createGuardedLookup(
+      config.endpointDeniedIPs,
+      config.endpointAllowlistedSuffixes
+    );
+    // The legacy client has no agent option. It builds its own agent per connection, so set the
+    // lookup on the agent it builds. The SigV4 connector sends through its own handler and reads
+    // `guardedLookup` instead.
+    Object.assign(configOptions, {
+      guardedLookup: lookup,
+      createNodeAgent: (connection: any, connectionConfig: any) => {
+        const agent = connection.createAgent(connectionConfig);
+        agent.options = { ...agent.options, lookup };
+        return agent;
+      },
+    });
+  }
 
   return configOptions;
 }

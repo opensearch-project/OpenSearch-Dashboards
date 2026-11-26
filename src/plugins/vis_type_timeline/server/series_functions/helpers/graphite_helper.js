@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as dnsPromises } from 'dns';
+import { lookup as dnsLookup, promises as dnsPromises } from 'dns';
 import { IPCIDR } from '@osd/utils';
 /**
  * Resolve hostname to IP address
@@ -77,4 +77,36 @@ async function isValidConfig(deniedIPs, allowedUrls, configuredUrl) {
   }
   return true;
 }
-export { getIpAddress, isDeniedURL, isValidConfig };
+/**
+ * Build a dns lookup function for an http(s) agent that applies the denylist when connecting.
+ * isValidConfig resolves the name once, and the HTTP client resolves it again when it connects, so
+ * the check has to run at connect time as well. Denied addresses are removed from the answer, so
+ * a connection only uses an address that isValidConfig would accept, and the lookup fails only
+ * when every address is denied. A literal IP address in the URL never reaches a lookup function,
+ * which is why isValidConfig still runs first.
+ * @param {Array|string} deniedIPs
+ * @returns {Function} lookup(hostname, options, callback)
+ */
+function createGuardedLookup(deniedIPs) {
+  const cidrs = deniedIPs.map((deniedIP) => new IPCIDR(deniedIP));
+  const isDenied = (address) =>
+    !IPCIDR.isValidAddress(address) || cidrs.some((cidr) => cidr.contains(address));
+  return (hostname, options, callback) => {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    const lookupOptions = typeof options === 'number' ? { family: options } : options || {};
+    dnsLookup(hostname, { ...lookupOptions, all: true }, (err, addresses) => {
+      if (err) return callback(err);
+      const allowed = addresses.filter(({ address }) => !isDenied(address));
+      if (allowed.length === 0) {
+        return callback(new Error('The Graphite host resolves to an address that is not allowed'));
+      }
+      if (lookupOptions.all) return callback(null, allowed);
+      return callback(null, allowed[0].address, allowed[0].family);
+    });
+  };
+}
+
+export { getIpAddress, isDeniedURL, isValidConfig, createGuardedLookup };

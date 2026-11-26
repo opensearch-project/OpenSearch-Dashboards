@@ -242,20 +242,10 @@ describe('snapshotToSearchResult', () => {
     });
   });
 
-  it('prefers the backend took over measured elapsed time when present', () => {
-    const result = snapshotToSearchResult({
-      snapshot: snapshot({ took: 5709 }),
-      rows: [],
-      elapsedMs: 6000,
-    });
-
-    expect(result.took).toBe(5709);
-    expect(result.elapsedMs).toBe(6000);
-  });
-
-  it('falls back to elapsedMs while the query is still running', () => {
+  it('reports the measured elapsed time as took', () => {
     const result = snapshotToSearchResult({ snapshot: snapshot(), rows: [], elapsedMs: 1500 });
     expect(result.took).toBe(1500);
+    expect(result.elapsedMs).toBe(1500);
   });
 
   it('omits aggregations when no histogram is derived', () => {
@@ -371,7 +361,13 @@ describe('response metadata', () => {
   });
 
   it('surfaces backend warnings when present', () => {
-    const warnings = [{ message: 'Partial result', detail: 'two indices were skipped' }];
+    const warnings = [
+      {
+        type: 'PARTIAL_RESULT',
+        message: 'Results are partial: 1 of 4 shards did not return data.',
+        detail: '_shards: total 4, successful 3, skipped 0, failed 0',
+      },
+    ];
     const result = snapshotToSearchResult({
       snapshot: snapshot({ warnings } as any),
       rows: [],

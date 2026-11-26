@@ -30,10 +30,6 @@ jest.mock('../state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn(() => 'results-key'),
 }));
 
-jest.mock('../state_management/actions/streaming_query_actions', () => ({
-  STREAMING_MAX_HELD_ROWS: 100,
-}));
-
 let mockStreamingKeys: string[] = [];
 jest.mock('../streaming/streaming_abort_registry', () => ({
   isStreamingQueryAbortable: (cacheKey: string) => mockStreamingKeys.includes(cacheKey),
@@ -235,7 +231,7 @@ describe('useTimefilterSubscription', () => {
       expect(mockExecuteQueries).not.toHaveBeenCalled();
     });
 
-    it('refreshes once a run below the cap has finished', () => {
+    it('refreshes once the run has finished', () => {
       renderHookWithProvider(
         mockServices,
         withStreaming({ isPolling: false, rowsFetched: 40, total: 40 })
@@ -245,15 +241,15 @@ describe('useTimefilterSubscription', () => {
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
     });
 
-    // Past the cap the run only polls for status, which could hold refreshes back for minutes.
-    it('refreshes once the table reaches the row cap', () => {
+    // No client-side row cap: a run that is still polling may still add rows, however many it shows.
+    it('skips while polling, however many rows the table already shows', () => {
       renderHookWithProvider(
         mockServices,
-        withStreaming({ isPolling: true, rowsFetched: 100, total: 5000 })
+        withStreaming({ isPolling: true, rowsFetched: 250000, total: 250000 })
       );
 
       autoRefreshSubject.next({});
-      expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
     });
 
     it('still refreshes while some other query streams', () => {
