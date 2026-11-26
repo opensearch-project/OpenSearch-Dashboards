@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FilterOperator } from '../types';
+import { FilterOperator, VisColumn, VisFieldType } from '../types';
 import { FilterConfig } from './table_vis_filter';
+import type { TableSortConfig } from './table_vis_config';
 
 // Function to calculate luminance of a hex color
 export const getLuminance = (hexColor: string): number => {
@@ -96,4 +97,75 @@ export const matchesFilter = (value: any, config: FilterConfig) => {
   }
 
   return true;
+};
+
+export interface TableSortingColumn {
+  /** Data grid column id (`VisColumn.column`). */
+  id: string;
+  direction: 'asc' | 'desc';
+}
+
+/**
+ * Maps a saved sort (keyed by column name) to data grid sorting (keyed by column id).
+ * Entries whose column is no longer present are dropped.
+ */
+export const toGridSorting = (
+  sortColumns: TableSortConfig[] = [],
+  columns: VisColumn[]
+): TableSortingColumn[] =>
+  sortColumns.flatMap(({ field, direction }) => {
+    const col = columns.find((c) => c.name === field);
+    return col ? [{ id: col.column, direction }] : [];
+  });
+
+const isEmptyValue = (value: unknown) => value === null || value === undefined || value === '';
+
+const toSortableTime = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  if (value instanceof Date) return value.getTime();
+  return Date.parse(String(value));
+};
+
+/**
+ * Ascending comparison of two non-empty cell values for a column of the given type.
+ * Values that cannot be parsed as the column type fall back to string comparison.
+ */
+export const compareTableValues = (a: unknown, b: unknown, schema?: VisFieldType): number => {
+  if (schema === VisFieldType.Numerical) {
+    const nA = Number(a);
+    const nB = Number(b);
+    if (Number.isFinite(nA) && Number.isFinite(nB)) return nA - nB;
+  } else if (schema === VisFieldType.Date) {
+    const tA = toSortableTime(a);
+    const tB = toSortableTime(b);
+    if (Number.isFinite(tA) && Number.isFinite(tB)) return tA - tB;
+  }
+  return cellValueText(a).localeCompare(cellValueText(b), undefined, { numeric: true });
+};
+
+/**
+ * Returns a new array sorted by the given columns in priority order.
+ * Empty values (null / undefined / '') always sort last, regardless of direction.
+ */
+export const sortTableRows = <T extends Record<string, any>>(
+  rows: T[],
+  sorting: TableSortingColumn[],
+  columnTypes: Record<string, VisFieldType>
+): T[] => {
+  if (sorting.length === 0) return rows;
+  return [...rows].sort((rowA, rowB) => {
+    for (const { id, direction } of sorting) {
+      const a = rowA[id];
+      const b = rowB[id];
+      const emptyA = isEmptyValue(a);
+      const emptyB = isEmptyValue(b);
+      if (emptyA || emptyB) {
+        if (emptyA && emptyB) continue;
+        return emptyA ? 1 : -1;
+      }
+      const result = compareTableValues(a, b, columnTypes[id]);
+      if (result !== 0) return direction === 'asc' ? result : -result;
+    }
+    return 0;
+  });
 };

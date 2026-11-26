@@ -605,4 +605,131 @@ describe('TableVis', () => {
       expect(setPopoverOpenCellMock).toHaveBeenCalledWith({ rowIndex: 0, columnId: 'column1' });
     });
   });
+
+  describe('column sort', () => {
+    const sortRows = [
+      { column1: 10, column2: 'b' },
+      { column1: null, column2: 'a' },
+      { column1: 30, column2: 'c' },
+      { column1: 20, column2: 'a' },
+    ];
+    const lastGridProps = () => {
+      const calls = (jest.mocked(EuiDataGrid) as jest.Mock).mock.calls;
+      return calls[calls.length - 1][0];
+    };
+    const columnValues = (columnId: string, count: number) =>
+      Array.from({ length: count }).map(
+        (_, i) => screen.getByTestId(`cellValue-${i}-${columnId}`).textContent
+      );
+
+    test('applies saved sort by column name with empty values last', () => {
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={{
+            ...defaultTableChartStyles,
+            sortColumns: [{ field: 'Column 1', direction: 'desc' }],
+          }}
+          onStyleChange={jest.fn()}
+        />
+      );
+      expect(lastGridProps().sorting.columns).toEqual([{ id: 'column1', direction: 'desc' }]);
+      expect(lastGridProps().toolbarVisibility.showSortSelector).toBe(true);
+      // must not mutate the column definitions passed in
+      expect(mockColumns.map((c) => c.name)).toEqual(['Column 1', 'Column 2']);
+      expect(columnValues('column1', 4)).toEqual(['30', '20', '10', '']);
+    });
+
+    test('sorts by multiple columns in priority order', () => {
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={{
+            ...defaultTableChartStyles,
+            sortColumns: [
+              { field: 'Column 2', direction: 'asc' },
+              { field: 'Column 1', direction: 'desc' },
+            ],
+          }}
+          onStyleChange={jest.fn()}
+        />
+      );
+      expect(columnValues('column2', 4)).toEqual(['a', 'a', 'b', 'c']);
+      expect(columnValues('column1', 4)).toEqual(['20', '', '10', '30']);
+    });
+
+    test('ignores saved sort entries for columns that no longer exist', () => {
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={{
+            ...defaultTableChartStyles,
+            sortColumns: [{ field: 'Missing', direction: 'asc' }],
+          }}
+          onStyleChange={jest.fn()}
+        />
+      );
+      expect(lastGridProps().sorting.columns).toEqual([]);
+      expect(columnValues('column1', 4)).toEqual(['10', '', '30', '20']);
+    });
+
+    test('onSort saves sort columns by column name', () => {
+      const onStyleChange = jest.fn();
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={defaultTableChartStyles}
+          onStyleChange={onStyleChange}
+        />
+      );
+      act(() => {
+        lastGridProps().sorting.onSort([{ id: 'column2', direction: 'asc' }]);
+      });
+      expect(onStyleChange).toHaveBeenCalledWith({
+        sortColumns: [{ field: 'Column 2', direction: 'asc' }],
+      });
+    });
+
+    test('sorts with local state when changes cannot be saved (e.g. raw table)', () => {
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={{
+            ...defaultTableChartStyles,
+            sortColumns: [{ field: 'Column 2', direction: 'desc' }],
+          }}
+        />
+      );
+      expect(lastGridProps().toolbarVisibility.showSortSelector).toBe(true);
+      // initial sort comes from styleOptions
+      expect(columnValues('column2', 4)).toEqual(['c', 'b', 'a', 'a']);
+
+      act(() => {
+        lastGridProps().sorting.onSort([{ id: 'column1', direction: 'asc' }]);
+      });
+      expect(lastGridProps().sorting.columns).toEqual([{ id: 'column1', direction: 'asc' }]);
+      expect(columnValues('column1', 4)).toEqual(['10', '20', '30', '']);
+    });
+
+    test('applies saved sort without sort UI when read-only (e.g. dashboard embeddable)', () => {
+      render(
+        <TableVis
+          rows={sortRows}
+          columns={mockColumns}
+          styleOptions={{
+            ...defaultTableChartStyles,
+            sortColumns: [{ field: 'Column 1', direction: 'asc' }],
+          }}
+          disableActions={true}
+        />
+      );
+      expect(lastGridProps().toolbarVisibility).toBe(false);
+      expect(columnValues('column1', 4)).toEqual(['10', '20', '30', '']);
+    });
+  });
 });

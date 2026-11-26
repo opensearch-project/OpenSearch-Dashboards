@@ -20,10 +20,16 @@ export interface Calc {
   calculation: CalculationMethod;
 }
 
+export interface TableSortConfig {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
 export interface TableChartStyleOptions {
   pageSize?: number;
   globalAlignment?: CellAlignment;
   showColumnFilter?: boolean;
+  sortColumns?: TableSortConfig[];
   showFooter?: boolean;
   footerCalculations?: Calc[];
   cellTypes?: CellTypeConfig[];
@@ -40,6 +46,7 @@ export const defaultTableChartStyles: TableChartStyle = {
   pageSize: 50,
   globalAlignment: 'left',
   showColumnFilter: false,
+  sortColumns: [],
   showFooter: false,
   footerCalculations: [],
   cellTypes: [],
