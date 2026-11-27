@@ -125,7 +125,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   }, [fields]);
 
   if (!selectedDataSet || !fields) {
-    return null;
+    return <DiscoverFieldHeader onCollapse={onCollapse} />;
   }
 
   return (
