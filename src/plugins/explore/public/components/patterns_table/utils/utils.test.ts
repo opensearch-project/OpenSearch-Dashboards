@@ -127,13 +127,13 @@ describe('utils', () => {
     describe('regexExcludeSearchPatternQuery', () => {
       it('should build a regex exclude pattern query', () => {
         expect(regexExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
-          'source = my_index | patterns `message` | where patterns_field != "Error in <*>"'
+          'source = my_index | patterns `message` | where patterns_field != "Error in <*>" | fields - patterns_field'
         );
       });
 
       it('should escape double quotes in patternString', () => {
         expect(regexExcludeSearchPatternQuery(queryBase, patternsField, 'say "hello"')).toBe(
-          'source = my_index | patterns `message` | where patterns_field != "say \\"hello\\""'
+          'source = my_index | patterns `message` | where patterns_field != "say \\"hello\\"" | fields - patterns_field'
         );
       });
     });
@@ -141,13 +141,13 @@ describe('utils', () => {
     describe('brainExcludeSearchPatternQuery', () => {
       it('should build a brain exclude pattern query', () => {
         expect(brainExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
-          'source = my_index | patterns `message` method=brain mode=label | where patterns_field != "Error in <*>"'
+          'source = my_index | patterns `message` method=brain mode=label | where patterns_field != "Error in <*>" | fields - patterns_field'
         );
       });
 
       it('should escape double quotes in patternString', () => {
         expect(brainExcludeSearchPatternQuery(queryBase, patternsField, 'say "hello"')).toBe(
-          'source = my_index | patterns `message` method=brain mode=label | where patterns_field != "say \\"hello\\""'
+          'source = my_index | patterns `message` method=brain mode=label | where patterns_field != "say \\"hello\\"" | fields - patterns_field'
         );
       });
     });
@@ -189,7 +189,7 @@ describe('utils', () => {
       const query = { query: 'my raw query', language: 'PPL' };
       const result = createExcludeSearchPatternQuery(query, patternsField, false, patternString);
       expect(result).toBe(
-        'my raw query | patterns `message` method=brain mode=label | where patterns_field != "Error <*>"'
+        'my raw query | patterns `message` method=brain mode=label | where patterns_field != "Error <*>" | fields - patterns_field'
       );
     });
 
@@ -197,7 +197,7 @@ describe('utils', () => {
       const query = { query: 'my raw query', language: 'PPL' };
       const result = createExcludeSearchPatternQuery(query, patternsField, true, patternString);
       expect(result).toBe(
-        'my raw query | patterns `message` | where patterns_field != "Error <*>"'
+        'my raw query | patterns `message` | where patterns_field != "Error <*>" | fields - patterns_field'
       );
     });
   });
