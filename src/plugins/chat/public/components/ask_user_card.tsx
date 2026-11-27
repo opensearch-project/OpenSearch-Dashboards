@@ -16,7 +16,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { isImeComposing } from '../../../../core/public/utils';
 import { AskUserRequest, HumanInputService } from '../services/human_input_service';
 
 import './ask_user_card.scss';
@@ -82,7 +81,7 @@ export const AskUserCard: React.FC<AskUserCardProps> = ({ request, onAnswer, onD
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !isImeComposing(e)) submitText();
+              if (e.key === 'Enter') submitText();
             }}
             placeholder={i18n.translate('chat.askUser.textPlaceholder', {
               defaultMessage: 'Type your answer...',

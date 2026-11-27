@@ -18,7 +18,6 @@ import { Chart, LineSeries, Axis, Settings, Position, ScaleType } from '@elastic
 import { ChartData } from './types';
 import { createTooltipSettings } from './chart_config';
 import { useChartsTheme, useChartsBaseTheme, getGraphVisualizationTheme } from './theme_utils';
-import { isImeComposing } from '../../../../../core/public/utils';
 
 interface ExpandedViewProps {
   isOpen: boolean;
@@ -40,7 +39,7 @@ export const ExpandedView: React.FC<ExpandedViewProps> = ({
   // Handle ESC key press
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isImeComposing(event)) {
+      if (event.key === 'Escape') {
         onClose();
       }
     },

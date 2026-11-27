@@ -28,20 +28,12 @@ describe('useUIAceKeyboardMode', () => {
     document.body.removeChild(container);
   });
 
-  const pressEscape = (init: KeyboardEventInit = {}) =>
-    textarea.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true, ...init })
-    );
-
   it('moves focus to the overlay on plain Escape', () => {
     const overlay = container.querySelector('.osdUiAceKeyboardHint');
     expect(overlay).not.toBeNull();
-    pressEscape();
+    textarea.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    );
     expect(document.activeElement).toBe(overlay);
-  });
-
-  it('ignores Escape while an IME is composing', () => {
-    pressEscape({ isComposing: true });
-    expect(document.activeElement).toBe(textarea);
   });
 });
