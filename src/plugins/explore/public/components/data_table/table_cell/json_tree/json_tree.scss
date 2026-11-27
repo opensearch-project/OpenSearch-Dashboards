@@ -1,0 +1,87 @@
+.exploreJsonTree {
+  @include ouiCodeFont;
+
+  font-size: $euiFontSizeS;
+  line-height: $euiLineHeight;
+  white-space: normal;
+  word-break: break-word;
+
+  &__children {
+    padding-left: $euiSizeL;
+  }
+
+  // Line actions (copy path, filter): shown on hover/focus of their line, always on small screens.
+  &__actions {
+    display: inline-flex;
+    vertical-align: middle;
+    padding-left: $euiSizeXS;
+
+    // The buttons are taller than a line of text; don't let them push lines apart
+    margin: (-$euiSizeXS) 0;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &__line:hover &__actions,
+  &__line:focus-within &__actions,
+  [role="treeitem"]:focus > &__line:first-child &__actions {
+    opacity: 1;
+  }
+
+  // Keyboard focus: mark the focused item's own line rather than its whole subtree
+  [role="treeitem"] {
+    outline: none;
+  }
+
+  &__line[role="treeitem"]:focus-visible,
+  [role="treeitem"]:focus-visible > &__line:first-child {
+    background-color: $euiFocusBackgroundColor;
+    outline: $euiBorderWidthThin solid $euiFocusRingColor;
+  }
+
+  &__key {
+    color: $euiColorDanger;
+    font-weight: $euiFontWeightBold;
+  }
+
+  &__string {
+    color: $euiColorSuccessText;
+  }
+
+  &__number {
+    color: $euiColorPrimaryText;
+  }
+
+  &__boolean,
+  &__null {
+    color: $euiColorAccentText;
+  }
+
+  &__toggle,
+  &__link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: $euiLinkColor;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // The "Show as raw text" link is a control, not data: regular UI font, one size down
+  &__footer {
+    @include ouiFont;
+    @include ouiFontSizeXS;
+  }
+
+  &__raw {
+    white-space: pre-wrap;
+  }
+}

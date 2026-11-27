@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +27,14 @@ import {
   setHideEmptyFields,
   setWrapCellText,
 } from '../../../../application/utils/state_management/slices';
+import {
+  setFormatJson,
+  useFormatJson,
+} from '../../../data_table/table_cell/json_tree/format_json_setting';
+import {
+  collapseAllJsonTrees,
+  expandAllJsonTrees,
+} from '../../../data_table/table_cell/json_tree/json_tree_state';
 
 /**
  * Overflow menu for the settings that change how the results table renders.
@@ -35,6 +44,7 @@ export const TableActionsPopoverButton = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const wrapCellText = useSelector(selectWrapCellText);
   const hideEmptyFields = useSelector(selectHideEmptyFields);
+  const formatJson = useFormatJson();
 
   const buttonLabel = i18n.translate('explore.discover.tableActions.buttonLabel', {
     defaultMessage: 'Table settings',
@@ -133,6 +143,63 @@ export const TableActionsPopoverButton = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            {i18n.translate('explore.discover.formatJson', {
+              defaultMessage: 'Format JSON values',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            showLabel={false}
+            label={i18n.translate('explore.discover.formatJson', {
+              defaultMessage: 'Format JSON values',
+            })}
+            checked={formatJson}
+            // Per user, remembered in the browser; not part of the URL state.
+            onChange={(e) => setFormatJson(e.target.checked)}
+            data-test-subj="exploreFormatJsonSwitch"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {formatJson && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                onClick={expandAllJsonTrees}
+                data-test-subj="exploreExpandAllJson"
+              >
+                {i18n.translate('explore.discover.expandAllJson', {
+                  defaultMessage: 'Expand all JSON',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={collapseAllJsonTrees}
+                data-test-subj="exploreCollapseAllJson"
+              >
+                {i18n.translate('explore.discover.collapseAllJson', {
+                  defaultMessage: 'Collapse all JSON',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPopover>
   );
 };
