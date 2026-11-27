@@ -14,24 +14,13 @@ import './source_field_table_cell.scss';
 import React, { Fragment } from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { isPlainObject } from 'lodash';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { getDisplayValue } from '../../../../../data/common';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
+import { getSourceFieldNames } from '../../../helpers/source_field_names';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
-// Internal metadata field injected by the data importer on lookup rows (the per-import UUID the
-// filtered alias matches on). Kept in sync with the data_importer plugin's LOOKUP_FIELD by
-// convention — a stable data contract — to avoid an explore -> data_importer plugin dependency.
-const LOOKUP_METADATA_FIELD = '__lookup';
 const MAX_INLINE_SOURCE_FIELDS = 10;
-
-function isParentContainer(value: unknown): value is Record<string, unknown> | unknown[] {
-  return (
-    isPlainObject(value) ||
-    (Array.isArray(value) && value.some((entry) => isPlainObject(entry) || Array.isArray(entry)))
-  );
-}
 
 export interface SourceFieldTableCellProps {
   colName: string;
@@ -49,13 +38,9 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   wrapCellText,
 }) => {
   const flattened = dataset.flattenHit(row);
-  const metaFields = dataset.metaFields || [];
-  // The data importer injects `__lookup` (a per-import UUID) on lookup rows. It's internal
-  // metadata — like _id/_index/_score it adds no value inline and just eats horizontal space in
-  // the _source summary — so exclude it here. It stays visible in the expanded document view,
-  // which renders the full hit (including other metadata) through a separate path.
-  const hiddenSourceFields = [...metaFields, LOOKUP_METADATA_FIELD];
-  const rawKeys = Object.keys(flattened).filter((key) => !hiddenSourceFields.includes(key));
+  // The data importer's `__lookup` field is hidden along with the meta fields. Both stay visible
+  // in the expanded document view, which renders the full hit through a separate path.
+  const rawKeys = getSourceFieldNames(flattened, dataset.metaFields || []);
   // Keep search matches visible even when they occur after the preview limit.
   const highlightedKeys = row.highlight
     ? rawKeys.filter((key) => row.highlight[key]?.length > 0)
@@ -63,25 +48,9 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   const orderedKeys = highlightedKeys.length ? [...highlightedKeys, ...rawKeys] : rawKeys;
 
   const previewKeys: string[] = [];
-  let parentPrefixes: Set<string> | undefined;
   let hasMoreFields = false;
   for (const rawKey of orderedKeys) {
     if (previewKeys.includes(rawKey)) continue;
-    // flattenHit retains some parent containers alongside their flattened children.
-    if (isParentContainer(flattened[rawKey])) {
-      // Index prefixes once to avoid repeated scans, only when a container needs checking.
-      if (!parentPrefixes) {
-        parentPrefixes = new Set<string>();
-        for (const key of rawKeys) {
-          let dotIndex = key.indexOf('.');
-          while (dotIndex !== -1) {
-            parentPrefixes.add(key.slice(0, dotIndex));
-            dotIndex = key.indexOf('.', dotIndex + 1);
-          }
-        }
-      }
-      if (parentPrefixes.has(rawKey)) continue;
-    }
     if (previewKeys.length === MAX_INLINE_SOURCE_FIELDS) {
       hasMoreFields = true;
       break;

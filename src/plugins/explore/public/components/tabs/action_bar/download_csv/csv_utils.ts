@@ -8,10 +8,12 @@ import moment from 'moment';
 import { saveAs } from 'file-saver';
 import { autoBom } from '@osd/std';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { pick } from 'lodash';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { VisTabular } from '../../../visualizations/utils/vis_data_to_tabular';
 import { isSourceColumn } from '../../../../helpers/is_source_column';
+import { getSourceFieldNames } from '../../../../helpers/source_field_names';
 
 export const formatRowsForCsv =
   ({
@@ -30,8 +32,13 @@ export const formatRowsForCsv =
       }
 
       if (isSourceColumn(colName, fieldInfo)) {
+        // The same fields the table's _source cell shows, without meta fields such as _id.
         const formattedRow = indexPattern.formatHit(row, 'text');
-        return JSON.stringify(formattedRow);
+        const shownFields = getSourceFieldNames(
+          indexPattern.flattenHit(row),
+          indexPattern.metaFields
+        );
+        return JSON.stringify(pick(formattedRow, shownFields));
       }
 
       const formattedValue = indexPattern.formatField(row, colName, 'text');
