@@ -6,8 +6,8 @@
   "main": "./target/index.js",
   "scripts": {
     "build": "babel src --out-dir target --copy-files --delete-dir-on-start --extensions .ts --ignore *.test.ts --source-maps=inline",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "osd:bootstrap": "npm run build",
+    "osd:watch": "npm run build -- --watch"
   },
   "dependencies": {
     "@babel/cli": "^7.29.7",

@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "osd:bootstrap": "yarn build"
+    "osd:bootstrap": "npm run build"
   },
   "devDependencies": {
     "tsd": "^0.33.0"

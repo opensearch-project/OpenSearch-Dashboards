@@ -37,7 +37,8 @@ import { Project } from '../utils/project';
 import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
-import { readYarnLock } from '../utils/yarn_lock';
+import { readLockfile } from '../utils/yarn_lock';
+import { detectPackageManager } from '../utils/package_manager';
 import { validateDependencies, isMutatingSingleVersionMode } from '../utils/validate_dependencies';
 import {
   computeFingerprint,
@@ -70,7 +71,9 @@ export const BootstrapCommand: ICommand = {
       const previous = readFingerprint(osd);
       const current = computeFingerprint(osd, projects);
 
-      const integrityOk = Fs.existsSync(osd.getAbsolute('node_modules/.yarn-integrity'));
+      const integrityOk = Fs.existsSync(
+        osd.getAbsolute('node_modules', detectPackageManager(osd.getAbsolute()).integrityMarker)
+      );
       log.verbose(
         `[fingerprint] previous=${previous ? 'present' : 'absent'} match=${
           previous ? fingerprintsEqual(previous, current) : false
@@ -78,7 +81,7 @@ export const BootstrapCommand: ICommand = {
       );
 
       if (previous && fingerprintsEqual(previous, current) && integrityOk) {
-        const yarnLock = await readYarnLock(osd);
+        const yarnLock = await readLockfile(osd);
         const checksums = await getAllChecksums(osd, log, yarnLock);
 
         let staleProject: string | undefined;
@@ -147,7 +150,7 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
-    const yarnLock = await readYarnLock(osd);
+    const yarnLock = await readLockfile(osd);
 
     await validateDependencies(osd, yarnLock, options['single-version']?.toLowerCase?.());
 
