@@ -20,10 +20,12 @@ import { i18n } from '@osd/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectHideEmptyFields,
+  selectShowRowSeparators,
   selectWrapCellText,
 } from '../../../../application/utils/state_management/selectors';
 import {
   setHideEmptyFields,
+  setShowRowSeparators,
   setWrapCellText,
 } from '../../../../application/utils/state_management/slices';
 
@@ -35,6 +37,7 @@ export const TableActionsPopoverButton = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const wrapCellText = useSelector(selectWrapCellText);
   const hideEmptyFields = useSelector(selectHideEmptyFields);
+  const showRowSeparators = useSelector(selectShowRowSeparators);
 
   const buttonLabel = i18n.translate('explore.discover.tableActions.buttonLabel', {
     defaultMessage: 'Table settings',
@@ -130,6 +133,32 @@ export const TableActionsPopoverButton = () => {
             checked={wrapCellText ?? false}
             onChange={(e) => dispatch(setWrapCellText(e.target.checked))}
             data-test-subj="exploreWrapCellTextSwitch"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            {i18n.translate('explore.discover.showRowSeparators', {
+              defaultMessage: 'Show row separators',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            showLabel={false}
+            label={i18n.translate('explore.discover.showRowSeparators', {
+              defaultMessage: 'Show row separators',
+            })}
+            checked={showRowSeparators}
+            onChange={(e) => dispatch(setShowRowSeparators(e.target.checked))}
+            data-test-subj="exploreShowRowSeparatorsSwitch"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

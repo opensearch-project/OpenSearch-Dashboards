@@ -15,6 +15,11 @@ export interface UIState {
    * for until the user opts in.
    */
   hideEmptyFields: boolean;
+  /**
+   * Draws a faint line between the rows of the results table. Optional, so state persisted before
+   * this setting existed reads as off (see `selectShowRowSeparators`).
+   */
+  showRowSeparators?: boolean;
   metricsPageMode?: 'explore' | 'query';
 }
 
@@ -44,6 +49,9 @@ const uiSlice = createSlice({
     setHideEmptyFields: (state, action: PayloadAction<boolean>) => {
       state.hideEmptyFields = action.payload;
     },
+    setShowRowSeparators: (state, action: PayloadAction<boolean>) => {
+      state.showRowSeparators = action.payload;
+    },
     setMetricsPageMode: (state, action: PayloadAction<'explore' | 'query'>) => {
       state.metricsPageMode = action.payload;
     },
@@ -56,6 +64,7 @@ export const {
   setShowHistogram,
   setWrapCellText,
   setHideEmptyFields,
+  setShowRowSeparators,
   setMetricsPageMode,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;

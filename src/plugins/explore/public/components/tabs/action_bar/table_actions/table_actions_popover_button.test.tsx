@@ -10,7 +10,9 @@ import { TableActionsPopoverButton } from './table_actions_popover_button';
 
 const mockStore = configureMockStore([]);
 
-const renderWithState = (ui: Partial<{ wrapCellText: boolean; hideEmptyFields: boolean }>) => {
+const renderWithState = (
+  ui: Partial<{ wrapCellText: boolean; hideEmptyFields: boolean; showRowSeparators: boolean }>
+) => {
   const store = mockStore({ ui: { activeTabId: 'logs', ...ui } });
   render(
     <Provider store={store}>
@@ -82,6 +84,23 @@ describe('TableActionsPopoverButton', () => {
     expect(store.getActions()).toContainEqual({
       type: 'ui/setWrapCellText',
       payload: true,
+    });
+  });
+
+  it('shows row separators off by default, also for state persisted without the setting', () => {
+    renderWithState({ wrapCellText: false });
+    fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
+    expect(screen.getByTestId('exploreShowRowSeparatorsSwitch')).not.toBeChecked();
+  });
+
+  it('dispatches setShowRowSeparators when toggled', () => {
+    const store = renderWithState({ showRowSeparators: true });
+    fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
+    expect(screen.getByTestId('exploreShowRowSeparatorsSwitch')).toBeChecked();
+    fireEvent.click(screen.getByTestId('exploreShowRowSeparatorsSwitch'));
+    expect(store.getActions()).toContainEqual({
+      type: 'ui/setShowRowSeparators',
+      payload: false,
     });
   });
 });

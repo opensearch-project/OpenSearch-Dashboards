@@ -47,6 +47,12 @@ export const selectWrapCellText = createSelector(
   (uiState) => uiState.wrapCellText
 );
 
+// Defaults to false for state persisted before this setting existed.
+export const selectShowRowSeparators = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showRowSeparators ?? false
+);
+
 // Defaults to false so state persisted before this setting existed keeps every column until the
 // user opts in.
 export const selectHideEmptyFields = createSelector(

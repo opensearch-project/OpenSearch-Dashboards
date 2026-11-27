@@ -47,6 +47,8 @@ export interface DataTableProps {
   scrollToTop?: () => void;
   expandedTableHeader?: string;
   wrapCellText?: boolean;
+  // Draws a faint line between rows (Table settings > Show row separators)
+  showRowSeparators?: boolean;
 }
 
 // ToDo: These would need to be read from an upcoming config panel
@@ -71,6 +73,7 @@ const DataTableUI = ({
   scrollToTop,
   expandedTableHeader,
   wrapCellText,
+  showRowSeparators,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -124,7 +127,9 @@ const DataTableUI = ({
       ) : null}
       <table
         data-test-subj="docTable"
-        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}`}
+        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}${
+          showRowSeparators ? ' explore-table--separators' : ''
+        }`}
       >
         <thead>
           <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />
