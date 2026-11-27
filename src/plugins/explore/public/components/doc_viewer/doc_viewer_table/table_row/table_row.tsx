@@ -11,6 +11,7 @@ import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
+import { DocViewTableRowBtnCopy } from './table_row_btn_copy';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from './field_name/field_name';
@@ -32,6 +33,21 @@ export interface Props {
   onToggleColumn?: () => void;
   value: string | ReactNode;
   valueRaw: unknown;
+}
+
+function getTextToCopy(valueRaw: unknown): string {
+  if (valueRaw === null || valueRaw === undefined) {
+    return '';
+  }
+  try {
+    return typeof valueRaw === 'string'
+      ? valueRaw
+      : typeof valueRaw === 'object'
+        ? JSON.stringify(valueRaw, null, 2)
+        : String(valueRaw);
+  } catch {
+    return String(valueRaw);
+  }
 }
 
 export function DocViewTableRow({
@@ -64,6 +80,8 @@ export function DocViewTableRow({
   const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
   const disableValueFilter = isTimeField || isDateField;
 
+  const textToCopy = getTextToCopy(valueRaw);
+
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
@@ -80,6 +98,7 @@ export function DocViewTableRow({
               />
             </>
           )}
+          <DocViewTableRowBtnCopy textToCopy={textToCopy} />
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
