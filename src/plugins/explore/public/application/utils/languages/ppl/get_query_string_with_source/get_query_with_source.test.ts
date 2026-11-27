@@ -497,4 +497,48 @@ describe('addPPLSourceClause', () => {
     const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'source=my-index | where source=prod' });
   });
+
+  describe('commands that must open the query', () => {
+    const dataset = { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' };
+    const run = (queryString: string) =>
+      addPPLSourceClause({ query: queryString, dataset, language: 'ppl' }).query;
+
+    it('drops a leading pipe before multisearch and does not prepend a source', () => {
+      expect(
+        run(
+          '| multisearch\n  [search source=logs-* | head 1]\n  [search source=logs-* | where level="ERROR" | head 1]'
+        )
+      ).toBe(
+        'multisearch\n  [search source=logs-* | head 1]\n  [search source=logs-* | where level="ERROR" | head 1]'
+      );
+    });
+
+    it('leaves multisearch subsearch sources unquoted for an index-pattern dataset', () => {
+      // The backtick rewrite would turn `source=logs-*]` into `source=`logs-*]``.
+      expect(run('multisearch [search source=logs-*] [search source=other-*]')).toBe(
+        'multisearch [search source=logs-*] [search source=other-*]'
+      );
+    });
+
+    it('matches multisearch case-insensitively', () => {
+      expect(run('| MULTISEARCH [search source=a] [search source=b]')).toBe(
+        'MULTISEARCH [search source=a] [search source=b]'
+      );
+    });
+
+    it('drops a leading pipe before source and search source', () => {
+      expect(run('| source=logs | head 1')).toBe('source=`logs` | head 1');
+      expect(run('  |  search source=logs | head 1')).toBe('search source=`logs` | head 1');
+    });
+
+    it('drops a leading pipe before describe and show', () => {
+      expect(run('| describe logs')).toBe('describe logs');
+      expect(run('| show datasources')).toBe('show datasources');
+    });
+
+    it('still prepends the dataset to a leading-pipe query that continues from it', () => {
+      expect(run('| where source="prod"')).toBe('source = `test-dataset` | where source="prod"');
+      expect(run('| multisearchable=true')).toBe('source = `test-dataset` | multisearchable=true');
+    });
+  });
 });

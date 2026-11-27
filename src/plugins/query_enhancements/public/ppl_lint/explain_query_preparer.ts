@@ -18,6 +18,11 @@ const FILTER_MANAGER_SUPPORTED_APP_NAMES = ['dashboards'];
 
 const INDEX_PATTERN_DATASET_TYPES = ['INDEXES', 'INDEX_PATTERN'];
 
+// Mirrors explore's `addPPLSourceClause`: the PPL API accepts an optional leading `|` before a
+// command that must open the query, and prepending a source would push it out of first position.
+const LEADING_PIPE_BEFORE_FIRST_COMMAND =
+  /^\s*\|\s*(?=(?:search\s+)?source\s*=|describe\s|show\s|multisearch\b)/i;
+
 interface PreparerServices {
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
@@ -53,13 +58,17 @@ function backtickWrapSource(queryString: string): string {
 /**
  * Prepend `source = <dataset>` to a query that does not already have a source,
  * mirroring the editor-seed / `getInitialQueryString` behavior so a leading-pipe
- * query (`| where ...`) explains against a real source. `describe`/`show` are
- * returned unchanged. INDEXES / INDEX_PATTERN dataset titles are backtick-wrapped
- * (sql#4444/#4445), matching the host source clause — including an existing
- * unquoted source clause, which the host also rewrites before executing.
+ * query (`| where ...`) explains against a real source. `describe`/`show`/`multisearch`
+ * are returned unchanged, minus an optional leading `|`. INDEXES / INDEX_PATTERN dataset
+ * titles are backtick-wrapped (sql#4444/#4445), matching the host source clause — including
+ * an existing unquoted source clause, which the host also rewrites before executing.
  */
-function prependSource(raw: string, dataset: Query['dataset']): string {
+function prependSource(rawQuery: string, dataset: Query['dataset']): string {
+  const raw = rawQuery.replace(LEADING_PIPE_BEFORE_FIRST_COMMAND, '');
   const lower = raw.toLowerCase();
+  if (/^\s*multisearch\b/.test(lower)) {
+    return raw;
+  }
   const hasSource = /^[^|]*\bsource\s*=/.test(lower);
   const hasDescribe = /^\s*describe\s+/.test(lower);
   const hasShow = /^\s*show\s+/.test(lower);
