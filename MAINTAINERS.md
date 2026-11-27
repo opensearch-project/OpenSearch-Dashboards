@@ -28,7 +28,7 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Justin Kim            | [angle943](https://github.com/angle943)             | Amazon               |
 | Joey Liu              | [Maosaic](https://github.com/Maosaic)               | Amazon               |
 | Lin Wang              | [wanglam](https://github.com/wanglam)               | Amazon               |
-| Daniel Rowe           | [d-buckner](https://github.com/d-buckner)           | External Contributor |
+| Daniel Buckner        | [d-buckner](https://github.com/d-buckner)           | External Contributor |
 | Shenoy Pratik         | [ps48](https://github.com/ps48)                     | Amazon               |
 | Adam Tackett          | [TackAdam](https://github.com/TackAdam)             | Amazon               |
 | Ruchi Sharma          | [ruchidh](https://github.com/ruchidh)               | Amazon               |
