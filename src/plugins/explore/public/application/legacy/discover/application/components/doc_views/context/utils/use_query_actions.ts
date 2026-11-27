@@ -9,6 +9,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { Filter } from '../../../../../../../../../../data/public';
 import { fetchAnchor } from '../api/anchor';
 import { OpenSearchHitRecord, fetchSurroundingDocs } from '../api/context';
+import { fetchPPLAnchor, fetchPPLSurroundingDocs } from '../api/ppl_context';
 import { ExploreServices } from '../../../../../../../../types';
 import { useOpenSearchDashboards } from '../../../../../../../../../../opensearch_dashboards_react/public';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../../../../../common/legacy/discover';
@@ -38,28 +39,37 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
   );
   const [contextQueryState, setContextQueryState] = useState<ContextQueryState>(initialState);
 
-  const fetchAnchorRow = useCallback(async () => {
-    if (!tieBreakerField) {
-      setContextQueryState((prevState) => ({
-        ...prevState,
-        anchorStatus: {
-          value: LOADING_STATUS.FAILED,
-          reason: FAILURE_REASONS.INVALID_TIEBREAKER,
-        },
-      }));
-      return;
-    }
+  const isPPL = data.query.queryString.getQuery().language === 'PPL';
 
+  const fetchAnchorRow = useCallback(async () => {
     try {
       setContextQueryState((prevState) => ({
         ...prevState,
         anchorStatus: { value: LOADING_STATUS.LOADING },
       }));
-      const sort = [
-        { [indexPattern.timeFieldName!]: SortDirection.desc },
-        { [tieBreakerField]: SortDirection.desc },
-      ];
-      const fetchAnchorResult = await fetchAnchor(anchorId, indexPattern, searchSource, sort);
+
+      let fetchAnchorResult: OpenSearchHitRecord;
+
+      if (isPPL) {
+        fetchAnchorResult = await fetchPPLAnchor(anchorId, indexPattern);
+      } else {
+        if (!tieBreakerField) {
+          setContextQueryState((prevState) => ({
+            ...prevState,
+            anchorStatus: {
+              value: LOADING_STATUS.FAILED,
+              reason: FAILURE_REASONS.INVALID_TIEBREAKER,
+            },
+          }));
+          return;
+        }
+        const sort = [
+          { [indexPattern.timeFieldName!]: SortDirection.desc },
+          { [tieBreakerField]: SortDirection.desc },
+        ];
+        fetchAnchorResult = await fetchAnchor(anchorId, indexPattern, searchSource, sort);
+      }
+
       setContextQueryState((prevState) => ({
         ...prevState,
         anchor: fetchAnchorResult,
@@ -78,7 +88,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         text: 'fail',
       });
     }
-  }, [anchorId, indexPattern, searchSource, tieBreakerField, toastNotifications]);
+  }, [anchorId, indexPattern, isPPL, searchSource, tieBreakerField, toastNotifications]);
 
   const fetchSurroundingRows = useCallback(
     async (type: SurrDocType, count: number, filters: Filter[], anchor?: OpenSearchHitRecord) => {
@@ -96,15 +106,23 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         }
         const fetchedAchor = anchor || contextQueryState.anchor;
 
-        const rows = await fetchSurroundingDocs(
-          type,
-          indexPattern,
-          fetchedAchor as OpenSearchHitRecord,
-          tieBreakerField,
-          SortDirection.desc,
-          count,
-          filters
-        );
+        const rows = isPPL
+          ? await fetchPPLSurroundingDocs(
+              type,
+              indexPattern,
+              fetchedAchor as OpenSearchHitRecord,
+              SortDirection.desc,
+              count
+            )
+          : await fetchSurroundingDocs(
+              type,
+              indexPattern,
+              fetchedAchor as OpenSearchHitRecord,
+              tieBreakerField,
+              SortDirection.desc,
+              count,
+              filters
+            );
         if (type === SurrDocType.PREDECESSORS) {
           setContextQueryState((prevState) => ({
             ...prevState,
@@ -141,7 +159,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         });
       }
     },
-    [contextQueryState.anchor, indexPattern, tieBreakerField, toastNotifications]
+    [contextQueryState.anchor, indexPattern, isPPL, tieBreakerField, toastNotifications]
   );
 
   const fetchContextRows = useCallback(

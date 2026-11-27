@@ -121,8 +121,22 @@ export const convertResult = ({
         hit[field.name] = processField(field, field.values[index]);
       });
 
+      // Metadata fields returned by PPL when include_metadata=true belong at the hit top level,
+      // not inside _source, matching the structure of DSL hits. Lift them out so that code
+      // reading hit._id (e.g. "View surrounding documents") works the same way for both.
+      const topLevelMeta: Record<string, unknown> = {};
+      for (const metaKey of ['_id', '_index', '_score', '_sort', '_routing']) {
+        if (metaKey in hit) {
+          topLevelMeta[metaKey] = hit[metaKey];
+          delete hit[metaKey];
+        }
+      }
+
       hits.push({
-        _index: data.name,
+        _index: (topLevelMeta._index as string | undefined) ?? data.name,
+        ...(topLevelMeta._id !== undefined && { _id: topLevelMeta._id as string }),
+        ...(topLevelMeta._score !== undefined && { _score: topLevelMeta._score as number }),
+        ...(topLevelMeta._sort !== undefined && { sort: [topLevelMeta._sort as number] }),
         _source: hit,
         ...(highlightData?.[index] && { highlight: highlightData[index] }),
       });
