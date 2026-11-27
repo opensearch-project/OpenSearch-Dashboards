@@ -53,6 +53,7 @@ describe('table_vis_config', () => {
         globalAlignment: 'left',
         hiddenColumns: [],
         showColumnFilter: false,
+        sortColumns: [],
         showFooter: false,
         footerCalculations: [],
         cellTypes: [],

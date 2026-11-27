@@ -4,7 +4,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
+} from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
 import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
@@ -12,7 +17,7 @@ import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
 import type { VariableValue } from '../../../../../dashboard/public';
 import { getThresholdByValue } from '../utils/utils';
-import { matchesFilter } from './table_vis_utils';
+import { matchesFilter, sortTableRows, toGridSorting } from './table_vis_utils';
 
 import './table_vis.scss';
 
@@ -70,6 +75,14 @@ export const TableVis = React.memo(
     const [visibleColumns, setVisibleColumns] = useState(() =>
       sortedColumns.map(({ column }) => column)
     );
+
+    const [gridSortingColumns, setGridSortingColumns] = useState(() =>
+      toGridSorting(styleOptions?.sortColumns, sortedColumns)
+    );
+
+    useEffect(() => {
+      setGridSortingColumns(toGridSorting(styleOptions?.sortColumns, sortedColumns));
+    }, [sortedColumns, styleOptions?.sortColumns]);
 
     // Update visibleColumns when sortedColumns changes, preserving user's visibility choices
     useEffect(() => {
@@ -211,9 +224,28 @@ export const TableVis = React.memo(
       );
     }, [rows, filters]);
 
+    const sortedRows = useMemo(() => {
+      return sortTableRows(filteredRows, gridSortingColumns, columnTypes);
+    }, [filteredRows, gridSortingColumns, columnTypes]);
+
+    const onSort = useCallback(
+      (sortingColumns: EuiDataGridSorting['columns']) => {
+        setGridSortingColumns(sortingColumns);
+        onStyleChange?.({
+          sortColumns: sortingColumns.flatMap(({ id, direction }) => {
+            const name = sortedColumns.find((c) => c.column === id)?.name;
+            return name ? [{ field: name, direction }] : [];
+          }),
+        });
+      },
+      [onStyleChange, sortedColumns]
+    );
+
+    const sortingKey = JSON.stringify(gridSortingColumns);
+
     useEffect(() => {
       setPagination({ pageIndex: 0, pageSize });
-    }, [filteredRows.length, pageSize]);
+    }, [filteredRows.length, pageSize, sortingKey]);
 
     const renderCellValue = useCallback(
       ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
@@ -226,8 +258,9 @@ export const TableVis = React.memo(
               ? 'right'
               : 'left'
             : alignment;
-        const row = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
-          ? filteredRows[rowIndex]
+
+        const row = Object.prototype.hasOwnProperty.call(sortedRows, rowIndex)
+          ? sortedRows[rowIndex]
           : undefined;
         const cellValue = row ? row[columnId] : null;
 
@@ -265,7 +298,7 @@ export const TableVis = React.memo(
       },
       [
         columnTypes,
-        filteredRows,
+        sortedRows,
         styleOptions?.thresholds,
         styleOptions?.baseColor,
         styleOptions?.cellTypes,
@@ -350,6 +383,7 @@ export const TableVis = React.memo(
             onChangeItemsPerPage,
             pageSizeOptions,
           }}
+          sorting={disableActions ? undefined : { columns: gridSortingColumns, onSort }}
           renderCellValue={renderCellValue}
           renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
           toolbarVisibility={
@@ -359,6 +393,7 @@ export const TableVis = React.memo(
                   showFullScreenSelector: false,
                   showStyleSelector: showStyleSelector ?? true,
                   showColumnSelector: true,
+                  showSortSelector: true,
                 }
           }
           gridStyle={{ rowHover: 'highlight' }}
