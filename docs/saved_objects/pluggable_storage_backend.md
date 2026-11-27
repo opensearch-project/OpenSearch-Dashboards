@@ -41,6 +41,10 @@ savedObjects.storage.backend: "sqlite"
 savedObjects.storage.sqlite.path: "data/osd-metadata.db"
 ```
 
+The SQLite backend does not support saved object permission control. OpenSearch Dashboards rejects
+configurations that combine `savedObjects.storage.backend: "sqlite"` with
+`savedObjects.permission.enabled: true`.
+
 ## How it's wired
 
 In `saved_objects_service.ts` `setup()`, the factory provider is set. It receives `migrator` and `typeRegistry` when called during `start()`:

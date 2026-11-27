@@ -1,6 +1,6 @@
 # Saved Objects Storage Backend
 
-SQLite implementation of `ISavedObjectsRepository` for OpenSearch Dashboards. Allows running OSD without an OpenSearch cluster for development, testing, and edge deployments.
+SQLite implementation of `ISavedObjectsRepository` for OpenSearch Dashboards. Allows running OSD without an OpenSearch cluster for development and testing.
 
 **RFC:** [#11772](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11772)
 
@@ -36,6 +36,10 @@ No adapter layer — `SqliteSavedObjectsRepository` implements `ISavedObjectsRep
 yarn start --savedObjects.storage.backend=sqlite
 ```
 
+Saved object permission control is not supported. OpenSearch Dashboards rejects configurations
+that combine `savedObjects.storage.backend: "sqlite"` with
+`savedObjects.permission.enabled: true`.
+
 ## Tests
 
 ```bash
@@ -64,6 +68,7 @@ yarn test:jest src/core/server/saved_objects/saved_objects_service.test.ts
 | Multi-namespace types (`namespaceType: 'multiple'`) | ✅ Object in multiple namespaces | ❌ Single namespace per row | `addToNamespaces`/`deleteFromNamespaces` are no-ops |
 | Namespace-agnostic types (`namespaceType: 'agnostic'`) | ✅ Visible across all namespaces | ❌ Always filters by namespace | Global config objects may not be found cross-namespace |
 | `typeToNamespacesMap` | ✅ Cross-namespace type queries | ❌ Not supported | Security plugin multi-tenant visibility won't work |
+| Saved object permission control | ✅ Workspace and object ACL filtering | ❌ Not supported | Configuration validation rejects permission control with SQLite |
 | Hidden type enforcement | ✅ `_allowedTypes` filtering | ⚠️ Partial (constructor-level) | Not enforced per-method |
 | `fields` option (partial response) | ✅ Returns only requested fields | ❌ Always returns all fields | Slightly more data over the wire |
 | `preference` (read routing) | ✅ Routing preference | ❌ N/A (single file) | No impact for single-node |
