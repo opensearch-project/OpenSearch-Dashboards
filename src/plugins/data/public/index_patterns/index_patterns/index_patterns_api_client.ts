@@ -31,6 +31,9 @@
 import { HttpSetup } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
 import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
+import { DEFAULT_DATA } from '../../../common/constants';
+
+const DATASET_TYPES: string[] = Object.values(DEFAULT_DATA.SET_TYPES);
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -78,7 +81,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     let url;
     let query;
 
-    if (type) {
+    if (type && !DATASET_TYPES.includes(type)) {
       url = this._getUrl([type, '_fields_for_wildcard']);
       query = {
         pattern,
