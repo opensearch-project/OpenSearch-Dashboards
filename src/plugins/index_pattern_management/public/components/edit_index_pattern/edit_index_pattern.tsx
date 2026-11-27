@@ -46,11 +46,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  IndexPattern,
-  IndexPatternField,
-  isPayloadTooLargeError,
-} from '../../../../../plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
@@ -163,24 +159,14 @@ export const EditIndexPattern = withRouter(
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
         if (isConfirmed) {
-          const previousFields = indexPattern.fields.getAll().map((field) => field.spec);
           try {
-            await data.indexPatterns.refreshFields(indexPattern);
-            await data.indexPatterns.updateSavedObject(indexPattern);
+            await data.indexPatterns.refreshFieldsAndSave(indexPattern);
           } catch (err) {
-            // Keep the in-memory (cached) pattern in sync with what is actually saved
-            indexPattern.fields.replaceAll(previousFields);
-            // The index patterns service already shows a dedicated toast for HTTP 413
-            if (!isPayloadTooLargeError(err)) {
-              notifications.toasts.addError(err, {
-                title: i18n.translate(
-                  'indexPatternManagement.editIndexPattern.refreshFieldsError',
-                  {
-                    defaultMessage: 'Unable to refresh the field list.',
-                  }
-                ),
-              });
-            }
+            notifications.toasts.addError(err, {
+              title: i18n.translate('indexPatternManagement.editIndexPattern.refreshFieldsError', {
+                defaultMessage: 'Unable to refresh the field list.',
+              }),
+            });
           }
           setFields(indexPattern.getNonScriptedFields());
           setConflictedFields(

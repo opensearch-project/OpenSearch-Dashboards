@@ -25,11 +25,19 @@ import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
-import { isPayloadTooLargeError, getPayloadTooLargeToast } from '../../index_patterns/lib';
+import {
+  isPayloadTooLargeError,
+  getPayloadTooLargeToast,
+  getFieldChanges,
+} from '../../index_patterns/lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, MissingDataViewError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+
+const copyProperty = <K extends keyof DataView>(target: DataView, source: DataView, key: K) => {
+  target[key] = source[key];
+};
 const savedObjectType = 'index-pattern';
 
 export interface DataViewSavedObjectAttrs {
@@ -385,17 +393,57 @@ export class DataViewsService {
       const scripted = dataView.getScriptedFields().map((field) => field.spec);
       dataView.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id: dataView.id, title: dataView.title },
-        }),
-      });
+      this.onRefreshFieldsError(err, dataView);
     }
+  };
+
+  refreshFieldsAndSave = async (dataView: DataView) => {
+    // Only a saved data view can be refreshed on the server; without an id the request would
+    // silently target a different URL.
+    if (!dataView.id) {
+      throw new Error('Cannot refresh the fields of a data view that has not been saved');
+    }
+    try {
+      const { fields, version, attributes } = await this.apiClient.refreshFields(dataView.id, {
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+      });
+      // The server refreshed the latest saved copy, which can include changes made elsewhere
+      // since this one was loaded. Take those too: adopting only the new version would let the
+      // next save overwrite them without a conflict.
+      const spec = this.savedObjectToSpec({
+        id: dataView.id,
+        type: savedObjectType,
+        version,
+        attributes: { ...attributes, fields },
+        references: [],
+      });
+      const savedDataView = await this.create(spec, true);
+      const savedBody = savedDataView.getAsSavedObjectBody();
+      (Object.keys(savedBody) as Array<keyof typeof savedBody>).forEach((key) => {
+        if (key !== 'fields') {
+          copyProperty(dataView, savedDataView, key);
+        }
+      });
+      // Update the field list in place; code holding it would otherwise keep stale fields.
+      dataView.fields.replaceAll(Object.values(spec.fields ?? {}));
+      dataView.version = version;
+      dataView.resetOriginalSavedObjectBody();
+    } catch (err) {
+      this.onRefreshFieldsError(err, dataView);
+    }
+  };
+
+  private onRefreshFieldsError = (err: Error, dataView: DataView) => {
+    if (err instanceof DataViewMissingIndices) {
+      this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+    }
+
+    this.onError(err, {
+      title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+        defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+        values: { id: dataView.id, title: dataView.title },
+      }),
+    });
   };
 
   /**
@@ -429,7 +477,15 @@ export class DataViewsService {
    * Converts data view saved object to data view spec
    * @param savedObject
    */
-  savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+  savedObjectToSpec = (
+    // `fields` can also be an already parsed list, as stored by external tooling or returned by
+    // the refresh route.
+    savedObject: SavedObject<
+      Omit<DataViewAttributes, 'fields'> & {
+        fields?: DataViewAttributes['fields'] | DataViewFieldSpec[];
+      }
+    >
+  ): DataViewSpec => {
     const {
       id,
       version,
@@ -640,10 +696,13 @@ export class DataViewsService {
     skipFetchFields = false,
     reuseExisting = false
   ) {
-    const dataView = await this.create(spec, skipFetchFields);
+    const dataView = await this.create(spec, true);
     // createSavedObject returns the existing view when reuseExisting hits a duplicate.
     const savedDataView =
       (await this.createSavedObject(dataView, override, reuseExisting)) ?? dataView;
+    if (!skipFetchFields && savedDataView === dataView) {
+      await this.refreshFieldsAndSave(dataView);
+    }
     await this.setDefault(savedDataView.id as string);
     return savedDataView;
   }
@@ -681,6 +740,8 @@ export class DataViewsService {
         references,
       });
       dataView.id = response.id;
+      // What was just created is the baseline for the first update's changes.
+      dataView.resetOriginalSavedObjectBody(body);
       this.patterns.saveToCache(dataView.id, dataView);
       return dataView;
     } catch (err) {
@@ -739,11 +800,36 @@ export class DataViewsService {
       }
     });
 
-    return this.savedObjectsClient
-      .update(savedObjectType, dataView.id, body, { version: dataView.version })
+    // Send only the changed attributes: the update is partial, so the rest keep their saved
+    // values. A cleared (undefined) attribute is still dropped from the request, as before.
+    const bodyAttributes: Record<string, unknown> = body;
+    const changedAttributes: Record<string, unknown> = {};
+    originalChangedKeys.forEach((key) => {
+      if (key !== 'fields') {
+        changedAttributes[key] = bodyAttributes[key];
+      }
+    });
+    // The field list is one attribute, so a partial update would replace all of it. Only its
+    // scripted-field and popularity changes are sent, and the server applies them to the saved
+    // list; other differences are discovered metadata that only a field refresh writes.
+    const fieldChanges = originalChangedKeys.includes('fields')
+      ? getFieldChanges(originalBody.fields, body.fields)
+      : undefined;
+    const save: Promise<{ version?: string }> = fieldChanges
+      ? this.apiClient.updateFields(dataView.id, {
+          version: dataView.version,
+          attributes: changedAttributes,
+          ...fieldChanges,
+        })
+      : this.savedObjectsClient.update(savedObjectType, dataView.id, changedAttributes, {
+          version: dataView.version,
+        });
+
+    return save
       .then((resp) => {
-        dataView.id = resp.id;
         dataView.version = resp.version;
+        // What this request sent is now saved; later edits stay pending for the next save.
+        dataView.resetOriginalSavedObjectBody(body);
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {

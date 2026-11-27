@@ -36,3 +36,5 @@ export { isDefault } from './is_default';
 export * from './types';
 export { validateIndexPattern } from './validate_index_pattern';
 export { isPayloadTooLargeError, getPayloadTooLargeToast } from './payload_too_large';
+export { getFieldChanges } from './get_field_changes';
+export { getEffectiveFields } from './get_effective_fields';

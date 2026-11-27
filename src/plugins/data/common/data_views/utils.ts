@@ -86,11 +86,14 @@ export const concatDataSourceWithDataView = (dataSourceTitle: string, dataViewTi
   return dataSourceTitle.concat(DATA_SOURCE_DATA_VIEW_DELIMITER).concat(dataViewTitle);
 };
 
+// Only the fields needed to recognize a reference, so core saved-object references work too.
+type ReferenceIdentity = Pick<DataViewSavedObjectReference, 'id' | 'name' | 'type'>;
+
 // Match by name or type (tolerating legacy engine-typed refs); require a non-empty id.
-export const isDataSourceReference = (ref: DataViewSavedObjectReference) =>
+export const isDataSourceReference = (ref: ReferenceIdentity) =>
   !!ref.id && (ref.name === 'dataSource' || ref.type === 'data-source');
 
-export const getDataSourceReference = (references: DataViewSavedObjectReference[]) => {
+export const getDataSourceReference = <T extends ReferenceIdentity>(references: T[]) => {
   return references.find(isDataSourceReference);
 };
 

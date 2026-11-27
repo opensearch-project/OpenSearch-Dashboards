@@ -662,6 +662,56 @@ describe('DatasetService', () => {
     expect(mockDataViews.createAndSave).not.toHaveBeenCalled();
   });
 
+  describe('saveDataset fields', () => {
+    const fields = [{ name: 'Time', type: 'date', searchable: true, aggregatable: true }];
+    let mockDataViews: { createAndSave: jest.Mock };
+    let servicesWithDataViews: Partial<IDataPluginServices>;
+
+    beforeEach(() => {
+      mockDataViews = { createAndSave: jest.fn().mockResolvedValue({ id: 'saved-id' }) };
+      servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: { ...dataPluginMock.createStartContract(), dataViews: mockDataViews as any },
+      };
+    });
+
+    test('leaves the fields of OpenSearch index datasets to the server', async () => {
+      const indexType = { ...mockType, id: DEFAULT_DATA.SET_TYPES.INDEX, fetchFields: jest.fn() };
+      service.registerType(indexType);
+
+      await service.saveDataset(
+        { id: 'logs', title: 'logs-*', type: DEFAULT_DATA.SET_TYPES.INDEX } as Dataset,
+        servicesWithDataViews
+      );
+
+      expect(indexType.fetchFields).not.toHaveBeenCalled();
+      expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: {} }),
+        undefined,
+        false,
+        false
+      );
+    });
+
+    test('saves the fields that other dataset types provide', async () => {
+      const otherType = { ...mockType, fetchFields: jest.fn().mockResolvedValue(fields) };
+      service.registerType(otherType);
+
+      await service.saveDataset(
+        { id: 'metrics', title: 'metrics', type: otherType.id } as Dataset,
+        servicesWithDataViews
+      );
+
+      expect(otherType.fetchFields).toHaveBeenCalled();
+      expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+        expect.objectContaining({ fields }),
+        undefined,
+        false,
+        false
+      );
+    });
+  });
+
   test('addRecentDataset adds a dataset', () => {
     const mockDataset1: Dataset = {
       id: 'dataset1',

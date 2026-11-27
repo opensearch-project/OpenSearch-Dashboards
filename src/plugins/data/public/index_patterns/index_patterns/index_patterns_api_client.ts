@@ -30,7 +30,12 @@
 
 import { HttpSetup } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
+import {
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  RefreshFieldsResponse,
+  UpdateFieldsRequest,
+} from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -41,9 +46,10 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query: any) {
+  private _request(url: string, query: any, method: 'GET' | 'POST' = 'GET') {
     return this.http
       .fetch(url, {
+        method,
         query,
       })
       .catch((resp: any) => {
@@ -96,5 +102,22 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }
 
     return this._request(url, query).then((resp: any) => resp.fields);
+  }
+
+  refreshFields(
+    id: string,
+    options: Pick<GetFieldsOptions, 'metaFields'> = {}
+  ): Promise<RefreshFieldsResponse> {
+    const url = this._getUrl([id, '_refresh_fields']);
+
+    return this._request(url, { meta_fields: options.metaFields }, 'POST');
+  }
+
+  updateFields(id: string, request: UpdateFieldsRequest): Promise<{ version: string }> {
+    // Errors are not wrapped like in _request: callers need the HTTP status to resolve conflicts.
+    return this.http.fetch(this._getUrl([id, '_update_fields']), {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
   }
 }

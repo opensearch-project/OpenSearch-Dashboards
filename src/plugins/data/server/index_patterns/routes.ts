@@ -28,10 +28,101 @@
  * under the License.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@osd/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
+import {
+  HttpServiceSetup,
+  LegacyAPICaller,
+  OpenSearchDashboardsResponseFactory,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/server';
+import {
+  FieldSpec,
+  IndexPatternAttributes,
+  UpdateFieldsRequest,
+  getDataSourceReference,
+  getEffectiveFields,
+} from '../../common';
 import { IndexPatternsFetcher } from './fetcher';
 import { decideLegacyClient } from '../../../data_source/common/util/';
+
+// Objects written directly to the index by external tooling can store `fields` as an array.
+const readSavedFields = (
+  storedFields: IndexPatternAttributes['fields'] | FieldSpec[]
+): FieldSpec[] => (Array.isArray(storedFields) ? storedFields : JSON.parse(storedFields || '[]'));
+
+// Async functions can keep dead locals alive across awaits, so these parse field lists in their own
+// frame and return only what the routes keep.
+const readSavedPatternForRefresh = async (client: SavedObjectsClientContract, id: string) => {
+  const {
+    version,
+    references,
+    attributes: { fields: storedFields, ...attributes },
+  } = await client.get<IndexPatternAttributes>('index-pattern', id);
+  // Popularity is the only user setting stored on discovered fields; keep it across refreshes.
+  const counts = new Map<string, number>();
+  const scriptedFields: FieldSpec[] = [];
+  readSavedFields(storedFields).forEach((field) => {
+    if (field.scripted) {
+      scriptedFields.push(field);
+    } else if (field.count) {
+      counts.set(field.name, field.count);
+    }
+  });
+  return { version, references, attributes, counts, scriptedFields };
+};
+
+const discoverFieldsJson = async (
+  fetcher: IndexPatternsFetcher,
+  options: { pattern: string; metaFields: string[] },
+  { counts, scriptedFields }: { counts: Map<string, number>; scriptedFields: FieldSpec[] }
+): Promise<string> => {
+  const discoveredFields = await fetcher.getFieldsForWildcard(options);
+  // Saved in the shape the browser writes, so every field has a count (0 if never used). A
+  // scripted field shadows a mapped field of the same name, so only one is saved.
+  return JSON.stringify(
+    getEffectiveFields<FieldSpec>([
+      ...discoveredFields.map((field) =>
+        Object.assign(field, { count: counts.get(field.name) ?? 0, scripted: false })
+      ),
+      ...scriptedFields,
+    ])
+  );
+};
+
+const readUpdatedFieldsJson = async (
+  client: SavedObjectsClientContract,
+  id: string,
+  { scripted, counts }: Pick<UpdateFieldsRequest, 'scripted' | 'counts'>
+): Promise<string> => {
+  const { attributes } = await client.get<IndexPatternAttributes>('index-pattern', id);
+  // Unknown names are ignored, so repeating a change is harmless. A scripted field may reuse the
+  // name of a mapped field and then replaces it, so the saved list keeps one definition per name.
+  // That also cleans up lists saved earlier with both entries.
+  const removed = new Set(scripted?.remove ?? []);
+  const countByName = new Map((counts ?? []).map(({ name, count }) => [name, count]));
+  return JSON.stringify(
+    getEffectiveFields<FieldSpec>([
+      ...readSavedFields(attributes.fields).filter(
+        (field) => !(field.scripted && removed.has(field.name))
+      ),
+      ...(scripted?.upsert ?? []),
+    ]).map((field) => {
+      const count = countByName.get(field.name);
+      return count === undefined ? field : { ...field, count };
+    })
+  );
+};
+
+const boomErrorResponse = (response: OpenSearchDashboardsResponseFactory, error: Boom.Boom) =>
+  response.customError({
+    statusCode: error.output.statusCode,
+    body: { message: error.output.payload.message, attributes: error.output.payload },
+  });
+
+// Saved attributes `_update_fields` can change along with the fields; null clears one.
+const savedAttribute = schema.maybe(schema.oneOf([schema.string(), schema.literal(null)]));
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -147,6 +238,155 @@ export function registerRoutes(http: HttpServiceSetup) {
         });
       } catch {
         return response.notFound();
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/index_patterns/{id}/_refresh_fields',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        query: schema.object({
+          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            defaultValue: [],
+          }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { id } = request.params;
+
+      let parsedFields: string[] = [];
+      try {
+        parsedFields = parseMetaFields(request.query.meta_fields);
+      } catch {
+        return response.badRequest();
+      }
+
+      try {
+        const saved = await readSavedPatternForRefresh(savedObjectsClient, id);
+
+        // Fields always come from the data source the pattern references, never from the request.
+        const dataSourceId = getDataSourceReference(saved.references)?.id;
+        if (dataSourceId && !context.dataSource) {
+          return response.badRequest({
+            body: {
+              message: `Index pattern [${id}] references a data source, but data sources are not enabled`,
+            },
+          });
+        }
+        const callAsCurrentUser: LegacyAPICaller = dataSourceId
+          ? (context.dataSource.opensearch.legacy.getClient(dataSourceId)
+              .callAPI as LegacyAPICaller)
+          : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+        const fields = await discoverFieldsJson(
+          new IndexPatternsFetcher(callAsCurrentUser),
+          { pattern: saved.attributes.title, metaFields: parsedFields },
+          saved
+        );
+
+        const { version } = await savedObjectsClient.update(
+          'index-pattern',
+          id,
+          { fields },
+          { version: saved.version }
+        );
+
+        // Reuses the serialized list; returning an object would serialize the list a second time.
+        return response.ok({
+          headers: { 'content-type': 'application/json' },
+          body: `{"fields":${fields},"version":${JSON.stringify(version)},"attributes":${JSON.stringify(
+            saved.attributes
+          )}}`,
+        });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          return boomErrorResponse(response, error);
+        }
+        throw error;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/index_patterns/{id}/_update_fields',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          version: schema.maybe(schema.string()),
+          attributes: schema.maybe(
+            schema.object({
+              title: savedAttribute,
+              displayName: savedAttribute,
+              description: savedAttribute,
+              signalType: savedAttribute,
+              timeFieldName: savedAttribute,
+              intervalName: savedAttribute,
+              sourceFilters: savedAttribute,
+              fieldFormatMap: savedAttribute,
+              type: savedAttribute,
+              typeMeta: savedAttribute,
+              schemaMappings: savedAttribute,
+            })
+          ),
+          scripted: schema.maybe(
+            schema.object({
+              upsert: schema.maybe(
+                schema.arrayOf(
+                  schema.object(
+                    {
+                      name: schema.string({ minLength: 1 }),
+                      type: schema.string(),
+                      script: schema.string(),
+                      scripted: schema.literal(true),
+                      searchable: schema.boolean(),
+                      aggregatable: schema.boolean(),
+                    },
+                    // Keep the rest of the field as the browser serialized it (count, lang, ...).
+                    { unknowns: 'allow' }
+                  )
+                )
+              ),
+              remove: schema.maybe(schema.arrayOf(schema.string())),
+            })
+          ),
+          counts: schema.maybe(
+            schema.arrayOf(
+              schema.object({ name: schema.string(), count: schema.number({ min: 0 }) })
+            )
+          ),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { id } = request.params;
+      const { version, attributes } = request.body;
+
+      try {
+        const fields = await readUpdatedFieldsJson(savedObjectsClient, id, request.body);
+
+        const { version: savedVersion } = await savedObjectsClient.update(
+          'index-pattern',
+          id,
+          { ...attributes, fields },
+          { version }
+        );
+
+        return response.ok({ body: { version: savedVersion } });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          return boomErrorResponse(response, error);
+        }
+        throw error;
       }
     }
   );

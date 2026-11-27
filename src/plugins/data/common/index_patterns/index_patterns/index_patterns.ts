@@ -57,11 +57,20 @@ import {
   IndexPatternMissingIndices,
   isPayloadTooLargeError,
   getPayloadTooLargeToast,
+  getFieldChanges,
 } from '../lib';
 import { findByTitle, getDataSourceIdFromIndexPattern, getIndexPatternTitle } from '../utils';
 import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
+
+const copyProperty = <K extends keyof IndexPattern>(
+  target: IndexPattern,
+  source: IndexPattern,
+  key: K
+) => {
+  target[key] = source[key];
+};
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
@@ -389,17 +398,57 @@ export class IndexPatternsService {
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-          values: { id: indexPattern.id, title: indexPattern.title },
-        }),
-      });
+      this.onRefreshFieldsError(err, indexPattern);
     }
+  };
+
+  refreshFieldsAndSave = async (indexPattern: IndexPattern) => {
+    // Only a saved index pattern can be refreshed on the server; without an id the request would
+    // silently target a different URL.
+    if (!indexPattern.id) {
+      throw new Error('Cannot refresh the fields of an index pattern that has not been saved');
+    }
+    try {
+      const { fields, version, attributes } = await this.apiClient.refreshFields(indexPattern.id, {
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+      });
+      // The server refreshed the latest saved copy, which can include changes made elsewhere
+      // since this one was loaded. Take those too: adopting only the new version would let the
+      // next save overwrite them without a conflict.
+      const spec = this.savedObjectToSpec({
+        id: indexPattern.id,
+        type: savedObjectType,
+        version,
+        attributes: { ...attributes, fields },
+        references: [],
+      });
+      const savedPattern = await this.create(spec, true);
+      const savedBody = savedPattern.getAsSavedObjectBody();
+      (Object.keys(savedBody) as Array<keyof typeof savedBody>).forEach((key) => {
+        if (key !== 'fields') {
+          copyProperty(indexPattern, savedPattern, key);
+        }
+      });
+      // Update the field list in place; code holding it would otherwise keep stale fields.
+      indexPattern.fields.replaceAll(Object.values(spec.fields ?? {}));
+      indexPattern.version = version;
+      indexPattern.resetOriginalSavedObjectBody();
+    } catch (err) {
+      this.onRefreshFieldsError(err, indexPattern);
+    }
+  };
+
+  private onRefreshFieldsError = (err: Error, indexPattern: IndexPattern) => {
+    if (err instanceof IndexPatternMissingIndices) {
+      this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+    }
+
+    this.onError(err, {
+      title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+        defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+        values: { id: indexPattern.id, title: indexPattern.title },
+      }),
+    });
   };
 
   /**
@@ -438,7 +487,15 @@ export class IndexPatternsService {
    * @param savedObject
    */
 
-  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
+  savedObjectToSpec = (
+    // `fields` can also be an already parsed list, as stored by external tooling or returned by
+    // the refresh route.
+    savedObject: SavedObject<
+      Omit<IndexPatternAttributes, 'fields'> & {
+        fields?: IndexPatternAttributes['fields'] | FieldSpec[];
+      }
+    >
+  ): IndexPatternSpec => {
     const {
       id,
       version,
@@ -670,8 +727,11 @@ export class IndexPatternsService {
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.create(spec, skipFetchFields);
+    const indexPattern = await this.create(spec, true);
     await this.createSavedObject(indexPattern, override);
+    if (!skipFetchFields) {
+      await this.refreshFieldsAndSave(indexPattern);
+    }
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
   }
@@ -709,6 +769,8 @@ export class IndexPatternsService {
         throw err;
       });
     indexPattern.id = response.id;
+    // What was just created is the baseline for the first update's changes.
+    indexPattern.resetOriginalSavedObjectBody(body);
     indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
   }
@@ -746,11 +808,36 @@ export class IndexPatternsService {
       }
     });
 
-    return this.savedObjectsClient
-      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
+    // Send only the changed attributes: the update is partial, so the rest keep their saved
+    // values. A cleared (undefined) attribute is still dropped from the request, as before.
+    const bodyAttributes: Record<string, unknown> = body;
+    const changedAttributes: Record<string, unknown> = {};
+    originalChangedKeys.forEach((key) => {
+      if (key !== 'fields') {
+        changedAttributes[key] = bodyAttributes[key];
+      }
+    });
+    // The field list is one attribute, so a partial update would replace all of it. Only its
+    // scripted-field and popularity changes are sent, and the server applies them to the saved
+    // list; other differences are discovered metadata that only a field refresh writes.
+    const fieldChanges = originalChangedKeys.includes('fields')
+      ? getFieldChanges(originalBody.fields, body.fields)
+      : undefined;
+    const save: Promise<{ version?: string }> = fieldChanges
+      ? this.apiClient.updateFields(indexPattern.id, {
+          version: indexPattern.version,
+          attributes: changedAttributes,
+          ...fieldChanges,
+        })
+      : this.savedObjectsClient.update(savedObjectType, indexPattern.id, changedAttributes, {
+          version: indexPattern.version,
+        });
+
+    return save
       .then((resp) => {
-        indexPattern.id = resp.id;
         indexPattern.version = resp.version;
+        // What this request sent is now saved; later edits stay pending for the next save.
+        indexPattern.resetOriginalSavedObjectBody(body);
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
