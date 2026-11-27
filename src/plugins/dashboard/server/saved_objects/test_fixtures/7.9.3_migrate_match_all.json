@@ -1,0 +1,23 @@
+{
+  "description": "Dashboard 7.9.3: Migrate match_all query (same as 6.7.2, re-applied for safety)",
+  "type": "dashboard",
+  "migrationVersion": "7.9.3",
+  "input": {
+    "id": "dash-match-all-v2",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Old dashboard with match_all",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"match_all\":{}},\"filter\":[{\"meta\":{\"index\":\"logstash-*\"}}]}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "attributes_equals": {
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"index\":\"logstash-*\"}}]}"
+      }
+    }
+  }
+}

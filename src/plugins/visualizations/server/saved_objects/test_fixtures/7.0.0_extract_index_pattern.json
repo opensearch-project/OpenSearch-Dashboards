@@ -1,0 +1,23 @@
+{
+  "description": "Visualization 7.0.0: Extract index pattern reference from searchSourceJSON",
+  "type": "visualization",
+  "migrationVersion": "7.0.0",
+  "input": {
+    "id": "viz-with-index",
+    "type": "visualization",
+    "attributes": {
+      "title": "My Visualization",
+      "visState": "{\"type\":\"histogram\",\"params\":{}}",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "references_contain": [
+      { "type": "index-pattern", "id": "logstash-*" }
+    ],
+    "attributes_has": ["visState", "kibanaSavedObjectMeta"]
+  }
+}

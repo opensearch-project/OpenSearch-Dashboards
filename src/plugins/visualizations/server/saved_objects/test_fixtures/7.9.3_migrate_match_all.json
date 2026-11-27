@@ -1,0 +1,24 @@
+{
+  "description": "Visualization 7.9.3: Migrate match_all query to default query",
+  "type": "visualization",
+  "migrationVersion": "7.9.3",
+  "input": {
+    "id": "viz-match-all",
+    "type": "visualization",
+    "attributes": {
+      "title": "Viz with match_all",
+      "visState": "{\"type\":\"metric\",\"params\":{}}",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"match_all\":{}}}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "attributes_equals": {
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      }
+    }
+  }
+}
