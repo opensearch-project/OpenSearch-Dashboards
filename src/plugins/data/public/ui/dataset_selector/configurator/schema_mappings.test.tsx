@@ -8,7 +8,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { DatasetField } from '../../../../common';
-import { SchemaMappings, SchemaMappingsProps } from './schema_mappings';
+import { MAX_SELECT_OPTIONS, SchemaMappings, SchemaMappingsProps } from './schema_mappings';
 import { SchemaConfig } from './schema_config';
 
 const mockSchemaConfig: SchemaConfig = {
@@ -128,10 +128,7 @@ describe('SchemaMappings Component', () => {
     };
 
     renderWithIntl(<SchemaMappings {...propsWithMapping} />);
-    const accordion = screen.getByTestId('schemaMappingsAccordion');
-    const accordionButton = accordion.querySelector('button');
-    fireEvent.click(accordionButton!);
-
+    // Accordion auto-opens because mappings already exist
     const select = screen.getByTestId('schemaMappingSelect-otelLogs-traceId');
     fireEvent.change(select, { target: { value: '' } });
 
@@ -165,10 +162,7 @@ describe('SchemaMappings Component', () => {
     };
 
     renderWithIntl(<SchemaMappings {...propsWithMapping} />);
-    const accordion = screen.getByTestId('schemaMappingsAccordion');
-    const accordionButton = accordion.querySelector('button');
-    fireEvent.click(accordionButton!);
-
+    // Accordion auto-opens because mappings already exist
     const traceIdSelect = screen.getByTestId(
       'schemaMappingSelect-otelLogs-traceId'
     ) as HTMLSelectElement;
@@ -223,5 +217,49 @@ describe('SchemaMappings Component', () => {
     // Accordion should be auto-opened, so schema details should be visible without clicking
     expect(screen.getByText('OTel logs - optional')).toBeInTheDocument();
     expect(screen.getByText('Trace ID')).toBeInTheDocument();
+  });
+
+  describe('with many fields', () => {
+    const manyFields: DatasetField[] = Array.from({ length: MAX_SELECT_OPTIONS + 1 }, (_, i) => ({
+      name: `field_${i}`,
+      displayName: `field_${i}`,
+      type: 'string',
+    }));
+
+    it('should not render any field options while the accordion is closed', () => {
+      const { container } = renderWithIntl(
+        <SchemaMappings {...defaultProps} availableFields={manyFields} />
+      );
+      expect(container.querySelectorAll('option')).toHaveLength(0);
+      expect(screen.queryByTestId('schemaMappingSelect-otelLogs-traceId')).not.toBeInTheDocument();
+    });
+
+    it('should use a combo box instead of a select above the option limit', () => {
+      const { container } = renderWithIntl(
+        <SchemaMappings {...defaultProps} availableFields={manyFields} />
+      );
+      fireEvent.click(screen.getByTestId('schemaMappingsAccordion').querySelector('button')!);
+
+      expect(screen.getByTestId('schemaMappingSelect-otelLogs-traceId')).toBeInTheDocument();
+      expect(container.querySelectorAll('option').length).toBeLessThan(MAX_SELECT_OPTIONS);
+    });
+
+    it('should call onChange when a field is chosen in the combo box', () => {
+      const mockOnChange = jest.fn();
+      renderWithIntl(
+        <SchemaMappings {...defaultProps} availableFields={manyFields} onChange={mockOnChange} />
+      );
+      fireEvent.click(screen.getByTestId('schemaMappingsAccordion').querySelector('button')!);
+
+      const combo = screen.getByTestId('schemaMappingSelect-otelLogs-traceId');
+      const input = combo.querySelector('input')!;
+      fireEvent.change(input, { target: { value: 'field_5' } });
+      fireEvent.keyDown(input, { key: 'ArrowDown', keyCode: 40 });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 13 });
+
+      expect(mockOnChange).toHaveBeenCalled();
+      const mapped = mockOnChange.mock.calls[0][0].otelLogs.traceId;
+      expect(mapped).toMatch(/^field_5/);
+    });
   });
 });

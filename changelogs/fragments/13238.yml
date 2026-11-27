@@ -1,0 +1,2 @@
+fix:
+- Fix Create dataset dialog freezing on indices with very many fields by rendering schema mappings lazily and using a searchable combo box for large field lists ([#13238](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/13238))
