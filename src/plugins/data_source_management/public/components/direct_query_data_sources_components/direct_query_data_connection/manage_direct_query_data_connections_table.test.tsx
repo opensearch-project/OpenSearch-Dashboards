@@ -902,6 +902,39 @@ describe('GetDataConnections', () => {
       expectNoFlowBehaviour();
     });
 
+    it('links owned rows without canManage when the flow does not require data source management', async () => {
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-flow',
+        title: 'Example connection',
+        buttonLabel: 'Connect example data source',
+        requiresDataSourceManagement: false,
+        mount: jest.fn(),
+        ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+      });
+      const flowHistory = scopedHistoryMock.create() as unknown as ScopedHistory;
+      (flowHistory.createHref as jest.Mock).mockImplementation(
+        ({ pathname }: { pathname: string }) => `/app/dataSources${pathname}`
+      );
+      await mountTable(
+        {
+          ...mockedContext,
+          application: { capabilities: { dataSource: { canManage: false } } },
+          directQueryConnectionFlowRegistry: registry,
+        },
+        flowHistory
+      );
+
+      const link = component.find('a[data-test-subj="directQueryConnectionFlowLink-flow-1"]');
+      expect(link.exists()).toBe(true);
+      expect(link.prop('href')).toBe('/app/dataSources/flows/example-flow/manage/flow-1');
+      expect(
+        findRow('Unowned connection')
+          .find('[data-test-subj^="directQueryConnectionFlowLink"]')
+          .exists()
+      ).toBe(false);
+    });
+
     it('does not add flow links or the Workspaces column when no flow is registered', async () => {
       await mountTable(
         {

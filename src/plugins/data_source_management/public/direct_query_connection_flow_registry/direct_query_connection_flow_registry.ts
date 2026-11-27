@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IconType } from '@elastic/eui';
 import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'src/core/public';
 import { DataConnectionType } from '../../../data_source/common';
 
@@ -56,6 +57,19 @@ export interface DirectQueryConnectionFlowMountParams {
 }
 
 /**
+ * A flow's type card on the Create data source page. The card's title is the flow's `title`, and
+ * selecting the card opens the flow's create page.
+ */
+export interface DirectQueryConnectionFlowCreatePageCard {
+  /** One line under the title. */
+  description: string;
+  /** An OUI icon type or an imported SVG. */
+  iconType?: IconType;
+  /** Labels the card "New". */
+  isNew?: boolean;
+}
+
+/**
  * A pluggable "connect a direct query data source" experience that is rendered inside the
  * data sources management app under `/flows/<id>`.
  */
@@ -66,11 +80,31 @@ export interface DirectQueryConnectionFlow {
   /** Label of the header button rendered on the Direct query connections tab. */
   buttonLabel: string;
   /**
+   * Lists the flow as a type on the Create data source page. The page shows type cards only with
+   * the data connections experience on (see `registerDataConnectionsExperience`), and only for
+   * visible flows (see `isVisible`). With the experience on, the Data sources page has no header
+   * buttons, so the card is the flow's entry point: a flow without one is reached only by its URL
+   * (`/flows/<id>`), which keeps a flow off the Create page on purpose. With the experience off, a
+   * visible flow is reached from its header button.
+   */
+  createPageCard?: DirectQueryConnectionFlowCreatePageCard;
+  /**
    * Label shown in the Type column of the Direct query connections table for the connections this
    * flow owns (see `ownsConnection`), e.g. "Example data connection". Optional: without it (or when
    * blank) the row shows the stored `attributes.type`. The stored value itself is never changed.
    */
   typeLabel?: string;
+  /**
+   * Whether the flow's pages (`/flows/<id>`), its row links and its Create page card also need the
+   * `dataSource.canManage` capability (the `data_source.manageableBy` setting). Defaults to true:
+   * the flow is shown only to users who can manage data sources. A flow whose connections are
+   * governed by other rules sets false; then `isVisible` alone decides (for example the flow's own
+   * feature flag, and dashboard admins only), and the flow's own server routes still decide who may
+   * create or change its connections. The header buttons of the tabbed Data sources page (the data
+   * connections experience off) stay for users who can manage data sources: there a flow that sets
+   * false is reached from its row links and its URL.
+   */
+  requiresDataSourceManagement?: boolean;
   /**
    * Defaults to visible. A rejected promise or a thrown error hides the flow for that check (fail
    * closed) and is logged; the next check calls `isVisible` again. Use it for capability or feature
@@ -243,6 +277,16 @@ const resolveDirectQueryConnectionFlowVisibility = async (
     return { visible: false, failed: true };
   }
 };
+
+/**
+ * Whether a user may have the flow at all, before its `isVisible`: a flow that requires data source
+ * management (the default) needs `canManageDataSources`; one that sets `requiresDataSourceManagement`
+ * to false doesn't.
+ */
+export const isDirectQueryConnectionFlowAllowed = (
+  flow: DirectQueryConnectionFlow,
+  canManageDataSources: boolean
+): boolean => canManageDataSources || flow.requiresDataSourceManagement === false;
 
 /**
  * Resolves a flow's visibility. Missing `isVisible` means visible; an error or a rejection is

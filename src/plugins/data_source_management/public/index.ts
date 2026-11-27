@@ -27,9 +27,11 @@ export {
 } from './components/data_source_menu';
 export {
   DirectQueryConnectionFlow,
+  DirectQueryConnectionFlowCreatePageCard,
   DirectQueryConnectionFlowMountParams,
   DirectQueryConnectionFlowSavedObject,
 } from './direct_query_connection_flow_registry';
+export { DataConnectionsExperience } from './components/data_connections_experience';
 export { DataSourceSelectionService } from './service/data_source_selection_service';
 export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
 export { DATACONNECTIONS_BASE, DatasourceTypeToDisplayName } from './constants';

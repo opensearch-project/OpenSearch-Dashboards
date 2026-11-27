@@ -5,10 +5,12 @@
 
 export {
   DirectQueryConnectionFlow,
+  DirectQueryConnectionFlowCreatePageCard,
   DirectQueryConnectionFlowMountParams,
   DirectQueryConnectionFlowSavedObject,
   DirectQueryConnectionFlowRegistry,
   IDirectQueryConnectionFlowRegistry,
   isDirectQueryConnectionFlowVisible,
+  isDirectQueryConnectionFlowAllowed,
   findOwningDirectQueryConnectionFlow,
 } from './direct_query_connection_flow_registry';

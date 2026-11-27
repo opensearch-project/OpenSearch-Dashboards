@@ -135,8 +135,9 @@ export const ManageDirectQueryDataConnectionsTable = ({
 
   // Flow-specific behaviour (row links, type labels, descriptions, Workspaces column) is only
   // enabled while at least one registered direct query connection flow is visible, consistent
-  // with the header buttons and the flow mount point (flow routes only exist for users who can
-  // manage data sources). Rows are fetched right away; flows apply to them at render, each as soon
+  // with the flow mount point: a flow that requires data source management (the default) is not
+  // visible without canManage, see `isDirectQueryConnectionFlowAllowed`. The header buttons still
+  // need canManage. Rows are fetched right away; flows apply to them at render, each as soon
   // as its own visibility is known.
   const visibleFlows = useVisibleDirectQueryConnectionFlows(
     directQueryConnectionFlowRegistry,
