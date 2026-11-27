@@ -92,6 +92,7 @@ export interface ITransformationService {
   //  Pipeline instance management --
   readonly pipeline$: BehaviorSubject<TransformationPipeline>;
   readonly stageFields$: BehaviorSubject<Map<string, FieldSchema[]>>;
+  readonly stepResults$: BehaviorSubject<Map<string, TransformationStepResult>>;
   getPipeline$(): Observable<TransformationPipeline>;
   addInstance(id: string): void;
   removeInstance(id: string): void;
