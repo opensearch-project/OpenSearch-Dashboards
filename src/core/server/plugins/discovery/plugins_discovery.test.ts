@@ -31,19 +31,72 @@
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@osd/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
-import mockFs from 'mock-fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
 import { first, map, toArray } from 'rxjs/operators';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { ConfigService, Env } from '../../config';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
-import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
+
+// Pass-through fs mocks so a test can inject EACCES (chmod 000 is not enforced on Windows or for root).
+const mockErrors: {
+  readdir?: (path: string) => NodeJS.ErrnoException | undefined;
+  readFile?: (path: string) => NodeJS.ErrnoException | undefined;
+} = {};
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return {
+    ...actual,
+    readdir: (path: string, ...rest: any[]) => {
+      const error = mockErrors.readdir?.(String(path));
+      if (error) return rest[rest.length - 1](error);
+      return actual.readdir(path, ...rest);
+    },
+  };
+});
+jest.mock('fs/promises', () => {
+  const actual = jest.requireActual('fs/promises');
+  return {
+    ...actual,
+    readFile: async (path: string, ...rest: any[]) => {
+      const error = mockErrors.readFile?.(String(path));
+      if (error) throw error;
+      return actual.readFile(path, ...rest);
+    },
+  };
+});
+
+const eacces = (syscall: string, path: string) =>
+  Object.assign(new Error(`EACCES: permission denied, ${syscall} '${path}'`), {
+    code: 'EACCES',
+    syscall,
+    path,
+  });
+
+interface Tree {
+  [name: string]: string | Tree;
+}
+const writeTree = (tree: Tree, dir = '') => {
+  for (const [name, value] of Object.entries(tree)) {
+    const path = dir ? join(dir, name) : name;
+    if (typeof value === 'string') {
+      mkdirSync(resolve(path, '..'), { recursive: true });
+      writeFileSync(path, value);
+    } else {
+      mkdirSync(path, { recursive: true });
+      writeTree(value, path);
+    }
+  }
+};
+
+let root: string;
 
 const Plugins = {
   invalid: () => ({
@@ -57,10 +110,7 @@ const Plugins = {
   }),
   missingManifest: () => ({}),
   inaccessibleManifest: () => ({
-    'opensearch_dashboards.json': mockFs.file({
-      mode: 0, // 0000,
-      content: JSON.stringify({ id: 'plugin', version: '1' }),
-    }),
+    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '1' }),
   }),
   valid: (id: string) => ({
     'opensearch_dashboards.json': JSON.stringify({
@@ -86,7 +136,7 @@ const packageMock = {
 };
 
 const manifestPath = (...pluginPath: string[]) =>
-  resolve(PROCESS_WORKING_DIR, 'src', 'plugins', ...pluginPath, 'opensearch_dashboards.json');
+  resolve(root, 'src', 'plugins', ...pluginPath, 'opensearch_dashboards.json');
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -98,6 +148,8 @@ describe('plugins discovery system', () => {
 
   beforeEach(async () => {
     logger = loggingSystemMock.create();
+    root = join(mkdtempSync(join(tmpdir(), 'osd-plugins-discovery-')), 'osd');
+    mkdirSync(root);
 
     mockPackage.raw = packageMock;
 
@@ -106,7 +158,7 @@ describe('plugins discovery system', () => {
     };
 
     env = Env.createDefault(
-      REPO_ROOT,
+      root,
       getEnvOptions({
         cliArgs: { envName: 'development' },
       })
@@ -132,31 +184,22 @@ describe('plugins discovery system', () => {
       .atPath<PluginsConfigType>('plugins')
       .pipe(first())
       .toPromise();
-
-    // jest relies on the filesystem to get sourcemaps when using console.log
-    // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
-    // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
-      process.stdout.write(args + '\n');
-    });
   });
 
   afterEach(() => {
-    mockFs.restore();
-    // restore the console.log behavior
+    delete mockErrors.readdir;
+    delete mockErrors.readFile;
+    rmSync(resolve(root, '..'), { recursive: true, force: true });
     jest.restoreAllMocks();
   });
 
   it('discovers plugins in the search locations', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${PROCESS_WORKING_DIR}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-      },
-      { createCwd: false }
-    );
+    writeTree({
+      [`${root}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+      [`${root}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -172,13 +215,10 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.invalid(),
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_b`]: Plugins.incomplete(),
-      },
-      { createCwd: false }
-    );
+    writeTree({
+      [`${root}/src/plugins/plugin_a`]: Plugins.invalid(),
+      [`${root}/src/plugins/plugin_b`]: Plugins.incomplete(),
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -207,14 +247,11 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_c`]: Plugins.incompatible(),
-        [`${PROCESS_WORKING_DIR}/plugins`]: {},
-        [`${PROCESS_WORKING_DIR}/../opensearch-dashboards-extra`]: {},
-      },
-      { createCwd: false }
-    );
+    writeTree({
+      [`${root}/src/plugins/plugin_c`]: Plugins.incompatible(),
+      [`${root}/plugins`]: {},
+      [`${root}/../opensearch-dashboards-extra`]: {},
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(1);
@@ -248,16 +285,13 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins`]: {
-          plugin_ad: Plugins.missingManifest(),
-        },
-        [`${PROCESS_WORKING_DIR}/plugins`]: {},
-        [`${PROCESS_WORKING_DIR}/../opensearch-dashboards-extra`]: {},
+    writeTree({
+      [`${root}/src/plugins`]: {
+        plugin_ad: Plugins.missingManifest(),
       },
-      { createCwd: false }
-    );
+      [`${root}/plugins`]: {},
+      [`${root}/../opensearch-dashboards-extra`]: {},
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -282,17 +316,9 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins`]: mockFs.directory({
-          mode: 0, // 0000
-          items: {
-            plugin_a: Plugins.valid('pluginA'),
-          },
-        }),
-      },
-      { createCwd: false }
-    );
+    writeTree({ [`${root}/src/plugins/plugin_a`]: Plugins.valid('pluginA') });
+    mockErrors.readdir = (path) =>
+      path === resolve(root, 'src', 'plugins') ? eacces('scandir', path) : undefined;
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -314,15 +340,14 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: {
-          ...Plugins.inaccessibleManifest(),
-          nested_plugin: Plugins.valid('nestedPlugin'),
-        },
+    writeTree({
+      [`${root}/src/plugins/plugin_a`]: {
+        ...Plugins.inaccessibleManifest(),
+        nested_plugin: Plugins.valid('nestedPlugin'),
       },
-      { createCwd: false }
-    );
+    });
+    mockErrors.readFile = (path) =>
+      path === manifestPath('plugin_a') ? eacces('open', path) : undefined;
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     expect(plugins).toHaveLength(0);
@@ -344,15 +369,12 @@ describe('plugins discovery system', () => {
       instanceInfo
     );
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
-      },
-      { createCwd: false }
-    );
+    writeTree({
+      [`${root}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+      [`${root}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
+      [`${root}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
+      [`${root}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -381,15 +403,12 @@ describe('plugins discovery system', () => {
   it('does not discover plugins nested inside another plugin', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: {
-          ...Plugins.valid('pluginA'),
-          nested_plugin: Plugins.valid('nestedPlugin'),
-        },
+    writeTree({
+      [`${root}/src/plugins/plugin_a`]: {
+        ...Plugins.valid('pluginA'),
+        nested_plugin: Plugins.valid('nestedPlugin'),
       },
-      { createCwd: false }
-    );
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -400,19 +419,14 @@ describe('plugins discovery system', () => {
   it('stops scanning when reaching `maxDepth`', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]:
-          Plugins.valid('plugin5'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]:
-          Plugins.valid('plugin6'),
-      },
-      { createCwd: false }
-    );
+    writeTree({
+      [`${root}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
+      [`${root}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
+      [`${root}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
+      [`${root}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
+      [`${root}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
+      [`${root}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid('plugin6'),
+    });
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
@@ -426,20 +440,16 @@ describe('plugins discovery system', () => {
   it('works with symlinks', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    const pluginFolder = resolve(PROCESS_WORKING_DIR, '..', 'ext-plugins');
+    const pluginFolder = resolve(root, '..', 'ext-plugins');
 
-    mockFs(
-      {
-        [`${PROCESS_WORKING_DIR}/plugins`]: mockFs.symlink({
-          path: '../ext-plugins',
-        }),
-        [pluginFolder]: {
-          plugin_a: Plugins.valid('pluginA'),
-          plugin_b: Plugins.valid('pluginB'),
-        },
+    writeTree({
+      [pluginFolder]: {
+        plugin_a: Plugins.valid('pluginA'),
+        plugin_b: Plugins.valid('pluginB'),
       },
-      { createCwd: false }
-    );
+    });
+    // 'junction' lets Windows link a directory without admin rights; ignored elsewhere
+    symlinkSync(pluginFolder, resolve(root, 'plugins'), 'junction');
 
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);

@@ -28,29 +28,30 @@
  * under the License.
  */
 
-import axios from 'axios';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { ToolingLog } from '@osd/dev-utils';
 
+/**
+ * sha256 of every Node.js archive the build downloads, committed for the version in
+ * `.node-version` so a download is never checked against data from the same server.
+ * Regenerate with `node scripts/update_node_checksums <version>`.
+ */
+export const NODE_CHECKSUMS_PATH = resolve(__dirname, 'node_checksums.json');
+
 export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {
-  const url = `https://nodejs.org/dist/v${nodeVersion}/SHASUMS256.txt`;
+  const { version, sha256 } = JSON.parse(readFileSync(NODE_CHECKSUMS_PATH, 'utf8')) as {
+    version: string;
+    sha256: Record<string, string>;
+  };
 
-  log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
-
-  const { status, data } = await axios.get(url);
-
-  if (status !== 200) {
-    throw new Error(`${url} failed with a ${status} response`);
+  if (version !== nodeVersion) {
+    throw new Error(
+      `${NODE_CHECKSUMS_PATH} has checksums for Node.js ${version}, but .node-version is ${nodeVersion}. ` +
+        `Run: node scripts/update_node_checksums ${nodeVersion}`
+    );
   }
 
-  return data
-    .toString('utf8')
-    .split('\n')
-    .reduce((acc: Record<string, string>, line: string) => {
-      const [sha, platform] = line.split('  ');
-
-      return {
-        ...acc,
-        [platform]: sha,
-      };
-    }, {});
+  log.debug('Using committed checksums for Node.js', nodeVersion);
+  return sha256;
 }

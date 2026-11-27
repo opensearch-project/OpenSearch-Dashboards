@@ -52,4 +52,13 @@ describe('All configs should use a single version of Node', () => {
     });
     expect(semver.satisfies(nodeVersion.trim(), engines.node)).to.be(true);
   });
+
+  it('should compare .node-version and the committed release checksums', async () => {
+    const [nodeVersion, checksums] = await Promise.all([
+      readFile('./.node-version', { encoding: 'utf8' }),
+      readFile('./src/dev/build/tasks/nodejs/node_checksums.json', { encoding: 'utf8' }),
+    ]);
+    // Bump both with: node scripts/update_node_checksums <version>
+    expect(JSON.parse(checksums).version).to.be(nodeVersion.trim());
+  });
 });

@@ -74,9 +74,20 @@ The project uses multiple files to manage the Node.js version for different purp
 
 | File | Format | Purpose | When to update |
 |------|--------|---------|----------------|
-| `.node-version` | Exact version (e.g. `22.23.2`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
-| `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
-| `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
+| `.node-version` | Exact version (e.g. `26.13.1`) | The Node.js release bundled into release builds | Patch, minor, and major bumps, with `node scripts/update_node_checksums` |
+| `src/dev/build/tasks/nodejs/node_checksums.json` | sha256 of each platform's archive for `.node-version` | Release builds verify every Node.js download against it | Written by `node scripts/update_node_checksums` |
+| `.nvmrc` | Major version only (e.g. `26`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
+| `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps, and Node.js security releases (raise the floor) |
+
+At startup OpenSearch Dashboards only checks `engines.node` (`^26.13.1`), so any Node.js 26.x release from 26.13.1 on can run it. The floor is the newest 26.x security release; raise it with each new one. `.node-version` only selects the binary bundled into release artifacts; packagers who provide their own Node.js 26 runtime do not need to match it (see `--node-dir` in [src/dev/build/README.md](src/dev/build/README.md)).
+
+To bump the bundled Node.js, run:
+
+```bash
+node scripts/update_node_checksums 26.14.0
+```
+
+It downloads the release's signed `SHASUMS256.txt.asc` from nodejs.org, checks the signature with `gpg` against the Node.js release keys published in [nodejs/release-keys](https://github.com/nodejs/release-keys), and writes `.node-version` and `node_checksums.json`. Commit both. Builds then trust only the committed checksums, never data served alongside the download.
 
 ### Fork and clone OpenSearch Dashboards
 

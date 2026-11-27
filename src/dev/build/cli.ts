@@ -70,6 +70,7 @@ if (showHelp) {
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
+        --node-dir <path>       {dim Bundle this Node.js install instead of downloading one (single platform)}
         --with-translations     {dim Include available translations}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}

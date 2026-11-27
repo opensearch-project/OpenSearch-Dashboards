@@ -28,17 +28,33 @@
  * under the License.
  */
 
-import mockFs from 'mock-fs';
+import fs from 'fs';
 import { loggerMock } from '@osd/logging/target/mocks';
 import { OsCgroupMetricsCollector } from './cgroup';
 
+const fsError = (code: string, syscallMessage: string, path: string) =>
+  Object.assign(new Error(`${code}: ${syscallMessage}, open '${path}'`), { code, path });
+
+// The collector reads fixed absolute paths, so stub readFile instead of touching the real FS.
+// Paths are compared with `/` separators because the collector builds them with path.join.
+const mockFiles = (files: Record<string, string>, deniedPrefix?: string) => {
+  jest.spyOn(fs.promises, 'readFile').mockImplementation(async (path: any) => {
+    const p = String(path).replace(/\\/g, '/');
+    if (deniedPrefix && p.startsWith(deniedPrefix)) {
+      throw fsError('EACCES', 'permission denied', p);
+    }
+    if (!(p in files)) {
+      throw fsError('ENOENT', 'no such file or directory', p);
+    }
+    return Buffer.from(files[p]);
+  });
+};
+
 describe('OsCgroupMetricsCollector', () => {
-  afterEach(() => mockFs.restore());
+  afterEach(() => jest.restoreAllMocks());
 
   it('returns empty object when no cgroup file present', async () => {
-    mockFs({
-      '/proc/self': {/** empty directory */},
-    });
+    mockFiles({});
 
     const logger = loggerMock.create();
     const collector = new OsCgroupMetricsCollector({ logger });
@@ -47,7 +63,7 @@ describe('OsCgroupMetricsCollector', () => {
   });
 
   it('collects default cgroup data', async () => {
-    mockFs({
+    mockFiles({
       '/proc/self/cgroup': `
 123:memory:/groupname
 123:cpu:/groupname
@@ -85,7 +101,7 @@ throttled_time 666
   });
 
   it('collects override cgroup data', async () => {
-    mockFs({
+    mockFiles({
       '/proc/self/cgroup': `
 123:memory:/groupname
 123:cpu:/groupname
@@ -127,14 +143,16 @@ throttled_time 666
   });
 
   it('returns empty object and logs error on an EACCES error', async () => {
-    mockFs({
-      '/proc/self/cgroup': `
+    mockFiles(
+      {
+        '/proc/self/cgroup': `
 123:memory:/groupname
 123:cpu:/groupname
 123:cpuacct:/groupname
       `,
-      '/sys/fs/cgroup': mockFs.directory({ mode: parseInt('0000', 8) }),
-    });
+      },
+      '/sys/fs/cgroup'
+    );
 
     const logger = loggerMock.create();
 
