@@ -63,7 +63,14 @@ jest.mock('../../helpers/use_displayed_columns', () => ({
 jest.mock(
   '../../application/legacy/discover/application/components/uninitialized/uninitialized',
   () => ({
-    DiscoverUninitialized: () => <div>Uninitialized</div>,
+    DiscoverUninitialized: ({ requiresExplicitRun }: { requiresExplicitRun?: boolean }) => (
+      <div
+        data-test-subj="uninitialized"
+        data-requires-explicit-run={String(!!requiresExplicitRun)}
+      >
+        Uninitialized
+      </div>
+    ),
   })
 );
 
@@ -597,5 +604,59 @@ describe('ExploreTabsComponent', () => {
 
     // The component should render and fallback to first available tab
     expect(screen.getByText('Logs Content')).toBeInTheDocument();
+  });
+
+  describe('the empty state for a dataset type that requires an explicit Run', () => {
+    const renderUninitialized = (flavor: ExploreFlavor, datasetType: string) => {
+      mockUseFlavorId.mockReturnValue(flavor);
+      const services = {
+        tabRegistry: {
+          getAllTabs: jest.fn(() => [
+            { id: 'logs_tab', label: 'Logs', component: () => <div />, flavor: [flavor] },
+          ]),
+          getTab: jest.fn(),
+        },
+        data: {
+          query: {
+            queryString: {
+              getDatasetService: () => ({
+                getType: (type: string) => ({
+                  meta: { requiresExplicitRun: type === 'EXPLICIT_RUN_TYPE' },
+                }),
+              }),
+            },
+          },
+        },
+      };
+      const store = createMockStore({
+        query: {
+          query: 'source = logs',
+          language: 'PPL',
+          dataset: { id: 'logs', title: 'logs', type: datasetType },
+        },
+      });
+      render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <ExploreTabs />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+      return screen.getByTestId('uninitialized').getAttribute('data-requires-explicit-run');
+    };
+
+    afterEach(() => mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs));
+
+    it('asks for the explicit-run copy on the Logs page', () => {
+      expect(renderUninitialized(ExploreFlavor.Logs, 'EXPLICIT_RUN_TYPE')).toBe('true');
+    });
+
+    it('keeps the default copy for a dataset type that runs on its own', () => {
+      expect(renderUninitialized(ExploreFlavor.Logs, 'INDEX_PATTERN')).toBe('false');
+    });
+
+    it('keeps the default copy on the Metrics page', () => {
+      expect(renderUninitialized(ExploreFlavor.Metrics, 'EXPLICIT_RUN_TYPE')).toBe('false');
+    });
   });
 });

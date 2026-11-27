@@ -18,8 +18,17 @@ jest.mock(
 jest.mock(
   '../../../../application/legacy/discover/application/components/uninitialized/uninitialized',
   () => ({
-    DiscoverUninitialized: ({ onRefresh }: { onRefresh: () => void }) => (
-      <div data-test-subj="uninitialized">
+    DiscoverUninitialized: ({
+      onRefresh,
+      requiresExplicitRun,
+    }: {
+      onRefresh: () => void;
+      requiresExplicitRun?: boolean;
+    }) => (
+      <div
+        data-test-subj="uninitialized"
+        data-requires-explicit-run={String(!!requiresExplicitRun)}
+      >
         <button onClick={onRefresh}>Refresh</button>
       </div>
     ),
@@ -183,6 +192,58 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.UNINITIALIZED);
     expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+  });
+
+  describe('the empty state for a dataset type that requires an explicit Run', () => {
+    const renderUninitialized = (datasetType: string, explicitRunTypes: string[]) => {
+      mockUseOpenSearchDashboards.mockReturnValue({
+        services: {
+          ...mockServices,
+          data: {
+            query: {
+              ...mockServices.data.query,
+              queryString: {
+                ...mockServices.data.query.queryString,
+                getDatasetService: () => ({
+                  getType: (type: string) => ({
+                    meta: { requiresExplicitRun: explicitRunTypes.includes(type) },
+                  }),
+                }),
+              },
+            },
+          },
+        },
+      } as unknown as ReturnType<typeof useOpenSearchDashboards>);
+      mockUseDatasetContext.mockReturnValue({
+        dataset: { timeFieldName: 'timestamp' } as unknown as ReturnType<
+          typeof useDatasetContext
+        >['dataset'],
+        isLoading: false,
+        error: null,
+      });
+      const store = createMockStore(QueryExecutionStatus.UNINITIALIZED, {}, undefined, undefined, {
+        dataset: { id: 'd1', title: 'd1', type: datasetType },
+      });
+      render(
+        <Provider store={store}>
+          <BottomRightContainer />
+        </Provider>
+      );
+      return screen.getByTestId('uninitialized').getAttribute('data-requires-explicit-run');
+    };
+
+    it('asks for the explicit-run copy on the Logs page', () => {
+      expect(renderUninitialized('EXPLICIT_RUN_TYPE', ['EXPLICIT_RUN_TYPE'])).toBe('true');
+    });
+
+    it('keeps the default copy for a dataset type that runs on its own', () => {
+      expect(renderUninitialized('INDEX_PATTERN', ['EXPLICIT_RUN_TYPE'])).toBe('false');
+    });
+
+    it('keeps the default copy outside the Logs page', () => {
+      mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+      expect(renderUninitialized('EXPLICIT_RUN_TYPE', ['EXPLICIT_RUN_TYPE'])).toBe('false');
+    });
   });
 
   it('renders loading spinner when status is LOADING', () => {

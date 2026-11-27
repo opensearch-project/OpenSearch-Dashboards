@@ -27,8 +27,10 @@ import {
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
+  ExploreFlavor,
 } from '../../../common';
 import { DEFAULT_DATA } from '../../../../data/common';
+import { datasetRequiresExplicitRun } from '../../application/utils/requires_explicit_run';
 import { DiscoverUninitialized } from '../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { DiscoverNoResults } from '../../application/legacy/discover/application/components/no_results/no_results';
 import { LoadingSpinner } from '../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
@@ -179,6 +181,11 @@ export const ExploreTabs = () => {
     if (status === QueryExecutionStatus.UNINITIALIZED && !isMetricsExploreTab) {
       return (
         <DiscoverUninitialized
+          // Only the Logs page gets the explicit-run copy; Metrics keeps today's copy.
+          requiresExplicitRun={
+            flavorId === ExploreFlavor.Logs &&
+            datasetRequiresExplicitRun(services?.data?.query?.queryString, query?.dataset)
+          }
           onRefresh={() => {
             if (services) {
               dispatch(

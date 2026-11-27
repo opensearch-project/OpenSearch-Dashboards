@@ -74,8 +74,15 @@ export function HeaderBreadcrumbs({
 
   let crumbs = breadcrumbs;
 
-  if (breadcrumbs.length === 0 && appTitle) {
-    crumbs = [{ text: appTitle }];
+  if (breadcrumbs.length === 0) {
+    // An app that sets no breadcrumbs but renders a screen title (e.g. a new Explore
+    // "Logs" search) gets that title as its crumb, not the chrome's default app title
+    // ("Overview"), which is not a level of the page: "Workspace / Logs", not
+    // "Workspace / Overview Logs".
+    const fallback = screenTitle || appTitle;
+    if (fallback) {
+      crumbs = [{ text: fallback }];
+    }
   }
 
   if (breadcrumbEnricher) {
