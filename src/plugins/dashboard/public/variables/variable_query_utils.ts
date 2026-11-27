@@ -30,13 +30,25 @@ function parseVariableRegex(regex?: string): RegExp | undefined {
   return match ? new RegExp(match[1], match[2]) : new RegExp(regex);
 }
 
+// The PPL API accepts an optional leading `|` before a command that must open the query.
+// Prepending `source = <dataset>` to such a query would push that command out of first position.
+const LEADING_PIPE_BEFORE_FIRST_COMMAND =
+  /^\s*\|\s*(?=(?:search\s+)?source\s*=|describe\s|show\s|multisearch\b)/i;
+
 /**
  * Adds "source = <dataset>" clause to PPL query if not present.
  * Handles backtick escaping for INDEXES and INDEX_PATTERN dataset types.
  */
 function addPPLSourceClause(query: Query): Query {
-  const queryString = typeof query.query === 'string' ? query.query : '';
+  const queryString = (typeof query.query === 'string' ? query.query : '').replace(
+    LEADING_PIPE_BEFORE_FIRST_COMMAND,
+    ''
+  );
   const lowerCaseQuery = queryString.toLowerCase();
+  // multisearch names its own sources in its subsearches, so it is never prefixed or rewritten.
+  if (/^\s*multisearch\b/.test(lowerCaseQuery)) {
+    return { ...query, query: queryString };
+  }
   const hasSource = /^[^|]*\bsource\s*=/.test(lowerCaseQuery);
   const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
   const hasShow = /^\s*show\s+/.test(lowerCaseQuery);

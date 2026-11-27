@@ -175,6 +175,24 @@ describe('createExplainQueryPreparer', () => {
     expect(mockConvertFiltersToWhereClause).not.toHaveBeenCalled();
   });
 
+  it('explains a leading-pipe multisearch as written, without a source or filters', () => {
+    const prepare = createExplainQueryPreparer(
+      makeServices({ appId: 'dashboards', filters: [{ any: true }] })
+    );
+    const { query, cacheKey, injectedWhereCount } = prepare(
+      '| multisearch [search source=logs-* | head 1] [search source=logs-*]'
+    );
+    expect(query).toBe('multisearch [search source=logs-* | head 1] [search source=logs-*]');
+    expect(cacheKey).toBe(query);
+    expect(injectedWhereCount).toBe(0);
+    expect(mockConvertFiltersToWhereClause).not.toHaveBeenCalled();
+  });
+
+  it('drops a leading pipe before describe instead of prepending a source', () => {
+    const prepare = createExplainQueryPreparer(makeServices({}));
+    expect(prepare('| describe logs').query).toBe('describe logs');
+  });
+
   it('reports how many where commands it injected (dashboard + time)', () => {
     mockConvertFiltersToWhereClause.mockReturnValue('WHERE `status` = 500');
     const prepare = createExplainQueryPreparer(
