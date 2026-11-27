@@ -44,4 +44,7 @@ export const servicesFieldMappings = {
     type: 'keyword',
     ignore_above: 1024,
   },
+  timestamp: {
+    type: 'date',
+  },
 };
