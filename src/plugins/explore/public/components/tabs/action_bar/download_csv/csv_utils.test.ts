@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildCsv, buildCsvFromTabular } from './csv_utils';
+import { buildCsv, buildCsvFromTabular, formatRowsForCsv } from './csv_utils';
 import { FormattedData } from '../../../../../../inspector/public';
 
 describe('buildCsv', () => {
@@ -54,6 +54,48 @@ describe('buildCsv', () => {
     });
 
     expect(header(csv)).toBe('"host"');
+  });
+});
+
+describe('formatRowsForCsv with useRawValues', () => {
+  const row = {
+    _source: {
+      'count()': 42,
+      bytes: 1444079,
+      zero: 0,
+      empty: null,
+      'values(a)': ['x', 'y'],
+    },
+  } as any;
+  const format = (colName: string) =>
+    formatRowsForCsv({
+      displayedColumnNames: [colName],
+      indexPattern: {
+        fields: { getByName: () => undefined },
+        formatField: () => '1,444,079',
+      } as any,
+      useRawValues: true,
+    })(row)[0];
+
+  it('reads columns that are not in the mapping from the row', () => {
+    expect(format('count()')).toBe('42');
+  });
+
+  it('does not apply the field formatter of a column sharing a field name', () => {
+    expect(format('bytes')).toBe('1444079');
+  });
+
+  it('keeps a zero value', () => {
+    expect(format('zero')).toBe('0');
+  });
+
+  it('returns an empty string for null and missing values', () => {
+    expect(format('empty')).toBe('');
+    expect(format('missing')).toBe('');
+  });
+
+  it('serializes array and object values as JSON', () => {
+    expect(format('values(a)')).toBe('["x","y"]');
   });
 });
 

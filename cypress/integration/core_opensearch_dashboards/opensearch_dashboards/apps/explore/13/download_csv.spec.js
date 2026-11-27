@@ -94,6 +94,33 @@ const runDownloadCsvTests = () => {
         toggleFieldsForCsvDownload();
       });
     });
+
+    it('should download the aggregated rows from the Statistics tab', () => {
+      const config = generateDownloadCsvTestConfigurations().find(
+        ({ language }) => language.name === 'PPL'
+      );
+      prepareDiscoverPageForDownload(config, workspaceName);
+
+      cy.explore.setQueryEditor(`source = ${config.dataset} | stats count() by category`, {
+        parseSpecialCharSequences: false,
+      });
+      cy.getElementByTestId('exploreTab-explore_statistics').should(
+        'have.attr',
+        'aria-selected',
+        'true'
+      );
+
+      cy.getElementByTestId('dscDownloadCsvButton').click();
+      cy.getElementByTestId('dscDownloadCsvOptionVisible').should('exist');
+      cy.getElementByTestId('dscDownloadCsvOptionMax').should('not.exist');
+
+      downloadCsvAndVerify('Visible', (csvString) => {
+        const { data } = Papa.parse(csvString, { skipEmptyLines: true });
+        cy.wrap(data[0]).should('deep.equal', ['count()', 'category']);
+        cy.wrap(data.length).should('be.greaterThan', 1);
+        cy.wrap(data[1][0]).should('match', /^\d+$/);
+      });
+    });
   });
 };
 

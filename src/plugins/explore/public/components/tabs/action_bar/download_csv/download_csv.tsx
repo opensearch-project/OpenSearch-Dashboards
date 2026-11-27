@@ -21,6 +21,8 @@ export interface DiscoverDownloadCsvProps {
   indexPattern: IndexPattern;
   shouldShowMaxExport?: boolean;
   visibleRowsCount?: number;
+  /** Query response columns to export as raw values, in place of the Logs columns. */
+  columnNamesOverride?: string[];
   isStreaming?: boolean;
 }
 
@@ -30,6 +32,7 @@ export const DiscoverDownloadCsv = ({
   rows,
   shouldShowMaxExport = true,
   visibleRowsCount,
+  columnNamesOverride,
   isStreaming = false,
 }: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -39,6 +42,7 @@ export const DiscoverDownloadCsv = ({
     rows,
     hits,
     indexPattern,
+    columnNamesOverride,
     onSuccess,
     onError,
     onLoading,

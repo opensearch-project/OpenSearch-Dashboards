@@ -24,6 +24,8 @@ export interface UseDiscoverDownloadCsvProps {
   hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  /** Query response columns to export as raw values, in place of the Logs columns. */
+  columnNamesOverride?: string[];
   onLoading(): void;
   onSuccess(): void;
   onError(): void;
@@ -33,6 +35,7 @@ export const useDiscoverDownloadCsv = ({
   hits,
   rows,
   indexPattern,
+  columnNamesOverride,
   onLoading,
   onSuccess,
   onError,
@@ -74,9 +77,10 @@ export const useDiscoverDownloadCsv = ({
         ? buildCsvFromTabular(visDataToTabular(visData, indexPattern), uiSettings)
         : buildCsv({
             rows: rowsToDownload,
-            displayedColumnNames,
+            displayedColumnNames: columnNamesOverride ?? displayedColumnNames,
             indexPattern,
             uiSettings,
+            useRawValues: columnNamesOverride !== undefined,
           });
       saveDataAsCsv(csvData);
       onSuccess();

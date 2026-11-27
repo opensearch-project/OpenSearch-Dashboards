@@ -266,6 +266,20 @@ describe('useDiscoverDownloadCsv', () => {
       expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    it('uses columnNamesOverride instead of the displayed columns when provided', async () => {
+      const columnNamesOverride = ['count()', 'category'];
+      const { result } = renderHook(() =>
+        useDiscoverDownloadCsv({ ...mockProps, columnNamesOverride })
+      );
+      await act(async () => {
+        await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
+      });
+      expect(unparse).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: columnNamesOverride }),
+        expect.anything()
+      );
+    });
+
     it('uses rows provided by props if option is visible', async () => {
       const { result } = renderHook(() =>
         useDiscoverDownloadCsv({

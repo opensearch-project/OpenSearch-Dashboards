@@ -121,6 +121,14 @@ describe('DiscoverDownloadCsv', () => {
       ).toBeInTheDocument();
     });
 
+    it('passes columnNamesOverride to useDiscoverDownloadCsv', () => {
+      const columnNamesOverride = ['count()'];
+      render(<TestHarness columnNamesOverride={columnNamesOverride} />);
+      expect(useDiscoverDownloadCsv).toHaveBeenCalledWith(
+        expect.objectContaining({ columnNamesOverride })
+      );
+    });
+
     it('counts Visible from visibleRowsCount when given, not from rows', () => {
       render(<TestHarness visibleRowsCount={3} />);
       fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
