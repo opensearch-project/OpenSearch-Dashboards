@@ -31,6 +31,16 @@ const removeUnwantedFolders = async (root, unwantedNames) => {
   return promises;
 };
 
+const MONACO_IMPORT_META_FILES = [
+  'editor/browser/services/editorWorkerService.js',
+  'editor/standalone/browser/services/standaloneWebWorkerService.js',
+  'languages/features/css/workerManager.js',
+  'languages/features/html/workerManager.js',
+  'languages/features/json/workerManager.js',
+  'languages/features/typescript/workerManager.js',
+];
+const REACT_MONACO_EDITOR_FILES = ['index.js', 'editor.js', 'diff.js', 'index.d.ts', 'types.d.ts'];
+
 const patchFile = async (file, patch) => {
   console.log(`Patching ${file}`);
   const patches = Array.isArray(patch) ? patch : [patch];
@@ -43,7 +53,15 @@ const patchFile = async (file, patch) => {
       .flat()
       .join(to);
   }
-  await fs.writeFile(file, fileContent);
+  const tmpFile = `${file}.${process.pid}.tmp`;
+  await fs.writeFile(tmpFile, fileContent);
+  await fs.rename(tmpFile, file);
+};
+
+const assertNotPresent = async (file, text) => {
+  if ((await fs.readFile(file, 'utf8')).includes(text)) {
+    throw new Error(`postinstall: ${file} still contains "${text}" after patching`);
+  }
 };
 
 const assertFileIncludes = async (file, snippets) => {
@@ -205,6 +223,31 @@ function propertyIsUnsafe(target, key) {
     })
   );
 
+  // monaco-editor only uses import.meta.url for fallback worker URLs (Dashboards provides
+  // MonacoEnvironment.getWorker), and it breaks plugin Jest suites that load monaco via CommonJS.
+  for (const file of MONACO_IMPORT_META_FILES) {
+    promises.push(
+      patchFile(`node_modules/monaco-editor/esm/vs/${file}`, {
+        from: 'import.meta.url',
+        to: 'globalThis.location.href',
+      })
+    );
+  }
+  for (const file of REACT_MONACO_EDITOR_FILES) {
+    promises.push(
+      patchFile(`node_modules/react-monaco-editor/lib/${file}`, {
+        from: 'monaco-editor/esm/vs/editor/editor.api"',
+        to: 'monaco-editor/editor/editor.api.js"',
+      })
+    );
+  }
+  promises.push(
+    patchFile('node_modules/monaco-editor/esm/vs/base/browser/cssValue.js', {
+      from: 'CSS.escape(',
+      to: '(globalThis.CSS?.escape ?? String)(',
+    })
+  );
+
   await Promise.all(promises);
 
   await Promise.all([
@@ -217,6 +260,16 @@ function propertyIsUnsafe(target, key) {
     assertFileIncludes('node_modules/deepmerge/dist/umd.js', [
       "key === '__proto__' || key === 'constructor' || key === 'prototype'",
     ]),
+    ...MONACO_IMPORT_META_FILES.map((file) =>
+      assertNotPresent(`node_modules/monaco-editor/esm/vs/${file}`, 'import.meta.url')
+    ),
+    ...REACT_MONACO_EDITOR_FILES.map((file) =>
+      assertNotPresent(
+        `node_modules/react-monaco-editor/lib/${file}`,
+        'monaco-editor/esm/vs/editor/editor.api"'
+      )
+    ),
+    assertNotPresent('node_modules/monaco-editor/esm/vs/base/browser/cssValue.js', 'CSS.escape('),
   ]);
 };
 
