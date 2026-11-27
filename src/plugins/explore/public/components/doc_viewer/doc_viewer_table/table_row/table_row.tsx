@@ -14,6 +14,7 @@ import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from './field_name/field_name';
+import { JsonTree, useJsonTreeValue } from '../../../json_tree/json_tree';
 
 export interface Props {
   field: string;
@@ -22,6 +23,9 @@ export interface Props {
   // True when this field is the dataset's configured time field. Used, together with
   // the date-typed check, to suppress value filters (see below).
   isTimeField?: boolean;
+  // True when the index pattern sets a per-field format for this field. Such a field keeps the
+  // formatter's output and never draws as a JSON tree.
+  hasFieldFormat?: boolean;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -39,6 +43,7 @@ export function DocViewTableRow({
   fieldMapping,
   fieldType,
   isTimeField,
+  hasFieldFormat,
   displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
@@ -63,6 +68,10 @@ export function DocViewTableRow({
   // OTEL startTime, are not date-typed).
   const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
   const disableValueFilter = isTimeField || isDateField;
+  const { jsonTreeValue, highlightTerms } = useJsonTreeValue(
+    hasFieldFormat ? undefined : valueRaw,
+    value
+  );
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
@@ -94,23 +103,36 @@ export function DocViewTableRow({
         />
       </td>
       <td>
-        {isCollapsible && (
+        {/* The JSON tree collapses through its own toggles, so the height collapse button is hidden. */}
+        {isCollapsible && !jsonTreeValue && (
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          /*
-           * Justification for dangerouslySetInnerHTML:
-           * We just use values encoded by our field formatters. The output is
-           * additionally passed through DOMPurify to defend against any unsafe
-           * HTML that may slip through the formatters.
-           */
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value as string) }}
-        />
+        {jsonTreeValue ? (
+          <JsonTree
+            // A new value remounts the tree, so its open state starts over.
+            key={valueRaw as string}
+            value={jsonTreeValue}
+            raw={valueRaw as string}
+            highlightTerms={highlightTerms}
+            inExpandedDocument
+            data-test-subj={`tableDocViewRow-${field}-value`}
+          />
+        ) : (
+          <div
+            className={valueClassName}
+            data-test-subj={`tableDocViewRow-${field}-value`}
+            /*
+             * Justification for dangerouslySetInnerHTML:
+             * We just use values encoded by our field formatters. The output is
+             * additionally passed through DOMPurify to defend against any unsafe
+             * HTML that may slip through the formatters.
+             */
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value as string) }}
+          />
+        )}
       </td>
     </tr>
   );

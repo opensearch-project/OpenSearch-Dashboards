@@ -74,3 +74,10 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
     font-size: inherit !important;
   }
 }
+
+// The JSON tree fills the cell's flex row and grows to its full height.
+.exploreDocTableCell .exploreJsonTree {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-self: flex-start;
+}

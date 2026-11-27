@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './table_actions_popover_button.scss';
+
 import { useState } from 'react';
 import {
   EuiButtonIcon,
@@ -19,13 +21,18 @@ import {
 import { i18n } from '@osd/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  selectExpandAllJson,
   selectHideEmptyFields,
+  selectShowJsonFormat,
   selectWrapCellText,
 } from '../../../../application/utils/state_management/selectors';
 import {
+  setExpandAllJson,
   setHideEmptyFields,
+  setShowJsonFormat,
   setWrapCellText,
 } from '../../../../application/utils/state_management/slices';
+import { isOnTracesPage } from '../../../data_table/table_cell/trace_utils/trace_utils';
 
 /**
  * Overflow menu for the settings that change how the results table renders.
@@ -35,6 +42,10 @@ export const TableActionsPopoverButton = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const wrapCellText = useSelector(selectWrapCellText);
   const hideEmptyFields = useSelector(selectHideEmptyFields);
+  const showJsonFormat = useSelector(selectShowJsonFormat);
+  const expandAllJson = useSelector(selectExpandAllJson);
+  // Trace cells never draw a JSON tree, so the JSON switches would do nothing there.
+  const showJsonSettings = !isOnTracesPage();
 
   const buttonLabel = i18n.translate('explore.discover.tableActions.buttonLabel', {
     defaultMessage: 'Table settings',
@@ -59,6 +70,9 @@ export const TableActionsPopoverButton = () => {
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downRight"
       panelPaddingSize="s"
+      // Focus the Hide empty fields switch, so opening the menu does not focus its info icon and pop
+      // its tooltip.
+      initialFocus='[data-test-subj="exploreHideEmptyFieldsSwitch"]'
     >
       <EuiPopoverTitle>
         {i18n.translate('explore.discover.tableActions.title', {
@@ -133,6 +147,95 @@ export const TableActionsPopoverButton = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {showJsonSettings && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.translate('explore.discover.showJsonFormat', {
+                  defaultMessage: 'Show as JSON format',
+                })}{' '}
+                <EuiIconTip
+                  type="iInCircle"
+                  size="s"
+                  aria-label={i18n.translate('explore.discover.showJsonFormatInfoAriaLabel', {
+                    defaultMessage: 'About show as JSON format',
+                  })}
+                  content={i18n.translate('explore.discover.showJsonFormatInfo', {
+                    defaultMessage:
+                      'Shows string values that hold JSON as a collapsible tree, in the table and in expanded documents',
+                  })}
+                  iconProps={{
+                    // @ts-expect-error TS2353 iconProps is typed as Omit<unknown, 'type'> in this EUI version
+                    'data-test-subj': 'exploreShowJsonFormatInfo',
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                showLabel={false}
+                label={i18n.translate('explore.discover.showJsonFormat', {
+                  defaultMessage: 'Show as JSON format',
+                })}
+                checked={showJsonFormat}
+                onChange={(e) => dispatch(setShowJsonFormat(e.target.checked))}
+                data-test-subj="exploreShowJsonFormatSwitch"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            responsive={false}
+            className="exploreTableActions__subSetting"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color={showJsonFormat ? 'default' : 'subdued'}>
+                {i18n.translate('explore.discover.expandAllJson', {
+                  defaultMessage: 'Expand all',
+                })}{' '}
+                <EuiIconTip
+                  type="iInCircle"
+                  size="s"
+                  aria-label={i18n.translate('explore.discover.expandAllJsonInfoAriaLabel', {
+                    defaultMessage: 'About expand all',
+                  })}
+                  content={i18n.translate('explore.discover.expandAllJsonInfo', {
+                    defaultMessage:
+                      'Opens up to 15 levels of each JSON tree. An object or array over 1,000 characters of its own starts closed, and a whole field value over 50,000 characters opens only its top level',
+                  })}
+                  iconProps={{
+                    // @ts-expect-error TS2353 iconProps is typed as Omit<unknown, 'type'> in this EUI version
+                    'data-test-subj': 'exploreExpandAllJsonInfo',
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                showLabel={false}
+                label={i18n.translate('explore.discover.expandAllJson', {
+                  defaultMessage: 'Expand all',
+                })}
+                checked={expandAllJson}
+                disabled={!showJsonFormat}
+                onChange={(e) => dispatch(setExpandAllJson(e.target.checked))}
+                data-test-subj="exploreExpandAllJsonSwitch"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPopover>
   );
 };
