@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { createFailError, isFailError, REPO_ROOT } from '@osd/dev-utils';
 import { ErrorReporter, filterConfigPaths, I18nConfig, normalizePath, readFileAsync } from '..';
 import { extractCodeMessages } from '../extractors';
@@ -76,7 +76,7 @@ async function extractMessagesFromFilesToMap(
   ];
 
   const filesToCheck = files.filter(
-    (file) => glob.sync(file, { ignore: ignoredPatterns, root: REPO_ROOT }).length > 0
+    (file) => globSync(file, { ignore: ignoredPatterns, root: REPO_ROOT }).length > 0
   );
 
   const fileContents = await Promise.all(
