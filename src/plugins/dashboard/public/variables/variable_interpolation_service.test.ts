@@ -100,6 +100,22 @@ describe('VariableInterpolationService', () => {
       expect(svc.interpolate('$unknown')).toBe('$unknown');
     });
 
+    // $__interval is resolved by the PPL search interceptor only when it's still in the query, so a
+    // user-defined __interval wins, and without one the placeholder must reach the interceptor.
+    it('should use a user-defined __interval over the built-in one', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeTextVar({ name: '__interval', current: ['5m'] }),
+      ]);
+      expect(svc.interpolate('span(@timestamp, $__interval)', 'PPL')).toBe('span(@timestamp, 5m)');
+    });
+
+    it('should keep $__interval for the PPL interceptor when no variable defines it', () => {
+      const svc = new VariableInterpolationService(() => [makeCustomVar()]);
+      expect(svc.interpolate('span(@timestamp, $__interval) | where s = $service', 'PPL')).toBe(
+        'span(@timestamp, $__interval) | where s = api'
+      );
+    });
+
     it('should replace multiple variables in one query', () => {
       const svc = new VariableInterpolationService(() => [
         makeCustomVar(),
