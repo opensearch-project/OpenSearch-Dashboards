@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Role } from '../../../../types';
 import { AuthMethod, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
+import { getOAuth2AuthEnabled } from '../../../utils';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
 import { NameRow } from '../name_row';
 import { QueryPermissionsConfiguration } from '../query_permissions';
@@ -40,6 +41,13 @@ interface ConfigurePrometheusDatasourceProps {
   currentSecretKey: string;
   currentRegion: string;
   currentAuthMethod: AuthMethod;
+  // OAuth2 fields for OAuth2 authentication
+  currentClientId: string;
+  currentClientSecret: string;
+  currentTokenUrl: string;
+  currentScopes: string;
+  currentAudience: string;
+  currentGrantType: string;
   hasSecurityAccess: boolean;
   error: string;
   setError: React.Dispatch<React.SetStateAction<string>>;
@@ -52,6 +60,13 @@ interface ConfigurePrometheusDatasourceProps {
   setStoreForRequest: React.Dispatch<React.SetStateAction<string>>;
   setNameForRequest: React.Dispatch<React.SetStateAction<string>>;
   setDetailsForRequest: React.Dispatch<React.SetStateAction<string>>;
+  // OAuth2 setters for OAuth2 authentication
+  setClientIdForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setClientSecretForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setTokenUrlForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setScopesForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setAudienceForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setGrantTypeForRequest: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDatasourceProps) => {
@@ -78,6 +93,19 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
     setSecretKeyForRequest,
     currentRegion,
     setRegionForRequest,
+    // OAuth2 props for OAuth2 authentication
+    currentClientId,
+    setClientIdForRequest,
+    currentClientSecret,
+    setClientSecretForRequest,
+    currentTokenUrl,
+    setTokenUrlForRequest,
+    currentScopes,
+    setScopesForRequest,
+    currentAudience,
+    setAudienceForRequest,
+    currentGrantType,
+    setGrantTypeForRequest,
     currentAuthMethod,
     setAuthMethodForRequest,
     hasSecurityAccess,
@@ -91,6 +119,10 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
     { value: 'noauth', text: 'No authentication' },
     { value: 'basicauth', text: 'Basic authentication' },
     { value: 'awssigv4', text: 'AWS Signature Version 4' },
+    // Honours data_source.authTypes.OAuth2.enabled, so turning OAuth2 off hides it here as
+    // well as in the data source form. Without this the setting would not be a kill switch
+    // for the Prometheus connections that actually use OAuth2.
+    ...(getOAuth2AuthEnabled() ? [{ value: 'oauth2', text: 'OAuth2 / OIDC' }] : []),
   ];
 
   const description = (
@@ -200,6 +232,19 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
             currentRegion={currentRegion}
             setRegionForRequest={setRegionForRequest}
             currentAuthMethod={currentAuthMethod}
+            // OAuth2 props for OAuth2 authentication
+            currentClientId={currentClientId}
+            setClientIdForRequest={setClientIdForRequest}
+            currentClientSecret={currentClientSecret}
+            setClientSecretForRequest={setClientSecretForRequest}
+            currentTokenUrl={currentTokenUrl}
+            setTokenUrlForRequest={setTokenUrlForRequest}
+            currentScopes={currentScopes}
+            setScopesForRequest={setScopesForRequest}
+            currentAudience={currentAudience}
+            setAudienceForRequest={setAudienceForRequest}
+            currentGrantType={currentGrantType}
+            setGrantTypeForRequest={setGrantTypeForRequest}
           />
 
           <EuiSpacer />

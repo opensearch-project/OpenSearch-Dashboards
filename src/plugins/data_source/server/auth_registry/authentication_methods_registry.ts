@@ -34,6 +34,18 @@ export class AuthenticationMethodRegistry {
     this.authMethods.set(method.name, deepFreeze(method) as AuthenticationMethod);
   }
 
+  /**
+   * Removes a previously registered authentication method.
+   *
+   * Exists so the data source plugin's built-in OAuth2 provider can be replaced when another
+   * plugin registers its own. Without it that registration would hit the duplicate-name check
+   * above and fail the registering plugin's setup, taking down startup. Not part of
+   * IAuthenticationMethodRegistry, so it is not reachable by plugins.
+   */
+  public removeAuthenticationMethod(name: string) {
+    this.authMethods.delete(name);
+  }
+
   public getAllAuthenticationMethods() {
     return [...this.authMethods.values()];
   }

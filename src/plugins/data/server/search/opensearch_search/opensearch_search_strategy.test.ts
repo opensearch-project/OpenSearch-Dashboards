@@ -55,6 +55,7 @@ describe('OpenSearch search strategy', () => {
       return new DataSourceError({});
     },
     dataSourceEnabled: jest.fn(() => true),
+    oauth2AuthEnabled: jest.fn(() => true),
     registerCredentialProvider: jest.fn(),
     registerCustomApiSchema(schema: any): void {
       throw new Error('Function not implemented.');
@@ -65,6 +66,7 @@ describe('OpenSearch search strategy', () => {
       return new DataSourceError({});
     },
     dataSourceEnabled: jest.fn(() => false),
+    oauth2AuthEnabled: jest.fn(() => true),
     registerCredentialProvider: jest.fn(),
     registerCustomApiSchema(schema: any): void {
       throw new Error('Function not implemented.');

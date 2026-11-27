@@ -18,6 +18,7 @@ import {
 import {
   AuthType,
   DataSourceAttributes,
+  OAuth2Content,
   SigV4Content,
   UsernamePasswordTypedContent,
   SigV4ServiceName,
@@ -180,6 +181,19 @@ const getQueryClient = async (
 
       return await getAWSChildClient(rootClient, { endpoint, clientParams, options }, credential);
 
+    case AuthType.OAuth2:
+      if (!credential) {
+        throw new Error('OAuth2 credentials not provided by authentication registry');
+      }
+      if (!rootClient) rootClient = new LegacyClient(clientOptions);
+      addClientToPool(cacheKey, type, rootClient);
+
+      return await getOAuth2Client(
+        rootClient,
+        { endpoint, clientParams, options },
+        credential as OAuth2Content
+      );
+
     default:
       throw Error(`${type} is not a supported auth type for data source`);
   }
@@ -241,6 +255,31 @@ const getBasicAuthClient = async (
 ) => {
   const headers: Headers = {
     authorization: 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64'),
+  };
+  clientParams.headers = Object.assign({}, clientParams.headers, headers);
+
+  return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
+};
+
+/**
+ * Calls the OpenSearch API with the bearer token minted by the OAuth2 credential provider.
+ *
+ * Mirrors getBasicAuthClient: the token goes on the per-call headers rather than the pooled
+ * root client, so a refreshed token is picked up on the next call.
+ */
+const getOAuth2Client = async (
+  rootClient: LegacyClient,
+  { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
+  credential: OAuth2Content
+) => {
+  if (!credential.token) {
+    throw new Error(
+      'OAuth2 Bearer token not available in credentials. Please ensure the data source is properly configured.'
+    );
+  }
+
+  const headers: Headers = {
+    authorization: `Bearer ${credential.token}`,
   };
   clientParams.headers = Object.assign({}, clientParams.headers, headers);
 

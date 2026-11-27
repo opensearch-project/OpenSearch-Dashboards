@@ -166,7 +166,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       this.state,
       this.props.existingDatasourceNamesList,
       this.props.existingDataSource.title,
-      this.authenticationMethodRegistry
+      this.authenticationMethodRegistry,
+      this.props.existingDataSource.auth.type
     );
   };
 
@@ -383,6 +384,36 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           /* Remove password if previously & currently username & password auth method is selected*/
           if (this.props.existingDataSource.auth.type === this.state.auth.type)
             delete formValues.auth.credentials?.password;
+          break;
+        case AuthType.OAuth2:
+          formValues.auth.credentials = extractRegisteredAuthTypeCredentials(
+            (this.state.auth.credentials ?? {}) as { [key: string]: string },
+            this.state.auth.type,
+            this.authenticationMethodRegistry
+          );
+          /* Credentials are stripped when a data source is read, so every OAuth2 field comes
+           * back blank in edit mode. A blank field therefore means "keep the stored value":
+           * submitting it would overwrite the stored value, because the saved object update
+           * merges recursively and an explicit '' does overwrite while an omitted key does not.
+           * Unlike password and SigV4 there is no separate update modal, so a value the user
+           * did type has to be forwarded or the credentials could never be rotated.
+           *
+           * Only applies when the auth type is unchanged - switching TO OAuth2 has nothing
+           * stored to keep, so the blanks are forwarded and rejected by validation instead.
+           *
+           * Consequence worth knowing: because a cleared field is indistinguishable from a
+           * never-loaded one, scopes and audience cannot be emptied from this form once set. */
+          if (this.props.existingDataSource.auth.type === this.state.auth.type) {
+            const credentials = formValues.auth.credentials as
+              { [key: string]: string } | undefined;
+            (['clientId', 'clientSecret', 'tokenUrl', 'scopes', 'audience'] as const).forEach(
+              (field) => {
+                if (credentials && !credentials[field]) {
+                  delete credentials[field];
+                }
+              }
+            );
+          }
           break;
         default:
           const currentCredentials = (this.state.auth.credentials ?? {}) as {

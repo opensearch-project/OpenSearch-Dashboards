@@ -1,0 +1,2 @@
+feat:
+- Add OAuth2 (client credentials) authentication for data sources and the Prometheus direct query connection ([#12785](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12785))
