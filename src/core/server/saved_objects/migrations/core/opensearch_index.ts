@@ -108,7 +108,7 @@ export function reader(
 
   const close = async () => scrollId && (await client.clearScroll({ scroll_id: scrollId }));
 
-  return async function read() {
+  const read = async () => {
     const result = await nextBatch();
     assertResponseIncludeAllShards(result.body);
 
@@ -120,6 +120,8 @@ export function reader(
 
     return docs;
   };
+
+  return { read, close };
 }
 
 /**
