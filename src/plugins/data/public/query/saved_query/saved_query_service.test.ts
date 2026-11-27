@@ -32,6 +32,7 @@ import { createSavedQueryService } from './saved_query_service';
 import { FilterStateStore } from '../../../common';
 import { SavedQueryAttributes } from './types';
 import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { of } from 'rxjs';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -412,6 +413,49 @@ describe('saved query service', () => {
 
       const response = await getSavedQuery('foo');
       expect(response.attributes.query.query).toEqual('"Men\'s Shoes"');
+    });
+
+    describe('language-based filtering', () => {
+      const kueryQueryAttributes = {
+        ...savedQueryAttributes,
+        query: { language: 'kuery', query: 'response:200' },
+      };
+
+      const findWithLanguage = (language: { supportedAppNames?: string[] } | undefined) => {
+        mockSavedObjectsClient.find.mockReturnValue({
+          savedObjects: [{ id: 'bar', attributes: kueryQueryAttributes }],
+          total: 1,
+        });
+
+        const application = applicationServiceMock.createStartContract();
+        application.currentAppId$ = of('thirdPartyApp');
+        const queryStringManager = {
+          getLanguageService: () => ({ getLanguage: () => language }),
+        };
+
+        const { findSavedQueries: findSavedQueriesWithLanguageFilter } = createSavedQueryService(
+          // @ts-ignore
+          mockSavedObjectsClient,
+          { application, uiSettings: uiSettingsServiceMock.createStartContract() },
+          // @ts-ignore
+          queryStringManager
+        );
+        return findSavedQueriesWithLanguageFilter();
+      };
+
+      it.each([
+        ['declares the wildcard app name', { supportedAppNames: ['*'] }, 1],
+        ['declares the current app', { supportedAppNames: ['thirdPartyApp'] }, 1],
+        ['does not declare the current app', { supportedAppNames: ['discover'] }, 0],
+        ['does not declare supported app names', {}, 1],
+        ['is not registered', undefined, 1],
+      ])('keeps queries as expected when language %s', async (_desc, language, expectedCount) => {
+        const response = await findWithLanguage(language);
+        expect(response.queries).toHaveLength(expectedCount);
+        if (expectedCount) {
+          expect(response.queries[0]).toEqual({ id: 'bar', attributes: kueryQueryAttributes });
+        }
+      });
     });
   });
 

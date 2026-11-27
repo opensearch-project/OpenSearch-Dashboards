@@ -148,10 +148,10 @@ export const createSavedQueryService = (
     ) {
       queries = queries.filter((query) => {
         const languageId = query.attributes.query.language;
-        return (
-          languageService?.getLanguage(languageId)?.supportedAppNames?.includes(currentAppId) ??
-          true
-        );
+        const supportedAppNames = languageService.getLanguage(languageId)?.supportedAppNames;
+        // Keep queries whose language is unknown or doesn't declare supported apps
+        if (!supportedAppNames) return true;
+        return supportedAppNames.includes('*') || supportedAppNames.includes(currentAppId);
       });
     }
 
