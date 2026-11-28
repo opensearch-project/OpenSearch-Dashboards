@@ -4,6 +4,12 @@
   overflow: auto;
 
   @include euiScrollBar;
+
+  // Skip EUI's negative gutter margin so the flex group stays inside the
+  // visualization box and no extra scrollbars appear.
+  &.euiFlexGroup--gutterLarge {
+    margin: 0;
+  }
 }
 
 // A percentage width creates an intrinsic sizing cycle inside auto-sized column-split groups.
