@@ -10,10 +10,12 @@
  */
 
 import { BannerConfig } from '../common';
+import { Logger } from '../../../core/server';
 
 export interface BannerPluginSetup {
   bannerEnabled: () => boolean;
   getConfig: () => BannerConfig;
+  logger: Logger;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
